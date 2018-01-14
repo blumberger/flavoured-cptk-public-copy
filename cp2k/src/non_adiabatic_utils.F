@@ -116,9 +116,9 @@ SUBROUTINE define_active_region(ctin, mat, active_region)
         end if
      end do
 
-!do i =1, mat
-!    write (*,'(I12,A, F12.10)') active_region(i),  "  pop = ", pop(i)
-!end do
+do i =1, mat
+    write (*,'(I12,A, F12.10)') active_region(i),  "  pop = ", pop(i)
+end do
 
 
      DEALLOCATE(pop)
