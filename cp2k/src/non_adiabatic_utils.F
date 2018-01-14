@@ -75,10 +75,92 @@ MODULE non_adiabatic_utils
                  classically_forbidden_hops, &
                  ida_collapse, &
                  define_active_region, &
-                 calc_psi_after_correction
+                 calc_psi_after_correction, &
+                 adiab_overalp_calc
                   
 
 CONTAINS
+
+
+SUBROUTINE adiab_overalp_calc(active_state, aom_env, C_tp, mol, itimes, & 
+                                   attempt_hop, enforced_active_state)
+
+     INTEGER, intent(INOUT)                         :: active_state, mol, itimes
+     INTEGER, intent(OUT)                         :: enforced_active_state 
+     LOGICAL, INTENT(INOUT)                           :: attempt_hop
+     REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE, INTENT(INOUT)   :: C_tp
+     TYPE(aom_env_type), INTENT(IN)              :: aom_env
+
+     CHARACTER(len=*), PARAMETER :: routineN = 'adiab_overalp_calc', &
+              routineP = moduleN//':'//routineN
+     REAL(KIND=dp), dimension(:), allocatable    :: overlaps
+     REAL(KIND=dp)                                :: sum, sum1
+     INTEGER                                     :: i, loc(1) 
+!     INTEGER, DIMENSION(:), allocatable         :: loc
+
+     allocate(overlaps(4))
+!     allocate(loc(1))
+
+     overlaps = 0.0D0
+
+     sum = 0.0D0
+     sum1 = 0.0D0
+     
+     do i=1, mol
+         sum = sum + (abs(aom_env%C_t(i, active_state)) *abs(C_tp(i, active_state)))
+         sum1 = sum1 + aom_env%C_t(i, active_state)*C_tp(i, active_state)
+     end do
+     
+     
+     print *, "OVERLAP_TRIVIAL", sum
+     print *, "PHASE_OVERALAP", sum1
+     
+     if (abs(sum1) .lt. 0.7 .and. .not. attempt_hop) then
+        print *, "POSSIBLE_TRIVIAL_CROSSING"
+        do i =1,mol
+            if (active_state .gt. 2) then
+                overlaps(1) = overlaps(1) + aom_env%C_t(i, active_state) *C_tp(i,active_state+2)
+                overlaps(2) = overlaps(2) + aom_env%C_t(i, active_state) *C_tp(i,active_state+1)
+                overlaps(3) = overlaps(3) + aom_env%C_t(i, active_state) *C_tp(i,active_state-1)
+                overlaps(4) = overlaps(4) + aom_env%C_t(i, active_state) *C_tp(i,active_state-2)
+            else if (active_state .gt. 1) then
+                overlaps(1) = overlaps(1) + aom_env%C_t(i, active_state)*C_tp(i,active_state+2)
+                overlaps(2) = overlaps(2) + aom_env%C_t(i, active_state)*C_tp(i,active_state+1)
+                overlaps(3) = overlaps(3) + aom_env%C_t(i, active_state)*C_tp(i,active_state-1)
+            else 
+                overlaps(1) = overlaps(1) + aom_env%C_t(i,active_state)*C_tp(i,active_state+2)
+                overlaps(2) = overlaps(2) + aom_env%C_t(i,active_state)*C_tp(i,active_state+1)
+            end if
+     
+       end do
+       print *, "OVERALPS", abs(overlaps(:))
+       print *, "MAX_OVERLAP", itimes, sum1, maxval(abs(overlaps(:)))
+       print *, "MAXLOC", maxloc(abs(overlaps(:)))
+       loc = maxloc(abs(overlaps(:)))
+       if (maxval(abs(overlaps(:))) .lt. sum1) then 
+           print *, "WARNING: MORE THAN TWO STATES CROSS"
+           enforced_active_state = active_state
+       else     
+           if (loc(1) == 1) then
+               enforced_active_state = active_state+2
+           else if (loc(1) == 2) then
+               enforced_active_state = active_state+1
+           else if (loc(1) == 3) then
+               enforced_active_state = active_state-1
+           else if (loc(1) == 4) then
+               enforced_active_state = active_state-2
+           end if
+       print *, "enforced_active_state", enforced_active_state
+       end if
+      !enforced_active_state = 0
+         
+     end if
+     
+     deallocate(overlaps)
+
+
+END SUBROUTINE adiab_overalp_calc
+
 
 SUBROUTINE define_active_region(ctin, mat, active_region)
      COMPLEX(KIND=dp), dimension(:), allocatable, INTENT(IN) :: ctin
@@ -103,7 +185,7 @@ SUBROUTINE define_active_region(ctin, mat, active_region)
      sum = 0.0
      do i =1, mat
          sum = sum + maxval(pop)
-         if (sum .le. 0.999) then
+         if (sum .le. 0.995) then
              pop(maxloc(pop)) = -1
          else
              exit
