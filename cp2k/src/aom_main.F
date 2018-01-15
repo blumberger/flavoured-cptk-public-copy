@@ -195,7 +195,8 @@ CONTAINS
      COMPLEX(KIND=dp), dimension(:), allocatable :: ctin_after_tranf_correction
      REAL(KIND=dp), dimension(:), allocatable    :: pop_atmdt, pop_a, pop_ap2, &
                                                      pop_ap1, pop_am2, pop_am1, pop_t_before, &
-                                                pop_t_present, pop_after_deco, pop_after_sp_corr
+                                                pop_t_present, pop_after_deco, pop_after_sp_corr 
+!     INTEGER     :: loc(1)
 
      !> cutoff to define the neighborough list
      CALL section_vals_val_get(coupling_section,"CUT_OFF_BETWEEN_SITES",&
@@ -466,12 +467,13 @@ write (*,'(F12.10,A, F12.10,A , F12.10,A , F12.10,A , F12.10,A , F12.10)') &
               aom_env%E_t(active_state), " a= ", E_tp(active_state), " a+2= ", &
                                E_tp(active_state+2), " a+1= ", E_tp(active_state+1), &
                             " a-1= ", E_tp(active_state-1), " a-2= ", E_tp(active_state-2)
-deallocate(pop_am2, pop_am1, pop_ap2, pop_ap1, pop_a, pop_atmdt)
 
 
-     CALL adiab_overalp_calc(active_state, aom_env, C_tp, mol, itimes, & 
+     CALL adiab_overalp_calc(pop_atmdt, active_state, aom_env, C_tp, mol, itimes, & 
                                    attempt_hop, enforced_active_state)
 
+deallocate(pop_am2, pop_am1, pop_ap2, pop_ap1, pop_a, pop_atmdt)
+!print *, "LOCALIZATION", maxloc(pop_a), loc
 !sum = 0.0D0
 !sum1 = 0.0D0
 

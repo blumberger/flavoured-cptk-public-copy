@@ -82,7 +82,7 @@ MODULE non_adiabatic_utils
 CONTAINS
 
 
-SUBROUTINE adiab_overalp_calc(active_state, aom_env, C_tp, mol, itimes, & 
+SUBROUTINE adiab_overalp_calc(pop_atmdt, active_state, aom_env, C_tp, mol, itimes, & 
                                    attempt_hop, enforced_active_state)
 
      INTEGER, intent(INOUT)                         :: active_state, mol, itimes
@@ -90,11 +90,12 @@ SUBROUTINE adiab_overalp_calc(active_state, aom_env, C_tp, mol, itimes, &
      LOGICAL, INTENT(INOUT)                           :: attempt_hop
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE, INTENT(INOUT)   :: C_tp
      TYPE(aom_env_type), INTENT(IN)              :: aom_env
+     REAL(KIND=dp), dimension(:), allocatable, INTENT(IN)    :: pop_atmdt
 
      CHARACTER(len=*), PARAMETER :: routineN = 'adiab_overalp_calc', &
               routineP = moduleN//':'//routineN
      REAL(KIND=dp), dimension(:), allocatable    :: overlaps
-     REAL(KIND=dp)                                :: sum, sum1
+     REAL(KIND=dp)                                :: sum1!, sum
      INTEGER                                     :: i, loc(1) 
 !     INTEGER, DIMENSION(:), allocatable         :: loc
 
@@ -103,17 +104,17 @@ SUBROUTINE adiab_overalp_calc(active_state, aom_env, C_tp, mol, itimes, &
 
      overlaps = 0.0D0
 
-     sum = 0.0D0
+!     sum = 0.0D0
      sum1 = 0.0D0
      
      do i=1, mol
-         sum = sum + (abs(aom_env%C_t(i, active_state)) *abs(C_tp(i, active_state)))
+!         sum = sum + (abs(aom_env%C_t(i, active_state)) *abs(C_tp(i, active_state)))
          sum1 = sum1 + aom_env%C_t(i, active_state)*C_tp(i, active_state)
      end do
      
      
-     print *, "OVERLAP_TRIVIAL", sum
-     print *, "PHASE_OVERALAP", sum1
+!     print *, "OVERLAP_TRIVIAL", sum
+     print *, "PHASE_OVERALAP", abs(sum1)
      
      if (abs(sum1) .lt. 0.7 .and. .not. attempt_hop) then
         print *, "POSSIBLE_TRIVIAL_CROSSING"
@@ -135,7 +136,8 @@ SUBROUTINE adiab_overalp_calc(active_state, aom_env, C_tp, mol, itimes, &
        end do
        print *, "OVERALPS", abs(overlaps(:))
        print *, "MAX_OVERLAP", itimes, sum1, maxval(abs(overlaps(:)))
-       print *, "MAXLOC", maxloc(abs(overlaps(:)))
+print *, "MORE_INFO", itimes, sum1, overlaps(1), overlaps(2), overlaps(3), overlaps(4)
+!       print *, "MAXLOC", maxloc(abs(overlaps(:)))
        loc = maxloc(abs(overlaps(:)))
        if (maxval(abs(overlaps(:))) .lt. sum1) then 
            print *, "WARNING: MORE THAN TWO STATES CROSS"
@@ -150,7 +152,10 @@ SUBROUTINE adiab_overalp_calc(active_state, aom_env, C_tp, mol, itimes, &
            else if (loc(1) == 4) then
                enforced_active_state = active_state-2
            end if
-       print *, "enforced_active_state", enforced_active_state
+       print *, "enforced_active_state", enforced_active_state 
+print *, "STATE_TO_GO", active_state, enforced_active_state 
+print *, "LOCALIZATION", maxloc(pop_atmdt), &
+        maxloc(abs(C_tp(:,enforced_active_state)*C_tp(:,enforced_active_state)))
        end if
       !enforced_active_state = 0
          
