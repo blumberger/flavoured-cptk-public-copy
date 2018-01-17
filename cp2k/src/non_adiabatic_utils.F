@@ -76,13 +76,88 @@ MODULE non_adiabatic_utils
                  ida_collapse, &
                  define_active_region, &
                  calc_psi_after_correction, &
-                 adiab_overalp_calc
+                 adiab_overalp_check
                   
 
 CONTAINS
 
+SUBROUTINE adiab_overalp_check(aom_env)
 
-SUBROUTINE adiab_overalp_calc(pop_atmdt, active_state, aom_env, C_tp, mol, itimes, & 
+    TYPE(aom_env_type), INTENT(INOUT)              :: aom_env
+
+    CHARACTER(len=*), PARAMETER :: routineN = 'adiab_overalp_check', &
+              routineP = moduleN//':'//routineN
+
+    REAL(KIND=dp), dimension(:), allocatable    :: overlaps
+    integer                                     :: mat, i, j, res_mod, state
+    REAL(KIND=dp)                               :: sum_ov, max_val   
+     
+
+    mat    = SIZE(aom_env%Stptp, 1)
+
+    allocate(overlaps(2*mat))
+
+    overlaps = 0.0D0
+    
+    !sum_ov = abs(aom_env%C_t(:, aom_env%old_state)*aom_env%C_tp(:, aom_env%active_state))**2
+     
+print *, "OLD_STATE", aom_env%active_state_past
+print *, "NEW_STATE", aom_env%active_state    
+
+
+!    sum_ov = aom_env%C_t(:, aom_env%active_state_past)*aom_env%C_tp(:, aom_env%active_state)
+
+     sum_ov = 0.0D0
+     do i=1, mat
+         sum_ov = sum_ov + aom_env%C_t(i, aom_env%active_state_past)*aom_env%C_tp(i, aom_env%active_state)
+     end do
+print *, "SUM", sum_ov
+
+
+
+     do i=1, mat
+         overlaps(1) = overlaps(1) + aom_env%C_t(i, aom_env%active_state_past)*aom_env%C_tp(i, aom_env%active_state)
+     end do
+print *, "OVERLAP_NOTSQUARED", overlaps(1)
+
+     overlaps(1) = abs(overlaps(1))*abs(overlaps(1))
+print *, "OVERALP_SQUARED", overlaps(1)
+
+!PUT A LOGICAL up
+
+
+     if ( overlaps(1) .gt. 0.5) then
+        print *, "CARRY_ON_THE_SAME_STATE"
+     else
+        print *, "POSSIBLE_TRIVIAL_CROSSING"
+        sum_ov = overlaps(1)
+     !   max_val = maxval(overlaps(:))
+        do j =2, 2*mat  !I want to be sure to count all the states
+           max_val = maxval(overlaps(:)) 
+           res_mod = ((-1)**(modulo(j ,2)))*(j/2)   !this is +1,-1,+2,-2
+           state = aom_env%active_state+res_mod
+           if (state .le. 0 .or. state .gt. mat) then
+              print *, "skipped", j, state
+              cycle
+           else  
+              do i = 1, mat
+                 overlaps(j) = overlaps(j) + aom_env%C_t(i,aom_env%active_state_past)*&
+                                             aom_env%C_tp(i, state)
+              end do
+              overlaps(j) = abs(overlaps(j))*abs(overlaps(j))
+              print *, j, state
+           end if
+        end do
+     end if
+
+print *, "OVERALP_CALCC", overlaps
+
+    deallocate(overlaps)
+     
+END SUBROUTINE adiab_overalp_check
+
+
+SUBROUTINE adiab_overalp_calc(active_state, aom_env, C_tp, mol, itimes, & 
                                    attempt_hop, enforced_active_state)
 
      INTEGER, intent(INOUT)                         :: active_state, mol, itimes
@@ -90,7 +165,7 @@ SUBROUTINE adiab_overalp_calc(pop_atmdt, active_state, aom_env, C_tp, mol, itime
      LOGICAL, INTENT(INOUT)                           :: attempt_hop
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE, INTENT(INOUT)   :: C_tp
      TYPE(aom_env_type), INTENT(IN)              :: aom_env
-     REAL(KIND=dp), dimension(:), allocatable, INTENT(IN)    :: pop_atmdt
+!     REAL(KIND=dp), dimension(:), allocatable, INTENT(IN)    :: pop_atmdt
 
      CHARACTER(len=*), PARAMETER :: routineN = 'adiab_overalp_calc', &
               routineP = moduleN//':'//routineN
@@ -135,7 +210,7 @@ SUBROUTINE adiab_overalp_calc(pop_atmdt, active_state, aom_env, C_tp, mol, itime
      
        end do
        print *, "OVERALPS", abs(overlaps(:))
-       print *, "MAX_OVERLAP", itimes, sum1, maxval(abs(overlaps(:)))
+       print *, "MAX_OVERLAP", itimes, abs(sum1), maxval(abs(overlaps(:)))
 print *, "MORE_INFO", itimes, sum1, overlaps(1), overlaps(2), overlaps(3), overlaps(4)
 !       print *, "MAXLOC", maxloc(abs(overlaps(:)))
        loc = maxloc(abs(overlaps(:)))
@@ -154,7 +229,7 @@ print *, "MORE_INFO", itimes, sum1, overlaps(1), overlaps(2), overlaps(3), overl
            end if
        print *, "enforced_active_state", enforced_active_state 
 print *, "STATE_TO_GO", active_state, enforced_active_state 
-print *, "LOCALIZATION", maxloc(pop_atmdt), &
+print *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, active_state)*aom_env%C_t(:, active_state))), &
         maxloc(abs(C_tp(:,enforced_active_state)*C_tp(:,enforced_active_state)))
        end if
       !enforced_active_state = 0

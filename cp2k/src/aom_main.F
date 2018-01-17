@@ -108,8 +108,8 @@ MODULE aom_main
                                                calc_kinetic_tot, &
                                                classically_forbidden_hops, &
                                                define_active_region, &
-                                               calc_psi_after_correction, &
-                                               adiab_overalp_calc
+                                               calc_psi_after_correction
+                                               !adiab_overalp_calc
                                           
      USE non_adiabatic_types,           ONLY: sh_env_type
 
@@ -167,7 +167,7 @@ CONTAINS
      REAL(kind=dp), DIMENSION(:,:),POINTER          :: my_forces_adiab
      REAL(kind=dp), DIMENSION(:,:),POINTER          :: my_forces_adiab_new
      integer :: coord
-     integer :: mol, atoms, c, active_state, mat, orb, enforced_active_state
+     integer :: mol, atoms, c, active_state, mat, orb
      REAL(KIND=dp) :: cutoff_sites, cutoff_connect, scaling, deltatMD, deltatE
      REAL(KIND=dp)    :: cbar, minao
      REAL(KIND=dp), dimension(:), allocatable    :: energy_conservation
@@ -469,8 +469,8 @@ write (*,'(F12.10,A, F12.10,A , F12.10,A , F12.10,A , F12.10,A , F12.10)') &
                             " a-1= ", E_tp(active_state-1), " a-2= ", E_tp(active_state-2)
 
 
-     CALL adiab_overalp_calc(pop_atmdt, active_state, aom_env, C_tp, mol, itimes, & 
-                                   attempt_hop, enforced_active_state)
+!     CALL adiab_overalp_calc(pop_atmdt, active_state, aom_env, C_tp, mol, itimes, & 
+!                                   attempt_hop, enforced_active_state)
 
 deallocate(pop_am2, pop_am1, pop_ap2, pop_ap1, pop_a, pop_atmdt)
 !print *, "LOCALIZATION", maxloc(pop_a), loc
@@ -622,7 +622,8 @@ deallocate(pop_t_before, pop_t_present, pop_after_deco, pop_after_sp_corr)
      aom_env%Sttm  = aom_env%Stpt
      aom_env%Stmt  = aom_env%Sttp
      aom_env%E_t = E_tp
-     aom_env%C_t = C_tp
+     aom_env%C_tp = C_tp
+     !aom_env%C_t = aom_env%C_tp
 
      !aom_env%Stmtm = Stt
      IF (attempt_hop) THEN

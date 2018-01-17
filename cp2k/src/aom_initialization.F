@@ -183,6 +183,7 @@ CONTAINS
 
      ALLOCATE(aom_env%E_t(mat))
      ALLOCATE(aom_env%C_t(mat,mat))
+     ALLOCATE(aom_env%C_tp(mat,mat))
      allocate(aom_env%dist(mol,mol))
      allocate(aom_env%F(3,natom,mol)) !array of diagonal atomic forces
      allocate(aom_env%crds(3,c,3))
