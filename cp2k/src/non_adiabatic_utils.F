@@ -90,7 +90,7 @@ SUBROUTINE adiab_overalp_check(aom_env)
 
     REAL(KIND=dp), dimension(:), allocatable    :: overlaps
     integer                                     :: mat, i, j, res_mod, state
-    REAL(KIND=dp)                               :: sum_ov, max_val   
+    REAL(KIND=dp)                               :: sum_ov, max_val, resid   
      
 
     mat    = SIZE(aom_env%Stptp, 1)
@@ -133,9 +133,9 @@ print *, "OVERALP_SQUARED", overlaps(1)
         sum_ov = overlaps(1)
      !   max_val = maxval(overlaps(:))
         do j =2, 2*mat  !I want to be sure to count all the states
-           max_val = maxval(overlaps(:)) 
            res_mod = ((-1)**(modulo(j ,2)))*(j/2)   !this is +1,-1,+2,-2
            state = aom_env%active_state+res_mod
+           !two conditions in case state is negative or is larger than mat
            if (state .le. 0 .or. state .gt. mat) then
               print *, "skipped", j, state
               cycle
@@ -146,6 +146,22 @@ print *, "OVERALP_SQUARED", overlaps(1)
               end do
               overlaps(j) = abs(overlaps(j))*abs(overlaps(j))
               print *, j, state
+           end if
+           print *, "OV_CALC_NOW", overlaps(j)
+           max_val = maxval(overlaps(:))
+           print *, "MAX_VAL_UPTONOW", max_val 
+           sum_ov = sum_ov +  overlaps(j)
+           print *, "SUM_OV", sum_ov
+           resid = 1.0D0 - sum_ov
+           if (resid .gt. max_val) then 
+               print *, "REPEAT"
+               cycle
+           else
+               print *, "MAX FOUND", max_val
+               if (max_val .le. 0.5) then 
+                  print *, "WARNING: MORE THAN TWO STATES CROSS"
+               end if 
+               exit
            end if
         end do
      end if

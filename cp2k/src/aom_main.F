@@ -431,6 +431,17 @@ pop_ap1 = 0.0D0
 pop_am1 = 0.0D0
 pop_am2 = 0.0D0
 
+print *, "#############U_MATRIX_ACTIVE_STATE###############"
+
+do i =1, mol
+write (*,'(F12.10,A, F12.10,A , F12.10,A , F12.10,A , F12.10,A , F12.10)') &
+              aom_env%C_t(i, active_state), " a= ", C_tp(i, active_state), &
+                 " a+2= ", C_tp(i, active_state+2), " a+1= ", C_tp(i, active_state+1), &
+                 " a-1= ", C_tp(i, active_state-1), " a-2= ", C_tp(i, active_state-2)
+end do
+
+print *, "#############ACTIVE_STATE_POP###############"
+
 do i =1, mol
 if (active_state .gt. 2) then
     pop_atmdt(i) = aom_env%C_t(i, active_state)*aom_env%C_t(i, active_state)
