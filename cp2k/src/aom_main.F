@@ -595,6 +595,7 @@ allocate(sh_env%exact_forces(3,natom))
         ctin=sh_env%ctin
      ENDIF
 
+     if (correct_transfer_keyword .and. sh_env%decoherence) then
 print *, "################CARRIER_WF##############"
 
 allocate(pop_t_before(mol))
@@ -624,6 +625,7 @@ write (*,'(I12,A, I12,A , I12,A , I12)') &
          " spcorr = ", maxloc(pop_after_sp_corr)
 
 deallocate(pop_t_before, pop_t_present, pop_after_deco, pop_after_sp_corr)
+     ENDIF
 
      !> PRINT
      CALL adiab_print_hamiltonian(adiab_section, -AIMAG(aom_env%H_tp), nadiab,norbitals,itimes, deltatMD)
