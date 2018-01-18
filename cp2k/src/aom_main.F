@@ -190,6 +190,7 @@ CONTAINS
      LOGICAL                                      :: correct_transfer_keyword
      real(kind=dp), DIMENSION(:,:), allocatable :: PC_allrvecs
      LOGICAL                                      :: do_random !, correct_transfer
+     REAL(KIND=dp)                                :: sum
      !REAL(KIND=dp)                                :: sum, sum1
      INTEGER, dimension(:), allocatable       :: active_region
      COMPLEX(KIND=dp), dimension(:), allocatable :: ctin_after_tranf_correction
