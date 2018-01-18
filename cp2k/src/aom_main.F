@@ -297,6 +297,27 @@ CONTAINS
      CALL adiabaticity(-AIMAG(aom_env%H_tp), mat, C_tp, E_tp, .true., sh_env)
      sh_env%E_tp = E_tp
 
+     !> Check if the eigenvectors have a sign change from one timestep to the
+     !others
+     do imol=1, mol
+        sum = 0
+        do coord=1, mol
+           sum = sum + aom_env%C_t(coord, imol) * C_tp(coord, imol)
+        enddo
+        !print*, "AC_PHASE", imol, sum
+        if (sum.lt.0) then
+           print*, "AC_PHASE_WARNING for ", imol
+           C_tp(:,imol) = - C_tp(:, imol)
+        endif
+        sum = 0 
+        !do coord=1, mol
+        !   sum = sum + aom_env%C_t(coord, imol) * C_tp(coord, imol)
+        !enddo
+        !print*, "AC_PHASE", imol, sum
+        !if (imol.eq.active_state) print*, "AC_STATE_WARNING"
+     enddo
+           
+
      !> ADIABATIC NACE CALCULATION
 !COMMENT: do we really need to calculate the full NACE matrix? I guess one only
 !need ADIAB_NACE(active_state, :) ---> SAM: no we need the all matrix in the

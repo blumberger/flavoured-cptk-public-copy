@@ -453,6 +453,7 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         integer :: i, j, mol!, k, l
         REAL(KIND=dp) :: hop, sumg, ex_prob, min, g_exa, err
         REAL(KIND=dp), dimension(:), allocatable :: b, g
+        REAL(KIND=dp), dimension(:), allocatable :: g_before, g_after, g_renorm
         COMPLEX(KIND=dp), dimension(:), allocatable :: ct, cttm_ad
         COMPLEX(KIND=dp), dimension(:), allocatable :: ak, akttm
         COMPLEX(KIND=dp) :: cstate, cstate_tm
@@ -521,6 +522,7 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
                CPABORT("There is no method to propagate the wavefunction.")
         END SELECT
 
+!print*, "AC_COEFF_ACTIVE", cstate
         do i=1,mol
                !construct state density for t present and t-deltat from the active state to
                !other state
@@ -554,7 +556,7 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
                 end if
         end do
         sh_print_env%sumflux   = sumg
-
+g_before = g
 !EFFECTIVE TRIVIAL CROSSINGS CORRECTION
         trivial_correction = .FALSE.
         err = abs(sumg - ex_prob)
@@ -566,6 +568,7 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
                         end if
         end if
 
+g_after = g
 !! CORRECTION FOR NEGATIVE NUMBER
        correct_for_negative = .FALSE.
        do i =1,mol
@@ -598,10 +601,14 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
                sh_print_env%sumprob   = sumg
                g(old_state) = 1.0D0 - sumg
        end if
-
+g_renorm = g
 !> CHANGE_AC
         sh_print_env%proba     = g
 
+        !print*, "AC_TRIVIAL", old_state, sh_env%state_min
+        !do i=1, mol
+        !   print *, "AC_TRIVIAL", g_before(i), g_after(i), g_renorm(i)
+        !enddo
 !print *, "g_AFTER_TRIVIAL", g
 !to move on in the trivial hopping correction we use rescaled g to avoid
 !unphysical number larger than 1. 
@@ -697,6 +704,14 @@ subroutine calc_adiab_nace(C1, C2, deltat, aom_env)
         DT = (0.5D0/deltat)*(T2 - T1)
         DS = (0.5D0/deltat)*(aom_env%Sttp - aom_env%Sttm)
         DC = (1.0D0/deltat)*(C2 - C1)
+
+        !do i=1, mol
+        !   print*, "C1", i, C1(i,:)
+        !enddo
+        !do i=1, mol
+        !   print*, "C2", i, C2(i,:)
+        !enddo
+ 
 
         !with these two loops, calculate the nacv in the time domain between adiabatic wavefunctions
         !by transforming from the diabatic overlaps
