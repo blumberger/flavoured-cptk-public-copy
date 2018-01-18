@@ -615,8 +615,30 @@ CONTAINS
              ENDIF
 
              !Probably I would need to check the overalp here
-             CALL adiab_overalp_check(force_env%mixed_env%aom_env)
+             CALL adiab_overalp_check(itimes, force_env%mixed_env%aom_env)
 
+             if (.not. force_env%mixed_env%aom_env%attempt_hop) then
+                 if (force_env%mixed_env%aom_env%overalp_over_thresh) then
+                    print *, "CASE1"
+                 else
+                    print *, "CASE2"
+                 end if
+             else 
+                if (force_env%mixed_env%aom_env%active_state_past .eq. &
+                                  force_env%mixed_env%aom_env%active_state) then
+                   if (.not. force_env%mixed_env%aom_env%overalp_over_thresh) then
+                       print *, "CASE3" 
+                   else
+                       print *, "CASE4"
+                   end if
+                else
+                  if (.not. force_env%mixed_env%aom_env%overalp_over_thresh) then
+                       print *, "CASE5"
+                  else 
+                       print *, "CASE6"
+                  end if
+                end if
+             end if
 
              !UPDATE
              force_env%mixed_env%aom_env%C_t = force_env%mixed_env%aom_env%C_tp
