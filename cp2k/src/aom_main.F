@@ -109,6 +109,7 @@ MODULE aom_main
                                                classically_forbidden_hops, &
                                                define_active_region, &
                                                calc_psi_after_correction
+                                               !adiab_overalp_calc
                                           
      USE non_adiabatic_types,           ONLY: sh_env_type
 
@@ -189,9 +190,13 @@ CONTAINS
      LOGICAL                                      :: correct_transfer_keyword
      real(kind=dp), DIMENSION(:,:), allocatable :: PC_allrvecs
      LOGICAL                                      :: do_random !, correct_transfer
-     REAL(KIND=dp)                                :: sum
+     !REAL(KIND=dp)                                :: sum, sum1
      INTEGER, dimension(:), allocatable       :: active_region
      COMPLEX(KIND=dp), dimension(:), allocatable :: ctin_after_tranf_correction
+     REAL(KIND=dp), dimension(:), allocatable    :: pop_atmdt, pop_a, pop_ap2, &
+                                                     pop_ap1, pop_am2, pop_am1, pop_t_before, &
+                                                pop_t_present, pop_after_deco, pop_after_sp_corr 
+!     INTEGER     :: loc(1)
 
      !> cutoff to define the neighborough list
      CALL section_vals_val_get(coupling_section,"CUT_OFF_BETWEEN_SITES",&
@@ -427,17 +432,117 @@ ALLOCATE(sh_env%forces_active_state(3,natom))
 
 !TEST TO EVALUATE TRIVIAL CROSSING
 
-sum = 0.0D0
+!do i=1, mol
+!print *, "C_t", aom_env%C_t(:, active_state)
+!print *, "C_tp", C_tp(:, active_state)
+!end do
 
-do i=1, mol
-    sum = sum + (abs(aom_env%C_t(i, active_state)) *abs(C_tp(i, active_state)))
+
+allocate(pop_atmdt(mol))
+allocate(pop_a(mol))
+allocate(pop_ap2(mol))
+allocate(pop_ap1(mol))
+allocate(pop_am1(mol))
+allocate(pop_am2(mol)) 
+
+pop_atmdt = 0.0D0
+pop_a = 0.0D0
+pop_ap2 = 0.0D0
+pop_ap1 = 0.0D0
+pop_am1 = 0.0D0
+pop_am2 = 0.0D0
+
+print *, "#############U_MATRIX_ACTIVE_STATE###############"
+
+do i =1, mol
+write (*,'(F12.10,A, F12.10,A , F12.10,A , F12.10,A , F12.10,A , F12.10)') &
+              aom_env%C_t(i, active_state), " a= ", C_tp(i, active_state), &
+                 " a+2= ", C_tp(i, active_state+2), " a+1= ", C_tp(i, active_state+1), &
+                 " a-1= ", C_tp(i, active_state-1), " a-2= ", C_tp(i, active_state-2)
 end do
 
-print *, "OVERLAP_TRIVIAL", sum
-if (abs(sum) .lt. 0.7) then
-   print *, "POSSIBLE_TRIVIAL_CROSSING"
-end if
+print *, "#############ACTIVE_STATE_POP###############"
 
+do i =1, mol
+if (active_state .gt. 2) then
+    pop_atmdt(i) = aom_env%C_t(i, active_state)*aom_env%C_t(i, active_state)
+    pop_a(i) = C_tp(i, active_state)*C_tp(i,active_state)
+    pop_ap2(i) = C_tp(i, active_state+2)*C_tp(i,active_state+2)
+    pop_ap1(i) = C_tp(i, active_state+1)*C_tp(i,active_state+1)
+    pop_am1(i) = C_tp(i, active_state-1)*C_tp(i,active_state-1)
+    pop_am2(i) = C_tp(i, active_state-2)*C_tp(i,active_state-2)
+
+else if (active_state .gt. 1) then
+    pop_atmdt(i) = aom_env%C_t(i, active_state)*aom_env%C_t(i, active_state)
+    pop_a(i) = C_tp(i, active_state)*C_tp(i,active_state)
+    pop_ap2(i) = C_tp(i, active_state+2)*C_tp(i,active_state+2)
+    pop_ap1(i) = C_tp(i, active_state+1)*C_tp(i,active_state+1)
+    pop_am1(i) = C_tp(i, active_state-1)*C_tp(i,active_state-1)
+
+else
+    pop_atmdt(i) = aom_env%C_t(i, active_state)*aom_env%C_t(i, active_state)
+    pop_a(i) = C_tp(i, active_state)*C_tp(i,active_state)
+    pop_ap2(i) = C_tp(i, active_state+2)*C_tp(i,active_state+2)
+    pop_ap1(i) = C_tp(i, active_state+1)*C_tp(i,active_state+1)
+endif
+
+write (*,'(F12.10,A, F12.10,A , F12.10,A , F12.10,A , F12.10,A , F12.10)') &
+              pop_atmdt(i), " a= ", pop_a(i), " a+2= ", pop_ap2(i), " a+1= ", pop_ap1(i), &
+                          " a-1= ", pop_am1(i), " a-2= ", pop_am2(i) 
+end do
+
+write (*,'(I12,A, I12,A , I12,A , I12,A , I12,A , I12)') &
+        maxloc(pop_atmdt), " a= ", maxloc(pop_a), " a+2 = ", maxloc(pop_ap2), & 
+         " a+1 = ", maxloc(pop_ap1), " a-1 = ", maxloc(pop_am1), " a-2 = ", maxloc(pop_am2)
+
+write (*,'(F12.10,A, F12.10,A , F12.10,A , F12.10,A , F12.10,A , F12.10)') &
+              aom_env%E_t(active_state), " a= ", E_tp(active_state), " a+2= ", &
+                               E_tp(active_state+2), " a+1= ", E_tp(active_state+1), &
+                            " a-1= ", E_tp(active_state-1), " a-2= ", E_tp(active_state-2)
+
+
+!     CALL adiab_overalp_calc(pop_atmdt, active_state, aom_env, C_tp, mol, itimes, & 
+!                                   attempt_hop, enforced_active_state)
+
+deallocate(pop_am2, pop_am1, pop_ap2, pop_ap1, pop_a, pop_atmdt)
+!print *, "LOCALIZATION", maxloc(pop_a), loc
+!sum = 0.0D0
+!sum1 = 0.0D0
+
+!do i=1, mol
+!    sum = sum + (abs(aom_env%C_t(i, active_state)) *abs(C_tp(i, active_state)))
+!    sum1 = sum1 + aom_env%C_t(i, active_state)*C_tp(i, active_state)
+!end do
+
+!allocate(overlaps(4))
+!overlaps = 0.0D0
+
+!print *, "OVERLAP_TRIVIAL", sum
+!print *, "PHASE_OVERALAP", sum1
+
+!if (abs(sum1) .lt. 0.7 .and. .not. attempt_hop) then
+!   print *, "POSSIBLE_TRIVIAL_CROSSING"
+!   do i =1,mol
+!       if (active_state .gt. 2) then
+!           overlaps(1) = overlaps(1) + aom_env%C_t(i, active_state) *C_tp(i, active_state+2)
+!           overlaps(2) = overlaps(2) + aom_env%C_t(i, active_state) *C_tp(i, active_state+1)
+!           overlaps(3) = overlaps(3) + aom_env%C_t(i, active_state) *C_tp(i, active_state-1)
+!           overlaps(4) = overlaps(4) + aom_env%C_t(i, active_state) *C_tp(i, active_state-2)
+!       else if (active_state .gt. 1) then
+!           overlaps(1) = overlaps(1) + aom_env%C_t(i, active_state)*C_tp(i, active_state+2)
+!           overlaps(2) = overlaps(2) + aom_env%C_t(i, active_state) *C_tp(i,active_state+1)
+!           overlaps(3) = overlaps(3) + aom_env%C_t(i, active_state) *C_tp(i,active_state-1)
+!       else 
+!           overlaps(1) = overlaps(1) + aom_env%C_t(i,active_state)*C_tp(i, active_state+2)
+!           overlaps(2) = overlaps(2) + aom_env%C_t(i, active_state)*C_tp(i,active_state+1)
+!       end if
+
+!   end do
+!   print *, "OVERALPS", abs(overlaps(:))
+!   print *, "MAX_OVERLAP", itimes, sum1, maxval(abs(overlaps(:)))
+!end if
+
+!deallocate(overlaps)
 
 
      !> APPLY DECOHERENCE CORRECTION
@@ -489,6 +594,35 @@ allocate(sh_env%exact_forces(3,natom))
         ctin=sh_env%ctin
      ENDIF
 
+print *, "################CARRIER_WF##############"
+
+allocate(pop_t_before(mol))
+allocate(pop_t_present(mol))
+allocate(pop_after_deco(mol))
+allocate(pop_after_sp_corr(mol))
+
+pop_t_before = 0.0D0
+pop_t_present = 0.0D0
+pop_after_deco = 0.0D0
+pop_after_sp_corr = 0.0D0
+
+do i =1, mol
+      pop_t_before(i) = real(sh_env%cttm(i)*conjg(sh_env%cttm(i)))
+      pop_t_present(i) = real(sh_env%ctt(i)*conjg(sh_env%ctt(i)))
+      pop_after_deco = real(ctin_after_deco(i)*conjg(ctin_after_deco(i)))
+      pop_after_sp_corr = real(ctin_after_tranf_correction(i)*conjg(ctin_after_tranf_correction(i)))
+
+write (*,'(F12.10,A, F12.10, A, F12.10, A, F12.10)') pop_t_before(i), " tp= ", pop_t_present(i), " deco = ", &
+       pop_after_deco(i), " spcor = ", pop_after_sp_corr(i)
+
+end do
+
+
+write (*,'(I12,A, I12,A , I12,A , I12)') &
+        maxloc(pop_t_before), " tp= ", maxloc(pop_t_present), " deco = ", maxloc(pop_after_deco), &
+         " spcorr = ", maxloc(pop_after_sp_corr)
+
+deallocate(pop_t_before, pop_t_present, pop_after_deco, pop_after_sp_corr)
 
      !> PRINT
      CALL adiab_print_hamiltonian(adiab_section, -AIMAG(aom_env%H_tp), nadiab,norbitals,itimes, deltatMD)
@@ -520,7 +654,8 @@ allocate(sh_env%exact_forces(3,natom))
      aom_env%Sttm  = aom_env%Stpt
      aom_env%Stmt  = aom_env%Sttp
      aom_env%E_t = E_tp
-     aom_env%C_t = C_tp
+     aom_env%C_tp = C_tp
+     !aom_env%C_t = aom_env%C_tp
 
      !aom_env%Stmtm = Stt
      IF (attempt_hop) THEN

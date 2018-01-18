@@ -118,7 +118,7 @@ IMPLICIT NONE
                                                          forces_adiab, &      ! forces at step 0
                                                          forces_adiab_new
 !> To store energies in the Jacob's Method
-     REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE   :: C_t
+     REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE   :: C_t, C_tp
      REAL(KIND=dp), DIMENSION(:), POINTER     :: E_t
      REAL(KIND = dp), DIMENSION(:), POINTER :: energies_t   
      REAL(KIND = dp), DIMENSION(:), POINTER :: adiab_energies_t 
@@ -129,9 +129,9 @@ IMPLICIT NONE
      REAL(KIND = dp)                        :: delta_energy, scaling, cbar
 !> Old and new state number
      INTEGER                                :: new_state
-     INTEGER                                :: active_state
-     INTEGER                                :: old_state
-!     LOGICAL                                :: inrun
+     INTEGER                                :: active_state, active_state_past
+     INTEGER                                :: old_state, enforced_active_state
+     LOGICAL                                :: overalp_over_thresh
      REAL(KIND=dp), dimension(:,:), POINTER :: coms
      REAL(KIND=dp), dimension(:,:,:), POINTER :: crds
      REAL(KIND=dp), dimension(:,:), POINTER :: dist

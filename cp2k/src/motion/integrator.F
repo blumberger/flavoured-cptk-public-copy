@@ -119,7 +119,8 @@ MODULE integrator
                                              zero_md_ener
   USE aom_utils,                       ONLY: check_hop_attempt, &
                                              total_momentum
-  USE non_adiabatic_utils,             ONLY: ida_collapse
+  USE non_adiabatic_utils,             ONLY: ida_collapse, &
+                                             adiab_overalp_check
 !> END CHANGE_AC
 
   IMPLICIT NONE
@@ -599,17 +600,50 @@ CONTAINS
               CALL vv_second(tmp, atomic_kind_set, local_particles, particle_set, &
                              core_particle_set, shell_particle_set, nparticle_kind, shell_adiabatic, dt)
              !ENDIF
+             force_env%mixed_env%aom_env%active_state_past = force_env%mixed_env%aom_env%active_state
+
              IF (force_env%mixed_env%aom_env%attempt_hop) THEN
                 CALL check_hop_attempt(tmp%vel, atomic_kind_set, nparticle_kind, local_particles, force_env)
-               if (force_env%mixed_env%aom_env%ida_deco) then
+                if (force_env%mixed_env%aom_env%ida_deco) then
                    CALL ida_collapse(force_env%mixed_env%aom_env)
-               end if
-
+                end if
+                                  
                 IF (force_env%mixed_env%aom_env%successful_hop) THEN
                    CALL force_env_calc_energy_force(force_env,require_consistent_energy_force=.FALSE., &
                                                     itimes = itimes)
                 ENDIF
              ENDIF
+
+             !Probably I would need to check the overalp here
+             CALL adiab_overalp_check(itimes, force_env%mixed_env%aom_env)
+
+             if (.not. force_env%mixed_env%aom_env%attempt_hop) then
+                 if (force_env%mixed_env%aom_env%overalp_over_thresh) then
+                    print *, "CASE1"
+                 else
+                    print *, "CASE2"
+                 end if
+             else 
+                if (force_env%mixed_env%aom_env%active_state_past .eq. &
+                                  force_env%mixed_env%aom_env%active_state) then
+                   if (.not. force_env%mixed_env%aom_env%overalp_over_thresh) then
+                       print *, "CASE3" 
+                   else
+                       print *, "CASE4"
+                   end if
+                else
+                  if (.not. force_env%mixed_env%aom_env%overalp_over_thresh) then
+                       print *, "CASE5"
+                  else 
+                       print *, "CASE6"
+                  end if
+                end if
+             end if
+
+             !UPDATE
+             force_env%mixed_env%aom_env%C_t = force_env%mixed_env%aom_env%C_tp
+
+
               CALL total_momentum(tmp%vel, atomic_kind_set, nparticle_kind, local_particles, force_env)
 
                 !CALL update_forces_newstate ( atomic_kind_set, local_particles, particle_set,&
@@ -681,6 +715,7 @@ CONTAINS
 
     END DO
 
+print *, "WHERE AM I???"
     ! Update virial
     IF ( simpar%constraint ) CALL pv_constraint ( gci, local_molecules, &
          molecule_set,molecule_kind_set,particle_set, virial,para_env%group )
