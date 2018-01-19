@@ -1622,13 +1622,14 @@ print *, "RANDOM_NUMBER_FISRT_ADIAB", random
 
 
    SUBROUTINE check_hop_attempt(velocities, atomic_kind_set, nparticle_kind, local_particles, &
- force_env)
+ force_env, rescale_keyword)
         REAL(kind=dp), DIMENSION(:,:),POINTER    :: velocities
         TYPE(atomic_kind_type), DIMENSION(:), &
              POINTER                                :: atomic_kind_set
         INTEGER, INTENT(IN)                      :: nparticle_kind
         TYPE(distribution_1d_type), POINTER      :: local_particles
         TYPE(force_env_type), POINTER            :: force_env
+        CHARACTER(LEN=default_string_length), OPTIONAL  :: rescale_keyword
 
         CHARACTER(len=*), PARAMETER :: routineN = 'check_hop_attempt', &
         routineP = moduleN//':'//routineN
@@ -1638,7 +1639,8 @@ print *, "RANDOM_NUMBER_FISRT_ADIAB", random
         REAL(kind=dp), DIMENSION(:,:), ALLOCATABLE  :: hop_nacv, hop_nacv_oldold, hop_nacv_newnew
         REAL(kind=dp), DIMENSION(:,:), ALLOCATABLE  :: hop_nacv_oldnew, hop_nacv_newold
         REAL(kind=dp), DIMENSION(:,:), ALLOCATABLE  :: F_11, F_1, F_2, F_3
-        CHARACTER(LEN=default_string_length)     :: rescale_keyword, nacv_keyword, reversal_keyword
+        CHARACTER(LEN=default_string_length)     :: my_rescale_keyword
+        CHARACTER(LEN=default_string_length)     :: nacv_keyword, reversal_keyword
         TYPE(section_vals_type), POINTER         :: mixed_section, adiab_section, coupling_section
         TYPE(section_vals_type), POINTER         :: force_env_section
         INTEGER                                  :: old_state, new_state
@@ -1652,14 +1654,18 @@ print *, "RANDOM_NUMBER_FISRT_ADIAB", random
         mixed_section => section_vals_get_subs_vals(force_env_section,"MIXED")
         adiab_section => section_vals_get_subs_vals(mixed_section, "ADIABATIC")
         coupling_section => section_vals_get_subs_vals(adiab_section, "AOM")
-        CALL section_vals_val_get(coupling_section,"METHOD_RESCALING",c_val=rescale_keyword)
+        IF (PRESENT(rescale_keyword)) THEN
+           my_rescale_keyword = rescale_keyword
+        ELSE
+           CALL section_vals_val_get(coupling_section,"METHOD_RESCALING",c_val=my_rescale_keyword)
+        ENDIF
         CALL section_vals_val_get(coupling_section,"CENTER_OF_MASS",l_val=translate_keyword)
         sh_print_env = force_env%mixed_env%aom_env%sh_print_env
 
         ALLOCATE(velocities_com(SIZE(velocities, 1), SIZE(velocities, 2)))
         CALL translate_com(velocities, translate_keyword, velocities_com, &
                            local_particles, nparticle_kind = nparticle_kind, atomic_kind_set = atomic_kind_set)
-        SELECT CASE(rescale_keyword)
+        SELECT CASE(my_rescale_keyword)
         CASE("SIMPLE")
            CALL cal_delta_energy(nparticle_kind, velocities_com, force_env, atomic_kind_set, &
                                  local_particles, delta_energy, kinetic_energy_prime)
