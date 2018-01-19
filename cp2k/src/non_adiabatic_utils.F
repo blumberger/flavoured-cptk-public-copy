@@ -81,19 +81,20 @@ MODULE non_adiabatic_utils
 
 CONTAINS
 
-SUBROUTINE adiab_overalp_check(itimes, aom_env)
+SUBROUTINE adiab_overalp_check(itimes, aom_env, changed_state)
 
     TYPE(aom_env_type), INTENT(INOUT)              :: aom_env
+    INTEGER, OPTIONAL, intent(in)               :: changed_state  
 
     CHARACTER(len=*), PARAMETER :: routineN = 'adiab_overalp_check', &
               routineP = moduleN//':'//routineN
 
     REAL(KIND=dp), dimension(:), allocatable    :: overlaps
     integer                                     :: mat, i, j, res_mod, state, &
-                                                     itimes
+                                                     itimes, past_state
                                                     !enforced_active_state
-    REAL(KIND=dp)                               :: sum_ov, max_val, resid   
-     
+    REAL(KIND=dp)                               :: sum_ov, max_val, resid 
+!!ADD OPTIONAL
 
     mat    = SIZE(aom_env%Stptp, 1)
 
@@ -102,25 +103,31 @@ SUBROUTINE adiab_overalp_check(itimes, aom_env)
     overlaps = 0.0D0
     
     !sum_ov = abs(aom_env%C_t(:, aom_env%old_state)*aom_env%C_tp(:, aom_env%active_state))**2
-     
-print *, "OLD_STATE", aom_env%active_state_past
+    
+    if (PRESENT(changed_state)) then
+        past_state = changed_state
+print *, "OLD_STATE", changed_state
+    else
+        past_state = aom_env%active_state
+print *, "STATE_CHANGED", changed_state
+    end if
+
 print *, "NEW_STATE", aom_env%active_state    
 
 
      do i=1, mat
-         overlaps(1) = overlaps(1) + aom_env%C_t(i, aom_env%active_state_past)*aom_env%C_tp(i, aom_env%active_state)
+         overlaps(1) = overlaps(1) + aom_env%C_t(i, past_state)*aom_env%C_tp(i, aom_env%active_state)
      end do
 print *, "OVERLAP_NOTSQUARED", overlaps(1)
 
      overlaps(1) = abs(overlaps(1))*abs(overlaps(1))
 print *, "OVERALP_SQUARED", overlaps(1)
 
-!PUT A LOGICAL up
      aom_env%overalp_over_thresh = .False.
   
      if ( overlaps(1) .gt. 0.5) then
         print *, "CARRY_ON_THE_SAME_STATE"
-         aom_env%enforced_active_state = 0
+         aom_env%enforced_active_state = past_state
          aom_env%overalp_over_thresh = .True.
      else
         print *, "POSSIBLE_TRIVIAL_CROSSING"
@@ -135,7 +142,7 @@ print *, "OVERALP_SQUARED", overlaps(1)
               cycle
            else  
               do i = 1, mat
-                 overlaps(j) = overlaps(j) + aom_env%C_t(i,aom_env%active_state_past)*&
+                 overlaps(j) = overlaps(j) + aom_env%C_t(i, past_state)*&
                                              aom_env%C_tp(i, state)
               end do
               overlaps(j) = abs(overlaps(j))*abs(overlaps(j))
@@ -165,17 +172,17 @@ print *, "LAST_ENFORCED_ACTIVE", aom_env%enforced_active_state
 print *, "OVERALP_CALCC", overlaps
 print *, "MAX_OVERLAP", itimes, overlaps(1), maxval(overlaps(:))
 
-if (aom_env%enforced_active_state .eq.0) then 
-print *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, aom_env%active_state_past)*&
-                            aom_env%C_t(:, aom_env%active_state_past))), &
+if ( overlaps(1) .gt. 0.5) then
+print *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, past_state)*&
+                            aom_env%C_t(:, past_state))), &
       maxloc(abs(aom_env%C_tp(:,aom_env%active_state)*aom_env%C_tp(:,aom_env%active_state)))
-print *, "STATE_TOGOTO", aom_env%active_state_past, aom_env%active_state
+print *, "STATE_TOGOTO", past_state, aom_env%active_state
 else
-print *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, aom_env%active_state_past)*&
-                            aom_env%C_t(:, aom_env%active_state_past))), &
+print *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, past_state)*&
+                            aom_env%C_t(:, past_state))), &
             maxloc(abs(aom_env%C_tp(:,aom_env%enforced_active_state)*&
                             aom_env%C_tp(:,aom_env%enforced_active_state)))
-print *, "STATE_TOGOTO", aom_env%active_state_past, aom_env%enforced_active_state
+print *, "STATE_TOGOTO", past_state, aom_env%enforced_active_state
 end if
 
     deallocate(overlaps)

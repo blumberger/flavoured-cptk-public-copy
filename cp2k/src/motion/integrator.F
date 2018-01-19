@@ -600,6 +600,8 @@ CONTAINS
               CALL vv_second(tmp, atomic_kind_set, local_particles, particle_set, &
                              core_particle_set, shell_particle_set, nparticle_kind, shell_adiabatic, dt)
              !ENDIF
+             
+             !UPDATE_OLD_STATE
              force_env%mixed_env%aom_env%active_state_past = force_env%mixed_env%aom_env%active_state
 
              IF (force_env%mixed_env%aom_env%attempt_hop) THEN
@@ -615,7 +617,7 @@ CONTAINS
              ENDIF
 
              !Probably I would need to check the overalp here
-             CALL adiab_overalp_check(itimes, force_env%mixed_env%aom_env)
+             CALL adiab_overalp_check(itimes, force_env%mixed_env%aom_env, force_env%mixed_env%aom_env%active_state_past)
 
              if (.not. force_env%mixed_env%aom_env%attempt_hop) then
                  if (force_env%mixed_env%aom_env%overalp_over_thresh) then
