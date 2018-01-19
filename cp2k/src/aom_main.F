@@ -302,8 +302,6 @@ CONTAINS
      sh_env%E_t = aom_env%E_t
      CALL adiabaticity(-AIMAG(aom_env%H_tp), mat, C_tp, E_tp, .true., sh_env)
      sh_env%E_tp = E_tp
-!aom_env%C_tp must be created before we try to hop, it is used in adiab_overalp_check
-     aom_env%C_tp = C_tp
 
      !> Check if the eigenvectors have a sign change from one timestep to the
      !others
@@ -325,6 +323,8 @@ CONTAINS
         !if (imol.eq.active_state) print*, "AC_STATE_WARNING"
      enddo
            
+!aom_env%C_tp must be created before we try to hop, it is used in adiab_overalp_check
+     aom_env%C_tp = C_tp
 
      !> ADIABATIC NACE CALCULATION
 !COMMENT: do we really need to calculate the full NACE matrix? I guess one only
