@@ -75,119 +75,125 @@ MODULE non_adiabatic_utils
                  classically_forbidden_hops, &
                  ida_collapse, &
                  define_active_region, &
-                 calc_psi_after_correction, &
-                 adiab_overalp_check
+                 calc_psi_after_correction!, &
+                 !adiab_overalp_check
                   
 
 CONTAINS
 
-SUBROUTINE adiab_overalp_check(itimes, aom_env, changed_state)
 
-    TYPE(aom_env_type), INTENT(INOUT)              :: aom_env
-    INTEGER, OPTIONAL, intent(in)               :: changed_state  
 
-    CHARACTER(len=*), PARAMETER :: routineN = 'adiab_overalp_check', &
-              routineP = moduleN//':'//routineN
-
-    REAL(KIND=dp), dimension(:), allocatable    :: overlaps
-    integer                                     :: mat, i, j, res_mod, state, &
-                                                     itimes, past_state
-                                                    !enforced_active_state
-    REAL(KIND=dp)                               :: sum_ov, max_val, resid 
+!UBROUTINE adiab_overalp_check(aom_env, changed_state, itimes)
+!
+!   TYPE(aom_env_type), INTENT(INOUT)              :: aom_env
+!   INTEGER, OPTIONAL, intent(in)               :: changed_state, itimes  
+!
+!   CHARACTER(len=*), PARAMETER :: routineN = 'adiab_overalp_check', &
+!             routineP = moduleN//':'//routineN
+!
+!   REAL(KIND=dp), dimension(:), allocatable    :: overlaps
+!   integer                                     :: mat, i, j, res_mod, state, &
+!                                                    past_state
+!                                                   !enforced_active_state
+!   REAL(KIND=dp)                               :: sum_ov, max_val, resid 
 !!ADD OPTIONAL
-
-    mat    = SIZE(aom_env%Stptp, 1)
-
-    allocate(overlaps(2*mat))
-
-    overlaps = 0.0D0
-    
-    !sum_ov = abs(aom_env%C_t(:, aom_env%old_state)*aom_env%C_tp(:, aom_env%active_state))**2
-    
-    if (PRESENT(changed_state)) then
-        past_state = changed_state
-print *, "OLD_STATE", changed_state
-    else
-        past_state = aom_env%active_state
-print *, "STATE_CHANGED", changed_state
-    end if
-
-print *, "NEW_STATE", aom_env%active_state    
-
-
-     do i=1, mat
-         overlaps(1) = overlaps(1) + aom_env%C_t(i, past_state)*aom_env%C_tp(i, aom_env%active_state)
-     end do
-print *, "OVERLAP_NOTSQUARED", overlaps(1)
-
-     overlaps(1) = abs(overlaps(1))*abs(overlaps(1))
-print *, "OVERALP_SQUARED", overlaps(1)
-
-     aom_env%overalp_over_thresh = .False.
-  
-     if ( overlaps(1) .gt. 0.5) then
-        print *, "CARRY_ON_THE_SAME_STATE"
-         aom_env%enforced_active_state = past_state
-         aom_env%overalp_over_thresh = .True.
-     else
-        print *, "POSSIBLE_TRIVIAL_CROSSING"
-        sum_ov = overlaps(1)
-     !   max_val = maxval(overlaps(:))
-        do j =2, 2*mat  !I want to be sure to count all the states
-           res_mod = ((-1)**(modulo(j ,2)))*(j/2)   !this is +1,-1,+2,-2
-           state = aom_env%active_state+res_mod
-           !two conditions in case state is negative or is larger than mat
-           if (state .le. 0 .or. state .gt. mat) then
-              print *, "skipped", j, state
-              cycle
-           else  
-              do i = 1, mat
-                 overlaps(j) = overlaps(j) + aom_env%C_t(i, past_state)*&
-                                             aom_env%C_tp(i, state)
-              end do
-              overlaps(j) = abs(overlaps(j))*abs(overlaps(j))
-              print *, j, state
-           end if
-           print *, "OV_CALC_NOW", overlaps(j)
-           max_val = maxval(overlaps(:))
-           print *, "MAX_VAL_UPTONOW", max_val 
-           sum_ov = sum_ov +  overlaps(j)
-           print *, "SUM_OV", sum_ov
-           resid = 1.0D0 - sum_ov
-           if (resid .gt. max_val) then 
-               print *, "REPEAT"
-               cycle
-           else
-               print *, "MAX FOUND", max_val
-               if (max_val .le. 0.5) then 
-                  print *, "WARNING: MORE THAN TWO STATES CROSS"
-               end if 
-               aom_env%enforced_active_state = state
-               exit
-           end if
-        end do
-     end if
-
-print *, "LAST_ENFORCED_ACTIVE", aom_env%enforced_active_state
-print *, "OVERALP_CALCC", overlaps
-print *, "MAX_OVERLAP", itimes, overlaps(1), maxval(overlaps(:))
-
-if ( overlaps(1) .gt. 0.5) then
-print *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, past_state)*&
-                            aom_env%C_t(:, past_state))), &
-      maxloc(abs(aom_env%C_tp(:,aom_env%active_state)*aom_env%C_tp(:,aom_env%active_state)))
-print *, "STATE_TOGOTO", past_state, aom_env%active_state
-else
-print *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, past_state)*&
-                            aom_env%C_t(:, past_state))), &
-            maxloc(abs(aom_env%C_tp(:,aom_env%enforced_active_state)*&
-                            aom_env%C_tp(:,aom_env%enforced_active_state)))
-print *, "STATE_TOGOTO", past_state, aom_env%enforced_active_state
-end if
-
-    deallocate(overlaps)
-     
-END SUBROUTINE adiab_overalp_check
+!
+!   mat    = SIZE(aom_env%Stptp, 1)
+!
+!   allocate(overlaps(2*mat))
+!
+!   overlaps = 0.0D0
+!   
+!   !sum_ov = abs(aom_env%C_t(:, aom_env%old_state)*aom_env%C_tp(:, aom_env%active_state))**2
+!   
+!   if (PRESENT(changed_state)) then
+!       past_state = changed_state
+!rint *, "OLD_STATE", changed_state
+!   else
+!       past_state = aom_env%active_state
+!rint *, "STATE_CHANGED", changed_state
+!   end if
+!
+!rint *, "NEW_STATE", aom_env%active_state    
+!
+!
+!    do i=1, mat
+!        overlaps(1) = overlaps(1) + aom_env%C_t(i, past_state)*aom_env%C_tp(i, aom_env%active_state)
+!    end do
+!rint *, "OVERLAP_NOTSQUARED", overlaps(1)
+!
+!    overlaps(1) = abs(overlaps(1))*abs(overlaps(1))
+!rint *, "OVERALP_SQUARED", overlaps(1)
+!
+!    aom_env%overalp_over_thresh = .False.
+! 
+!    if ( overlaps(1) .gt. 0.5) then
+!       print *, "CARRY_ON_THE_SAME_STATE"
+!        aom_env%enforced_active_state = past_state
+!        aom_env%overalp_over_thresh = .True.
+!    else
+!       print *, "POSSIBLE_TRIVIAL_CROSSING"
+!       sum_ov = overlaps(1)
+!    !   max_val = maxval(overlaps(:))
+!       do j =2, 2*mat  !I want to be sure to count all the states
+!          res_mod = ((-1)**(modulo(j ,2)))*(j/2)   !this is +1,-1,+2,-2
+!          state = aom_env%active_state+res_mod
+!          !two conditions in case state is negative or is larger than mat
+!          if (state .le. 0 .or. state .gt. mat) then
+!             print *, "skipped", j, state
+!             cycle
+!          else  
+!             do i = 1, mat
+!                overlaps(j) = overlaps(j) + aom_env%C_t(i, past_state)*&
+!                                            aom_env%C_tp(i, state)
+!             end do
+!             overlaps(j) = abs(overlaps(j))*abs(overlaps(j))
+!             print *, j, state
+!          end if
+!          print *, "OV_CALC_NOW", overlaps(j)
+!          max_val = maxval(overlaps(:))
+!          print *, "MAX_VAL_UPTONOW", max_val 
+!          sum_ov = sum_ov +  overlaps(j)
+!          print *, "SUM_OV", sum_ov
+!          resid = 1.0D0 - sum_ov
+!          if (resid .gt. max_val) then 
+!              print *, "REPEAT"
+!              cycle
+!          else
+!              print *, "MAX FOUND", max_val
+!              if (max_val .le. 0.5) then 
+!                 print *, "WARNING: MORE THAN TWO STATES CROSS"
+!              end if 
+!              aom_env%enforced_active_state = state
+!              exit
+!          end if
+!       end do
+!    end if
+!
+!rint *, "LAST_ENFORCED_ACTIVE", aom_env%enforced_active_state
+!rint *, "OVERALP_CALCC", overlaps
+!f (present(itimes)) then 
+!rint *, "MAX_OVERLAP", itimes, overlaps(1), maxval(overlaps(:))
+!lse
+!rint *, "MAX_OVERLAP_HOPPING", overlaps(1), maxval(overlaps(:))
+!nd if
+!
+!f ( overlaps(1) .gt. 0.5) then
+!rint *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, past_state)*&
+!                           aom_env%C_t(:, past_state))), &
+!     maxloc(abs(aom_env%C_tp(:,aom_env%active_state)*aom_env%C_tp(:,aom_env%active_state)))
+!rint *, "STATE_TOGOTO", past_state, aom_env%active_state
+!lse
+!rint *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, past_state)*&
+!                           aom_env%C_t(:, past_state))), &
+!           maxloc(abs(aom_env%C_tp(:,aom_env%enforced_active_state)*&
+!                           aom_env%C_tp(:,aom_env%enforced_active_state)))
+!rint *, "STATE_TOGOTO", past_state, aom_env%enforced_active_state
+!nd if
+!
+!   deallocate(overlaps)
+!    
+!ND SUBROUTINE adiab_overalp_check
 
 
 SUBROUTINE adiab_overalp_calc(active_state, aom_env, C_tp, mol, itimes, & 

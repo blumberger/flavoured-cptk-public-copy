@@ -118,9 +118,11 @@ MODULE integrator
   USE md_ener_types,                   ONLY: md_ener_type,&
                                              zero_md_ener
   USE aom_utils,                       ONLY: check_hop_attempt, &
-                                             total_momentum
-  USE non_adiabatic_utils,             ONLY: ida_collapse, &
+                                             total_momentum, &
                                              adiab_overalp_check
+ 
+  USE non_adiabatic_utils,             ONLY: ida_collapse!, &
+                                             !adiab_overalp_check
 !> END CHANGE_AC
 
   IMPLICIT NONE
@@ -617,7 +619,7 @@ CONTAINS
              ENDIF
 
              !Probably I would need to check the overalp here
-             CALL adiab_overalp_check(itimes, force_env%mixed_env%aom_env, force_env%mixed_env%aom_env%active_state_past)
+             CALL adiab_overalp_check(force_env%mixed_env%aom_env, force_env%mixed_env%aom_env%active_state_past, itimes)
 
              if (.not. force_env%mixed_env%aom_env%attempt_hop) then
                  if (force_env%mixed_env%aom_env%overalp_over_thresh) then

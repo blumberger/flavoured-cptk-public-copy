@@ -108,7 +108,7 @@ MODULE aom_utils
 
   USE aom_types,                       ONLY: aom_env_type
 
-!  USE integrator_utils,                ONLY: tmp_variables_type 
+!  USE non_adiabatic_utils,                ONLY: adiab_overalp_check
 
 #include "./base/base_uses.f90"
 
@@ -138,7 +138,8 @@ IMPLICIT NONE
              calc_hop_nacv, &
              cal_delta_energy_nacv , &
              calc_diabatic_nace, &
-             rotation_diab_to_adiab
+             rotation_diab_to_adiab, &
+             adiab_overalp_check
 
 CONTAINS
 
@@ -340,16 +341,26 @@ subroutine surf_hop_type(adiab_section, C1, C2, deltat, old_state, &
                                routineP = moduleN//':'//routineN
 
        CHARACTER(LEN=default_string_length)           :: surfhop_keyword
+       LOGICAL                                        :: overlap_key
+
+       overlap_key = .True.
 
        CALL section_vals_val_get(adiab_section,"SURF_HOP_CHOICE", c_val=surfhop_keyword)
 
        sh_print_env%additional_prints = .FALSE.
-       if (surfhop_keyword == "TRIVIAL_HOP_CORRECT") then 
-                       sh_print_env%additional_prints = .TRUE.
-       end if
+       !if (surfhop_keyword == "TRIVIAL_HOP_CORRECT") then 
+       !                sh_print_env%additional_prints = .TRUE.
+       !end if
 
        SELECT CASE(surfhop_keyword)
+       CASE("TRIVIAL_CORR_WITH_OVERALP")
+                       sh_print_env%additional_prints = .TRUE.
+   
+            CALL modified_surfacehop(C1, C2, deltat, old_state, &
+              sh_env, new_state, attempt_hop, decohere_criterion, &
+              sh_print_env, aom_env, adiab_section, overlap_key ) !triv_threshold)
        CASE("TRIVIAL_HOP_CORRECT")
+                       sh_print_env%additional_prints = .TRUE.
             CALL modified_surfacehop(C1, C2, deltat, old_state, &
               sh_env, new_state, attempt_hop, decohere_criterion, &
               sh_print_env, aom_env, adiab_section) !triv_threshold)
@@ -428,9 +439,122 @@ subroutine diab_to_adiab( C2, old_state, sh_env, mol, cstate, ct, C1, cttm_ad, c
 end subroutine diab_to_adiab
 
 
+SUBROUTINE adiab_overalp_check(aom_env, changed_state, itimes)
+
+    TYPE(aom_env_type)                         :: aom_env
+    INTEGER, OPTIONAL, intent(in)               :: changed_state, itimes  
+
+    CHARACTER(len=*), PARAMETER :: routineN = 'adiab_overalp_check', &
+              routineP = moduleN//':'//routineN
+
+    REAL(KIND=dp), dimension(:), allocatable    :: overlaps
+    integer                                     :: mat, i, j, res_mod, state, &
+                                                     past_state
+                                                    !enforced_active_state
+    REAL(KIND=dp)                               :: sum_ov, max_val, resid 
+!!ADD OPTIONAL
+
+    mat    = SIZE(aom_env%Stptp, 1)
+
+    allocate(overlaps(2*mat))
+
+    overlaps = 0.0D0
+    
+    !sum_ov = abs(aom_env%C_t(:, aom_env%old_state)*aom_env%C_tp(:, aom_env%active_state))**2
+    
+    if (PRESENT(changed_state)) then
+        past_state = changed_state
+print *, "OLD_STATE", changed_state
+    else
+        past_state = aom_env%active_state
+print *, "STATE_CHANGED", past_state
+print *, "NEW_STATE_here", aom_env%active_state    
+    end if
+
+print *, "NEW_STATE", aom_env%active_state    
+
+     do i=1, mat
+         overlaps(1) = overlaps(1) + aom_env%C_t(i, past_state)*aom_env%C_tp(i, aom_env%active_state)
+     end do
+print *, "OVERLAP_NOTSQUARED", overlaps(1)
+
+     overlaps(1) = abs(overlaps(1))*abs(overlaps(1))
+print *, "OVERALP_SQUARED", overlaps(1)
+
+     aom_env%overalp_over_thresh = .False.
+  
+     if ( overlaps(1) .gt. 0.5) then
+        print *, "CARRY_ON_THE_SAME_STATE"
+         aom_env%enforced_active_state = past_state
+         aom_env%overalp_over_thresh = .True.
+     else
+        print *, "POSSIBLE_TRIVIAL_CROSSING"
+        sum_ov = overlaps(1)
+     !   max_val = maxval(overlaps(:))
+        do j =2, 2*mat  !I want to be sure to count all the states
+           res_mod = ((-1)**(modulo(j ,2)))*(j/2)   !this is +1,-1,+2,-2
+           state = aom_env%active_state+res_mod
+           !two conditions in case state is negative or is larger than mat
+           if (state .le. 0 .or. state .gt. mat) then
+              print *, "skipped", j, state
+              cycle
+           else  
+              do i = 1, mat
+                 overlaps(j) = overlaps(j) + aom_env%C_t(i, past_state)*&
+                                             aom_env%C_tp(i, state)
+              end do
+              overlaps(j) = abs(overlaps(j))*abs(overlaps(j))
+              print *, j, state
+           end if
+           print *, "OV_CALC_NOW", overlaps(j)
+           max_val = maxval(overlaps(:))
+           print *, "MAX_VAL_UPTONOW", max_val 
+           sum_ov = sum_ov +  overlaps(j)
+           print *, "SUM_OV", sum_ov
+           resid = 1.0D0 - sum_ov
+           if (resid .gt. max_val) then 
+               print *, "REPEAT"
+               cycle
+           else
+               print *, "MAX FOUND", max_val
+               if (max_val .le. 0.5) then 
+                  print *, "WARNING: MORE THAN TWO STATES CROSS"
+               end if 
+               aom_env%enforced_active_state = state
+               exit
+           end if
+        end do
+     end if
+
+print *, "LAST_ENFORCED_ACTIVE", aom_env%enforced_active_state
+print *, "OVERALP_CALCC", overlaps
+if (present(itimes)) then 
+print *, "MAX_OVERLAP", itimes, overlaps(1), maxval(overlaps(:))
+else
+print *, "MAX_OVERLAP_HOPPING", overlaps(1), maxval(overlaps(:))
+end if
+
+if ( overlaps(1) .gt. 0.5) then
+print *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, past_state)*&
+                            aom_env%C_t(:, past_state))), &
+      maxloc(abs(aom_env%C_tp(:,aom_env%active_state)*aom_env%C_tp(:,aom_env%active_state)))
+print *, "STATE_TOGOTO", past_state, aom_env%active_state
+else
+print *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, past_state)*&
+                            aom_env%C_t(:, past_state))), &
+            maxloc(abs(aom_env%C_tp(:,aom_env%enforced_active_state)*&
+                            aom_env%C_tp(:,aom_env%enforced_active_state)))
+print *, "STATE_TOGOTO", past_state, aom_env%enforced_active_state
+end if
+
+    deallocate(overlaps)
+     
+END SUBROUTINE adiab_overalp_check
+
+
 subroutine modified_surfacehop(C1, C2, deltat, old_state, &
               sh_env, new_state, attempt_hop, decohere_criterion, &
-              sh_print_env, aom_env, adiab_section) !triv_threshold)
+              sh_print_env, aom_env, adiab_section, overlap_key) !triv_threshold)
         !using the method outlined in John Tully's Electronic Transitions paper
         !calculate the probability of the molecular dynamics switching to evolve on a different potential surface
         REAL(KIND=dp), dimension(:,:), intent(in) :: C1, C2
@@ -443,6 +567,7 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         TYPE(sh_print_env_type) :: sh_print_env
         TYPE(aom_env_type), INTENT(IN)             :: aom_env
         TYPE(section_vals_type), POINTER               :: adiab_section
+        LOGICAL, OPTIONAL, INTENT(IN)                 :: overlap_key
 
        CHARACTER(len=*), PARAMETER :: routineN ='modified_surfacehop', &
        routineP = moduleN//':'//routineN
@@ -469,40 +594,51 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         allocate(cttm_ad(mol)) 
         ALLOCATE(sh_print_env%proba(mol))
 
-        do i=1,mol
-                if (i .ne. old_state) then 
-                        sh_env%enerdiff(i) = abs(sh_env%E_tp(i) - sh_env%E_tp(old_state)) 
-                else if (i .eq. old_state) then 
-                        sh_env%enerdiff(old_state) = 0.0D0
-                end if
-        end do
-       
-        if (sh_env%enerdiff(1) == sh_env%enerdiff(old_state)) then
-                min = sh_env%enerdiff(2)
-                do i= 3,mol
-                       if (sh_env%enerdiff(i) < min .and. i .ne. old_state) then
-                               min = sh_env%enerdiff(i)
-!                               sh_env%state_min = i
-                        end if          
-                end do
-        else 
-                min = sh_env%enerdiff(1)
-                do i= 2,mol
-                       if (sh_env%enerdiff(i) < min .and. i .ne. old_state) then
-                               min = sh_env%enerdiff(i)
-!                               sh_env%state_min = i
-                        end if          
-                end do
-        end if
+        if (PRESENT(overlap_key)) then
+            CALL adiab_overalp_check(aom_env)
 
-
-        do i =1,mol
-                if (sh_env%enerdiff(i) == min) then
-                       sh_env%state_min = i
-                end if
-        end do
-
-        sh_print_env%enermin = min
+print *, "NOWENFORCEDDDD", aom_env%enforced_active_state
+!stop
+            sh_env%state_min = aom_env%enforced_active_state
+            
+            !TO BE ADJUSTED
+            sh_print_env%enermin = 0.0D0
+        else
+             do i=1,mol
+                     if (i .ne. old_state) then 
+                             sh_env%enerdiff(i) = abs(sh_env%E_tp(i) - sh_env%E_tp(old_state)) 
+                     else if (i .eq. old_state) then 
+                             sh_env%enerdiff(old_state) = 0.0D0
+                     end if
+             end do
+            
+             if (sh_env%enerdiff(1) == sh_env%enerdiff(old_state)) then
+                     min = sh_env%enerdiff(2)
+                     do i= 3,mol
+                            if (sh_env%enerdiff(i) < min .and. i .ne. old_state) then
+                                    min = sh_env%enerdiff(i)
+                                     sh_env%state_min = i
+                             end if          
+                     end do
+             else 
+                     min = sh_env%enerdiff(1)
+                     do i= 2,mol
+                            if (sh_env%enerdiff(i) < min .and. i .ne. old_state) then
+                                    min = sh_env%enerdiff(i)
+                                     sh_env%state_min = i
+                             end if          
+                     end do
+             end if
+            
+            
+             do i =1,mol
+                     if (sh_env%enerdiff(i) == min) then
+                            sh_env%state_min = i
+                     end if
+             end do
+            
+             sh_print_env%enermin = min
+         end if
 
 !if the propagation occurs in the diabatic basis, transfor diabatic coefficients
 !into adiabatic coefficients
@@ -559,10 +695,17 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         trivial_correction = .FALSE.
         err = abs(sumg - ex_prob)
         if (err >= 0.0D0) then      !WITHOUT THRESHOLD
-                trivial_correction = .TRUE.
+                !trivial_correction = .TRUE.
+                trivial_correction = (sh_env%state_min.NE.old_state)
+print *, "trivial_correction", trivial_correction
                         if (trivial_correction) then  
-                                g_exa = ex_prob - sumg + g(sh_env%state_min)
+print*, "ex_prob", ex_prob
+print*, "sumg", sumg
+print*, sh_env%state_min
+print*, "g(sh_env%state_min)", g(sh_env%state_min)               
+                 g_exa = ex_prob - sumg + g(sh_env%state_min)
                                 g(sh_env%state_min) = g_exa
+print*, "g(sh_env%state_min)", g(sh_env%state_min)               
                         end if
         end if
 

@@ -301,6 +301,8 @@ CONTAINS
      sh_env%E_t = aom_env%E_t
      CALL adiabaticity(-AIMAG(aom_env%H_tp), mat, C_tp, E_tp, .true., sh_env)
      sh_env%E_tp = E_tp
+!aom_env%C_tp must be created before we try to hop, it is used in adiab_overalp_check
+     aom_env%C_tp = C_tp
 
      !> ADIABATIC NACE CALCULATION
 !COMMENT: do we really need to calculate the full NACE matrix? I guess one only
@@ -633,7 +635,7 @@ deallocate(pop_t_before, pop_t_present, pop_after_deco, pop_after_sp_corr)
      aom_env%Sttm  = aom_env%Stpt
      aom_env%Stmt  = aom_env%Sttp
      aom_env%E_t = E_tp
-     aom_env%C_tp = C_tp
+     !aom_env%C_tp = C_tp
      !aom_env%C_t = aom_env%C_tp
 
      !aom_env%Stmtm = Stt
