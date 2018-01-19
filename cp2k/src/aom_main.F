@@ -190,6 +190,7 @@ CONTAINS
      LOGICAL                                      :: correct_transfer_keyword
      real(kind=dp), DIMENSION(:,:), allocatable :: PC_allrvecs
      LOGICAL                                      :: do_random !, correct_transfer
+     REAL(KIND=dp)                                :: sum
      !REAL(KIND=dp)                                :: sum, sum1
      INTEGER, dimension(:), allocatable       :: active_region
      COMPLEX(KIND=dp), dimension(:), allocatable :: ctin_after_tranf_correction
@@ -303,6 +304,27 @@ CONTAINS
      sh_env%E_tp = E_tp
 !aom_env%C_tp must be created before we try to hop, it is used in adiab_overalp_check
      aom_env%C_tp = C_tp
+
+     !> Check if the eigenvectors have a sign change from one timestep to the
+     !others
+     do imol=1, mol
+        sum = 0
+        do coord=1, mol
+           sum = sum + aom_env%C_t(coord, imol) * C_tp(coord, imol)
+        enddo
+        !print*, "AC_PHASE", imol, sum
+        if (sum.lt.0) then
+           print*, "AC_PHASE_WARNING for ", imol
+           C_tp(:,imol) = - C_tp(:, imol)
+        endif
+        sum = 0 
+        !do coord=1, mol
+        !   sum = sum + aom_env%C_t(coord, imol) * C_tp(coord, imol)
+        !enddo
+        !print*, "AC_PHASE", imol, sum
+        !if (imol.eq.active_state) print*, "AC_STATE_WARNING"
+     enddo
+           
 
      !> ADIABATIC NACE CALCULATION
 !COMMENT: do we really need to calculate the full NACE matrix? I guess one only
@@ -575,6 +597,7 @@ allocate(sh_env%exact_forces(3,natom))
         ctin=sh_env%ctin
      ENDIF
 
+     if (correct_transfer_keyword .and. sh_env%decoherence) then
 print *, "################CARRIER_WF##############"
 
 allocate(pop_t_before(mol))
@@ -604,6 +627,7 @@ write (*,'(I12,A, I12,A , I12,A , I12)') &
          " spcorr = ", maxloc(pop_after_sp_corr)
 
 deallocate(pop_t_before, pop_t_present, pop_after_deco, pop_after_sp_corr)
+     ENDIF
 
      !> PRINT
      CALL adiab_print_hamiltonian(adiab_section, -AIMAG(aom_env%H_tp), nadiab,norbitals,itimes, deltatMD)
