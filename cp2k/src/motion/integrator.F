@@ -457,6 +457,7 @@ CONTAINS
 !> CHANGE_AC
     INTEGER                                  :: mixing_type
     TYPE(section_vals_type), POINTER         :: mixed_section, force_env_section
+    LOGICAL                                  :: successful_hop
     !TYPE(aom_env_type), POINTER              :: aom_env
 !    TYPE(md_ener_type), POINTER              :: md_ener
 !> END
@@ -604,20 +605,29 @@ CONTAINS
              !ENDIF
              
              !UPDATE_OLD_STATE
-             force_env%mixed_env%aom_env%active_state_past = force_env%mixed_env%aom_env%active_state
+             if (force_env%mixed_env%aom_env%reorder) then 
+                 force_env%mixed_env%aom_env%active_state_past = force_env%mixed_env%aom_env%state_tmdt
+print *, "STATE_EVOLUTION", force_env%mixed_env%aom_env%state_tmdt, "TO", &
+                    force_env%mixed_env%aom_env%active_state, "TO", &
+                    force_env%mixed_env%aom_env%new_state 
+             else
+                force_env%mixed_env%aom_env%active_state_past = force_env%mixed_env%aom_env%active_state
+             end if
+          
+             successful_hop = .False.                  
 
              IF (force_env%mixed_env%aom_env%attempt_hop) THEN
                 CALL check_hop_attempt(tmp%vel, atomic_kind_set, nparticle_kind, local_particles, force_env)
                 if (force_env%mixed_env%aom_env%ida_deco) then
                    CALL ida_collapse(force_env%mixed_env%aom_env)
                 end if
-                                  
                 IF (force_env%mixed_env%aom_env%successful_hop) THEN
+                   successful_hop = .True.
                    CALL force_env_calc_energy_force(force_env,require_consistent_energy_force=.FALSE., &
                                                     itimes = itimes)
                 ENDIF
              ENDIF
-
+             print *, "successful_hop", successful_hop
              !Probably I would need to check the overalp here
              CALL adiab_overalp_check(force_env%mixed_env%aom_env, force_env%mixed_env%aom_env%active_state_past, itimes)
 
@@ -628,8 +638,9 @@ CONTAINS
                     print *, "CASE2"
                  end if
              else 
-                if (force_env%mixed_env%aom_env%active_state_past .eq. &
-                                  force_env%mixed_env%aom_env%active_state) then
+                !if (force_env%mixed_env%aom_env%active_state_past .eq. &
+                !                  force_env%mixed_env%aom_env%active_state) then
+                 if(.not.successful_hop) then
                    if (.not. force_env%mixed_env%aom_env%overalp_over_thresh) then
                        print *, "CASE3" 
                    else

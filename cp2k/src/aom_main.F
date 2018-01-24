@@ -280,7 +280,8 @@ CONTAINS
      active_state = aom_env%active_state
      ctin(:) = aom_env%ctin(:)
      aom_env%adiab_nace_t = aom_env%adiab_nace_tp
-
+     aom_env%state_tmdt = active_state
+     
      !> CALCULATE THE CENTER OF MASS
      !> CONSTRUCT NEIGHBOURS LIST
      CALL calc_coms_and_nlist(aom_env, atoms, mol, cutoff_sites, orb)
@@ -408,6 +409,7 @@ CONTAINS
                                  decohere_criterion, &
                                  sh_print_env, aom_env)
      ENDIF
+print *, "Active_state_after_surf_hop", active_state
 
      !CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE RESULT OF THE SURFACE
      !HOP ROUTINE IS. 

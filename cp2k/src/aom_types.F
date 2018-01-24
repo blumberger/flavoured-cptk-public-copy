@@ -179,6 +179,8 @@ IMPLICIT NONE
      REAL(KIND=dp), DIMENSION(:), POINTER         :: scoeffs
      REAL(KIND = dp)                              :: energy_new
      INTEGER, dimension(:), POINTER          :: class_forbidden_hop_t
+     LOGICAL                                     :: reorder
+     INTEGER                                     :: state_tmdt
 
    END TYPE aom_env_type
 

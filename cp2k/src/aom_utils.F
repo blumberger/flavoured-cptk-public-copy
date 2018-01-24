@@ -329,7 +329,7 @@ subroutine surf_hop_type(adiab_section, C1, C2, deltat, old_state, &
        TYPE(section_vals_type), POINTER               :: adiab_section
        REAL(KIND=dp), dimension(:,:), intent(in) :: C1, C2
        REAL(KIND=dp), intent(in) :: deltat
-       integer, intent(in) :: old_state
+       integer, intent(inout) :: old_state
        TYPE(sh_env_type)           :: sh_env
        INTEGER, INTENT(OUT)        :: new_state
        LOGICAL, INTENT(OUT)        :: attempt_hop
@@ -559,13 +559,13 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         !calculate the probability of the molecular dynamics switching to evolve on a different potential surface
         REAL(KIND=dp), dimension(:,:), intent(in) :: C1, C2
         REAL(KIND=dp), intent(in) :: deltat
-        integer, intent(in) :: old_state
+        integer, intent(inout) :: old_state
         TYPE(sh_env_type)       :: sh_env
         INTEGER, INTENT(OUT)        :: new_state
         LOGICAL, INTENT(OUT)        :: attempt_hop
         REAL(KIND=dp), INTENT(IN) :: decohere_criterion
         TYPE(sh_print_env_type) :: sh_print_env
-        TYPE(aom_env_type), INTENT(IN)             :: aom_env
+        TYPE(aom_env_type), INTENT(INOUT)             :: aom_env
         TYPE(section_vals_type), POINTER               :: adiab_section
         LOGICAL, OPTIONAL, INTENT(IN)                 :: overlap_key
 
@@ -582,6 +582,8 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         COMPLEX(KIND=dp), dimension(:), allocatable :: ct, cttm_ad
         COMPLEX(KIND=dp), dimension(:), allocatable :: ak, akttm
         COMPLEX(KIND=dp) :: cstate, cstate_tm
+        !LOGICAL        :: reorder
+        INTEGER        :: my_old_state 
  
         mol = size(aom_env%Stt,1)
 
@@ -641,6 +643,17 @@ print *, "NOWENFORCEDDDD", aom_env%enforced_active_state
              sh_print_env%enermin = min
          end if
 
+!> find out if we want to use the correct state order for the active state
+ aom_env%reorder = .True.
+ if (aom_env%reorder) then 
+    my_old_state = aom_env%enforced_active_state
+print *, "old_state", old_state
+print *, "my_old_state", my_old_state
+print *, "aom_env%enforced_active_state", aom_env%enforced_active_state
+ else 
+    my_old_state = old_state
+ end if   
+
 !if the propagation occurs in the diabatic basis, transfor diabatic coefficients
 !into adiabatic coefficients
         CALL section_vals_val_get(adiab_section,"REPRESENTATION", &
@@ -649,6 +662,9 @@ print *, "NOWENFORCEDDDD", aom_env%enforced_active_state
         CASE("DIABATIC_BASIS")
                CALL diab_to_adiab(C2, old_state, sh_env, mol, cstate, ct, &
                                                    C1, cttm_ad, cstate_tm)
+               if (aom_env%reorder) then
+                    CALL diab_to_adiab(C2, my_old_state, sh_env, mol, cstate, ct)
+               end if
         CASE("ADIABATIC_BASIS")
                ct(:) = sh_env%ctt(:)
                cttm_ad(:) = sh_env%cttm(:)
@@ -676,9 +692,12 @@ print *, "NOWENFORCEDDDD", aom_env%enforced_active_state
 
     !calc exact total surface hopping probability (also termed g_tot) 
     !according to Prezhdo and Wang 2014
-        ex_prob = (abs(akttm(old_state))- abs(ak(old_state)))/abs(akttm(old_state))
-        sh_print_env%exprob = ex_prob 
 
+    !>in this case we need to use the new enforced state to avoid discontinuity
+    !in the time derivative
+        ex_prob = (abs(akttm(old_state))- abs(ak(my_old_state)))/abs(akttm(old_state))
+        sh_print_env%exprob = ex_prob 
+print *, "TO_TRY_my_old_state", my_old_state
     ! calculate sumg that can also be negative because each individual probability
     ! (flux) could be negative 
         sumg = 0.0D0
@@ -686,8 +705,11 @@ print *, "NOWENFORCEDDDD", aom_env%enforced_active_state
         do i=1,mol
               !g(i) is the probability to hop from the current state (old_state) to any other
               !state (i) 
-                g(i) = (deltat*b(i))/abs(ak(old_state))
-                if (i .ne. old_state) then
+              !>the current state is now the enforced state
+                g(i) = (deltat*b(i))/abs(ak(my_old_state))
+              !>here also we have to use the enforce state that now is indeed the
+              !new state
+                if (i .ne. my_old_state) then
                         sumg = sumg + g(i)
                 end if
         end do
@@ -698,7 +720,7 @@ g_before = g
         err = abs(sumg - ex_prob)
         if (err >= 0.0D0) then      !WITHOUT THRESHOLD
                 !trivial_correction = .TRUE.
-                trivial_correction = (sh_env%state_min.NE.old_state)
+                trivial_correction = (sh_env%state_min.NE.my_old_state)
 print *, "trivial_correction", trivial_correction
                         if (trivial_correction) then  
 print*, "ex_prob", ex_prob
@@ -726,14 +748,14 @@ g_after = g
 !        !if this happens, rescale them down to sum = 1
        sumg = 0.0D0
        do i=1,mol
-               if (i .ne. old_state) then
+               if (i .ne. my_old_state) then
                        sumg = sumg + g(i)
                end if
        end do
        if (sumg > 1.0D0) then
                do i=1,mol
                        g(i) = g(i)/sumg
-                       g(old_state) = 0.0D0
+                       g(my_old_state) = 0.0D0
                end do
 !> CHANGE_AC
                sh_print_env%renorm = .TRUE.
@@ -742,7 +764,7 @@ g_after = g
 !> CHANGE_AC
                sh_print_env%renorm = .FALSE.
                sh_print_env%sumprob   = sumg
-               g(old_state) = 1.0D0 - sumg
+               g(my_old_state) = 1.0D0 - sumg
        end if
 g_renorm = g
 !> CHANGE_AC
@@ -759,13 +781,13 @@ g_renorm = g
         hop = next_random_number(aom_env%rng_stream)
 print *, "RANDOM_NUMBER_HOPPING_PROBA", hop
         sh_print_env%hop       = hop
-        sh_print_env%old_state = old_state
+        sh_print_env%old_state = my_old_state
         !and see if this random number causes a surface hop
         sumg = 0.0D0
         do i=1,mol
                 sumg = sumg + g(i)
                 if (hop <= sumg) then
-                        if (i .ne. old_state) then
+                        if (i .ne. my_old_state) then
                                 new_state = i
 !                                write(24,*) i                        
                                ! decohere = .FALSE.
@@ -775,8 +797,8 @@ print *, "ATTEMPTED_HOP"
                                 sh_print_env%attempt_hop    = attempt_hop
                                 sh_print_env%new_state = new_state
                                 EXIT
-                        elseif (i == old_state) then
-                                new_state = old_state
+                        elseif (i == my_old_state) then
+                                new_state = my_old_state
                                 attempt_hop = .FALSE.
                                 sh_print_env%attempt_hop    = attempt_hop
                                 sh_print_env%new_state = new_state
@@ -788,7 +810,7 @@ print *, "ATTEMPTED_HOP"
                                 sh_env%decohere = .TRUE.
                                 do j=1,mol
                                         if (abs(aom_env%adiab_nace_tp(old_state,j)) & 
-                                                     > decohere_criterion .and. old_state .ne. j) then
+                                                     > decohere_criterion .and. my_old_state .ne. j) then
                                                ! decohere = .FALSE.
                                                 sh_env%decohere = .FALSE.
                                                 EXIT
@@ -801,8 +823,11 @@ print *, "ATTEMPTED_HOP"
                 end if
         end do
 
-
         CALL adiab_print_sh_info(sh_print_env, keyword = 'TULLY_TEST') 
+
+        if (aom_env%reorder) then
+            old_state = my_old_state
+        end if
 
         DEALLOCATE(sh_print_env%proba)
         DEALLOCATE(sh_env%enerdiff)
@@ -2047,6 +2072,7 @@ ENDIF
               old_state = i
            ELSE
               old_state = aom_env%active_state
+print *, "DELTAE_OLDSTATE", old_state
            ENDIF
            delta_energy = B**2 - 4 * A * (  &
                      aom_env%adiab_energies_t(new_state) - &
@@ -2094,6 +2120,7 @@ ENDIF
 
            new_state = force_env%mixed_env%aom_env%new_state
            old_state = force_env%mixed_env%aom_env%active_state
+print *, "OLD_STATE_ISOTROP", old_state
            delta_energy = kinetic_energy_prime-( &
                      force_env%mixed_env%aom_env%adiab_energies_t(new_state) - &
                      force_env%mixed_env%aom_env%adiab_energies_t(old_state))
