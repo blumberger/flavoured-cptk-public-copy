@@ -458,6 +458,7 @@ CONTAINS
     INTEGER                                  :: mixing_type
     TYPE(section_vals_type), POINTER         :: mixed_section, force_env_section
     LOGICAL                                  :: successful_hop
+    INTEGER                                  :: i, mol
     !TYPE(aom_env_type), POINTER              :: aom_env
 !    TYPE(md_ener_type), POINTER              :: md_ener
 !> END
@@ -613,7 +614,24 @@ print *, "STATE_EVOLUTION", force_env%mixed_env%aom_env%state_tmdt, "TO", &
              else
                 force_env%mixed_env%aom_env%active_state_past = force_env%mixed_env%aom_env%active_state
              end if
-          
+
+print *, "#############U_MATRIX_ACTIVE_STATE###############"
+
+mol = size(force_env%mixed_env%aom_env%Stt,1)
+
+do i =1, mol
+write (*,'(F12.10,A, F12.10,A , F12.10,A , F12.10)') &
+   force_env%mixed_env%aom_env%C_t(i, force_env%mixed_env%aom_env%state_tmdt), &
+    " Ctp(a)= ", force_env%mixed_env%aom_env%C_tp(i, force_env%mixed_env%aom_env%state_tmdt), &
+    " Ctp(a')= ", force_env%mixed_env%aom_env%C_tp(i, force_env%mixed_env%aom_env%active_state), &
+    " Ctp(f)= ", force_env%mixed_env%aom_env%C_tp(i, force_env%mixed_env%aom_env%new_state)
+end do
+
+
+
+
+
+ 
              successful_hop = .False.                  
 
              IF (force_env%mixed_env%aom_env%attempt_hop) THEN
@@ -730,7 +748,7 @@ print *, "STATE_EVOLUTION", force_env%mixed_env%aom_env%state_tmdt, "TO", &
 
     END DO
 
-print *, "WHERE AM I???"
+!print *, "WHERE AM I???"
     ! Update virial
     IF ( simpar%constraint ) CALL pv_constraint ( gci, local_molecules, &
          molecule_set,molecule_kind_set,particle_set, virial,para_env%group )

@@ -194,9 +194,11 @@ CONTAINS
      !REAL(KIND=dp)                                :: sum, sum1
      INTEGER, dimension(:), allocatable       :: active_region
      COMPLEX(KIND=dp), dimension(:), allocatable :: ctin_after_tranf_correction
-     REAL(KIND=dp), dimension(:), allocatable    :: pop_atmdt, pop_a, pop_ap2, &
-                                                     pop_ap1, pop_am2, pop_am1, pop_t_before, &
+     REAL(KIND=dp), dimension(:), allocatable    :: pop_t_before, &
                                                 pop_t_present, pop_after_deco, pop_after_sp_corr 
+!     REAL(KIND=dp), dimension(:), allocatable    :: pop_atmdt, pop_a, pop_ap2, &
+!                                                     pop_ap1, pop_am2, pop_am1, pop_t_before, &
+!                                                pop_t_present, pop_after_deco, pop_after_sp_corr 
 !     INTEGER     :: loc(1)
 
      !> cutoff to define the neighborough list
@@ -313,7 +315,7 @@ CONTAINS
         enddo
         !print*, "AC_PHASE", imol, sum
         if (sum.lt.0) then
-           print*, "AC_PHASE_WARNING for ", imol
+           !print*, "AC_PHASE_WARNING for ", imol
            C_tp(:,imol) = - C_tp(:, imol)
         endif
         sum = 0 
@@ -443,73 +445,73 @@ ALLOCATE(sh_env%forces_active_state(3,natom))
 !end do
 
 
-allocate(pop_atmdt(mol))
-allocate(pop_a(mol))
-allocate(pop_ap2(mol))
-allocate(pop_ap1(mol))
-allocate(pop_am1(mol))
-allocate(pop_am2(mol)) 
+!allocate(pop_atmdt(mol))
+!allocate(pop_a(mol))
+!allocate(pop_ap2(mol))
+!allocate(pop_ap1(mol))
+!allocate(pop_am1(mol))
+!allocate(pop_am2(mol)) 
 
-pop_atmdt = 0.0D0
-pop_a = 0.0D0
-pop_ap2 = 0.0D0
-pop_ap1 = 0.0D0
-pop_am1 = 0.0D0
-pop_am2 = 0.0D0
+!pop_atmdt = 0.0D0
+!pop_a = 0.0D0
+!pop_ap2 = 0.0D0
+!pop_ap1 = 0.0D0
+!pop_am1 = 0.0D0
+!pop_am2 = 0.0D0
 
-print *, "#############U_MATRIX_ACTIVE_STATE###############"
+!print *, "#############U_MATRIX_ACTIVE_STATE###############"
 
-do i =1, mol
-write (*,'(F12.10,A, F12.10,A , F12.10,A , F12.10,A , F12.10,A , F12.10)') &
-              aom_env%C_t(i, active_state), " a= ", C_tp(i, active_state), &
-                 " a+2= ", C_tp(i, active_state+2), " a+1= ", C_tp(i, active_state+1), &
-                 " a-1= ", C_tp(i, active_state-1), " a-2= ", C_tp(i, active_state-2)
-end do
+!do i =1, mol
+!write (*,'(F12.10,A, F12.10,A , F12.10,A , F12.10,A , F12.10,A , F12.10)') &
+!              aom_env%C_t(i, active_state), " a= ", C_tp(i, active_state), &
+!                 " a+2= ", C_tp(i, active_state+2), " a+1= ", C_tp(i, active_state+1), &
+!                 " a-1= ", C_tp(i, active_state-1), " a-2= ", C_tp(i, active_state-2)
+!end do
 
-print *, "#############ACTIVE_STATE_POP###############"
+!print *, "#############ACTIVE_STATE_POP###############"
 
-do i =1, mol
-if (active_state .gt. 2) then
-    pop_atmdt(i) = aom_env%C_t(i, active_state)*aom_env%C_t(i, active_state)
-    pop_a(i) = C_tp(i, active_state)*C_tp(i,active_state)
-    pop_ap2(i) = C_tp(i, active_state+2)*C_tp(i,active_state+2)
-    pop_ap1(i) = C_tp(i, active_state+1)*C_tp(i,active_state+1)
-    pop_am1(i) = C_tp(i, active_state-1)*C_tp(i,active_state-1)
-    pop_am2(i) = C_tp(i, active_state-2)*C_tp(i,active_state-2)
+!do i =1, mol
+!if (active_state .gt. 2) then
+!    pop_atmdt(i) = aom_env%C_t(i, active_state)*aom_env%C_t(i, active_state)
+!    pop_a(i) = C_tp(i, active_state)*C_tp(i,active_state)
+!    pop_ap2(i) = C_tp(i, active_state+2)*C_tp(i,active_state+2)
+!    pop_ap1(i) = C_tp(i, active_state+1)*C_tp(i,active_state+1)
+!    pop_am1(i) = C_tp(i, active_state-1)*C_tp(i,active_state-1)
+!    pop_am2(i) = C_tp(i, active_state-2)*C_tp(i,active_state-2)
 
-else if (active_state .gt. 1) then
-    pop_atmdt(i) = aom_env%C_t(i, active_state)*aom_env%C_t(i, active_state)
-    pop_a(i) = C_tp(i, active_state)*C_tp(i,active_state)
-    pop_ap2(i) = C_tp(i, active_state+2)*C_tp(i,active_state+2)
-    pop_ap1(i) = C_tp(i, active_state+1)*C_tp(i,active_state+1)
-    pop_am1(i) = C_tp(i, active_state-1)*C_tp(i,active_state-1)
+!else if (active_state .gt. 1) then
+!    pop_atmdt(i) = aom_env%C_t(i, active_state)*aom_env%C_t(i, active_state)
+!    pop_a(i) = C_tp(i, active_state)*C_tp(i,active_state)
+!    pop_ap2(i) = C_tp(i, active_state+2)*C_tp(i,active_state+2)
+!    pop_ap1(i) = C_tp(i, active_state+1)*C_tp(i,active_state+1)
+!    pop_am1(i) = C_tp(i, active_state-1)*C_tp(i,active_state-1)
 
-else
-    pop_atmdt(i) = aom_env%C_t(i, active_state)*aom_env%C_t(i, active_state)
-    pop_a(i) = C_tp(i, active_state)*C_tp(i,active_state)
-    pop_ap2(i) = C_tp(i, active_state+2)*C_tp(i,active_state+2)
-    pop_ap1(i) = C_tp(i, active_state+1)*C_tp(i,active_state+1)
-endif
+!else
+!    pop_atmdt(i) = aom_env%C_t(i, active_state)*aom_env%C_t(i, active_state)
+!    pop_a(i) = C_tp(i, active_state)*C_tp(i,active_state)
+!    pop_ap2(i) = C_tp(i, active_state+2)*C_tp(i,active_state+2)
+!    pop_ap1(i) = C_tp(i, active_state+1)*C_tp(i,active_state+1)
+!endif
 
-write (*,'(F12.10,A, F12.10,A , F12.10,A , F12.10,A , F12.10,A , F12.10)') &
-              pop_atmdt(i), " a= ", pop_a(i), " a+2= ", pop_ap2(i), " a+1= ", pop_ap1(i), &
-                          " a-1= ", pop_am1(i), " a-2= ", pop_am2(i) 
-end do
+!write (*,'(F12.10,A, F12.10,A , F12.10,A , F12.10,A , F12.10,A , F12.10)') &
+!              pop_atmdt(i), " a= ", pop_a(i), " a+2= ", pop_ap2(i), " a+1= ", pop_ap1(i), &
+!                          " a-1= ", pop_am1(i), " a-2= ", pop_am2(i) 
+!end do
 
-write (*,'(I12,A, I12,A , I12,A , I12,A , I12,A , I12)') &
-        maxloc(pop_atmdt), " a= ", maxloc(pop_a), " a+2 = ", maxloc(pop_ap2), & 
-         " a+1 = ", maxloc(pop_ap1), " a-1 = ", maxloc(pop_am1), " a-2 = ", maxloc(pop_am2)
+!write (*,'(I12,A, I12,A , I12,A , I12,A , I12,A , I12)') &
+!        maxloc(pop_atmdt), " a= ", maxloc(pop_a), " a+2 = ", maxloc(pop_ap2), & 
+!         " a+1 = ", maxloc(pop_ap1), " a-1 = ", maxloc(pop_am1), " a-2 = ", maxloc(pop_am2)
 
-write (*,'(F12.10,A, F12.10,A , F12.10,A , F12.10,A , F12.10,A , F12.10)') &
-              aom_env%E_t(active_state), " a= ", E_tp(active_state), " a+2= ", &
-                               E_tp(active_state+2), " a+1= ", E_tp(active_state+1), &
-                            " a-1= ", E_tp(active_state-1), " a-2= ", E_tp(active_state-2)
+!write (*,'(F12.10,A, F12.10,A , F12.10,A , F12.10,A , F12.10,A , F12.10)') &
+!              aom_env%E_t(active_state), " a= ", E_tp(active_state), " a+2= ", &
+!                               E_tp(active_state+2), " a+1= ", E_tp(active_state+1), &
+!                            " a-1= ", E_tp(active_state-1), " a-2= ", E_tp(active_state-2)
 
 
 !     CALL adiab_overalp_calc(pop_atmdt, active_state, aom_env, C_tp, mol, itimes, & 
 !                                   attempt_hop, enforced_active_state)
 
-deallocate(pop_am2, pop_am1, pop_ap2, pop_ap1, pop_a, pop_atmdt)
+!deallocate(pop_am2, pop_am1, pop_ap2, pop_ap1, pop_a, pop_atmdt)
 !print *, "LOCALIZATION", maxloc(pop_a), loc
 !sum = 0.0D0
 !sum1 = 0.0D0

@@ -467,8 +467,8 @@ SUBROUTINE adiab_overalp_check(aom_env, changed_state, itimes)
 print *, "OLD_STATE", changed_state
     else
         past_state = aom_env%active_state
-print *, "STATE_CHANGED", past_state
-print *, "NEW_STATE_here", aom_env%active_state    
+!print *, "STATE_CHANGED", past_state
+!print *, "NEW_STATE_here", aom_env%active_state    
     end if
 
 print *, "NEW_STATE", aom_env%active_state    
@@ -484,11 +484,11 @@ print *, "OVERALP_SQUARED", overlaps(1)
      aom_env%overalp_over_thresh = .False.
   
      if ( overlaps(1) .gt. 0.5) then
-        print *, "CARRY_ON_THE_SAME_STATE"
+!        print *, "CARRY_ON_THE_SAME_STATE"
          aom_env%enforced_active_state = past_state
          aom_env%overalp_over_thresh = .True.
      else
-        print *, "POSSIBLE_TRIVIAL_CROSSING"
+!        print *, "POSSIBLE_TRIVIAL_CROSSING"
         sum_ov = overlaps(1)
      !   max_val = maxval(overlaps(:))
         do j =2, 2*mat  !I want to be sure to count all the states
@@ -496,7 +496,7 @@ print *, "OVERALP_SQUARED", overlaps(1)
            state = aom_env%active_state+res_mod
            !two conditions in case state is negative or is larger than mat
            if (state .le. 0 .or. state .gt. mat) then
-              print *, "skipped", j, state
+!              print *, "skipped", j, state
               cycle
            else  
               do i = 1, mat
@@ -504,19 +504,19 @@ print *, "OVERALP_SQUARED", overlaps(1)
                                              aom_env%C_tp(i, state)
               end do
               overlaps(j) = abs(overlaps(j))*abs(overlaps(j))
-              print *, j, state
+!              print *, j, state
            end if
-           print *, "OV_CALC_NOW", overlaps(j)
+!           print *, "OV_CALC_NOW", overlaps(j)
            max_val = maxval(overlaps(:))
-           print *, "MAX_VAL_UPTONOW", max_val 
+!           print *, "MAX_VAL_UPTONOW", max_val 
            sum_ov = sum_ov +  overlaps(j)
-           print *, "SUM_OV", sum_ov
+!           print *, "SUM_OV", sum_ov
            resid = 1.0D0 - sum_ov
            if (resid .gt. max_val) then 
-               print *, "REPEAT"
+!               print *, "REPEAT"
                cycle
            else
-               print *, "MAX FOUND", max_val
+!               print *, "MAX FOUND", max_val
                if (max_val .le. 0.5) then 
                   print *, "WARNING: MORE THAN TWO STATES CROSS"
                end if 
@@ -582,7 +582,7 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         COMPLEX(KIND=dp), dimension(:), allocatable :: ct, cttm_ad
         COMPLEX(KIND=dp), dimension(:), allocatable :: ak, akttm
         COMPLEX(KIND=dp) :: cstate, cstate_tm
-        !LOGICAL        :: reorder
+        LOGICAL        :: reordering_states_keyword
         INTEGER        :: my_old_state 
  
         mol = size(aom_env%Stt,1)
@@ -600,7 +600,7 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         if (PRESENT(overlap_key)) then
             CALL adiab_overalp_check(aom_env)
 
-print *, "NOWENFORCEDDDD", aom_env%enforced_active_state
+!print *, "NOWENFORCEDDDD", aom_env%enforced_active_state
 !stop
             sh_env%state_min = aom_env%enforced_active_state
             
@@ -643,8 +643,9 @@ print *, "NOWENFORCEDDDD", aom_env%enforced_active_state
              sh_print_env%enermin = min
          end if
 
-!> find out if we want to use the correct state order for the active state
- aom_env%reorder = .True.
+!> choose the correct state order for the active state using the overlap criteria
+ CALL section_vals_val_get(adiab_section,"REORDERING_STATES_USING_OVERALP", l_val=reordering_states_keyword)
+ aom_env%reorder = reordering_states_keyword
  if (aom_env%reorder) then 
     my_old_state = aom_env%enforced_active_state
 print *, "old_state", old_state
@@ -697,7 +698,7 @@ print *, "aom_env%enforced_active_state", aom_env%enforced_active_state
     !in the time derivative
         ex_prob = (abs(akttm(old_state))- abs(ak(my_old_state)))/abs(akttm(old_state))
         sh_print_env%exprob = ex_prob 
-print *, "TO_TRY_my_old_state", my_old_state
+!print *, "TO_TRY_my_old_state", my_old_state
     ! calculate sumg that can also be negative because each individual probability
     ! (flux) could be negative 
         sumg = 0.0D0
@@ -722,15 +723,15 @@ g_before = g
                 !trivial_correction = .TRUE.
                 trivial_correction = (sh_env%state_min.NE.my_old_state)
 print *, "trivial_correction", trivial_correction
-                        if (trivial_correction) then  
 print*, "ex_prob", ex_prob
 print*, "sumg", sumg
 print*, sh_env%state_min
 print*, "g(sh_env%state_min)", g(sh_env%state_min)               
+                 if (trivial_correction) then  
                  g_exa = ex_prob - sumg + g(sh_env%state_min)
                                 g(sh_env%state_min) = g_exa
 print*, "g(sh_env%state_min)", g(sh_env%state_min)               
-                        end if
+                 end if
         end if
 
 g_after = g
