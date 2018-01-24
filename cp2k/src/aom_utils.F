@@ -526,6 +526,10 @@ print *, "OVERALP_SQUARED", overlaps(1)
         end do
      end if
 
+    if (PRESENT(changed_state) .and. maxval(overlaps(:)) .lt. 0.5) then
+        print *, "REDUCE_THE_TS"
+    end if
+
 print *, "LAST_ENFORCED_ACTIVE", aom_env%enforced_active_state
 print *, "OVERALP_CALCC", overlaps
 if (present(itimes)) then 
@@ -597,28 +601,40 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         allocate(cttm_ad(mol)) 
         ALLOCATE(sh_print_env%proba(mol))
 
-        if (PRESENT(overlap_key)) then
+        !> choose the correct state order for the active state using the overlap criteria
+        CALL section_vals_val_get(adiab_section,"REORDERING_STATES_USING_OVERALP", l_val=reordering_states_keyword)
+        aom_env%reorder = reordering_states_keyword
+        if (aom_env%reorder) then 
             CALL adiab_overalp_check(aom_env)
+            my_old_state = aom_env%enforced_active_state
+        print *, "old_state", old_state
+        print *, "my_old_state", my_old_state
+        print *, "aom_env%enforced_active_state", aom_env%enforced_active_state
+        else 
+            my_old_state = old_state
+        end if   
 
-!print *, "NOWENFORCEDDDD", aom_env%enforced_active_state
-!stop
+        if (PRESENT(overlap_key) .and. aom_env%reorder) then
+            !CALL adiab_overalp_check(aom_env)
             sh_env%state_min = aom_env%enforced_active_state
-            
-            !TO BE ADJUSTED
-            sh_print_env%enermin = 0.0D0
+        else if (PRESENT(overlap_key) .and. .not.aom_env%reorder) then
+            CALL adiab_overalp_check(aom_env)
+            sh_env%state_min = aom_env%enforced_active_state
+         !TO BE ADJUSTED
+         sh_print_env%enermin = 0.0D0
         else
              do i=1,mol
-                     if (i .ne. old_state) then 
-                             sh_env%enerdiff(i) = abs(sh_env%E_tp(i) - sh_env%E_tp(old_state)) 
-                     else if (i .eq. old_state) then 
-                             sh_env%enerdiff(old_state) = 0.0D0
+                     if (i .ne. my_old_state) then 
+                             sh_env%enerdiff(i) = abs(sh_env%E_tp(i) - sh_env%E_tp(my_old_state)) 
+                     else if (i .eq. my_old_state) then 
+                             sh_env%enerdiff(my_old_state) = 0.0D0
                      end if
              end do
             
-             if (sh_env%enerdiff(1) == sh_env%enerdiff(old_state)) then
+             if (sh_env%enerdiff(1) == sh_env%enerdiff(my_old_state)) then
                      min = sh_env%enerdiff(2)
                      do i= 3,mol
-                            if (sh_env%enerdiff(i) < min .and. i .ne. old_state) then
+                            if (sh_env%enerdiff(i) < min .and. i .ne. my_old_state) then
                                     min = sh_env%enerdiff(i)
                                      sh_env%state_min = i
                              end if          
@@ -626,7 +642,7 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
              else 
                      min = sh_env%enerdiff(1)
                      do i= 2,mol
-                            if (sh_env%enerdiff(i) < min .and. i .ne. old_state) then
+                            if (sh_env%enerdiff(i) < min .and. i .ne. my_old_state) then
                                     min = sh_env%enerdiff(i)
                                      sh_env%state_min = i
                              end if          
@@ -643,17 +659,6 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
              sh_print_env%enermin = min
          end if
 
-!> choose the correct state order for the active state using the overlap criteria
- CALL section_vals_val_get(adiab_section,"REORDERING_STATES_USING_OVERALP", l_val=reordering_states_keyword)
- aom_env%reorder = reordering_states_keyword
- if (aom_env%reorder) then 
-    my_old_state = aom_env%enforced_active_state
-print *, "old_state", old_state
-print *, "my_old_state", my_old_state
-print *, "aom_env%enforced_active_state", aom_env%enforced_active_state
- else 
-    my_old_state = old_state
- end if   
 
 !if the propagation occurs in the diabatic basis, transfor diabatic coefficients
 !into adiabatic coefficients

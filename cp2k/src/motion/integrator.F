@@ -611,9 +611,6 @@ CONTAINS
 print *, "STATE_EVOLUTION", force_env%mixed_env%aom_env%state_tmdt, "TO", &
                     force_env%mixed_env%aom_env%active_state, "TO", &
                     force_env%mixed_env%aom_env%new_state 
-             else
-                force_env%mixed_env%aom_env%active_state_past = force_env%mixed_env%aom_env%active_state
-             end if
 
 print *, "#############U_MATRIX_ACTIVE_STATE###############"
 
@@ -627,10 +624,9 @@ write (*,'(F12.10,A, F12.10,A , F12.10,A , F12.10)') &
     " Ctp(f)= ", force_env%mixed_env%aom_env%C_tp(i, force_env%mixed_env%aom_env%new_state)
 end do
 
-
-
-
-
+             else
+                force_env%mixed_env%aom_env%active_state_past = force_env%mixed_env%aom_env%active_state
+             end if
  
              successful_hop = .False.                  
 
