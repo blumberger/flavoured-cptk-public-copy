@@ -131,7 +131,7 @@ IMPLICIT NONE
      INTEGER                                :: new_state
      INTEGER                                :: active_state, active_state_past
      INTEGER                                :: old_state, enforced_active_state
-     LOGICAL                                :: overalp_over_thresh
+     LOGICAL                                :: overlap_over_thresh
      REAL(KIND=dp), dimension(:,:), POINTER :: coms
      REAL(KIND=dp), dimension(:,:,:), POINTER :: crds
      REAL(KIND=dp), dimension(:,:), POINTER :: dist

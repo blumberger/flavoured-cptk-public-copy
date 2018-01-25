@@ -139,7 +139,7 @@ IMPLICIT NONE
              cal_delta_energy_nacv , &
              calc_diabatic_nace, &
              rotation_diab_to_adiab, &
-             adiab_overalp_check
+             adiab_overlap_check
 
 CONTAINS
 
@@ -353,7 +353,7 @@ subroutine surf_hop_type(adiab_section, C1, C2, deltat, old_state, &
        !end if
 
        SELECT CASE(surfhop_keyword)
-       CASE("TRIVIAL_CORR_WITH_OVERALP")
+       CASE("TRIVIAL_CORR_WITH_OVERLAP")
                        sh_print_env%additional_prints = .TRUE.
    
             CALL modified_surfacehop(C1, C2, deltat, old_state, &
@@ -439,12 +439,12 @@ subroutine diab_to_adiab( C2, old_state, sh_env, mol, cstate, ct, C1, cttm_ad, c
 end subroutine diab_to_adiab
 
 
-SUBROUTINE adiab_overalp_check(aom_env, changed_state, itimes)
+SUBROUTINE adiab_overlap_check(aom_env, changed_state, itimes)
 
     TYPE(aom_env_type)                         :: aom_env
     INTEGER, OPTIONAL, intent(in)               :: changed_state, itimes  
 
-    CHARACTER(len=*), PARAMETER :: routineN = 'adiab_overalp_check', &
+    CHARACTER(len=*), PARAMETER :: routineN = 'adiab_overlap_check', &
               routineP = moduleN//':'//routineN
 
     REAL(KIND=dp), dimension(:), allocatable    :: overlaps
@@ -481,12 +481,12 @@ print *, "OVERLAP_NOTSQUARED", overlaps(1)
      overlaps(1) = abs(overlaps(1))*abs(overlaps(1))
 print *, "OVERALP_SQUARED", overlaps(1)
 
-     aom_env%overalp_over_thresh = .False.
+     aom_env%overlap_over_thresh = .False.
   
      if ( overlaps(1) .gt. 0.5) then
 !        print *, "CARRY_ON_THE_SAME_STATE"
          aom_env%enforced_active_state = past_state
-         aom_env%overalp_over_thresh = .True.
+         aom_env%overlap_over_thresh = .True.
      else
 !        print *, "POSSIBLE_TRIVIAL_CROSSING"
         sum_ov = overlaps(1)
@@ -553,7 +553,7 @@ end if
 
     deallocate(overlaps)
      
-END SUBROUTINE adiab_overalp_check
+END SUBROUTINE adiab_overlap_check
 
 
 subroutine modified_surfacehop(C1, C2, deltat, old_state, &
@@ -602,10 +602,10 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         ALLOCATE(sh_print_env%proba(mol))
 
         !> choose the correct state order for the active state using the overlap criteria
-        CALL section_vals_val_get(adiab_section,"REORDERING_STATES_USING_OVERALP", l_val=reordering_states_keyword)
+        CALL section_vals_val_get(adiab_section,"REORDERING_STATES_USING_OVERLAP", l_val=reordering_states_keyword)
         aom_env%reorder = reordering_states_keyword
         if (aom_env%reorder) then 
-            CALL adiab_overalp_check(aom_env)
+            CALL adiab_overlap_check(aom_env)
             my_old_state = aom_env%enforced_active_state
         print *, "old_state", old_state
         print *, "my_old_state", my_old_state
@@ -615,10 +615,10 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         end if   
 
         if (PRESENT(overlap_key) .and. aom_env%reorder) then
-            !CALL adiab_overalp_check(aom_env)
+            !CALL adiab_overlap_check(aom_env)
             sh_env%state_min = aom_env%enforced_active_state
         else if (PRESENT(overlap_key) .and. .not.aom_env%reorder) then
-            CALL adiab_overalp_check(aom_env)
+            CALL adiab_overlap_check(aom_env)
             sh_env%state_min = aom_env%enforced_active_state
          !TO BE ADJUSTED
          sh_print_env%enermin = 0.0D0

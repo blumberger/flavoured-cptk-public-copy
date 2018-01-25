@@ -119,7 +119,7 @@ MODULE integrator
                                              zero_md_ener
   USE aom_utils,                       ONLY: check_hop_attempt, &
                                              total_momentum, &
-                                             adiab_overalp_check
+                                             adiab_overlap_check
  
   USE non_adiabatic_utils,             ONLY: ida_collapse!, &
                                              !adiab_overalp_check
@@ -643,10 +643,10 @@ end do
              ENDIF
              print *, "successful_hop", successful_hop
              !Probably I would need to check the overalp here
-             CALL adiab_overalp_check(force_env%mixed_env%aom_env, force_env%mixed_env%aom_env%active_state_past, itimes)
+             CALL adiab_overlap_check(force_env%mixed_env%aom_env, force_env%mixed_env%aom_env%active_state_past, itimes)
 
              if (.not. force_env%mixed_env%aom_env%attempt_hop) then
-                 if (force_env%mixed_env%aom_env%overalp_over_thresh) then
+                 if (force_env%mixed_env%aom_env%overlap_over_thresh) then
                     print *, "CASE1"
                  else
                     print *, "CASE2"
@@ -655,13 +655,13 @@ end do
                 !if (force_env%mixed_env%aom_env%active_state_past .eq. &
                 !                  force_env%mixed_env%aom_env%active_state) then
                  if(.not.successful_hop) then
-                   if (.not. force_env%mixed_env%aom_env%overalp_over_thresh) then
+                   if (.not. force_env%mixed_env%aom_env%overlap_over_thresh) then
                        print *, "CASE3" 
                    else
                        print *, "CASE4"
                    end if
                 else
-                  if (.not. force_env%mixed_env%aom_env%overalp_over_thresh) then
+                  if (.not. force_env%mixed_env%aom_env%overlap_over_thresh) then
                        print *, "CASE5"
                   else 
                        print *, "CASE6"
