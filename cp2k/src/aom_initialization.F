@@ -423,7 +423,7 @@ CONTAINS
      ALLOCATE(sh_env%ctin(mat))
      ALLOCATE(sh_env%cttm(mat))
      ALLOCATE(sh_env%ctt(mat))
-     ALLOCATE(sh_env%C_tp(mat,mat))
+     !ALLOCATE(sh_env%C_tp(mat,mat))
      !ALLOCATE(sh_env%E_tp(mat))
      !ALLOCATE(sh_env%E_t(mat))
 
@@ -623,7 +623,7 @@ CONTAINS
      !> CONVERT NACV AND CALCULATE EIGENPROPERTIES 
      !> THESE ASSOCIATIONS ARE NEEDED FOR THE NACV CALC
      nacv = cbar*nacv
-     CALL adiabaticity(-AIMAG(H_tp), mat, C_tp, E_tp, .true., sh_env)
+     CALL adiabaticity(-AIMAG(H_tp), mat, C_tp, E_tp, .true., aom_env)
      aom_env%E_t = E_tp
 !print *, "aom_env%E_t", aom_env%E_t
      aom_env%C_t = C_tp
@@ -802,7 +802,7 @@ CONTAINS
      DEALLOCATE(sh_env%ctin)
      DEALLOCATE(sh_env%cttm)
      DEALLOCATE(sh_env%ctt)
-     DEALLOCATE(sh_env%C_tp)
+     !DEALLOCATE(sh_env%C_tp)
      !DEALLOCATE(sh_env%E_tp)
      !DEALLOCATE(sh_env%E_t)
 

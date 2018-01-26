@@ -777,7 +777,6 @@ g_renorm = g
 !> CHANGE_AC
         sh_print_env%proba     = g
 
-        !print*, "AC_TRIVIAL", old_state, sh_env%state_min
         !do i=1, mol
         !   print *, "AC_TRIVIAL", g_before(i), g_after(i), g_renorm(i)
         !enddo
@@ -1131,7 +1130,7 @@ subroutine matinvsqrt(mol, invert, S)
         deallocate(D, P, Pinv, DGETRI_WORK)
 end subroutine matinvsqrt
 
-subroutine adiabaticity(H, mol, C, E, print, sh_env)
+subroutine adiabaticity(H, mol, C, E, print, aom_env)
         !this subroutine will allow calculation of surface hopping probabilities
         !between N adiabatic surfaces
 
@@ -1140,7 +1139,7 @@ subroutine adiabaticity(H, mol, C, E, print, sh_env)
         REAL(KIND=dp), dimension(:,:), intent(out), allocatable :: C
         REAL(KIND=dp), dimension(:), intent(out), allocatable :: E
         logical, intent(in) :: print
-        TYPE(sh_env_type), INTENT(INOUT), OPTIONAL               ::    sh_env
+        TYPE(aom_env_type), INTENT(INOUT), OPTIONAL               ::    aom_env
 
         CHARACTER(len=*), PARAMETER :: routineN ='adiabaticity', &
                                routineP = moduleN//':'//routineN
@@ -1174,9 +1173,9 @@ subroutine adiabaticity(H, mol, C, E, print, sh_env)
                 CPABORT("Error with subroutine DSYEV: error status")
         end if
         
-        if (print.AND.PRESENT(sh_env)) then 
-        allocate(sh_env%C_tp(mol,mol))
-                sh_env%C_tp=C
+        if (print.AND.PRESENT(aom_env)) then 
+        !allocate(aom_env%C_tp(mol,mol))
+                aom_env%C_tp=C
         end if 
         
          

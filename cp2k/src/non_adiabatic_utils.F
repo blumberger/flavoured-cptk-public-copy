@@ -558,14 +558,14 @@ END SUBROUTINE classically_forbidden_hops
             CASE("INSTANT_COLLAPSE")
               CALL wf_collapse(aom_env, sh_print_env, sh_env, itimes)
             CASE("TRESH_ONLY_COLLAPSE")  
-              CALL  wf_tresh_collaps(sh_print_env, sh_env, itimes)
+              CALL  wf_tresh_collaps(aom_env, sh_print_env, sh_env, itimes)
             CASE("DAMPING")
               CALL calc_kinetic_tot(velocities_com_tp, local_particles, atomic_kinds, &
                                     nparticle_kind, atomic_kind_set, K_tot, ext_pres)
               CALL eval_deco_tau(aom_env, tau, adiab_section, sh_env, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds,nparticle_kind, atomic_kind_set) 
                    
-              CALL  wf_damping(tau, sh_env, mol, deltatMD, sh_print_env)  
+              CALL  wf_damping(aom_env, tau, sh_env, mol, deltatMD, sh_print_env)  
             CASE("COLLAPSE_WITHIN_DECOTIME")
               CALL calc_kinetic_tot(velocities_com_tp, local_particles, atomic_kinds, &
                                     nparticle_kind, atomic_kind_set, K_tot, ext_pres)
@@ -619,7 +619,6 @@ END SUBROUTINE classically_forbidden_hops
 !The wafunction is collapsed in a pure state
                      sh_env%ctin(:) =  CMPLX(0.0D0, 0.0D0,dp)
                      sh_env%ctin(sh_env%active_state) = CMPLX(1.0D0, 0.0D0,dp)
-                     !sh_env%ctin(:) = sh_env%C_tp(:, sh_env%active_state)
                   aom_env%futur_decohere = .FALSE.                         
          end if                                                            
          CALL adiab_print_sh_info(sh_print_env, keyword = 'DECOHERENCE')   
@@ -643,7 +642,7 @@ END SUBROUTINE classically_forbidden_hops
          if (aom_env%futur_decohere .and. sh_env%decohere) then                                  
 !> Check if the surface_hop subroutine asks us to do the decoherence       
                   sh_print_env%decohere = .TRUE.
-                     sh_env%ctin(:) = sh_env%C_tp(:, sh_env%active_state)
+                     sh_env%ctin(:) = aom_env%C_tp(:, sh_env%active_state)
                   aom_env%futur_decohere = .FALSE.                         
          end if                                                            
          CALL adiab_print_sh_info(sh_print_env, keyword = 'DECOHERENCE')   
@@ -665,7 +664,8 @@ END SUBROUTINE classically_forbidden_hops
   END SUBROUTINE ida_collapse
 
  
-  SUBROUTINE wf_tresh_collaps(sh_print_env, sh_env, itimes)
+  SUBROUTINE wf_tresh_collaps(aom_env, sh_print_env, sh_env, itimes)
+    TYPE(aom_env_type)                             :: aom_env
     TYPE(sh_print_env_type)                        :: sh_print_env
     TYPE(sh_env_type)                              :: sh_env
     INTEGER, POINTER                               :: itimes
@@ -679,7 +679,7 @@ END SUBROUTINE classically_forbidden_hops
          if (sh_env%decohere) then                                  
 !> Check if the surface_hop subroutine asks us to do the decoherence       
                   sh_print_env%decohere = .TRUE.
-                     sh_env%ctin(:) = sh_env%C_tp(:, sh_env%active_state)
+                     sh_env%ctin(:) = aom_env%C_tp(:, sh_env%active_state)
          end if                                                            
          CALL adiab_print_sh_info(sh_print_env, keyword = 'DECOHERENCE')   
       ENDIF
@@ -840,7 +840,7 @@ END SUBROUTINE classically_forbidden_hops
                                          .ge. mixing_threshold) then
                          !sh_env%pure_deph(i) = .FALSE.
                          !if there is mixing then we use force otherwise we use !pure dephasing
-                         call calcforces(i ,-AIMAG(sh_env%H_tp), sh_env%C_tp, sh_env%nacv, &
+                         call calcforces(i ,-AIMAG(sh_env%H_tp), aom_env%C_tp, sh_env%nacv, &
                               sh_env%NN, sh_env%atoms, &
                               sh_env%scaling, sh_env%cbar, sh_env%F, my_forces_adiab, &
                              sh_env%ext_pres, sh_env%analytics, sh_env%exact_forces)
@@ -893,7 +893,7 @@ print *, "PURE_DEPHASING", i
                                          .ge. mixing_threshold) then
                          !sh_env%pure_deph(i) = .FALSE.
                          !if there is mixing then we use force otherwise we use !pure dephasing
-                         call calcforces(i ,-AIMAG(sh_env%H_tp), sh_env%C_tp, sh_env%nacv, &
+                         call calcforces(i ,-AIMAG(sh_env%H_tp), aom_env%C_tp, sh_env%nacv, &
                               sh_env%NN, sh_env%atoms, &
                               sh_env%scaling, sh_env%cbar, sh_env%F, my_forces_adiab, &
                              sh_env%ext_pres, sh_env%analytics, sh_env%exact_forces)
@@ -985,7 +985,7 @@ print *, "PURE_DEPHASING", i
              ct(i) = cmplx(0.0D0, 0.0D0,dp) 
              !> Tranform coefficients in the adiabatic basis 
              do j=1,mol
-                    ct(i) = ct(i) + cmplx(sh_env%C_tp(j,i), 0.0D0,dp)*sh_env%ctin(j)
+                    ct(i) = ct(i) + cmplx(aom_env%C_tp(j,i), 0.0D0,dp)*sh_env%ctin(j)
              end do
              print *, "ct_SUBOTNIK_BEFRE", ct(i)                
              pop(i) = ct(i)*conjg(ct(i))
@@ -1008,7 +1008,7 @@ print *, "PURE_DEPHASING", i
     ct(sh_env%active_state) = cmplx(0.0D0, 0.0D0, dp)
     do i=1,mol                                                       
            ct(sh_env%active_state) = ct(sh_env%active_state) + &
-             cmplx(sh_env%C_tp(i,sh_env%active_state), 0.0D0,dp)*sh_env%ctin(i)
+             cmplx(aom_env%C_tp(i,sh_env%active_state), 0.0D0,dp)*sh_env%ctin(i)
     end do  
     
     pop(sh_env%active_state) = ct(sh_env%active_state)*conjg(ct(sh_env%active_state))
@@ -1029,7 +1029,7 @@ print *, "PURE_DEPHASING", i
           sh_env%ctin(j) = cmplx(0.0D0, 0.0D0,dp)                           
           pop(j) = cmplx(0.0D0, 0.0D0,dp) !TEST
           do i=1,mol 
-              sh_env%ctin(j) = sh_env%ctin(j) + cmplx(sh_env%C_tp(j,i), 0.0D0,dp)*ct(i)
+              sh_env%ctin(j) = sh_env%ctin(j) + cmplx(aom_env%C_tp(j,i), 0.0D0,dp)*ct(i)
           end do
          pop(j)=sh_env%ctin(j)*conjg(sh_env%ctin(j))
     end do
@@ -1040,9 +1040,10 @@ print *, "PURE_DEPHASING", i
   END SUBROUTINE collapse_within_deco_time
 
 
-  SUBROUTINE  wf_damping(tau, sh_env, mol, deltatMD, sh_print_env)                    
+  SUBROUTINE  wf_damping(aom_env, tau, sh_env, mol, deltatMD, sh_print_env)                    
     REAL(KIND=dp), DIMENSION(:), INTENT(in)    :: tau!, tau_forces
     TYPE(sh_env_type)                          :: sh_env
+    TYPE(aom_env_type)                          :: aom_env
     INTEGER, INTENT(IN)                        :: mol
     REAL(KIND=dp), INTENT(IN)                  :: deltatMD
     TYPE(sh_print_env_type)                    :: sh_print_env
@@ -1067,7 +1068,7 @@ print *, "PURE_DEPHASING", i
 
                !> Tranform coefficients in the adiabatic basis 
                 do j=1,mol
-                        ct(i) = ct(i) + cmplx(sh_env%C_tp(j,i), 0.0D0,dp)*sh_env%ctin(j)
+                        ct(i) = ct(i) + cmplx(aom_env%C_tp(j,i), 0.0D0,dp)*sh_env%ctin(j)
                 end do
                 !>damp the coefficients of the states different from the active state    
                 pop(i) = ct(i)*conjg(ct(i))
@@ -1083,7 +1084,7 @@ print *, "PURE_DEPHASING", i
     ct(sh_env%active_state) = cmplx(0.0D0, 0.0D0, dp)
     do i=1,mol                                                       
            ct(sh_env%active_state) = ct(sh_env%active_state) + &
-             cmplx(sh_env%C_tp(i,sh_env%active_state), 0.0D0,dp)*sh_env%ctin(i)
+             cmplx(aom_env%C_tp(i,sh_env%active_state), 0.0D0,dp)*sh_env%ctin(i)
     end do  
     
     pop(sh_env%active_state) = ct(sh_env%active_state)*conjg(ct(sh_env%active_state))
@@ -1104,7 +1105,7 @@ print *, "PURE_DEPHASING", i
           sh_env%ctin(j) = cmplx(0.0D0, 0.0D0,dp)                           
           pop(j) = cmplx(0.0D0, 0.0D0,dp) !TEST
           do i=1,mol 
-              sh_env%ctin(j) = sh_env%ctin(j) + cmplx(sh_env%C_tp(j,i), 0.0D0,dp)*ct(i)
+              sh_env%ctin(j) = sh_env%ctin(j) + cmplx(aom_env%C_tp(j,i), 0.0D0,dp)*ct(i)
           end do
          pop(j)=sh_env%ctin(j)*conjg(sh_env%ctin(j))
     end do

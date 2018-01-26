@@ -305,7 +305,7 @@ CONTAINS
 
      !sh_env%E_t = aom_env%E_t
 
-     CALL adiabaticity(-AIMAG(aom_env%H_tp), mat, C_tp, E_tp, .true., sh_env)
+     CALL adiabaticity(-AIMAG(aom_env%H_tp), mat, C_tp, E_tp, .true., aom_env)
      aom_env%E_tp = E_tp
 
      !> Check if the eigenvectors have a sign change from one timestep to the
@@ -697,7 +697,7 @@ deallocate(pop_t_before, pop_t_present, pop_after_deco, pop_after_sp_corr)
      !DEALLOCATE(sh_env%E_tp)
      !DEALLOCATE(sh_env%E_t)
      DEALLOCATE(sh_env%cttm)
-     DEALLOCATE(sh_env%C_tp)
+     !DEALLOCATE(sh_env%C_tp)
      DEALLOCATE(sh_env%ctt)
      DEALLOCATE(sh_env%ctin)
 
