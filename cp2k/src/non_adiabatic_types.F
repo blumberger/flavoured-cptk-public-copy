@@ -33,8 +33,8 @@ IMPLICIT NONE
      !COMPLEX(KIND=dp), dimension(:), POINTER     :: ctin       
      COMPLEX(KIND=dp), dimension(:), POINTER     :: ctin, cttm, ctt       
      REAL(KIND=dp), DIMENSION(:,:), POINTER      :: C_tp          
-     INTEGER                                     :: active_state, state_min, active_atoms  
-     REAL(KIND=dp), dimension(:), POINTER        :: enerdiff
+     INTEGER                                     :: active_state, active_atoms  
+     !REAL(KIND=dp), dimension(:), POINTER        :: enerdiff
      !REAL(KIND=dp), dimension(:,:), POINTER      :: dphi_tp, dphi_t                                                                           
      logical                                    ::  analytics 
      LOGICAL, DIMENSION(:), POINTER             :: ext_pres

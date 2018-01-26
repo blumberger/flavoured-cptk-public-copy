@@ -587,7 +587,8 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         COMPLEX(KIND=dp), dimension(:), allocatable :: ak, akttm
         COMPLEX(KIND=dp) :: cstate, cstate_tm
         LOGICAL        :: reordering_states_keyword
-        INTEGER        :: my_old_state 
+        INTEGER        :: my_old_state, state_min 
+        REAL(KIND=dp), dimension(:), ALLOCATABLE :: enerdiff
  
         mol = size(aom_env%Stt,1)
 
@@ -596,7 +597,7 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         allocate(b(mol))
         allocate(g(mol))
         allocate(akttm(mol))        
-        allocate(sh_env%enerdiff(mol))
+        allocate(enerdiff(mol))
         allocate(ct(mol))
         allocate(cttm_ad(mol)) 
         ALLOCATE(sh_print_env%proba(mol))
@@ -616,43 +617,43 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
 
         if (PRESENT(overlap_key) .and. aom_env%reorder) then
             !CALL adiab_overlap_check(aom_env)
-            sh_env%state_min = aom_env%enforced_active_state
+            state_min = aom_env%enforced_active_state
         else if (PRESENT(overlap_key) .and. .not.aom_env%reorder) then
             CALL adiab_overlap_check(aom_env)
-            sh_env%state_min = aom_env%enforced_active_state
+            state_min = aom_env%enforced_active_state
          !TO BE ADJUSTED
          sh_print_env%enermin = 0.0D0
         else
              do i=1,mol
                      if (i .ne. my_old_state) then 
-                             sh_env%enerdiff(i) = abs(aom_env%E_tp(i) - aom_env%E_tp(my_old_state)) 
+                             enerdiff(i) = abs(aom_env%E_tp(i) - aom_env%E_tp(my_old_state)) 
                      else if (i .eq. my_old_state) then 
-                             sh_env%enerdiff(my_old_state) = 0.0D0
+                             enerdiff(my_old_state) = 0.0D0
                      end if
              end do
             
-             if (sh_env%enerdiff(1) == sh_env%enerdiff(my_old_state)) then
-                     min = sh_env%enerdiff(2)
+             if (enerdiff(1) == enerdiff(my_old_state)) then
+                     min = enerdiff(2)
                      do i= 3,mol
-                            if (sh_env%enerdiff(i) < min .and. i .ne. my_old_state) then
-                                    min = sh_env%enerdiff(i)
-                                     sh_env%state_min = i
+                            if (enerdiff(i) < min .and. i .ne. my_old_state) then
+                                    min = enerdiff(i)
+                                     state_min = i
                              end if          
                      end do
              else 
-                     min = sh_env%enerdiff(1)
+                     min = enerdiff(1)
                      do i= 2,mol
-                            if (sh_env%enerdiff(i) < min .and. i .ne. my_old_state) then
-                                    min = sh_env%enerdiff(i)
-                                     sh_env%state_min = i
+                            if (enerdiff(i) < min .and. i .ne. my_old_state) then
+                                    min = enerdiff(i)
+                                    state_min = i
                              end if          
                      end do
              end if
             
             
              do i =1,mol
-                     if (sh_env%enerdiff(i) == min) then
-                            sh_env%state_min = i
+                     if (enerdiff(i) == min) then
+                            state_min = i
                      end if
              end do
             
@@ -726,16 +727,16 @@ g_before = g
         err = abs(sumg - ex_prob)
         if (err >= 0.0D0) then      !WITHOUT THRESHOLD
                 !trivial_correction = .TRUE.
-                trivial_correction = (sh_env%state_min.NE.my_old_state)
+                trivial_correction = (state_min.NE.my_old_state)
 print *, "trivial_correction", trivial_correction
 print*, "ex_prob", ex_prob
 print*, "sumg", sumg
-print*, sh_env%state_min
-print*, "g(sh_env%state_min)", g(sh_env%state_min)               
+print*, state_min
+print*, "g(state_min)", g(state_min)               
                  if (trivial_correction) then  
-                 g_exa = ex_prob - sumg + g(sh_env%state_min)
-                                g(sh_env%state_min) = g_exa
-print*, "g(sh_env%state_min)", g(sh_env%state_min)               
+                 g_exa = ex_prob - sumg + g(state_min)
+                                g(state_min) = g_exa
+print*, "g(sh_env%state_min)", g(state_min)               
                  end if
         end if
 
@@ -836,7 +837,7 @@ print *, "ATTEMPTED_HOP"
         end if
 
         DEALLOCATE(sh_print_env%proba)
-        DEALLOCATE(sh_env%enerdiff)
+        DEALLOCATE(enerdiff)
         deallocate(ak)
         deallocate(b)
         deallocate(G)
