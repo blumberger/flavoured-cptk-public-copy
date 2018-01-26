@@ -117,6 +117,12 @@ IMPLICIT NONE
                                                          velocities_t,&      ! velocities step min 1
                                                          forces_adiab, &      ! forces at step 0
                                                          forces_adiab_new
+
+     INTEGER                                     :: active_atoms
+!     REAL(KIND=dp)                              :: cbar, scaling
+     integer                                    :: atoms, natom
+     logical                                    ::  analytics
+
 !>store charge carrier WF coefficients
      COMPLEX(KIND=dp), dimension(:), POINTER     :: cttm, ctt
 !> To store energies in the Jacob's Method
@@ -125,6 +131,8 @@ IMPLICIT NONE
      REAL(KIND = dp), DIMENSION(:), POINTER :: energies_t   
      REAL(KIND = dp), DIMENSION(:), POINTER :: adiab_energies_t 
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER :: F
+     REAL(kind=dp), DIMENSION(:,:),POINTER      :: exact_forces, forces_active_state
+     !REAL(kind=dp), DIMENSION(:,:),POINTER      :: exact_forces
      REAL(KIND=dp), dimension(:,:), POINTER :: At, Atm, Atp, Bt, Btm, & 
                                                          Btp, siteenergies
      REAL(KIND = dp)                        :: kinetic_energy
@@ -134,6 +142,7 @@ IMPLICIT NONE
      INTEGER                                :: active_state, active_state_past
      INTEGER                                :: old_state, enforced_active_state
      LOGICAL                                :: overlap_over_thresh
+     LOGICAL                                :: decohere, decoherence
      REAL(KIND=dp), dimension(:,:), POINTER :: coms
      REAL(KIND=dp), dimension(:,:,:), POINTER :: crds
      REAL(KIND=dp), dimension(:,:), POINTER :: dist

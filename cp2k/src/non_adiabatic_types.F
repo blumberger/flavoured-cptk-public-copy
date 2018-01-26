@@ -27,25 +27,25 @@ IMPLICIT NONE
    TYPE sh_env_type
 !> Variables used for the decoherence methods
    
-     LOGICAL                                     :: decohere
-     LOGICAL                                     :: decoherence
+     !LOGICAL                                     :: decohere
+     !LOGICAL                                     :: decoherence
 
      !COMPLEX(KIND=dp), dimension(:), POINTER     :: ctin       
-     COMPLEX(KIND=dp), dimension(:), POINTER     :: ctin, ctt       
-     REAL(KIND=dp), DIMENSION(:,:), POINTER      :: C_tp          
-     INTEGER                                     :: active_state, active_atoms  
+     !COMPLEX(KIND=dp), dimension(:), POINTER     :: ctin, ctt       
+     !REAL(KIND=dp), DIMENSION(:,:), POINTER      :: C_tp          
+     !INTEGER                                     :: active_atoms  
      !REAL(KIND=dp), dimension(:), POINTER        :: enerdiff
      !REAL(KIND=dp), dimension(:,:), POINTER      :: dphi_tp, dphi_t                                                                           
-     logical                                    ::  analytics 
-     LOGICAL, DIMENSION(:), POINTER             :: ext_pres
-     REAL(kind=dp), DIMENSION(:,:),POINTER      :: exact_forces, forces_active_state
+     !logical                                    ::  analytics 
+     !LOGICAL, DIMENSION(:), POINTER             :: ext_pres
+     !REAL(kind=dp), DIMENSION(:,:),POINTER      :: exact_forces
 !          REAL(KIND=dp), dimension(:,:), POINTER      :: adiab_nace
-     INTEGER, DIMENSION(:,:), POINTER           :: NN
-     COMPLEX(KIND=dp), DIMENSION(:,:), POINTER  ::  H_tp
-     REAL(KIND=dp), DIMENSION(:,:,:), POINTER   :: F
-     REAL(KIND=dp), DIMENSION(:,:,:), POINTER   :: nacv
-     REAL(KIND=dp)                              :: cbar, scaling
-     integer                                    :: atoms, natom
+     !INTEGER, DIMENSION(:,:), POINTER           :: NN
+     !COMPLEX(KIND=dp), DIMENSION(:,:), POINTER  ::  H_tp
+     !REAL(KIND=dp), DIMENSION(:,:,:), POINTER   :: F
+     !REAL(KIND=dp), DIMENSION(:,:,:), POINTER   :: nacv
+     !REAL(KIND=dp)                              :: cbar, scaling
+     !integer                                    :: atoms, natom
      
                     
    END TYPE sh_env_type

@@ -322,7 +322,7 @@ end subroutine make_adiabX
 
 
 subroutine surf_hop_type(adiab_section, C1, C2, deltat, old_state, &
-           sh_env, new_state, attempt_hop, decohere_criterion, sh_print_env, aom_env)
+           new_state, attempt_hop, decohere_criterion, sh_print_env, aom_env)
 !Choose whether doing surface hopping with trivial hopping correction or without
 !it following the old code 
         
@@ -330,7 +330,6 @@ subroutine surf_hop_type(adiab_section, C1, C2, deltat, old_state, &
        REAL(KIND=dp), dimension(:,:), intent(in) :: C1, C2
        REAL(KIND=dp), intent(in) :: deltat
        integer, intent(inout) :: old_state
-       TYPE(sh_env_type)           :: sh_env
        INTEGER, INTENT(OUT)        :: new_state
        LOGICAL, INTENT(OUT)        :: attempt_hop
        REAL(KIND=dp), INTENT(IN) :: decohere_criterion
@@ -357,16 +356,16 @@ subroutine surf_hop_type(adiab_section, C1, C2, deltat, old_state, &
                        sh_print_env%additional_prints = .TRUE.
    
             CALL modified_surfacehop(C1, C2, deltat, old_state, &
-              sh_env, new_state, attempt_hop, decohere_criterion, &
+              new_state, attempt_hop, decohere_criterion, &
               sh_print_env, aom_env, adiab_section, overlap_key ) !triv_threshold)
        CASE("TRIVIAL_HOP_CORRECT")
                        sh_print_env%additional_prints = .TRUE.
             CALL modified_surfacehop(C1, C2, deltat, old_state, &
-              sh_env, new_state, attempt_hop, decohere_criterion, &
+              new_state, attempt_hop, decohere_criterion, &
               sh_print_env, aom_env, adiab_section) !triv_threshold)
        CASE("UNMODIFIED_SURF_HOP")
             CALL  surfacehop(deltat, old_state, C2, &
-              sh_env, new_state, attempt_hop, decohere_criterion, sh_print_env, &
+              new_state, attempt_hop, decohere_criterion, sh_print_env, &
                                               aom_env, adiab_section)
        CASE DEFAULT
             CPABORT("There is no method to add trivial crossing correction")
@@ -553,14 +552,13 @@ END SUBROUTINE adiab_overlap_check
 
 
 subroutine modified_surfacehop(C1, C2, deltat, old_state, &
-              sh_env, new_state, attempt_hop, decohere_criterion, &
+              new_state, attempt_hop, decohere_criterion, &
               sh_print_env, aom_env, adiab_section, overlap_key) !triv_threshold)
         !using the method outlined in John Tully's Electronic Transitions paper
         !calculate the probability of the molecular dynamics switching to evolve on a different potential surface
         REAL(KIND=dp), dimension(:,:), intent(in) :: C1, C2
         REAL(KIND=dp), intent(in) :: deltat
         integer, intent(inout) :: old_state
-        TYPE(sh_env_type)       :: sh_env
         INTEGER, INTENT(OUT)        :: new_state
         LOGICAL, INTENT(OUT)        :: attempt_hop
         REAL(KIND=dp), INTENT(IN) :: decohere_criterion
@@ -805,7 +803,7 @@ print *, "RANDOM_NUMBER_HOPPING_PROBA", hop
                                 new_state = i
 !                                write(24,*) i                        
                                ! decohere = .FALSE.
-                                sh_env%decohere = .FALSE.
+                                aom_env%decohere = .FALSE.
                                 attempt_hop = .TRUE.
 print *, "ATTEMPTED_HOP"
                                 sh_print_env%attempt_hop    = attempt_hop
@@ -821,17 +819,16 @@ print *, "ATTEMPTED_HOP"
                                 !if there has not been any surfacehop, we need to consider the possibility of the decoherence correction
                                 !if the non-adiabatic coupling dphi to all other states is below a certain threshold
                                 !then a wavefunction collapse will be enforced
-                                sh_env%decohere = .TRUE.
+                                aom_env%decohere = .TRUE.
                                 do j=1,mol
                                         if (abs(aom_env%adiab_nace_tp(old_state,j)) & 
                                                      > decohere_criterion .and. my_old_state .ne. j) then
                                                ! decohere = .FALSE.
-                                                sh_env%decohere = .FALSE.
+                                                aom_env%decohere = .FALSE.
                                                 EXIT
                                         end if
                                 end do
                                ! decohere = .TRUE.
-                               ! sh_env%decohere = .TRUE.
                                 EXIT
                         end if
                 end if
@@ -1001,7 +998,7 @@ end subroutine calc_adiab_nace
 
 
 subroutine surfacehop(deltat, old_state, C2, &
-              sh_env, new_state, attempt_hop, decohere_criterion, sh_print_env, &
+              new_state, attempt_hop, decohere_criterion, sh_print_env, &
                                                      aom_env, adiab_section)
 
         !using the method outlined in John Tully's Electronic Transitions paper
@@ -1009,12 +1006,11 @@ subroutine surfacehop(deltat, old_state, C2, &
         REAL(KIND=dp), intent(in) :: deltat
         integer, intent(in) :: old_state
         REAL(KIND=dp), dimension(:,:), intent(in) :: C2
-        TYPE(sh_env_type)          :: sh_env
         INTEGER, INTENT(OUT)        :: new_state
         LOGICAL, INTENT(OUT)        :: attempt_hop
         REAL(KIND=dp), INTENT(IN) :: decohere_criterion
         TYPE(sh_print_env_type), INTENT(OUT) :: sh_print_env
-        TYPE(aom_env_type), INTENT(IN)              :: aom_env
+        TYPE(aom_env_type)                   :: aom_env
         TYPE(section_vals_type), POINTER               :: adiab_section
 
         CHARACTER(len=*), PARAMETER :: routineN ='surfacehop', &
@@ -1108,7 +1104,7 @@ subroutine surfacehop(deltat, old_state, C2, &
                         if (i .ne. old_state) then
                                 new_state = i
                                ! decohere = .FALSE.
-                                sh_env%decohere = .FALSE.
+                                aom_env%decohere = .FALSE.
                                 attempt_hop = .TRUE.
 print *, "ATTEMPTED_HOP"
                                 sh_print_env%attempt_hop    = attempt_hop
@@ -1124,17 +1120,16 @@ print *, "ATTEMPTED_HOP"
                                 !if there has not been any surfacehop, we need to consider the possibility of the decoherence correction
                                 !if the non-adiabatic coupling dphi to all other states is below a certain threshold
                                 !then a wavefunction collapse will be enforced
-                                sh_env%decohere = .TRUE.
+                                aom_env%decohere = .TRUE.
                                 do j=1,mol
                                         if (abs(aom_env%adiab_nace_tp(old_state,j)) & 
                                                  > decohere_criterion .and. old_state .ne. j) then
                                                ! decohere = .FALSE.
-                                                sh_env%decohere = .FALSE.
+                                                aom_env%decohere = .FALSE.
                                                 EXIT
                                         end if
                                 end do
                                ! decohere = .TRUE.
-                               ! sh_env%decohere = .TRUE.
                                 EXIT
                         end if
                 end if

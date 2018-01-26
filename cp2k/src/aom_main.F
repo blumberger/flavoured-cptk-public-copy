@@ -105,13 +105,13 @@ MODULE aom_main
                                                propagate_wf, &
                                                propagate_adiab_wf, &
                                                prop_wf_HS_corr, & 
-                                               calc_kinetic_tot, &
+                                               !calc_kinetic_tot, &
                                                classically_forbidden_hops, &
                                                define_active_region, &
                                                calc_psi_after_correction
                                                !adiab_overalp_calc
                                           
-     USE non_adiabatic_types,           ONLY: sh_env_type
+!     USE non_adiabatic_types,           ONLY: sh_env_type
 
      USE parallel_rng_types,              ONLY: UNIFORM,&
                                              create_rng_stream,&
@@ -163,7 +163,7 @@ CONTAINS
      CHARACTER(len=*), PARAMETER :: routineN ='construct_ham_X_SH', &
      routineP = moduleN//':'//routineN
 
-     TYPE(sh_env_type)                              :: sh_env
+!     TYPE(sh_env_type)                              :: sh_env
      REAL(kind=dp), DIMENSION(:,:),POINTER          :: my_forces_adiab
      REAL(kind=dp), DIMENSION(:,:),POINTER          :: my_forces_adiab_new
      integer :: coord
@@ -239,10 +239,10 @@ CONTAINS
      mat = orb*mol
      !> Numbers of active atoms 
      c = mol*atoms
-     sh_env%active_atoms = c 
+     aom_env%active_atoms = c 
      !> Numbers of atoms
      natom = SIZE(global_forces(1)%forces,2)
-     sh_env%natom = natom
+     aom_env%natom = natom
      !> Find deltaMD, nuclear timestep, in atomic units
      deltatMD = MDtimestep !CHANGE_AC
      aom_env%deltat = deltatMD
@@ -256,7 +256,7 @@ CONTAINS
 !scoefftot and they are de-allocated at the end of the subroutine.
      !ALLOCATE(sh_env%E_tp(mat))
      !ALLOCATE(sh_env%E_t(mat))
-     ALLOCATE(sh_env%ctin(mat))
+     !ALLOCATE(sh_env%ctin(mat))
      !ALLOCATE(sh_env%adiab_nace(mat,mat))
 
      !ALLOCATE(E_tp(mat))
@@ -376,7 +376,7 @@ CONTAINS
      !The eigenvectors are needed to calculate the surface hopping probabilities
      !The surfacehop subroutine calculates these probabilites and decides on the
      !new (possibly unchanged) surface for simulation
-     sh_env%decohere = .FALSE.
+     aom_env%decohere = .FALSE.
      attempt_hop = .FALSE.
      IF (my_test_keyword) THEN   
         attempt_hop = .TRUE.
@@ -385,7 +385,7 @@ CONTAINS
         IF ((new_state).EQ.0) new_state = mat
      ELSE IF (.NOT.my_bo_keyword) THEN ! THEN IT IS A FSSH RUN
             call surf_hop_type(adiab_section, aom_env%C_t, C_tp,   &
-                                 deltatMD, active_state, sh_env,  &
+                                 deltatMD, active_state, &
                                  new_state, &
                                  attempt_hop, &
                                  decohere_criterion, &
@@ -405,8 +405,9 @@ print *, "Active_state_after_surf_hop", active_state
                             NN=aom_env%NN, atoms=atoms, & 
                            scaling=scaling, cbar=cbar, Fin=aom_env%F, forces_adiab=my_forces_adiab, &
                            ext_pres=aom_env%ext_pres, analytics=analytics, exact_forces=exact_forces)
-ALLOCATE(sh_env%forces_active_state(3,natom))
-     sh_env%forces_active_state = my_forces_adiab  
+
+     !>store forces for the active state used for forces-based decoherence
+     aom_env%forces_active_state = my_forces_adiab  
 
      IF (attempt_hop) THEN
          call calcforces(state=new_state,Hin=-AIMAG(aom_env%H_tp), C=C_tp, nacv=aom_env%nacv, &
@@ -534,55 +535,55 @@ ALLOCATE(sh_env%forces_active_state(3,natom))
 
      !> APPLY DECOHERENCE CORRECTION
      !> initialize derived type variables used in the decohere_wf subroutine
-     sh_env%ctin=ctin
-     sh_env%active_state=active_state
+     aom_env%ctin=ctin
+     aom_env%active_state=active_state
 
 
-ALLOCATE(sh_env%nacv(3,mat, mat*aom_atoms))
-ALLOCATE(sh_env%NN(mat, mat))
-ALLOCATE(sh_env%H_tp(mat,mat))
-allocate(sh_env%F(3,natom,mol))
-ALLOCATE(sh_env%ext_pres(natom))
-allocate(sh_env%exact_forces(3,natom))
+!ALLOCATE(sh_env%nacv(3,mat, mat*aom_atoms))
+!ALLOCATE(sh_env%NN(mat, mat))
+!ALLOCATE(sh_env%H_tp(mat,mat))
+!allocate(sh_env%F(3,natom,mol))
+!ALLOCATE(sh_env%ext_pres(natom))
+!allocate(sh_env%exact_forces(3,natom))
 !ALLOCATE(exact_forces())
 !ALLOCATE(sh_env%my_forces_adiab(3,natom))
 
-     sh_env%nacv = aom_env%nacv
-     sh_env%NN  = aom_env%NN
-     sh_env%atoms = atoms
-     sh_env%scaling = scaling
-     sh_env%cbar = cbar
-     sh_env%F = aom_env%F
+     !sh_env%nacv = aom_env%nacv
+     !sh_env%NN  = aom_env%NN
+     aom_env%atoms = atoms
+     aom_env%scaling = scaling
+     aom_env%cbar = cbar
+     !sh_env%F = aom_env%F
 !     sh_env%my_forces_adiab = my_forces_adiab
-     sh_env%exact_forces = exact_forces
-     sh_env%ext_pres  = aom_env%ext_pres
-     sh_env%analytics = analytics 
-     sh_env%H_tp = aom_env%H_tp
+     aom_env%exact_forces = exact_forces
+     !sh_env%ext_pres  = aom_env%ext_pres
+     aom_env%analytics = analytics 
+     !sh_env%H_tp = aom_env%H_tp
 
 
 
 
-     CALL decohere_wf(adiab_section, sh_print_env, aom_env,sh_env, deco_keyword, itimes, &
+     CALL decohere_wf(adiab_section, sh_print_env, aom_env, deco_keyword, itimes, &
                                     deltatMD, mol,velocities_com_tp, local_particles, atomic_kinds, nparticle_kind,    &
-                                    atomic_kind_set, K_tot, aom_env%ext_pres)
+                                    atomic_kind_set, K_tot)
     
      CALL section_vals_val_get(adiab_section,"SPURIOUS_TRANSFER_CORR", l_val=correct_transfer_keyword)
 !     CALL section_vals_val_get(coupling_section,"CENTER_OF_MASS",l_val=translate_keyword) 
 !     correct_transfer = .TRUE.
-     if (correct_transfer_keyword .and. sh_env%decoherence) then
+     if (correct_transfer_keyword .and. aom_env%decoherence) then
      !if (correct_tranfer) then
         CALL define_active_region(ctin, mat, active_region)
-        ctin_after_deco=sh_env%ctin         
+        ctin_after_deco=aom_env%ctin         
         CALL calc_psi_after_correction(ctin, ctin_after_deco, active_region, mat, ctin_after_tranf_correction)
 
         ctin = ctin_after_tranf_correction
        ! ctin=sh_env%ctin
      else
-        ctin=sh_env%ctin
+        ctin=aom_env%ctin
      ENDIF
 
-     if (correct_transfer_keyword .and. sh_env%decoherence) then
-!print *, "################CARRIER_WF##############"
+     if (correct_transfer_keyword .and. aom_env%decoherence) then
+print *, "################CARRIER_WF##############"
 
 allocate(pop_t_before(mol))
 allocate(pop_t_present(mol))
@@ -637,7 +638,7 @@ deallocate(pop_t_before, pop_t_present, pop_after_deco, pop_after_sp_corr)
      aom_env%attempt_hop  = attempt_hop
      aom_env%H_t = aom_env%H_tp
      aom_env%new_state = new_state
-     aom_env%active_state = active_state
+     !aom_env%active_state = active_state
      aom_env%Stmtm = aom_env%Stt
      aom_env%Stt   = aom_env%Stptp
      aom_env%Sttm  = aom_env%Stpt
@@ -665,18 +666,18 @@ deallocate(pop_t_before, pop_t_present, pop_after_deco, pop_after_sp_corr)
      DEALLOCATE(positions_com_tp) 
      DEALLOCATE(velocities_com_tp)
 
-     DEALLOCATE(sh_env%forces_active_state)
+     !DEALLOCATE(sh_env%forces_active_state)
      !DEALLOCATE(sh_env%adiab_nace)
-     DEALLOCATE(sh_env%nacv)
-     DEALLOCATE(sh_env%NN)
-     DEALLOCATE(sh_env%H_tp)
-     DEallocate(sh_env%F)
-     DEALLOCATE(sh_env%ext_pres)
-     deallocate(sh_env%exact_forces)
+     !DEALLOCATE(sh_env%nacv)
+     !DEALLOCATE(sh_env%NN)
+!     DEALLOCATE(sh_env%H_tp)
+     !DEallocate(sh_env%F)
+     !DEALLOCATE(sh_env%ext_pres)
+!     deallocate(sh_env%exact_forces)
      !DEALLOCATE(sh_env%E_tp)
      !DEALLOCATE(sh_env%E_t)
      !DEALLOCATE(sh_env%C_tp)
-     DEALLOCATE(sh_env%ctin)
+     !DEALLOCATE(sh_env%ctin)
 
      deallocate(ctin, ctin_after_deco)
      deallocate(exact_forces)
