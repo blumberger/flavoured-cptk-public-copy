@@ -253,12 +253,12 @@ CONTAINS
 
 !COMMENT: one should check that all these arrays are used below (e.g. pcoefftot,
 !scoefftot and they are de-allocated at the end of the subroutine.
-     ALLOCATE(sh_env%E_tp(mat))
-     ALLOCATE(sh_env%E_t(mat))
+     !ALLOCATE(sh_env%E_tp(mat))
+     !ALLOCATE(sh_env%E_t(mat))
      ALLOCATE(sh_env%cttm(mat))
      ALLOCATE(sh_env%ctt(mat))
      ALLOCATE(sh_env%ctin(mat))
-     ALLOCATE(sh_env%adiab_nace(mat,mat))
+     !ALLOCATE(sh_env%adiab_nace(mat,mat))
 
      ALLOCATE(E_tp(mat))
      ALLOCATE(my_forces_adiab(3,natom))
@@ -302,9 +302,11 @@ CONTAINS
      !decoherence corrections
 !COMMENT: in fact, C_t and E_t are already known at the previous timestep, maybe
 !check aom_env%E_t, aom_env%C_t
-     sh_env%E_t = aom_env%E_t
+
+     !sh_env%E_t = aom_env%E_t
+
      CALL adiabaticity(-AIMAG(aom_env%H_tp), mat, C_tp, E_tp, .true., sh_env)
-     sh_env%E_tp = E_tp
+     aom_env%E_tp = E_tp
 
      !> Check if the eigenvectors have a sign change from one timestep to the
      !others
@@ -333,9 +335,8 @@ CONTAINS
 !COMMENT: do we really need to calculate the full NACE matrix? I guess one only
 !need ADIAB_NACE(active_state, :) ---> SAM: no we need the all matrix in the
 !adiabatic prograpagion (even if we never use it is a feature of the code)
-
      CALL calc_adiab_nace(aom_env%C_t, C_tp, deltatMD, aom_env)
-     sh_env%adiab_nace = aom_env%adiab_nace_tp 
+     !sh_env%adiab_nace = aom_env%adiab_nace_tp 
 
 !allocate(var(mat))
 !do i = 1,mat
@@ -686,15 +687,15 @@ deallocate(pop_t_before, pop_t_present, pop_after_deco, pop_after_sp_corr)
      DEALLOCATE(velocities_com_tp)
 
      DEALLOCATE(sh_env%forces_active_state)
-     DEALLOCATE(sh_env%adiab_nace)
+     !DEALLOCATE(sh_env%adiab_nace)
      DEALLOCATE(sh_env%nacv)
      DEALLOCATE(sh_env%NN)
      DEALLOCATE(sh_env%H_tp)
      DEallocate(sh_env%F)
      DEALLOCATE(sh_env%ext_pres)
      deallocate(sh_env%exact_forces)
-     DEALLOCATE(sh_env%E_tp)
-     DEALLOCATE(sh_env%E_t)
+     !DEALLOCATE(sh_env%E_tp)
+     !DEALLOCATE(sh_env%E_t)
      DEALLOCATE(sh_env%cttm)
      DEALLOCATE(sh_env%C_tp)
      DEALLOCATE(sh_env%ctt)

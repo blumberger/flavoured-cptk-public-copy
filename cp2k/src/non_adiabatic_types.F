@@ -34,12 +34,12 @@ IMPLICIT NONE
      COMPLEX(KIND=dp), dimension(:), POINTER     :: ctin, cttm, ctt       
      REAL(KIND=dp), DIMENSION(:,:), POINTER      :: C_tp          
      INTEGER                                     :: active_state, state_min, active_atoms  
-     REAL(KIND=dp), dimension(:), POINTER        :: E_tp, E_t, enerdiff
+     REAL(KIND=dp), dimension(:), POINTER        :: enerdiff
      !REAL(KIND=dp), dimension(:,:), POINTER      :: dphi_tp, dphi_t                                                                           
      logical                                    ::  analytics 
      LOGICAL, DIMENSION(:), POINTER             :: ext_pres
      REAL(kind=dp), DIMENSION(:,:),POINTER      :: exact_forces, forces_active_state
-          REAL(KIND=dp), dimension(:,:), POINTER      :: adiab_nace
+!          REAL(KIND=dp), dimension(:,:), POINTER      :: adiab_nace
      INTEGER, DIMENSION(:,:), POINTER           :: NN
      COMPLEX(KIND=dp), DIMENSION(:,:), POINTER  ::  H_tp
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER   :: F

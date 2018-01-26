@@ -562,14 +562,14 @@ END SUBROUTINE classically_forbidden_hops
             CASE("DAMPING")
               CALL calc_kinetic_tot(velocities_com_tp, local_particles, atomic_kinds, &
                                     nparticle_kind, atomic_kind_set, K_tot, ext_pres)
-              CALL eval_deco_tau(tau, adiab_section, sh_env, mol, K_tot, sh_print_env, &
+              CALL eval_deco_tau(aom_env, tau, adiab_section, sh_env, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds,nparticle_kind, atomic_kind_set) 
                    
               CALL  wf_damping(tau, sh_env, mol, deltatMD, sh_print_env)  
             CASE("COLLAPSE_WITHIN_DECOTIME")
               CALL calc_kinetic_tot(velocities_com_tp, local_particles, atomic_kinds, &
                                     nparticle_kind, atomic_kind_set, K_tot, ext_pres)
-              CALL eval_deco_tau(tau, adiab_section, sh_env, mol, K_tot, sh_print_env, &
+              CALL eval_deco_tau(aom_env, tau, adiab_section, sh_env, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds,nparticle_kind, atomic_kind_set) 
                    
               CALL  collapse_within_deco_time(tau, mol, deltatMD, aom_env, sh_env)
@@ -589,7 +589,7 @@ END SUBROUTINE classically_forbidden_hops
             CASE("DAMPING")
               CALL calc_kinetic_tot(velocities_com_tp, local_particles, atomic_kinds, &
                                     nparticle_kind, atomic_kind_set, K_tot, ext_pres)
-              CALL eval_deco_tau(tau, adiab_section, sh_env, mol, K_tot, sh_print_env, &
+              CALL eval_deco_tau(aom_env, tau, adiab_section, sh_env, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds,nparticle_kind, atomic_kind_set) 
               CALL wf_damping_adiab_prop(tau, sh_env, mol, deltatMD, sh_print_env)                    
             CASE DEFAULT                                           
@@ -730,11 +730,12 @@ END SUBROUTINE classically_forbidden_hops
   END SUBROUTINE wf_damping_adiab_prop 
 
   
-  SUBROUTINE  eval_deco_tau(tau, adiab_section, sh_env, mol, K_tot, sh_print_env, &
+  SUBROUTINE  eval_deco_tau(aom_env, tau, adiab_section, sh_env, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds,nparticle_kind, atomic_kind_set)                    
 !    LOGICAL, INTENT(IN)                        :: edc_deco_time
     TYPE(sh_env_type)                          :: sh_env
     INTEGER, INTENT(IN)                        :: mol
+    TYPE(aom_env_type)                         :: aom_env
 !    REAL(KIND=dp), INTENT(IN)                  :: deltatMD
     REAL(kind=dp)                              :: K_tot
     TYPE(sh_print_env_type)                    :: sh_print_env
@@ -777,7 +778,7 @@ END SUBROUTINE classically_forbidden_hops
     allocate(adiab_nace_vector(mol))
 !    allocate(sh_print_env%pure_deph(mol))
 
-    adiab_nace_vector(:) = sh_env%adiab_nace(sh_env%active_state,:)
+    adiab_nace_vector(:) = aom_env%adiab_nace_tp(sh_env%active_state,:)
     !>number of degrees of freedom intensive EDC
     deg_of_freedom = (sh_env%active_atoms*3-6)
 
@@ -817,7 +818,7 @@ END SUBROUTINE classically_forbidden_hops
                     if (E_0_param == 0.0D0) then  
                          K_tot = 1.0D0
                     end if
-                    tau(i)= (1/abs(sh_env%E_tp(i) - sh_env%E_tp(sh_env%active_state)))* &
+                    tau(i)= (1/abs(aom_env%E_tp(i) - aom_env%E_tp(sh_env%active_state)))* &
                                         (C_param+((E_0_param/K_tot)*deg_of_freedom))
 
               CASE("FORCES_BASED")
@@ -835,7 +836,7 @@ END SUBROUTINE classically_forbidden_hops
                     Temp = 3.1693191275167785e-06*T_inp !conver in KbT
                       !Temp = 0.0009444571  !KbT at 298 K
                       ! mixing_threshold = 2.0D0
-                    if ((abs(adiab_nace_vector(i))/(abs(sh_env%E_tp(i)-sh_env%E_tp(sh_env%active_state)))) & 
+                    if ((abs(adiab_nace_vector(i))/(abs(aom_env%E_tp(i)-aom_env%E_tp(sh_env%active_state)))) & 
                                          .ge. mixing_threshold) then
                          !sh_env%pure_deph(i) = .FALSE.
                          !if there is mixing then we use force otherwise we use !pure dephasing
@@ -869,7 +870,7 @@ END SUBROUTINE classically_forbidden_hops
                          end if
                     else
 !                         sh_print_env%pure_deph(i) = .TRUE.
-                         tau(i)= (1/abs(sh_env%E_tp(i) - sh_env%E_tp(sh_env%active_state)))
+                         tau(i)= (1/abs(aom_env%E_tp(i) - aom_env%E_tp(sh_env%active_state)))
 print *, "PURE_DEPHASING", i
                     end if
 
@@ -888,7 +889,7 @@ print *, "PURE_DEPHASING", i
                     Temp = 3.1693191275167785e-06*T_inp !conver in KbT
                       !Temp = 0.0009444571  !KbT at 298 K
                       ! mixing_threshold = 2.0D0
-                    if ((abs(adiab_nace_vector(i))/(abs(sh_env%E_tp(i)-sh_env%E_tp(sh_env%active_state)))) & 
+                    if ((abs(adiab_nace_vector(i))/(abs(aom_env%E_tp(i)-aom_env%E_tp(sh_env%active_state)))) & 
                                          .ge. mixing_threshold) then
                          !sh_env%pure_deph(i) = .FALSE.
                          !if there is mixing then we use force otherwise we use !pure dephasing
@@ -921,7 +922,7 @@ print *, "PURE_DEPHASING", i
                              tau(i) = sqrt(1/tau(i))
                          else
                              tau_forces(i) = 1/tau(i)
-                             tau_pure_deph(i) =  1/abs(sh_env%E_tp(i)-sh_env%E_tp(sh_env%active_state))
+                             tau_pure_deph(i) =  1/abs(aom_env%E_tp(i)-aom_env%E_tp(sh_env%active_state))
                             if(tau_forces(i) .ge. tau_pure_deph(i)) then
                                  tau(i) = tau_forces(i)
                             else
@@ -930,7 +931,7 @@ print *, "PURE_DEPHASING", i
                          end if
                     else
 !                         sh_print_env%pure_deph(i) = .TRUE.
-                         tau(i)= (1/abs(sh_env%E_tp(i) - sh_env%E_tp(sh_env%active_state)))
+                         tau(i)= (1/abs(aom_env%E_tp(i) - aom_env%E_tp(sh_env%active_state)))
 print *, "PURE_DEPHASING", i
                     end if
               

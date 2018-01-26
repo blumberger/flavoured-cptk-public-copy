@@ -119,7 +119,7 @@ IMPLICIT NONE
                                                          forces_adiab_new
 !> To store energies in the Jacob's Method
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE   :: C_t, C_tp
-     REAL(KIND=dp), DIMENSION(:), POINTER     :: E_t
+     REAL(KIND=dp), DIMENSION(:), POINTER     :: E_t, E_tp
      REAL(KIND = dp), DIMENSION(:), POINTER :: energies_t   
      REAL(KIND = dp), DIMENSION(:), POINTER :: adiab_energies_t 
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER :: F

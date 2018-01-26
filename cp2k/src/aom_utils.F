@@ -625,7 +625,7 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         else
              do i=1,mol
                      if (i .ne. my_old_state) then 
-                             sh_env%enerdiff(i) = abs(sh_env%E_tp(i) - sh_env%E_tp(my_old_state)) 
+                             sh_env%enerdiff(i) = abs(aom_env%E_tp(i) - aom_env%E_tp(my_old_state)) 
                      else if (i .eq. my_old_state) then 
                              sh_env%enerdiff(my_old_state) = 0.0D0
                      end if

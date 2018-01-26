@@ -182,6 +182,7 @@ CONTAINS
      !Naming convention: At = A(t), Atp = A(t+1), Atm = A(t-1), etc
 
      ALLOCATE(aom_env%E_t(mat))
+     ALLOCATE(aom_env%E_tp(mat))
      ALLOCATE(aom_env%C_t(mat,mat))
      ALLOCATE(aom_env%C_tp(mat,mat))
      allocate(aom_env%dist(mol,mol))
@@ -423,8 +424,8 @@ CONTAINS
      ALLOCATE(sh_env%cttm(mat))
      ALLOCATE(sh_env%ctt(mat))
      ALLOCATE(sh_env%C_tp(mat,mat))
-     ALLOCATE(sh_env%E_tp(mat))
-     ALLOCATE(sh_env%E_t(mat))
+     !ALLOCATE(sh_env%E_tp(mat))
+     !ALLOCATE(sh_env%E_t(mat))
 
      sh_print_env%adiab_section => adiab_section
      sh_print_env%nadiab = mat
@@ -627,7 +628,7 @@ CONTAINS
 !print *, "aom_env%E_t", aom_env%E_t
      aom_env%C_t = C_tp
 !print *, "aom_env%C_t", aom_env%C_t
-     sh_env%E_tp = E_tp
+     aom_env%E_tp = E_tp
      aom_env%adiab_energies_t = E_tp
      aom_env%eigenvector_matrix = C_tp
      aom_env%Stptp = Stptp
@@ -802,8 +803,8 @@ CONTAINS
      DEALLOCATE(sh_env%cttm)
      DEALLOCATE(sh_env%ctt)
      DEALLOCATE(sh_env%C_tp)
-     DEALLOCATE(sh_env%E_tp)
-     DEALLOCATE(sh_env%E_t)
+     !DEALLOCATE(sh_env%E_tp)
+     !DEALLOCATE(sh_env%E_t)
 
 
   END SUBROUTINE propagate_aom_namd_first_step
