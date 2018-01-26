@@ -109,7 +109,7 @@ MODULE aom_initialization
                                                classically_forbidden_hops
 
 
-     USE non_adiabatic_types,           ONLY: sh_env_type
+     !USE non_adiabatic_types,           ONLY: sh_env_type
 
 
      USE parallel_rng_types,           ONLY: UNIFORM,&
@@ -341,7 +341,7 @@ CONTAINS
      CHARACTER(len=*), PARAMETER :: routineN ='propagate_aom_namd_first_step', &
      routineP = moduleN//':'//routineN
 
-     TYPE(sh_env_type)                              :: sh_env
+     !TYPE(sh_env_type)                              :: sh_env
      REAL(kind=dp), DIMENSION(:,:),POINTER          :: my_forces_adiab
      integer :: coord, t2
      integer :: mol, i, j, k, l, m, d, atoms, c,  first_diabat, active_state, mat, orb
@@ -423,7 +423,7 @@ CONTAINS
      !> electronic timestep is a fraction of the molecular timestep
      deltatE = deltatMD/ELsteps !CHANGE_AC
 
-     ALLOCATE(sh_env%ctin(mat))
+     !ALLOCATE(sh_env%ctin(mat))
      !ALLOCATE(sh_env%C_tp(mat,mat))
      !ALLOCATE(sh_env%E_tp(mat))
      !ALLOCATE(sh_env%E_t(mat))
@@ -800,7 +800,7 @@ CONTAINS
     DEALLOCATE(positions_com_tp)
     DEALLOCATE(velocities_com_tp)
 
-     DEALLOCATE(sh_env%ctin)
+     !DEALLOCATE(sh_env%ctin)
      !DEALLOCATE(sh_env%C_tp)
      !DEALLOCATE(sh_env%E_tp)
      !DEALLOCATE(sh_env%E_t)

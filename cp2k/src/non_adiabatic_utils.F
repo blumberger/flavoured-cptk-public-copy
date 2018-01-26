@@ -556,23 +556,23 @@ END SUBROUTINE classically_forbidden_hops
                  aom_env%decoherence = .FALSE.
                  PRINT *, 'NO DECOHERENCE CORRECTIONS'
             CASE("INSTANT_COLLAPSE")
-              CALL wf_collapse(aom_env, sh_print_env, sh_env, itimes)
+              CALL wf_collapse(aom_env, sh_print_env, itimes)
             CASE("TRESH_ONLY_COLLAPSE")  
-              CALL  wf_tresh_collaps(aom_env, sh_print_env, sh_env, itimes)
+              CALL  wf_tresh_collaps(aom_env, sh_print_env, itimes)
             CASE("DAMPING")
               CALL calc_kinetic_tot(velocities_com_tp, local_particles, atomic_kinds, &
                                     nparticle_kind, atomic_kind_set, K_tot, ext_pres)
               CALL eval_deco_tau(aom_env, tau, adiab_section, sh_env, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds,nparticle_kind, atomic_kind_set) 
                    
-              CALL  wf_damping(aom_env, tau, sh_env, mol, deltatMD, sh_print_env)  
+              CALL  wf_damping(aom_env, tau, mol, deltatMD, sh_print_env)  
             CASE("COLLAPSE_WITHIN_DECOTIME")
               CALL calc_kinetic_tot(velocities_com_tp, local_particles, atomic_kinds, &
                                     nparticle_kind, atomic_kind_set, K_tot, ext_pres)
               CALL eval_deco_tau(aom_env, tau, adiab_section, sh_env, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds,nparticle_kind, atomic_kind_set) 
                    
-              CALL  collapse_within_deco_time(tau, mol, deltatMD, aom_env, sh_env)
+              CALL  collapse_within_deco_time(tau, mol, deltatMD, aom_env)
             CASE("IDA")
                aom_env%ida_deco = .TRUE.
             CASE DEFAULT                                           
@@ -583,7 +583,7 @@ END SUBROUTINE classically_forbidden_hops
             CASE("NO_DECO_CORR")
                  PRINT *, 'NO DECOHERENCE CORRECTIONS'
             CASE("INSTANT_COLLAPSE")
-              CALL wf_collapse_adiab_prop(aom_env,sh_print_env, sh_env, itimes)
+              CALL wf_collapse_adiab_prop(aom_env,sh_print_env, itimes)
             CASE("TRESH_ONLY_COLLAPSE")  
               CPABORT("NOT IMPLEMENTED")
             CASE("DAMPING")
@@ -591,7 +591,7 @@ END SUBROUTINE classically_forbidden_hops
                                     nparticle_kind, atomic_kind_set, K_tot, ext_pres)
               CALL eval_deco_tau(aom_env, tau, adiab_section, sh_env, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds,nparticle_kind, atomic_kind_set) 
-              CALL wf_damping_adiab_prop(tau, sh_env, mol, deltatMD, sh_print_env)                    
+              CALL wf_damping_adiab_prop(aom_env, tau, mol, deltatMD, sh_print_env)                    
             CASE DEFAULT                                           
               CPABORT("There is no method to add the decoherence.") 
             END SELECT
@@ -601,10 +601,10 @@ END SUBROUTINE classically_forbidden_hops
   END SUBROUTINE decohere_wf
 
 
-  SUBROUTINE wf_collapse_adiab_prop(aom_env,sh_print_env, sh_env, itimes)
+  SUBROUTINE wf_collapse_adiab_prop(aom_env,sh_print_env, itimes)
     TYPE(aom_env_type)                             :: aom_env
     TYPE(sh_print_env_type)                        :: sh_print_env
-    TYPE(sh_env_type)                              :: sh_env
+    !TYPE(sh_env_type)                              :: sh_env
     INTEGER, POINTER                               :: itimes
 
     CHARACTER(len=*), PARAMETER :: routineN ='wf_collapse_adiab_prop', &         
@@ -617,8 +617,8 @@ END SUBROUTINE classically_forbidden_hops
 !> Check if the surface_hop subroutine asks us to do the decoherence       
                   sh_print_env%decohere = .TRUE.
 !The wafunction is collapsed in a pure state
-                     sh_env%ctin(:) =  CMPLX(0.0D0, 0.0D0,dp)
-                     sh_env%ctin(sh_env%active_state) = CMPLX(1.0D0, 0.0D0,dp)
+                     aom_env%ctin(:) =  CMPLX(0.0D0, 0.0D0,dp)
+                     aom_env%ctin(aom_env%active_state) = CMPLX(1.0D0, 0.0D0,dp)
                   aom_env%futur_decohere = .FALSE.                         
          end if                                                            
          CALL adiab_print_sh_info(sh_print_env, keyword = 'DECOHERENCE')   
@@ -626,10 +626,10 @@ END SUBROUTINE classically_forbidden_hops
   END SUBROUTINE wf_collapse_adiab_prop
 
 
-  SUBROUTINE wf_collapse(aom_env,sh_print_env, sh_env, itimes)
+  SUBROUTINE wf_collapse(aom_env,sh_print_env, itimes)
     TYPE(sh_print_env_type)                        :: sh_print_env
     TYPE(aom_env_type)                             :: aom_env
-    TYPE(sh_env_type)                              :: sh_env
+    !TYPE(sh_env_type)                              :: sh_env
     INTEGER, POINTER                               :: itimes
 
     CHARACTER(len=*), PARAMETER :: routineN ='wf_collapse', &         
@@ -642,7 +642,7 @@ END SUBROUTINE classically_forbidden_hops
          if (aom_env%futur_decohere .and. aom_env%decohere) then                                  
 !> Check if the surface_hop subroutine asks us to do the decoherence       
                   sh_print_env%decohere = .TRUE.
-                     sh_env%ctin(:) = aom_env%C_tp(:, sh_env%active_state)
+                     aom_env%ctin(:) = aom_env%C_tp(:, aom_env%active_state)
                   aom_env%futur_decohere = .FALSE.                         
          end if                                                            
          CALL adiab_print_sh_info(sh_print_env, keyword = 'DECOHERENCE')   
@@ -664,10 +664,10 @@ END SUBROUTINE classically_forbidden_hops
   END SUBROUTINE ida_collapse
 
  
-  SUBROUTINE wf_tresh_collaps(aom_env, sh_print_env, sh_env, itimes)
+  SUBROUTINE wf_tresh_collaps(aom_env, sh_print_env, itimes)
     TYPE(aom_env_type)                             :: aom_env
     TYPE(sh_print_env_type)                        :: sh_print_env
-    TYPE(sh_env_type)                              :: sh_env
+    !TYPE(sh_env_type)                              :: sh_env
     INTEGER, POINTER                               :: itimes
 
     CHARACTER(len=*), PARAMETER :: routineN ='wf_collapse', &         
@@ -679,16 +679,17 @@ END SUBROUTINE classically_forbidden_hops
          if (aom_env%decohere) then                                  
 !> Check if the surface_hop subroutine asks us to do the decoherence       
                   sh_print_env%decohere = .TRUE.
-                     sh_env%ctin(:) = aom_env%C_tp(:, sh_env%active_state)
+                     aom_env%ctin(:) = aom_env%C_tp(:, aom_env%active_state)
          end if                                                            
          CALL adiab_print_sh_info(sh_print_env, keyword = 'DECOHERENCE')   
       ENDIF
   END SUBROUTINE wf_tresh_collaps
 
 
-  SUBROUTINE  wf_damping_adiab_prop(tau, sh_env, mol, deltatMD, sh_print_env)                    
+  SUBROUTINE  wf_damping_adiab_prop(aom_env, tau, mol, deltatMD, sh_print_env)                    
     REAL(KIND=dp), DIMENSION(:), INTENT(in)    :: tau!, tau_forces
-    TYPE(sh_env_type)                          :: sh_env
+    !TYPE(sh_env_type)                          :: sh_env
+    TYPE(aom_env_type)                          :: aom_env
     INTEGER, INTENT(IN)                        :: mol
     REAL(KIND=dp), INTENT(IN)                  :: deltatMD
     TYPE(sh_print_env_type)                    :: sh_print_env
@@ -707,25 +708,25 @@ END SUBROUTINE classically_forbidden_hops
 
 !transfor the diabatic into the adiabatic coefficients and calculate tau
     do i=1,mol 
-           if (i .ne. sh_env%active_state) then
+           if (i .ne. aom_env%active_state) then
 !               tau(i)= (1/abs(sh_env%E_tp(i) - sh_env%E_tp(sh_env%active_state)))* &
 !                                        (C_param +(E_0_param/K_tot))
 
 !Damp the coefficients of the states different from the active state    
-                sh_env%ctin(i) = sh_env%ctin(i)*exp(-(deltatMD/tau(i)))
-                sum = sum + abs(sh_env%ctin(i))*abs(sh_env%ctin(i))
+                aom_env%ctin(i) = aom_env%ctin(i)*exp(-(deltatMD/tau(i)))
+                sum = sum + abs(aom_env%ctin(i))*abs(aom_env%ctin(i))
            end if
     end do
 
 !transfer population to the active state for keeping the detailed balance   
-    if (sh_env%ctin(sh_env%active_state)== 0) then
-           sh_env%ctin(sh_env%active_state) = sqrt(1-sum)
+    if (aom_env%ctin(aom_env%active_state)== 0) then
+           aom_env%ctin(aom_env%active_state) = sqrt(1-sum)
     else 
-           sh_env%ctin(sh_env%active_state)= sh_env%ctin(sh_env%active_state)* &
-              sqrt((1-sum)/(abs(sh_env%ctin(sh_env%active_state))*abs(sh_env%ctin(sh_env%active_state))))
+           aom_env%ctin(aom_env%active_state)= aom_env%ctin(aom_env%active_state)* &
+              sqrt((1-sum)/(abs(aom_env%ctin(aom_env%active_state))*abs(aom_env%ctin(aom_env%active_state))))
     end if
     
-    pop(sh_env%active_state) = sh_env%ctin(sh_env%active_state)*conjg(sh_env%ctin(sh_env%active_state))
+    pop(aom_env%active_state) = aom_env%ctin(aom_env%active_state)*conjg(aom_env%ctin(aom_env%active_state))
     deallocate(pop)
   END SUBROUTINE wf_damping_adiab_prop 
 
@@ -778,7 +779,7 @@ END SUBROUTINE classically_forbidden_hops
     allocate(adiab_nace_vector(mol))
 !    allocate(sh_print_env%pure_deph(mol))
 
-    adiab_nace_vector(:) = aom_env%adiab_nace_tp(sh_env%active_state,:)
+    adiab_nace_vector(:) = aom_env%adiab_nace_tp(aom_env%active_state,:)
     !>number of degrees of freedom intensive EDC
     deg_of_freedom = (sh_env%active_atoms*3-6)
 
@@ -808,7 +809,7 @@ END SUBROUTINE classically_forbidden_hops
    
    CALL section_vals_val_get(adiab_section,"DECO_TIME",c_val=tau_param)
     do i=1,mol 
-           if (i .ne. sh_env%active_state) then
+           if (i .ne. aom_env%active_state) then
               SELECT CASE(tau_param)
               CASE("EDC")
                     CALL section_vals_val_get(adiab_section,"EDC_C",r_val=C_param)
@@ -818,7 +819,7 @@ END SUBROUTINE classically_forbidden_hops
                     if (E_0_param == 0.0D0) then  
                          K_tot = 1.0D0
                     end if
-                    tau(i)= (1/abs(aom_env%E_tp(i) - aom_env%E_tp(sh_env%active_state)))* &
+                    tau(i)= (1/abs(aom_env%E_tp(i) - aom_env%E_tp(aom_env%active_state)))* &
                                         (C_param+((E_0_param/K_tot)*deg_of_freedom))
 
               CASE("FORCES_BASED")
@@ -836,7 +837,7 @@ END SUBROUTINE classically_forbidden_hops
                     Temp = 3.1693191275167785e-06*T_inp !conver in KbT
                       !Temp = 0.0009444571  !KbT at 298 K
                       ! mixing_threshold = 2.0D0
-                    if ((abs(adiab_nace_vector(i))/(abs(aom_env%E_tp(i)-aom_env%E_tp(sh_env%active_state)))) & 
+                    if ((abs(adiab_nace_vector(i))/(abs(aom_env%E_tp(i)-aom_env%E_tp(aom_env%active_state)))) & 
                                          .ge. mixing_threshold) then
                          !sh_env%pure_deph(i) = .FALSE.
                          !if there is mixing then we use force otherwise we use !pure dephasing
@@ -870,7 +871,7 @@ END SUBROUTINE classically_forbidden_hops
                          end if
                     else
 !                         sh_print_env%pure_deph(i) = .TRUE.
-                         tau(i)= (1/abs(aom_env%E_tp(i) - aom_env%E_tp(sh_env%active_state)))
+                         tau(i)= (1/abs(aom_env%E_tp(i) - aom_env%E_tp(aom_env%active_state)))
 print *, "PURE_DEPHASING", i
                     end if
 
@@ -889,7 +890,7 @@ print *, "PURE_DEPHASING", i
                     Temp = 3.1693191275167785e-06*T_inp !conver in KbT
                       !Temp = 0.0009444571  !KbT at 298 K
                       ! mixing_threshold = 2.0D0
-                    if ((abs(adiab_nace_vector(i))/(abs(aom_env%E_tp(i)-aom_env%E_tp(sh_env%active_state)))) & 
+                    if ((abs(adiab_nace_vector(i))/(abs(aom_env%E_tp(i)-aom_env%E_tp(aom_env%active_state)))) & 
                                          .ge. mixing_threshold) then
                          !sh_env%pure_deph(i) = .FALSE.
                          !if there is mixing then we use force otherwise we use !pure dephasing
@@ -922,7 +923,7 @@ print *, "PURE_DEPHASING", i
                              tau(i) = sqrt(1/tau(i))
                          else
                              tau_forces(i) = 1/tau(i)
-                             tau_pure_deph(i) =  1/abs(aom_env%E_tp(i)-aom_env%E_tp(sh_env%active_state))
+                             tau_pure_deph(i) =  1/abs(aom_env%E_tp(i)-aom_env%E_tp(aom_env%active_state))
                             if(tau_forces(i) .ge. tau_pure_deph(i)) then
                                  tau(i) = tau_forces(i)
                             else
@@ -931,7 +932,7 @@ print *, "PURE_DEPHASING", i
                          end if
                     else
 !                         sh_print_env%pure_deph(i) = .TRUE.
-                         tau(i)= (1/abs(aom_env%E_tp(i) - aom_env%E_tp(sh_env%active_state)))
+                         tau(i)= (1/abs(aom_env%E_tp(i) - aom_env%E_tp(aom_env%active_state)))
 print *, "PURE_DEPHASING", i
                     end if
               
@@ -957,12 +958,12 @@ print *, "PURE_DEPHASING", i
   END SUBROUTINE eval_deco_tau
 
 
-  SUBROUTINE collapse_within_deco_time(tau, mol, deltatMD, aom_env, sh_env)
+  SUBROUTINE collapse_within_deco_time(tau, mol, deltatMD, aom_env)
 
     INTEGER, INTENT(IN)                        :: mol
     REAL(KIND=dp), INTENT(IN)                  :: deltatMD
     TYPE(aom_env_type)                         :: aom_env
-    TYPE(sh_env_type)                          :: sh_env
+!    TYPE(sh_env_type)                          :: sh_env
     REAL(KIND=dp), DIMENSION(:), INTENT(in)    :: tau!, tau_forces
 
     CHARACTER(len=*), PARAMETER :: routineN ='collapse_within_deco_time', &
@@ -980,12 +981,12 @@ print *, "PURE_DEPHASING", i
 
     sum = 0.0D0
     do i=1,mol
-         if (i .ne. sh_env%active_state) then
+         if (i .ne. aom_env%active_state) then
              pop(i) = cmplx(0.0D0, 0.0D0,dp) !TEST
              ct(i) = cmplx(0.0D0, 0.0D0,dp) 
              !> Tranform coefficients in the adiabatic basis 
              do j=1,mol
-                    ct(i) = ct(i) + cmplx(aom_env%C_tp(j,i), 0.0D0,dp)*sh_env%ctin(j)
+                    ct(i) = ct(i) + cmplx(aom_env%C_tp(j,i), 0.0D0,dp)*aom_env%ctin(j)
              end do
              print *, "ct_SUBOTNIK_BEFRE", ct(i)                
              pop(i) = ct(i)*conjg(ct(i))
@@ -1004,34 +1005,34 @@ print *, "PURE_DEPHASING", i
     end do
  
     !>transfor the active diabatic state into the active adiabatic state
-    pop(sh_env%active_state)= cmplx(0.0D0, 0.0D0, dp)
-    ct(sh_env%active_state) = cmplx(0.0D0, 0.0D0, dp)
+    pop(aom_env%active_state)= cmplx(0.0D0, 0.0D0, dp)
+    ct(aom_env%active_state) = cmplx(0.0D0, 0.0D0, dp)
     do i=1,mol                                                       
-           ct(sh_env%active_state) = ct(sh_env%active_state) + &
-             cmplx(aom_env%C_tp(i,sh_env%active_state), 0.0D0,dp)*sh_env%ctin(i)
+           ct(aom_env%active_state) = ct(aom_env%active_state) + &
+             cmplx(aom_env%C_tp(i,aom_env%active_state), 0.0D0,dp)*aom_env%ctin(i)
     end do  
     
-    pop(sh_env%active_state) = ct(sh_env%active_state)*conjg(ct(sh_env%active_state))
+    pop(aom_env%active_state) = ct(aom_env%active_state)*conjg(ct(aom_env%active_state))
     
     !>transfer population to the active state for keeping the detailed balance   
-    if (ct(sh_env%active_state)== 0) then
-           ct(sh_env%active_state) = sqrt(1-sum)
+    if (ct(aom_env%active_state)== 0) then
+           ct(aom_env%active_state) = sqrt(1-sum)
     else 
-           ct(sh_env%active_state)= ct(sh_env%active_state)* &
-              sqrt((1-sum)/(abs(ct(sh_env%active_state))*abs(ct(sh_env%active_state))))
+           ct(aom_env%active_state)= ct(aom_env%active_state)* &
+              sqrt((1-sum)/(abs(ct(aom_env%active_state))*abs(ct(aom_env%active_state))))
     end if
 
-    pop(sh_env%active_state) = ct(sh_env%active_state)*conjg(ct(sh_env%active_state))
+    pop(aom_env%active_state) = ct(aom_env%active_state)*conjg(ct(aom_env%active_state))
 
     !>transfor back the adiabatic into the diabatic which, then, follow the
       !electronic prpagation    
     do j=1,mol
-          sh_env%ctin(j) = cmplx(0.0D0, 0.0D0,dp)                           
+          aom_env%ctin(j) = cmplx(0.0D0, 0.0D0,dp)                           
           pop(j) = cmplx(0.0D0, 0.0D0,dp) !TEST
           do i=1,mol 
-              sh_env%ctin(j) = sh_env%ctin(j) + cmplx(aom_env%C_tp(j,i), 0.0D0,dp)*ct(i)
+              aom_env%ctin(j) = aom_env%ctin(j) + cmplx(aom_env%C_tp(j,i), 0.0D0,dp)*ct(i)
           end do
-         pop(j)=sh_env%ctin(j)*conjg(sh_env%ctin(j))
+         pop(j)=aom_env%ctin(j)*conjg(aom_env%ctin(j))
     end do
 
     deallocate(pop) !TEST
@@ -1040,9 +1041,9 @@ print *, "PURE_DEPHASING", i
   END SUBROUTINE collapse_within_deco_time
 
 
-  SUBROUTINE  wf_damping(aom_env, tau, sh_env, mol, deltatMD, sh_print_env)                    
+  SUBROUTINE  wf_damping(aom_env, tau, mol, deltatMD, sh_print_env)                    
     REAL(KIND=dp), DIMENSION(:), INTENT(in)    :: tau!, tau_forces
-    TYPE(sh_env_type)                          :: sh_env
+!    TYPE(sh_env_type)                          :: sh_env
     TYPE(aom_env_type)                          :: aom_env
     INTEGER, INTENT(IN)                        :: mol
     REAL(KIND=dp), INTENT(IN)                  :: deltatMD
@@ -1061,14 +1062,14 @@ print *, "PURE_DEPHASING", i
 
     sum = 0.0D0
     do i=1,mol 
-           if (i .ne. sh_env%active_state) then
+           if (i .ne. aom_env%active_state) then
                pop(i) = cmplx(0.0D0, 0.0D0,dp) !TEST
                ct(i) = cmplx(0.0D0, 0.0D0,dp) 
                !> if statement to choose the decoherence time
 
                !> Tranform coefficients in the adiabatic basis 
                 do j=1,mol
-                        ct(i) = ct(i) + cmplx(aom_env%C_tp(j,i), 0.0D0,dp)*sh_env%ctin(j)
+                        ct(i) = ct(i) + cmplx(aom_env%C_tp(j,i), 0.0D0,dp)*aom_env%ctin(j)
                 end do
                 !>damp the coefficients of the states different from the active state    
                 pop(i) = ct(i)*conjg(ct(i))
@@ -1080,34 +1081,34 @@ print *, "PURE_DEPHASING", i
     end do
 
     !>transfor the active diabatic state into the active adiabatic state
-    pop(sh_env%active_state)= cmplx(0.0D0, 0.0D0, dp)
-    ct(sh_env%active_state) = cmplx(0.0D0, 0.0D0, dp)
+    pop(aom_env%active_state)= cmplx(0.0D0, 0.0D0, dp)
+    ct(aom_env%active_state) = cmplx(0.0D0, 0.0D0, dp)
     do i=1,mol                                                       
-           ct(sh_env%active_state) = ct(sh_env%active_state) + &
-             cmplx(aom_env%C_tp(i,sh_env%active_state), 0.0D0,dp)*sh_env%ctin(i)
+           ct(aom_env%active_state) = ct(aom_env%active_state) + &
+             cmplx(aom_env%C_tp(i,aom_env%active_state), 0.0D0,dp)*aom_env%ctin(i)
     end do  
     
-    pop(sh_env%active_state) = ct(sh_env%active_state)*conjg(ct(sh_env%active_state))
+    pop(aom_env%active_state) = ct(aom_env%active_state)*conjg(ct(aom_env%active_state))
     
     !>transfer population to the active state for keeping the detailed balance   
-    if (ct(sh_env%active_state)== 0) then
-           ct(sh_env%active_state) = sqrt(1-sum)
+    if (ct(aom_env%active_state)== 0) then
+           ct(aom_env%active_state) = sqrt(1-sum)
     else 
-           ct(sh_env%active_state)= ct(sh_env%active_state)* &
-              sqrt((1-sum)/(abs(ct(sh_env%active_state))*abs(ct(sh_env%active_state))))
+           ct(aom_env%active_state)= ct(aom_env%active_state)* &
+              sqrt((1-sum)/(abs(ct(aom_env%active_state))*abs(ct(aom_env%active_state))))
     end if
     
-    pop(sh_env%active_state) = ct(sh_env%active_state)*conjg(ct(sh_env%active_state))
+    pop(aom_env%active_state) = ct(aom_env%active_state)*conjg(ct(aom_env%active_state))
 
     !>transfor back the adiabatic into the diabatic which, then, follow the
       !electronic prpagation    
     do j=1,mol
-          sh_env%ctin(j) = cmplx(0.0D0, 0.0D0,dp)                           
+          aom_env%ctin(j) = cmplx(0.0D0, 0.0D0,dp)                           
           pop(j) = cmplx(0.0D0, 0.0D0,dp) !TEST
           do i=1,mol 
-              sh_env%ctin(j) = sh_env%ctin(j) + cmplx(aom_env%C_tp(j,i), 0.0D0,dp)*ct(i)
+              aom_env%ctin(j) = aom_env%ctin(j) + cmplx(aom_env%C_tp(j,i), 0.0D0,dp)*ct(i)
           end do
-         pop(j)=sh_env%ctin(j)*conjg(sh_env%ctin(j))
+         pop(j)= aom_env%ctin(j)*conjg(aom_env%ctin(j))
     end do
     
 !   CALL adiab_print_sh_info(sh_print_env, keyword = 'DAMPING')   

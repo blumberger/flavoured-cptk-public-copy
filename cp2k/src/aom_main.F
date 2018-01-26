@@ -255,7 +255,7 @@ CONTAINS
 !scoefftot and they are de-allocated at the end of the subroutine.
      !ALLOCATE(sh_env%E_tp(mat))
      !ALLOCATE(sh_env%E_t(mat))
-     ALLOCATE(sh_env%ctin(mat))
+     !ALLOCATE(sh_env%ctin(mat))
      !ALLOCATE(sh_env%adiab_nace(mat,mat))
 
      !ALLOCATE(E_tp(mat))
@@ -557,8 +557,8 @@ print *, "Active_state_after_surf_hop", active_state
 
      !> APPLY DECOHERENCE CORRECTION
      !> initialize derived type variables used in the decohere_wf subroutine
-     sh_env%ctin=ctin
-     sh_env%active_state=active_state
+     aom_env%ctin=ctin
+     aom_env%active_state=active_state
 
 
 ALLOCATE(sh_env%nacv(3,mat, mat*aom_atoms))
@@ -595,13 +595,13 @@ allocate(sh_env%exact_forces(3,natom))
      if (correct_transfer_keyword .and. aom_env%decoherence) then
      !if (correct_tranfer) then
         CALL define_active_region(ctin, mat, active_region)
-        ctin_after_deco=sh_env%ctin         
+        ctin_after_deco=aom_env%ctin         
         CALL calc_psi_after_correction(ctin, ctin_after_deco, active_region, mat, ctin_after_tranf_correction)
 
         ctin = ctin_after_tranf_correction
        ! ctin=sh_env%ctin
      else
-        ctin=sh_env%ctin
+        ctin=aom_env%ctin
      ENDIF
 
      if (correct_transfer_keyword .and. aom_env%decoherence) then
@@ -660,7 +660,7 @@ deallocate(pop_t_before, pop_t_present, pop_after_deco, pop_after_sp_corr)
      aom_env%attempt_hop  = attempt_hop
      aom_env%H_t = aom_env%H_tp
      aom_env%new_state = new_state
-     aom_env%active_state = active_state
+     !aom_env%active_state = active_state
      aom_env%Stmtm = aom_env%Stt
      aom_env%Stt   = aom_env%Stptp
      aom_env%Sttm  = aom_env%Stpt
@@ -699,7 +699,7 @@ deallocate(pop_t_before, pop_t_present, pop_after_deco, pop_after_sp_corr)
      !DEALLOCATE(sh_env%E_tp)
      !DEALLOCATE(sh_env%E_t)
      !DEALLOCATE(sh_env%C_tp)
-     DEALLOCATE(sh_env%ctin)
+     !DEALLOCATE(sh_env%ctin)
 
      deallocate(ctin, ctin_after_deco)
      deallocate(exact_forces)
