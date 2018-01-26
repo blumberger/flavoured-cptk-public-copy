@@ -657,7 +657,7 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
          end if
 
 !> choose the correct state order for the active state using the overlap criteria
- CALL section_vals_val_get(adiab_section,"REORDERING_STATES_USING_OVERALP", l_val=reordering_states_keyword)
+ CALL section_vals_val_get(adiab_section,"REORDERING_STATES_USING_OVERLAP", l_val=reordering_states_keyword)
  aom_env%reorder = reordering_states_keyword
 aom_env%reorder = .TRUE.
  if (aom_env%reorder) then 
@@ -864,8 +864,9 @@ subroutine calc_adiab_nace(aom_env)
         REAL(KIND=dp), dimension(:,:), allocatable :: T1, T2, DT, TST, TDT, DS, DC
         REAL(KIND=dp), dimension(:,:), allocatable :: adiab_overlap, identity
         REAL(KIND=dp), dimension(:,:), allocatable :: C1, C2
-        REAL(KIND=dp)                              :: deltat, max_val
-
+        INTEGER, dimension(:),  allocatable        :: map_new2old, basic
+        REAL(KIND=dp)                              :: deltat, max_val, threshold
+        LOGICAL                                    :: go_on
 
         mol = size(aom_env%Stt,1)
         deltat = aom_env%deltat
@@ -905,16 +906,21 @@ subroutine calc_adiab_nace(aom_env)
         !> End of 1.
 
  
+        !> 2. Check reordering of eigenvectors between the different timestep.
         ALLOCATE(adiab_overlap(mol, mol))
         ALLOCATE(identity(mol, mol))
         ALLOCATE(C1(mol, mol))
         ALLOCATE(C2(mol, mol))
+        ALLOCATE(map_new2old(mol))
+        ALLOCATE(basic(mol))
         C1 = aom_env%C_t
         C2 = aom_env%C_tp
-        !> 2. Check reordering of eigenvectors between the different timestep.
-        do j=1, mol
+        map_new2old = 0
+        basic = (/( i, i=1, mol )/)
+        threshold = 0.1
+        do i=1, mol
            max_val = 0.0
-           do i= 1, mol
+           do j= 1, mol
               adiab_overlap(i,j) = 0.0
               !identity(i,j) = 0.0
               do k = 1, mol
@@ -923,15 +929,49 @@ subroutine calc_adiab_nace(aom_env)
               enddo
               if (abs(adiab_overlap(i,j)).GE.abs(max_val)) THEN
                  max_val = adiab_overlap(i,j)
-                 new_index = i
+                 new_index = j
               endif
            enddo
-           if (j.NE.new_index) then
-              print*, "AC_OVERLAP: For", j, " new index is", new_index, "with overlap", max_val, "and former", adiab_overlap(j,j)
+           if ( abs( max_val**2 - 1 ).LT.threshold) then
+              map_new2old(i) = new_index
+              basic(new_index) = -1
+           endif
+           if (i.NE.new_index) then
+              if ( abs( max_val**2 - 1 ).LT.threshold) then
+                 print*, "AC_OVERLAP_CHANGE: For", i, " new index is", new_index, &
+                         "with overlap", max_val, "and former", adiab_overlap(i,i)
+              else 
+                 print*, "AC_OVERLAP_NO_CHANGE: For", i, " we stay in with overlap", &
+                         adiab_overlap(i,i), " instead of goind to ", new_index, "with overlap", max_val
+              endif
            endif
            !print*, "adiab_overlap", adiab_overlap(i,:)
            !print*, "identity", identity(i,:)
         enddo
+
+print*, "AC_MAP", map_new2old
+print*, "AC_BASIC", basic
+        do i=1, mol
+           if (map_new2old(i).EQ.0) then
+              go_on = .TRUE.
+              j = 1
+              do while (go_on) 
+                    if (basic(j).LT.0) then
+                        j= j + 1
+                    else
+                        go_on = .FALSE.
+                        map_new2old(i) = j
+                        basic(j) = -1
+                    endif
+              enddo
+           endif
+        enddo
+            
+        basic = (/( i, i=1, mol )/)
+        IF (ANY(map_new2old.NE.basic)) print*, "AC_MAP_NEW", map_new2old
+        IF (SUM(map_new2old).NE.( mol*(mol+1)/2 )) THEN
+           CPABORT("Problem in the mapping between old and new states.")
+        ENDIF
 print*, "  "
         allocate(DC(mol,mol))
         DC = (1.0D0/deltat)*(C2 - C1)
