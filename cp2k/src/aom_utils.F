@@ -401,10 +401,11 @@ SUBROUTINE rotation_diab_to_adiab(C_tp, ctin, mat, adiab_ctin, pop)
 
 END SUBROUTINE rotation_diab_to_adiab
 
-subroutine diab_to_adiab( C2, old_state, sh_env, mol, cstate, ct, C1, cttm_ad, cstate_tm)
+subroutine diab_to_adiab( aom_env, C2, old_state, sh_env, mol, cstate, ct, C1, cttm_ad, cstate_tm)
         REAL(KIND=dp), dimension(:,:), intent(in) :: C2
         integer, intent(in) :: old_state
         TYPE(sh_env_type) :: sh_env
+        TYPE(aom_env_type) :: aom_env
         integer, intent(in) :: mol
         COMPLEX(KIND=dp), intent(out) :: cstate
         COMPLEX(KIND=dp), dimension(:), intent(out) :: ct
@@ -422,7 +423,7 @@ subroutine diab_to_adiab( C2, old_state, sh_env, mol, cstate, ct, C1, cttm_ad, c
         do i=1,mol
                 cstate = cstate + cmplx(C2(i,old_state), 0.0D0,dp)*sh_env%ctt(i)
                 IF (PRESENT(C1)) THEN
-                     cstate_tm = cstate_tm + cmplx(C1(i,old_state),0.0D0,dp)*sh_env%cttm(i)
+                     cstate_tm = cstate_tm + cmplx(C1(i,old_state),0.0D0,dp)*aom_env%cttm(i)
                 END IF
         end do
         do i=1,mol
@@ -432,7 +433,7 @@ subroutine diab_to_adiab( C2, old_state, sh_env, mol, cstate, ct, C1, cttm_ad, c
                 do j=1,mol
                         ct(i) = ct(i) + cmplx(C2(j,i), 0.0D0,dp)*sh_env%ctt(j)
                         IF (PRESENT(C1)) THEN
-                              cttm_ad(i) = cttm_ad(i) + cmplx(C1(j,i),0.0D0,dp)*sh_env%cttm(j)
+                              cttm_ad(i) = cttm_ad(i) + cmplx(C1(j,i),0.0D0,dp)*aom_env%cttm(j)
                         END IF
                 end do
         end do
@@ -667,16 +668,16 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
                                                      c_val=wfpropag_keyword)
         SELECT CASE(wfpropag_keyword)
         CASE("DIABATIC_BASIS")
-               CALL diab_to_adiab(C2, old_state, sh_env, mol, cstate, ct, &
+               CALL diab_to_adiab(aom_env, C2, old_state, sh_env, mol, cstate, ct, &
                                                    C1, cttm_ad, cstate_tm)
                if (aom_env%reorder) then
-                    CALL diab_to_adiab(C2, my_old_state, sh_env, mol, cstate, ct)
+                    CALL diab_to_adiab(aom_env, C2, my_old_state, sh_env, mol, cstate, ct)
                end if
         CASE("ADIABATIC_BASIS")
                ct(:) = sh_env%ctt(:)
-               cttm_ad(:) = sh_env%cttm(:)
+               cttm_ad(:) = aom_env%cttm(:)
                cstate = sh_env%ctt(old_state)
-               cstate_tm = sh_env%cttm(old_state)
+               cstate_tm = aom_env%cttm(old_state)
         CASE DEFAULT
                CPABORT("There is no method to propagate the wavefunction.")
         END SELECT
@@ -967,7 +968,7 @@ subroutine surfacehop(deltat, old_state, C2, &
 
         SELECT CASE(wfpropag_keyword)
         CASE("DIABATIC_BASIS")
-            CALL diab_to_adiab(C2, old_state, sh_env, mol, cstate, ct)
+            CALL diab_to_adiab(aom_env, C2, old_state, sh_env, mol, cstate, ct)
         CASE("ADIABATIC_BASIS")
             ct(:) = sh_env%ctt(:)
             cstate = sh_env%ctt(old_state)

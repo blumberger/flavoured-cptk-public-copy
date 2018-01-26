@@ -31,7 +31,7 @@ IMPLICIT NONE
      LOGICAL                                     :: decoherence
 
      !COMPLEX(KIND=dp), dimension(:), POINTER     :: ctin       
-     COMPLEX(KIND=dp), dimension(:), POINTER     :: ctin, cttm, ctt       
+     COMPLEX(KIND=dp), dimension(:), POINTER     :: ctin, ctt       
      REAL(KIND=dp), DIMENSION(:,:), POINTER      :: C_tp          
      INTEGER                                     :: active_state, active_atoms  
      !REAL(KIND=dp), dimension(:), POINTER        :: enerdiff
