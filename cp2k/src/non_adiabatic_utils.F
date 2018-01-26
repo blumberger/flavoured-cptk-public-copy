@@ -841,9 +841,9 @@ END SUBROUTINE classically_forbidden_hops
                                          .ge. mixing_threshold) then
                          !sh_env%pure_deph(i) = .FALSE.
                          !if there is mixing then we use force otherwise we use !pure dephasing
-                         call calcforces(i ,-AIMAG(sh_env%H_tp), aom_env%C_tp, sh_env%nacv, &
-                              sh_env%NN, sh_env%atoms, &
-                              sh_env%scaling, sh_env%cbar, sh_env%F, my_forces_adiab, &
+                         call calcforces(i ,-AIMAG(sh_env%H_tp), aom_env%C_tp, aom_env%nacv, &
+                              aom_env%NN, sh_env%atoms, &
+                              sh_env%scaling, sh_env%cbar, aom_env%F, my_forces_adiab, &
                              sh_env%ext_pres, sh_env%analytics, sh_env%exact_forces)
                          tau(i) = 0.0D0
                          DO iparticle_kind= 1, my_nparticle_kind
@@ -894,9 +894,9 @@ print *, "PURE_DEPHASING", i
                                          .ge. mixing_threshold) then
                          !sh_env%pure_deph(i) = .FALSE.
                          !if there is mixing then we use force otherwise we use !pure dephasing
-                         call calcforces(i ,-AIMAG(sh_env%H_tp), aom_env%C_tp, sh_env%nacv, &
-                              sh_env%NN, sh_env%atoms, &
-                              sh_env%scaling, sh_env%cbar, sh_env%F, my_forces_adiab, &
+                         call calcforces(i ,-AIMAG(sh_env%H_tp), aom_env%C_tp, aom_env%nacv, &
+                              aom_env%NN, sh_env%atoms, &
+                              sh_env%scaling, sh_env%cbar, aom_env%F, my_forces_adiab, &
                              sh_env%ext_pres, sh_env%analytics, sh_env%exact_forces)
                          tau(i) = 0.0D0
                          tau_forces(i) =  0.0D0

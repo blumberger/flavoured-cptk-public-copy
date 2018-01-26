@@ -40,10 +40,10 @@ IMPLICIT NONE
      LOGICAL, DIMENSION(:), POINTER             :: ext_pres
      REAL(kind=dp), DIMENSION(:,:),POINTER      :: exact_forces
 !          REAL(KIND=dp), dimension(:,:), POINTER      :: adiab_nace
-     INTEGER, DIMENSION(:,:), POINTER           :: NN
+     !INTEGER, DIMENSION(:,:), POINTER           :: NN
      COMPLEX(KIND=dp), DIMENSION(:,:), POINTER  ::  H_tp
-     REAL(KIND=dp), DIMENSION(:,:,:), POINTER   :: F
-     REAL(KIND=dp), DIMENSION(:,:,:), POINTER   :: nacv
+     !REAL(KIND=dp), DIMENSION(:,:,:), POINTER   :: F
+     !REAL(KIND=dp), DIMENSION(:,:,:), POINTER   :: nacv
      REAL(KIND=dp)                              :: cbar, scaling
      integer                                    :: atoms, natom
      
