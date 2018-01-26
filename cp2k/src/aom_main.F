@@ -398,7 +398,7 @@ CONTAINS
      !The eigenvectors are needed to calculate the surface hopping probabilities
      !The surfacehop subroutine calculates these probabilites and decides on the
      !new (possibly unchanged) surface for simulation
-     sh_env%decohere = .FALSE.
+     aom_env%decohere = .FALSE.
      attempt_hop = .FALSE.
      IF (my_test_keyword) THEN   
         attempt_hop = .TRUE.
@@ -407,7 +407,7 @@ CONTAINS
         IF ((new_state).EQ.0) new_state = mat
      ELSE IF (.NOT.my_bo_keyword) THEN ! THEN IT IS A FSSH RUN
             call surf_hop_type(adiab_section, aom_env%C_t, C_tp,   &
-                                 deltatMD, active_state, sh_env,  &
+                                 deltatMD, active_state, &
                                  new_state, &
                                  attempt_hop, &
                                  decohere_criterion, &
@@ -427,8 +427,9 @@ print *, "Active_state_after_surf_hop", active_state
                             NN=aom_env%NN, atoms=atoms, & 
                            scaling=scaling, cbar=cbar, Fin=aom_env%F, forces_adiab=my_forces_adiab, &
                            ext_pres=aom_env%ext_pres, analytics=analytics, exact_forces=exact_forces)
-ALLOCATE(sh_env%forces_active_state(3,natom))
-     sh_env%forces_active_state = my_forces_adiab  
+
+     !>store forces for the active state used for forces-based decoherence
+     aom_env%forces_active_state = my_forces_adiab  
 
      IF (attempt_hop) THEN
          call calcforces(state=new_state,Hin=-AIMAG(aom_env%H_tp), C=C_tp, nacv=aom_env%nacv, &
@@ -591,7 +592,7 @@ allocate(sh_env%exact_forces(3,natom))
      CALL section_vals_val_get(adiab_section,"SPURIOUS_TRANSFER_CORR", l_val=correct_transfer_keyword)
 !     CALL section_vals_val_get(coupling_section,"CENTER_OF_MASS",l_val=translate_keyword) 
 !     correct_transfer = .TRUE.
-     if (correct_transfer_keyword .and. sh_env%decoherence) then
+     if (correct_transfer_keyword .and. aom_env%decoherence) then
      !if (correct_tranfer) then
         CALL define_active_region(ctin, mat, active_region)
         ctin_after_deco=sh_env%ctin         
@@ -603,7 +604,7 @@ allocate(sh_env%exact_forces(3,natom))
         ctin=sh_env%ctin
      ENDIF
 
-     if (correct_transfer_keyword .and. sh_env%decoherence) then
+     if (correct_transfer_keyword .and. aom_env%decoherence) then
 print *, "################CARRIER_WF##############"
 
 allocate(pop_t_before(mol))
@@ -687,7 +688,7 @@ deallocate(pop_t_before, pop_t_present, pop_after_deco, pop_after_sp_corr)
      DEALLOCATE(positions_com_tp) 
      DEALLOCATE(velocities_com_tp)
 
-     DEALLOCATE(sh_env%forces_active_state)
+     !DEALLOCATE(sh_env%forces_active_state)
      !DEALLOCATE(sh_env%adiab_nace)
      DEALLOCATE(sh_env%nacv)
      DEALLOCATE(sh_env%NN)

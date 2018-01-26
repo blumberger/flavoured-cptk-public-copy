@@ -547,13 +547,13 @@ END SUBROUTINE classically_forbidden_hops
         CALL section_vals_val_get(adiab_section,"DECOHERENCE_CORRECTIONS",c_val=deco_keyword)
         
         aom_env%ida_deco = .FALSE.
-        sh_env%decoherence = .TRUE.
+        aom_env%decoherence = .TRUE.
         
         SELECT CASE(wfprop_keyword)
         CASE("DIABATIC_BASIS")   
             SELECT CASE(deco_keyword)                                                          
             CASE("NO_DECO_CORR")
-                 sh_env%decoherence = .FALSE.
+                 aom_env%decoherence = .FALSE.
                  PRINT *, 'NO DECOHERENCE CORRECTIONS'
             CASE("INSTANT_COLLAPSE")
               CALL wf_collapse(aom_env, sh_print_env, sh_env, itimes)
@@ -613,7 +613,7 @@ END SUBROUTINE classically_forbidden_hops
  sh_print_env%decohere = .FALSE.                                      
       IF (itimes.ge.1) THEN                                                
          !Finally, collapse the wavefunction if called for                 
-         if (aom_env%futur_decohere .and. sh_env%decohere) then                                  
+         if (aom_env%futur_decohere .and. aom_env%decohere) then                                  
 !> Check if the surface_hop subroutine asks us to do the decoherence       
                   sh_print_env%decohere = .TRUE.
 !The wafunction is collapsed in a pure state
@@ -639,7 +639,7 @@ END SUBROUTINE classically_forbidden_hops
  sh_print_env%decohere = .FALSE.                                      
       IF (itimes.ge.1) THEN                                                
          !Finally, collapse the wavefunction if called for                 
-         if (aom_env%futur_decohere .and. sh_env%decohere) then                                  
+         if (aom_env%futur_decohere .and. aom_env%decohere) then                                  
 !> Check if the surface_hop subroutine asks us to do the decoherence       
                   sh_print_env%decohere = .TRUE.
                      sh_env%ctin(:) = aom_env%C_tp(:, sh_env%active_state)
@@ -676,7 +676,7 @@ END SUBROUTINE classically_forbidden_hops
  sh_print_env%decohere = .FALSE.                                      
       IF (itimes.ge.1) THEN                                                
          !Finally, collapse the wavefunction if called for                 
-         if (sh_env%decohere) then                                  
+         if (aom_env%decohere) then                                  
 !> Check if the surface_hop subroutine asks us to do the decoherence       
                   sh_print_env%decohere = .TRUE.
                      sh_env%ctin(:) = aom_env%C_tp(:, sh_env%active_state)
@@ -854,12 +854,12 @@ END SUBROUTINE classically_forbidden_hops
                                    alpha = 6*mass*Temp                  
                                    if (tau_schwartz) then    
                                         tau(i) = tau(i) + &
-                                        (dot_product((my_forces_adiab(:,iparticle)-sh_env%forces_active_state(:,iparticle)),&
-                                        (my_forces_adiab(:,iparticle)-sh_env%forces_active_state(:,iparticle))))/(4*alpha)
+                                        (dot_product((my_forces_adiab(:,iparticle)-aom_env%forces_active_state(:,iparticle)),&
+                                        (my_forces_adiab(:,iparticle)-aom_env%forces_active_state(:,iparticle))))/(4*alpha)
                                    else
                                         tau(i) = tau(i) + &
-                                        (sqrt(dot_product((my_forces_adiab(:,iparticle)-sh_env%forces_active_state(:,iparticle)),&
-                                        (my_forces_adiab(:,iparticle)-sh_env%forces_active_state(:,iparticle)))))/(2*sqrt(alpha))
+                                        (sqrt(dot_product((my_forces_adiab(:,iparticle)-aom_env%forces_active_state(:,iparticle)),&
+                                        (my_forces_adiab(:,iparticle)-aom_env%forces_active_state(:,iparticle)))))/(2*sqrt(alpha))
                                    end if
                                 END DO
                          END DO
@@ -909,12 +909,12 @@ print *, "PURE_DEPHASING", i
                                    alpha = 6*mass*Temp                  
                                    if (tau_schwartz) then    
                                         tau(i) = tau(i) + &
-                                        (dot_product((my_forces_adiab(:,iparticle)-sh_env%forces_active_state(:,iparticle)),&
-                                        (my_forces_adiab(:,iparticle)-sh_env%forces_active_state(:,iparticle))))/(4*alpha)
+                                        (dot_product((my_forces_adiab(:,iparticle)-aom_env%forces_active_state(:,iparticle)),&
+                                        (my_forces_adiab(:,iparticle)-aom_env%forces_active_state(:,iparticle))))/(4*alpha)
                                    else
                                         tau(i) = tau(i) + &
-                                        (sqrt(dot_product((my_forces_adiab(:,iparticle)-sh_env%forces_active_state(:,iparticle)),&
-                                        (my_forces_adiab(:,iparticle)-sh_env%forces_active_state(:,iparticle)))))/(2*sqrt(alpha))
+                                        (sqrt(dot_product((my_forces_adiab(:,iparticle)-aom_env%forces_active_state(:,iparticle)),&
+                                        (my_forces_adiab(:,iparticle)-aom_env%forces_active_state(:,iparticle)))))/(2*sqrt(alpha))
                                    end if
                                 END DO
                          END DO
