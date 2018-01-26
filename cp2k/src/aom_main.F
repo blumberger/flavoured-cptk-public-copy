@@ -175,7 +175,7 @@ CONTAINS
      COMPLEX(KIND=dp), dimension(:), allocatable :: ctin, ctin_after_deco
      INTEGER :: i
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE   :: C_tp
-     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE     :: E_tp
+     !REAL(KIND=dp), DIMENSION(:), ALLOCATABLE     :: E_tp
      LOGICAL                                      :: analytics
      INTEGER                                      :: new_state , ELsteps   
      REAL(KIND=dp)                                :: dR, times 
@@ -258,7 +258,7 @@ CONTAINS
      ALLOCATE(sh_env%ctin(mat))
      !ALLOCATE(sh_env%adiab_nace(mat,mat))
 
-     ALLOCATE(E_tp(mat))
+     !ALLOCATE(E_tp(mat))
      ALLOCATE(my_forces_adiab(3,natom))
      ALLOCATE(my_forces_adiab_new(3,natom))
      ALLOCATE(positions_com_tp(3, natom))
@@ -304,8 +304,8 @@ CONTAINS
      !sh_env%E_t = aom_env%E_t
 
      !CALL adiabaticity(-AIMAG(aom_env%H_tp), mat, C_tp, E_tp, .true., aom_env)
-     CALL adiabaticity(-AIMAG(aom_env%H_tp), aom_env%C_tp, E_tp)
-     aom_env%E_tp = E_tp
+     CALL adiabaticity(-AIMAG(aom_env%H_tp), aom_env%C_tp, aom_env%E_tp)
+     !aom_env%E_tp = E_tp
 
      !TO BE CHANGED BY ANTOINE
      C_tp = aom_env%C_tp
@@ -370,7 +370,7 @@ CONTAINS
                              itimes, adiab_section, deltatMD, deltatE , times,    &
                              mat)
      CASE("ADIABATIC_RK")
-           CALL propagate_adiab_wf(aom_env%E_t, E_tp, ctin, aom_env, nadiab, norbitals, ELsteps, &
+           CALL propagate_adiab_wf(aom_env%E_t, aom_env%E_tp, ctin, aom_env, nadiab, norbitals, ELsteps, &
                                    itimes, adiab_section, deltatMD, deltatE , times,  & 
                                    mat)
      CASE("HS_CORRECTED_RK")  
@@ -378,7 +378,7 @@ CONTAINS
            CALL prop_wf_HS_corr(ctin, aom_env, nadiab,  norbitals, ELsteps, &
                            itimes, adiab_section, deltatMD, deltatE , times, &
                             mat, aom_env%class_forbidden_hop_t, active_state)
-           CALL classically_forbidden_hops(active_state, aom_env, mat, E_tp, &
+           CALL classically_forbidden_hops(active_state, aom_env, mat, aom_env%E_tp, &
                   velocities_com_tp, local_particles, atomic_kinds, nparticle_kind, &
                           atomic_kind_set, energy_conservation, class_forbidden_hop_tp)
            aom_env%class_forbidden_hop_t = class_forbidden_hop_tp 
@@ -638,7 +638,7 @@ deallocate(pop_t_before, pop_t_present, pop_after_deco, pop_after_sp_corr)
      !> PRINT
      CALL adiab_print_hamiltonian(adiab_section, -AIMAG(aom_env%H_tp), nadiab,norbitals,itimes, deltatMD)
      CALL adiab_print_nacv(adiab_section, aom_env%nacv, nadiab, norbitals, aom_atoms,itimes, deltatMD)
-     CALL adiab_print_adiabat_energies(adiab_section, E_tp, nadiab, deltatMD, times)
+     CALL adiab_print_adiabat_energies(adiab_section, aom_env%E_tp, nadiab, deltatMD, times)
      CALL adiab_print_pvecs(adiab_section, PC_allrvecs, itimes, deltatMD, times, atoms, nadiab)
                          sh_print_env%times = times
                          sh_print_env%times = DBLE(itimes)
@@ -654,7 +654,7 @@ deallocate(pop_t_before, pop_t_present, pop_after_deco, pop_after_sp_corr)
      aom_env%rm_t       = positions_com_tp
      aom_env%energies_t = energies_tp
      !aom_env%adiab_energies_t = aom_env%E_t
-     aom_env%adiab_energies_t = E_tp
+     aom_env%adiab_energies_t = aom_env%E_tp
      aom_env%ctin        = ctin
      aom_env%attempt_hop  = attempt_hop
      aom_env%H_t = aom_env%H_tp
@@ -664,7 +664,7 @@ deallocate(pop_t_before, pop_t_present, pop_after_deco, pop_after_sp_corr)
      aom_env%Stt   = aom_env%Stptp
      aom_env%Sttm  = aom_env%Stpt
      aom_env%Stmt  = aom_env%Sttp
-     aom_env%E_t = E_tp
+     aom_env%E_t = aom_env%E_tp
      !aom_env%C_tp = C_tp
      !aom_env%C_t = aom_env%C_tp
 
@@ -676,9 +676,9 @@ deallocate(pop_t_before, pop_t_present, pop_after_deco, pop_after_sp_corr)
          aom_env%diabatic_forces = aom_env%F
          aom_env%scaling  = scaling
          aom_env%cbar     = cbar
-         aom_env%energy_new = E_tp(aom_env%new_state)
+         aom_env%energy_new = aom_env%E_tp(aom_env%new_state)
      ENDIF
-     energy_adiabat = E_tp(active_state)
+     energy_adiabat = aom_env%E_tp(active_state)
      aom_env%sh_print_env = sh_print_env
 
      !> DEALLOCATE
