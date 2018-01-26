@@ -1567,24 +1567,24 @@ print *, "PURE_DEPHASING", i
 !INDEED: interm_hamil(3,1,:,:) = interm_hamil(1,2,:,:), etc.
 !PROBABLY interm_hamil and intemr_umatrix could be only: 
 !interm( 9, :, :)
-            CALL adiabaticity(-AIMAG(aom_env%H_t), mat, U_t, Eig_val_t, .false.)
-            CALL adiabaticity(-AIMAG(aom_env%H_tp), mat, U_tp, Eig_val_tp, .false.)
+            CALL adiabaticity(-AIMAG(aom_env%H_t), U_t, Eig_val_t)
+            CALL adiabaticity(-AIMAG(aom_env%H_tp), U_tp, Eig_val_tp)
             do t2=1,int(deltatMD/deltatE)
 
                    !create 3 others intermediate hamiltonians usefull to build the X
                    !matrix in the following 
                    interm_hamil(1,t2,:,:) = H_0(:,:)
-                   CALL adiabaticity(-AIMAG(H_0), mat, U_t0, Eig_val_t0, .false.)
+                   CALL adiabaticity(-AIMAG(H_0), U_t0, Eig_val_t0)
                    interm_umatrix(1,t2,:,:) = U_t0(:,:)
 
                    H_1 = H_0 + 0.5D0*Hdiff
                    interm_hamil(2,t2,:,:) = H_1(:,:)
-                   CALL adiabaticity(-AIMAG(H_1), mat, U_t1, Eig_val_t1, .false.)
+                   CALL adiabaticity(-AIMAG(H_1), U_t1, Eig_val_t1)
                    interm_umatrix(2,t2,:,:) = U_t1(:,:)
 
                    H_2 = H_1 + 0.5D0*Hdiff
                    interm_hamil(3,t2,:,:) = H_2(:,:)
-                   CALL adiabaticity(-AIMAG(H_2), mat, U_t2, Eig_val_t2, .false.)
+                   CALL adiabaticity(-AIMAG(H_2), U_t2, Eig_val_t2)
                    interm_umatrix(3,t2,:,:) = U_t2(:,:)
 
                    H_0 = H_2
