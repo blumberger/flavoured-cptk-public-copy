@@ -254,12 +254,11 @@ CONTAINS
 
 !COMMENT: one should check that all these arrays are used below (e.g. pcoefftot,
 !scoefftot and they are de-allocated at the end of the subroutine.
-     ALLOCATE(sh_env%E_tp(mat))
-     ALLOCATE(sh_env%E_t(mat))
-     ALLOCATE(sh_env%cttm(mat))
+     !ALLOCATE(sh_env%E_tp(mat))
+     !ALLOCATE(sh_env%E_t(mat))
      ALLOCATE(sh_env%ctt(mat))
      ALLOCATE(sh_env%ctin(mat))
-     ALLOCATE(sh_env%adiab_nace(mat,mat))
+     !ALLOCATE(sh_env%adiab_nace(mat,mat))
 
      ALLOCATE(E_tp(mat))
      ALLOCATE(my_forces_adiab(3,natom))
@@ -301,10 +300,11 @@ CONTAINS
      !It gives us back the eigenvalues E_tp and eigenvectors C_tp
      !initialize Adiabatic energies that will be used for trivial hopping and
      !decoherence corrections
-     sh_env%E_t = aom_env%E_t
-     CALL adiabaticity(-AIMAG(aom_env%H_tp), mat, C_tp, E_tp, .true., sh_env)
-     sh_env%E_tp = E_tp
-     aom_env%C_tp = C_tp
+
+     !sh_env%E_t = aom_env%E_t
+
+     CALL adiabaticity(-AIMAG(aom_env%H_tp), mat, C_tp, E_tp, .true., aom_env)
+     aom_env%E_tp = E_tp
 
      !> Check if the eigenvectors have a sign change from one timestep to the
      !others
@@ -329,12 +329,11 @@ CONTAINS
      !> calculate the adiabatic nace and get the proper order for eigenvectors.
      !CALL calc_adiab_nace(aom_env%C_t, C_tp, deltatMD, aom_env)
      CALL calc_adiab_nace(aom_env)
-     sh_env%adiab_nace = aom_env%adiab_nace_tp 
 
 
      
      !> PROPAGATE THE ELECTRON FOR ONE MOLECULAR TIMESTEP
-     sh_env%cttm(:) = ctin(:)
+     aom_env%cttm(:) = ctin(:)
 
      aom_env%HS_propagation = .FALSE.
       
@@ -594,7 +593,7 @@ pop_after_deco = 0.0D0
 pop_after_sp_corr = 0.0D0
 
 do i =1, mol
-      pop_t_before(i) = real(sh_env%cttm(i)*conjg(sh_env%cttm(i)))
+      pop_t_before(i) = real(aom_env%cttm(i)*conjg(aom_env%cttm(i)))
       pop_t_present(i) = real(sh_env%ctt(i)*conjg(sh_env%ctt(i)))
       pop_after_deco = real(ctin_after_deco(i)*conjg(ctin_after_deco(i)))
       pop_after_sp_corr = real(ctin_after_tranf_correction(i)*conjg(ctin_after_tranf_correction(i)))
@@ -665,17 +664,16 @@ deallocate(pop_t_before, pop_t_present, pop_after_deco, pop_after_sp_corr)
      DEALLOCATE(velocities_com_tp)
 
      DEALLOCATE(sh_env%forces_active_state)
-     DEALLOCATE(sh_env%adiab_nace)
+     !DEALLOCATE(sh_env%adiab_nace)
      DEALLOCATE(sh_env%nacv)
      DEALLOCATE(sh_env%NN)
      DEALLOCATE(sh_env%H_tp)
      DEallocate(sh_env%F)
      DEALLOCATE(sh_env%ext_pres)
      deallocate(sh_env%exact_forces)
-     DEALLOCATE(sh_env%E_tp)
-     DEALLOCATE(sh_env%E_t)
-     DEALLOCATE(sh_env%cttm)
-     DEALLOCATE(sh_env%C_tp)
+     !DEALLOCATE(sh_env%E_tp)
+     !DEALLOCATE(sh_env%E_t)
+     !DEALLOCATE(sh_env%C_tp)
      DEALLOCATE(sh_env%ctt)
      DEALLOCATE(sh_env%ctin)
 

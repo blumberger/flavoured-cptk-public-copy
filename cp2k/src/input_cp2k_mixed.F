@@ -229,9 +229,9 @@ CONTAINS
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
     
-    CALL keyword_create(keyword, name="REORDERING_STATES_USING_OVERALP",&
-         description="Choose if you want to activate REORDERING_STATES_USING_OVERALP",&
-         usage="REORDERING_STATES_USING_OVERALP: False", default_l_val=.False., &
+    CALL keyword_create(keyword, name="REORDERING_STATES_USING_OVERLAP",&
+         description="Choose if you want to activate REORDERING_STATES_USING_OVERLAP",&
+         usage="REORDERING_STATES_USING_OVERLAP: False", default_l_val=.False., &
          lone_keyword_l_val=.False.) 
         ! type_of_var=char_t,&
         ! n_var=-1)

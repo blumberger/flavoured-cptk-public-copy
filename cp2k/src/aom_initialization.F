@@ -180,7 +180,9 @@ CONTAINS
      !first column is now atomic number of atom (e.g. 6 for carbon)
      !Naming convention: At = A(t), Atp = A(t+1), Atm = A(t-1), etc
 
+     ALLOCATE(aom_env%cttm(mat))
      ALLOCATE(aom_env%E_t(mat))
+     ALLOCATE(aom_env%E_tp(mat))
      ALLOCATE(aom_env%C_t(mat,mat))
      ALLOCATE(aom_env%C_tp(mat,mat))
      allocate(aom_env%dist(mol,mol))
@@ -419,11 +421,10 @@ CONTAINS
      deltatE = deltatMD/ELsteps !CHANGE_AC
 
      ALLOCATE(sh_env%ctin(mat))
-     ALLOCATE(sh_env%cttm(mat))
      ALLOCATE(sh_env%ctt(mat))
-     ALLOCATE(sh_env%C_tp(mat,mat))
-     ALLOCATE(sh_env%E_tp(mat))
-     ALLOCATE(sh_env%E_t(mat))
+     !ALLOCATE(sh_env%C_tp(mat,mat))
+     !ALLOCATE(sh_env%E_tp(mat))
+     !ALLOCATE(sh_env%E_t(mat))
 
      sh_print_env%adiab_section => adiab_section
      sh_print_env%nadiab = mat
@@ -621,12 +622,12 @@ CONTAINS
      !> CONVERT NACV AND CALCULATE EIGENPROPERTIES 
      !> THESE ASSOCIATIONS ARE NEEDED FOR THE NACV CALC
      nacv = cbar*nacv
-     CALL adiabaticity(-AIMAG(H_tp), mat, C_tp, E_tp, .true., sh_env)
+     CALL adiabaticity(-AIMAG(H_tp), mat, C_tp, E_tp, .true., aom_env)
      aom_env%E_t = E_tp
 !print *, "aom_env%E_t", aom_env%E_t
      aom_env%C_t = C_tp
 !print *, "aom_env%C_t", aom_env%C_t
-     sh_env%E_tp = E_tp
+     aom_env%E_tp = E_tp
      aom_env%adiab_energies_t = E_tp
      aom_env%eigenvector_matrix = C_tp
      aom_env%Stptp = Stptp
@@ -798,11 +799,10 @@ CONTAINS
     DEALLOCATE(velocities_com_tp)
 
      DEALLOCATE(sh_env%ctin)
-     DEALLOCATE(sh_env%cttm)
      DEALLOCATE(sh_env%ctt)
-     DEALLOCATE(sh_env%C_tp)
-     DEALLOCATE(sh_env%E_tp)
-     DEALLOCATE(sh_env%E_t)
+     !DEALLOCATE(sh_env%C_tp)
+     !DEALLOCATE(sh_env%E_tp)
+     !DEALLOCATE(sh_env%E_t)
 
 
   END SUBROUTINE propagate_aom_namd_first_step

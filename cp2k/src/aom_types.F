@@ -117,9 +117,11 @@ IMPLICIT NONE
                                                          velocities_t,&      ! velocities step min 1
                                                          forces_adiab, &      ! forces at step 0
                                                          forces_adiab_new
+!>store charge carrier WF coefficients
+     COMPLEX(KIND=dp), dimension(:), POINTER     :: cttm
 !> To store energies in the Jacob's Method
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE   :: C_t, C_tp
-     REAL(KIND=dp), DIMENSION(:), POINTER     :: E_t
+     REAL(KIND=dp), DIMENSION(:), POINTER     :: E_t, E_tp
      REAL(KIND = dp), DIMENSION(:), POINTER :: energies_t   
      REAL(KIND = dp), DIMENSION(:), POINTER :: adiab_energies_t 
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER :: F
@@ -131,7 +133,7 @@ IMPLICIT NONE
      INTEGER                                :: new_state
      INTEGER                                :: active_state, active_state_past
      INTEGER                                :: old_state, enforced_active_state
-     LOGICAL                                :: overalp_over_thresh
+     LOGICAL                                :: overlap_over_thresh
      REAL(KIND=dp), dimension(:,:), POINTER :: coms
      REAL(KIND=dp), dimension(:,:,:), POINTER :: crds
      REAL(KIND=dp), dimension(:,:), POINTER :: dist

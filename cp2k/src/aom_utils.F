@@ -139,7 +139,7 @@ IMPLICIT NONE
              cal_delta_energy_nacv , &
              calc_diabatic_nace, &
              rotation_diab_to_adiab, &
-             adiab_overalp_check
+             adiab_overlap_check
 
 CONTAINS
 
@@ -353,7 +353,7 @@ subroutine surf_hop_type(adiab_section, C1, C2, deltat, old_state, &
        !end if
 
        SELECT CASE(surfhop_keyword)
-       CASE("TRIVIAL_CORR_WITH_OVERALP")
+       CASE("TRIVIAL_CORR_WITH_OVERLAP")
                        sh_print_env%additional_prints = .TRUE.
    
             CALL modified_surfacehop(C1, C2, deltat, old_state, &
@@ -401,10 +401,11 @@ SUBROUTINE rotation_diab_to_adiab(C_tp, ctin, mat, adiab_ctin, pop)
 
 END SUBROUTINE rotation_diab_to_adiab
 
-subroutine diab_to_adiab( C2, old_state, sh_env, mol, cstate, ct, C1, cttm_ad, cstate_tm)
+subroutine diab_to_adiab( aom_env, C2, old_state, sh_env, mol, cstate, ct, C1, cttm_ad, cstate_tm)
         REAL(KIND=dp), dimension(:,:), intent(in) :: C2
         integer, intent(in) :: old_state
         TYPE(sh_env_type) :: sh_env
+        TYPE(aom_env_type) :: aom_env
         integer, intent(in) :: mol
         COMPLEX(KIND=dp), intent(out) :: cstate
         COMPLEX(KIND=dp), dimension(:), intent(out) :: ct
@@ -422,7 +423,7 @@ subroutine diab_to_adiab( C2, old_state, sh_env, mol, cstate, ct, C1, cttm_ad, c
         do i=1,mol
                 cstate = cstate + cmplx(C2(i,old_state), 0.0D0,dp)*sh_env%ctt(i)
                 IF (PRESENT(C1)) THEN
-                     cstate_tm = cstate_tm + cmplx(C1(i,old_state),0.0D0,dp)*sh_env%cttm(i)
+                     cstate_tm = cstate_tm + cmplx(C1(i,old_state),0.0D0,dp)*aom_env%cttm(i)
                 END IF
         end do
         do i=1,mol
@@ -432,19 +433,19 @@ subroutine diab_to_adiab( C2, old_state, sh_env, mol, cstate, ct, C1, cttm_ad, c
                 do j=1,mol
                         ct(i) = ct(i) + cmplx(C2(j,i), 0.0D0,dp)*sh_env%ctt(j)
                         IF (PRESENT(C1)) THEN
-                              cttm_ad(i) = cttm_ad(i) + cmplx(C1(j,i),0.0D0,dp)*sh_env%cttm(j)
+                              cttm_ad(i) = cttm_ad(i) + cmplx(C1(j,i),0.0D0,dp)*aom_env%cttm(j)
                         END IF
                 end do
         end do
 end subroutine diab_to_adiab
 
 
-SUBROUTINE adiab_overalp_check(aom_env, changed_state, itimes)
+SUBROUTINE adiab_overlap_check(aom_env, changed_state, itimes)
 
     TYPE(aom_env_type)                         :: aom_env
     INTEGER, OPTIONAL, intent(in)               :: changed_state, itimes  
 
-    CHARACTER(len=*), PARAMETER :: routineN = 'adiab_overalp_check', &
+    CHARACTER(len=*), PARAMETER :: routineN = 'adiab_overlap_check', &
               routineP = moduleN//':'//routineN
 
     REAL(KIND=dp), dimension(:), allocatable    :: overlaps
@@ -481,12 +482,12 @@ SUBROUTINE adiab_overalp_check(aom_env, changed_state, itimes)
      overlaps(1) = abs(overlaps(1))*abs(overlaps(1))
 print *, "OVERALP_SQUARED", past_state, aom_env%active_state, overlaps(1)
 
-     aom_env%overalp_over_thresh = .False.
+     aom_env%overlap_over_thresh = .False.
   
      if ( overlaps(1) .gt. 0.5) then
 !        print *, "CARRY_ON_THE_SAME_STATE"
          aom_env%enforced_active_state = past_state
-         aom_env%overalp_over_thresh = .True.
+         aom_env%overlap_over_thresh = .True.
      else
 !        print *, "POSSIBLE_TRIVIAL_CROSSING"
         sum_ov = overlaps(1)
@@ -549,7 +550,7 @@ end if
 
     deallocate(overlaps)
      
-END SUBROUTINE adiab_overalp_check
+END SUBROUTINE adiab_overlap_check
 
 
 subroutine modified_surfacehop(C1, C2, deltat, old_state, &
@@ -583,7 +584,8 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         COMPLEX(KIND=dp), dimension(:), allocatable :: ak, akttm
         COMPLEX(KIND=dp) :: cstate, cstate_tm
         LOGICAL        :: reordering_states_keyword
-        INTEGER        :: my_old_state 
+        INTEGER        :: my_old_state, state_min 
+        REAL(KIND=dp), dimension(:), ALLOCATABLE :: enerdiff
  
         mol = size(aom_env%Stt,1)
 
@@ -592,51 +594,63 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         allocate(b(mol))
         allocate(g(mol))
         allocate(akttm(mol))        
-        allocate(sh_env%enerdiff(mol))
+        allocate(enerdiff(mol))
         allocate(ct(mol))
         allocate(cttm_ad(mol)) 
         ALLOCATE(sh_print_env%proba(mol))
 
-        if (PRESENT(overlap_key)) then
-            CALL adiab_overalp_check(aom_env)
+        !> choose the correct state order for the active state using the overlap criteria
+        CALL section_vals_val_get(adiab_section,"REORDERING_STATES_USING_OVERLAP", l_val=reordering_states_keyword)
+        aom_env%reorder = reordering_states_keyword
+        if (aom_env%reorder) then 
+            CALL adiab_overlap_check(aom_env)
+            my_old_state = aom_env%enforced_active_state
+        print *, "old_state", old_state
+        print *, "my_old_state", my_old_state
+        print *, "aom_env%enforced_active_state", aom_env%enforced_active_state
+        else 
+            my_old_state = old_state
+        end if   
 
-!print *, "NOWENFORCEDDDD", aom_env%enforced_active_state
-!stop
-            sh_env%state_min = aom_env%enforced_active_state
-            
-            !TO BE ADJUSTED
-            sh_print_env%enermin = 0.0D0
+        if (PRESENT(overlap_key) .and. aom_env%reorder) then
+            !CALL adiab_overlap_check(aom_env)
+            state_min = aom_env%enforced_active_state
+        else if (PRESENT(overlap_key) .and. .not.aom_env%reorder) then
+            CALL adiab_overlap_check(aom_env)
+            state_min = aom_env%enforced_active_state
+         !TO BE ADJUSTED
+         sh_print_env%enermin = 0.0D0
         else
              do i=1,mol
-                     if (i .ne. old_state) then 
-                             sh_env%enerdiff(i) = abs(sh_env%E_tp(i) - sh_env%E_tp(old_state)) 
-                     else if (i .eq. old_state) then 
-                             sh_env%enerdiff(old_state) = 0.0D0
+                     if (i .ne. my_old_state) then 
+                             enerdiff(i) = abs(aom_env%E_tp(i) - aom_env%E_tp(my_old_state)) 
+                     else if (i .eq. my_old_state) then 
+                             enerdiff(my_old_state) = 0.0D0
                      end if
              end do
             
-             if (sh_env%enerdiff(1) == sh_env%enerdiff(old_state)) then
-                     min = sh_env%enerdiff(2)
+             if (enerdiff(1) == enerdiff(my_old_state)) then
+                     min = enerdiff(2)
                      do i= 3,mol
-                            if (sh_env%enerdiff(i) < min .and. i .ne. old_state) then
-                                    min = sh_env%enerdiff(i)
-                                     sh_env%state_min = i
+                            if (enerdiff(i) < min .and. i .ne. my_old_state) then
+                                    min = enerdiff(i)
+                                     state_min = i
                              end if          
                      end do
              else 
-                     min = sh_env%enerdiff(1)
+                     min = enerdiff(1)
                      do i= 2,mol
-                            if (sh_env%enerdiff(i) < min .and. i .ne. old_state) then
-                                    min = sh_env%enerdiff(i)
-                                     sh_env%state_min = i
+                            if (enerdiff(i) < min .and. i .ne. my_old_state) then
+                                    min = enerdiff(i)
+                                    state_min = i
                              end if          
                      end do
              end if
             
             
              do i =1,mol
-                     if (sh_env%enerdiff(i) == min) then
-                            sh_env%state_min = i
+                     if (enerdiff(i) == min) then
+                            state_min = i
                      end if
              end do
             
@@ -662,16 +676,16 @@ print *, "aom_env%enforced_active_state", aom_env%enforced_active_state
                                                      c_val=wfpropag_keyword)
         SELECT CASE(wfpropag_keyword)
         CASE("DIABATIC_BASIS")
-               CALL diab_to_adiab(C2, old_state, sh_env, mol, cstate, ct, &
+               CALL diab_to_adiab(aom_env, C2, old_state, sh_env, mol, cstate, ct, &
                                                    C1, cttm_ad, cstate_tm)
                if (aom_env%reorder) then
-                    CALL diab_to_adiab(C2, my_old_state, sh_env, mol, cstate, ct)
+                    CALL diab_to_adiab(aom_env, C2, my_old_state, sh_env, mol, cstate, ct)
                end if
         CASE("ADIABATIC_BASIS")
                ct(:) = sh_env%ctt(:)
-               cttm_ad(:) = sh_env%cttm(:)
+               cttm_ad(:) = aom_env%cttm(:)
                cstate = sh_env%ctt(old_state)
-               cstate_tm = sh_env%cttm(old_state)
+               cstate_tm = aom_env%cttm(old_state)
         CASE DEFAULT
                CPABORT("There is no method to propagate the wavefunction.")
         END SELECT
@@ -722,16 +736,16 @@ g_before = g
         err = abs(sumg - ex_prob)
         if (err >= 0.0D0) then      !WITHOUT THRESHOLD
                 !trivial_correction = .TRUE.
-                trivial_correction = (sh_env%state_min.NE.my_old_state)
+                trivial_correction = (state_min.NE.my_old_state)
 print *, "trivial_correction", trivial_correction
 print*, "ex_prob", ex_prob
 print*, "sumg", sumg
                  if (trivial_correction) then  
-print*, sh_env%state_min
-print*, "g(sh_env%state_min)", g(sh_env%state_min)               
-                 g_exa = ex_prob - sumg + g(sh_env%state_min)
-                                g(sh_env%state_min) = g_exa
-print*, "g(sh_env%state_min)", g(sh_env%state_min)               
+print*, state_min
+print*, "g(state_min)", g(state_min)               
+                 g_exa = ex_prob - sumg + g(state_min)
+                                g(state_min) = g_exa
+print*, "g(state_min)", g(state_min)               
                  end if
         end if
 
@@ -772,7 +786,6 @@ g_renorm = g
 !> CHANGE_AC
         sh_print_env%proba     = g
 
-        !print*, "AC_TRIVIAL", old_state, sh_env%state_min
         !do i=1, mol
         !   print *, "AC_TRIVIAL", g_before(i), g_after(i), g_renorm(i)
         !enddo
@@ -832,7 +845,7 @@ print *, "ATTEMPTED_HOP"
         end if
 
         DEALLOCATE(sh_print_env%proba)
-        DEALLOCATE(sh_env%enerdiff)
+        DEALLOCATE(enerdiff)
         deallocate(ak)
         deallocate(b)
         deallocate(G)
@@ -990,7 +1003,7 @@ subroutine surfacehop(deltat, old_state, C2, &
 
         SELECT CASE(wfpropag_keyword)
         CASE("DIABATIC_BASIS")
-            CALL diab_to_adiab(C2, old_state, sh_env, mol, cstate, ct)
+            CALL diab_to_adiab(aom_env, C2, old_state, sh_env, mol, cstate, ct)
         CASE("ADIABATIC_BASIS")
             ct(:) = sh_env%ctt(:)
             cstate = sh_env%ctt(old_state)
@@ -1153,7 +1166,7 @@ subroutine matinvsqrt(mol, invert, S)
         deallocate(D, P, Pinv, DGETRI_WORK)
 end subroutine matinvsqrt
 
-subroutine adiabaticity(H, mol, C, E, print, sh_env)
+subroutine adiabaticity(H, mol, C, E, print, aom_env)
         !this subroutine will allow calculation of surface hopping probabilities
         !between N adiabatic surfaces
 
@@ -1162,7 +1175,7 @@ subroutine adiabaticity(H, mol, C, E, print, sh_env)
         REAL(KIND=dp), dimension(:,:), intent(out), allocatable :: C
         REAL(KIND=dp), dimension(:), intent(out), allocatable :: E
         logical, intent(in) :: print
-        TYPE(sh_env_type), INTENT(INOUT), OPTIONAL               ::    sh_env
+        TYPE(aom_env_type), INTENT(INOUT), OPTIONAL               ::    aom_env
 
         CHARACTER(len=*), PARAMETER :: routineN ='adiabaticity', &
                                routineP = moduleN//':'//routineN
@@ -1196,9 +1209,9 @@ subroutine adiabaticity(H, mol, C, E, print, sh_env)
                 CPABORT("Error with subroutine DSYEV: error status")
         end if
         
-        if (print.AND.PRESENT(sh_env)) then 
-        allocate(sh_env%C_tp(mol,mol))
-                sh_env%C_tp=C
+        if (print.AND.PRESENT(aom_env)) then 
+        !allocate(aom_env%C_tp(mol,mol))
+                aom_env%C_tp=C
         end if 
         
          

@@ -119,7 +119,7 @@ MODULE integrator
                                              zero_md_ener
   USE aom_utils,                       ONLY: check_hop_attempt, &
                                              total_momentum, &
-                                             adiab_overalp_check
+                                             adiab_overlap_check
  
   USE non_adiabatic_utils,             ONLY: ida_collapse!, &
                                              !adiab_overalp_check
@@ -611,9 +611,6 @@ CONTAINS
 print *, "STATE_EVOLUTION", force_env%mixed_env%aom_env%state_tmdt, "TO", &
                     force_env%mixed_env%aom_env%active_state, "TO", &
                     force_env%mixed_env%aom_env%new_state 
-             else
-                force_env%mixed_env%aom_env%active_state_past = force_env%mixed_env%aom_env%active_state
-             end if
 
 print *, "#############U_MATRIX_ACTIVE_STATE###############"
 
@@ -631,10 +628,9 @@ mol = size(force_env%mixed_env%aom_env%Stt,1)
 !    " Ctp(f)= ", force_env%mixed_env%aom_env%C_tp(i, force_env%mixed_env%aom_env%new_state)
 !end do
 
-
-
-
-
+             else
+                force_env%mixed_env%aom_env%active_state_past = force_env%mixed_env%aom_env%active_state
+             end if
  
              successful_hop = .False.                  
 
@@ -651,10 +647,10 @@ mol = size(force_env%mixed_env%aom_env%Stt,1)
              ENDIF
              print *, "successful_hop", successful_hop
              !Probably I would need to check the overalp here
-             CALL adiab_overalp_check(force_env%mixed_env%aom_env, force_env%mixed_env%aom_env%active_state_past, itimes)
+             CALL adiab_overlap_check(force_env%mixed_env%aom_env, force_env%mixed_env%aom_env%active_state_past, itimes)
 
              if (.not. force_env%mixed_env%aom_env%attempt_hop) then
-                 if (force_env%mixed_env%aom_env%overalp_over_thresh) then
+                 if (force_env%mixed_env%aom_env%overlap_over_thresh) then
                     print *, "CASE1"
                  else
                     print *, "CASE2"
@@ -663,13 +659,13 @@ mol = size(force_env%mixed_env%aom_env%Stt,1)
                 !if (force_env%mixed_env%aom_env%active_state_past .eq. &
                 !                  force_env%mixed_env%aom_env%active_state) then
                  if(.not.successful_hop) then
-                   if (.not. force_env%mixed_env%aom_env%overalp_over_thresh) then
+                   if (.not. force_env%mixed_env%aom_env%overlap_over_thresh) then
                        print *, "CASE3" 
                    else
                        print *, "CASE4"
                    end if
                 else
-                  if (.not. force_env%mixed_env%aom_env%overalp_over_thresh) then
+                  if (.not. force_env%mixed_env%aom_env%overlap_over_thresh) then
                        print *, "CASE5"
                   else 
                        print *, "CASE6"
