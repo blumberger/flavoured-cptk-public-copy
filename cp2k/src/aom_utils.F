@@ -148,7 +148,7 @@ CONTAINS
   
 subroutine makeX(mol, H, Stt, Sttp, Sttm, Stptp, Stmtm, X, deltat, NACE)
         !X is the name I give to the matrix in the solution to the Schroedinger equation:
-        !dc/dt = X*sh_env%ctt
+        !dc/dt = X*aom_env%ctt
         !makeX constructs an X matrix from inputs of S and H
 
         implicit none
@@ -216,7 +216,7 @@ end subroutine makeX
 
 subroutine calc_diabatic_nace(mol, H, Stt, Sttp, Sttm, Stptp, Stmtm, deltat, NACE, X)
        !X is the name I give to the matrix in the solution to the Schroedinger equation:
-       !dc/dt = X*sh_env%ctt
+       !dc/dt = X*aom_env%ctt
        !makeX constructs an X matrix from inputs of S and H
 
        integer, intent(in) :: mol
@@ -286,7 +286,7 @@ end subroutine calc_diabatic_nace
 
 subroutine make_adiabX(mol, E_t, NACE_ad_t, X) !deltat, NACE)
         !X is the name I give to the matrix in the solution to the Schroedinger equation:
-        !dc/dt = X*sh_env%ctt
+        !dc/dt = X*aom_env%ctt
         !makeX constructs an X matrix from inputs of S and H
 
         integer, intent(in) :: mol
@@ -401,10 +401,9 @@ SUBROUTINE rotation_diab_to_adiab(C_tp, ctin, mat, adiab_ctin, pop)
 
 END SUBROUTINE rotation_diab_to_adiab
 
-subroutine diab_to_adiab( aom_env, C2, old_state, sh_env, mol, cstate, ct, C1, cttm_ad, cstate_tm)
+subroutine diab_to_adiab( aom_env, C2, old_state, mol, cstate, ct, C1, cttm_ad, cstate_tm)
         REAL(KIND=dp), dimension(:,:), intent(in) :: C2
         integer, intent(in) :: old_state
-        TYPE(sh_env_type) :: sh_env
         TYPE(aom_env_type) :: aom_env
         integer, intent(in) :: mol
         COMPLEX(KIND=dp), intent(out) :: cstate
@@ -421,7 +420,7 @@ subroutine diab_to_adiab( aom_env, C2, old_state, sh_env, mol, cstate, ct, C1, c
         cstate = cmplx(0.0D0, 0.0D0, dp)
         IF (PRESENT(cstate_tm)) cstate_tm = cmplx(0.0D0, 0.0D0, dp)
         do i=1,mol
-                cstate = cstate + cmplx(C2(i,old_state), 0.0D0,dp)*sh_env%ctt(i)
+                cstate = cstate + cmplx(C2(i,old_state), 0.0D0,dp)*aom_env%ctt(i)
                 IF (PRESENT(C1)) THEN
                      cstate_tm = cstate_tm + cmplx(C1(i,old_state),0.0D0,dp)*aom_env%cttm(i)
                 END IF
@@ -431,7 +430,7 @@ subroutine diab_to_adiab( aom_env, C2, old_state, sh_env, mol, cstate, ct, C1, c
                 ct(i) = cmplx(0.0D0, 0.0D0,dp)
                 IF (PRESENT(cttm_ad)) cttm_ad(i) = cmplx(0.0D0, 0.0D0,dp)
                 do j=1,mol
-                        ct(i) = ct(i) + cmplx(C2(j,i), 0.0D0,dp)*sh_env%ctt(j)
+                        ct(i) = ct(i) + cmplx(C2(j,i), 0.0D0,dp)*aom_env%ctt(j)
                         IF (PRESENT(C1)) THEN
                               cttm_ad(i) = cttm_ad(i) + cmplx(C1(j,i),0.0D0,dp)*aom_env%cttm(j)
                         END IF
@@ -668,15 +667,15 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
                                                      c_val=wfpropag_keyword)
         SELECT CASE(wfpropag_keyword)
         CASE("DIABATIC_BASIS")
-               CALL diab_to_adiab(aom_env, C2, old_state, sh_env, mol, cstate, ct, &
+               CALL diab_to_adiab(aom_env, C2, old_state, mol, cstate, ct, &
                                                    C1, cttm_ad, cstate_tm)
                if (aom_env%reorder) then
-                    CALL diab_to_adiab(aom_env, C2, my_old_state, sh_env, mol, cstate, ct)
+                    CALL diab_to_adiab(aom_env, C2, my_old_state, mol, cstate, ct)
                end if
         CASE("ADIABATIC_BASIS")
-               ct(:) = sh_env%ctt(:)
+               ct(:) = aom_env%ctt(:)
                cttm_ad(:) = aom_env%cttm(:)
-               cstate = sh_env%ctt(old_state)
+               cstate = aom_env%ctt(old_state)
                cstate_tm = aom_env%cttm(old_state)
         CASE DEFAULT
                CPABORT("There is no method to propagate the wavefunction.")
@@ -968,10 +967,10 @@ subroutine surfacehop(deltat, old_state, C2, &
 
         SELECT CASE(wfpropag_keyword)
         CASE("DIABATIC_BASIS")
-            CALL diab_to_adiab(aom_env, C2, old_state, sh_env, mol, cstate, ct)
+            CALL diab_to_adiab(aom_env, C2, old_state, mol, cstate, ct)
         CASE("ADIABATIC_BASIS")
-            ct(:) = sh_env%ctt(:)
-            cstate = sh_env%ctt(old_state)
+            ct(:) = aom_env%ctt(:)
+            cstate = aom_env%ctt(old_state)
         CASE DEFAULT
            CPABORT("There is no method to propagate the wavefunction.")
         END SELECT

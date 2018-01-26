@@ -255,7 +255,6 @@ CONTAINS
 !scoefftot and they are de-allocated at the end of the subroutine.
      !ALLOCATE(sh_env%E_tp(mat))
      !ALLOCATE(sh_env%E_t(mat))
-     ALLOCATE(sh_env%ctt(mat))
      ALLOCATE(sh_env%ctin(mat))
      !ALLOCATE(sh_env%adiab_nace(mat,mat))
 
@@ -390,7 +389,7 @@ CONTAINS
      CASE DEFAULT                                           
            CPABORT("There is no method to propagate the wavefunction.") 
      END SELECT                                             
-     sh_env%ctt(:) = ctin(:)
+     aom_env%ctt(:) = ctin(:)
 
      !> SURFACE HOPPING TEST
      !The eigenvectors are needed to calculate the surface hopping probabilities
@@ -616,7 +615,7 @@ pop_after_sp_corr = 0.0D0
 
 do i =1, mol
       pop_t_before(i) = real(aom_env%cttm(i)*conjg(aom_env%cttm(i)))
-      pop_t_present(i) = real(sh_env%ctt(i)*conjg(sh_env%ctt(i)))
+      pop_t_present(i) = real(aom_env%ctt(i)*conjg(aom_env%ctt(i)))
       pop_after_deco = real(ctin_after_deco(i)*conjg(ctin_after_deco(i)))
       pop_after_sp_corr = real(ctin_after_tranf_correction(i)*conjg(ctin_after_tranf_correction(i)))
 
@@ -696,7 +695,6 @@ deallocate(pop_t_before, pop_t_present, pop_after_deco, pop_after_sp_corr)
      !DEALLOCATE(sh_env%E_tp)
      !DEALLOCATE(sh_env%E_t)
      !DEALLOCATE(sh_env%C_tp)
-     DEALLOCATE(sh_env%ctt)
      DEALLOCATE(sh_env%ctin)
 
      deallocate(ctin, ctin_after_deco)

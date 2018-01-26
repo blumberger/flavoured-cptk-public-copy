@@ -181,6 +181,7 @@ CONTAINS
      !first column is now atomic number of atom (e.g. 6 for carbon)
      !Naming convention: At = A(t), Atp = A(t+1), Atm = A(t-1), etc
 
+     ALLOCATE(aom_env%ctt(mat))
      ALLOCATE(aom_env%cttm(mat))
      ALLOCATE(aom_env%E_t(mat))
      ALLOCATE(aom_env%E_tp(mat))
@@ -422,7 +423,6 @@ CONTAINS
      deltatE = deltatMD/ELsteps !CHANGE_AC
 
      ALLOCATE(sh_env%ctin(mat))
-     ALLOCATE(sh_env%ctt(mat))
      !ALLOCATE(sh_env%C_tp(mat,mat))
      !ALLOCATE(sh_env%E_tp(mat))
      !ALLOCATE(sh_env%E_t(mat))
@@ -800,7 +800,6 @@ CONTAINS
     DEALLOCATE(velocities_com_tp)
 
      DEALLOCATE(sh_env%ctin)
-     DEALLOCATE(sh_env%ctt)
      !DEALLOCATE(sh_env%C_tp)
      !DEALLOCATE(sh_env%E_tp)
      !DEALLOCATE(sh_env%E_t)
