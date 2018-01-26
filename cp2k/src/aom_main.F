@@ -429,7 +429,7 @@ print *, "Active_state_after_surf_hop", active_state
                            ext_pres=aom_env%ext_pres)
 
      !>store forces for the active state used for forces-based decoherence
-     aom_env%forces_active_state = my_forces_adiab  
+!     aom_env%forces_active_state = my_forces_adiab  
 
      IF (attempt_hop) THEN
          call calcforces(state=new_state,Hin=-AIMAG(aom_env%H_tp), C=C_tp, nacv=aom_env%nacv, &
@@ -560,6 +560,7 @@ print *, "Active_state_after_surf_hop", active_state
      aom_env%ctin=ctin
      aom_env%ctin_before_deco = ctin 
      aom_env%active_state=active_state
+     aom_env%forces_adiab=my_forces_adiab
 
 
 !ALLOCATE(sh_env%nacv(3,mat, mat*aom_atoms))
@@ -653,7 +654,6 @@ print *, "Active_state_after_surf_hop", active_state
 
 
      !> STORE THE COORDINATES IF NOT SUCCESSFUL RUN
-     aom_env%forces_adiab=my_forces_adiab
      aom_env%rm_tm      = aom_env%rm_t
      aom_env%rm_t       = positions_com_tp
      aom_env%energies_t = energies_tp

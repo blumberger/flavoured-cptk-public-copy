@@ -859,12 +859,12 @@ END SUBROUTINE classically_forbidden_hops
                                    alpha = 6*mass*Temp                  
                                    if (tau_schwartz) then    
                                         tau(i) = tau(i) + &
-                                        (dot_product((my_forces_adiab(:,iparticle)-aom_env%forces_active_state(:,iparticle)),&
-                                        (my_forces_adiab(:,iparticle)-aom_env%forces_active_state(:,iparticle))))/(4*alpha)
+                                        (dot_product((my_forces_adiab(:,iparticle)-aom_env%forces_adiab(:,iparticle)),&
+                                        (my_forces_adiab(:,iparticle)-aom_env%forces_adiab(:,iparticle))))/(4*alpha)
                                    else
                                         tau(i) = tau(i) + &
-                                        (sqrt(dot_product((my_forces_adiab(:,iparticle)-aom_env%forces_active_state(:,iparticle)),&
-                                        (my_forces_adiab(:,iparticle)-aom_env%forces_active_state(:,iparticle)))))/(2*sqrt(alpha))
+                                        (sqrt(dot_product((my_forces_adiab(:,iparticle)-aom_env%forces_adiab(:,iparticle)),&
+                                        (my_forces_adiab(:,iparticle)-aom_env%forces_adiab(:,iparticle)))))/(2*sqrt(alpha))
                                    end if
                                 END DO
                          END DO
@@ -912,12 +912,12 @@ print *, "PURE_DEPHASING", i
                                    alpha = 6*mass*Temp                  
                                    if (tau_schwartz) then    
                                         tau(i) = tau(i) + &
-                                        (dot_product((my_forces_adiab(:,iparticle)-aom_env%forces_active_state(:,iparticle)),&
-                                        (my_forces_adiab(:,iparticle)-aom_env%forces_active_state(:,iparticle))))/(4*alpha)
+                                        (dot_product((my_forces_adiab(:,iparticle)-aom_env%forces_adiab(:,iparticle)),&
+                                        (my_forces_adiab(:,iparticle)-aom_env%forces_adiab(:,iparticle))))/(4*alpha)
                                    else
                                         tau(i) = tau(i) + &
-                                        (sqrt(dot_product((my_forces_adiab(:,iparticle)-aom_env%forces_active_state(:,iparticle)),&
-                                        (my_forces_adiab(:,iparticle)-aom_env%forces_active_state(:,iparticle)))))/(2*sqrt(alpha))
+                                        (sqrt(dot_product((my_forces_adiab(:,iparticle)-aom_env%forces_adiab(:,iparticle)),&
+                                        (my_forces_adiab(:,iparticle)-aom_env%forces_adiab(:,iparticle)))))/(2*sqrt(alpha))
                                    end if
                                 END DO
                          END DO

@@ -136,7 +136,7 @@ IMPLICIT NONE
      REAL(KIND = dp), DIMENSION(:), POINTER :: energies_t   
      REAL(KIND = dp), DIMENSION(:), POINTER :: adiab_energies_t 
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER :: F
-     REAL(kind=dp), DIMENSION(:,:),POINTER      :: forces_active_state
+!     REAL(kind=dp), DIMENSION(:,:),POINTER      :: forces_active_state
      !REAL(kind=dp), DIMENSION(:,:),POINTER      :: exact_forces
      REAL(KIND=dp), dimension(:,:), POINTER :: At, Atm, Atp, Bt, Btm, & 
                                                          Btp, siteenergies
