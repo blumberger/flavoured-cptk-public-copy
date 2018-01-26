@@ -623,7 +623,7 @@ CONTAINS
      !> CONVERT NACV AND CALCULATE EIGENPROPERTIES 
      !> THESE ASSOCIATIONS ARE NEEDED FOR THE NACV CALC
      nacv = cbar*nacv
-     CALL adiabaticity(-AIMAG(H_tp), mat, C_tp, E_tp, .true., aom_env)
+     CALL adiabaticity(-AIMAG(H_tp), C_tp, E_tp)
      aom_env%E_t = E_tp
 !print *, "aom_env%E_t", aom_env%E_t
      aom_env%C_t = C_tp

@@ -1130,28 +1130,30 @@ subroutine matinvsqrt(mol, invert, S)
         deallocate(D, P, Pinv, DGETRI_WORK)
 end subroutine matinvsqrt
 
-subroutine adiabaticity(H, mol, C, E, print, aom_env)
+subroutine adiabaticity(H, C, E)
         !this subroutine will allow calculation of surface hopping probabilities
         !between N adiabatic surfaces
 
         REAL(KIND=dp), dimension(:,:), intent(in) :: H
-        integer, intent(in) :: mol
         REAL(KIND=dp), dimension(:,:), intent(out), allocatable :: C
         REAL(KIND=dp), dimension(:), intent(out), allocatable :: E
-        logical, intent(in) :: print
-        TYPE(aom_env_type), INTENT(INOUT), OPTIONAL               ::    aom_env
+        !logical, intent(in) :: store_C
+        !TYPE(aom_env_type), INTENT(INOUT), OPTIONAL               ::    aom_env
 
         CHARACTER(len=*), PARAMETER :: routineN ='adiabaticity', &
                                routineP = moduleN//':'//routineN
 
+        integer :: mol
         integer :: stat, LWORK
         character(len=1) :: job, up
         REAL(KIND=dp), dimension(:), allocatable :: DGETRI_WORK
 
+        mol = SIZE(H, 1)
+ 
         allocate(C(mol,mol))
         allocate(E(mol))
         allocate(DGETRI_WORK(3*size(C)-1))
-
+ 
         C = H
 
         job = 'V'
@@ -1173,10 +1175,10 @@ subroutine adiabaticity(H, mol, C, E, print, aom_env)
                 CPABORT("Error with subroutine DSYEV: error status")
         end if
         
-        if (print.AND.PRESENT(aom_env)) then 
+        !if (AND.PRESENT(aom_env)) then 
         !allocate(aom_env%C_tp(mol,mol))
-                aom_env%C_tp=C
-        end if 
+        !        aom_env%C_tp=C
+        !end if 
         
          
         deallocate(DGETRI_WORK)
@@ -1277,8 +1279,8 @@ SUBROUTINE calc_hop_nacv(aom_env, hop_nacv, ext_old_state, ext_new_state, symmet
         T = S
         CALL matinvsqrt(mat, .FALSE., T)
         X = matmul(T, C)
-        CALL adiabaticity(T, mat, LL, Sdiag, .FALSE.)
-        CALL adiabaticity(S, mat, LL, Sdiag, .FALSE.)
+        CALL adiabaticity(T, LL, Sdiag)
+        CALL adiabaticity(S, LL, Sdiag)
 
 !CALCULATE Y = L^{dagger} U
         Y = matmul( transpose(LL), C)

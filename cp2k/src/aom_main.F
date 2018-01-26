@@ -303,9 +303,12 @@ CONTAINS
 
      !sh_env%E_t = aom_env%E_t
 
-     CALL adiabaticity(-AIMAG(aom_env%H_tp), mat, C_tp, E_tp, .true., aom_env)
+     !CALL adiabaticity(-AIMAG(aom_env%H_tp), mat, C_tp, E_tp, .true., aom_env)
+     CALL adiabaticity(-AIMAG(aom_env%H_tp), aom_env%C_tp, E_tp)
      aom_env%E_tp = E_tp
 
+     !TO BE CHANGED BY ANTOINE
+     C_tp = aom_env%C_tp
      !> Check if the eigenvectors have a sign change from one timestep to the
      !others
      do imol=1, mol
