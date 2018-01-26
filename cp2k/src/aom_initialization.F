@@ -181,9 +181,12 @@ CONTAINS
      !first column is now atomic number of atom (e.g. 6 for carbon)
      !Naming convention: At = A(t), Atp = A(t+1), Atm = A(t-1), etc
  
-     allocate(aom_env%exact_forces(3,natom))
+     !allocate(aom_env%exact_forces(3,natom))
      ALLOCATE(aom_env%forces_active_state(3,natom))
      ALLOCATE(aom_env%ctt(mat))
+     ALLOCATE(aom_env%ctin_before_deco(mat))
+     ALLOCATE(aom_env%ctin_after_deco(mat))
+     allocate(aom_env%ctin_after_tranf_correction(mat))
      ALLOCATE(aom_env%cttm(mat))
      ALLOCATE(aom_env%E_t(mat))
      ALLOCATE(aom_env%E_tp(mat))
@@ -728,7 +731,7 @@ CONTAINS
      print*, "ACTIVE STATE = ", active_state
      call calcforces(state=active_state,Hin=-AIMAG(H_tp), C=C_tp, nacv=nacv, NN=NN, atoms=atoms, & 
                      scaling=scaling, cbar=cbar, Fin=F, forces_adiab=my_forces_adiab, &
-                     ext_pres=aom_env%ext_pres, analytics=analytics, exact_forces=exact_forces)
+                     ext_pres=aom_env%ext_pres)
      IF (analytics) THEN
         times = DBLE(itimes)
         CALL adiab_print_exact_forces(adiab_section, exact_forces, natom, deltatMD, times)

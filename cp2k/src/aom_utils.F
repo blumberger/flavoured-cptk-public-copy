@@ -1448,8 +1448,8 @@ subroutine calcforces(state, Hin, C, nacv, NN, atoms, scaling, cbar, Fin, forces
         REAL(KIND=dp), intent(in), dimension(:,:,:) :: Fin
         REAL(KIND=dp), dimension(:,:), POINTER                  :: forces_adiab
         LOGICAL, dimension(:), INTENT(IN)       :: ext_pres
-        LOGICAL, INTENT(IN)  :: analytics
-        REAL(KIND=dp), dimension(:,:), INTENT(OUT) :: exact_forces
+        LOGICAL, INTENT(IN), OPTIONAL  :: analytics
+        REAL(KIND=dp), dimension(:,:), INTENT(OUT), OPTIONAL :: exact_forces
 
         CHARACTER(len=*), PARAMETER :: routineN ='calcforces', &
                                routineP = moduleN//':'//routineN

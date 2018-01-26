@@ -281,26 +281,28 @@ print *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, active_state)*aom_env%C_t(:, 
 END SUBROUTINE adiab_overalp_calc
 
 
-SUBROUTINE define_active_region(ctin, mat, active_region)
-     COMPLEX(KIND=dp), dimension(:), allocatable, INTENT(IN) :: ctin
-     INTEGER, INTENT(IN)                                     :: mat
-     INTEGER, dimension(:), allocatable, INTENT(out)       :: active_region
- 
+SUBROUTINE define_active_region(aom_env)
+     
+     TYPE(aom_env_type)                      :: aom_env   
+   
      CHARACTER(len=*), PARAMETER :: routineN = 'define_active_region', &
         routineP = moduleN//':'//routineN
     
      REAL(KIND=dp), dimension(:), allocatable :: pop
      REAL(KIND=dp)                            :: sum
      INTEGER                                  :: i 
+     INTEGER                                     :: mat
 
+     
+     mat = size(aom_env%H_tp,1) 
 
      ALLOCATE(pop(mat))
-     ALLOCATE(active_region(mat))
+     ALLOCATE(aom_env%active_region(mat))
 
      ! do i=1, mol
-     pop(:)  = real(ctin(:)*conjg(ctin(:)))
+     pop(:)  = real(aom_env%ctin_before_deco(:)*conjg(aom_env%ctin_before_deco(:)))
      ! end do
-     active_region(:) = 0
+     aom_env%active_region(:) = 0
      sum = 0.0
      do i =1, mat
          sum = sum + maxval(pop)
@@ -313,12 +315,12 @@ SUBROUTINE define_active_region(ctin, mat, active_region)
 
      do i =1,mat
         if (pop(i) == -1) then
-            active_region(i) = 1
+            aom_env%active_region(i) = 1
         end if
      end do
 
 !do i =1, mat
-!    write (*,'(I12,A, F12.10)') active_region(i),  "  pop = ", pop(i)
+!    write (*,'(I12,A, F12.10)') aom_env%active_region(i),  "  pop = ", pop(i)
 !end do
 
 
@@ -327,30 +329,33 @@ SUBROUTINE define_active_region(ctin, mat, active_region)
 
 END SUBROUTINE define_active_region
 
-SUBROUTINE calc_psi_after_correction(ctin, ctin_after_deco, active_region, mat, &
-                                               ctin_after_tranf_correction)
-
-     COMPLEX(KIND=dp), dimension(:), INTENT(IN) :: ctin, ctin_after_deco
-     COMPLEX(KIND=dp), dimension(:), allocatable, INTENT(out) :: ctin_after_tranf_correction
-     INTEGER, dimension(:), INTENT(in)          :: active_region
-     INTEGER, INTENT(IN)                        :: mat
+SUBROUTINE calc_psi_after_correction(aom_env)
+ 
+     TYPE(aom_env_type)                      :: aom_env
+     !COMPLEX(KIND=dp), dimension(:), INTENT(IN) :: ctin, ctin_after_deco
+     !COMPLEX(KIND=dp), dimension(:), allocatable, INTENT(out) :: ctin_after_tranf_correction
+     !INTEGER, dimension(:), INTENT(in)          :: active_region
  
      CHARACTER(len=*), PARAMETER :: routineN = 'calc_psi_after_correction', &
         routineP = moduleN//':'//routineN
    
      REAL(KIND=dp)             :: sum_ctin, sum_ctin_after_deco, lambda_scaling 
      INTEGER                  :: i
+     INTEGER                        :: mat
 
-     allocate(ctin_after_tranf_correction(mat))
+     mat = size(aom_env%H_tp,1) 
+   
+     !allocate(ctin_after_tranf_correction(mat))
     
      sum_ctin = 0.0D0
      sum_ctin_after_deco = 0.0D0
      do i =1, mat
-         if (active_region(i) == 0) then 
-             sum_ctin = sum_ctin + abs(ctin(i)*conjg(ctin(i)))
+         if (aom_env%active_region(i) == 0) then 
+             sum_ctin = sum_ctin + abs(aom_env%ctin_before_deco(i)*&
+                                        conjg(aom_env%ctin_before_deco(i)))
          else
              sum_ctin_after_deco = sum_ctin_after_deco + &
-                                abs(ctin_after_deco(i)*conjg(ctin_after_deco(i)))
+                      abs(aom_env%ctin_after_deco(i)*conjg(aom_env%ctin_after_deco(i)))
          end if
      end do
 
@@ -360,10 +365,10 @@ SUBROUTINE calc_psi_after_correction(ctin, ctin_after_deco, active_region, mat, 
         lambda_scaling = sqrt((1-sum_ctin)/sum_ctin_after_deco)
     end if
 
-    ctin_after_tranf_correction(:) = ctin(:)
+    aom_env%ctin_after_tranf_correction(:) = aom_env%ctin_before_deco(:)
     do i =1, mat
-       if (active_region(i) == 1) then
-           ctin_after_tranf_correction(i) = ctin_after_deco(i)*lambda_scaling
+       if (aom_env%active_region(i) == 1) then
+           aom_env%ctin_after_tranf_correction(i) = aom_env%ctin_after_deco(i)*lambda_scaling
        end if
     end do
 
@@ -512,18 +517,15 @@ END SUBROUTINE classically_forbidden_hops
 
 
  
-  SUBROUTINE decohere_wf(adiab_section, sh_print_env, aom_env, deco_keyword, itimes, &
-                         deltatMD, mol,velocities_com_tp, local_particles, atomic_kinds, nparticle_kind, &
-                         atomic_kind_set, K_tot)
+  SUBROUTINE decohere_wf(adiab_section, aom_env,  itimes, &
+                         velocities_com_tp, local_particles, atomic_kinds, nparticle_kind, &
+                         atomic_kind_set)
 
         TYPE(section_vals_type), POINTER               :: adiab_section 
         TYPE(sh_print_env_type)                        :: sh_print_env
         TYPE(aom_env_type)                             :: aom_env
  !       TYPE(sh_env_type)                              :: sh_env
-        CHARACTER(LEN=default_string_length)           :: deco_keyword
         INTEGER, POINTER                               :: itimes
-        REAL(KIND=dp), INTENT(IN)                      :: deltatMD
-        INTEGER                                        :: mol
         REAL(kind=dp), DIMENSION(:,:), POINTER             :: velocities_com_tp
         TYPE(distribution_1d_type), POINTER                :: local_particles
         TYPE(atomic_kind_list_type), POINTER, OPTIONAL     :: atomic_kinds
@@ -531,7 +533,6 @@ END SUBROUTINE classically_forbidden_hops
         TYPE(atomic_kind_type), DIMENSION(:), &
                   POINTER, OPTIONAL                        :: atomic_kind_set
 
-        REAL(kind=dp), INTENT(OUT)                         :: K_tot
 !        LOGICAL, dimension(:), POINTER, OPTIONAL         :: ext_pres
 
         CHARACTER(len=*), PARAMETER :: routineN ='decohere_wf', &         
@@ -540,6 +541,10 @@ END SUBROUTINE classically_forbidden_hops
 !       logical                                            :: edc_deco_time
         REAL(KIND=dp), DIMENSION(:), ALLOCATABLE       :: tau!, tau_forces
         CHARACTER(LEN=default_string_length)           :: wfprop_keyword
+        CHARACTER(LEN=default_string_length)           :: deco_keyword
+        REAL(kind=dp)                                 :: K_tot
+        INTEGER                                        :: mol
+        REAL(KIND=dp)                                 :: deltatMD
 !        REAL(KIND=dp)                                  :: C_param, E_0_param
 
         CALL section_vals_val_get(adiab_section,"REPRESENTATION", &
@@ -548,7 +553,12 @@ END SUBROUTINE classically_forbidden_hops
         
         aom_env%ida_deco = .FALSE.
         aom_env%decoherence = .TRUE.
-        
+       
+        mol = SIZE(aom_env%H_tp, 1) 
+        deltatMD = aom_env%deltatMD 
+        sh_print_env = aom_env%sh_print_env    
+
+
         SELECT CASE(wfprop_keyword)
         CASE("DIABATIC_BASIS")   
             SELECT CASE(deco_keyword)                                                          
@@ -838,7 +848,7 @@ END SUBROUTINE classically_forbidden_hops
                          call calcforces(i ,-AIMAG(aom_env%H_tp), aom_env%C_tp, aom_env%nacv, &
                               aom_env%NN, aom_env%atoms, &
                               aom_env%scaling, aom_env%cbar, aom_env%F, my_forces_adiab, &
-                             aom_env%ext_pres, aom_env%analytics, aom_env%exact_forces)
+                             aom_env%ext_pres)
                          tau(i) = 0.0D0
                          DO iparticle_kind= 1, my_nparticle_kind
                                 atomic_kind => my_atomic_kind_set(iparticle_kind)
@@ -889,7 +899,7 @@ print *, "PURE_DEPHASING", i
                          call calcforces(i ,-AIMAG(aom_env%H_tp), aom_env%C_tp, aom_env%nacv, &
                               aom_env%NN, aom_env%atoms, &
                               aom_env%scaling, aom_env%cbar, aom_env%F, my_forces_adiab, &
-                             aom_env%ext_pres, aom_env%analytics, aom_env%exact_forces)
+                             aom_env%ext_pres)
                          tau(i) = 0.0D0
                          tau_forces(i) =  0.0D0
                           tau_pure_deph(i) = 0.0D0

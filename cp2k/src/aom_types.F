@@ -121,7 +121,12 @@ IMPLICIT NONE
      INTEGER                                     :: active_atoms
 !     REAL(KIND=dp)                              :: cbar, scaling
      integer                                    :: atoms, natom
-     logical                                    ::  analytics
+     REAL(KIND=dp)                              :: deltatMD
+!> arrays used in the decoherence
+     COMPLEX(KIND=dp), dimension(:), POINTER :: ctin_before_deco
+     COMPLEX(KIND=dp), dimension(:), POINTER :: ctin_after_deco
+     COMPLEX(KIND=dp), dimension(:), POINTER :: ctin_after_tranf_correction
+     INTEGER, dimension(:), POINTER          :: active_region
 
 !>store charge carrier WF coefficients
      COMPLEX(KIND=dp), dimension(:), POINTER     :: cttm, ctt
@@ -131,7 +136,7 @@ IMPLICIT NONE
      REAL(KIND = dp), DIMENSION(:), POINTER :: energies_t   
      REAL(KIND = dp), DIMENSION(:), POINTER :: adiab_energies_t 
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER :: F
-     REAL(kind=dp), DIMENSION(:,:),POINTER      :: exact_forces, forces_active_state
+     REAL(kind=dp), DIMENSION(:,:),POINTER      :: forces_active_state
      !REAL(kind=dp), DIMENSION(:,:),POINTER      :: exact_forces
      REAL(KIND=dp), dimension(:,:), POINTER :: At, Atm, Atp, Bt, Btm, & 
                                                          Btp, siteenergies
