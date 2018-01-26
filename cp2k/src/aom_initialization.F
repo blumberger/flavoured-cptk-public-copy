@@ -181,6 +181,7 @@ CONTAINS
      !first column is now atomic number of atom (e.g. 6 for carbon)
      !Naming convention: At = A(t), Atp = A(t+1), Atm = A(t-1), etc
  
+     allocate(sh_env%exact_forces(3,natom))
      ALLOCATE(aom_env%forces_active_state(3,natom))
      ALLOCATE(aom_env%ctt(mat))
      ALLOCATE(aom_env%cttm(mat))

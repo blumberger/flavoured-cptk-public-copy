@@ -31,17 +31,17 @@ IMPLICIT NONE
      !LOGICAL                                     :: decoherence
 
      !COMPLEX(KIND=dp), dimension(:), POINTER     :: ctin       
-     COMPLEX(KIND=dp), dimension(:), POINTER     :: ctin, ctt       
+     !COMPLEX(KIND=dp), dimension(:), POINTER     :: ctin, ctt       
      REAL(KIND=dp), DIMENSION(:,:), POINTER      :: C_tp          
-     INTEGER                                     :: active_state, active_atoms  
+     INTEGER                                     :: active_atoms  
      !REAL(KIND=dp), dimension(:), POINTER        :: enerdiff
      !REAL(KIND=dp), dimension(:,:), POINTER      :: dphi_tp, dphi_t                                                                           
      logical                                    ::  analytics 
      !LOGICAL, DIMENSION(:), POINTER             :: ext_pres
-     REAL(kind=dp), DIMENSION(:,:),POINTER      :: exact_forces
+     !REAL(kind=dp), DIMENSION(:,:),POINTER      :: exact_forces
 !          REAL(KIND=dp), dimension(:,:), POINTER      :: adiab_nace
      !INTEGER, DIMENSION(:,:), POINTER           :: NN
-     COMPLEX(KIND=dp), DIMENSION(:,:), POINTER  ::  H_tp
+     !COMPLEX(KIND=dp), DIMENSION(:,:), POINTER  ::  H_tp
      !REAL(KIND=dp), DIMENSION(:,:,:), POINTER   :: F
      !REAL(KIND=dp), DIMENSION(:,:,:), POINTER   :: nacv
      REAL(KIND=dp)                              :: cbar, scaling

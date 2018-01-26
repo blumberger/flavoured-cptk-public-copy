@@ -563,10 +563,10 @@ print *, "Active_state_after_surf_hop", active_state
 
 !ALLOCATE(sh_env%nacv(3,mat, mat*aom_atoms))
 !ALLOCATE(sh_env%NN(mat, mat))
-ALLOCATE(sh_env%H_tp(mat,mat))
+!ALLOCATE(sh_env%H_tp(mat,mat))
 !allocate(sh_env%F(3,natom,mol))
 !ALLOCATE(sh_env%ext_pres(natom))
-allocate(sh_env%exact_forces(3,natom))
+!allocate(sh_env%exact_forces(3,natom))
 !ALLOCATE(exact_forces())
 !ALLOCATE(sh_env%my_forces_adiab(3,natom))
 
@@ -577,10 +577,10 @@ allocate(sh_env%exact_forces(3,natom))
      sh_env%cbar = cbar
      !sh_env%F = aom_env%F
 !     sh_env%my_forces_adiab = my_forces_adiab
-     sh_env%exact_forces = exact_forces
+     aom_env%exact_forces = exact_forces
      !sh_env%ext_pres  = aom_env%ext_pres
      sh_env%analytics = analytics 
-     sh_env%H_tp = aom_env%H_tp
+     !sh_env%H_tp = aom_env%H_tp
 
 
 
@@ -692,10 +692,10 @@ deallocate(pop_t_before, pop_t_present, pop_after_deco, pop_after_sp_corr)
      !DEALLOCATE(sh_env%adiab_nace)
      !DEALLOCATE(sh_env%nacv)
      !DEALLOCATE(sh_env%NN)
-     DEALLOCATE(sh_env%H_tp)
+!     DEALLOCATE(sh_env%H_tp)
      !DEallocate(sh_env%F)
      !DEALLOCATE(sh_env%ext_pres)
-     deallocate(sh_env%exact_forces)
+!     deallocate(sh_env%exact_forces)
      !DEALLOCATE(sh_env%E_tp)
      !DEALLOCATE(sh_env%E_t)
      !DEALLOCATE(sh_env%C_tp)
