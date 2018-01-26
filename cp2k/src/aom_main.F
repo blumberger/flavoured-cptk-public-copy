@@ -245,6 +245,7 @@ CONTAINS
      sh_env%natom = natom
      !> Find deltaMD, nuclear timestep, in atomic units
      deltatMD = MDtimestep !CHANGE_AC
+     aom_env%deltat = deltatMD
      !> electronic timestep is a fraction of the molecular timestep
      deltatE = deltatMD/ELsteps !CHANGE_AC
 
@@ -296,62 +297,40 @@ CONTAINS
      aom_env%nacv = cbar*aom_env%nacv
 
      !> HAMILTONIAN DIAGONALIZATION
-     !The adiabaticity subroutine diagonalises the diabatic Hamiltonian
-     !It gives us back the eigenvalues and eigenvectors
+     !The adiabaticity subroutine diagonalises the diabatic Hamiltonian H_tp
+     !It gives us back the eigenvalues E_tp and eigenvectors C_tp
      !initialize Adiabatic energies that will be used for trivial hopping and
      !decoherence corrections
-!COMMENT: in fact, C_t and E_t are already known at the previous timestep, maybe
-!check aom_env%E_t, aom_env%C_t
      sh_env%E_t = aom_env%E_t
      CALL adiabaticity(-AIMAG(aom_env%H_tp), mat, C_tp, E_tp, .true., sh_env)
      sh_env%E_tp = E_tp
+     aom_env%C_tp = C_tp
 
      !> Check if the eigenvectors have a sign change from one timestep to the
      !others
-     do imol=1, mol
-        sum = 0
-        do coord=1, mol
-           sum = sum + aom_env%C_t(coord, imol) * C_tp(coord, imol)
-        enddo
-        !print*, "AC_PHASE", imol, sum
-        if (sum.lt.0) then
-           !print*, "AC_PHASE_WARNING for ", imol
-           C_tp(:,imol) = - C_tp(:, imol)
-        endif
-        sum = 0 
-        !do coord=1, mol
-        !   sum = sum + aom_env%C_t(coord, imol) * C_tp(coord, imol)
-        !enddo
-        !print*, "AC_PHASE", imol, sum
-        !if (imol.eq.active_state) print*, "AC_STATE_WARNING"
-     enddo
+     !do imol=1, mol
+     !   sum = 0
+     !   do coord=1, mol
+     !      sum = sum + aom_env%C_t(coord, imol) * C_tp(coord, imol)
+     !   enddo
+     !   !print*, "AC_PHASE", imol, sum
+     !   if (sum.lt.0) then
+     !      print*, "AC_PHASE_WARNING for ", imol
+     !      C_tp(:,imol) = - C_tp(:, imol)
+     !   endif
+     !   sum = 0 
+     !   !do coord=1, mol
+     !   !   sum = sum + aom_env%C_t(coord, imol) * C_tp(coord, imol)
+     !   !enddo
+     !   !print*, "AC_PHASE", imol, sum
+     !   !if (imol.eq.active_state) print*, "AC_STATE_WARNING"
+     !enddo
            
-!aom_env%C_tp must be created before we try to hop, it is used in adiab_overalp_check
-     aom_env%C_tp = C_tp
-
-     !> ADIABATIC NACE CALCULATION
-!COMMENT: do we really need to calculate the full NACE matrix? I guess one only
-!need ADIAB_NACE(active_state, :) ---> SAM: no we need the all matrix in the
-!adiabatic prograpagion (even if we never use it is a feature of the code)
-
-     CALL calc_adiab_nace(aom_env%C_t, C_tp, deltatMD, aom_env)
+     !> calculate the adiabatic nace and get the proper order for eigenvectors.
+     !CALL calc_adiab_nace(aom_env%C_t, C_tp, deltatMD, aom_env)
+     CALL calc_adiab_nace(aom_env)
      sh_env%adiab_nace = aom_env%adiab_nace_tp 
 
-!allocate(var(mat))
-!do i = 1,mat
-!    if (i .eq. active_state) then
-!        do j =1, mat
-!            var(j) = aom_env%adiab_nace_tp(i,j)
-!        end do
-!    end if
-!end do
-
-!print *, "var", var
-
-!allocate(var2(mat))
-!var2(:) = aom_env%adiab_nace_tp(active_state,:)
-
-!print *, "var2", var2
 
      
      !> PROPAGATE THE ELECTRON FOR ONE MOLECULAR TIMESTEP
@@ -437,8 +416,8 @@ ALLOCATE(sh_env%forces_active_state(3,natom))
 
 
 
-!TEST TO EVALUATE TRIVIAL CROSSING
 
+!TEST TO EVALUATE TRIVIAL CROSSING
 !do i=1, mol
 !print *, "C_t", aom_env%C_t(:, active_state)
 !print *, "C_tp", C_tp(:, active_state)
@@ -602,7 +581,7 @@ allocate(sh_env%exact_forces(3,natom))
      ENDIF
 
      if (correct_transfer_keyword .and. sh_env%decoherence) then
-print *, "################CARRIER_WF##############"
+!print *, "################CARRIER_WF##############"
 
 allocate(pop_t_before(mol))
 allocate(pop_t_present(mol))
@@ -620,15 +599,15 @@ do i =1, mol
       pop_after_deco = real(ctin_after_deco(i)*conjg(ctin_after_deco(i)))
       pop_after_sp_corr = real(ctin_after_tranf_correction(i)*conjg(ctin_after_tranf_correction(i)))
 
-write (*,'(F12.10,A, F12.10, A, F12.10, A, F12.10)') pop_t_before(i), " tp= ", pop_t_present(i), " deco = ", &
-       pop_after_deco(i), " spcor = ", pop_after_sp_corr(i)
+!write (*,'(F12.10,A, F12.10, A, F12.10, A, F12.10)') pop_t_before(i), " tp= ", pop_t_present(i), " deco = ", &
+!       pop_after_deco(i), " spcor = ", pop_after_sp_corr(i)
 
 end do
 
 
-write (*,'(I12,A, I12,A , I12,A , I12)') &
-        maxloc(pop_t_before), " tp= ", maxloc(pop_t_present), " deco = ", maxloc(pop_after_deco), &
-         " spcorr = ", maxloc(pop_after_sp_corr)
+!write (*,'(I12,A, I12,A , I12,A , I12)') &
+!        maxloc(pop_t_before), " tp= ", maxloc(pop_t_present), " deco = ", maxloc(pop_after_deco), &
+!         " spcorr = ", maxloc(pop_after_sp_corr)
 
 deallocate(pop_t_before, pop_t_present, pop_after_deco, pop_after_sp_corr)
      ENDIF

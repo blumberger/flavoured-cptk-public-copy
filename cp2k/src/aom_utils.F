@@ -464,22 +464,22 @@ SUBROUTINE adiab_overalp_check(aom_env, changed_state, itimes)
     
     if (PRESENT(changed_state)) then
         past_state = changed_state
-print *, "OLD_STATE", changed_state
+!print *, "OLD_STATE", changed_state
     else
         past_state = aom_env%active_state
 !print *, "STATE_CHANGED", past_state
 !print *, "NEW_STATE_here", aom_env%active_state    
     end if
 
-print *, "NEW_STATE", aom_env%active_state    
+!print *, "NEW_STATE", aom_env%active_state    
 
      do i=1, mat
          overlaps(1) = overlaps(1) + aom_env%C_t(i, past_state)*aom_env%C_tp(i, aom_env%active_state)
      end do
-print *, "OVERLAP_NOTSQUARED", overlaps(1)
+!print *, "OVERLAP_NOTSQUARED", overlaps(1)
 
      overlaps(1) = abs(overlaps(1))*abs(overlaps(1))
-print *, "OVERALP_SQUARED", overlaps(1)
+print *, "OVERALP_SQUARED", past_state, aom_env%active_state, overlaps(1)
 
      aom_env%overalp_over_thresh = .False.
   
@@ -526,8 +526,8 @@ print *, "OVERALP_SQUARED", overlaps(1)
         end do
      end if
 
-print *, "LAST_ENFORCED_ACTIVE", aom_env%enforced_active_state
-print *, "OVERALP_CALCC", overlaps
+!print *, "LAST_ENFORCED_ACTIVE", aom_env%enforced_active_state
+!print *, "OVERALP_CALCC", overlaps
 if (present(itimes)) then 
 print *, "MAX_OVERLAP", itimes, overlaps(1), maxval(overlaps(:))
 else
@@ -646,6 +646,7 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
 !> choose the correct state order for the active state using the overlap criteria
  CALL section_vals_val_get(adiab_section,"REORDERING_STATES_USING_OVERALP", l_val=reordering_states_keyword)
  aom_env%reorder = reordering_states_keyword
+aom_env%reorder = .TRUE.
  if (aom_env%reorder) then 
     my_old_state = aom_env%enforced_active_state
 print *, "old_state", old_state
@@ -725,9 +726,9 @@ g_before = g
 print *, "trivial_correction", trivial_correction
 print*, "ex_prob", ex_prob
 print*, "sumg", sumg
+                 if (trivial_correction) then  
 print*, sh_env%state_min
 print*, "g(sh_env%state_min)", g(sh_env%state_min)               
-                 if (trivial_correction) then  
                  g_exa = ex_prob - sumg + g(sh_env%state_min)
                                 g(sh_env%state_min) = g_exa
 print*, "g(sh_env%state_min)", g(sh_env%state_min)               
@@ -839,21 +840,27 @@ print *, "ATTEMPTED_HOP"
 end subroutine modified_surfacehop
 
 
-subroutine calc_adiab_nace(C1, C2, deltat, aom_env)
+subroutine calc_adiab_nace(aom_env)
         !this subroutine calculates the adiabatic nace used in the calculation
         !of the hopping probability and also in the RK adiabatic propagation 
-        REAL(KIND=dp), dimension(:,:), intent(in) :: C1, C2
-        REAL(KIND=dp), intent(in) :: deltat
         TYPE(aom_env_type)        :: aom_env
 
        CHARACTER(len=*), PARAMETER :: routineN ='calc_adiab_nace', &
        routineP = moduleN//':'//routineN
 
-        integer :: i, j, mol, k, l
+        integer :: i, j, mol, k, l, new_index
         REAL(KIND=dp), dimension(:,:), allocatable :: T1, T2, DT, TST, TDT, DS, DC
+        REAL(KIND=dp), dimension(:,:), allocatable :: adiab_overlap, identity
+        REAL(KIND=dp), dimension(:,:), allocatable :: C1, C2
+        REAL(KIND=dp)                              :: deltat, max_val
+
 
         mol = size(aom_env%Stt,1)
+        deltat = aom_env%deltat
 
+        !> Based on Eq. 19 of paper: Spencer et al., J. Chem. Phys. 145, 064102 (2016)
+
+        !> 1. Calculate the term U^dag D U (first term in Eq. 19)
         !many allocations
         allocate(T1(mol,mol))
         allocate(T2(mol,mol))
@@ -861,27 +868,14 @@ subroutine calc_adiab_nace(C1, C2, deltat, aom_env)
         allocate(TST(mol,mol))
         allocate(TDT(mol,mol))
         allocate(DS(mol,mol))
-        allocate(DC(mol,mol))
-
         !use the matinvsqrt subroutine to find T = S^(-1/2)
         T1 = aom_env%Stmtm
         T2 = aom_env%Stptp
         call matinvsqrt(mol, .TRUE., T1)
         call matinvsqrt(mol, .TRUE., T2)
-
         !and do some straightforward first-order numerical derivatives
         DT = (0.5D0/deltat)*(T2 - T1)
         DS = (0.5D0/deltat)*(aom_env%Sttp - aom_env%Sttm)
-        DC = (1.0D0/deltat)*(C2 - C1)
-
-        !do i=1, mol
-        !   print*, "C1", i, C1(i,:)
-        !enddo
-        !do i=1, mol
-        !   print*, "C2", i, C2(i,:)
-        !enddo
- 
-
         !with these two loops, calculate the nacv in the time domain between adiabatic wavefunctions
         !by transforming from the diabatic overlaps
         do i=1,mol
@@ -896,18 +890,52 @@ subroutine calc_adiab_nace(C1, C2, deltat, aom_env)
                         end do
                 end do
         end do
+        !> End of 1.
+
+ 
+        ALLOCATE(adiab_overlap(mol, mol))
+        ALLOCATE(identity(mol, mol))
+        ALLOCATE(C1(mol, mol))
+        ALLOCATE(C2(mol, mol))
+        C1 = aom_env%C_t
+        C2 = aom_env%C_tp
+        !> 2. Check reordering of eigenvectors between the different timestep.
+        do j=1, mol
+           max_val = 0.0
+           do i= 1, mol
+              adiab_overlap(i,j) = 0.0
+              !identity(i,j) = 0.0
+              do k = 1, mol
+                 adiab_overlap(i,j) = adiab_overlap(i,j) + C2(k,i)*C1(k,j)
+                 !identity(i,j) = identity(i,j) + C2(k,i)*C2(k,j)
+              enddo
+              if (abs(adiab_overlap(i,j)).GE.abs(max_val)) THEN
+                 max_val = adiab_overlap(i,j)
+                 new_index = i
+              endif
+           enddo
+           if (j.NE.new_index) then
+              print*, "AC_OVERLAP: For", j, " new index is", new_index, "with overlap", max_val, "and former", adiab_overlap(j,j)
+           endif
+           !print*, "adiab_overlap", adiab_overlap(i,:)
+           !print*, "identity", identity(i,:)
+        enddo
+print*, "  "
+        allocate(DC(mol,mol))
+        DC = (1.0D0/deltat)*(C2 - C1)
         do i=1,mol
                 do j=1,mol
                         aom_env%adiab_nace_tp(i,j) = 0.0D0
                         do k=1,mol
                                 aom_env%adiab_nace_tp(i,j) = & 
                                         aom_env%adiab_nace_tp(i,j) + C2(k,i)*DC(k,j)
-                                do l=1,mol
-                                        aom_env%adiab_nace_tp(i,j) = & 
-                          aom_env%adiab_nace_tp(i,j) + C2(k,i)*C2(l,j)*(TST(k,l) + TDT(k,l))
-                                end do
+                                !do l=1,mol
+                                !        aom_env%adiab_nace_tp(i,j) = & 
+                                !    aom_env%adiab_nace_tp(i,j) + C2(k,i)*C2(l,j)*(TST(k,l) + TDT(k,l))
+                                !end do
                         end do
                 end do
+                !print*, "nace", aom_env%adiab_nace_tp(i,:)
         end do
 
         deallocate(T1)

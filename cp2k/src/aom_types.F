@@ -126,7 +126,7 @@ IMPLICIT NONE
      REAL(KIND=dp), dimension(:,:), POINTER :: At, Atm, Atp, Bt, Btm, & 
                                                          Btp, siteenergies
      REAL(KIND = dp)                        :: kinetic_energy
-     REAL(KIND = dp)                        :: delta_energy, scaling, cbar
+     REAL(KIND = dp)                        :: delta_energy, scaling, cbar, deltat
 !> Old and new state number
      INTEGER                                :: new_state
      INTEGER                                :: active_state, active_state_past
@@ -181,6 +181,7 @@ IMPLICIT NONE
      INTEGER, dimension(:), POINTER          :: class_forbidden_hop_t
      LOGICAL                                     :: reorder
      INTEGER                                     :: state_tmdt
+
 
    END TYPE aom_env_type
 

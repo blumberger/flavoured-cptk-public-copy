@@ -619,13 +619,17 @@ print *, "#############U_MATRIX_ACTIVE_STATE###############"
 
 mol = size(force_env%mixed_env%aom_env%Stt,1)
 
-do i =1, mol
-write (*,'(F12.10,A, F12.10,A , F12.10,A , F12.10)') &
-   force_env%mixed_env%aom_env%C_t(i, force_env%mixed_env%aom_env%state_tmdt), &
-    " Ctp(a)= ", force_env%mixed_env%aom_env%C_tp(i, force_env%mixed_env%aom_env%state_tmdt), &
-    " Ctp(a')= ", force_env%mixed_env%aom_env%C_tp(i, force_env%mixed_env%aom_env%active_state), &
-    " Ctp(f)= ", force_env%mixed_env%aom_env%C_tp(i, force_env%mixed_env%aom_env%new_state)
-end do
+!print*, "a before =", force_env%mixed_env%aom_env%state_tmdt
+!print*, "a' after enforcement =",  force_env%mixed_env%aom_env%active_state
+!print*, "f final state =", force_env%mixed_env%aom_env%new_state
+
+!do i =1, mol
+!write (*,'(A,F12.10,A, F12.10,A , F12.10,A , F12.10)') &
+!     "Ct(a)=", force_env%mixed_env%aom_env%C_t(i, force_env%mixed_env%aom_env%state_tmdt), &
+!    " Ctp(a)= ", force_env%mixed_env%aom_env%C_tp(i, force_env%mixed_env%aom_env%state_tmdt), &
+!    " Ctp(a')= ", force_env%mixed_env%aom_env%C_tp(i, force_env%mixed_env%aom_env%active_state), &
+!    " Ctp(f)= ", force_env%mixed_env%aom_env%C_tp(i, force_env%mixed_env%aom_env%new_state)
+!end do
 
 
 

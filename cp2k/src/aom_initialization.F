@@ -59,7 +59,6 @@ MODULE aom_initialization
                                              choose_firstadiabat, &
                                              simple_vel_rescaling, &
                                              translate_com, &
-                                             calc_adiab_nace, &
                                               calc_hop_nacv, &
                                               cal_delta_energy_nacv
 
