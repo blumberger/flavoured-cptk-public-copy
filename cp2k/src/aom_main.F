@@ -105,7 +105,7 @@ MODULE aom_main
                                                propagate_wf, &
                                                propagate_adiab_wf, &
                                                prop_wf_HS_corr, & 
-                                               calc_kinetic_tot, &
+                                               !calc_kinetic_tot, &
                                                classically_forbidden_hops, &
                                                define_active_region, &
                                                calc_psi_after_correction
@@ -565,7 +565,7 @@ print *, "Active_state_after_surf_hop", active_state
 !ALLOCATE(sh_env%NN(mat, mat))
 ALLOCATE(sh_env%H_tp(mat,mat))
 !allocate(sh_env%F(3,natom,mol))
-ALLOCATE(sh_env%ext_pres(natom))
+!ALLOCATE(sh_env%ext_pres(natom))
 allocate(sh_env%exact_forces(3,natom))
 !ALLOCATE(exact_forces())
 !ALLOCATE(sh_env%my_forces_adiab(3,natom))
@@ -578,7 +578,7 @@ allocate(sh_env%exact_forces(3,natom))
      !sh_env%F = aom_env%F
 !     sh_env%my_forces_adiab = my_forces_adiab
      sh_env%exact_forces = exact_forces
-     sh_env%ext_pres  = aom_env%ext_pres
+     !sh_env%ext_pres  = aom_env%ext_pres
      sh_env%analytics = analytics 
      sh_env%H_tp = aom_env%H_tp
 
@@ -587,7 +587,7 @@ allocate(sh_env%exact_forces(3,natom))
 
      CALL decohere_wf(adiab_section, sh_print_env, aom_env,sh_env, deco_keyword, itimes, &
                                     deltatMD, mol,velocities_com_tp, local_particles, atomic_kinds, nparticle_kind,    &
-                                    atomic_kind_set, K_tot, aom_env%ext_pres)
+                                    atomic_kind_set, K_tot)
     
      CALL section_vals_val_get(adiab_section,"SPURIOUS_TRANSFER_CORR", l_val=correct_transfer_keyword)
 !     CALL section_vals_val_get(coupling_section,"CENTER_OF_MASS",l_val=translate_keyword) 
@@ -694,7 +694,7 @@ deallocate(pop_t_before, pop_t_present, pop_after_deco, pop_after_sp_corr)
      !DEALLOCATE(sh_env%NN)
      DEALLOCATE(sh_env%H_tp)
      !DEallocate(sh_env%F)
-     DEALLOCATE(sh_env%ext_pres)
+     !DEALLOCATE(sh_env%ext_pres)
      deallocate(sh_env%exact_forces)
      !DEALLOCATE(sh_env%E_tp)
      !DEALLOCATE(sh_env%E_t)

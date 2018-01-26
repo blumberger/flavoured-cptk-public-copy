@@ -37,7 +37,7 @@ IMPLICIT NONE
      !REAL(KIND=dp), dimension(:), POINTER        :: enerdiff
      !REAL(KIND=dp), dimension(:,:), POINTER      :: dphi_tp, dphi_t                                                                           
      logical                                    ::  analytics 
-     LOGICAL, DIMENSION(:), POINTER             :: ext_pres
+     !LOGICAL, DIMENSION(:), POINTER             :: ext_pres
      REAL(kind=dp), DIMENSION(:,:),POINTER      :: exact_forces
 !          REAL(KIND=dp), dimension(:,:), POINTER      :: adiab_nace
      !INTEGER, DIMENSION(:,:), POINTER           :: NN

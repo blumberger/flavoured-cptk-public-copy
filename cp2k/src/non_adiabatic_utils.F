@@ -395,7 +395,7 @@ SUBROUTINE classically_forbidden_hops(active_state, aom_env, mat, E_tp, &
      ALLOCATE(energy_conservation(mat)) 
      ALLOCATE(class_forbidden_hop(mat))
 
-     CALL calc_kinetic_tot(velocities_com_tp, local_particles, atomic_kinds, &
+     CALL calc_kinetic_tot(aom_env, velocities_com_tp, local_particles, atomic_kinds, &
                   nparticle_kind, atomic_kind_set, K_tot)
      E_cutoff = 0.0D0
      E_cutoff = E_tp(active_state) + K_tot  !THIS CUTOFF IS TO LARGE ALL THE
@@ -514,7 +514,7 @@ END SUBROUTINE classically_forbidden_hops
  
   SUBROUTINE decohere_wf(adiab_section, sh_print_env, aom_env,sh_env, deco_keyword, itimes, &
                          deltatMD, mol,velocities_com_tp, local_particles, atomic_kinds, nparticle_kind, &
-                         atomic_kind_set, K_tot, ext_pres)
+                         atomic_kind_set, K_tot)
 
         TYPE(section_vals_type), POINTER               :: adiab_section 
         TYPE(sh_print_env_type)                        :: sh_print_env
@@ -532,7 +532,7 @@ END SUBROUTINE classically_forbidden_hops
                   POINTER, OPTIONAL                        :: atomic_kind_set
 
         REAL(kind=dp), INTENT(OUT)                         :: K_tot
-        LOGICAL, dimension(:), POINTER, INTENT(IN)         :: ext_pres
+!        LOGICAL, dimension(:), POINTER, OPTIONAL         :: ext_pres
 
         CHARACTER(len=*), PARAMETER :: routineN ='decohere_wf', &         
                                        routineP = moduleN//':'//routineN
@@ -560,15 +560,15 @@ END SUBROUTINE classically_forbidden_hops
             CASE("TRESH_ONLY_COLLAPSE")  
               CALL  wf_tresh_collaps(aom_env, sh_print_env, itimes)
             CASE("DAMPING")
-              CALL calc_kinetic_tot(velocities_com_tp, local_particles, atomic_kinds, &
-                                    nparticle_kind, atomic_kind_set, K_tot, ext_pres)
+              CALL calc_kinetic_tot(aom_env, velocities_com_tp, local_particles, atomic_kinds, &
+                                    nparticle_kind, atomic_kind_set, K_tot, aom_env%ext_pres)
               CALL eval_deco_tau(aom_env, tau, adiab_section, sh_env, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds,nparticle_kind, atomic_kind_set) 
                    
               CALL  wf_damping(aom_env, tau, mol, deltatMD, sh_print_env)  
             CASE("COLLAPSE_WITHIN_DECOTIME")
-              CALL calc_kinetic_tot(velocities_com_tp, local_particles, atomic_kinds, &
-                                    nparticle_kind, atomic_kind_set, K_tot, ext_pres)
+              CALL calc_kinetic_tot(aom_env, velocities_com_tp, local_particles, atomic_kinds, &
+                                    nparticle_kind, atomic_kind_set, K_tot, aom_env%ext_pres)
               CALL eval_deco_tau(aom_env, tau, adiab_section, sh_env, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds,nparticle_kind, atomic_kind_set) 
                    
@@ -587,8 +587,8 @@ END SUBROUTINE classically_forbidden_hops
             CASE("TRESH_ONLY_COLLAPSE")  
               CPABORT("NOT IMPLEMENTED")
             CASE("DAMPING")
-              CALL calc_kinetic_tot(velocities_com_tp, local_particles, atomic_kinds, &
-                                    nparticle_kind, atomic_kind_set, K_tot, ext_pres)
+              CALL calc_kinetic_tot(aom_env, velocities_com_tp, local_particles, atomic_kinds, &
+                                    nparticle_kind, atomic_kind_set, K_tot, aom_env%ext_pres)
               CALL eval_deco_tau(aom_env, tau, adiab_section, sh_env, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds,nparticle_kind, atomic_kind_set) 
               CALL wf_damping_adiab_prop(aom_env, tau, mol, deltatMD, sh_print_env)                    
@@ -844,7 +844,7 @@ END SUBROUTINE classically_forbidden_hops
                          call calcforces(i ,-AIMAG(sh_env%H_tp), aom_env%C_tp, aom_env%nacv, &
                               aom_env%NN, sh_env%atoms, &
                               sh_env%scaling, sh_env%cbar, aom_env%F, my_forces_adiab, &
-                             sh_env%ext_pres, sh_env%analytics, sh_env%exact_forces)
+                             aom_env%ext_pres, sh_env%analytics, sh_env%exact_forces)
                          tau(i) = 0.0D0
                          DO iparticle_kind= 1, my_nparticle_kind
                                 atomic_kind => my_atomic_kind_set(iparticle_kind)
@@ -897,7 +897,7 @@ print *, "PURE_DEPHASING", i
                          call calcforces(i ,-AIMAG(sh_env%H_tp), aom_env%C_tp, aom_env%nacv, &
                               aom_env%NN, sh_env%atoms, &
                               sh_env%scaling, sh_env%cbar, aom_env%F, my_forces_adiab, &
-                             sh_env%ext_pres, sh_env%analytics, sh_env%exact_forces)
+                             aom_env%ext_pres, sh_env%analytics, sh_env%exact_forces)
                          tau(i) = 0.0D0
                          tau_forces(i) =  0.0D0
                           tau_pure_deph(i) = 0.0D0
@@ -1118,8 +1118,10 @@ print *, "PURE_DEPHASING", i
   END SUBROUTINE wf_damping 
  
 
-  SUBROUTINE calc_kinetic_tot(array, local_particles, atomic_kinds, &
+  SUBROUTINE calc_kinetic_tot(aom_env, array, local_particles, atomic_kinds, &
                                               nparticle_kind, atomic_kind_set, K_tot, ext_pres)
+      
+        TYPE(aom_env_type)                                 :: aom_env
         REAL(kind=dp), DIMENSION(:,:), POINTER             :: array
         TYPE(distribution_1d_type), POINTER                :: local_particles
         TYPE(atomic_kind_list_type), POINTER, OPTIONAL     :: atomic_kinds
@@ -1154,7 +1156,8 @@ print *, "PURE_DEPHASING", i
            END IF
 
            qsys_only = .FALSE.
-           if (PRESENT(ext_pres)) then 
+           if (PRESENT(ext_pres)) then
+               !ext_pres =  aom_env%ext_pres 
                qsys_only = .TRUE.
            else 
                qsys_only = .FALSE.

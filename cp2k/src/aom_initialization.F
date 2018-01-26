@@ -105,7 +105,7 @@ MODULE aom_initialization
                                                propagate_wf, &
                                                propagate_adiab_wf, &
                                                   prop_wf_HS_corr, & 
-                                                  calc_kinetic_tot, & 
+                                                  !calc_kinetic_tot, & 
                                                classically_forbidden_hops
 
 
