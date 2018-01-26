@@ -117,6 +117,12 @@ IMPLICIT NONE
                                                          velocities_t,&      ! velocities step min 1
                                                          forces_adiab, &      ! forces at step 0
                                                          forces_adiab_new
+
+     INTEGER                                     :: active_atoms
+!     REAL(KIND=dp)                              :: cbar, scaling
+     integer                                    :: atoms, natom
+     logical                                    ::  analytics
+
 !>store charge carrier WF coefficients
      COMPLEX(KIND=dp), dimension(:), POINTER     :: cttm, ctt
 !> To store energies in the Jacob's Method

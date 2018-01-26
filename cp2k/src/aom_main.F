@@ -111,7 +111,7 @@ MODULE aom_main
                                                calc_psi_after_correction
                                                !adiab_overalp_calc
                                           
-     USE non_adiabatic_types,           ONLY: sh_env_type
+!     USE non_adiabatic_types,           ONLY: sh_env_type
 
      USE parallel_rng_types,              ONLY: UNIFORM,&
                                              create_rng_stream,&
@@ -163,7 +163,7 @@ CONTAINS
      CHARACTER(len=*), PARAMETER :: routineN ='construct_ham_X_SH', &
      routineP = moduleN//':'//routineN
 
-     TYPE(sh_env_type)                              :: sh_env
+!     TYPE(sh_env_type)                              :: sh_env
      REAL(kind=dp), DIMENSION(:,:),POINTER          :: my_forces_adiab
      REAL(kind=dp), DIMENSION(:,:),POINTER          :: my_forces_adiab_new
      integer :: coord
@@ -239,10 +239,10 @@ CONTAINS
      mat = orb*mol
      !> Numbers of active atoms 
      c = mol*atoms
-     sh_env%active_atoms = c 
+     aom_env%active_atoms = c 
      !> Numbers of atoms
      natom = SIZE(global_forces(1)%forces,2)
-     sh_env%natom = natom
+     aom_env%natom = natom
      !> Find deltaMD, nuclear timestep, in atomic units
      deltatMD = MDtimestep !CHANGE_AC
      !> electronic timestep is a fraction of the molecular timestep
@@ -572,20 +572,20 @@ print *, "Active_state_after_surf_hop", active_state
 
      !sh_env%nacv = aom_env%nacv
      !sh_env%NN  = aom_env%NN
-     sh_env%atoms = atoms
-     sh_env%scaling = scaling
-     sh_env%cbar = cbar
+     aom_env%atoms = atoms
+     aom_env%scaling = scaling
+     aom_env%cbar = cbar
      !sh_env%F = aom_env%F
 !     sh_env%my_forces_adiab = my_forces_adiab
      aom_env%exact_forces = exact_forces
      !sh_env%ext_pres  = aom_env%ext_pres
-     sh_env%analytics = analytics 
+     aom_env%analytics = analytics 
      !sh_env%H_tp = aom_env%H_tp
 
 
 
 
-     CALL decohere_wf(adiab_section, sh_print_env, aom_env,sh_env, deco_keyword, itimes, &
+     CALL decohere_wf(adiab_section, sh_print_env, aom_env, deco_keyword, itimes, &
                                     deltatMD, mol,velocities_com_tp, local_particles, atomic_kinds, nparticle_kind,    &
                                     atomic_kind_set, K_tot)
     

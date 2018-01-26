@@ -47,7 +47,7 @@ MODULE non_adiabatic_utils
                                              calc_diabatic_nace
 
 
-     USE non_adiabatic_types,           ONLY: sh_env_type
+!     USE non_adiabatic_types,           ONLY: sh_env_type
 
      USE atomic_kind_list_types,          ONLY: atomic_kind_list_type   
 
@@ -512,14 +512,14 @@ END SUBROUTINE classically_forbidden_hops
 
 
  
-  SUBROUTINE decohere_wf(adiab_section, sh_print_env, aom_env,sh_env, deco_keyword, itimes, &
+  SUBROUTINE decohere_wf(adiab_section, sh_print_env, aom_env, deco_keyword, itimes, &
                          deltatMD, mol,velocities_com_tp, local_particles, atomic_kinds, nparticle_kind, &
                          atomic_kind_set, K_tot)
 
         TYPE(section_vals_type), POINTER               :: adiab_section 
         TYPE(sh_print_env_type)                        :: sh_print_env
         TYPE(aom_env_type)                             :: aom_env
-        TYPE(sh_env_type)                              :: sh_env
+ !       TYPE(sh_env_type)                              :: sh_env
         CHARACTER(LEN=default_string_length)           :: deco_keyword
         INTEGER, POINTER                               :: itimes
         REAL(KIND=dp), INTENT(IN)                      :: deltatMD
@@ -562,14 +562,14 @@ END SUBROUTINE classically_forbidden_hops
             CASE("DAMPING")
               CALL calc_kinetic_tot(aom_env, velocities_com_tp, local_particles, atomic_kinds, &
                                     nparticle_kind, atomic_kind_set, K_tot, aom_env%ext_pres)
-              CALL eval_deco_tau(aom_env, tau, adiab_section, sh_env, mol, K_tot, sh_print_env, &
+              CALL eval_deco_tau(aom_env, tau, adiab_section, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds,nparticle_kind, atomic_kind_set) 
                    
               CALL  wf_damping(aom_env, tau, mol, deltatMD, sh_print_env)  
             CASE("COLLAPSE_WITHIN_DECOTIME")
               CALL calc_kinetic_tot(aom_env, velocities_com_tp, local_particles, atomic_kinds, &
                                     nparticle_kind, atomic_kind_set, K_tot, aom_env%ext_pres)
-              CALL eval_deco_tau(aom_env, tau, adiab_section, sh_env, mol, K_tot, sh_print_env, &
+              CALL eval_deco_tau(aom_env, tau, adiab_section, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds,nparticle_kind, atomic_kind_set) 
                    
               CALL  collapse_within_deco_time(tau, mol, deltatMD, aom_env)
@@ -589,7 +589,7 @@ END SUBROUTINE classically_forbidden_hops
             CASE("DAMPING")
               CALL calc_kinetic_tot(aom_env, velocities_com_tp, local_particles, atomic_kinds, &
                                     nparticle_kind, atomic_kind_set, K_tot, aom_env%ext_pres)
-              CALL eval_deco_tau(aom_env, tau, adiab_section, sh_env, mol, K_tot, sh_print_env, &
+              CALL eval_deco_tau(aom_env, tau, adiab_section, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds,nparticle_kind, atomic_kind_set) 
               CALL wf_damping_adiab_prop(aom_env, tau, mol, deltatMD, sh_print_env)                    
             CASE DEFAULT                                           
@@ -604,7 +604,6 @@ END SUBROUTINE classically_forbidden_hops
   SUBROUTINE wf_collapse_adiab_prop(aom_env,sh_print_env, itimes)
     TYPE(aom_env_type)                             :: aom_env
     TYPE(sh_print_env_type)                        :: sh_print_env
-    !TYPE(sh_env_type)                              :: sh_env
     INTEGER, POINTER                               :: itimes
 
     CHARACTER(len=*), PARAMETER :: routineN ='wf_collapse_adiab_prop', &         
@@ -629,7 +628,6 @@ END SUBROUTINE classically_forbidden_hops
   SUBROUTINE wf_collapse(aom_env,sh_print_env, itimes)
     TYPE(sh_print_env_type)                        :: sh_print_env
     TYPE(aom_env_type)                             :: aom_env
-    !TYPE(sh_env_type)                              :: sh_env
     INTEGER, POINTER                               :: itimes
 
     CHARACTER(len=*), PARAMETER :: routineN ='wf_collapse', &         
@@ -667,7 +665,6 @@ END SUBROUTINE classically_forbidden_hops
   SUBROUTINE wf_tresh_collaps(aom_env, sh_print_env, itimes)
     TYPE(aom_env_type)                             :: aom_env
     TYPE(sh_print_env_type)                        :: sh_print_env
-    !TYPE(sh_env_type)                              :: sh_env
     INTEGER, POINTER                               :: itimes
 
     CHARACTER(len=*), PARAMETER :: routineN ='wf_collapse', &         
@@ -688,7 +685,6 @@ END SUBROUTINE classically_forbidden_hops
 
   SUBROUTINE  wf_damping_adiab_prop(aom_env, tau, mol, deltatMD, sh_print_env)                    
     REAL(KIND=dp), DIMENSION(:), INTENT(in)    :: tau!, tau_forces
-    !TYPE(sh_env_type)                          :: sh_env
     TYPE(aom_env_type)                          :: aom_env
     INTEGER, INTENT(IN)                        :: mol
     REAL(KIND=dp), INTENT(IN)                  :: deltatMD
@@ -731,10 +727,10 @@ END SUBROUTINE classically_forbidden_hops
   END SUBROUTINE wf_damping_adiab_prop 
 
   
-  SUBROUTINE  eval_deco_tau(aom_env, tau, adiab_section, sh_env, mol, K_tot, sh_print_env, &
+  SUBROUTINE  eval_deco_tau(aom_env, tau, adiab_section, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds,nparticle_kind, atomic_kind_set)                    
 !    LOGICAL, INTENT(IN)                        :: edc_deco_time
-    TYPE(sh_env_type)                          :: sh_env
+!    TYPE(sh_env_type)                          :: sh_env
     INTEGER, INTENT(IN)                        :: mol
     TYPE(aom_env_type)                         :: aom_env
 !    REAL(KIND=dp), INTENT(IN)                  :: deltatMD
@@ -771,7 +767,7 @@ END SUBROUTINE classically_forbidden_hops
     LOGICAL                                  :: tau_schwartz
 
 
-    ALLOCATE(my_forces_adiab(3,sh_env%natom))
+    ALLOCATE(my_forces_adiab(3,aom_env%natom))
     allocate(tau(mol)) ! decoherence time (EDC method)
     allocate(tau_forces(mol)) ! decoherence time (EDC method)
     allocate(tau_pure_deph(mol)) ! decoherence time (EDC method)
@@ -781,7 +777,7 @@ END SUBROUTINE classically_forbidden_hops
 
     adiab_nace_vector(:) = aom_env%adiab_nace_tp(aom_env%active_state,:)
     !>number of degrees of freedom intensive EDC
-    deg_of_freedom = (sh_env%active_atoms*3-6)
+    deg_of_freedom = (aom_env%active_atoms*3-6)
 
 
     IF (PRESENT(atomic_kinds)) THEN
@@ -823,10 +819,9 @@ END SUBROUTINE classically_forbidden_hops
                                         (C_param+((E_0_param/K_tot)*deg_of_freedom))
 
               CASE("FORCES_BASED")
-!                    allocate(sh_env%pure_deph(mol))
 
                     !Boltzmann factor to use in alpha parameter
-                     KbT = (2*K_tot)/(3*sh_env%active_atoms)
+                     KbT = (2*K_tot)/(3*aom_env%active_atoms)
                     !instead of using the exact boltzmann factor, at the moment the code uses Temp =
                     !298 K, maybe this point should be modified in future
                     
@@ -839,12 +834,11 @@ END SUBROUTINE classically_forbidden_hops
                       ! mixing_threshold = 2.0D0
                     if ((abs(adiab_nace_vector(i))/(abs(aom_env%E_tp(i)-aom_env%E_tp(aom_env%active_state)))) & 
                                          .ge. mixing_threshold) then
-                         !sh_env%pure_deph(i) = .FALSE.
                          !if there is mixing then we use force otherwise we use !pure dephasing
                          call calcforces(i ,-AIMAG(aom_env%H_tp), aom_env%C_tp, aom_env%nacv, &
-                              aom_env%NN, sh_env%atoms, &
-                              sh_env%scaling, sh_env%cbar, aom_env%F, my_forces_adiab, &
-                             aom_env%ext_pres, sh_env%analytics, aom_env%exact_forces)
+                              aom_env%NN, aom_env%atoms, &
+                              aom_env%scaling, aom_env%cbar, aom_env%F, my_forces_adiab, &
+                             aom_env%ext_pres, aom_env%analytics, aom_env%exact_forces)
                          tau(i) = 0.0D0
                          DO iparticle_kind= 1, my_nparticle_kind
                                 atomic_kind => my_atomic_kind_set(iparticle_kind)
@@ -876,10 +870,9 @@ print *, "PURE_DEPHASING", i
                     end if
 
               CASE("HYBRID_TAU")
-!                    allocate(sh_env%pure_deph(mol))
 
                     !Boltzmann factor to use in alpha parameter
-                     KbT = (2*K_tot)/(3*sh_env%active_atoms)
+                     KbT = (2*K_tot)/(3*aom_env%active_atoms)
                     !instead of using the exact boltzmann factor, at the moment the code uses Temp =
                     !298 K, maybe this point should be modified in future
                     
@@ -892,12 +885,11 @@ print *, "PURE_DEPHASING", i
                       ! mixing_threshold = 2.0D0
                     if ((abs(adiab_nace_vector(i))/(abs(aom_env%E_tp(i)-aom_env%E_tp(aom_env%active_state)))) & 
                                          .ge. mixing_threshold) then
-                         !sh_env%pure_deph(i) = .FALSE.
                          !if there is mixing then we use force otherwise we use !pure dephasing
                          call calcforces(i ,-AIMAG(aom_env%H_tp), aom_env%C_tp, aom_env%nacv, &
-                              aom_env%NN, sh_env%atoms, &
-                              sh_env%scaling, sh_env%cbar, aom_env%F, my_forces_adiab, &
-                             aom_env%ext_pres, sh_env%analytics, aom_env%exact_forces)
+                              aom_env%NN, aom_env%atoms, &
+                              aom_env%scaling, aom_env%cbar, aom_env%F, my_forces_adiab, &
+                             aom_env%ext_pres, aom_env%analytics, aom_env%exact_forces)
                          tau(i) = 0.0D0
                          tau_forces(i) =  0.0D0
                           tau_pure_deph(i) = 0.0D0
@@ -936,7 +928,6 @@ print *, "PURE_DEPHASING", i
 print *, "PURE_DEPHASING", i
                     end if
               
-!              deallocate(sh_env%pure_deph) 
               CASE DEFAULT
                   CPABORT("There is no method to choose decoherence time.")
               END SELECT
@@ -963,7 +954,6 @@ print *, "PURE_DEPHASING", i
     INTEGER, INTENT(IN)                        :: mol
     REAL(KIND=dp), INTENT(IN)                  :: deltatMD
     TYPE(aom_env_type)                         :: aom_env
-!    TYPE(sh_env_type)                          :: sh_env
     REAL(KIND=dp), DIMENSION(:), INTENT(in)    :: tau!, tau_forces
 
     CHARACTER(len=*), PARAMETER :: routineN ='collapse_within_deco_time', &
@@ -1043,7 +1033,6 @@ print *, "PURE_DEPHASING", i
 
   SUBROUTINE  wf_damping(aom_env, tau, mol, deltatMD, sh_print_env)                    
     REAL(KIND=dp), DIMENSION(:), INTENT(in)    :: tau!, tau_forces
-!    TYPE(sh_env_type)                          :: sh_env
     TYPE(aom_env_type)                          :: aom_env
     INTEGER, INTENT(IN)                        :: mol
     REAL(KIND=dp), INTENT(IN)                  :: deltatMD
