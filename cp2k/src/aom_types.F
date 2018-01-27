@@ -184,7 +184,7 @@ IMPLICIT NONE
      REAL(KIND = dp)                                     :: factor
 !> If hop
      LOGICAL                                     :: attempt_hop
-     LOGICAL                                     :: successful_hop
+     LOGICAL                                     :: successful_hop, my_successful_hop
      LOGICAL                                     :: HS_propagation
 !> Adiabatic nace at time t and t-dt
      !REAL(KIND=dp), dimension(:,:), POINTER      :: adiab_nace_tp, adiab_nace_t

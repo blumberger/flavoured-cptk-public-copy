@@ -281,7 +281,7 @@ CONTAINS
      !ctin(:) = aom_env%ctin(:)
      aom_env%adiab_nace_t = aom_env%adiab_nace_tp
      aom_env%state_tmdt = active_state
-     
+     aom_env%my_successful_hop = .False.
      !> CALCULATE THE CENTER OF MASS
      !> CONSTRUCT NEIGHBOURS LIST
      CALL calc_coms_and_nlist(aom_env, atoms, mol, cutoff_sites, orb)
@@ -440,6 +440,10 @@ print *, "Active_state_after_surf_hop", active_state
                                NN=aom_env%NN, atoms=atoms, & 
                               scaling=scaling, cbar=cbar, Fin=aom_env%F, forces_adiab=my_forces_adiab_new, &
                               ext_pres=aom_env%ext_pres)
+!TEST
+else
+   my_forces_adiab_new = 0.D0
+!ENDTEST
      ENDIF
 
 
@@ -565,6 +569,7 @@ print *, "Active_state_after_surf_hop", active_state
      aom_env%ctin_before_deco = aom_env%ctin 
      aom_env%active_state=active_state
      aom_env%forces_adiab=my_forces_adiab
+     aom_env%forces_adiab_new = my_forces_adiab_new
 
 
 !ALLOCATE(sh_env%nacv(3,mat, mat*aom_atoms))
@@ -684,7 +689,8 @@ print *, "Active_state_after_surf_hop", active_state
 
      !aom_env%Stmtm = Stt
      IF (attempt_hop) THEN
-         aom_env%forces_adiab_new = my_forces_adiab_new
+         !!NB this variable
+    !    aom_env%forces_adiab_new = my_forces_adiab_new
          aom_env%active_state = active_state
          aom_env%eigenvector_matrix = C_tp
          aom_env%diabatic_forces = aom_env%F

@@ -457,7 +457,7 @@ CONTAINS
 !> CHANGE_AC
     INTEGER                                  :: mixing_type
     TYPE(section_vals_type), POINTER         :: mixed_section, force_env_section
-    LOGICAL                                  :: successful_hop
+    !LOGICAL                                  :: successful_hop
     INTEGER                                  :: i, mol
     !TYPE(aom_env_type), POINTER              :: aom_env
 !    TYPE(md_ener_type), POINTER              :: md_ener
@@ -628,7 +628,9 @@ end do
                 force_env%mixed_env%aom_env%active_state_past = force_env%mixed_env%aom_env%active_state
              end if
  
-             successful_hop = .False.                  
+             !successful_hop = .False.
+                  
+print *, "ACTIVE_STATE_BEFORE", force_env%mixed_env%aom_env%active_state
 
              IF (force_env%mixed_env%aom_env%attempt_hop) THEN
                 CALL check_hop_attempt(tmp%vel, atomic_kind_set, nparticle_kind, local_particles, force_env)
@@ -636,12 +638,16 @@ end do
                    CALL ida_collapse(force_env%mixed_env%aom_env)
                 end if
                 IF (force_env%mixed_env%aom_env%successful_hop) THEN
-                   successful_hop = .True.
+                   force_env%mixed_env%aom_env%my_successful_hop = .True.
                    CALL force_env_calc_energy_force(force_env,require_consistent_energy_force=.FALSE., &
                                                     itimes = itimes)
                 ENDIF
              ENDIF
-             print *, "successful_hop", successful_hop
+             print *, "successful_hop", force_env%mixed_env%aom_env%my_successful_hop
+
+print *, "ACTIVE_STATE_END", force_env%mixed_env%aom_env%active_state
+
+
              !Probably I would need to check the overalp here
              CALL adiab_overlap_check(force_env%mixed_env%aom_env, force_env%mixed_env%aom_env%active_state_past, itimes)
 
@@ -654,7 +660,7 @@ end do
              else 
                 !if (force_env%mixed_env%aom_env%active_state_past .eq. &
                 !                  force_env%mixed_env%aom_env%active_state) then
-                 if(.not.successful_hop) then
+                 if(.not. force_env%mixed_env%aom_env%my_successful_hop) then
                    if (.not. force_env%mixed_env%aom_env%overlap_over_thresh) then
                        print *, "CASE3" 
                    else
@@ -669,7 +675,7 @@ end do
                 end if
              end if
 
-             !UPDATE
+             !UPDATE variables for the next time step
              force_env%mixed_env%aom_env%C_t = force_env%mixed_env%aom_env%C_tp
              force_env%mixed_env%aom_env%H_t = force_env%mixed_env%aom_env%H_tp
              force_env%mixed_env%aom_env%E_t = force_env%mixed_env%aom_env%E_tp
