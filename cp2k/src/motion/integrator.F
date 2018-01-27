@@ -671,6 +671,8 @@ end do
 
              !UPDATE
              force_env%mixed_env%aom_env%C_t = force_env%mixed_env%aom_env%C_tp
+             force_env%mixed_env%aom_env%H_t = force_env%mixed_env%aom_env%H_tp
+             force_env%mixed_env%aom_env%E_t = force_env%mixed_env%aom_env%E_tp
 
 
               CALL total_momentum(tmp%vel, atomic_kind_set, nparticle_kind, local_particles, force_env)

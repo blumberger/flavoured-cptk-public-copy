@@ -57,6 +57,9 @@ MODULE non_adiabatic_utils
                                                                    
      USE distribution_1d_types,           ONLY: distribution_1d_type    
 
+     USE force_env_types,                ONLY: force_env_get, &
+                                            force_env_type
+
 
 
 #include "./base/base_uses.f90" 
@@ -194,6 +197,10 @@ CONTAINS
 !   deallocate(overlaps)
 !    
 !ND SUBROUTINE adiab_overalp_check
+
+!SUBROUTINE applay_decoherence()
+
+!END SUBROUTINE applay_decoherence
 
 
 SUBROUTINE adiab_overalp_calc(active_state, aom_env, C_tp, mol, itimes, & 
@@ -514,12 +521,53 @@ END SUBROUTINE classically_forbidden_hops
    END SUBROUTINE evaluate_delta_energy_nacv
 
 
+  SUBROUTINE apply_decoherence(itimes, velocities, force_env, local_particles, nparticle_kind, atomic_kind_set)
 
+       REAL(kind=dp), DIMENSION(:,:),POINTER    :: velocities
+       TYPE(atomic_kind_type), DIMENSION(:), &
+          POINTER                                :: atomic_kind_set
+       INTEGER, INTENT(IN)                      :: nparticle_kind
+       TYPE(distribution_1d_type), POINTER      :: local_particles
+       TYPE(force_env_type), POINTER            :: force_env
+       INTEGER, POINTER                          :: itimes 
+!       TYPE(atomic_kind_list_type), POINTER     :: atomic_kinds
+       
+       CHARACTER(len=*), PARAMETER :: routineN = 'apply_decoherence', &
+            routineP = moduleN//':'//routineN 
+
+       REAL(kind=dp), DIMENSION(:,:),POINTER    :: velocities_com_tp
+       LOGICAL                                  :: translate_keyword
+       TYPE(section_vals_type), POINTER         :: mixed_section, adiab_section, coupling_section
+       TYPE(section_vals_type), POINTER         :: force_env_section
+       TYPE(sh_print_env_type)                  :: sh_print_env
+
+       CALL force_env_get(force_env=force_env,&
+                       force_env_section=force_env_section)
+        mixed_section => section_vals_get_subs_vals(force_env_section,"MIXED")
+        adiab_section => section_vals_get_subs_vals(mixed_section, "ADIABATIC")
+        coupling_section => section_vals_get_subs_vals(adiab_section, "AOM")
+
+        CALL section_vals_val_get(coupling_section,"CENTER_OF_MASS",l_val=translate_keyword)
+        sh_print_env = force_env%mixed_env%aom_env%sh_print_env
+ 
+        ALLOCATE(velocities_com_tp(SIZE(velocities, 1), SIZE(velocities, 2)))
+        CALL translate_com(velocities, translate_keyword, velocities_com_tp, &
+              local_particles, nparticle_kind = nparticle_kind, atomic_kind_set = atomic_kind_set)
+   
+        CALL decohere_wf(adiab_section, force_env%mixed_env%aom_env, sh_print_env, itimes, &
+                         velocities_com_tp, local_particles, nparticle_kind,atomic_kind_set)        
+        
+                        
+
+
+        DEALLOCATE(velocities_com_tp)
+
+  END SUBROUTINE
 
  
-  SUBROUTINE decohere_wf(adiab_section, aom_env,  itimes, &
-                         velocities_com_tp, local_particles, atomic_kinds, nparticle_kind, &
-                         atomic_kind_set)
+  SUBROUTINE decohere_wf(adiab_section, aom_env, sh_print_env, itimes, &
+                         velocities_com_tp, local_particles, nparticle_kind, &
+                         atomic_kind_set, atomic_kinds)
 
         TYPE(section_vals_type), POINTER               :: adiab_section 
         TYPE(sh_print_env_type)                        :: sh_print_env
@@ -556,7 +604,7 @@ END SUBROUTINE classically_forbidden_hops
        
         mol = SIZE(aom_env%H_tp, 1) 
         deltatMD = aom_env%deltatMD 
-        sh_print_env = aom_env%sh_print_env    
+        !sh_print_env = aom_env%sh_print_env    
 
 
         SELECT CASE(wfprop_keyword)
@@ -570,14 +618,14 @@ END SUBROUTINE classically_forbidden_hops
             CASE("TRESH_ONLY_COLLAPSE")  
               CALL  wf_tresh_collaps(aom_env, sh_print_env, itimes)
             CASE("DAMPING")
-              CALL calc_kinetic_tot(aom_env, velocities_com_tp, local_particles, atomic_kinds, &
+              CALL calc_kinetic_tot(aom_env, velocities_com_tp, local_particles, atomic_kinds,&
                                     nparticle_kind, atomic_kind_set, K_tot, aom_env%ext_pres)
               CALL eval_deco_tau(aom_env, tau, adiab_section, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds,nparticle_kind, atomic_kind_set) 
                    
               CALL  wf_damping(aom_env, tau, mol, deltatMD, sh_print_env)  
             CASE("COLLAPSE_WITHIN_DECOTIME")
-              CALL calc_kinetic_tot(aom_env, velocities_com_tp, local_particles, atomic_kinds, &
+              CALL calc_kinetic_tot(aom_env, velocities_com_tp, local_particles, atomic_kinds,&
                                     nparticle_kind, atomic_kind_set, K_tot, aom_env%ext_pres)
               CALL eval_deco_tau(aom_env, tau, adiab_section, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds,nparticle_kind, atomic_kind_set) 
@@ -597,10 +645,10 @@ END SUBROUTINE classically_forbidden_hops
             CASE("TRESH_ONLY_COLLAPSE")  
               CPABORT("NOT IMPLEMENTED")
             CASE("DAMPING")
-              CALL calc_kinetic_tot(aom_env, velocities_com_tp, local_particles, atomic_kinds, &
+              CALL calc_kinetic_tot(aom_env, velocities_com_tp, local_particles, atomic_kinds,&
                                     nparticle_kind, atomic_kind_set, K_tot, aom_env%ext_pres)
               CALL eval_deco_tau(aom_env, tau, adiab_section, mol, K_tot, sh_print_env, &
-                          local_particles, atomic_kinds,nparticle_kind, atomic_kind_set) 
+                          local_particles, atomic_kinds, nparticle_kind, atomic_kind_set) 
               CALL wf_damping_adiab_prop(aom_env, tau, mol, deltatMD, sh_print_env)                    
             CASE DEFAULT                                           
               CPABORT("There is no method to add the decoherence.") 
@@ -1190,7 +1238,7 @@ print *, "PURE_DEPHASING", i
               END DO
            END DO
            K_tot = 0.5*K_tot
-
+print *, "KINETIC", K_tot
 
    END SUBROUTINE calc_kinetic_tot
  

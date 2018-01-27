@@ -172,7 +172,7 @@ CONTAINS
      REAL(KIND=dp)    :: cbar, minao
      REAL(KIND=dp), dimension(:), allocatable    :: energy_conservation
      INTEGER, dimension(:), allocatable          :: class_forbidden_hop_tp
-     COMPLEX(KIND=dp), dimension(:), allocatable :: ctin, ctin_after_deco
+     COMPLEX(KIND=dp), dimension(:), allocatable :: ctin
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE   :: C_tp
      !REAL(KIND=dp), DIMENSION(:), ALLOCATABLE     :: E_tp
      LOGICAL                                      :: analytics
@@ -193,9 +193,9 @@ CONTAINS
      !REAL(KIND=dp)                                :: sum, sum1
 !     INTEGER, dimension(:), allocatable       :: active_region
 !     COMPLEX(KIND=dp), dimension(:), allocatable :: ctin_after_tranf_correction
-     INTEGER :: i
-     REAL(KIND=dp), dimension(:), allocatable    :: pop_t_before, &
-                                                pop_t_present, pop_after_deco, pop_after_sp_corr 
+!     INTEGER :: i
+!     REAL(KIND=dp), dimension(:), allocatable    :: pop_t_before, &
+!                                                pop_t_present, pop_after_deco, pop_after_sp_corr 
 !     REAL(KIND=dp), dimension(:), allocatable    :: pop_atmdt, pop_a, pop_ap2, &
 !                                                     pop_ap1, pop_am2, pop_am1, pop_t_before, &
 !                                                pop_t_present, pop_after_deco, pop_after_sp_corr 
@@ -265,7 +265,7 @@ CONTAINS
      ALLOCATE(velocities_com_tp(3, natom))
      allocate(exact_forces(3,natom))
      allocate(ctin(mat))      !ctin goes into the subroutine ZGEMV
-     allocate(ctin_after_deco(mat))
+     !allocate(ctin_after_deco(mat))
 
      !> OBTAIN COORDINATES, ENERGIES, STATES, etc. FROM PREVIOUS STEP
      CALL translate_com(positions_tp, keyword_translate, positions_com_tp, local_particles, atomic_kinds = atomic_kinds)  
@@ -589,9 +589,9 @@ print *, "Active_state_after_surf_hop", active_state
 
 
 
-     CALL decohere_wf(adiab_section, aom_env, itimes, &
-                                    velocities_com_tp, local_particles, atomic_kinds, nparticle_kind,    &
-                                    atomic_kind_set)
+     CALL decohere_wf(adiab_section, aom_env, sh_print_env, itimes, &
+                                    velocities_com_tp, local_particles, nparticle_kind,    &
+                                    atomic_kind_set, atomic_kinds)
     
      CALL section_vals_val_get(adiab_section,"SPURIOUS_TRANSFER_CORR", l_val=correct_transfer_keyword)
 !     CALL section_vals_val_get(coupling_section,"CENTER_OF_MASS",l_val=translate_keyword) 
@@ -608,37 +608,37 @@ print *, "Active_state_after_surf_hop", active_state
         ctin=aom_env%ctin
      ENDIF
 
-        if (correct_transfer_keyword .and. aom_env%decoherence) then
-   print *, "################CARRIER_WF##############"
-   
-   allocate(pop_t_before(mol))
-   allocate(pop_t_present(mol))
-   allocate(pop_after_deco(mol))
-   allocate(pop_after_sp_corr(mol))
-   
-   pop_t_before = 0.0D0
-   pop_t_present = 0.0D0
-   pop_after_deco = 0.0D0
-   pop_after_sp_corr = 0.0D0
-   
-   do i =1, mol
-         pop_t_before(i) = real(aom_env%cttm(i)*conjg(aom_env%cttm(i)))
-         pop_t_present(i) = real(aom_env%ctt(i)*conjg(aom_env%ctt(i)))
-         pop_after_deco = real(aom_env%ctin_after_deco(i)*conjg(aom_env%ctin_after_deco(i)))
-         pop_after_sp_corr = real(aom_env%ctin_after_tranf_correction(i)*conjg(aom_env%ctin_after_tranf_correction(i)))
-   
-   write (*,'(F12.10,A, F12.10, A, F12.10, A, F12.10)') pop_t_before(i), " tp= ", pop_t_present(i), " deco = ", &
-          pop_after_deco(i), " spcor = ", pop_after_sp_corr(i)
-   
-   end do
-   
-   
-   write (*,'(I12,A, I12,A , I12,A , I12)') &
-           maxloc(pop_t_before), " tp= ", maxloc(pop_t_present), " deco = ", maxloc(pop_after_deco), &
-            " spcorr = ", maxloc(pop_after_sp_corr)
-   
-   deallocate(pop_t_before, pop_t_present, pop_after_deco, pop_after_sp_corr)
-        endif
+  !       if (correct_transfer_keyword .and. aom_env%decoherence) then
+  !  print *, "################CARRIER_WF##############"
+  !  
+  !  allocate(pop_t_before(mol))
+  !  allocate(pop_t_present(mol))
+  !  allocate(pop_after_deco(mol))
+  !  allocate(pop_after_sp_corr(mol))
+  !  
+  !  pop_t_before = 0.0D0
+  !  pop_t_present = 0.0D0
+  !  pop_after_deco = 0.0D0
+  !  pop_after_sp_corr = 0.0D0
+  !  
+  !  do i =1, mol
+  !        pop_t_before(i) = real(aom_env%cttm(i)*conjg(aom_env%cttm(i)))
+  !        pop_t_present(i) = real(aom_env%ctt(i)*conjg(aom_env%ctt(i)))
+  !        pop_after_deco = real(aom_env%ctin_after_deco(i)*conjg(aom_env%ctin_after_deco(i)))
+  !        pop_after_sp_corr = real(aom_env%ctin_after_tranf_correction(i)*conjg(aom_env%ctin_after_tranf_correction(i)))
+  !  
+  !  write (*,'(F12.10,A, F12.10, A, F12.10, A, F12.10)') pop_t_before(i), " tp= ", pop_t_present(i), " deco = ", &
+  !         pop_after_deco(i), " spcor = ", pop_after_sp_corr(i)
+  !  
+  !  end do
+  !  
+  !  
+  !  write (*,'(I12,A, I12,A , I12,A , I12)') &
+  !          maxloc(pop_t_before), " tp= ", maxloc(pop_t_present), " deco = ", maxloc(pop_after_deco), &
+  !           " spcorr = ", maxloc(pop_after_sp_corr)
+  !  
+  !  deallocate(pop_t_before, pop_t_present, pop_after_deco, pop_after_sp_corr)
+  !       endif
 
      !> PRINT
      CALL adiab_print_hamiltonian(adiab_section, -AIMAG(aom_env%H_tp), nadiab,norbitals,itimes, deltatMD)
@@ -661,14 +661,14 @@ print *, "Active_state_after_surf_hop", active_state
      aom_env%adiab_energies_t = aom_env%E_tp
      aom_env%ctin        = ctin
      aom_env%attempt_hop  = attempt_hop
-     aom_env%H_t = aom_env%H_tp
+     !aom_env%H_t = aom_env%H_tp
      aom_env%new_state = new_state
      !aom_env%active_state = active_state
      aom_env%Stmtm = aom_env%Stt
      aom_env%Stt   = aom_env%Stptp
      aom_env%Sttm  = aom_env%Stpt
      aom_env%Stmt  = aom_env%Sttp
-     aom_env%E_t = aom_env%E_tp
+     !aom_env%E_t = aom_env%E_tp
      !aom_env%C_tp = C_tp
      !aom_env%C_t = aom_env%C_tp
 
@@ -704,7 +704,7 @@ print *, "Active_state_after_surf_hop", active_state
      !DEALLOCATE(sh_env%C_tp)
      !DEALLOCATE(sh_env%ctin)
 
-     deallocate(ctin, ctin_after_deco)
+     deallocate(ctin)
      deallocate(exact_forces)
     END SUBROUTINE construct_ham_X_SH
 
