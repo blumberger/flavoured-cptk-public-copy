@@ -172,7 +172,7 @@ CONTAINS
      REAL(KIND=dp)    :: cbar, minao
      REAL(KIND=dp), dimension(:), allocatable    :: energy_conservation
      INTEGER, dimension(:), allocatable          :: class_forbidden_hop_tp
-     COMPLEX(KIND=dp), dimension(:), allocatable :: ctin
+     !COMPLEX(KIND=dp), dimension(:), allocatable :: ctin
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE   :: C_tp
      !REAL(KIND=dp), DIMENSION(:), ALLOCATABLE     :: E_tp
      LOGICAL                                      :: analytics
@@ -264,7 +264,7 @@ CONTAINS
      ALLOCATE(positions_com_tp(3, natom))
      ALLOCATE(velocities_com_tp(3, natom))
      allocate(exact_forces(3,natom))
-     allocate(ctin(mat))      !ctin goes into the subroutine ZGEMV
+     !allocate(ctin(mat))      !ctin goes into the subroutine ZGEMV
      !allocate(ctin_after_deco(mat))
 
      !> OBTAIN COORDINATES, ENERGIES, STATES, etc. FROM PREVIOUS STEP
@@ -278,7 +278,7 @@ CONTAINS
         aom_env%siteenergies(3,:) = energies_tp(:) ! CHANGE_AC
      enddo
      active_state = aom_env%active_state
-     ctin(:) = aom_env%ctin(:)
+     !ctin(:) = aom_env%ctin(:)
      aom_env%adiab_nace_t = aom_env%adiab_nace_tp
      aom_env%state_tmdt = active_state
      
@@ -357,7 +357,11 @@ CONTAINS
 
      
      !> PROPAGATE THE ELECTRON FOR ONE MOLECULAR TIMESTEP
-     aom_env%cttm(:) = ctin(:)
+     !>the CHARGE CARRIER WF is called aom_env%ctin
+     !> aom_env%cttm before propagation and aom_env%ctt after propagation are
+     !used in the surf_hop_type subroutine
+
+     aom_env%cttm(:) = aom_env%ctin(:)
 
      aom_env%HS_propagation = .FALSE.
       
@@ -366,16 +370,16 @@ CONTAINS
      
      SELECT CASE(prop_wf_keyword)                                 
      CASE("DIABATIC_RK")
-           CALL propagate_wf(ctin, aom_env, nadiab,  norbitals, ELsteps, &
+           CALL propagate_wf(aom_env%ctin, aom_env, nadiab,  norbitals, ELsteps, &
                              itimes, adiab_section, deltatMD, deltatE , times,    &
                              mat)
      CASE("ADIABATIC_RK")
-           CALL propagate_adiab_wf(aom_env%E_t, aom_env%E_tp, ctin, aom_env, nadiab, norbitals, ELsteps, &
+           CALL propagate_adiab_wf(aom_env%E_t, aom_env%E_tp, aom_env%ctin, aom_env, nadiab, norbitals, ELsteps, &
                                    itimes, adiab_section, deltatMD, deltatE , times,  & 
                                    mat)
      CASE("HS_CORRECTED_RK")  
            !> ADIABATIC NACV EVALUATION FOR HS CORRECTION
-           CALL prop_wf_HS_corr(ctin, aom_env, nadiab,  norbitals, ELsteps, &
+           CALL prop_wf_HS_corr(aom_env%ctin, aom_env, nadiab,  norbitals, ELsteps, &
                            itimes, adiab_section, deltatMD, deltatE , times, &
                             mat, aom_env%class_forbidden_hop_t, active_state)
            CALL classically_forbidden_hops(active_state, aom_env, mat, aom_env%E_tp, &
@@ -392,7 +396,7 @@ CONTAINS
      CASE DEFAULT                                           
            CPABORT("There is no method to propagate the wavefunction.") 
      END SELECT                                             
-     aom_env%ctt(:) = ctin(:)
+     aom_env%ctt(:) = aom_env%ctin(:)
 
      !> SURFACE HOPPING TEST
      !The eigenvectors are needed to calculate the surface hopping probabilities
@@ -557,8 +561,8 @@ print *, "Active_state_after_surf_hop", active_state
 
      !> APPLY DECOHERENCE CORRECTION
      !> initialize derived type variables used in the decohere_wf subroutine
-     aom_env%ctin=ctin
-     aom_env%ctin_before_deco = ctin 
+     !aom_env%ctin=ctin
+     aom_env%ctin_before_deco = aom_env%ctin 
      aom_env%active_state=active_state
      aom_env%forces_adiab=my_forces_adiab
 
@@ -588,7 +592,7 @@ print *, "Active_state_after_surf_hop", active_state
 
 
 
-
+     !> decoherence_wf changes the value of aom_env%ctin
      CALL decohere_wf(adiab_section, aom_env, sh_print_env, itimes, &
                                     velocities_com_tp, local_particles, nparticle_kind,    &
                                     atomic_kind_set, atomic_kinds)
@@ -598,14 +602,20 @@ print *, "Active_state_after_surf_hop", active_state
 !     correct_transfer = .TRUE.
      if (correct_transfer_keyword .and. aom_env%decoherence) then
      !if (correct_tranfer) then
+        !> this subroutine define the active regione for local decoherence, it
+        !takes aom_env%ctin_before_deco  as argument
         CALL define_active_region(aom_env)
+
+        !> the new aom_env%ctin after deco is given to aom_env%ctin_after_deco
         aom_env%ctin_after_deco=aom_env%ctin         
         CALL calc_psi_after_correction(aom_env)
-
-        ctin = aom_env%ctin_after_tranf_correction
+       
+        !> the value of aom_env%ctin is updated again using the spurious charge
+        !transfer correction
+        aom_env%ctin = aom_env%ctin_after_tranf_correction
        ! ctin=sh_env%ctin
-     else
-        ctin=aom_env%ctin
+    ! else
+     !   ctin=aom_env%ctin
      ENDIF
 
   !       if (correct_transfer_keyword .and. aom_env%decoherence) then
@@ -659,7 +669,7 @@ print *, "Active_state_after_surf_hop", active_state
      aom_env%energies_t = energies_tp
      !aom_env%adiab_energies_t = aom_env%E_t
      aom_env%adiab_energies_t = aom_env%E_tp
-     aom_env%ctin        = ctin
+     !aom_env%ctin        = ctin
      aom_env%attempt_hop  = attempt_hop
      !aom_env%H_t = aom_env%H_tp
      aom_env%new_state = new_state
@@ -704,7 +714,7 @@ print *, "Active_state_after_surf_hop", active_state
      !DEALLOCATE(sh_env%C_tp)
      !DEALLOCATE(sh_env%ctin)
 
-     deallocate(ctin)
+     !deallocate(ctin)
      deallocate(exact_forces)
     END SUBROUTINE construct_ham_X_SH
 
