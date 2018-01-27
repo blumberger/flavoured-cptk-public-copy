@@ -121,7 +121,8 @@ MODULE integrator
                                              total_momentum, &
                                              adiab_overlap_check
  
-  USE non_adiabatic_utils,             ONLY: ida_collapse!, &
+  USE non_adiabatic_utils,             ONLY: ida_collapse, &
+                                             apply_decoherence
                                              !adiab_overalp_check
 !> END CHANGE_AC
 
@@ -646,7 +647,9 @@ print *, "ACTIVE_STATE_BEFORE", force_env%mixed_env%aom_env%active_state
              print *, "successful_hop", force_env%mixed_env%aom_env%my_successful_hop
 
 print *, "ACTIVE_STATE_END", force_env%mixed_env%aom_env%active_state
-
+            
+             CALL apply_decoherence(itimes, tmp%vel, force_env, local_particles, nparticle_kind, atomic_kind_set)
+          
 
              !Probably I would need to check the overalp here
              CALL adiab_overlap_check(force_env%mixed_env%aom_env, force_env%mixed_env%aom_env%active_state_past, itimes)

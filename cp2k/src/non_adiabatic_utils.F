@@ -78,7 +78,8 @@ MODULE non_adiabatic_utils
                  classically_forbidden_hops, &
                  ida_collapse, &
                  define_active_region, &
-                 calc_psi_after_correction!, &
+                 calc_psi_after_correction, &
+                 apply_decoherence
                  !adiab_overalp_check
                   
 

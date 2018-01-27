@@ -186,13 +186,13 @@ CONTAINS
      REAL(kind=dp), DIMENSION(:,:),POINTER          :: positions_com_tp, velocities_com_tp
      CHARACTER(LEN=default_string_length)           :: prop_wf_keyword 
      CHARACTER(LEN=default_string_length)          :: reversal_keyword
-     LOGICAL                                      :: correct_transfer_keyword
      real(kind=dp), DIMENSION(:,:), allocatable :: PC_allrvecs
      LOGICAL                                      :: do_random !, correct_transfer
      REAL(KIND=dp)                                :: sum
      !REAL(KIND=dp)                                :: sum, sum1
 !     INTEGER, dimension(:), allocatable       :: active_region
 !     COMPLEX(KIND=dp), dimension(:), allocatable :: ctin_after_tranf_correction
+!     LOGICAL                                      :: correct_transfer_keyword
 !     INTEGER :: i
 !     REAL(KIND=dp), dimension(:), allocatable    :: pop_t_before, &
 !                                                pop_t_present, pop_after_deco, pop_after_sp_corr 
@@ -440,10 +440,6 @@ print *, "Active_state_after_surf_hop", active_state
                                NN=aom_env%NN, atoms=atoms, & 
                               scaling=scaling, cbar=cbar, Fin=aom_env%F, forces_adiab=my_forces_adiab_new, &
                               ext_pres=aom_env%ext_pres)
-!TEST
-else
-   my_forces_adiab_new = 0.D0
-!ENDTEST
      ENDIF
 
 
@@ -569,7 +565,7 @@ else
      aom_env%ctin_before_deco = aom_env%ctin 
      aom_env%active_state=active_state
      aom_env%forces_adiab=my_forces_adiab
-     aom_env%forces_adiab_new = my_forces_adiab_new
+     !aom_env%forces_adiab_new = my_forces_adiab_new
 
 
 !ALLOCATE(sh_env%nacv(3,mat, mat*aom_atoms))
@@ -598,30 +594,31 @@ else
 
 
      !> decoherence_wf changes the value of aom_env%ctin
-     CALL decohere_wf(adiab_section, aom_env, sh_print_env, itimes, &
-                                    velocities_com_tp, local_particles, nparticle_kind,    &
-                                    atomic_kind_set, atomic_kinds)
-    
-     CALL section_vals_val_get(adiab_section,"SPURIOUS_TRANSFER_CORR", l_val=correct_transfer_keyword)
-!     CALL section_vals_val_get(coupling_section,"CENTER_OF_MASS",l_val=translate_keyword) 
-!     correct_transfer = .TRUE.
-     if (correct_transfer_keyword .and. aom_env%decoherence) then
-     !if (correct_tranfer) then
-        !> this subroutine define the active regione for local decoherence, it
-        !takes aom_env%ctin_before_deco  as argument
-        CALL define_active_region(aom_env)
 
-        !> the new aom_env%ctin after deco is given to aom_env%ctin_after_deco
-        aom_env%ctin_after_deco=aom_env%ctin         
-        CALL calc_psi_after_correction(aom_env)
-       
-        !> the value of aom_env%ctin is updated again using the spurious charge
-        !transfer correction
-        aom_env%ctin = aom_env%ctin_after_tranf_correction
-       ! ctin=sh_env%ctin
-    ! else
-     !   ctin=aom_env%ctin
-     ENDIF
+!    CALL decohere_wf(adiab_section, aom_env, sh_print_env, itimes, &
+!                                   velocities_com_tp, local_particles, nparticle_kind,    &
+!                                   atomic_kind_set, atomic_kinds)
+!   
+!    CALL section_vals_val_get(adiab_section,"SPURIOUS_TRANSFER_CORR", l_val=correct_transfer_keyword)
+!!     CALL section_vals_val_get(coupling_section,"CENTER_OF_MASS",l_val=translate_keyword) 
+!!     correct_transfer = .TRUE.
+!    if (correct_transfer_keyword .and. aom_env%decoherence) then
+!    !if (correct_tranfer) then
+!       !> this subroutine define the active regione for local decoherence, it
+!       !takes aom_env%ctin_before_deco  as argument
+!       CALL define_active_region(aom_env)
+!
+!       !> the new aom_env%ctin after deco is given to aom_env%ctin_after_deco
+!       aom_env%ctin_after_deco=aom_env%ctin         
+!       CALL calc_psi_after_correction(aom_env)
+!      
+!       !> the value of aom_env%ctin is updated again using the spurious charge
+!       !transfer correction
+!       aom_env%ctin = aom_env%ctin_after_tranf_correction
+!      ! ctin=sh_env%ctin
+!   ! else
+!    !   ctin=aom_env%ctin
+!    ENDIF
 
   !       if (correct_transfer_keyword .and. aom_env%decoherence) then
   !  print *, "################CARRIER_WF##############"
@@ -690,7 +687,7 @@ else
      !aom_env%Stmtm = Stt
      IF (attempt_hop) THEN
          !!NB this variable
-    !    aom_env%forces_adiab_new = my_forces_adiab_new
+         aom_env%forces_adiab_new = my_forces_adiab_new
          aom_env%active_state = active_state
          aom_env%eigenvector_matrix = C_tp
          aom_env%diabatic_forces = aom_env%F
