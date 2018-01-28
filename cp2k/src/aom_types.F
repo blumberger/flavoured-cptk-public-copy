@@ -116,7 +116,8 @@ IMPLICIT NONE
                                                          velocities_tp,& ! velocities step
                                                          velocities_t,&      ! velocities step min 1
                                                          forces_adiab, &      ! forces at step 0
-                                                         forces_adiab_new
+                                                         forces_adiab_new, &
+                                                         actforces_after_hop
 
      INTEGER                                     :: active_atoms
 !     REAL(KIND=dp)                              :: cbar, scaling

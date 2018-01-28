@@ -876,6 +876,7 @@ END SUBROUTINE classically_forbidden_hops
 !transfor the diabatic into the adiabatic coefficients and calculate tau
    
    CALL section_vals_val_get(adiab_section,"DECO_TIME",c_val=tau_param)
+print *, "aom_env%active_state", aom_env%active_state
     do i=1,mol 
            if (i .ne. aom_env%active_state) then
               SELECT CASE(tau_param)
@@ -893,7 +894,8 @@ END SUBROUTINE classically_forbidden_hops
               CASE("FORCES_BASED")
 
                     if (aom_env%my_successful_hop) then
-                        active_state_adforces = aom_env%forces_adiab_new
+                        !active_state_adforces = aom_env%forces_adiab_new
+                        active_state_adforces = aom_env%actforces_after_hop
                     else 
                         active_state_adforces = aom_env%forces_adiab
                     end if
@@ -950,7 +952,8 @@ print *, "PURE_DEPHASING", i
               CASE("HYBRID_TAU")
 
                     if (aom_env%my_successful_hop) then
-                        active_state_adforces = aom_env%forces_adiab_new
+                        !active_state_adforces = aom_env%forces_adiab_new
+                        active_state_adforces = aom_env%actforces_after_hop
                     else 
                         active_state_adforces = aom_env%forces_adiab
                     end if

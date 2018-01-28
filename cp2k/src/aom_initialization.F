@@ -235,6 +235,7 @@ CONTAINS
      ALLOCATE(aom_env%diabatic_forces(3,natom, mat))
      ALLOCATE(aom_env%forces_adiab(3,natom))
      ALLOCATE(aom_env%forces_adiab_new(3,natom))
+     ALLOCATE(aom_env%actforces_after_hop(3,natom))
      ALLOCATE(aom_env%pcoeffs(aom_atoms,norbitals))
      ALLOCATE(aom_env%scoeffs(aom_atoms))
      allocate(aom_env%adiab_nace_t(mat,mat))
