@@ -645,7 +645,9 @@ END SUBROUTINE classically_forbidden_hops
                    
               CALL  collapse_within_deco_time(tau, mol, deltatMD, aom_env)
             CASE("IDA")
+               
                aom_env%ida_deco = .TRUE.
+               CALL ida_collapse(aom_env)
             CASE DEFAULT                                           
               CPABORT("There is no method to add the decoherence.") 
             END SELECT
@@ -721,15 +723,37 @@ END SUBROUTINE classically_forbidden_hops
 
   SUBROUTINE ida_collapse(aom_env)
     TYPE(aom_env_type)                             :: aom_env
+!    COMPLEX(KIND=dp), dimension(:), allocatable :: ct
+!    integer :: j, i
  
     CHARACTER(len=*), PARAMETER :: routineN ='ida_collapse', &         
     routineP = moduleN//':'//routineN                                                                 
-    
-         if (aom_env%successful_hop) then
-              aom_env%ctin(:) = aom_env%C_t(:, aom_env%new_state)
+ !   allocate(ct(10)) 
+        
+!print *, "aom_env%my_successful_hop_INSIDE", aom_env%my_successful_hop
+!print *, "aom_env%active_state_INSIDE", aom_env%active_state
+!print *, "aom_env%active_state_past_INSIDE", aom_env%active_state_past
+!print *, "aom_env%attempt_hop_INSIDE", aom_env%attempt_hop
+       if (aom_env%attempt_hop) then
+         !if (aom_env%successful_hop) then
+         if (aom_env%my_successful_hop) then
+              !aom_env%ctin(:) = aom_env%C_tp(:, aom_env%new_state)
+              aom_env%ctin(:) = aom_env%C_tp(:, aom_env%active_state)
          else 
-              aom_env%ctin(:) = aom_env%C_t(:, aom_env%active_state)
-         end if                                                            
+              !aom_env%ctin(:) = aom_env%C_tp(:, aom_env%active_state)
+              aom_env%ctin(:) = aom_env%C_tp(:, aom_env%active_state_past)
+         end if
+
+ !      do i=1,10
+ !         ct(i) = cmplx(0.0D0, 0.0D0,dp)
+ !         do j=1,10
+ !              ct(i) = ct(i) + cmplx(aom_env%C_tp(j,i), 0.0D0,dp)*aom_env%ctin(j)
+ !         end do 
+ !      end do 
+ !      print *, "CTNOW", ct                 
+                         
+      end if      
+  !  deallocate(ct)           
   END SUBROUTINE ida_collapse
 
  

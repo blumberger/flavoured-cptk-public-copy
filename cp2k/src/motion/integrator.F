@@ -121,8 +121,9 @@ MODULE integrator
                                              total_momentum, &
                                              adiab_overlap_check
  
-  USE non_adiabatic_utils,             ONLY: ida_collapse, &
-                                             apply_decoherence
+  USE non_adiabatic_utils,             ONLY: apply_decoherence
+                                             !ida_collapse, &
+                                             !apply_decoherence
                                              !adiab_overalp_check
 !> END CHANGE_AC
 
@@ -635,9 +636,9 @@ print *, "ACTIVE_STATE_BEFORE", force_env%mixed_env%aom_env%active_state
 
              IF (force_env%mixed_env%aom_env%attempt_hop) THEN
                 CALL check_hop_attempt(tmp%vel, atomic_kind_set, nparticle_kind, local_particles, force_env)
-                if (force_env%mixed_env%aom_env%ida_deco) then
-                   CALL ida_collapse(force_env%mixed_env%aom_env)
-                end if
+               ! if (force_env%mixed_env%aom_env%ida_deco) then
+                !   CALL ida_collapse(force_env%mixed_env%aom_env)
+                !end if
                 IF (force_env%mixed_env%aom_env%successful_hop) THEN
                    force_env%mixed_env%aom_env%my_successful_hop = .True.
                    CALL force_env_calc_energy_force(force_env,require_consistent_energy_force=.FALSE., &
@@ -647,7 +648,9 @@ print *, "ACTIVE_STATE_BEFORE", force_env%mixed_env%aom_env%active_state
              print *, "successful_hop", force_env%mixed_env%aom_env%my_successful_hop
 
 print *, "ACTIVE_STATE_END", force_env%mixed_env%aom_env%active_state
-            
+           
+             !> here we decohere the WF onto the active state  , that could be a
+             !new one in case of successful hop 
              CALL apply_decoherence(itimes, tmp%vel, force_env, local_particles, nparticle_kind, atomic_kind_set)
           
 
