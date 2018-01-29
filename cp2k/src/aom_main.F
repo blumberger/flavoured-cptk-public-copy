@@ -428,7 +428,6 @@ print *, "Active_state_after_surf_hop", aom_env%active_state
      !aom_env%Stmtm = Stt
      IF (attempt_hop) THEN
          !!NB this variable
-         aom_env%actforces_after_hop = my_forces_adiab_new
          aom_env%eigenvector_matrix = C_tp
          aom_env%diabatic_forces = aom_env%F
          aom_env%scaling  = scaling

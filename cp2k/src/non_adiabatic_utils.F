@@ -710,11 +710,11 @@ END SUBROUTINE classically_forbidden_hops
     INTEGER  :: i, deg_of_freedom
     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE :: adiab_nace_vector
     REAL(KIND=dp)      :: KbT, Temp, alpha, T_inp 
-    REAL(kind=dp), DIMENSION(:,:),POINTER          :: active_state_adforces
+    !REAL(kind=dp), DIMENSION(:,:),POINTER          :: active_state_adforces
     REAL(kind=dp), DIMENSION(:,:),POINTER          :: my_forces_adiab
     LOGICAL                                  :: tau_schwartz
 
-    ALLOCATE(active_state_adforces(3, aom_env%natom))
+    !ALLOCATE(active_state_adforces(3, aom_env%natom))
     ALLOCATE(my_forces_adiab(3,aom_env%natom))
     allocate(tau(mol)) ! decoherence time (EDC method)
     allocate(tau_forces(mol)) ! decoherence time (EDC method)
@@ -769,12 +769,12 @@ print *, "aom_env%active_state", aom_env%active_state
 
               CASE("FORCES_BASED")
 
-                    if (aom_env%my_successful_hop) then
+                    !if (aom_env%my_successful_hop) then
                         !active_state_adforces = aom_env%forces_adiab_new
-                        active_state_adforces = aom_env%actforces_after_hop
-                    else 
-                        active_state_adforces = aom_env%forces_adiab
-                    end if
+                       ! active_state_adforces = aom_env%actforces_after_hop
+                    !else 
+                     !active_state_adforces = aom_env%forces_adiab
+                    !end if
 
                     !Boltzmann factor to use in alpha parameter
                      KbT = (2*K_tot)/(3*aom_env%active_atoms)
@@ -805,12 +805,12 @@ print *, "aom_env%active_state", aom_env%active_state
                                    alpha = 6*mass*Temp                  
                                    if (tau_schwartz) then    
                                         tau(i) = tau(i) + &
-                                        (dot_product((my_forces_adiab(:,iparticle)-active_state_adforces(:,iparticle)),&
-                                        (my_forces_adiab(:,iparticle)-active_state_adforces(:,iparticle))))/(4*alpha)
+                                        (dot_product((my_forces_adiab(:,iparticle)-aom_env%forces_adiab(:,iparticle)),&
+                                        (my_forces_adiab(:,iparticle)-aom_env%forces_adiab(:,iparticle))))/(4*alpha)
                                    else
                                         tau(i) = tau(i) + &
-                                        (sqrt(dot_product((my_forces_adiab(:,iparticle)-active_state_adforces(:,iparticle)),&
-                                        (my_forces_adiab(:,iparticle)-active_state_adforces(:,iparticle)))))/(2*sqrt(alpha))
+                                        (sqrt(dot_product((my_forces_adiab(:,iparticle)-aom_env%forces_adiab(:,iparticle)),&
+                                        (my_forces_adiab(:,iparticle)-aom_env%forces_adiab(:,iparticle)))))/(2*sqrt(alpha))
                                    end if
                                 END DO
                          END DO
@@ -827,12 +827,12 @@ print *, "PURE_DEPHASING", i
 
               CASE("HYBRID_TAU")
 
-                    if (aom_env%my_successful_hop) then
+                    !if (aom_env%my_successful_hop) then
                         !active_state_adforces = aom_env%forces_adiab_new
-                        active_state_adforces = aom_env%actforces_after_hop
-                    else 
-                        active_state_adforces = aom_env%forces_adiab
-                    end if
+                        !active_state_adforces = aom_env%actforces_after_hop
+                    !else 
+                    !active_state_adforces = aom_env%forces_adiab
+                    !end if
 
                     !Boltzmann factor to use in alpha parameter
                      KbT = (2*K_tot)/(3*aom_env%active_atoms)
@@ -865,12 +865,12 @@ print *, "PURE_DEPHASING", i
                                    alpha = 6*mass*Temp                  
                                    if (tau_schwartz) then    
                                         tau(i) = tau(i) + &
-                                        (dot_product((my_forces_adiab(:,iparticle)-active_state_adforces(:,iparticle)),&
-                                        (my_forces_adiab(:,iparticle)-active_state_adforces(:,iparticle))))/(4*alpha)
+                                        (dot_product((my_forces_adiab(:,iparticle)-aom_env%forces_adiab(:,iparticle)),&
+                                        (my_forces_adiab(:,iparticle)-aom_env%forces_adiab(:,iparticle))))/(4*alpha)
                                    else
                                         tau(i) = tau(i) + &
-                                        (sqrt(dot_product((my_forces_adiab(:,iparticle)-active_state_adforces(:,iparticle)),&
-                                        (my_forces_adiab(:,iparticle)-active_state_adforces(:,iparticle)))))/(2*sqrt(alpha))
+                                        (sqrt(dot_product((my_forces_adiab(:,iparticle)-aom_env%forces_adiab(:,iparticle)),&
+                                        (my_forces_adiab(:,iparticle)-aom_env%forces_adiab(:,iparticle)))))/(2*sqrt(alpha))
                                    end if
                                 END DO
                          END DO
@@ -908,7 +908,7 @@ print *, "PURE_DEPHASING", i
     deallocate(adiab_nace_vector)
     deallocate(sh_print_env%tau_deco)
     DEALLOCATE(my_forces_adiab)
-    DEALLOCATE(active_state_adforces)
+    !DEALLOCATE(active_state_adforces)
 !    deallocate(sh_print_env%pure_deph)
   END SUBROUTINE eval_deco_tau
 
