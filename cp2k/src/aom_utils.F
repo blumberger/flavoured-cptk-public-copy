@@ -340,7 +340,7 @@ subroutine surf_hop_type(adiab_section, C1, C2, deltat, old_state, &
                                routineP = moduleN//':'//routineN
 
        CHARACTER(LEN=default_string_length)           :: surfhop_keyword
-       LOGICAL                                        :: overlap_key
+       LOGICAL                                        :: overlap_key, do_trivial_corr
 
        overlap_key = .True.
 
@@ -353,20 +353,23 @@ subroutine surf_hop_type(adiab_section, C1, C2, deltat, old_state, &
 
        SELECT CASE(surfhop_keyword)
        CASE("TRIVIAL_CORR_WITH_OVERLAP")
-                       sh_print_env%additional_prints = .TRUE.
-   
+            sh_print_env%additional_prints = .TRUE.
             CALL modified_surfacehop(C1, C2, deltat, old_state, &
               new_state, attempt_hop, decohere_criterion, &
-              sh_print_env, aom_env, adiab_section, overlap_key ) !triv_threshold)
+              sh_print_env, aom_env, adiab_section, do_trivial_corr, overlap_key)
        CASE("TRIVIAL_HOP_CORRECT")
-                       sh_print_env%additional_prints = .TRUE.
+            sh_print_env%additional_prints = .TRUE.
             CALL modified_surfacehop(C1, C2, deltat, old_state, &
               new_state, attempt_hop, decohere_criterion, &
-              sh_print_env, aom_env, adiab_section) !triv_threshold)
+              sh_print_env, aom_env, adiab_section, do_trivial_corr)
        CASE("UNMODIFIED_SURF_HOP")
-            CALL  surfacehop(deltat, old_state, C2, &
-              new_state, attempt_hop, decohere_criterion, sh_print_env, &
-                                              aom_env, adiab_section)
+            do_trivial_corr = .FALSE.
+            !CALL  surfacehop(deltat, old_state, C2, &
+            !  new_state, attempt_hop, decohere_criterion, sh_print_env, &
+            !                                  aom_env, adiab_section)
+            CALL modified_surfacehop(C1, C2, deltat, old_state, &
+              new_state, attempt_hop, decohere_criterion, &
+              sh_print_env, aom_env, adiab_section, do_trivial_corr) 
        CASE DEFAULT
             CPABORT("There is no method to add trivial crossing correction")
        END SELECT
@@ -547,7 +550,8 @@ END SUBROUTINE adiab_overlap_check
 
 subroutine modified_surfacehop(C1, C2, deltat, old_state, &
               new_state, attempt_hop, decohere_criterion, &
-              sh_print_env, aom_env, adiab_section, overlap_key) !triv_threshold)
+              sh_print_env, aom_env, adiab_section,       & 
+              do_trivial_corr, overlap_key) 
         !using the method outlined in John Tully's Electronic Transitions paper
         !calculate the probability of the molecular dynamics switching to evolve on a different potential surface
         REAL(KIND=dp), dimension(:,:), intent(in) :: C1, C2
@@ -558,12 +562,12 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         REAL(KIND=dp), INTENT(IN) :: decohere_criterion
         TYPE(sh_print_env_type) :: sh_print_env
         TYPE(aom_env_type), INTENT(INOUT)             :: aom_env
-        TYPE(section_vals_type), POINTER               :: adiab_section
+        TYPE(section_vals_type), POINTER              :: adiab_section
+        LOGICAL, INTENT(IN)                           :: do_trivial_corr
         LOGICAL, OPTIONAL, INTENT(IN)                 :: overlap_key
 
-       CHARACTER(len=*), PARAMETER :: routineN ='modified_surfacehop', &
-       routineP = moduleN//':'//routineN
-
+        CHARACTER(len=*), PARAMETER :: routineN ='modified_surfacehop', &
+        routineP = moduleN//':'//routineN
 
         CHARACTER(LEN=default_string_length)         :: wfpropag_keyword
         LOGICAL        :: trivial_correction, correct_for_negative 
@@ -590,7 +594,8 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         allocate(cttm_ad(mol)) 
         ALLOCATE(sh_print_env%proba(mol))
 
-        !CALL section_vals_val_get(adiab_section,"REORDERING_STATES_USING_OVERLAP", l_val=reordering_states_keyword)
+        
+        IF (.NOT.do_trivial_corr) THEN 
              do i=1,mol
                      if (i .ne. my_old_state) then 
                              enerdiff(i) = abs(aom_env%E_tp(i) - aom_env%E_tp(aom_env%active_state)) 
@@ -621,6 +626,7 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
                      end if
              end do
              sh_print_env%enermin = min
+        ENDIF
 
         !if the propagation occurs in the diabatic basis, transfor diabatic coefficients
         !into adiabatic coefficients
@@ -630,9 +636,9 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         CASE("DIABATIC_BASIS")
                CALL diab_to_adiab(aom_env, C2, old_state, mol, cstate, ct, &
                                                    C1, cttm_ad, cstate_tm)
-               if (aom_env%reorder) then
-                    CALL diab_to_adiab(aom_env, C2, my_old_state, mol, cstate, ct)
-               end if
+               !if (aom_env%reorder) then
+               !     CALL diab_to_adiab(aom_env, C2, old_state, mol, cstate, ct)
+               !end if
         CASE("ADIABATIC_BASIS")
                ct(:) = aom_env%ctt(:)
                cttm_ad(:) = aom_env%cttm(:)
@@ -657,41 +663,40 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
                 end if
         end do
 
-    !calc exact total surface hopping probability (also termed g_tot) 
-    !according to Prezhdo and Wang 2014
-    !>in this case we need to use the new enforced state to avoid discontinuity
-    !in the time derivative
-        ex_prob = (abs(akttm(old_state))- abs(ak(my_old_state)))/abs(akttm(old_state))
+        !calc exact total surface hopping probability (also termed g_tot) 
+        !according to Prezhdo and Wang 2014
+        !>in this case we need to use the new enforced state to avoid discontinuity
+        !in the time derivative
+        ex_prob = (abs(akttm(old_state))- abs(ak(old_state)))/abs(akttm(old_state))
         sh_print_env%exprob = ex_prob 
 
-    ! calculate sumg that can also be negative because each individual probability
-    ! (flux) could be negative 
+        ! calculate sumg that can also be negative because each individual probability
+        ! (flux) could be negative 
         sumg = 0.0D0
         !calculate g and sum(g)
         do i=1,mol
               !g(i) is the probability to hop from the current state (old_state) to any other
               !state (i) 
               !>the current state is now the enforced state
-                g(i) = (deltat*b(i))/abs(ak(my_old_state))
+                g(i) = (deltat*b(i))/abs(ak(old_state))
               !>here also we have to use the enforce state that now is indeed the
               !new state
-                if (i .ne. my_old_state) then
+                if (i .ne. old_state) then
                         sumg = sumg + g(i)
                 end if
         end do
         sh_print_env%sumflux   = sumg
 
+
         !EFFECTIVE TRIVIAL CROSSINGS CORRECTION
-        trivial_correction = .FALSE.
         err = abs(sumg - ex_prob)
-        if (err >= 0.0D0) then      !WITHOUT THRESHOLD
-                !trivial_correction = .TRUE.
-                trivial_correction = (state_min.NE.my_old_state)
-                 if (trivial_correction) then  
-                 g_exa = ex_prob - sumg + g(state_min)
-                                g(state_min) = g_exa
-                 end if
-        end if
+        !if (err >= 0.0D0) then      !WITHOUT THRESHOLD
+        !        trivial_correction = (state_min.NE.my_old_state)
+        !         if (trivial_correction) then  
+        !         g_exa = ex_prob - sumg + g(state_min)
+        !                        g(state_min) = g_exa
+        !         end if
+        !end if
 
 
        !CORRECTION FOR NEGATIVE NUMBER
@@ -703,26 +708,27 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
                 end if
        end do
 
+
        !NORMALIZATION
        !due to finite timestep, sometimes the probabilities may sum to greater than 1
        !if this happens, rescale them down to sum = 1
        sumg = 0.0D0
        do i=1,mol
-               if (i .ne. my_old_state) then
+               if (i .ne. old_state) then
                        sumg = sumg + g(i)
                end if
        end do
        if (sumg > 1.0D0) then
                do i=1,mol
                        g(i) = g(i)/sumg
-                       g(my_old_state) = 0.0D0
+                       g(old_state) = 0.0D0
                end do
                sh_print_env%renorm = .TRUE.
                sh_print_env%sumprob   = sumg
        else
                sh_print_env%renorm = .FALSE.
                sh_print_env%sumprob   = sumg
-               g(my_old_state) = 1.0D0 - sumg
+               g(old_state) = 1.0D0 - sumg
        end if
        sh_print_env%proba     = g
 
@@ -732,26 +738,26 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
 
 
         hop = next_random_number(aom_env%rng_stream)
-print *, "RANDOM_NUMBER_HOPPING_PROBA", hop
+        print *, "RANDOM_NUMBER_HOPPING_PROBA", hop
         sh_print_env%hop       = hop
-        sh_print_env%old_state = my_old_state
+        sh_print_env%old_state = old_state
         !and see if this random number causes a surface hop
         sumg = 0.0D0
         do i=1,mol
                 sumg = sumg + g(i)
                 if (hop <= sumg) then
-                        if (i .ne. my_old_state) then
+                        if (i .ne. old_state) then
                                 new_state = i
-!                                write(24,*) i                        
-                               ! decohere = .FALSE.
+                                !write(24,*) i                        
+                                !decohere = .FALSE.
                                 aom_env%decohere = .FALSE.
                                 attempt_hop = .TRUE.
-print *, "ATTEMPTED_HOP"
+                                print *, "ATTEMPTED_HOP"
                                 sh_print_env%attempt_hop    = attempt_hop
                                 sh_print_env%new_state = new_state
                                 EXIT
-                        elseif (i == my_old_state) then
-                                new_state = my_old_state
+                        elseif (i == old_state) then
+                                new_state = old_state
                                 attempt_hop = .FALSE.
                                 sh_print_env%attempt_hop    = attempt_hop
                                 sh_print_env%new_state = new_state
@@ -763,7 +769,7 @@ print *, "ATTEMPTED_HOP"
                                 aom_env%decohere = .TRUE.
                                 do j=1,mol
                                         if (abs(aom_env%adiab_nace_tp(old_state,j)) & 
-                                                     > decohere_criterion .and. my_old_state .ne. j) then
+                                                     > decohere_criterion .and. old_state .ne. j) then
                                                ! decohere = .FALSE.
                                                 aom_env%decohere = .FALSE.
                                                 EXIT
