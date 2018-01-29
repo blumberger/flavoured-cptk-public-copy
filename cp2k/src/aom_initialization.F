@@ -104,11 +104,7 @@ MODULE aom_initialization
                                                propagate_wf, &
                                                propagate_adiab_wf, &
                                                   prop_wf_HS_corr, & 
-                                                  !calc_kinetic_tot, & 
                                                classically_forbidden_hops
-
-
-     !USE non_adiabatic_types,           ONLY: sh_env_type
 
 
      USE parallel_rng_types,           ONLY: UNIFORM,&
@@ -209,7 +205,6 @@ CONTAINS
      ALLOCATE(aom_env%H_tp(mat,mat))
      allocate(aom_env%pcoeffsrun(atoms,mat,3)) !pcoeffsrun exists because the p-coefficients
                                         !need to be renormalised for each structure
-     ALLOCATE(aom_env%eigenvector_matrix(mat,mat))
      ALLOCATE(aom_env%connlist1(4,aom_atoms))
      ALLOCATE(aom_env%neighbourlist(nadiab, nadiab,0:aom_atoms,0:aom_atoms))
      
@@ -225,12 +220,9 @@ CONTAINS
      ALLOCATE(aom_env%NN(mat, mat))
      ALLOCATE(aom_env%rm_t(3, natom))
      ALLOCATE(aom_env%rm_tm(3, natom))
-     ALLOCATE(aom_env%energies_t(nadiab))
-     ALLOCATE(aom_env%adiab_energies_t(mat))
      ALLOCATE(aom_env%bneighbour(3,0:aom_atoms))
      !ALLOCATE(aom_env%nacv(3,mat,mat,mat*aom_atoms))
      ALLOCATE(aom_env%nacv(3,mat, mat*aom_atoms))
-     ALLOCATE(aom_env%diabatic_forces(3,natom, mat))
      ALLOCATE(aom_env%forces_adiab(3,natom))
      ALLOCATE(aom_env%forces_adiab_new(3,natom))
      !ALLOCATE(aom_env%actforces_after_hop(3,natom))
@@ -627,8 +619,6 @@ CONTAINS
      aom_env%C_t = C_tp
 !print *, "aom_env%C_t", aom_env%C_t
      aom_env%E_tp = E_tp
-     aom_env%adiab_energies_t = E_tp
-     aom_env%eigenvector_matrix = C_tp
      aom_env%Stptp = Stptp
      aom_env%scaling  = scaling
      aom_env%cbar     = cbar
@@ -644,8 +634,6 @@ CONTAINS
            F(:,iatom,imol) =  global_forces(imol)%forces(:,iatom)
         ENDDO
      ENDDO
-
-     aom_env%diabatic_forces = F
 
      !> PRINT 
      CALL adiab_print_adiabat_energies(adiab_section, E_tp, nadiab, deltatMD, times)
@@ -764,7 +752,6 @@ CONTAINS
      
      aom_env%rm_tm      = positions_com_tp - velocities_com_tp*deltatMD
      aom_env%rm_t       = positions_com_tp
-     aom_env%energies_t = energies_tp
      !aom_env%neighbourlist = neighbourlist
      aom_env%sh_print_env = sh_print_env
      aom_env%ctin        = ctin

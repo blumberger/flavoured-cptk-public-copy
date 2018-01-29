@@ -725,7 +725,7 @@ END SUBROUTINE classically_forbidden_hops
 
     adiab_nace_vector(:) = aom_env%adiab_nace_tp(aom_env%active_state,:)
     !>number of degrees of freedom intensive EDC
-    deg_of_freedom = (aom_env%active_atoms*3-6)
+    deg_of_freedom = (aom_env%atoms*3-6)
 
 
     IF (PRESENT(atomic_kinds)) THEN
@@ -769,7 +769,7 @@ print *, "aom_env%active_state", aom_env%active_state
 
               CASE("FORCES_BASED")
                     !Boltzmann factor to use in alpha parameter
-                     KbT = (2*K_tot)/(3*aom_env%active_atoms)
+                     KbT = (2*K_tot)/(3*aom_env%atoms)
                     !instead of using the exact boltzmann factor, at the moment the code uses Temp =
                     !298 K, maybe this point should be modified in future
                     
@@ -819,7 +819,7 @@ print *, "PURE_DEPHASING", i
 
               CASE("HYBRID_TAU")
                     !Boltzmann factor to use in alpha parameter
-                     KbT = (2*K_tot)/(3*aom_env%active_atoms)
+                     KbT = (2*K_tot)/(3*aom_env%atoms)
                     !instead of using the exact boltzmann factor, at the moment the code uses Temp =
                     !298 K, maybe this point should be modified in future
                     

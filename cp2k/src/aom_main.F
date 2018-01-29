@@ -221,7 +221,6 @@ CONTAINS
      mat = orb*mol
      !> Numbers of active atoms 
      c = mol*atoms
-     aom_env%active_atoms = c 
      !> Numbers of atoms
      natom = SIZE(global_forces(1)%forces,2)
      aom_env%natom = natom
@@ -249,7 +248,6 @@ CONTAINS
         aom_env%crds(coord,:,1) = PACK(aom_env%rm_tm(coord,:), aom_env%ext_pres)
         aom_env%crds(coord,:,2) = PACK(aom_env%rm_t(coord,:), aom_env%ext_pres)
         aom_env%crds(coord,:,3) = PACK(positions_com_tp(coord,:), aom_env%ext_pres)
-        aom_env%siteenergies(2,:) = aom_env%energies_t(:) ! CHANGE_AC
         aom_env%siteenergies(3,:) = energies_tp(:) ! CHANGE_AC
      enddo
      !ctin(:) = aom_env%ctin(:)
@@ -406,8 +404,6 @@ print *, "Active_state_after_surf_hop", aom_env%active_state
      !> STORE THE COORDINATES IF NOT SUCCESSFUL RUN
      aom_env%rm_tm      = aom_env%rm_t
      aom_env%rm_t       = positions_com_tp
-     aom_env%energies_t = energies_tp
-     aom_env%adiab_energies_t = aom_env%E_tp
      !aom_env%ctin        = ctin
      aom_env%attempt_hop  = attempt_hop
      !aom_env%H_t = aom_env%H_tp
@@ -422,8 +418,6 @@ print *, "Active_state_after_surf_hop", aom_env%active_state
      !aom_env%Stmtm = Stt
      IF (attempt_hop) THEN
          !!NB this variable
-         aom_env%eigenvector_matrix = C_tp
-         aom_env%diabatic_forces = aom_env%F
          aom_env%scaling  = scaling
          aom_env%cbar     = cbar
      ENDIF

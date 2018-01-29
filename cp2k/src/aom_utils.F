@@ -1274,8 +1274,8 @@ SUBROUTINE calc_hop_nacv(aom_env, hop_nacv, ext_old_state, ext_new_state, symmet
         REAL(KIND=dp)                           :: convert_nacv 
 
         mat    = SIZE(aom_env%Stptp, 1)
-        natom  = SIZE(aom_env%diabatic_forces, 2)
-        nadiab = SIZE(aom_env%diabatic_forces, 3)
+        natom  = SIZE(aom_env%F, 2)
+        nadiab = SIZE(aom_env%F, 3)
         atoms  = SIZE(aom_env%connlist1, 2)
 
         my_fast = .FALSE.
@@ -1308,10 +1308,10 @@ SUBROUTINE calc_hop_nacv(aom_env, hop_nacv, ext_old_state, ext_new_state, symmet
         cbar = aom_env%cbar
         NN = aom_env%NN
         S = aom_env%Stptp
-        C = aom_env%eigenvector_matrix
+        C = aom_env%C_tp
         
         nacv = aom_env%nacv
-        Fin = aom_env%diabatic_forces
+        Fin = aom_env%F
         ext_pres = aom_env%ext_pres       
         IF (PRESENT(ext_old_state)) THEN
            old_state = ext_old_state
@@ -1323,8 +1323,8 @@ SUBROUTINE calc_hop_nacv(aom_env, hop_nacv, ext_old_state, ext_new_state, symmet
         ELSE
            new_state = aom_env%new_state
         ENDIF
-        E_old_state = aom_env%adiab_energies_t(old_state)
-        E_new_state = aom_env%adiab_energies_t(new_state)
+        E_old_state = aom_env%E_tp(old_state)
+        E_new_state = aom_env%E_tp(new_state)
         IF (E_old_state.EQ.E_new_state) THEN
            diff_energy = 0.0D0
         ELSE
@@ -1769,12 +1769,11 @@ print *, "RANDOM_NUMBER_FISRT_ADIAB", random
               force_env%mixed_env%aom_env%successful_hop = .TRUE.
               !force_env%mixed_env%aom_env%old_state      = force_env%mixed_env%aom_env%active_state
               force_env%mixed_env%aom_env%active_state   = force_env%mixed_env%aom_env%new_state
-              force_env%mixed_env%aom_env%kinetic_energy = kinetic_energy_prime
               force_env%mixed_env%aom_env%delta_energy   = delta_energy
               CALL simple_vel_rescaling(velocities, delta_energy, kinetic_energy_prime, rescale_factor)
            ENDIF
 
-           sh_print_env%adiab_energies_t = force_env%mixed_env%aom_env%adiab_energies_t
+           sh_print_env%adiab_energies_t = force_env%mixed_env%aom_env%E_tp
            sh_print_env%delta_energy     = delta_energy
            sh_print_env%successful_hop   = force_env%mixed_env%aom_env%successful_hop
            sh_print_env%kinetic_energy   = kinetic_energy_prime
@@ -1796,7 +1795,6 @@ print *, "RANDOM_NUMBER_FISRT_ADIAB", random
               force_env%mixed_env%aom_env%successful_hop = .TRUE.
               !force_env%mixed_env%aom_env%old_state      = force_env%mixed_env%aom_env%active_state
               force_env%mixed_env%aom_env%active_state   = force_env%mixed_env%aom_env%new_state
-              force_env%mixed_env%aom_env%kinetic_energy = kinetic_energy_qsys
               force_env%mixed_env%aom_env%delta_energy   = delta_energy
               CALL simple_vel_resc_qsys(atomic_kind_set, local_particles,  &
                        force_env, nparticle_kind, velocities, delta_energy, kinetic_energy_qsys, &
@@ -1804,7 +1802,7 @@ print *, "RANDOM_NUMBER_FISRT_ADIAB", random
 
            ENDIF
 
-           sh_print_env%adiab_energies_t = force_env%mixed_env%aom_env%adiab_energies_t
+           sh_print_env%adiab_energies_t = force_env%mixed_env%aom_env%E_tp
            sh_print_env%delta_energy     = delta_energy
            sh_print_env%successful_hop   = force_env%mixed_env%aom_env%successful_hop
            sh_print_env%kinetic_energy   = kinetic_energy_qsys
@@ -1822,7 +1820,7 @@ print *, "RANDOM_NUMBER_FISRT_ADIAB", random
            IF ((delta_energy.lt.0).AND.(nacv_keyword.ne."TEST")) THEN
               force_env%mixed_env%aom_env%successful_hop = .FALSE.
 
-              sh_print_env%adiab_energies_t = force_env%mixed_env%aom_env%adiab_energies_t
+              sh_print_env%adiab_energies_t = force_env%mixed_env%aom_env%E_tp
               sh_print_env%delta_energy     = delta_energy
               sh_print_env%successful_hop   = force_env%mixed_env%aom_env%successful_hop
               sh_print_env%old_state        = force_env%mixed_env%aom_env%active_state
@@ -1903,18 +1901,15 @@ ENDIF
                                               sh_print_env,A,B)
               ELSE 
                   force_env%mixed_env%aom_env%successful_hop = .TRUE.
-                  !force_env%mixed_env%aom_env%old_state      = force_env%mixed_env%aom_env%active_state
                   force_env%mixed_env%aom_env%active_state   = force_env%mixed_env%aom_env%new_state
-                  force_env%mixed_env%aom_env%kinetic_energy = kinetic_energy_prime
                   force_env%mixed_env%aom_env%delta_energy   = delta_energy
-                  !force_env%mixed_env%aom_env%new_state = -1
                   CALL hop_nacv_vel_rescaling(nparticle_kind, velocities, delta_energy, A, B, hop_nacv, &
                                               atomic_kind_set, local_particles, rescale_factor)
               ENDIF
 
               sh_print_env%A = A
               sh_print_env%B = B
-              sh_print_env%adiab_energies_t = force_env%mixed_env%aom_env%adiab_energies_t
+              sh_print_env%adiab_energies_t = force_env%mixed_env%aom_env%E_tp
               sh_print_env%delta_energy     = delta_energy
               sh_print_env%successful_hop   = force_env%mixed_env%aom_env%successful_hop
               IF (sh_print_env%successful_hop) THEN
@@ -2139,8 +2134,8 @@ ENDIF
 print *, "DELTAE_OLDSTATE", old_state
            ENDIF
            delta_energy = B**2 - 4 * A * (  &
-                     aom_env%adiab_energies_t(new_state) - &
-                     aom_env%adiab_energies_t(old_state))
+                     aom_env%E_tp(new_state) - &
+                     aom_env%E_tp(old_state))
         IF (ASSOCIATED(atomic_kind)) NULLIFY(atomic_kind)
    END SUBROUTINE cal_delta_energy_nacv
 
@@ -2186,8 +2181,8 @@ print *, "DELTAE_OLDSTATE", old_state
            old_state = force_env%mixed_env%aom_env%active_state
 print *, "OLD_STATE_ISOTROP", old_state
            delta_energy = kinetic_energy_prime-( &
-                     force_env%mixed_env%aom_env%adiab_energies_t(new_state) - &
-                     force_env%mixed_env%aom_env%adiab_energies_t(old_state))
+                     force_env%mixed_env%aom_env%E_tp(new_state) - &
+                     force_env%mixed_env%aom_env%E_tp(old_state))
         IF (ASSOCIATED(atomic_kind)) NULLIFY(atomic_kind)
    END SUBROUTINE cal_delta_energy
 
@@ -2236,8 +2231,8 @@ print *, "kinetic_energy_qsys", kinetic_energy_qsys
            new_state = force_env%mixed_env%aom_env%new_state
            old_state = force_env%mixed_env%aom_env%active_state
            delta_energy = kinetic_energy_qsys-( &
-                     force_env%mixed_env%aom_env%adiab_energies_t(new_state) - &
-                     force_env%mixed_env%aom_env%adiab_energies_t(old_state))
+                     force_env%mixed_env%aom_env%E_tp(new_state) - &
+                     force_env%mixed_env%aom_env%E_tp(old_state))
         IF (ASSOCIATED(atomic_kind)) NULLIFY(atomic_kind)
    END SUBROUTINE cal_delta_ene_QSYS
 

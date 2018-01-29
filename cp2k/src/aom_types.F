@@ -116,35 +116,37 @@ IMPLICIT NONE
      REAL(KIND = dp)                        :: delta_energy, scaling, cbar, deltat
 
 !> Information for the overlap method: calculate at the first timestep
-     INTEGER, DIMENSION(:), POINTER                      :: elements, atomlist
-     INTEGER, DIMENSION(:,:), POINTER                    :: NN
-     INTEGER, DIMENSION(:,:,:,:), POINTER                :: neighbourlist
-     REAL(KIND=dp), dimension(:,:,:), allocatable        :: pcoeffsrun
-     integer, dimension(:,:), POINTER       :: connlist1, connlist2, bneighbour
-     REAL(KIND=dp), dimension(:,:), POINTER   :: coms
-     REAL(KIND=dp), dimension(:,:,:), POINTER :: crds
-     REAL(KIND=dp), dimension(:,:), POINTER   :: dist
+     INTEGER, DIMENSION(:), POINTER           :: elements, atomlist
+     INTEGER, DIMENSION(:,:,:,:), POINTER     :: neighbourlist
+     integer, dimension(:,:), POINTER         :: connlist1, connlist2, bneighbour
      REAL(KIND=dp), DIMENSION(:,:), POINTER   :: pcoeffs
      REAL(KIND=dp), DIMENSION(:), POINTER     :: scoeffs
      LOGICAL, DIMENSION(:), POINTER           :: ext_pres
+     TYPE(rng_stream_type), POINTER           :: rng_stream !the random seed generator
 
 !> Calculate at each timestep
-     REAL(KIND=dp), dimension(:,:), POINTER   :: At, Atm, Atp, Bt, Btm, & 
-                                                 Btp, siteenergies
+     REAL(KIND=dp), dimension(:,:), POINTER         :: coms
+     REAL(KIND=dp), dimension(:,:,:), POINTER       :: crds
+     REAL(KIND=dp), dimension(:,:), POINTER         :: dist
+     INTEGER, DIMENSION(:,:), POINTER               :: NN
+     REAL(KIND=dp), dimension(:,:,:), allocatable   :: pcoeffsrun
+     REAL(KIND=dp), dimension(:,:), POINTER         :: At, Atm, Atp, Bt, Btm, & 
+                                                       Btp, siteenergies
+     REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: nacv
+     REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: F
+     REAL(KIND = dp), DIMENSION(:,:), POINTER       :: forces_adiab, &      ! forces at step 0
+                                                       forces_adiab_new!, &
 
 !> Use to store the present info in the future timestep
-     INTEGER                                :: new_state, old_state, active_state
-     REAL(KIND = dp), DIMENSION(:,:), POINTER         :: rm_t,&             ! position step min 1
-                                                         rm_tm,&             ! position step min 2
-                                                         velocities_tp,& ! velocities step
-                                                         velocities_t,&      ! velocities step min 1
-                                                         forces_adiab, &      ! forces at step 0
-                                                         forces_adiab_new!, &
+     REAL(KIND = dp), DIMENSION(:,:), POINTER     :: rm_t,&             ! position step min 1
+                                                     rm_tm,&             ! position step min 2
+                                                     velocities_tp,& ! velocities step
+                                                     velocities_t,&      ! velocities step min 1
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE   :: C_t, C_tp
      REAL(KIND=dp), DIMENSION(:),   ALLOCATABLE   :: E_t, E_tp
      COMPLEX(KIND=dp), DIMENSION(:,:), POINTER    :: H_t, H_tp
-     REAL(KIND=dp), dimension(:,:), POINTER :: Stt, Stmt, Sttm, Stmtm, &
-                                               Stptp, Sttp, Stpt
+     REAL(KIND=dp), dimension(:,:), POINTER       :: Stt, Stmt, Sttm, Stmtm, &
+                                                     Stptp, Sttp, Stpt
 
 !> arrays used in the decoherence
      COMPLEX(KIND=dp), DIMENSION(:),POINTER  :: ctin
@@ -159,6 +161,7 @@ IMPLICIT NONE
 
 
 !> Old and new state number
+     INTEGER                                :: new_state, old_state, active_state
      LOGICAL                                :: overlap_over_thresh
      LOGICAL                                :: attempt_hop
      LOGICAL                                :: successful_hop
@@ -170,27 +173,6 @@ IMPLICIT NONE
 
 !> To print
      TYPE(sh_print_env_type)                     :: sh_print_env
-
-!> The random seed generator
-     TYPE(rng_stream_type), POINTER              :: rng_stream
-
-!> To check
-     REAL(KIND = dp)                             :: energy_new
-     LOGICAL                                     :: reorder
-     INTEGER                                     :: state_tmdt
-     LOGICAL                                     :: my_successful_hop
-     REAL(KIND = dp)                                  :: factor
-     REAL(KIND=dp), DIMENSION(:,:), POINTER              :: nace
-     REAL(KIND=dp), DIMENSION(:), POINTER                :: population
-     REAL(KIND=dp), DIMENSION(:,:), POINTER              :: eigenvector_matrix
-     REAL(KIND=dp), DIMENSION(:,:,:), POINTER            :: diabatic_forces
-     REAL(KIND = dp)                        :: kinetic_energy
-     REAL(KIND=dp), DIMENSION(:,:,:), POINTER          :: nacv
-     INTEGER                                     :: active_atoms
-     REAL(KIND = dp), DIMENSION(:), POINTER :: energies_t   
-     REAL(KIND = dp), DIMENSION(:), POINTER :: adiab_energies_t 
-     REAL(KIND=dp), DIMENSION(:,:,:), POINTER :: F
-
    END TYPE aom_env_type
 
    PUBLIC :: aom_env_type, &
