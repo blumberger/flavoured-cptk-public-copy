@@ -603,6 +603,8 @@ CONTAINS
              !         core_particle_set, shell_particle_set, nparticle_kind,shell_adiabatic, dt,     &
              !         new_velocities=force_env%mixed_env%aom_env%velocities_tp)
              !ELSE
+             !> in this second parte of VV algortihm are used the forces on the
+             !old state
               CALL vv_second(tmp, atomic_kind_set, local_particles, particle_set, &
                              core_particle_set, shell_particle_set, nparticle_kind, shell_adiabatic, dt)
              !ENDIF
@@ -641,6 +643,9 @@ print *, "ACTIVE_STATE_BEFORE", force_env%mixed_env%aom_env%active_state
                 !end if
                 IF (force_env%mixed_env%aom_env%successful_hop) THEN
                    force_env%mixed_env%aom_env%my_successful_hop = .True.
+                   !> here the code uses the new forces updated in
+                   !non_adiabatic_methods.F subroutine, this forceson the new
+                   !state are also used in FORCES_BASED decohrence
                    CALL force_env_calc_energy_force(force_env,require_consistent_energy_force=.FALSE., &
                                                     itimes = itimes)
                 ENDIF

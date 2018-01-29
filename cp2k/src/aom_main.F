@@ -689,7 +689,7 @@ print *, "Active_state_after_surf_hop", active_state
      IF (attempt_hop) THEN
          !!NB this variable
          aom_env%forces_adiab_new = my_forces_adiab_new
-         aom_env%actforces_after_hop = my_forces_adiab_new
+         !aom_env%actforces_after_hop = my_forces_adiab_new
 !print *, "aom_env%forces_adiab_new", aom_env%forces_adiab_new
          aom_env%active_state = active_state
          aom_env%eigenvector_matrix = C_tp
