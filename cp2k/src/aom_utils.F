@@ -861,9 +861,10 @@ subroutine calc_adiab_nace(aom_env)
         REAL(KIND=dp), dimension(:,:), allocatable :: T1, T2, DT, TST, TDT, DS, DC
         REAL(KIND=dp), dimension(:,:), allocatable :: adiab_overlap, identity
         REAL(KIND=dp), dimension(:,:), allocatable :: C1, C2
-        INTEGER, dimension(:),  allocatable        :: map_new2old, basic
-        REAL(KIND=dp)                              :: deltat, max_val, threshold
-        LOGICAL                                    :: go_on
+        INTEGER, dimension(:),  allocatable        :: map_new2old, map_old2new, basic
+        INTEGER, dimension(:),  allocatable        :: not_associated, zeros
+        REAL(KIND=dp)                              :: deltat, max_val, threshold, my_threshold
+        LOGICAL                                    :: go_on, print_here
 
         mol = size(aom_env%Stt,1)
         deltat = aom_env%deltat
@@ -909,13 +910,24 @@ subroutine calc_adiab_nace(aom_env)
         ALLOCATE(C1(mol, mol))
         ALLOCATE(C2(mol, mol))
         ALLOCATE(map_new2old(mol))
+        ALLOCATE(map_old2new(mol))
         ALLOCATE(basic(mol))
+        ALLOCATE(zeros(mol))
+        ALLOCATE(not_associated(mol))
         C1 = aom_env%C_t
         C2 = aom_env%C_tp
         map_new2old = 0
+        map_old2new = 0
+        not_associated = 0
+        zeros = 0
         basic = (/( i, i=1, mol )/)
         threshold = 0.1
         do i=1, mol
+           !if (basic(i).GT.0) THEN
+           !   my_threshold = threshold
+           !else
+           !   my_threshold = 0.5
+           !endif
            max_val = 0.0
            do j= 1, mol
               adiab_overlap(i,j) = 0.0
@@ -931,41 +943,72 @@ subroutine calc_adiab_nace(aom_env)
            enddo
            if ( abs( max_val**2 - 1 ).LT.threshold) then
               map_new2old(i) = new_index
-              basic(new_index) = -1
+              map_old2new(new_index) = i
+              !if (i.gt.new_index) then
+              !   if (basic(new_index).NE.(-1)) then
+              !      map_new2old(new_index) = i
+              !   endif
+              !endif
+              !basic(new_index) = -1
            endif
-           if (i.NE.new_index) then
-              if ( abs( max_val**2 - 1 ).LT.threshold) then
-                 print*, "AC_OVERLAP_CHANGE: For", i, " new index is", new_index, &
-                         "with overlap", max_val, "and former", adiab_overlap(i,i)
-              else 
-                 print*, "AC_OVERLAP_NO_CHANGE: For", i, " we stay in with overlap", &
-                         adiab_overlap(i,i), " instead of goind to ", new_index, "with overlap", max_val
+           print_here = .TRUE.
+           if (print_here) then
+              if (i.NE.new_index) then
+                 if ( abs( max_val**2 - 1 ).LT.threshold) then
+                    print*, "AC_OVERLAP_CHANGE: For", i, " new index is", new_index, &
+                            "with overlap", max_val, "and former", adiab_overlap(i,i)
+                 else 
+                    print*, "AC_OVERLAP_NO_CHANGE: For", i, " we stay in with overlap", &
+                            adiab_overlap(i,i), " instead of goind to ", new_index, "with overlap", max_val
+                 endif
               endif
            endif
            !print*, "adiab_overlap", adiab_overlap(i,:)
            !print*, "identity", identity(i,:)
         enddo
+        IF (ANY(map_new2old.NE.basic)) print*, "AC_MAP_CHANGED", map_new2old
 
-print*, "AC_MAP", map_new2old
-print*, "AC_BASIC", basic
+        IF (ANY(map_new2old.EQ.zeros)) THEN
+         do i=1,mol
+            IF ((map_new2old(i).EQ.0).AND.(map_old2new(i).NE.0)) THEN
+print*, "OVERLAP IS: ", adiab_overlap(i, map_old2new(i))
+               IF ( abs( (adiab_overlap(i, map_old2new(i)))**2 - 1 ).LT.0.5 ) THEN
+                  map_new2old(i) = map_old2new(i)
+               ENDIF
+            ENDIF
+         enddo
+        IF (ANY(map_new2old.NE.basic)) print*, "AC_MAP_CHANGED_AGAIN", map_new2old
+       ENDIF
+
+        IF (ANY(map_new2old.EQ.zeros)) THEN
+         k = 1
+         do i=1, mol
+               j = 1
+               go_on = .TRUE.
+               do while ((go_on).AND.(j.LE.mol))
+                  if (i.eq.map_new2old(j)) then
+                     go_on = .FALSE.
+                  else
+                     j = j + 1
+                  endif
+               enddo
+               if (go_on) then
+                  not_associated(k) = i
+                  k = k +1
+               endif
+         enddo
+
+        j = 1
         do i=1, mol
            if (map_new2old(i).EQ.0) then
-              go_on = .TRUE.
-              j = 1
-              do while (go_on) 
-                    if (basic(j).LT.0) then
-                        j= j + 1
-                    else
-                        go_on = .FALSE.
-                        map_new2old(i) = j
-                        basic(j) = -1
-                    endif
-              enddo
+              map_new2old(i) = not_associated(j)
+              j = j+1
            endif
-        enddo
+        enddo 
             
-        basic = (/( i, i=1, mol )/)
-        IF (ANY(map_new2old.NE.basic)) print*, "AC_MAP_NEW", map_new2old
+        IF (ANY(map_new2old.NE.basic)) print*, "AC_MAP_FINAL", map_new2old
+       ENDIF
+
         IF (SUM(map_new2old).NE.( mol*(mol+1)/2 )) THEN
            CPABORT("Problem in the mapping between old and new states.")
         ENDIF
