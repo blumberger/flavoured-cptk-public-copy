@@ -330,7 +330,7 @@ subroutine surf_hop_type(adiab_section, C1, C2, deltat, old_state, &
        REAL(KIND=dp), dimension(:,:), intent(in) :: C1, C2
        REAL(KIND=dp), intent(in) :: deltat
        integer, intent(inout) :: old_state
-       INTEGER, INTENT(OUT)        :: new_state
+       INTEGER, INTENT(INOUT)        :: new_state
        LOGICAL, INTENT(OUT)        :: attempt_hop
        REAL(KIND=dp), INTENT(IN) :: decohere_criterion
        TYPE(sh_print_env_type)     :: sh_print_env
@@ -557,7 +557,7 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         REAL(KIND=dp), dimension(:,:), intent(in) :: C1, C2
         REAL(KIND=dp), intent(in) :: deltat
         integer, intent(inout) :: old_state
-        INTEGER, INTENT(OUT)        :: new_state
+        INTEGER, INTENT(INOUT)        :: new_state
         LOGICAL, INTENT(OUT)        :: attempt_hop
         REAL(KIND=dp), INTENT(IN) :: decohere_criterion
         TYPE(sh_print_env_type) :: sh_print_env
@@ -952,8 +952,9 @@ print*, "OVERLAP IS: ", adiab_overlap(i, map_old2new(i))
 
 
         !> 3. Reassociate state active_state
-        !aom_env%active_state = map_old2new(aom_env%old_state) 
+        !aom_env%active_state = map_old2new(aom_env%old_state)
         aom_env%active_state = aom_env%old_state 
+print*, "Put ", aom_env%old_state, "in", aom_env%active_state 
 
 
         allocate(DC(mol,mol))

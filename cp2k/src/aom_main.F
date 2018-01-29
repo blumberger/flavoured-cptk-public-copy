@@ -162,8 +162,6 @@ CONTAINS
      CHARACTER(len=*), PARAMETER :: routineN ='construct_ham_X_SH', &
      routineP = moduleN//':'//routineN
 
-     REAL(kind=dp), DIMENSION(:,:),POINTER          :: my_forces_adiab
-     REAL(kind=dp), DIMENSION(:,:),POINTER          :: my_forces_adiab_new
      integer :: coord
      integer :: mol, atoms, c,  mat, orb
      REAL(KIND=dp) :: cutoff_sites, cutoff_connect, scaling, deltatMD, deltatE
@@ -172,7 +170,7 @@ CONTAINS
      INTEGER, dimension(:), allocatable          :: class_forbidden_hop_tp
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE   :: C_tp
      LOGICAL                                      :: analytics
-     INTEGER                                      :: new_state , ELsteps   
+     INTEGER                                      :: ELsteps   
      REAL(KIND=dp)                                :: dR, times 
      REAL(KIND=dp)                                :: decohere_criterion
      INTEGER                                      :: imol, iatom, natom
@@ -239,8 +237,6 @@ CONTAINS
 
 !COMMENT: one should check that all these arrays are used below (e.g. pcoefftot,
 !scoefftot and they are de-allocated at the end of the subroutine.
-     ALLOCATE(my_forces_adiab(3,natom))
-     ALLOCATE(my_forces_adiab_new(3,natom))
      ALLOCATE(positions_com_tp(3, natom))
      ALLOCATE(velocities_com_tp(3, natom))
      allocate(exact_forces(3,natom))
@@ -355,11 +351,11 @@ CONTAINS
         attempt_hop = .TRUE.
         aom_env%active_state = 1
         aom_env%new_state = mod(aom_env%active_state + 1, mat) 
-        IF ((new_state).EQ.0) new_state = mat
+        IF ((aom_env%new_state).EQ.0) aom_env%new_state = mat
      ELSE IF (.NOT.my_bo_keyword) THEN ! THEN IT IS A FSSH RUN
             call surf_hop_type(adiab_section, aom_env%C_t, C_tp,   &
                                  deltatMD, aom_env%active_state, &
-                                 new_state, &
+                                 aom_env%new_state, &
                                  attempt_hop, &
                                  decohere_criterion, &
                                  sh_print_env, aom_env)
@@ -417,7 +413,7 @@ print *, "Active_state_after_surf_hop", aom_env%active_state
      !aom_env%ctin        = ctin
      aom_env%attempt_hop  = attempt_hop
      !aom_env%H_t = aom_env%H_tp
-     aom_env%new_state = new_state
+     !aom_env%new_state = new_state
      aom_env%Stmtm = aom_env%Stt
      aom_env%Stt   = aom_env%Stptp
      aom_env%Sttm  = aom_env%Stpt
@@ -438,8 +434,6 @@ print *, "Active_state_after_surf_hop", aom_env%active_state
      aom_env%sh_print_env = sh_print_env
 
      !> DEALLOCATE
-     DEALLOCATE(my_forces_adiab)
-     DEALLOCATE(my_forces_adiab_new)
      DEALLOCATE(positions_com_tp) 
      DEALLOCATE(velocities_com_tp)
      deallocate(exact_forces)
