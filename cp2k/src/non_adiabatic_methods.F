@@ -110,7 +110,6 @@ CONTAINS
     TYPE(aom_env_type)                       :: aom_env
     INTEGER, POINTER                         :: itimes
     REAL(KIND=dp)                            :: energy_adiabat
-    LOGICAL                                  :: is_hop
     LOGICAL                                  :: my_bo_keyword
     LOGICAL                                  :: my_test_keyword
 
@@ -160,9 +159,12 @@ CONTAINS
            CALL create_aom_env(nadiab, aom_atoms, norbitals, natom, &
                                positions_tp, coupling_section, adiab_section, & 
                                aom_env)
-           CALL propagate_aom_namd_first_step(nadiab, aom_atoms, norbitals, MDtimestep, &
+           aom_env%atoms = aom_atoms
+           aom_env%deltat = MDtimestep
+           aom_env%natom = SIZE(global_forces(1)%forces,2)
+           CALL propagate_aom_namd_first_step(nadiab, aom_atoms, norbitals,     &
                      positions_tp, velocities_tp, energies_tp, aom_env, itimes, &
-                     is_hop, global_forces, coupling_section, adiab_section,& 
+                     global_forces, coupling_section, adiab_section,& 
                      my_bo_keyword, atomic_kinds, &
                      local_particles, my_test_keyword, method_keyword)
         ELSE
@@ -180,10 +182,10 @@ CONTAINS
               !aom_env%old_state = -1
            ELSE
               !> Main CALL: calculate the Hamiltonian, propagate the electronic dynamics
-              CALL construct_ham_X_SH(nadiab, aom_atoms, norbitals, MDtimestep, &
-                            positions_tp, energies_tp, aom_env, itimes, &
-                            is_hop, global_forces, coupling_section, adiab_section,& 
-                            my_bo_keyword, atomic_kinds, &
+              CALL construct_ham_X_SH(nadiab, aom_atoms, norbitals,         &
+                            positions_tp, energies_tp, aom_env, itimes,     &
+                            global_forces, coupling_section, adiab_section, & 
+                            my_bo_keyword, atomic_kinds,                    &
                             local_particles, my_test_keyword)
            ENDIF
         ENDIF

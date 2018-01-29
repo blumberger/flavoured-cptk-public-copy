@@ -138,10 +138,9 @@ IMPLICIT NONE
                                                        forces_adiab_new!, &
 
 !> Use to store the present info in the future timestep
-     REAL(KIND = dp), DIMENSION(:,:), POINTER     :: rm_t,&             ! position step min 1
-                                                     rm_tm,&             ! position step min 2
-                                                     velocities_tp,& ! velocities step
-                                                     velocities_t,&      ! velocities step min 1
+     REAL(KIND = dp), DIMENSION(:,:), POINTER     :: rm_t,&        ! position step min 1
+                                                     rm_tm,&       ! position step min 2
+                                                     velocities_tp ! velocities step
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE   :: C_t, C_tp
      REAL(KIND=dp), DIMENSION(:),   ALLOCATABLE   :: E_t, E_tp
      COMPLEX(KIND=dp), DIMENSION(:,:), POINTER    :: H_t, H_tp

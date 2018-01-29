@@ -105,13 +105,9 @@ MODULE aom_main
                                                propagate_wf, &
                                                propagate_adiab_wf, &
                                                prop_wf_HS_corr, & 
-                                               !calc_kinetic_tot, &
                                                classically_forbidden_hops, &
                                                define_active_region, &
                                                calc_psi_after_correction
-                                               !adiab_overalp_calc
-                                          
-!     USE non_adiabatic_types,           ONLY: sh_env_type
 
      USE parallel_rng_types,              ONLY: UNIFORM,&
                                              create_rng_stream,&
@@ -130,11 +126,11 @@ MODULE aom_main
 
 CONTAINS
 
-    SUBROUTINE construct_ham_X_SH(nadiab, aom_atoms, norbitals, MDtimestep, &
+    SUBROUTINE construct_ham_X_SH(nadiab, aom_atoms, norbitals,  &
                                   positions_tp,  &
                                   energies_tp,  &
                                   aom_env, itimes, &
-                                  attempt_hop, global_forces, coupling_section, &
+                                  global_forces, coupling_section, &
                                   adiab_section, my_bo_keyword,                 & 
                                   atomic_kinds, local_particles,                &
                                   my_test_keyword)
@@ -142,12 +138,10 @@ CONTAINS
 
      INTEGER, INTENT(IN)                            :: nadiab,  norbitals 
      INTEGER, INTENT(IN)                            :: aom_atoms
-     REAL(KIND=dp), INTENT(OUT)                     :: MDtimestep
      REAL(kind=dp), DIMENSION(:,:),POINTER          :: positions_tp
      REAL(kind=dp), DIMENSION(:),  POINTER          :: energies_tp
      TYPE(aom_env_type), INTENT(INOUT)              :: aom_env
      INTEGER, POINTER                               :: itimes
-     LOGICAL, INTENT(OUT)                           :: attempt_hop
      TYPE(mixed_force_type), DIMENSION(:), POINTER  :: global_forces
      TYPE(section_vals_type), POINTER               :: coupling_section
      LOGICAL, INTENT(IN)                            :: my_bo_keyword
@@ -167,7 +161,6 @@ CONTAINS
      REAL(KIND=dp)    :: cbar, minao
      REAL(KIND=dp), dimension(:), allocatable    :: energy_conservation
      INTEGER, dimension(:), allocatable          :: class_forbidden_hop_tp
-     REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE   :: C_tp
      LOGICAL                                      :: analytics
      INTEGER                                      :: ELsteps   
      REAL(KIND=dp)                                :: dR, times 
@@ -176,12 +169,11 @@ CONTAINS
      REAL(kind=dp), DIMENSION(:,:), ALLOCATABLE   :: exact_forces
      LOGICAL                                      :: keyword_translate
      TYPE(sh_print_env_type)                      :: sh_print_env
-     REAL(kind=dp), DIMENSION(:,:),POINTER          :: positions_com_tp, velocities_com_tp
-     CHARACTER(LEN=default_string_length)           :: prop_wf_keyword 
-     CHARACTER(LEN=default_string_length)          :: reversal_keyword
-     real(kind=dp), DIMENSION(:,:), allocatable :: PC_allrvecs
-     LOGICAL                                      :: do_random !, correct_transfer
-     REAL(KIND=dp)                                :: sum
+     REAL(kind=dp), DIMENSION(:,:),POINTER        :: positions_com_tp, velocities_com_tp
+     CHARACTER(LEN=default_string_length)         :: prop_wf_keyword 
+     CHARACTER(LEN=default_string_length)         :: reversal_keyword
+     real(kind=dp), DIMENSION(:,:), allocatable   :: PC_allrvecs
+     LOGICAL                                      :: do_random 
 
      !> cutoff to define the neighborough list
      CALL section_vals_val_get(coupling_section,"CUT_OFF_BETWEEN_SITES",&
@@ -189,12 +181,6 @@ CONTAINS
      !> cutoff to define the neighborough list
      CALL section_vals_val_get(coupling_section,"CUT_OFF_CONNECTIVITY",&
              r_val=cutoff_connect)
-     !> Scaling factor Hab = scaling*Sab_bar
-     CALL section_vals_val_get(coupling_section,"SCALING_FACTOR",&
-             r_val=scaling)
-     !> cbar factor : Sab = cbar*Sab_bar
-     CALL section_vals_val_get(coupling_section,"CBAR",&
-             r_val=cbar)
      !minao is an atomic overlap cutoff
      CALL section_vals_val_get(coupling_section,"ATOMIC_OVERLAP_CUTOFF",&
              r_val=minao)
@@ -208,42 +194,32 @@ CONTAINS
      CALL section_vals_val_get(coupling_section,"RANDOM_DERIVATIVE", l_val=do_random)
      CALL section_vals_val_get(coupling_section,"CENTER_OF_MASS", l_val=keyword_translate)
 
-!COMMENT: if possible, transform all the mol, atoms, orb etc. in nadian,
-!aom_atoms, norbitals, etc.
+     scaling = aom_env%scaling
+     cbar = aom_env%cbar
+     atoms = aom_env%atoms !Number of atoms per site
+     natom = aom_env%natom !Total number of atoms
+     deltatMD = aom_env%deltat !Nuclear timestep
+
      !> Number of sites
      mol = nadiab ! CHANGE_AC
-     !> Number of atoms per site
-     atoms = aom_atoms ! CHANGE_AC
-    ! sh_env%atoms = atoms
      !> Number of orbitals per atom
      orb = norbitals ! CHANGE_AC
      !> Size of the vectorial space where the wavefunctions are projected
      mat = orb*mol
      !> Numbers of active atoms 
      c = mol*atoms
-     !> Numbers of atoms
-     natom = SIZE(global_forces(1)%forces,2)
-     aom_env%natom = natom
-     !> Find deltaMD, nuclear timestep, in atomic units
-     deltatMD = MDtimestep !CHANGE_AC
-     aom_env%deltat = deltatMD
      !> electronic timestep is a fraction of the molecular timestep
      deltatE = deltatMD/ELsteps !CHANGE_AC
 
      sh_print_env = aom_env%sh_print_env
      
-
-!COMMENT: one should check that all these arrays are used below (e.g. pcoefftot,
-!scoefftot and they are de-allocated at the end of the subroutine.
      ALLOCATE(positions_com_tp(3, natom))
      ALLOCATE(velocities_com_tp(3, natom))
      allocate(exact_forces(3,natom))
-     !allocate(ctin(mat))      !ctin goes into the subroutine ZGEMV
-     !allocate(ctin_after_deco(mat))
 
      !> OBTAIN COORDINATES, ENERGIES, STATES, etc. FROM PREVIOUS STEP
      CALL translate_com(positions_tp, keyword_translate, positions_com_tp, local_particles, atomic_kinds = atomic_kinds)  
-     CALL translate_com(aom_env%velocities_t, keyword_translate, velocities_com_tp, local_particles, atomic_kinds = atomic_kinds)  
+     CALL translate_com(aom_env%velocities_tp, keyword_translate, velocities_com_tp, local_particles, atomic_kinds = atomic_kinds)  
      do coord=1,3
         aom_env%crds(coord,:,1) = PACK(aom_env%rm_tm(coord,:), aom_env%ext_pres)
         aom_env%crds(coord,:,2) = PACK(aom_env%rm_t(coord,:), aom_env%ext_pres)
@@ -253,8 +229,7 @@ CONTAINS
      !ctin(:) = aom_env%ctin(:)
      aom_env%adiab_nace_t = aom_env%adiab_nace_tp
 
-     !> CALCULATE THE CENTER OF MASS
-     !> CONSTRUCT NEIGHBOURS LIST
+     !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
      CALL calc_coms_and_nlist(aom_env, atoms, mol, cutoff_sites, orb)
 
      !> CALCULATE THE HAMILTONIAN, THE STTP MATRIX AND THE NACV
@@ -269,33 +244,9 @@ CONTAINS
      !It gives us back the eigenvalues E_tp and eigenvectors C_tp
      !initialize Adiabatic energies that will be used for trivial hopping and
      !decoherence corrections
-
      CALL adiabaticity(-AIMAG(aom_env%H_tp), aom_env%C_tp, aom_env%E_tp)
-     !aom_env%E_tp = E_tp
-
-     !TO BE CHANGED BY ANTOINE
-     C_tp = aom_env%C_tp
-     !> Check if the eigenvectors have a sign change from one timestep to the
-     !others
-     !do imol=1, mol
-     !   sum = 0
-     !   do coord=1, mol
-     !      sum = sum + aom_env%C_t(coord, imol) * C_tp(coord, imol)
-     !   enddo
-     !   !print*, "AC_PHASE", imol, sum
-     !   if (sum.lt.0) then
-     !      print*, "AC_PHASE_WARNING for ", imol
-     !      C_tp(:,imol) = - C_tp(:, imol)
-     !   endif
-     !   sum = 0 
-     !   !do coord=1, mol
-     !   !   sum = sum + aom_env%C_t(coord, imol) * C_tp(coord, imol)
-     !   !enddo
-     !   !print*, "AC_PHASE", imol, sum
-     !   !if (imol.eq.active_state) print*, "AC_STATE_WARNING"
-     !enddo
-     !> calculate the adiabatic nace and get the proper order for eigenvectors.
-     !CALL calc_adiab_nace(aom_env%C_t, C_tp, deltatMD, aom_env)
+     !Calculate the overlap between C_tp and C_t, reorder state if required,
+     !calculate the nace
      CALL calc_adiab_nace(aom_env)
 
 
@@ -305,17 +256,14 @@ CONTAINS
      !used in the surf_hop_type subroutine
      aom_env%cttm(:) = aom_env%ctin(:)
      aom_env%HS_propagation = .FALSE.
-     CALL section_vals_val_get(adiab_section,"RK_PROPAGATION", &
-                                                  c_val=prop_wf_keyword)
+     CALL section_vals_val_get(adiab_section,"RK_PROPAGATION", c_val=prop_wf_keyword)
      SELECT CASE(prop_wf_keyword)                                 
      CASE("DIABATIC_RK")
            CALL propagate_wf(aom_env%ctin, aom_env, nadiab,  norbitals, ELsteps, &
-                             itimes, adiab_section, deltatMD, deltatE , times,    &
-                             mat)
+                             itimes, adiab_section, deltatMD, deltatE , times, mat)
      CASE("ADIABATIC_RK")
            CALL propagate_adiab_wf(aom_env%E_t, aom_env%E_tp, aom_env%ctin, aom_env, nadiab, norbitals, ELsteps, &
-                                   itimes, adiab_section, deltatMD, deltatE , times,  & 
-                                   mat)
+                                   itimes, adiab_section, deltatMD, deltatE , times,  mat)
      CASE("HS_CORRECTED_RK")  
            !> ADIABATIC NACV EVALUATION FOR HS CORRECTION
            CALL prop_wf_HS_corr(aom_env%ctin, aom_env, nadiab,  norbitals, ELsteps, &
@@ -342,21 +290,20 @@ CONTAINS
      !The surfacehop subroutine calculates these probabilites and decides on the
      !new (possibly unchanged) surface for simulation
      aom_env%decohere = .FALSE.
-     attempt_hop = .FALSE.
+     aom_env%attempt_hop = .FALSE.
      IF (my_test_keyword) THEN   
-        attempt_hop = .TRUE.
+        aom_env%attempt_hop = .TRUE.
         aom_env%active_state = 1
         aom_env%new_state = mod(aom_env%active_state + 1, mat) 
         IF ((aom_env%new_state).EQ.0) aom_env%new_state = mat
      ELSE IF (.NOT.my_bo_keyword) THEN ! THEN IT IS A FSSH RUN
-            call surf_hop_type(adiab_section, aom_env%C_t, C_tp,   &
+            call surf_hop_type(adiab_section, aom_env%C_t, aom_env%C_tp,   &
                                  deltatMD, aom_env%active_state, &
                                  aom_env%new_state, &
-                                 attempt_hop, &
+                                 aom_env%attempt_hop, &
                                  decohere_criterion, &
                                  sh_print_env, aom_env)
      ENDIF
-print *, "Active_state_after_surf_hop", aom_env%active_state
 
      !CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE RESULT OF THE SURFACE
      !HOP ROUTINE IS. 
@@ -366,27 +313,17 @@ print *, "Active_state_after_surf_hop", aom_env%active_state
         ENDDO
      ENDDO
      print*, "ACTIVE STATE = ", aom_env%active_state
-     call calcforces(state=aom_env%active_state,Hin=-AIMAG(aom_env%H_tp), C=C_tp, nacv=aom_env%nacv, &
+     call calcforces(state=aom_env%active_state,Hin=-AIMAG(aom_env%H_tp), C=aom_env%C_tp, nacv=aom_env%nacv, &
                             NN=aom_env%NN, atoms=atoms, & 
                            scaling=scaling, cbar=cbar, Fin=aom_env%F, forces_adiab=aom_env%forces_adiab, &
                            ext_pres=aom_env%ext_pres)
-     IF (attempt_hop) THEN
-         call calcforces(state=aom_env%new_state,Hin=-AIMAG(aom_env%H_tp), C=C_tp, nacv=aom_env%nacv, &
+     IF (aom_env%attempt_hop) THEN
+         call calcforces(state=aom_env%new_state,Hin=-AIMAG(aom_env%H_tp), C=aom_env%C_tp, nacv=aom_env%nacv, &
                                NN=aom_env%NN, atoms=atoms, & 
                               scaling=scaling, cbar=cbar, Fin=aom_env%F, forces_adiab=aom_env%forces_adiab_new, &
                               ext_pres=aom_env%ext_pres)
      ENDIF
 
-
-
-     !> APPLY DECOHERENCE CORRECTION
-     !> initialize derived type variables used in the decohere_wf subroutine
-     !aom_env%ctin=ctin
-     aom_env%ctin_before_deco = aom_env%ctin 
-     aom_env%atoms = atoms
-     aom_env%scaling = scaling
-     aom_env%cbar = cbar
-     aom_env%deltatMD = deltatMD
 
      !> PRINT
      CALL adiab_print_hamiltonian(adiab_section, -AIMAG(aom_env%H_tp), nadiab,norbitals,itimes, deltatMD)
@@ -400,27 +337,9 @@ print *, "Active_state_after_surf_hop", aom_env%active_state
         CALL adiab_print_exact_forces(adiab_section, exact_forces, natom, deltatMD, times)
      ENDIF
 
-
-     !> STORE THE COORDINATES IF NOT SUCCESSFUL RUN
+     !> TRANSLATE THE COORDINATE FOR ONE TIMESTEP
      aom_env%rm_tm      = aom_env%rm_t
      aom_env%rm_t       = positions_com_tp
-     !aom_env%ctin        = ctin
-     aom_env%attempt_hop  = attempt_hop
-     !aom_env%H_t = aom_env%H_tp
-     !aom_env%new_state = new_state
-     aom_env%Stmtm = aom_env%Stt
-     aom_env%Stt   = aom_env%Stptp
-     aom_env%Sttm  = aom_env%Stpt
-     aom_env%Stmt  = aom_env%Sttp
-     !aom_env%E_t = aom_env%E_tp
-     !aom_env%C_tp = C_tp
-     !aom_env%C_t = aom_env%C_tp
-     !aom_env%Stmtm = Stt
-     IF (attempt_hop) THEN
-         !!NB this variable
-         aom_env%scaling  = scaling
-         aom_env%cbar     = cbar
-     ENDIF
      aom_env%sh_print_env = sh_print_env
 
      !> DEALLOCATE

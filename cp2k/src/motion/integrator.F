@@ -584,7 +584,7 @@ CONTAINS
              !We save the velocities for the first timestep, to estimate the
              !position at t--1
              IF (itimes.ge.1) THEN
-                force_env%mixed_env%aom_env%velocities_t = tmp%vel
+                force_env%mixed_env%aom_env%velocities_tp = tmp%vel
              ENDIF
 
              !We calculate the forces, the Hamiltonian, propagate the wf. If we
@@ -666,6 +666,11 @@ CONTAINS
              force_env%mixed_env%aom_env%new_state = -1
              force_env%mixed_env%aom_env%successful_hop = .FALSE.
              force_env%mixed_env%aom_env%attempt_hop = .FALSE.
+
+             force_env%mixed_env%aom_env%Stmtm = force_env%mixed_env%aom_env%Stt
+             force_env%mixed_env%aom_env%Stt   = force_env%mixed_env%aom_env%Stptp
+             force_env%mixed_env%aom_env%Sttm  = force_env%mixed_env%aom_env%Stpt
+             force_env%mixed_env%aom_env%Stmt  = force_env%mixed_env%aom_env%Sttp
 
              CALL total_momentum(tmp%vel, atomic_kind_set, nparticle_kind, local_particles, force_env)
 

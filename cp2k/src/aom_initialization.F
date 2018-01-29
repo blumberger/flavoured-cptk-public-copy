@@ -230,7 +230,7 @@ CONTAINS
      ALLOCATE(aom_env%scoeffs(aom_atoms))
      allocate(aom_env%adiab_nace_t(mat,mat))
      allocate(aom_env%adiab_nace_tp(mat,mat))
-     ALLOCATE(aom_env%velocities_t(3, natom))
+     ALLOCATE(aom_env%velocities_tp(3, natom))
      aom_env%futur_decohere = .FALSE.
      aom_env%successful_hop = .FALSE.
      aom_env%attempt_hop = .FALSE.
@@ -243,6 +243,14 @@ CONTAINS
      CALL build_s_tables(file_name_s_psigma, file_name_s_ppi)
      allocate(aom_env%elements(c))
      !allocate(aom_env%adiab_nace_t(mat,mat))
+
+
+     !> Scaling factor Hab = scaling*Sab_bar
+     CALL section_vals_val_get(coupling_section,"SCALING_FACTOR",&
+             r_val=aom_env%scaling)
+     !> cbar factor : Sab = cbar*Sab_bar
+     CALL section_vals_val_get(coupling_section,"CBAR",&
+             r_val=aom_env%cbar)
 
 
 
@@ -303,25 +311,23 @@ CONTAINS
      DEALLOCATE(rng_stream)
   END SUBROUTINE create_aom_env
 
-  SUBROUTINE propagate_aom_namd_first_step(nadiab, aom_atoms, norbitals, MDtimestep, &
+  SUBROUTINE propagate_aom_namd_first_step(nadiab, aom_atoms, norbitals,  &
                                   positions_tp,  &
                                   velocities_tp,  &
                                   energies_tp,  &
                                   aom_env, itimes, &
-                                  attempt_hop, global_forces, coupling_section, &
+                                  global_forces, coupling_section, &
                                   adiab_section, my_bo_keyword,  &
                                   atomic_kinds, local_particles,                &
                                   my_test_keyword, method_keyword)
 
      INTEGER, INTENT(IN)                            :: nadiab,  norbitals 
      INTEGER, INTENT(IN)                            :: aom_atoms
-     REAL(KIND=dp), INTENT(OUT)                     :: MDtimestep
      REAL(kind=dp), DIMENSION(:,:),POINTER          :: positions_tp
      REAL(kind=dp), DIMENSION(:,:),POINTER          :: velocities_tp
      REAL(kind=dp), DIMENSION(:),  POINTER          :: energies_tp
      TYPE(aom_env_type), INTENT(INOUT)              :: aom_env
      INTEGER, POINTER                               :: itimes
-     LOGICAL, INTENT(OUT)                           :: attempt_hop
      TYPE(mixed_force_type), DIMENSION(:), POINTER  :: global_forces
      TYPE(section_vals_type), POINTER               :: coupling_section
      LOGICAL, INTENT(IN)                            :: my_bo_keyword
@@ -335,12 +341,9 @@ CONTAINS
      CHARACTER(len=*), PARAMETER :: routineN ='propagate_aom_namd_first_step', &
      routineP = moduleN//':'//routineN
 
-     !TYPE(sh_env_type)                              :: sh_env
-     REAL(kind=dp), DIMENSION(:,:),POINTER          :: my_forces_adiab
      integer :: coord, t2
      integer :: mol, i, j, k, l, m, d, atoms, c,  first_diabat, active_state, mat, orb
      integer, dimension(:,:), allocatable :: NN,  aneighbour, bneighbour  
-     !integer, dimension(:,:,:,:), allocatable :: neighbourlist
      REAL(KIND=dp) :: cutoff_sites, cutoff_connect, scaling, deltatMD, deltatE
      REAL(KIND=dp) :: S
      REAL(KIND=dp)    :: cbar, minao
@@ -353,8 +356,6 @@ CONTAINS
      REAL(KIND=dp), dimension(:,:), allocatable ::  Atp, Btp, coms, siteenergies
      REAL(KIND=dp), DIMENSION(:), ALLOCATABLE ::  scoefftot
      REAL(KIND=dp), DIMENSION(:,:,:), ALLOCATABLE :: F
-     REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE   :: C_tp
-     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE     :: E_tp
      LOGICAL                                      :: decohere, analytics
      INTEGER                                      :: new_state , ELsteps   
      REAL(KIND=dp)                                :: dR, times 
@@ -373,7 +374,7 @@ CONTAINS
      REAL(KIND=dp), dimension(:), allocatable    :: energy_conservation
      INTEGER, dimension(:), allocatable          :: class_forbidden_hop_tp
 
-     NULLIFY(my_forces_adiab, positions_com_tp, velocities_com_tp)
+     NULLIFY(positions_com_tp, velocities_com_tp)
 
      !> cutoff to define the neighborough list
      CALL section_vals_val_get(coupling_section,"CUT_OFF_BETWEEN_SITES",&
@@ -381,12 +382,6 @@ CONTAINS
      !> cutoff to define the neighborough list
      CALL section_vals_val_get(coupling_section,"CUT_OFF_CONNECTIVITY",&
              r_val=cutoff_connect)
-     !> Scaling factor Hab = scaling*Sab_bar
-     CALL section_vals_val_get(coupling_section,"SCALING_FACTOR",&
-             r_val=scaling)
-     !> cbar factor : Sab = cbar*Sab_bar
-     CALL section_vals_val_get(coupling_section,"CBAR",&
-             r_val=cbar)
      !minao is an atomic overlap cutoff
      CALL section_vals_val_get(coupling_section,"ATOMIC_OVERLAP_CUTOFF",&
              r_val=minao)
@@ -400,20 +395,20 @@ CONTAINS
      CALL section_vals_val_get(coupling_section,"RANDOM_DERIVATIVE", l_val=do_random)
      CALL section_vals_val_get(coupling_section,"CENTER_OF_MASS", l_val=keyword_translate)
 
+     scaling = aom_env%scaling
+     cbar = aom_env%cbar
+     atoms = aom_env%atoms !Number of atoms per site
+     natom = aom_env%natom !Total number of atoms
+     deltatMD = aom_env%deltat !Nuclear timestep
+
      !> Number of sites
      mol = nadiab ! CHANGE_AC
-     !> Number of atoms per site
-     atoms = aom_atoms ! CHANGE_AC
      !> Number of orbitals per atom
      orb = norbitals ! CHANGE_AC
      !> Size of the vectorial space where the wavefunctions are projected
      mat = orb*mol
      !> Numbers of active atoms 
      c = mol*atoms
-     !> Numbers of atoms
-     natom = SIZE(global_forces(1)%forces,2)
-     !> Find deltaMD, nuclear timestep, in atomic units
-     deltatMD = MDtimestep !CHANGE_AC
      !> electronic timestep is a fraction of the molecular timestep
      deltatE = deltatMD/ELsteps !CHANGE_AC
 
@@ -422,8 +417,6 @@ CONTAINS
      sh_print_env%norbitals = orb
      sh_print_env%deltatMD = deltatMD
      ALLOCATE(sh_print_env%adiab_energies_t(mat))
-     ALLOCATE(E_tp(mat))
-     ALLOCATE(my_forces_adiab(3,natom))
      ALLOCATE(positions_com_tp(3, natom))
      ALLOCATE(velocities_com_tp(3, natom))
      allocate(exact_forces(3,natom))
@@ -613,18 +606,7 @@ CONTAINS
      !> CONVERT NACV AND CALCULATE EIGENPROPERTIES 
      !> THESE ASSOCIATIONS ARE NEEDED FOR THE NACV CALC
      nacv = cbar*nacv
-     CALL adiabaticity(-AIMAG(H_tp), C_tp, E_tp)
-     aom_env%E_t = E_tp
-!print *, "aom_env%E_t", aom_env%E_t
-     aom_env%C_t = C_tp
-!print *, "aom_env%C_t", aom_env%C_t
-     aom_env%E_tp = E_tp
-     aom_env%Stptp = Stptp
-     aom_env%scaling  = scaling
-     aom_env%cbar     = cbar
-     aom_env%nacv = nacv
-     aom_env%NN = NN
-     
+     CALL adiabaticity(-AIMAG(H_tp), aom_env%C_tp, aom_env%E_tp)
      
      
      !> first part: CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE RESULT OF THE SURFACE
@@ -636,29 +618,28 @@ CONTAINS
      ENDDO
 
      !> PRINT 
-     CALL adiab_print_adiabat_energies(adiab_section, E_tp, nadiab, deltatMD, times)
+     CALL adiab_print_adiabat_energies(adiab_section, aom_env%E_tp, nadiab, deltatMD, times)
      call adiab_print_pvecs(adiab_section, PC_allrvecs, itimes, deltatMD, times, atoms, nadiab)
      sh_print_env%times = times
      sh_print_env%times = DBLE(itimes)
      CALL adiab_print_hamiltonian(adiab_section, -AIMAG(H_tp), nadiab,norbitals,itimes, deltatMD)
      CALL adiab_print_nacv(adiab_section, nacv, nadiab, norbitals, aom_atoms,itimes, deltatMD)
 
-
      !> INITIALIZE  
      IF  (.NOT. my_test_keyword) THEN
          decohere = .FALSE.
          aom_env%decohere = .FALSE.
-         attempt_hop = .FALSE.
+         aom_env%attempt_hop = .FALSE.
          CALL section_vals_val_get(adiab_section, "INITIALIZATION", c_val=keyword_init)
          CALL section_vals_val_get(adiab_section, "REPRESENTATION", c_val=keyword_basis_repr)
          SELECT CASE(keyword_init)
          CASE("DIABATIC")
              CALL section_vals_val_get(adiab_section,"FIRST_DIABAT", &
                                        i_val=first_diabat)
-             CALL choose_firstadiabat(C_tp, first_diabat, sh_print_env, active_state, aom_env) 
-!an active state in needed for the nuclear propagation but the wafunction has to
-!start form an eigenvector of the hamiltonian in the diab_basis
-            SELECT CASE(keyword_basis_repr)
+             CALL choose_firstadiabat(aom_env%C_tp, first_diabat, sh_print_env, active_state, aom_env) 
+             !an active state in needed for the nuclear propagation but the wafunction has to
+             !start form an eigenvector of the hamiltonian in the diab_basis
+             SELECT CASE(keyword_basis_repr)
              CASE("DIABATIC_BASIS")
                  ctin(:) = CMPLX(0.0D0, 0.0D0,dp)
                  !> WARNING: THIS LINE HAS TO BE MODIFIED TO INCLUDE MORE ORBITAL PER MOLECULE
@@ -667,20 +648,19 @@ CONTAINS
              !> CALCULATE NACV FOR ADIAB PROPAGATION AT t=0
              CALL nacv_first_ts(aom_env, natom, mat, velocities_com_tp) 
 !ONLY FOR THE TEST
-                 ctin(:) = C_tp(first_diabat,:)
+                 ctin(:) = aom_env%C_tp(first_diabat,:)
              CASE DEFAULT
                  CPABORT("Choose REPRESENTATION, only: DIABATIC_BASIS or ADIABATIC_BASIS")
              END SELECT
          CASE("ADIABATIC")
              CALL section_vals_val_get(adiab_section,"FIRST_ADIABAT",&
                                        i_val=active_state)
-              
              SELECT CASE(keyword_basis_repr)
              CASE("DIABATIC_BASIS")
-                 ctin(:) = C_tp(:, active_state)
+                 ctin(:) = aom_env%C_tp(:, active_state)
              CASE("ADIABATIC_BASIS")
-             !> CALCULATE NACV FOR ADIAB PROPAGATION AT t=0
-             CALL nacv_first_ts(aom_env, natom, mat, velocities_com_tp) 
+                 !> CALCULATE NACV FOR ADIAB PROPAGATION AT t=0
+                 CALL nacv_first_ts(aom_env, natom, mat, velocities_com_tp) 
                  ctin(:) = CMPLX(0.0D0, 0.0D0,dp)
                  !> WARNING: THIS LINE HAS TO BE MODIFIED TO INCLUDE MORE ORBITAL PER MOLECULE
                  ctin(active_state) = CMPLX(1.0D0, 0.0D0,dp)
@@ -690,57 +670,39 @@ CONTAINS
          CASE DEFAULT
              CPABORT("INITIALIZATION implemented: DIABATIC, ADIABATIC")
          END SELECT
-         DO t2=1,int(deltatMD/deltatE)
-                    times = DBLE(itimes) + (t2-1)*1/DBLE(ELsteps)
-                    CALL adiab_print_coeff(adiab_section, ctin,nadiab, norbitals,itimes, deltatMD, times)
-                    CALL adiab_print_pop(adiab_section, abs(ctin),nadiab,norbitals,itimes,deltatMD, times)
-                    CALL adiab_print_matrix_density(adiab_section, ctin, nadiab,norbitals,itimes, &
-                                                    deltatMD, times)
-         ENDDO
+         times = 0.0
+         CALL adiab_print_coeff(adiab_section, ctin,nadiab, norbitals,itimes, deltatMD, times)
+         CALL adiab_print_pop(adiab_section, abs(ctin),nadiab,norbitals,itimes,deltatMD, times)
+         CALL adiab_print_matrix_density(adiab_section, ctin, nadiab,norbitals,itimes, &
+                                         deltatMD, times)
      ELSE 
-         attempt_hop = .TRUE.
+         aom_env%attempt_hop = .TRUE.
          active_state = 1
          new_state = mod(active_state + 1, mat) 
          IF ((new_state).EQ.0) new_state = mat
      ENDIF 
     
 
-
-
      !> second part CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE
      !RESULT OF THE SURFACE HOP ROUTINE IS.
      print*, "ACTIVE STATE = ", active_state
-     call calcforces(state=active_state,Hin=-AIMAG(H_tp), C=C_tp, nacv=nacv, NN=NN, atoms=atoms, & 
-                     scaling=scaling, cbar=cbar, Fin=F, forces_adiab=my_forces_adiab, &
+     call calcforces(state=active_state,Hin=-AIMAG(H_tp), C=aom_env%C_tp, nacv=nacv, NN=NN, atoms=atoms, & 
+                     scaling=scaling, cbar=cbar, Fin=F, forces_adiab=aom_env%forces_adiab, &
                      ext_pres=aom_env%ext_pres)
      IF (analytics) THEN
         times = DBLE(itimes)
         CALL adiab_print_exact_forces(adiab_section, exact_forces, natom, deltatMD, times)
      ENDIF
 
-     !> APPLY DECOHERENCE CORRECTION
-     !> initialize derived type variables
-     !ALLOCATE(sh_env%ctin(mat))
-     !sh_env%E_tp=E_tp
-     !sh_env%ctin=ctin
-     !sh_env%active_state=active_state
-     !CALL decohere_wf(adiab_section, sh_print_env, aom_env,sh_env, deco_keyword, itimes, successful_hop, &
-     !                 deltatMD, mol,velocities_com_tp, local_particles, atomic_kinds, nparticle_kind,    &
-     !                 atomic_kind_set, K_tot, aom_env%ext_pres)
-     !ctin=sh_env%ctin
-
-     CALL section_vals_val_get(adiab_section,"RK_PROPAGATION", &
-                                                  c_val=prop_wf_keyword)
+     CALL section_vals_val_get(adiab_section,"RK_PROPAGATION", c_val=prop_wf_keyword)
      SELECT CASE(prop_wf_keyword)                                 
      CASE("DIABATIC_RK")
      CASE("ADIABATIC_RK")
      CASE("HS_CORRECTED_RK")  
           !> CALC ARRAY OF CLASSICALLY FORBIDDEN HOPS
-          CALL classically_forbidden_hops(active_state, aom_env, mat, E_tp, &
+          CALL classically_forbidden_hops(active_state, aom_env, mat, aom_env%E_tp, &
                   velocities_com_tp, local_particles, atomic_kinds, nparticle_kind, &
                           atomic_kind_set, energy_conservation, class_forbidden_hop_tp)
-
-          
           aom_env%class_forbidden_hop_t = class_forbidden_hop_tp
      CASE DEFAULT                                           
            CPABORT("There is no method to propagate the wavefunction.") 
@@ -748,30 +710,23 @@ CONTAINS
      
 
      !> STORE THE COORDINATES IF NOT SUCCESSFUL RUN
-     aom_env%forces_adiab=my_forces_adiab
-     
      aom_env%rm_tm      = positions_com_tp - velocities_com_tp*deltatMD
      aom_env%rm_t       = positions_com_tp
-     !aom_env%neighbourlist = neighbourlist
      aom_env%sh_print_env = sh_print_env
      aom_env%ctin        = ctin
-     aom_env%attempt_hop  = attempt_hop
      aom_env%H_t = H_tp
      aom_env%nacv        = nacv
      aom_env%new_state = new_state
      aom_env%active_state = active_state
      !> IMPORTANT FOR THE FIRST TIME STEP
      aom_env%Stt = Stptp
-
-     !aom_env%C_t = force_env%mixed_env%aom_env%C_tp
-     !aom_env%H_t = force_env%mixed_env%aom_env%H_tp
-     !aom_env%E_t = force_env%mixed_env%aom_env%E_tp
      aom_env%old_state = aom_env%active_state
-     aom_env%active_state = -1
+     !aom_env%active_state = -1
      aom_env%new_state = -1
      aom_env%successful_hop = .FALSE.
-     aom_env%attempt_hop = .FALSE.
-
+     !aom_env%Stptp = Stptp
+     aom_env%nacv = nacv
+     aom_env%NN = NN
 
 
     !> DEALLOCATE
@@ -790,7 +745,6 @@ CONTAINS
     deallocate(exact_forces)
     deallocate(F)
 
-    DEALLOCATE(my_forces_adiab)
     DEALLOCATE(positions_com_tp)
     DEALLOCATE(velocities_com_tp)
 
