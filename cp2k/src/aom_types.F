@@ -137,16 +137,12 @@ IMPLICIT NONE
      REAL(KIND = dp), DIMENSION(:), POINTER :: energies_t   
      REAL(KIND = dp), DIMENSION(:), POINTER :: adiab_energies_t 
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER :: F
-!     REAL(kind=dp), DIMENSION(:,:),POINTER      :: forces_active_state
-     !REAL(kind=dp), DIMENSION(:,:),POINTER      :: exact_forces
      REAL(KIND=dp), dimension(:,:), POINTER :: At, Atm, Atp, Bt, Btm, & 
                                                          Btp, siteenergies
      REAL(KIND = dp)                        :: kinetic_energy
      REAL(KIND = dp)                        :: delta_energy, scaling, cbar, deltat
 !> Old and new state number
-     INTEGER                                :: new_state
-     INTEGER                                :: active_state, active_state_past
-     INTEGER                                :: old_state, enforced_active_state
+     INTEGER                                :: new_state, old_state, active_state
      LOGICAL                                :: overlap_over_thresh
      LOGICAL                                :: decohere, decoherence
      REAL(KIND=dp), dimension(:,:), POINTER :: coms
@@ -155,8 +151,6 @@ IMPLICIT NONE
 !> To store the previous overlap matrix
      REAL(KIND=dp), dimension(:,:), POINTER :: Stt, Stmt, Sttm, Stmtm, &
                                              Stptp, Sttp, Stpt
-!     REAL(KIND=dp), dimension(:,:), POINTER :: Stt, Sttp, Stptp, Stpt, Stmt,
-!Sttm, Stmtm
 !> To store some connectivity information
      integer, dimension(:,:), POINTER       :: connlist1, connlist2, bneighbour
 !> To store the previous coefficients

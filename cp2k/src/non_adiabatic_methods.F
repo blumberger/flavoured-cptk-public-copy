@@ -175,10 +175,10 @@ CONTAINS
               aom_env%forces_adiab = aom_env%forces_adiab_new
               energy_adiabat = aom_env%energy_new
               aom_env%futur_decohere = .TRUE.
-              aom_env%successful_hop = .FALSE.
+              !aom_env%successful_hop = .FALSE.
               aom_env%forces_adiab_new = 0.0D0
-              aom_env%new_state = -1
-              aom_env%old_state = -1
+              !aom_env%new_state = -1
+              !aom_env%old_state = -1
            ELSE
               !> Main CALL: calculate the Hamiltonian, propagate the electronic dynamics
               CALL construct_ham_X_SH(nadiab, aom_atoms, norbitals, MDtimestep, &

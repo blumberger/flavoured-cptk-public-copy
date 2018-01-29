@@ -439,7 +439,6 @@ end subroutine diab_to_adiab
 
 
 SUBROUTINE adiab_overlap_check(aom_env, changed_state, itimes)
-
     TYPE(aom_env_type)                         :: aom_env
     INTEGER, OPTIONAL, intent(in)               :: changed_state, itimes  
 
@@ -449,7 +448,6 @@ SUBROUTINE adiab_overlap_check(aom_env, changed_state, itimes)
     REAL(KIND=dp), dimension(:), allocatable    :: overlaps
     integer                                     :: mat, i, j, res_mod, state, &
                                                      past_state
-                                                    !enforced_active_state
     REAL(KIND=dp)                               :: sum_ov, max_val, resid 
 !!ADD OPTIONAL
 
@@ -459,7 +457,6 @@ SUBROUTINE adiab_overlap_check(aom_env, changed_state, itimes)
 
     overlaps = 0.0D0
     
-    !sum_ov = abs(aom_env%C_t(:, aom_env%old_state)*aom_env%C_tp(:, aom_env%active_state))**2
     
     if (PRESENT(changed_state)) then
         past_state = changed_state
@@ -484,7 +481,6 @@ print *, "OVERALP_SQUARED", past_state, aom_env%active_state, overlaps(1)
   
      if ( overlaps(1) .gt. 0.5) then
 !        print *, "CARRY_ON_THE_SAME_STATE"
-         aom_env%enforced_active_state = past_state
          aom_env%overlap_over_thresh = .True.
      else
 !        print *, "POSSIBLE_TRIVIAL_CROSSING"
@@ -519,13 +515,11 @@ print *, "OVERALP_SQUARED", past_state, aom_env%active_state, overlaps(1)
                if (max_val .le. 0.5) then 
                   print *, "WARNING: MORE THAN TWO STATES CROSS"
                end if 
-               aom_env%enforced_active_state = state
                exit
            end if
         end do
      end if
 
-!print *, "LAST_ENFORCED_ACTIVE", aom_env%enforced_active_state
 !print *, "OVERALP_CALCC", overlaps
 if (present(itimes)) then 
 print *, "MAX_OVERLAP", itimes, overlaps(1), maxval(overlaps(:))
@@ -540,10 +534,10 @@ print *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, past_state)*&
 print *, "STATE_TOGOTO", past_state, aom_env%active_state
 else
 print *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, past_state)*&
-                            aom_env%C_t(:, past_state))), &
-            maxloc(abs(aom_env%C_tp(:,aom_env%enforced_active_state)*&
-                            aom_env%C_tp(:,aom_env%enforced_active_state)))
-print *, "STATE_TOGOTO", past_state, aom_env%enforced_active_state
+                            aom_env%C_t(:, past_state)))
+!            maxloc(abs(aom_env%C_tp(:,aom_env%enforced_active_state)*&
+!                            aom_env%C_tp(:,aom_env%enforced_active_state)))
+!print *, "STATE_TOGOTO", past_state, aom_env%enforced_active_state
 end if
 
     deallocate(overlaps)
@@ -596,37 +590,15 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         allocate(cttm_ad(mol)) 
         ALLOCATE(sh_print_env%proba(mol))
 
-        !> choose the correct state order for the active state using the overlap criteria
-        CALL section_vals_val_get(adiab_section,"REORDERING_STATES_USING_OVERLAP", l_val=reordering_states_keyword)
-        aom_env%reorder = reordering_states_keyword
-        if (aom_env%reorder) then 
-            CALL adiab_overlap_check(aom_env)
-            my_old_state = aom_env%enforced_active_state
-        print *, "old_state", old_state
-        print *, "my_old_state", my_old_state
-        print *, "aom_env%enforced_active_state", aom_env%enforced_active_state
-        else 
-            my_old_state = old_state
-        end if   
-
-        if (PRESENT(overlap_key) .and. aom_env%reorder) then
-            !CALL adiab_overlap_check(aom_env)
-            state_min = aom_env%enforced_active_state
-        else if (PRESENT(overlap_key) .and. .not.aom_env%reorder) then
-            CALL adiab_overlap_check(aom_env)
-            state_min = aom_env%enforced_active_state
-         !TO BE ADJUSTED
-         sh_print_env%enermin = 0.0D0
-        else
+        !CALL section_vals_val_get(adiab_section,"REORDERING_STATES_USING_OVERLAP", l_val=reordering_states_keyword)
              do i=1,mol
                      if (i .ne. my_old_state) then 
-                             enerdiff(i) = abs(aom_env%E_tp(i) - aom_env%E_tp(my_old_state)) 
-                     else if (i .eq. my_old_state) then 
+                             enerdiff(i) = abs(aom_env%E_tp(i) - aom_env%E_tp(aom_env%active_state)) 
+                     else if (i .eq. aom_env%active_state) then 
                              enerdiff(my_old_state) = 0.0D0
                      end if
              end do
-            
-             if (enerdiff(1) == enerdiff(my_old_state)) then
+             if (enerdiff(1) == enerdiff(aom_env%active_state)) then
                      min = enerdiff(2)
                      do i= 3,mol
                             if (enerdiff(i) < min .and. i .ne. my_old_state) then
@@ -643,32 +615,15 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
                              end if          
                      end do
              end if
-            
-            
              do i =1,mol
                      if (enerdiff(i) == min) then
                             state_min = i
                      end if
              end do
-            
              sh_print_env%enermin = min
-         end if
 
-!> choose the correct state order for the active state using the overlap criteria
- CALL section_vals_val_get(adiab_section,"REORDERING_STATES_USING_OVERLAP", l_val=reordering_states_keyword)
- aom_env%reorder = reordering_states_keyword
-aom_env%reorder = .TRUE.
- if (aom_env%reorder) then 
-    my_old_state = aom_env%enforced_active_state
-print *, "old_state", old_state
-print *, "my_old_state", my_old_state
-print *, "aom_env%enforced_active_state", aom_env%enforced_active_state
- else 
-    my_old_state = old_state
- end if   
-
-!if the propagation occurs in the diabatic basis, transfor diabatic coefficients
-!into adiabatic coefficients
+        !if the propagation occurs in the diabatic basis, transfor diabatic coefficients
+        !into adiabatic coefficients
         CALL section_vals_val_get(adiab_section,"REPRESENTATION", &
                                                      c_val=wfpropag_keyword)
         SELECT CASE(wfpropag_keyword)
@@ -687,30 +642,28 @@ print *, "aom_env%enforced_active_state", aom_env%enforced_active_state
                CPABORT("There is no method to propagate the wavefunction.")
         END SELECT
 
-!print*, "AC_COEFF_ACTIVE", cstate
+
         do i=1,mol
                !construct state density for t present and t-deltat from the active state to
                !other state
-                ak(i) = ct(i)*conjg(cstate)
-                akttm(i) = cttm_ad(i)*conjg(cstate_tm)
-               ! b(i) = -2.0D0*REAL(conjg(ak(i))*aom_env%adiab_nace_tp(i,old_state))
-      !>assign 0.0 to b(i) if the hop is forbidden
+                ak(i) = ct(i)*conjg(ct(aom_env%active_state))
+                akttm(i) = cttm_ad(i)*conjg(cttm_ad(aom_env%active_state))
+                !>assign 0.0 to b(i) if the hop is forbidden
                 if (aom_env%HS_propagation .and. &
                               (i .eq. aom_env%class_forbidden_hop_t(i))) then
                    b(i) = 0.0D0 
                 else 
-                   b(i) = -2.0D0*REAL(conjg(ak(i))*aom_env%adiab_nace_tp(i,old_state))
+                   b(i) = -2.0D0*REAL(conjg(ak(i))*aom_env%adiab_nace_tp(i,aom_env%active_state))
                 end if
         end do
 
     !calc exact total surface hopping probability (also termed g_tot) 
     !according to Prezhdo and Wang 2014
-
     !>in this case we need to use the new enforced state to avoid discontinuity
     !in the time derivative
         ex_prob = (abs(akttm(old_state))- abs(ak(my_old_state)))/abs(akttm(old_state))
         sh_print_env%exprob = ex_prob 
-!print *, "TO_TRY_my_old_state", my_old_state
+
     ! calculate sumg that can also be negative because each individual probability
     ! (flux) could be negative 
         sumg = 0.0D0
@@ -727,27 +680,21 @@ print *, "aom_env%enforced_active_state", aom_env%enforced_active_state
                 end if
         end do
         sh_print_env%sumflux   = sumg
-g_before = g
-!EFFECTIVE TRIVIAL CROSSINGS CORRECTION
+
+        !EFFECTIVE TRIVIAL CROSSINGS CORRECTION
         trivial_correction = .FALSE.
         err = abs(sumg - ex_prob)
         if (err >= 0.0D0) then      !WITHOUT THRESHOLD
                 !trivial_correction = .TRUE.
                 trivial_correction = (state_min.NE.my_old_state)
-print *, "trivial_correction", trivial_correction
-print*, "ex_prob", ex_prob
-print*, "sumg", sumg
                  if (trivial_correction) then  
-print*, state_min
-print*, "g(state_min)", g(state_min)               
                  g_exa = ex_prob - sumg + g(state_min)
                                 g(state_min) = g_exa
-print*, "g(state_min)", g(state_min)               
                  end if
         end if
 
-g_after = g
-!! CORRECTION FOR NEGATIVE NUMBER
+
+       !CORRECTION FOR NEGATIVE NUMBER
        correct_for_negative = .FALSE.
        do i =1,mol
                 if (g(i) < 0.0D0) then
@@ -756,9 +703,9 @@ g_after = g
                 end if
        end do
 
-!! G RENORMALIZATION
-!        !due to finite timestep, sometimes the probabilities may sum to greater than 1
-!        !if this happens, rescale them down to sum = 1
+       !NORMALIZATION
+       !due to finite timestep, sometimes the probabilities may sum to greater than 1
+       !if this happens, rescale them down to sum = 1
        sumg = 0.0D0
        do i=1,mol
                if (i .ne. my_old_state) then
@@ -770,25 +717,19 @@ g_after = g
                        g(i) = g(i)/sumg
                        g(my_old_state) = 0.0D0
                end do
-!> CHANGE_AC
                sh_print_env%renorm = .TRUE.
                sh_print_env%sumprob   = sumg
        else
-!> CHANGE_AC
                sh_print_env%renorm = .FALSE.
                sh_print_env%sumprob   = sumg
                g(my_old_state) = 1.0D0 - sumg
        end if
-g_renorm = g
-!> CHANGE_AC
-        sh_print_env%proba     = g
+       sh_print_env%proba     = g
 
         !do i=1, mol
         !   print *, "AC_TRIVIAL", g_before(i), g_after(i), g_renorm(i)
         !enddo
-!print *, "g_AFTER_TRIVIAL", g
-!to move on in the trivial hopping correction we use rescaled g to avoid
-!unphysical number larger than 1. 
+
 
         hop = next_random_number(aom_env%rng_stream)
 print *, "RANDOM_NUMBER_HOPPING_PROBA", hop
@@ -836,10 +777,6 @@ print *, "ATTEMPTED_HOP"
 
         CALL adiab_print_sh_info(sh_print_env, keyword = 'TULLY_TEST') 
 
-        if (aom_env%reorder) then
-            old_state = my_old_state
-        end if
-
         DEALLOCATE(sh_print_env%proba)
         DEALLOCATE(enerdiff)
         deallocate(ak)
@@ -859,7 +796,7 @@ subroutine calc_adiab_nace(aom_env)
 
         integer :: i, j, mol, k, l, new_index
         REAL(KIND=dp), dimension(:,:), allocatable :: T1, T2, DT, TST, TDT, DS, DC
-        REAL(KIND=dp), dimension(:,:), allocatable :: adiab_overlap, identity
+        REAL(KIND=dp), dimension(:,:), allocatable :: adiab_overlap
         REAL(KIND=dp), dimension(:,:), allocatable :: C1, C2
         INTEGER, dimension(:),  allocatable        :: map_new2old, map_old2new, basic
         INTEGER, dimension(:),  allocatable        :: not_associated, zeros
@@ -906,7 +843,6 @@ subroutine calc_adiab_nace(aom_env)
  
         !> 2. Check reordering of eigenvectors between the different timestep.
         ALLOCATE(adiab_overlap(mol, mol))
-        ALLOCATE(identity(mol, mol))
         ALLOCATE(C1(mol, mol))
         ALLOCATE(C2(mol, mol))
         ALLOCATE(map_new2old(mol))
@@ -922,19 +858,14 @@ subroutine calc_adiab_nace(aom_env)
         zeros = 0
         basic = (/( i, i=1, mol )/)
         threshold = 0.1
+!> First, we associate the new state i with the old state k if overlap is above
+!> 1 - threshold
         do i=1, mol
-           !if (basic(i).GT.0) THEN
-           !   my_threshold = threshold
-           !else
-           !   my_threshold = 0.5
-           !endif
            max_val = 0.0
            do j= 1, mol
               adiab_overlap(i,j) = 0.0
-              !identity(i,j) = 0.0
               do k = 1, mol
                  adiab_overlap(i,j) = adiab_overlap(i,j) + C2(k,i)*C1(k,j)
-                 !identity(i,j) = identity(i,j) + C2(k,i)*C2(k,j)
               enddo
               if (abs(adiab_overlap(i,j)).GE.abs(max_val)) THEN
                  max_val = adiab_overlap(i,j)
@@ -943,13 +874,7 @@ subroutine calc_adiab_nace(aom_env)
            enddo
            if ( abs( max_val**2 - 1 ).LT.threshold) then
               map_new2old(i) = new_index
-              map_old2new(new_index) = i
-              !if (i.gt.new_index) then
-              !   if (basic(new_index).NE.(-1)) then
-              !      map_new2old(new_index) = i
-              !   endif
-              !endif
-              !basic(new_index) = -1
+              map_old2new( map_new2old(i) ) = i
            endif
            print_here = .TRUE.
            if (print_here) then
@@ -963,23 +888,26 @@ subroutine calc_adiab_nace(aom_env)
                  endif
               endif
            endif
-           !print*, "adiab_overlap", adiab_overlap(i,:)
-           !print*, "identity", identity(i,:)
         enddo
         IF (ANY(map_new2old.NE.basic)) print*, "AC_MAP_CHANGED", map_new2old
 
+!> If we associate state i with state j, we try to associate j with if if the
+!> overlap is above 0.5
         IF (ANY(map_new2old.EQ.zeros)) THEN
          do i=1,mol
             IF ((map_new2old(i).EQ.0).AND.(map_old2new(i).NE.0)) THEN
 print*, "OVERLAP IS: ", adiab_overlap(i, map_old2new(i))
                IF ( abs( (adiab_overlap(i, map_old2new(i)))**2 - 1 ).LT.0.5 ) THEN
                   map_new2old(i) = map_old2new(i)
+                  map_old2new( map_new2old(i) ) = i
                ENDIF
             ENDIF
          enddo
         IF (ANY(map_new2old.NE.basic)) print*, "AC_MAP_CHANGED_AGAIN", map_new2old
        ENDIF
 
+!> Finally, we associate the not associate j with the remaining j state by order
+!> of energy
         IF (ANY(map_new2old.EQ.zeros)) THEN
          k = 1
          do i=1, mol
@@ -997,22 +925,31 @@ print*, "OVERLAP IS: ", adiab_overlap(i, map_old2new(i))
                   k = k +1
                endif
          enddo
-
         j = 1
         do i=1, mol
            if (map_new2old(i).EQ.0) then
               map_new2old(i) = not_associated(j)
+              map_old2new( map_new2old(i) ) = i
               j = j+1
            endif
         enddo 
-            
-        IF (ANY(map_new2old.NE.basic)) print*, "AC_MAP_FINAL", map_new2old
-       ENDIF
-
-        IF (SUM(map_new2old).NE.( mol*(mol+1)/2 )) THEN
-           CPABORT("Problem in the mapping between old and new states.")
+        IF (ANY(map_new2old.NE.basic)) THEN 
+           print*, "AC_MAP_FINAL", map_new2old
+           print*, "AC_MAP_INVERSE_FINAL", map_old2new
         ENDIF
-print*, "  "
+       ENDIF
+       IF (SUM(map_new2old).NE.( mol*(mol+1)/2 )) THEN
+           CPABORT("Problem in the mapping between old and new states.")
+       ENDIF
+       !> End of 2.
+
+
+
+        !> 3. Reassociate state active_state
+        !aom_env%active_state = map_old2new(aom_env%old_state) 
+        aom_env%active_state = aom_env%old_state 
+
+
         allocate(DC(mol,mol))
         DC = (1.0D0/deltat)*(C2 - C1)
         do i=1,mol
@@ -1021,10 +958,10 @@ print*, "  "
                         do k=1,mol
                                 aom_env%adiab_nace_tp(i,j) = & 
                                         aom_env%adiab_nace_tp(i,j) + C2(k,i)*DC(k,j)
-                                !do l=1,mol
-                                !        aom_env%adiab_nace_tp(i,j) = & 
-                                !    aom_env%adiab_nace_tp(i,j) + C2(k,i)*C2(l,j)*(TST(k,l) + TDT(k,l))
-                                !end do
+                                do l=1,mol
+                                        aom_env%adiab_nace_tp(i,j) = & 
+                                    aom_env%adiab_nace_tp(i,j) + C2(k,i)*C2(l,j)*(TST(k,l) + TDT(k,l))
+                                end do
                         end do
                 end do
                 !print*, "nace", aom_env%adiab_nace_tp(i,:)
@@ -1567,7 +1504,7 @@ subroutine calcforces(state, Hin, C, nacv, NN, atoms, scaling, cbar, Fin, forces
         REAL(KIND=dp), dimension(:,:), POINTER                  :: forces_adiab
         LOGICAL, dimension(:), INTENT(IN)       :: ext_pres
         LOGICAL, INTENT(IN), OPTIONAL  :: analytics
-        REAL(KIND=dp), dimension(:,:), INTENT(OUT), OPTIONAL :: exact_forces
+        REAL(KIND=dp), dimension(:,:),OPTIONAL, INTENT(OUT) :: exact_forces
 
         CHARACTER(len=*), PARAMETER :: routineN ='calcforces', &
                                routineP = moduleN//':'//routineN
@@ -1824,7 +1761,7 @@ print *, "RANDOM_NUMBER_FISRT_ADIAB", random
               !rescale_factor = SQRT(  delta_energy /kinetic_energy_prime )
               !velocities = rescale_factor*velocities
               force_env%mixed_env%aom_env%successful_hop = .TRUE.
-              force_env%mixed_env%aom_env%old_state      = force_env%mixed_env%aom_env%active_state
+              !force_env%mixed_env%aom_env%old_state      = force_env%mixed_env%aom_env%active_state
               force_env%mixed_env%aom_env%active_state   = force_env%mixed_env%aom_env%new_state
               force_env%mixed_env%aom_env%kinetic_energy = kinetic_energy_prime
               force_env%mixed_env%aom_env%delta_energy   = delta_energy
@@ -1851,7 +1788,7 @@ print *, "RANDOM_NUMBER_FISRT_ADIAB", random
               !rescale_factor = SQRT(  delta_energy /kinetic_energy_prime )
               !velocities = rescale_factor*velocities
               force_env%mixed_env%aom_env%successful_hop = .TRUE.
-              force_env%mixed_env%aom_env%old_state      = force_env%mixed_env%aom_env%active_state
+              !force_env%mixed_env%aom_env%old_state      = force_env%mixed_env%aom_env%active_state
               force_env%mixed_env%aom_env%active_state   = force_env%mixed_env%aom_env%new_state
               force_env%mixed_env%aom_env%kinetic_energy = kinetic_energy_qsys
               force_env%mixed_env%aom_env%delta_energy   = delta_energy
@@ -1960,7 +1897,7 @@ ENDIF
                                               sh_print_env,A,B)
               ELSE 
                   force_env%mixed_env%aom_env%successful_hop = .TRUE.
-                  force_env%mixed_env%aom_env%old_state      = force_env%mixed_env%aom_env%active_state
+                  !force_env%mixed_env%aom_env%old_state      = force_env%mixed_env%aom_env%active_state
                   force_env%mixed_env%aom_env%active_state   = force_env%mixed_env%aom_env%new_state
                   force_env%mixed_env%aom_env%kinetic_energy = kinetic_energy_prime
                   force_env%mixed_env%aom_env%delta_energy   = delta_energy

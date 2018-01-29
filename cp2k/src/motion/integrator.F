@@ -459,10 +459,8 @@ CONTAINS
 !> CHANGE_AC
     INTEGER                                  :: mixing_type
     TYPE(section_vals_type), POINTER         :: mixed_section, force_env_section
-    !LOGICAL                                  :: successful_hop
+    LOGICAL                                  :: do_fssh
     INTEGER                                  :: i, mol
-    !TYPE(aom_env_type), POINTER              :: aom_env
-!    TYPE(md_ener_type), POINTER              :: md_ener
 !> END
 
 
@@ -472,9 +470,6 @@ CONTAINS
     NULLIFY (shell_particles, shell_particle_set, core_particles, &
             core_particle_set, thermostat_shell, dft_control, itimes)
     CALL get_md_env(md_env=md_env,simpar=simpar,force_env=force_env,&
-!>CHANGE_AC
- !        md_ener=md_ener, &
-!>END CHANGE
          thermostat_coeff=thermostat_coeff,thermostat_shell=thermostat_shell,&
          para_env=para_env, ehrenfest_md=ehrenfest_md, itimes=itimes)
     dt = simpar%dt
@@ -583,10 +578,17 @@ CONTAINS
                              force_env_section=force_env_section)
           mixed_section => section_vals_get_subs_vals(force_env_section,"MIXED")
           CALL section_vals_val_get(mixed_section,"MIXING_TYPE",i_val=mixing_type)
-          IF (mixing_type.eq.mix_adiab) THEN
+          IF (mixing_type.eq.mix_adiab) do_fssh = .TRUE.
+       ENDIF
+       IF (do_fssh) THEN
+             !We save the velocities for the first timestep, to estimate the
+             !position at t--1
              IF (itimes.ge.1) THEN
                 force_env%mixed_env%aom_env%velocities_t = tmp%vel
              ENDIF
+
+             !We calculate the forces, the Hamiltonian, propagate the wf. If we
+             !attempt to hop, we also calculate the forces in the new state
              CALL force_env_calc_energy_force(force_env,require_consistent_energy_force=.FALSE., &
                   itimes = itimes)
              IF(ehrenfest_md)THEN
@@ -597,31 +599,15 @@ CONTAINS
              CALL metadyn_integrator(force_env, itimes, tmp%vel)
 
              ! Velocity Verlet (second part)
-
-             !IF (force_env%mixed_env%aom_env%is_hop) THEN
-             !    CALL vv_second_if_sh_rescaling(tmp, atomic_kind_set, local_particles, particle_set, &
-             !         core_particle_set, shell_particle_set, nparticle_kind,shell_adiabatic, dt,     &
-             !         new_velocities=force_env%mixed_env%aom_env%velocities_tp)
-             !ELSE
+             !We always update the velocities with the forces in the active
+             !state, even if we attempt to hop
               CALL vv_second(tmp, atomic_kind_set, local_particles, particle_set, &
                              core_particle_set, shell_particle_set, nparticle_kind, shell_adiabatic, dt)
-             !ENDIF
              
-             !UPDATE_OLD_STATE
-             if (force_env%mixed_env%aom_env%reorder) then 
-                 force_env%mixed_env%aom_env%active_state_past = force_env%mixed_env%aom_env%state_tmdt
-print *, "STATE_EVOLUTION", force_env%mixed_env%aom_env%state_tmdt, "TO", &
-                    force_env%mixed_env%aom_env%active_state, "TO", &
-                    force_env%mixed_env%aom_env%new_state 
-
-print *, "#############U_MATRIX_ACTIVE_STATE###############"
-
-mol = size(force_env%mixed_env%aom_env%Stt,1)
-
+!mol = size(force_env%mixed_env%aom_env%Stt,1)
 !print*, "a before =", force_env%mixed_env%aom_env%state_tmdt
 !print*, "a' after enforcement =",  force_env%mixed_env%aom_env%active_state
 !print*, "f final state =", force_env%mixed_env%aom_env%new_state
-
 !do i =1, mol
 !write (*,'(A,F12.10,A, F12.10,A , F12.10,A , F12.10)') &
 !     "Ct(a)=", force_env%mixed_env%aom_env%C_t(i, force_env%mixed_env%aom_env%state_tmdt), &
@@ -629,88 +615,62 @@ mol = size(force_env%mixed_env%aom_env%Stt,1)
 !    " Ctp(a')= ", force_env%mixed_env%aom_env%C_tp(i, force_env%mixed_env%aom_env%active_state), &
 !    " Ctp(f)= ", force_env%mixed_env%aom_env%C_tp(i, force_env%mixed_env%aom_env%new_state)
 !end do
-
-             else
-                force_env%mixed_env%aom_env%active_state_past = force_env%mixed_env%aom_env%active_state
-             end if
- 
-             !successful_hop = .False.
-                  
-print *, "ACTIVE_STATE_BEFORE", force_env%mixed_env%aom_env%active_state
-
+             !We check if the attempted hop is successful or not     
+             print *, "ACTIVE_STATE_BEFORE", force_env%mixed_env%aom_env%active_state
              IF (force_env%mixed_env%aom_env%attempt_hop) THEN
                 CALL check_hop_attempt(tmp%vel, atomic_kind_set, nparticle_kind, local_particles, force_env)
-               ! if (force_env%mixed_env%aom_env%ida_deco) then
-                !   CALL ida_collapse(force_env%mixed_env%aom_env)
-                !end if
                 IF (force_env%mixed_env%aom_env%successful_hop) THEN
                    force_env%mixed_env%aom_env%my_successful_hop = .True.
+                   ! If successful, we call again this subroutine to update the
+                   ! forces. It is necessary to proceed like that to apply the
+                   ! constraint. 
                    CALL force_env_calc_energy_force(force_env,require_consistent_energy_force=.FALSE., &
                                                     itimes = itimes)
                 ENDIF
              ENDIF
              print *, "successful_hop", force_env%mixed_env%aom_env%my_successful_hop
-
-print *, "ACTIVE_STATE_END", force_env%mixed_env%aom_env%active_state
+             print *, "ACTIVE_STATE_END", force_env%mixed_env%aom_env%active_state
            
              !> here we decohere the WF onto the active state  , that could be a
              !new one in case of successful hop 
              CALL apply_decoherence(itimes, tmp%vel, force_env, local_particles, nparticle_kind, atomic_kind_set)
           
-
              !Probably I would need to check the overalp here
-             CALL adiab_overlap_check(force_env%mixed_env%aom_env, force_env%mixed_env%aom_env%active_state_past, itimes)
-
-             if (.not. force_env%mixed_env%aom_env%attempt_hop) then
-                 if (force_env%mixed_env%aom_env%overlap_over_thresh) then
-                    print *, "CASE1"
-                 else
-                    print *, "CASE2"
-                 end if
-             else 
-                !if (force_env%mixed_env%aom_env%active_state_past .eq. &
-                !                  force_env%mixed_env%aom_env%active_state) then
-                 if(.not. force_env%mixed_env%aom_env%my_successful_hop) then
-                   if (.not. force_env%mixed_env%aom_env%overlap_over_thresh) then
-                       print *, "CASE3" 
-                   else
-                       print *, "CASE4"
-                   end if
-                else
-                  if (.not. force_env%mixed_env%aom_env%overlap_over_thresh) then
-                       print *, "CASE5"
-                  else 
-                       print *, "CASE6"
-                  end if
-                end if
-             end if
+             !CALL adiab_overlap_check(force_env%mixed_env%aom_env, force_env%mixed_env%aom_env%old_state, itimes)
+             !if (.not. force_env%mixed_env%aom_env%attempt_hop) then
+             !    if (force_env%mixed_env%aom_env%overlap_over_thresh) then
+             !       print *, "CASE1"
+             !    else
+             !       print *, "CASE2"
+             !    end if
+             !else 
+             !    if(.not. force_env%mixed_env%aom_env%my_successful_hop) then
+             !      if (.not. force_env%mixed_env%aom_env%overlap_over_thresh) then
+             !          print *, "CASE3" 
+             !      else
+             !          print *, "CASE4"
+             !      end if
+             !   else
+             !     if (.not. force_env%mixed_env%aom_env%overlap_over_thresh) then
+             !          print *, "CASE5"
+             !     else 
+             !          print *, "CASE6"
+             !     end if
+             !   end if
+             !end if
 
              !UPDATE variables for the next time step
              force_env%mixed_env%aom_env%C_t = force_env%mixed_env%aom_env%C_tp
              force_env%mixed_env%aom_env%H_t = force_env%mixed_env%aom_env%H_tp
              force_env%mixed_env%aom_env%E_t = force_env%mixed_env%aom_env%E_tp
+             force_env%mixed_env%aom_env%old_state = force_env%mixed_env%aom_env%active_state
+             force_env%mixed_env%aom_env%active_state = -1
+             force_env%mixed_env%aom_env%new_state = -1
+             force_env%mixed_env%aom_env%successful_hop = .FALSE.
+             force_env%mixed_env%aom_env%attempt_hop = .FALSE.
 
+             CALL total_momentum(tmp%vel, atomic_kind_set, nparticle_kind, local_particles, force_env)
 
-              CALL total_momentum(tmp%vel, atomic_kind_set, nparticle_kind, local_particles, force_env)
-
-                !CALL update_forces_newstate ( atomic_kind_set, local_particles, particle_set,&
-                !                              nparticle_kind, new_forces=force_env%mixed_env%aom_env%new_forces_adiab) 
-          ELSE 
-             ![NB] let nve work with force mixing which does not have consistent
-             !energies and forces
-             CALL force_env_calc_energy_force(force_env,require_consistent_energy_force=.FALSE.)
-
-             IF(ehrenfest_md)THEN
-               CALL rt_prop_output(force_env%qs_env,ehrenfest,delta_iter=force_env%qs_env%rtp%delta_iter)
-             ENDIF
-
-             ! Metadynamics
-             CALL metadyn_integrator(force_env, itimes, tmp%vel)
-
-             ! Velocity Verlet (second part)
-             CALL vv_second(tmp, atomic_kind_set, local_particles, particle_set, &
-                            core_particle_set, shell_particle_set, nparticle_kind, shell_adiabatic, dt)
-          ENDIF
        ELSE
 !> END CHANGE_AC
           ![NB] let nve work with force mixing which does not have consistent energies and forces
@@ -728,7 +688,6 @@ print *, "ACTIVE_STATE_END", force_env%mixed_env%aom_env%active_state
                          core_particle_set, shell_particle_set, nparticle_kind, shell_adiabatic, dt)
           CALL total_momentum(tmp%vel, atomic_kind_set, nparticle_kind, local_particles, force_env)
        ENDIF
-!> END CHANGE_AC
 
        IF (simpar%constraint) CALL rattle_control(gci,local_molecules, molecule_set, &
             molecule_kind_set, particle_set, tmp%vel, dt,simpar%shake_tol,&

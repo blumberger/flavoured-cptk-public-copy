@@ -784,6 +784,17 @@ CONTAINS
      aom_env%Stt = Stptp
      energy_adiabat = E_tp(active_state)
 
+     !aom_env%C_t = force_env%mixed_env%aom_env%C_tp
+     !aom_env%H_t = force_env%mixed_env%aom_env%H_tp
+     !aom_env%E_t = force_env%mixed_env%aom_env%E_tp
+     aom_env%old_state = aom_env%active_state
+     aom_env%active_state = -1
+     aom_env%new_state = -1
+     aom_env%successful_hop = .FALSE.
+     aom_env%attempt_hop = .FALSE.
+
+
+
     !> DEALLOCATE
     deallocate(scoefftot)
     deallocate(pcoeffsrun)
