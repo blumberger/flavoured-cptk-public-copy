@@ -135,7 +135,7 @@ CONTAINS
                                   energies_tp,  &
                                   aom_env, itimes, &
                                   attempt_hop, global_forces, coupling_section, &
-                                  adiab_section, my_bo_keyword, energy_adiabat, &
+                                  adiab_section, my_bo_keyword,                 & 
                                   atomic_kinds, local_particles,                &
                                   my_test_keyword)
 
@@ -152,7 +152,6 @@ CONTAINS
      TYPE(section_vals_type), POINTER               :: coupling_section
      LOGICAL, INTENT(IN)                            :: my_bo_keyword
      TYPE(section_vals_type), POINTER               :: adiab_section
-     REAL(KIND=dp), INTENT(OUT)                     :: energy_adiabat
      TYPE(atomic_kind_list_type), POINTER           :: atomic_kinds
      TYPE(distribution_1d_type), POINTER            :: local_particles
      LOGICAL, INTENT(IN)                            :: my_test_keyword
@@ -255,7 +254,6 @@ CONTAINS
      enddo
      !ctin(:) = aom_env%ctin(:)
      aom_env%adiab_nace_t = aom_env%adiab_nace_tp
-     aom_env%my_successful_hop = .False.
 
      !> CALCULATE THE CENTER OF MASS
      !> CONSTRUCT NEIGHBOURS LIST
@@ -428,9 +426,7 @@ print *, "Active_state_after_surf_hop", aom_env%active_state
          aom_env%diabatic_forces = aom_env%F
          aom_env%scaling  = scaling
          aom_env%cbar     = cbar
-         aom_env%energy_new = aom_env%E_tp(aom_env%new_state)
      ENDIF
-     energy_adiabat = aom_env%E_tp(aom_env%active_state)
      aom_env%sh_print_env = sh_print_env
 
      !> DEALLOCATE

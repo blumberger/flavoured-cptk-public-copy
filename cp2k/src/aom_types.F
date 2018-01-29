@@ -110,89 +110,86 @@ IMPLICIT NONE
 !COMMENT: one should check that all those variables are actually used somewhere
 !in the code
    TYPE aom_env_type
-!> To store the coordinates in step before and the one before
+!> Constant over the simulations
+     integer                                :: atoms, natom
+     REAL(KIND=dp)                          :: deltatMD
+     REAL(KIND = dp)                        :: delta_energy, scaling, cbar, deltat
+
+!> Information for the overlap method: calculate at the first timestep
+     INTEGER, DIMENSION(:), POINTER                      :: elements, atomlist
+     INTEGER, DIMENSION(:,:), POINTER                    :: NN
+     INTEGER, DIMENSION(:,:,:,:), POINTER                :: neighbourlist
+     REAL(KIND=dp), dimension(:,:,:), allocatable        :: pcoeffsrun
+     integer, dimension(:,:), POINTER       :: connlist1, connlist2, bneighbour
+     REAL(KIND=dp), dimension(:,:), POINTER   :: coms
+     REAL(KIND=dp), dimension(:,:,:), POINTER :: crds
+     REAL(KIND=dp), dimension(:,:), POINTER   :: dist
+     REAL(KIND=dp), DIMENSION(:,:), POINTER   :: pcoeffs
+     REAL(KIND=dp), DIMENSION(:), POINTER     :: scoeffs
+     LOGICAL, DIMENSION(:), POINTER           :: ext_pres
+
+!> Calculate at each timestep
+     REAL(KIND=dp), dimension(:,:), POINTER   :: At, Atm, Atp, Bt, Btm, & 
+                                                 Btp, siteenergies
+
+!> Use to store the present info in the future timestep
+     INTEGER                                :: new_state, old_state, active_state
      REAL(KIND = dp), DIMENSION(:,:), POINTER         :: rm_t,&             ! position step min 1
                                                          rm_tm,&             ! position step min 2
                                                          velocities_tp,& ! velocities step
                                                          velocities_t,&      ! velocities step min 1
                                                          forces_adiab, &      ! forces at step 0
                                                          forces_adiab_new!, &
-                                                         !actforces_after_hop
+     REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE   :: C_t, C_tp
+     REAL(KIND=dp), DIMENSION(:),   ALLOCATABLE   :: E_t, E_tp
+     COMPLEX(KIND=dp), DIMENSION(:,:), POINTER    :: H_t, H_tp
+     REAL(KIND=dp), dimension(:,:), POINTER :: Stt, Stmt, Sttm, Stmtm, &
+                                               Stptp, Sttp, Stpt
 
-     INTEGER                                     :: active_atoms
-!     REAL(KIND=dp)                              :: cbar, scaling
-     integer                                    :: atoms, natom
-     REAL(KIND=dp)                              :: deltatMD
 !> arrays used in the decoherence
+     COMPLEX(KIND=dp), DIMENSION(:),POINTER  :: ctin
      COMPLEX(KIND=dp), dimension(:), POINTER :: ctin_before_deco
      COMPLEX(KIND=dp), dimension(:), POINTER :: ctin_after_deco
      COMPLEX(KIND=dp), dimension(:), POINTER :: ctin_after_tranf_correction
      INTEGER, dimension(:), POINTER          :: active_region
+     COMPLEX(KIND=dp), dimension(:), POINTER :: cttm, ctt
+     LOGICAL                                 :: decohere, decoherence
+     LOGICAL                                 :: futur_decohere
+     LOGICAL                                 :: ida_deco
 
-!>store charge carrier WF coefficients
-     COMPLEX(KIND=dp), dimension(:), POINTER     :: cttm, ctt
-!> To store energies in the Jacob's Method
-     REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE   :: C_t, C_tp
-     REAL(KIND=dp), DIMENSION(:),   ALLOCATABLE     :: E_t, E_tp
+
+!> Old and new state number
+     LOGICAL                                :: overlap_over_thresh
+     LOGICAL                                :: attempt_hop
+     LOGICAL                                :: successful_hop
+     LOGICAL                                :: HS_propagation
+
+!> Adiabatic nace at time t and t-dt
+     REAL(KIND=dp), dimension(:,:), POINTER      :: adiab_nace_tp, adiab_nace_t
+     INTEGER, dimension(:), POINTER              :: class_forbidden_hop_t
+
+!> To print
+     TYPE(sh_print_env_type)                     :: sh_print_env
+
+!> The random seed generator
+     TYPE(rng_stream_type), POINTER              :: rng_stream
+
+!> To check
+     REAL(KIND = dp)                             :: energy_new
+     LOGICAL                                     :: reorder
+     INTEGER                                     :: state_tmdt
+     LOGICAL                                     :: my_successful_hop
+     REAL(KIND = dp)                                  :: factor
+     REAL(KIND=dp), DIMENSION(:,:), POINTER              :: nace
+     REAL(KIND=dp), DIMENSION(:), POINTER                :: population
+     REAL(KIND=dp), DIMENSION(:,:), POINTER              :: eigenvector_matrix
+     REAL(KIND=dp), DIMENSION(:,:,:), POINTER            :: diabatic_forces
+     REAL(KIND = dp)                        :: kinetic_energy
+     REAL(KIND=dp), DIMENSION(:,:,:), POINTER          :: nacv
+     INTEGER                                     :: active_atoms
      REAL(KIND = dp), DIMENSION(:), POINTER :: energies_t   
      REAL(KIND = dp), DIMENSION(:), POINTER :: adiab_energies_t 
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER :: F
-     REAL(KIND=dp), dimension(:,:), POINTER :: At, Atm, Atp, Bt, Btm, & 
-                                                         Btp, siteenergies
-     REAL(KIND = dp)                        :: kinetic_energy
-     REAL(KIND = dp)                        :: delta_energy, scaling, cbar, deltat
-!> Old and new state number
-     INTEGER                                :: new_state, old_state, active_state
-     LOGICAL                                :: overlap_over_thresh
-     LOGICAL                                :: decohere, decoherence
-     REAL(KIND=dp), dimension(:,:), POINTER :: coms
-     REAL(KIND=dp), dimension(:,:,:), POINTER :: crds
-     REAL(KIND=dp), dimension(:,:), POINTER :: dist
-!> To store the previous overlap matrix
-     REAL(KIND=dp), dimension(:,:), POINTER :: Stt, Stmt, Sttm, Stmtm, &
-                                             Stptp, Sttp, Stpt
-!> To store some connectivity information
-     integer, dimension(:,:), POINTER       :: connlist1, connlist2, bneighbour
-!> To store the previous coefficients
-     COMPLEX(KIND=dp), DIMENSION(:),POINTER              :: ctin
-!> To print the populations
-     REAL(KIND=dp), DIMENSION(:), POINTER                :: population
-!> To store some connectivity information
-     INTEGER, DIMENSION(:,:,:,:), POINTER                  :: neighbourlist
-     REAL(KIND=dp), dimension(:,:,:), allocatable          :: pcoeffsrun
-!> To print the Hamiltonian
-     COMPLEX(KIND=dp), DIMENSION(:,:), POINTER              :: H_t, H_tp
-     REAL(KIND=dp), DIMENSION(:,:), POINTER              :: eigenvector_matrix
-     INTEGER, DIMENSION(:,:), POINTER                    :: NN
-     REAL(KIND=dp), DIMENSION(:,:,:), POINTER            :: diabatic_forces
-     LOGICAL, DIMENSION(:), POINTER                      :: ext_pres
-     INTEGER, DIMENSION(:), POINTER                      :: elements, atomlist
-!> To print the NACEs
-     REAL(KIND=dp), DIMENSION(:,:), POINTER              :: nace
-!> To print the NACVs
-     !REAL(KIND=dp), DIMENSION(:,:,:,:), POINTER          :: nacv
-     REAL(KIND=dp), DIMENSION(:,:,:), POINTER          :: nacv
-!> Store information of a previous hop- required for the decoherence
-!procedure
-     LOGICAL                                             :: futur_decohere
-     LOGICAL                                             :: ida_deco
-     REAL(KIND = dp)                                     :: factor
-!> If hop
-     LOGICAL                                     :: attempt_hop
-     LOGICAL                                     :: successful_hop, my_successful_hop
-     LOGICAL                                     :: HS_propagation
-!> Adiabatic nace at time t and t-dt
-     !REAL(KIND=dp), dimension(:,:), POINTER      :: adiab_nace_tp, adiab_nace_t
-     REAL(KIND=dp), dimension(:,:), POINTER      :: adiab_nace_tp, adiab_nace_t
-     TYPE(sh_print_env_type)                     :: sh_print_env
-     TYPE(rng_stream_type), POINTER              :: rng_stream
-     REAL(KIND=dp), DIMENSION(:,:), POINTER      :: pcoeffs
-     REAL(KIND=dp), DIMENSION(:), POINTER         :: scoeffs
-     REAL(KIND = dp)                              :: energy_new
-     INTEGER, dimension(:), POINTER          :: class_forbidden_hop_t
-     LOGICAL                                     :: reorder
-     INTEGER                                     :: state_tmdt
-
 
    END TYPE aom_env_type
 

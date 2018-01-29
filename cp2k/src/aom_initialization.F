@@ -202,7 +202,6 @@ CONTAINS
      allocate(aom_env%Btp(4,atoms))
      allocate(aom_env%Btm(4,atoms))
      allocate(aom_env%siteenergies(3,mat))
-     ALLOCATE(aom_env%population(mat))
      ALLOCATE(aom_env%ctin(mat))
 
      ALLOCATE(aom_env%class_forbidden_hop_t(mat))
@@ -318,7 +317,7 @@ CONTAINS
                                   energies_tp,  &
                                   aom_env, itimes, &
                                   attempt_hop, global_forces, coupling_section, &
-                                  adiab_section, my_bo_keyword, energy_adiabat, &
+                                  adiab_section, my_bo_keyword,  &
                                   atomic_kinds, local_particles,                &
                                   my_test_keyword, method_keyword)
 
@@ -335,7 +334,6 @@ CONTAINS
      TYPE(section_vals_type), POINTER               :: coupling_section
      LOGICAL, INTENT(IN)                            :: my_bo_keyword
      TYPE(section_vals_type), POINTER               :: adiab_section
-     REAL(KIND=dp), INTENT(OUT)                     :: energy_adiabat
      TYPE(atomic_kind_list_type), POINTER           :: atomic_kinds
      TYPE(distribution_1d_type), POINTER            :: local_particles
      LOGICAL, INTENT(IN)                            :: my_test_keyword
@@ -426,11 +424,6 @@ CONTAINS
      deltatMD = MDtimestep !CHANGE_AC
      !> electronic timestep is a fraction of the molecular timestep
      deltatE = deltatMD/ELsteps !CHANGE_AC
-
-     !ALLOCATE(sh_env%ctin(mat))
-     !ALLOCATE(sh_env%C_tp(mat,mat))
-     !ALLOCATE(sh_env%E_tp(mat))
-     !ALLOCATE(sh_env%E_t(mat))
 
      sh_print_env%adiab_section => adiab_section
      sh_print_env%nadiab = mat
@@ -782,7 +775,6 @@ CONTAINS
      aom_env%active_state = active_state
      !> IMPORTANT FOR THE FIRST TIME STEP
      aom_env%Stt = Stptp
-     energy_adiabat = E_tp(active_state)
 
      !aom_env%C_t = force_env%mixed_env%aom_env%C_tp
      !aom_env%H_t = force_env%mixed_env%aom_env%H_tp
@@ -814,11 +806,6 @@ CONTAINS
     DEALLOCATE(my_forces_adiab)
     DEALLOCATE(positions_com_tp)
     DEALLOCATE(velocities_com_tp)
-
-     !DEALLOCATE(sh_env%ctin)
-     !DEALLOCATE(sh_env%C_tp)
-     !DEALLOCATE(sh_env%E_tp)
-     !DEALLOCATE(sh_env%E_t)
 
 
   END SUBROUTINE propagate_aom_namd_first_step

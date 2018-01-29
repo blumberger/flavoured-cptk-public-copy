@@ -620,7 +620,6 @@ CONTAINS
              IF (force_env%mixed_env%aom_env%attempt_hop) THEN
                 CALL check_hop_attempt(tmp%vel, atomic_kind_set, nparticle_kind, local_particles, force_env)
                 IF (force_env%mixed_env%aom_env%successful_hop) THEN
-                   force_env%mixed_env%aom_env%my_successful_hop = .True.
                    ! If successful, we call again this subroutine to update the
                    ! forces. It is necessary to proceed like that to apply the
                    ! constraint. 
@@ -628,7 +627,6 @@ CONTAINS
                                                     itimes = itimes)
                 ENDIF
              ENDIF
-             print *, "successful_hop", force_env%mixed_env%aom_env%my_successful_hop
              print *, "ACTIVE_STATE_END", force_env%mixed_env%aom_env%active_state
            
              !> here we decohere the WF onto the active state  , that could be a
@@ -644,7 +642,7 @@ CONTAINS
              !       print *, "CASE2"
              !    end if
              !else 
-             !    if(.not. force_env%mixed_env%aom_env%my_successful_hop) then
+             !    if(.not. force_env%mixed_env%aom_env%successful_hop) then
              !      if (.not. force_env%mixed_env%aom_env%overlap_over_thresh) then
              !          print *, "CASE3" 
              !      else

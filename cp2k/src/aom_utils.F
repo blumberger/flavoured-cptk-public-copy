@@ -636,7 +636,6 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         CASE("DIABATIC_BASIS")
                CALL diab_to_adiab(aom_env, C2, old_state, mol, cstate, ct, &
                                                    C1, cttm_ad, cstate_tm)
-               !if (aom_env%reorder) then
                !     CALL diab_to_adiab(aom_env, C2, old_state, mol, cstate, ct)
                !end if
         CASE("ADIABATIC_BASIS")

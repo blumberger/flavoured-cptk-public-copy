@@ -163,7 +163,7 @@ CONTAINS
            CALL propagate_aom_namd_first_step(nadiab, aom_atoms, norbitals, MDtimestep, &
                      positions_tp, velocities_tp, energies_tp, aom_env, itimes, &
                      is_hop, global_forces, coupling_section, adiab_section,& 
-                     my_bo_keyword, energy_adiabat, atomic_kinds, &
+                     my_bo_keyword, atomic_kinds, &
                      local_particles, my_test_keyword, method_keyword)
         ELSE
            !> Get the information for the previous timesteps
@@ -173,7 +173,6 @@ CONTAINS
            !aom_env%velocities_t = velocities_tp
            IF (aom_env%successful_hop) THEN
               aom_env%forces_adiab = aom_env%forces_adiab_new
-              energy_adiabat = aom_env%energy_new
               aom_env%futur_decohere = .TRUE.
               !aom_env%successful_hop = .FALSE.
               aom_env%forces_adiab_new = 0.0D0
@@ -184,7 +183,7 @@ CONTAINS
               CALL construct_ham_X_SH(nadiab, aom_atoms, norbitals, MDtimestep, &
                             positions_tp, energies_tp, aom_env, itimes, &
                             is_hop, global_forces, coupling_section, adiab_section,& 
-                            my_bo_keyword, energy_adiabat, atomic_kinds, &
+                            my_bo_keyword, atomic_kinds, &
                             local_particles, my_test_keyword)
            ENDIF
         ENDIF
@@ -196,6 +195,7 @@ CONTAINS
 
 
     !> IMPORTANT : GIVE BACK THE FORCES TO FIST
+    energy_adiabat = aom_env%E_tp(aom_env%active_state)
     forces_adiab = aom_env%forces_adiab
     DO iparticle = 1, natom
       jparticle = map_index(iparticle)

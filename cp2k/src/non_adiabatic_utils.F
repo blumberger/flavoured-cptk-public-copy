@@ -768,14 +768,6 @@ print *, "aom_env%active_state", aom_env%active_state
                                         (C_param+((E_0_param/K_tot)*deg_of_freedom))
 
               CASE("FORCES_BASED")
-
-                    !if (aom_env%my_successful_hop) then
-                        !active_state_adforces = aom_env%forces_adiab_new
-                       ! active_state_adforces = aom_env%actforces_after_hop
-                    !else 
-                     !active_state_adforces = aom_env%forces_adiab
-                    !end if
-
                     !Boltzmann factor to use in alpha parameter
                      KbT = (2*K_tot)/(3*aom_env%active_atoms)
                     !instead of using the exact boltzmann factor, at the moment the code uses Temp =
@@ -826,14 +818,6 @@ print *, "PURE_DEPHASING", i
                     end if
 
               CASE("HYBRID_TAU")
-
-                    !if (aom_env%my_successful_hop) then
-                        !active_state_adforces = aom_env%forces_adiab_new
-                        !active_state_adforces = aom_env%actforces_after_hop
-                    !else 
-                    !active_state_adforces = aom_env%forces_adiab
-                    !end if
-
                     !Boltzmann factor to use in alpha parameter
                      KbT = (2*K_tot)/(3*aom_env%active_atoms)
                     !instead of using the exact boltzmann factor, at the moment the code uses Temp =
@@ -1355,10 +1339,6 @@ print *, "KINETIC", K_tot
                     do i=1,mat
                          ctotal(i) = conjg(ctout(i))*ctout(i)
                     end do
-                    if (t2 == int(deltatMD/deltatE)) then
-                                        aom_env%population(1:mat) =&
-                                            abs(ctotal(1:mat)) 
-                    end if
 
                     !update
                      H_0 = H_2
@@ -1690,13 +1670,9 @@ print *, "KINETIC", K_tot
                     do i=1,mat
                          ctotal(i) = conjg(ctout(i))*ctout(i)
                     end do
-                    if (t2 == int(deltatMD/deltatE)) then
-                                        aom_env%population(1:mat) =&
-                                            abs(ctotal(1:mat)) 
-                    end if
 
                     !update
-                    !H_0 = H_2
+                    H_0 = H_2
 
                     ctin = ctout
 
@@ -2051,10 +2027,6 @@ print *, "KINETIC", K_tot
                     do i=1,mat
                          ctotal(i) = conjg(ctout(i))*ctout(i)
                     end do
-                    if (t2 == int(deltatMD/deltatE)) then
-                                        aom_env%population(1:mat) =&
-                                            abs(ctotal(1:mat)) 
-                    end if
  
                     !update
                     E_0 = E_2
