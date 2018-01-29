@@ -123,7 +123,6 @@ IMPLICIT NONE
 
    PUBLIC :: makeX,            &
              make_adiabX,      &
-!             surfacehop,       &
              adiabaticity,     &
              calcforces,           &
              read_listcoeff,       & 
@@ -131,7 +130,6 @@ IMPLICIT NONE
              simple_vel_rescaling, &
              check_hop_attempt,    &
              total_momentum,       &
-!             translate_com
              translate_com,       &
              surf_hop_type,    &
              calc_adiab_nace, &
@@ -403,7 +401,25 @@ SUBROUTINE rotation_diab_to_adiab(C_tp, ctin, mat, adiab_ctin, pop)
 
 END SUBROUTINE rotation_diab_to_adiab
 
-subroutine diab_to_adiab( aom_env, C2, old_state, mol, cstate, ct, C1, cttm_ad, cstate_tm)
+SUBROUTINE diab_to_adiab( C, diab_c, adiab_c)
+        REAL(KIND=dp), dimension(:,:), intent(in) :: C
+        COMPLEX(KIND=dp), dimension(:), intent(in) :: diab_c
+        COMPLEX(KIND=dp), dimension(:), intent(out) :: adiab_c
+        
+        CHARACTER(len=*), PARAMETER :: routineN ='diab_to_adiab', &
+                               routineP = moduleN//':'//routineN
+
+        integer :: i, j!, mol!, k, l
+        
+        do i=1, SIZE(diab_c)
+           adiab_c(i) = cmplx(0.0, 0.0, dp)
+           do j=1, SIZE(diab_c)
+              adiab_c(i) = adiab_c(i) + cmplx(C(j,i), 0.0D0,dp)*diab_c(j)
+           enddo
+        enddo
+END SUBROUTINE
+
+subroutine old_diab_to_adiab( aom_env, C2, old_state, mol, cstate, ct, C1, cttm_ad, cstate_tm)
         REAL(KIND=dp), dimension(:,:), intent(in) :: C2
         integer, intent(in) :: old_state
         TYPE(aom_env_type) :: aom_env
@@ -438,7 +454,7 @@ subroutine diab_to_adiab( aom_env, C2, old_state, mol, cstate, ct, C1, cttm_ad, 
                         END IF
                 end do
         end do
-end subroutine diab_to_adiab
+end subroutine old_diab_to_adiab
 
 
 SUBROUTINE adiab_overlap_check(aom_env, changed_state, itimes)
@@ -577,7 +593,6 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         REAL(KIND=dp), dimension(:), allocatable :: g_before, g_after, g_renorm
         COMPLEX(KIND=dp), dimension(:), allocatable :: ct, cttm_ad
         COMPLEX(KIND=dp), dimension(:), allocatable :: ak, akttm
-        COMPLEX(KIND=dp) :: cstate, cstate_tm
         LOGICAL        :: reordering_states_keyword
         INTEGER        :: my_old_state, state_min 
         REAL(KIND=dp), dimension(:), ALLOCATABLE :: enerdiff
@@ -594,7 +609,6 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         allocate(cttm_ad(mol)) 
         ALLOCATE(sh_print_env%proba(mol))
 
-        
         IF (.NOT.do_trivial_corr) THEN 
              do i=1,mol
                      if (i .ne. my_old_state) then 
@@ -634,15 +648,17 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
                                                      c_val=wfpropag_keyword)
         SELECT CASE(wfpropag_keyword)
         CASE("DIABATIC_BASIS")
-               CALL diab_to_adiab(aom_env, C2, old_state, mol, cstate, ct, &
-                                                   C1, cttm_ad, cstate_tm)
+               !CALL diab_to_adiab(aom_env, C2, old_state, mol, cstate, ct, &
+               !                                    C1, cttm_ad, cstate_tm)
                !     CALL diab_to_adiab(aom_env, C2, old_state, mol, cstate, ct)
                !end if
+               CALL diab_to_adiab(C2, aom_env%ctin, ct) 
+               CALL diab_to_adiab(C1, aom_env%ctin, cttm_ad) 
         CASE("ADIABATIC_BASIS")
                ct(:) = aom_env%ctt(:)
                cttm_ad(:) = aom_env%cttm(:)
-               cstate = aom_env%ctt(old_state)
-               cstate_tm = aom_env%cttm(old_state)
+               !cstate = aom_env%ctt(old_state)
+               !cstate_tm = aom_env%cttm(old_state)
         CASE DEFAULT
                CPABORT("There is no method to propagate the wavefunction.")
         END SELECT
@@ -652,7 +668,7 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
                !construct state density for t present and t-deltat from the active state to
                !other state
                 ak(i) = ct(i)*conjg(ct(aom_env%active_state))
-                akttm(i) = cttm_ad(i)*conjg(cttm_ad(aom_env%active_state))
+                akttm(i) = cttm_ad(i)*conjg(cttm_ad(aom_env%old_state))
                 !>assign 0.0 to b(i) if the hop is forbidden
                 if (aom_env%HS_propagation .and. &
                               (i .eq. aom_env%class_forbidden_hop_t(i))) then
@@ -666,21 +682,18 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         !according to Prezhdo and Wang 2014
         !>in this case we need to use the new enforced state to avoid discontinuity
         !in the time derivative
-        ex_prob = (abs(akttm(old_state))- abs(ak(old_state)))/abs(akttm(old_state))
+        ex_prob = (abs(akttm(aom_env%old_state))- abs(ak(aom_env%active_state)))/abs(akttm(aom_env%old_state))
         sh_print_env%exprob = ex_prob 
 
         ! calculate sumg that can also be negative because each individual probability
         ! (flux) could be negative 
-        sumg = 0.0D0
         !calculate g and sum(g)
+        sumg = 0.0D0
         do i=1,mol
-              !g(i) is the probability to hop from the current state (old_state) to any other
-              !state (i) 
-              !>the current state is now the enforced state
-                g(i) = (deltat*b(i))/abs(ak(old_state))
-              !>here also we have to use the enforce state that now is indeed the
-              !new state
-                if (i .ne. old_state) then
+                !g(i) is the probability to hop from the current state (old_state) to any other
+                !state (i) 
+                g(i) = (deltat*b(i))/abs(ak(aom_env%active_state))
+                if (i .ne. aom_env%active_state) then
                         sumg = sumg + g(i)
                 end if
         end do
@@ -713,21 +726,21 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
        !if this happens, rescale them down to sum = 1
        sumg = 0.0D0
        do i=1,mol
-               if (i .ne. old_state) then
+               if (i .ne. aom_env%active_state) then
                        sumg = sumg + g(i)
                end if
        end do
        if (sumg > 1.0D0) then
                do i=1,mol
                        g(i) = g(i)/sumg
-                       g(old_state) = 0.0D0
+                       g(aom_env%active_state) = 0.0D0
                end do
                sh_print_env%renorm = .TRUE.
                sh_print_env%sumprob   = sumg
        else
                sh_print_env%renorm = .FALSE.
                sh_print_env%sumprob   = sumg
-               g(old_state) = 1.0D0 - sumg
+               g(aom_env%active_state) = 1.0D0 - sumg
        end if
        sh_print_env%proba     = g
 
@@ -739,13 +752,13 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         hop = next_random_number(aom_env%rng_stream)
         print *, "RANDOM_NUMBER_HOPPING_PROBA", hop
         sh_print_env%hop       = hop
-        sh_print_env%old_state = old_state
+        sh_print_env%old_state = aom_env%active_state
         !and see if this random number causes a surface hop
         sumg = 0.0D0
         do i=1,mol
                 sumg = sumg + g(i)
                 if (hop <= sumg) then
-                        if (i .ne. old_state) then
+                        if (i .ne. aom_env%active_state) then
                                 new_state = i
                                 !write(24,*) i                        
                                 !decohere = .FALSE.
@@ -755,8 +768,8 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
                                 sh_print_env%attempt_hop    = attempt_hop
                                 sh_print_env%new_state = new_state
                                 EXIT
-                        elseif (i == old_state) then
-                                new_state = old_state
+                        elseif (i == aom_env%active_state) then
+                                new_state = aom_env%active_state 
                                 attempt_hop = .FALSE.
                                 sh_print_env%attempt_hop    = attempt_hop
                                 sh_print_env%new_state = new_state
@@ -767,8 +780,8 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
                                 !then a wavefunction collapse will be enforced
                                 aom_env%decohere = .TRUE.
                                 do j=1,mol
-                                        if (abs(aom_env%adiab_nace_tp(old_state,j)) & 
-                                                     > decohere_criterion .and. old_state .ne. j) then
+                                        if (abs(aom_env%adiab_nace_tp(aom_env%active_state,j)) & 
+                                                     > decohere_criterion .and. aom_env%active_state .ne. j) then
                                                ! decohere = .FALSE.
                                                 aom_env%decohere = .FALSE.
                                                 EXIT
@@ -1024,7 +1037,7 @@ subroutine surfacehop(deltat, old_state, C2, &
 
         SELECT CASE(wfpropag_keyword)
         CASE("DIABATIC_BASIS")
-            CALL diab_to_adiab(aom_env, C2, old_state, mol, cstate, ct)
+            CALL old_diab_to_adiab(aom_env, C2, old_state, mol, cstate, ct)
         CASE("ADIABATIC_BASIS")
             ct(:) = aom_env%ctt(:)
             cstate = aom_env%ctt(old_state)
