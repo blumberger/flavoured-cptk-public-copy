@@ -56,6 +56,9 @@ MODULE non_adiabatic_utils
                                                                    
      USE distribution_1d_types,           ONLY: distribution_1d_type    
 
+     USE force_env_types,                ONLY: force_env_get, &
+                                            force_env_type
+
 
 
 #include "./base/base_uses.f90" 
@@ -74,7 +77,8 @@ MODULE non_adiabatic_utils
                  classically_forbidden_hops, &
                  ida_collapse, &
                  define_active_region, &
-                 calc_psi_after_correction!, &
+                 calc_psi_after_correction, &
+                 apply_decoherence
                  !adiab_overalp_check
                   
 
@@ -194,6 +198,10 @@ CONTAINS
 !    
 !ND SUBROUTINE adiab_overalp_check
 
+!SUBROUTINE applay_decoherence()
+
+!END SUBROUTINE applay_decoherence
+
 
 SUBROUTINE adiab_overalp_calc(active_state, aom_env, C_tp, mol, itimes, & 
                                    attempt_hop, enforced_active_state)
@@ -280,26 +288,28 @@ print *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, active_state)*aom_env%C_t(:, 
 END SUBROUTINE adiab_overalp_calc
 
 
-SUBROUTINE define_active_region(ctin, mat, active_region)
-     COMPLEX(KIND=dp), dimension(:), allocatable, INTENT(IN) :: ctin
-     INTEGER, INTENT(IN)                                     :: mat
-     INTEGER, dimension(:), allocatable, INTENT(out)       :: active_region
- 
+SUBROUTINE define_active_region(aom_env)
+     
+     TYPE(aom_env_type)                      :: aom_env   
+   
      CHARACTER(len=*), PARAMETER :: routineN = 'define_active_region', &
         routineP = moduleN//':'//routineN
     
      REAL(KIND=dp), dimension(:), allocatable :: pop
      REAL(KIND=dp)                            :: sum
      INTEGER                                  :: i 
+     INTEGER                                     :: mat
 
+     
+     mat = size(aom_env%H_tp,1) 
 
      ALLOCATE(pop(mat))
-     ALLOCATE(active_region(mat))
+     ALLOCATE(aom_env%active_region(mat))
 
      ! do i=1, mol
-     pop(:)  = real(ctin(:)*conjg(ctin(:)))
+     pop(:)  = real(aom_env%ctin_before_deco(:)*conjg(aom_env%ctin_before_deco(:)))
      ! end do
-     active_region(:) = 0
+     aom_env%active_region(:) = 0
      sum = 0.0
      do i =1, mat
          sum = sum + maxval(pop)
@@ -312,12 +322,12 @@ SUBROUTINE define_active_region(ctin, mat, active_region)
 
      do i =1,mat
         if (pop(i) == -1) then
-            active_region(i) = 1
+            aom_env%active_region(i) = 1
         end if
      end do
 
 !do i =1, mat
-!    write (*,'(I12,A, F12.10)') active_region(i),  "  pop = ", pop(i)
+!    write (*,'(I12,A, F12.10)') aom_env%active_region(i),  "  pop = ", pop(i)
 !end do
 
 
@@ -326,30 +336,33 @@ SUBROUTINE define_active_region(ctin, mat, active_region)
 
 END SUBROUTINE define_active_region
 
-SUBROUTINE calc_psi_after_correction(ctin, ctin_after_deco, active_region, mat, &
-                                               ctin_after_tranf_correction)
-
-     COMPLEX(KIND=dp), dimension(:), INTENT(IN) :: ctin, ctin_after_deco
-     COMPLEX(KIND=dp), dimension(:), allocatable, INTENT(out) :: ctin_after_tranf_correction
-     INTEGER, dimension(:), INTENT(in)          :: active_region
-     INTEGER, INTENT(IN)                        :: mat
+SUBROUTINE calc_psi_after_correction(aom_env)
+ 
+     TYPE(aom_env_type)                      :: aom_env
+     !COMPLEX(KIND=dp), dimension(:), INTENT(IN) :: ctin, ctin_after_deco
+     !COMPLEX(KIND=dp), dimension(:), allocatable, INTENT(out) :: ctin_after_tranf_correction
+     !INTEGER, dimension(:), INTENT(in)          :: active_region
  
      CHARACTER(len=*), PARAMETER :: routineN = 'calc_psi_after_correction', &
         routineP = moduleN//':'//routineN
    
      REAL(KIND=dp)             :: sum_ctin, sum_ctin_after_deco, lambda_scaling 
      INTEGER                  :: i
+     INTEGER                        :: mat
 
-     allocate(ctin_after_tranf_correction(mat))
+     mat = size(aom_env%H_tp,1) 
+   
+     !allocate(ctin_after_tranf_correction(mat))
     
      sum_ctin = 0.0D0
      sum_ctin_after_deco = 0.0D0
      do i =1, mat
-         if (active_region(i) == 0) then 
-             sum_ctin = sum_ctin + abs(ctin(i)*conjg(ctin(i)))
+         if (aom_env%active_region(i) == 0) then 
+             sum_ctin = sum_ctin + abs(aom_env%ctin_before_deco(i)*&
+                                        conjg(aom_env%ctin_before_deco(i)))
          else
              sum_ctin_after_deco = sum_ctin_after_deco + &
-                                abs(ctin_after_deco(i)*conjg(ctin_after_deco(i)))
+                      abs(aom_env%ctin_after_deco(i)*conjg(aom_env%ctin_after_deco(i)))
          end if
      end do
 
@@ -359,10 +372,10 @@ SUBROUTINE calc_psi_after_correction(ctin, ctin_after_deco, active_region, mat, 
         lambda_scaling = sqrt((1-sum_ctin)/sum_ctin_after_deco)
     end if
 
-    ctin_after_tranf_correction(:) = ctin(:)
+    aom_env%ctin_after_tranf_correction(:) = aom_env%ctin_before_deco(:)
     do i =1, mat
-       if (active_region(i) == 1) then
-           ctin_after_tranf_correction(i) = ctin_after_deco(i)*lambda_scaling
+       if (aom_env%active_region(i) == 1) then
+           aom_env%ctin_after_tranf_correction(i) = aom_env%ctin_after_deco(i)*lambda_scaling
        end if
     end do
 
@@ -508,21 +521,71 @@ END SUBROUTINE classically_forbidden_hops
    END SUBROUTINE evaluate_delta_energy_nacv
 
 
+  SUBROUTINE apply_decoherence(itimes, velocities, force_env, local_particles, nparticle_kind, atomic_kind_set)
 
+       REAL(kind=dp), DIMENSION(:,:),POINTER    :: velocities
+       TYPE(atomic_kind_type), DIMENSION(:), &
+          POINTER                                :: atomic_kind_set
+       INTEGER, INTENT(IN)                      :: nparticle_kind
+       TYPE(distribution_1d_type), POINTER      :: local_particles
+       TYPE(force_env_type), POINTER            :: force_env
+       INTEGER, POINTER                          :: itimes 
+!       TYPE(atomic_kind_list_type), POINTER     :: atomic_kinds
+       
+       CHARACTER(len=*), PARAMETER :: routineN = 'apply_decoherence', &
+            routineP = moduleN//':'//routineN 
+
+       REAL(kind=dp), DIMENSION(:,:),POINTER    :: velocities_com_tp
+       LOGICAL                                  :: translate_keyword, correct_transfer_keyword 
+       TYPE(section_vals_type), POINTER         :: mixed_section, adiab_section, coupling_section
+       TYPE(section_vals_type), POINTER         :: force_env_section
+       TYPE(sh_print_env_type)                  :: sh_print_env
+
+       CALL force_env_get(force_env=force_env,&
+                       force_env_section=force_env_section)
+        mixed_section => section_vals_get_subs_vals(force_env_section,"MIXED")
+        adiab_section => section_vals_get_subs_vals(mixed_section, "ADIABATIC")
+        coupling_section => section_vals_get_subs_vals(adiab_section, "AOM")
+
+        CALL section_vals_val_get(coupling_section,"CENTER_OF_MASS",l_val=translate_keyword)
+        sh_print_env = force_env%mixed_env%aom_env%sh_print_env
+ 
+        ALLOCATE(velocities_com_tp(SIZE(velocities, 1), SIZE(velocities, 2)))
+        CALL translate_com(velocities, translate_keyword, velocities_com_tp, &
+              local_particles, nparticle_kind = nparticle_kind, atomic_kind_set = atomic_kind_set)
+   
+        CALL decohere_wf(adiab_section, force_env%mixed_env%aom_env, sh_print_env, itimes, &
+                         velocities_com_tp, local_particles, nparticle_kind,atomic_kind_set)
+        CALL section_vals_val_get(adiab_section,"SPURIOUS_TRANSFER_CORR", l_val=correct_transfer_keyword)
+        
+        if (correct_transfer_keyword .and. force_env%mixed_env%aom_env%decoherence) then
+
+              !> this subroutine define the active regione for local decoherence, it
+              !takes aom_env%ctin_before_deco  as argument
+              CALL define_active_region(force_env%mixed_env%aom_env)
+              !> the new aom_env%ctin after deco is given to aom_env%ctin_after_deco
+              force_env%mixed_env%aom_env%ctin_after_deco=force_env%mixed_env%aom_env%ctin
+              CALL calc_psi_after_correction(force_env%mixed_env%aom_env)
+
+              !> the value of aom_env%ctin is updated again using the spurious charge
+              !transfer correction
+              force_env%mixed_env%aom_env%ctin = force_env%mixed_env%aom_env%ctin_after_tranf_correction                        
+        end if
+
+        DEALLOCATE(velocities_com_tp)
+
+  END SUBROUTINE
 
  
-  SUBROUTINE decohere_wf(adiab_section, sh_print_env, aom_env, deco_keyword, itimes, &
-                         deltatMD, mol,velocities_com_tp, local_particles, atomic_kinds, nparticle_kind, &
-                         atomic_kind_set, K_tot)
+  SUBROUTINE decohere_wf(adiab_section, aom_env, sh_print_env, itimes, &
+                         velocities_com_tp, local_particles, nparticle_kind, &
+                         atomic_kind_set, atomic_kinds)
 
         TYPE(section_vals_type), POINTER               :: adiab_section 
         TYPE(sh_print_env_type)                        :: sh_print_env
         TYPE(aom_env_type)                             :: aom_env
  !       TYPE(sh_env_type)                              :: sh_env
-        CHARACTER(LEN=default_string_length)           :: deco_keyword
         INTEGER, POINTER                               :: itimes
-        REAL(KIND=dp), INTENT(IN)                      :: deltatMD
-        INTEGER                                        :: mol
         REAL(kind=dp), DIMENSION(:,:), POINTER             :: velocities_com_tp
         TYPE(distribution_1d_type), POINTER                :: local_particles
         TYPE(atomic_kind_list_type), POINTER, OPTIONAL     :: atomic_kinds
@@ -530,7 +593,6 @@ END SUBROUTINE classically_forbidden_hops
         TYPE(atomic_kind_type), DIMENSION(:), &
                   POINTER, OPTIONAL                        :: atomic_kind_set
 
-        REAL(kind=dp), INTENT(OUT)                         :: K_tot
 !        LOGICAL, dimension(:), POINTER, OPTIONAL         :: ext_pres
 
         CHARACTER(len=*), PARAMETER :: routineN ='decohere_wf', &         
@@ -539,6 +601,10 @@ END SUBROUTINE classically_forbidden_hops
 !       logical                                            :: edc_deco_time
         REAL(KIND=dp), DIMENSION(:), ALLOCATABLE       :: tau!, tau_forces
         CHARACTER(LEN=default_string_length)           :: wfprop_keyword
+        CHARACTER(LEN=default_string_length)           :: deco_keyword
+        REAL(kind=dp)                                 :: K_tot
+        INTEGER                                        :: mol
+        REAL(KIND=dp)                                 :: deltatMD
 !        REAL(KIND=dp)                                  :: C_param, E_0_param
 
         CALL section_vals_val_get(adiab_section,"REPRESENTATION", &
@@ -547,7 +613,12 @@ END SUBROUTINE classically_forbidden_hops
         
         aom_env%ida_deco = .FALSE.
         aom_env%decoherence = .TRUE.
-        
+       
+        mol = SIZE(aom_env%H_tp, 1) 
+        deltatMD = aom_env%deltatMD 
+        !sh_print_env = aom_env%sh_print_env    
+
+
         SELECT CASE(wfprop_keyword)
         CASE("DIABATIC_BASIS")   
             SELECT CASE(deco_keyword)                                                          
@@ -559,21 +630,23 @@ END SUBROUTINE classically_forbidden_hops
             CASE("TRESH_ONLY_COLLAPSE")  
               CALL  wf_tresh_collaps(aom_env, sh_print_env, itimes)
             CASE("DAMPING")
-              CALL calc_kinetic_tot(aom_env, velocities_com_tp, local_particles, atomic_kinds, &
+              CALL calc_kinetic_tot(aom_env, velocities_com_tp, local_particles, atomic_kinds,&
                                     nparticle_kind, atomic_kind_set, K_tot, aom_env%ext_pres)
               CALL eval_deco_tau(aom_env, tau, adiab_section, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds,nparticle_kind, atomic_kind_set) 
                    
               CALL  wf_damping(aom_env, tau, mol, deltatMD, sh_print_env)  
             CASE("COLLAPSE_WITHIN_DECOTIME")
-              CALL calc_kinetic_tot(aom_env, velocities_com_tp, local_particles, atomic_kinds, &
+              CALL calc_kinetic_tot(aom_env, velocities_com_tp, local_particles, atomic_kinds,&
                                     nparticle_kind, atomic_kind_set, K_tot, aom_env%ext_pres)
               CALL eval_deco_tau(aom_env, tau, adiab_section, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds,nparticle_kind, atomic_kind_set) 
                    
               CALL  collapse_within_deco_time(tau, mol, deltatMD, aom_env)
             CASE("IDA")
+               
                aom_env%ida_deco = .TRUE.
+               CALL ida_collapse(aom_env)
             CASE DEFAULT                                           
               CPABORT("There is no method to add the decoherence.") 
             END SELECT
@@ -586,10 +659,10 @@ END SUBROUTINE classically_forbidden_hops
             CASE("TRESH_ONLY_COLLAPSE")  
               CPABORT("NOT IMPLEMENTED")
             CASE("DAMPING")
-              CALL calc_kinetic_tot(aom_env, velocities_com_tp, local_particles, atomic_kinds, &
+              CALL calc_kinetic_tot(aom_env, velocities_com_tp, local_particles, atomic_kinds,&
                                     nparticle_kind, atomic_kind_set, K_tot, aom_env%ext_pres)
               CALL eval_deco_tau(aom_env, tau, adiab_section, mol, K_tot, sh_print_env, &
-                          local_particles, atomic_kinds,nparticle_kind, atomic_kind_set) 
+                          local_particles, atomic_kinds, nparticle_kind, atomic_kind_set) 
               CALL wf_damping_adiab_prop(aom_env, tau, mol, deltatMD, sh_print_env)                    
             CASE DEFAULT                                           
               CPABORT("There is no method to add the decoherence.") 
@@ -649,15 +722,37 @@ END SUBROUTINE classically_forbidden_hops
 
   SUBROUTINE ida_collapse(aom_env)
     TYPE(aom_env_type)                             :: aom_env
+!    COMPLEX(KIND=dp), dimension(:), allocatable :: ct
+!    integer :: j, i
  
     CHARACTER(len=*), PARAMETER :: routineN ='ida_collapse', &         
     routineP = moduleN//':'//routineN                                                                 
-    
-         if (aom_env%successful_hop) then
-              aom_env%ctin(:) = aom_env%C_t(:, aom_env%new_state)
+ !   allocate(ct(10)) 
+        
+!print *, "aom_env%my_successful_hop_INSIDE", aom_env%my_successful_hop
+!print *, "aom_env%active_state_INSIDE", aom_env%active_state
+!print *, "aom_env%active_state_past_INSIDE", aom_env%active_state_past
+!print *, "aom_env%attempt_hop_INSIDE", aom_env%attempt_hop
+       if (aom_env%attempt_hop) then
+         !if (aom_env%successful_hop) then
+         if (aom_env%my_successful_hop) then
+              !aom_env%ctin(:) = aom_env%C_tp(:, aom_env%new_state)
+              aom_env%ctin(:) = aom_env%C_tp(:, aom_env%active_state)
          else 
-              aom_env%ctin(:) = aom_env%C_t(:, aom_env%active_state)
-         end if                                                            
+              !aom_env%ctin(:) = aom_env%C_tp(:, aom_env%active_state)
+              aom_env%ctin(:) = aom_env%C_tp(:, aom_env%active_state_past)
+         end if
+
+ !      do i=1,10
+ !         ct(i) = cmplx(0.0D0, 0.0D0,dp)
+ !         do j=1,10
+ !              ct(i) = ct(i) + cmplx(aom_env%C_tp(j,i), 0.0D0,dp)*aom_env%ctin(j)
+ !         end do 
+ !      end do 
+ !      print *, "CTNOW", ct                 
+                         
+      end if      
+  !  deallocate(ct)           
   END SUBROUTINE ida_collapse
 
  
@@ -762,10 +857,11 @@ END SUBROUTINE classically_forbidden_hops
     INTEGER  :: i, deg_of_freedom
     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE :: adiab_nace_vector
     REAL(KIND=dp)      :: KbT, Temp, alpha, T_inp 
+    REAL(kind=dp), DIMENSION(:,:),POINTER          :: active_state_adforces
     REAL(kind=dp), DIMENSION(:,:),POINTER          :: my_forces_adiab
     LOGICAL                                  :: tau_schwartz
 
-
+    ALLOCATE(active_state_adforces(3, aom_env%natom))
     ALLOCATE(my_forces_adiab(3,aom_env%natom))
     allocate(tau(mol)) ! decoherence time (EDC method)
     allocate(tau_forces(mol)) ! decoherence time (EDC method)
@@ -803,6 +899,7 @@ END SUBROUTINE classically_forbidden_hops
 !transfor the diabatic into the adiabatic coefficients and calculate tau
    
    CALL section_vals_val_get(adiab_section,"DECO_TIME",c_val=tau_param)
+print *, "aom_env%active_state", aom_env%active_state
     do i=1,mol 
            if (i .ne. aom_env%active_state) then
               SELECT CASE(tau_param)
@@ -819,6 +916,13 @@ END SUBROUTINE classically_forbidden_hops
 
               CASE("FORCES_BASED")
 
+                    if (aom_env%my_successful_hop) then
+                        !active_state_adforces = aom_env%forces_adiab_new
+                        active_state_adforces = aom_env%actforces_after_hop
+                    else 
+                        active_state_adforces = aom_env%forces_adiab
+                    end if
+
                     !Boltzmann factor to use in alpha parameter
                      KbT = (2*K_tot)/(3*aom_env%active_atoms)
                     !instead of using the exact boltzmann factor, at the moment the code uses Temp =
@@ -837,7 +941,7 @@ END SUBROUTINE classically_forbidden_hops
                          call calcforces(i ,-AIMAG(aom_env%H_tp), aom_env%C_tp, aom_env%nacv, &
                               aom_env%NN, aom_env%atoms, &
                               aom_env%scaling, aom_env%cbar, aom_env%F, my_forces_adiab, &
-                             aom_env%ext_pres, aom_env%analytics, aom_env%exact_forces)
+                             aom_env%ext_pres)
                          tau(i) = 0.0D0
                          DO iparticle_kind= 1, my_nparticle_kind
                                 atomic_kind => my_atomic_kind_set(iparticle_kind)
@@ -848,12 +952,12 @@ END SUBROUTINE classically_forbidden_hops
                                    alpha = 6*mass*Temp                  
                                    if (tau_schwartz) then    
                                         tau(i) = tau(i) + &
-                                        (dot_product((my_forces_adiab(:,iparticle)-aom_env%forces_active_state(:,iparticle)),&
-                                        (my_forces_adiab(:,iparticle)-aom_env%forces_active_state(:,iparticle))))/(4*alpha)
+                                        (dot_product((my_forces_adiab(:,iparticle)-active_state_adforces(:,iparticle)),&
+                                        (my_forces_adiab(:,iparticle)-active_state_adforces(:,iparticle))))/(4*alpha)
                                    else
                                         tau(i) = tau(i) + &
-                                        (sqrt(dot_product((my_forces_adiab(:,iparticle)-aom_env%forces_active_state(:,iparticle)),&
-                                        (my_forces_adiab(:,iparticle)-aom_env%forces_active_state(:,iparticle)))))/(2*sqrt(alpha))
+                                        (sqrt(dot_product((my_forces_adiab(:,iparticle)-active_state_adforces(:,iparticle)),&
+                                        (my_forces_adiab(:,iparticle)-active_state_adforces(:,iparticle)))))/(2*sqrt(alpha))
                                    end if
                                 END DO
                          END DO
@@ -870,6 +974,13 @@ print *, "PURE_DEPHASING", i
 
               CASE("HYBRID_TAU")
 
+                    if (aom_env%my_successful_hop) then
+                        !active_state_adforces = aom_env%forces_adiab_new
+                        active_state_adforces = aom_env%actforces_after_hop
+                    else 
+                        active_state_adforces = aom_env%forces_adiab
+                    end if
+
                     !Boltzmann factor to use in alpha parameter
                      KbT = (2*K_tot)/(3*aom_env%active_atoms)
                     !instead of using the exact boltzmann factor, at the moment the code uses Temp =
@@ -888,7 +999,7 @@ print *, "PURE_DEPHASING", i
                          call calcforces(i ,-AIMAG(aom_env%H_tp), aom_env%C_tp, aom_env%nacv, &
                               aom_env%NN, aom_env%atoms, &
                               aom_env%scaling, aom_env%cbar, aom_env%F, my_forces_adiab, &
-                             aom_env%ext_pres, aom_env%analytics, aom_env%exact_forces)
+                             aom_env%ext_pres)
                          tau(i) = 0.0D0
                          tau_forces(i) =  0.0D0
                           tau_pure_deph(i) = 0.0D0
@@ -901,12 +1012,12 @@ print *, "PURE_DEPHASING", i
                                    alpha = 6*mass*Temp                  
                                    if (tau_schwartz) then    
                                         tau(i) = tau(i) + &
-                                        (dot_product((my_forces_adiab(:,iparticle)-aom_env%forces_active_state(:,iparticle)),&
-                                        (my_forces_adiab(:,iparticle)-aom_env%forces_active_state(:,iparticle))))/(4*alpha)
+                                        (dot_product((my_forces_adiab(:,iparticle)-active_state_adforces(:,iparticle)),&
+                                        (my_forces_adiab(:,iparticle)-active_state_adforces(:,iparticle))))/(4*alpha)
                                    else
                                         tau(i) = tau(i) + &
-                                        (sqrt(dot_product((my_forces_adiab(:,iparticle)-aom_env%forces_active_state(:,iparticle)),&
-                                        (my_forces_adiab(:,iparticle)-aom_env%forces_active_state(:,iparticle)))))/(2*sqrt(alpha))
+                                        (sqrt(dot_product((my_forces_adiab(:,iparticle)-active_state_adforces(:,iparticle)),&
+                                        (my_forces_adiab(:,iparticle)-active_state_adforces(:,iparticle)))))/(2*sqrt(alpha))
                                    end if
                                 END DO
                          END DO
@@ -944,6 +1055,7 @@ print *, "PURE_DEPHASING", i
     deallocate(adiab_nace_vector)
     deallocate(sh_print_env%tau_deco)
     DEALLOCATE(my_forces_adiab)
+    DEALLOCATE(active_state_adforces)
 !    deallocate(sh_print_env%pure_deph)
   END SUBROUTINE eval_deco_tau
 
@@ -1179,7 +1291,7 @@ print *, "PURE_DEPHASING", i
               END DO
            END DO
            K_tot = 0.5*K_tot
-
+print *, "KINETIC", K_tot
 
    END SUBROUTINE calc_kinetic_tot
  

@@ -116,12 +116,18 @@ IMPLICIT NONE
                                                          velocities_tp,& ! velocities step
                                                          velocities_t,&      ! velocities step min 1
                                                          forces_adiab, &      ! forces at step 0
-                                                         forces_adiab_new
+                                                         forces_adiab_new, &
+                                                         actforces_after_hop
 
      INTEGER                                     :: active_atoms
 !     REAL(KIND=dp)                              :: cbar, scaling
      integer                                    :: atoms, natom
-     logical                                    ::  analytics
+     REAL(KIND=dp)                              :: deltatMD
+!> arrays used in the decoherence
+     COMPLEX(KIND=dp), dimension(:), POINTER :: ctin_before_deco
+     COMPLEX(KIND=dp), dimension(:), POINTER :: ctin_after_deco
+     COMPLEX(KIND=dp), dimension(:), POINTER :: ctin_after_tranf_correction
+     INTEGER, dimension(:), POINTER          :: active_region
 
 !>store charge carrier WF coefficients
      COMPLEX(KIND=dp), dimension(:), POINTER     :: cttm, ctt
@@ -131,7 +137,7 @@ IMPLICIT NONE
      REAL(KIND = dp), DIMENSION(:), POINTER :: energies_t   
      REAL(KIND = dp), DIMENSION(:), POINTER :: adiab_energies_t 
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER :: F
-     REAL(kind=dp), DIMENSION(:,:),POINTER      :: exact_forces, forces_active_state
+!     REAL(kind=dp), DIMENSION(:,:),POINTER      :: forces_active_state
      !REAL(kind=dp), DIMENSION(:,:),POINTER      :: exact_forces
      REAL(KIND=dp), dimension(:,:), POINTER :: At, Atm, Atp, Bt, Btm, & 
                                                          Btp, siteenergies
@@ -179,7 +185,7 @@ IMPLICIT NONE
      REAL(KIND = dp)                                     :: factor
 !> If hop
      LOGICAL                                     :: attempt_hop
-     LOGICAL                                     :: successful_hop
+     LOGICAL                                     :: successful_hop, my_successful_hop
      LOGICAL                                     :: HS_propagation
 !> Adiabatic nace at time t and t-dt
      !REAL(KIND=dp), dimension(:,:), POINTER      :: adiab_nace_tp, adiab_nace_t

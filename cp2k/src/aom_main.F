@@ -156,7 +156,7 @@ CONTAINS
      TYPE(atomic_kind_list_type), POINTER           :: atomic_kinds
      TYPE(distribution_1d_type), POINTER            :: local_particles
      LOGICAL, INTENT(IN)                            :: my_test_keyword
-     REAL(kind=dp)                                 :: K_tot
+     !REAL(kind=dp)                                 :: K_tot
      INTEGER                                    :: nparticle_kind
      TYPE(atomic_kind_type), DIMENSION(:), POINTER                       :: atomic_kind_set
 
@@ -172,8 +172,7 @@ CONTAINS
      REAL(KIND=dp)    :: cbar, minao
      REAL(KIND=dp), dimension(:), allocatable    :: energy_conservation
      INTEGER, dimension(:), allocatable          :: class_forbidden_hop_tp
-     COMPLEX(KIND=dp), dimension(:), allocatable :: ctin, ctin_after_deco
-     INTEGER :: i
+     !COMPLEX(KIND=dp), dimension(:), allocatable :: ctin
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE   :: C_tp
      !REAL(KIND=dp), DIMENSION(:), ALLOCATABLE     :: E_tp
      LOGICAL                                      :: analytics
@@ -185,17 +184,18 @@ CONTAINS
      LOGICAL                                      :: keyword_translate
      TYPE(sh_print_env_type)                      :: sh_print_env
      REAL(kind=dp), DIMENSION(:,:),POINTER          :: positions_com_tp, velocities_com_tp
-     CHARACTER(LEN=default_string_length)           :: deco_keyword, prop_wf_keyword 
+     CHARACTER(LEN=default_string_length)           :: prop_wf_keyword 
      CHARACTER(LEN=default_string_length)          :: reversal_keyword
-     LOGICAL                                      :: correct_transfer_keyword
      real(kind=dp), DIMENSION(:,:), allocatable :: PC_allrvecs
      LOGICAL                                      :: do_random !, correct_transfer
      REAL(KIND=dp)                                :: sum
      !REAL(KIND=dp)                                :: sum, sum1
-     INTEGER, dimension(:), allocatable       :: active_region
-     COMPLEX(KIND=dp), dimension(:), allocatable :: ctin_after_tranf_correction
-     REAL(KIND=dp), dimension(:), allocatable    :: pop_t_before, &
-                                                pop_t_present, pop_after_deco, pop_after_sp_corr 
+!     INTEGER, dimension(:), allocatable       :: active_region
+!     COMPLEX(KIND=dp), dimension(:), allocatable :: ctin_after_tranf_correction
+!     LOGICAL                                      :: correct_transfer_keyword
+!     INTEGER :: i
+!     REAL(KIND=dp), dimension(:), allocatable    :: pop_t_before, &
+!                                                pop_t_present, pop_after_deco, pop_after_sp_corr 
 !     REAL(KIND=dp), dimension(:), allocatable    :: pop_atmdt, pop_a, pop_ap2, &
 !                                                     pop_ap1, pop_am2, pop_am1, pop_t_before, &
 !                                                pop_t_present, pop_after_deco, pop_after_sp_corr 
@@ -265,8 +265,8 @@ CONTAINS
      ALLOCATE(positions_com_tp(3, natom))
      ALLOCATE(velocities_com_tp(3, natom))
      allocate(exact_forces(3,natom))
-     allocate(ctin(mat))      !ctin goes into the subroutine ZGEMV
-     allocate(ctin_after_deco(mat))
+     !allocate(ctin(mat))      !ctin goes into the subroutine ZGEMV
+     !allocate(ctin_after_deco(mat))
 
      !> OBTAIN COORDINATES, ENERGIES, STATES, etc. FROM PREVIOUS STEP
      CALL translate_com(positions_tp, keyword_translate, positions_com_tp, local_particles, atomic_kinds = atomic_kinds)  
@@ -279,10 +279,10 @@ CONTAINS
         aom_env%siteenergies(3,:) = energies_tp(:) ! CHANGE_AC
      enddo
      active_state = aom_env%active_state
-     ctin(:) = aom_env%ctin(:)
+     !ctin(:) = aom_env%ctin(:)
      aom_env%adiab_nace_t = aom_env%adiab_nace_tp
      aom_env%state_tmdt = active_state
-     
+     aom_env%my_successful_hop = .False.
      !> CALCULATE THE CENTER OF MASS
      !> CONSTRUCT NEIGHBOURS LIST
      CALL calc_coms_and_nlist(aom_env, atoms, mol, cutoff_sites, orb)
@@ -335,7 +335,11 @@ CONTAINS
 
      
      !> PROPAGATE THE ELECTRON FOR ONE MOLECULAR TIMESTEP
-     aom_env%cttm(:) = ctin(:)
+     !>the CHARGE CARRIER WF is called aom_env%ctin
+     !> aom_env%cttm before propagation and aom_env%ctt after propagation are
+     !used in the surf_hop_type subroutine
+
+     aom_env%cttm(:) = aom_env%ctin(:)
 
      aom_env%HS_propagation = .FALSE.
       
@@ -344,16 +348,16 @@ CONTAINS
      
      SELECT CASE(prop_wf_keyword)                                 
      CASE("DIABATIC_RK")
-           CALL propagate_wf(ctin, aom_env, nadiab,  norbitals, ELsteps, &
+           CALL propagate_wf(aom_env%ctin, aom_env, nadiab,  norbitals, ELsteps, &
                              itimes, adiab_section, deltatMD, deltatE , times,    &
                              mat)
      CASE("ADIABATIC_RK")
-           CALL propagate_adiab_wf(aom_env%E_t, aom_env%E_tp, ctin, aom_env, nadiab, norbitals, ELsteps, &
+           CALL propagate_adiab_wf(aom_env%E_t, aom_env%E_tp, aom_env%ctin, aom_env, nadiab, norbitals, ELsteps, &
                                    itimes, adiab_section, deltatMD, deltatE , times,  & 
                                    mat)
      CASE("HS_CORRECTED_RK")  
            !> ADIABATIC NACV EVALUATION FOR HS CORRECTION
-           CALL prop_wf_HS_corr(ctin, aom_env, nadiab,  norbitals, ELsteps, &
+           CALL prop_wf_HS_corr(aom_env%ctin, aom_env, nadiab,  norbitals, ELsteps, &
                            itimes, adiab_section, deltatMD, deltatE , times, &
                             mat, aom_env%class_forbidden_hop_t, active_state)
            CALL classically_forbidden_hops(active_state, aom_env, mat, aom_env%E_tp, &
@@ -370,7 +374,7 @@ CONTAINS
      CASE DEFAULT                                           
            CPABORT("There is no method to propagate the wavefunction.") 
      END SELECT                                             
-     aom_env%ctt(:) = ctin(:)
+     aom_env%ctt(:) = aom_env%ctin(:)
 
      !> SURFACE HOPPING TEST
      !The eigenvectors are needed to calculate the surface hopping probabilities
@@ -404,16 +408,17 @@ print *, "Active_state_after_surf_hop", active_state
      call calcforces(state=active_state,Hin=-AIMAG(aom_env%H_tp), C=C_tp, nacv=aom_env%nacv, &
                             NN=aom_env%NN, atoms=atoms, & 
                            scaling=scaling, cbar=cbar, Fin=aom_env%F, forces_adiab=my_forces_adiab, &
-                           ext_pres=aom_env%ext_pres, analytics=analytics, exact_forces=exact_forces)
+                           ext_pres=aom_env%ext_pres)
 
      !>store forces for the active state used for forces-based decoherence
-     aom_env%forces_active_state = my_forces_adiab  
+!     aom_env%forces_active_state = my_forces_adiab  
 
      IF (attempt_hop) THEN
          call calcforces(state=new_state,Hin=-AIMAG(aom_env%H_tp), C=C_tp, nacv=aom_env%nacv, &
                                NN=aom_env%NN, atoms=atoms, & 
                               scaling=scaling, cbar=cbar, Fin=aom_env%F, forces_adiab=my_forces_adiab_new, &
-                              ext_pres=aom_env%ext_pres, analytics=analytics, exact_forces=exact_forces)
+                              ext_pres=aom_env%ext_pres)
+!print *, "my_forces_adiab_new", my_forces_adiab_new
      ENDIF
 
 
@@ -535,8 +540,11 @@ print *, "Active_state_after_surf_hop", active_state
 
      !> APPLY DECOHERENCE CORRECTION
      !> initialize derived type variables used in the decohere_wf subroutine
-     aom_env%ctin=ctin
+     !aom_env%ctin=ctin
+     aom_env%ctin_before_deco = aom_env%ctin 
      aom_env%active_state=active_state
+     aom_env%forces_adiab=my_forces_adiab
+     !aom_env%forces_adiab_new = my_forces_adiab_new
 
 
 !ALLOCATE(sh_env%nacv(3,mat, mat*aom_atoms))
@@ -553,66 +561,75 @@ print *, "Active_state_after_surf_hop", active_state
      aom_env%atoms = atoms
      aom_env%scaling = scaling
      aom_env%cbar = cbar
+     aom_env%deltatMD = deltatMD
+     !aom_env%sh_print_env = sh_print_env
      !sh_env%F = aom_env%F
 !     sh_env%my_forces_adiab = my_forces_adiab
-     aom_env%exact_forces = exact_forces
+!     aom_env%exact_forces = exact_forces
      !sh_env%ext_pres  = aom_env%ext_pres
-     aom_env%analytics = analytics 
+!     aom_env%analytics = analytics 
      !sh_env%H_tp = aom_env%H_tp
 
 
 
+     !> decoherence_wf changes the value of aom_env%ctin
 
-     CALL decohere_wf(adiab_section, sh_print_env, aom_env, deco_keyword, itimes, &
-                                    deltatMD, mol,velocities_com_tp, local_particles, atomic_kinds, nparticle_kind,    &
-                                    atomic_kind_set, K_tot)
-    
-     CALL section_vals_val_get(adiab_section,"SPURIOUS_TRANSFER_CORR", l_val=correct_transfer_keyword)
-!     CALL section_vals_val_get(coupling_section,"CENTER_OF_MASS",l_val=translate_keyword) 
-!     correct_transfer = .TRUE.
-     if (correct_transfer_keyword .and. aom_env%decoherence) then
-     !if (correct_tranfer) then
-        CALL define_active_region(ctin, mat, active_region)
-        ctin_after_deco=aom_env%ctin         
-        CALL calc_psi_after_correction(ctin, ctin_after_deco, active_region, mat, ctin_after_tranf_correction)
+!    CALL decohere_wf(adiab_section, aom_env, sh_print_env, itimes, &
+!                                   velocities_com_tp, local_particles, nparticle_kind,    &
+!                                   atomic_kind_set, atomic_kinds)
+!   
+!    CALL section_vals_val_get(adiab_section,"SPURIOUS_TRANSFER_CORR", l_val=correct_transfer_keyword)
+!!     CALL section_vals_val_get(coupling_section,"CENTER_OF_MASS",l_val=translate_keyword) 
+!!     correct_transfer = .TRUE.
+!    if (correct_transfer_keyword .and. aom_env%decoherence) then
+!    !if (correct_tranfer) then
+!       !> this subroutine define the active regione for local decoherence, it
+!       !takes aom_env%ctin_before_deco  as argument
+!       CALL define_active_region(aom_env)
+!
+!       !> the new aom_env%ctin after deco is given to aom_env%ctin_after_deco
+!       aom_env%ctin_after_deco=aom_env%ctin         
+!       CALL calc_psi_after_correction(aom_env)
+!      
+!       !> the value of aom_env%ctin is updated again using the spurious charge
+!       !transfer correction
+!       aom_env%ctin = aom_env%ctin_after_tranf_correction
+!      ! ctin=sh_env%ctin
+!   ! else
+!    !   ctin=aom_env%ctin
+!    ENDIF
 
-        ctin = ctin_after_tranf_correction
-       ! ctin=sh_env%ctin
-     else
-        ctin=aom_env%ctin
-     ENDIF
-
-     if (correct_transfer_keyword .and. aom_env%decoherence) then
-print *, "################CARRIER_WF##############"
-
-allocate(pop_t_before(mol))
-allocate(pop_t_present(mol))
-allocate(pop_after_deco(mol))
-allocate(pop_after_sp_corr(mol))
-
-pop_t_before = 0.0D0
-pop_t_present = 0.0D0
-pop_after_deco = 0.0D0
-pop_after_sp_corr = 0.0D0
-
-do i =1, mol
-      pop_t_before(i) = real(aom_env%cttm(i)*conjg(aom_env%cttm(i)))
-      pop_t_present(i) = real(aom_env%ctt(i)*conjg(aom_env%ctt(i)))
-      pop_after_deco = real(ctin_after_deco(i)*conjg(ctin_after_deco(i)))
-      pop_after_sp_corr = real(ctin_after_tranf_correction(i)*conjg(ctin_after_tranf_correction(i)))
-
-!write (*,'(F12.10,A, F12.10, A, F12.10, A, F12.10)') pop_t_before(i), " tp= ", pop_t_present(i), " deco = ", &
-!       pop_after_deco(i), " spcor = ", pop_after_sp_corr(i)
-
-end do
-
-
-!write (*,'(I12,A, I12,A , I12,A , I12)') &
-!        maxloc(pop_t_before), " tp= ", maxloc(pop_t_present), " deco = ", maxloc(pop_after_deco), &
-!         " spcorr = ", maxloc(pop_after_sp_corr)
-
-deallocate(pop_t_before, pop_t_present, pop_after_deco, pop_after_sp_corr)
-     ENDIF
+  !       if (correct_transfer_keyword .and. aom_env%decoherence) then
+  !  print *, "################CARRIER_WF##############"
+  !  
+  !  allocate(pop_t_before(mol))
+  !  allocate(pop_t_present(mol))
+  !  allocate(pop_after_deco(mol))
+  !  allocate(pop_after_sp_corr(mol))
+  !  
+  !  pop_t_before = 0.0D0
+  !  pop_t_present = 0.0D0
+  !  pop_after_deco = 0.0D0
+  !  pop_after_sp_corr = 0.0D0
+  !  
+  !  do i =1, mol
+  !        pop_t_before(i) = real(aom_env%cttm(i)*conjg(aom_env%cttm(i)))
+  !        pop_t_present(i) = real(aom_env%ctt(i)*conjg(aom_env%ctt(i)))
+  !        pop_after_deco = real(aom_env%ctin_after_deco(i)*conjg(aom_env%ctin_after_deco(i)))
+  !        pop_after_sp_corr = real(aom_env%ctin_after_tranf_correction(i)*conjg(aom_env%ctin_after_tranf_correction(i)))
+  !  
+  !  write (*,'(F12.10,A, F12.10, A, F12.10, A, F12.10)') pop_t_before(i), " tp= ", pop_t_present(i), " deco = ", &
+  !         pop_after_deco(i), " spcor = ", pop_after_sp_corr(i)
+  !  
+  !  end do
+  !  
+  !  
+  !  write (*,'(I12,A, I12,A , I12,A , I12)') &
+  !          maxloc(pop_t_before), " tp= ", maxloc(pop_t_present), " deco = ", maxloc(pop_after_deco), &
+  !           " spcorr = ", maxloc(pop_after_sp_corr)
+  !  
+  !  deallocate(pop_t_before, pop_t_present, pop_after_deco, pop_after_sp_corr)
+  !       endif
 
      !> PRINT
      CALL adiab_print_hamiltonian(adiab_section, -AIMAG(aom_env%H_tp), nadiab,norbitals,itimes, deltatMD)
@@ -628,28 +645,30 @@ deallocate(pop_t_before, pop_t_present, pop_after_deco, pop_after_sp_corr)
 
 
      !> STORE THE COORDINATES IF NOT SUCCESSFUL RUN
-     aom_env%forces_adiab=my_forces_adiab
      aom_env%rm_tm      = aom_env%rm_t
      aom_env%rm_t       = positions_com_tp
      aom_env%energies_t = energies_tp
      !aom_env%adiab_energies_t = aom_env%E_t
      aom_env%adiab_energies_t = aom_env%E_tp
-     aom_env%ctin        = ctin
+     !aom_env%ctin        = ctin
      aom_env%attempt_hop  = attempt_hop
-     aom_env%H_t = aom_env%H_tp
+     !aom_env%H_t = aom_env%H_tp
      aom_env%new_state = new_state
      !aom_env%active_state = active_state
      aom_env%Stmtm = aom_env%Stt
      aom_env%Stt   = aom_env%Stptp
      aom_env%Sttm  = aom_env%Stpt
      aom_env%Stmt  = aom_env%Sttp
-     aom_env%E_t = aom_env%E_tp
+     !aom_env%E_t = aom_env%E_tp
      !aom_env%C_tp = C_tp
      !aom_env%C_t = aom_env%C_tp
 
      !aom_env%Stmtm = Stt
      IF (attempt_hop) THEN
+         !!NB this variable
          aom_env%forces_adiab_new = my_forces_adiab_new
+         aom_env%actforces_after_hop = my_forces_adiab_new
+!print *, "aom_env%forces_adiab_new", aom_env%forces_adiab_new
          aom_env%active_state = active_state
          aom_env%eigenvector_matrix = C_tp
          aom_env%diabatic_forces = aom_env%F
@@ -679,7 +698,7 @@ deallocate(pop_t_before, pop_t_present, pop_after_deco, pop_after_sp_corr)
      !DEALLOCATE(sh_env%C_tp)
      !DEALLOCATE(sh_env%ctin)
 
-     deallocate(ctin, ctin_after_deco)
+     !deallocate(ctin)
      deallocate(exact_forces)
     END SUBROUTINE construct_ham_X_SH
 
