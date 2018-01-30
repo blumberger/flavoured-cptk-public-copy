@@ -438,6 +438,7 @@ END SUBROUTINE classically_forbidden_hops
         
         if (correct_transfer_keyword .and. force_env%mixed_env%aom_env%decoherence) then
 
+              force_env%mixed_env%aom_env%ctin_before_deco = force_env%mixed_env%aom_env%ctin
               !> this subroutine define the active regione for local decoherence, it
               !takes aom_env%ctin_before_deco  as argument
               CALL define_active_region(force_env%mixed_env%aom_env)
