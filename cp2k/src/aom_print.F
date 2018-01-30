@@ -845,8 +845,10 @@ CONTAINS
            WRITE( unit_nr, "(A)") "TRY ENERGY CONSERVATION WITH NACV-ORIENTED RESCALING:"
            WRITE( unit_nr, "(A,F20.10)" ) "   Energy old state (Ha) = ", adiab_energies_t(old_state)
            WRITE( unit_nr, "(A,F20.10)" ) "   Energy new state (Ha) = ", adiab_energies_t(new_state)
+           WRITE( unit_nr, "(A,F20.10)" ) "   Energy diff (Ha) = ", adiab_energies_t(new_state) - adiab_energies_t(old_state)
            WRITE( unit_nr, "(A,F20.10)" ) "   A-term   = ", A
            WRITE( unit_nr, "(A,F20.10)" ) "   B-term   = ", B
+           WRITE( unit_nr, "(A,F20.10)" ) "   NACV kinetic energy   = ", B**2/(4*A)
            WRITE( unit_nr, "(A,F20.10)" ) "   Discriminant   = ", delta_energy
            IF (successful_hop) THEN
                WRITE( unit_nr, "(A)") "SUCCESSFUL HOP!"

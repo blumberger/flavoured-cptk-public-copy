@@ -1131,7 +1131,14 @@ print *, "KINETIC", K_tot
                             mat)
 
      COMPLEX(KIND=dp), dimension(:), INTENT(INOUT)   :: ctin
+     TYPE(aom_env_type)                              :: aom_env
      INTEGER, INTENT(IN)                             :: nadiab,  norbitals 
+     INTEGER                                         :: ELsteps   
+     INTEGER, POINTER                                :: itimes
+     TYPE(section_vals_type), POINTER                :: adiab_section
+     REAL(KIND=dp)                                   :: deltatMD, deltatE
+     REAL(KIND=dp), INTENT(IN)                       :: times 
+     integer                                         :: mat 
 
 
      CHARACTER(len=*), PARAMETER                     :: routineN ='propagate_wf', &
@@ -1148,16 +1155,10 @@ print *, "KINETIC", K_tot
                                                           Sttm_int, Stmtm_int
 
      LOGICAL                                         :: renorm, offset
-     INTEGER                                         :: ELsteps   
-     INTEGER, POINTER                                :: itimes
-     TYPE(section_vals_type), POINTER                :: adiab_section
-     TYPE(aom_env_type)                              :: aom_env
-     REAL(KIND=dp)                                   :: deltatMD, deltatE
      REAL(KIND=dp)                                   :: ctmag
-     REAL(KIND=dp)                                   :: times 
      COMPLEX(KIND=dp)                                :: alpha, beta, ctcomp
      integer                                         :: t2
-     integer                                         :: i,j, inc, mat 
+     integer                                         :: i,j, inc 
      character(len=1)                                :: zgemm_type
 
 
@@ -1321,7 +1322,10 @@ print *, "KINETIC", K_tot
                          ctcomp = ctcomp + ctotal(i)
                     end do
                     ctmag = abs(ctcomp)
-                    !print*, "AC_NORM", ctmag
+                    IF ( ABS( ctmag - 1).GE.1E-6 ) THEN
+                       print*, "Norm is", ctmag
+                       CPABORT("Problem in the electronic propagation, norm is not conserved.")
+                    ENDIF
                     renorm = .TRUE.
                     if (renorm) then
                        !rescale to conserve norm = 1
@@ -1340,16 +1344,17 @@ print *, "KINETIC", K_tot
 !COMMENT: WHY CTOUT?
                     ctout = cmplx(0.0D0, 0.0D0,dp)
 
-                    times = DBLE(itimes) + (t2-1)*1/DBLE(ELsteps)
-                    CALL adiab_print_nace(adiab_section, NACE, nadiab, norbitals, itimes, deltatMD, times)
-                    CALL adiab_print_coeff(adiab_section, ctin,nadiab, norbitals,itimes, deltatMD, &
-                                           times)
-                    CALL adiab_print_pop(adiab_section, abs(ctotal),nadiab,norbitals,itimes, deltatMD, &
-                                         times)
-                    CALL adiab_print_matrix_density(adiab_section, ctin, nadiab,norbitals,itimes,deltatMD, &
-                                                    times)
 
              end do
+             !times = DBLE(itimes) + (t2-1)*1/DBLE(ELsteps)
+             !times = DBLE(itimes) 
+             CALL adiab_print_nace(adiab_section, NACE, nadiab, norbitals, itimes, deltatMD, times)
+             CALL adiab_print_coeff(adiab_section, ctin,nadiab, norbitals,itimes, deltatMD, &
+                                    times)
+             CALL adiab_print_pop(adiab_section, abs(ctotal),nadiab,norbitals,itimes, deltatMD, &
+                                    times)
+             CALL adiab_print_matrix_density(adiab_section, ctin, nadiab,norbitals,itimes,deltatMD, &
+                                    times)
        
 !END PROPAGATE THE ELECTRON FOR ONE MOLECULAR TIMESTEP
 

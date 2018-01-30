@@ -212,6 +212,8 @@ CONTAINS
      deltatE = deltatMD/ELsteps !CHANGE_AC
 
      sh_print_env = aom_env%sh_print_env
+     times = DBLE(itimes)
+     sh_print_env%times = times
      
      ALLOCATE(positions_com_tp(3, natom))
      ALLOCATE(velocities_com_tp(3, natom))
@@ -326,10 +328,7 @@ CONTAINS
      CALL adiab_print_nacv(adiab_section, aom_env%nacv, nadiab, norbitals, aom_atoms,itimes, deltatMD)
      CALL adiab_print_adiabat_energies(adiab_section, aom_env%E_tp, nadiab, deltatMD, times)
      CALL adiab_print_pvecs(adiab_section, PC_allrvecs, itimes, deltatMD, times, atoms, nadiab)
-                         sh_print_env%times = times
-                         sh_print_env%times = DBLE(itimes)
      IF (analytics) THEN
-        times = DBLE(itimes)
         CALL adiab_print_exact_forces(adiab_section, exact_forces, natom, deltatMD, times)
      ENDIF
 
