@@ -153,7 +153,7 @@ CONTAINS
      INTEGER    :: input_seed
      TYPE(rng_stream_type), POINTER           :: rng_stream
      LOGICAL                                  :: continue_while
-     CHARACTER(LEN=default_string_length)     :: file_name_s_psigma, file_name_s_ppi
+     CHARACTER(LEN=default_string_length)     :: file_name_s_psigma, file_name_s_ppi, deco_keyword
 
      NULLIFY(rng_stream)
      NULLIFY(listcoeff)
@@ -306,6 +306,11 @@ CONTAINS
      ALLOCATE(Atp(4,aom_atoms))
      Atp(2:4,1:aom_atoms) = crds(1:3,1:aom_atoms)
      call connect_list2(Atp(2:4,:), aom_env%atomlist, aom_env%connlist1, aom_env%connlist2, cutoff_connect)
+
+     
+     aom_env%do_deco = .FALSE.
+     CALL section_vals_val_get(adiab_section,"DECOHERENCE_CORRECTIONS",c_val=deco_keyword)
+     IF (.NOT.(deco_keyword.EQ."NO_DECO_CORR"))  aom_env%do_deco = .TRUE.
 
      DEALLOCATE(rng_stream)
   END SUBROUTINE create_aom_env

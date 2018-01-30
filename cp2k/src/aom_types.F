@@ -146,14 +146,17 @@ IMPLICIT NONE
      COMPLEX(KIND=dp), DIMENSION(:,:), POINTER    :: H_t, H_tp
      REAL(KIND=dp), dimension(:,:), POINTER       :: Stt, Stmt, Sttm, Stmtm, &
                                                      Stptp, Sttp, Stpt
+     COMPLEX(KIND=dp), DIMENSION(:),POINTER  :: ctin, ctin_t !wavefunction at tp and t
 
-!> arrays used in the decoherence
-     COMPLEX(KIND=dp), DIMENSION(:),POINTER  :: ctin, ctin_t
-     COMPLEX(KIND=dp), dimension(:), POINTER :: ctin_before_deco
+!> Decoherence part
+     LOGICAL                                 :: do_deco !should we do decoherence in that run?
+!> arrays used in the decoherence spurious transfer correction
+     COMPLEX(KIND=dp), dimension(:), POINTER :: ctin_before_deco 
      COMPLEX(KIND=dp), dimension(:), POINTER :: ctin_after_deco
      COMPLEX(KIND=dp), dimension(:), POINTER :: ctin_after_tranf_correction
      INTEGER, dimension(:), POINTER          :: active_region
-     LOGICAL                                 :: decohere, decoherence
+!> Logicals for instant collapse or IDA
+     LOGICAL                                 :: decohere
      LOGICAL                                 :: futur_decohere
      LOGICAL                                 :: ida_deco
 

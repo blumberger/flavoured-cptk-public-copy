@@ -436,7 +436,7 @@ END SUBROUTINE classically_forbidden_hops
                          velocities_com_tp, local_particles, nparticle_kind,atomic_kind_set)
         CALL section_vals_val_get(adiab_section,"SPURIOUS_TRANSFER_CORR", l_val=correct_transfer_keyword)
         
-        if (correct_transfer_keyword .and. force_env%mixed_env%aom_env%decoherence) then
+        if (correct_transfer_keyword) then
 
               force_env%mixed_env%aom_env%ctin_before_deco = force_env%mixed_env%aom_env%ctin
               !> this subroutine define the active regione for local decoherence, it
@@ -490,8 +490,6 @@ END SUBROUTINE classically_forbidden_hops
                                                      c_val=wfprop_keyword)
         CALL section_vals_val_get(adiab_section,"DECOHERENCE_CORRECTIONS",c_val=deco_keyword)
         
-        aom_env%ida_deco = .FALSE.
-        aom_env%decoherence = .TRUE.
        
         mol = SIZE(aom_env%H_tp, 1) 
         deltatMD = aom_env%deltatMD 
@@ -501,9 +499,6 @@ END SUBROUTINE classically_forbidden_hops
         SELECT CASE(wfprop_keyword)
         CASE("DIABATIC_BASIS")   
             SELECT CASE(deco_keyword)                                                          
-            CASE("NO_DECO_CORR")
-                 aom_env%decoherence = .FALSE.
-                 PRINT *, 'NO DECOHERENCE CORRECTIONS'
             CASE("INSTANT_COLLAPSE")
               CALL wf_collapse(aom_env, sh_print_env, itimes)
             CASE("TRESH_ONLY_COLLAPSE")  
@@ -523,8 +518,6 @@ END SUBROUTINE classically_forbidden_hops
                    
               CALL  collapse_within_deco_time(tau, mol, deltatMD, aom_env)
             CASE("IDA")
-               
-               aom_env%ida_deco = .TRUE.
                CALL ida_collapse(aom_env)
             CASE DEFAULT                                           
               CPABORT("There is no method to add the decoherence.") 

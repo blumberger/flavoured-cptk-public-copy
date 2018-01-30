@@ -629,10 +629,11 @@ CONTAINS
              ENDIF
              print *, "ACTIVE_STATE_END", force_env%mixed_env%aom_env%active_state
            
-             !> here we decohere the WF onto the active state  , that could be a
-             !new one in case of successful hop 
-             CALL apply_decoherence(itimes, tmp%vel, force_env, local_particles, nparticle_kind, atomic_kind_set)
-          
+             IF (force_env%mixed_env%aom_env%do_deco) THEN
+                !> here we decohere the WF onto the active state  , that could be a new one in case of successful hop 
+                CALL apply_decoherence(itimes, tmp%vel, force_env, local_particles, nparticle_kind, atomic_kind_set)
+             ENDIF          
+
              !Probably I would need to check the overalp here
              !CALL adiab_overlap_check(force_env%mixed_env%aom_env, force_env%mixed_env%aom_env%old_state, itimes)
              !if (.not. force_env%mixed_env%aom_env%attempt_hop) then
