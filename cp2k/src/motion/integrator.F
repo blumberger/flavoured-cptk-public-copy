@@ -460,7 +460,6 @@ CONTAINS
     INTEGER                                  :: mixing_type
     TYPE(section_vals_type), POINTER         :: mixed_section, force_env_section
     LOGICAL                                  :: do_fssh
-    INTEGER                                  :: i, mol
 !> END
 
 

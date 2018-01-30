@@ -590,10 +590,9 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         integer :: i, j, mol!, k, l
         REAL(KIND=dp) :: hop, sumg, ex_prob, min, g_exa, err
         REAL(KIND=dp), dimension(:), allocatable :: b, g
-        REAL(KIND=dp), dimension(:), allocatable :: g_before, g_after, g_renorm
+        !REAL(KIND=dp), dimension(:), allocatable :: g_before, g_after, g_renorm
         COMPLEX(KIND=dp), dimension(:), allocatable :: ct, cttm_ad
         COMPLEX(KIND=dp), dimension(:), allocatable :: ak, akttm
-        LOGICAL        :: reordering_states_keyword
         INTEGER        :: my_old_state, state_min 
         REAL(KIND=dp), dimension(:), ALLOCATABLE :: enerdiff
  
@@ -703,6 +702,8 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
 
         !EFFECTIVE TRIVIAL CROSSINGS CORRECTION
         err = abs(sumg - ex_prob)
+        g_exa = 0
+        trivial_correction = .FALSE.
         !if (err >= 0.0D0) then      !WITHOUT THRESHOLD
         !        trivial_correction = (state_min.NE.my_old_state)
         !         if (trivial_correction) then  
@@ -819,7 +820,7 @@ subroutine calc_adiab_nace(aom_env)
         REAL(KIND=dp), dimension(:,:), allocatable :: C1, C2
         INTEGER, dimension(:),  allocatable        :: map_new2old, map_old2new, basic
         INTEGER, dimension(:),  allocatable        :: not_associated, zeros
-        REAL(KIND=dp)                              :: deltat, max_val, threshold, my_threshold
+        REAL(KIND=dp)                              :: deltat, max_val, threshold
         LOGICAL                                    :: go_on, print_here
 
         mol = size(aom_env%Stt,1)

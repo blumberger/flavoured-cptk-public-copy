@@ -342,7 +342,7 @@ CONTAINS
      CHARACTER(len=*), PARAMETER :: routineN ='propagate_aom_namd_first_step', &
      routineP = moduleN//':'//routineN
 
-     integer :: coord, t2
+     integer :: coord 
      integer :: mol, i, j, k, l, m, d, atoms, c,  first_diabat, active_state, mat, orb
      integer, dimension(:,:), allocatable :: NN,  aneighbour, bneighbour  
      REAL(KIND=dp) :: cutoff_sites, cutoff_connect, scaling, deltatMD, deltatE
