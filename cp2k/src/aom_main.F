@@ -252,9 +252,6 @@ CONTAINS
 
      !> PROPAGATE THE ELECTRON FOR ONE MOLECULAR TIMESTEP
      !>the CHARGE CARRIER WF is called aom_env%ctin
-     !> aom_env%cttm before propagation and aom_env%ctt after propagation are
-     !used in the surf_hop_type subroutine
-     aom_env%cttm(:) = aom_env%ctin(:)
      aom_env%HS_propagation = .FALSE.
      CALL section_vals_val_get(adiab_section,"RK_PROPAGATION", c_val=prop_wf_keyword)
      SELECT CASE(prop_wf_keyword)                                 
@@ -282,7 +279,6 @@ CONTAINS
      CASE DEFAULT                                           
            CPABORT("There is no method to propagate the wavefunction.") 
      END SELECT                                             
-     aom_env%ctt(:) = aom_env%ctin(:)
 
 
      !> SURFACE HOPPING TEST

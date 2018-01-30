@@ -672,6 +672,7 @@ CONTAINS
              force_env%mixed_env%aom_env%Sttm  = force_env%mixed_env%aom_env%Stpt
              force_env%mixed_env%aom_env%Stmt  = force_env%mixed_env%aom_env%Sttp
 
+             force_env%mixed_env%aom_env%ctin_t = force_env%mixed_env%aom_env%ctin
              CALL total_momentum(tmp%vel, atomic_kind_set, nparticle_kind, local_particles, force_env)
 
        ELSE

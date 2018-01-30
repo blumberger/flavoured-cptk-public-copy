@@ -148,12 +148,11 @@ IMPLICIT NONE
                                                      Stptp, Sttp, Stpt
 
 !> arrays used in the decoherence
-     COMPLEX(KIND=dp), DIMENSION(:),POINTER  :: ctin
+     COMPLEX(KIND=dp), DIMENSION(:),POINTER  :: ctin, ctin_t
      COMPLEX(KIND=dp), dimension(:), POINTER :: ctin_before_deco
      COMPLEX(KIND=dp), dimension(:), POINTER :: ctin_after_deco
      COMPLEX(KIND=dp), dimension(:), POINTER :: ctin_after_tranf_correction
      INTEGER, dimension(:), POINTER          :: active_region
-     COMPLEX(KIND=dp), dimension(:), POINTER :: cttm, ctt
      LOGICAL                                 :: decohere, decoherence
      LOGICAL                                 :: futur_decohere
      LOGICAL                                 :: ida_deco

@@ -178,11 +178,11 @@ CONTAINS
  
      !allocate(aom_env%exact_forces(3,natom))
     ! ALLOCATE(aom_env%forces_active_state(3,natom))
-     ALLOCATE(aom_env%ctt(mat))
      ALLOCATE(aom_env%ctin_before_deco(mat))
      ALLOCATE(aom_env%ctin_after_deco(mat))
      allocate(aom_env%ctin_after_tranf_correction(mat))
-     ALLOCATE(aom_env%cttm(mat))
+     ALLOCATE(aom_env%ctin(mat))
+     ALLOCATE(aom_env%ctin_t(mat))
      ALLOCATE(aom_env%E_t(mat))
      ALLOCATE(aom_env%E_tp(mat))
      ALLOCATE(aom_env%C_t(mat,mat))
@@ -198,7 +198,6 @@ CONTAINS
      allocate(aom_env%Btp(4,atoms))
      allocate(aom_env%Btm(4,atoms))
      allocate(aom_env%siteenergies(3,mat))
-     ALLOCATE(aom_env%ctin(mat))
 
      ALLOCATE(aom_env%class_forbidden_hop_t(mat))
      ALLOCATE(aom_env%H_t(mat,mat))
