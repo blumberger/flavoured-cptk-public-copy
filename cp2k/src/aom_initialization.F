@@ -353,7 +353,6 @@ CONTAINS
      REAL(KIND=dp), dimension(:,:), allocatable :: Stptp
      REAL(KIND=dp), dimension(:,:), allocatable :: dist
      COMPLEX(KIND=dp), dimension(:), allocatable :: ctin
-     COMPLEX(KIND=dp), dimension(:,:), allocatable :: H_tp
      REAL(KIND=dp), dimension(:,:), allocatable ::  Atp, Btp, coms, siteenergies
      REAL(KIND=dp), DIMENSION(:), ALLOCATABLE ::  scoefftot
      REAL(KIND=dp), DIMENSION(:,:,:), ALLOCATABLE :: F
@@ -434,7 +433,6 @@ CONTAINS
      !For ease of calculation therefore, in this program,
      !H_t etc are always -i*H.
      !This is why they're complex variables
-     allocate(H_tp(mat,mat))
      !allocate(nacv(3,mat,mat,mat*atoms))      !non-adiabatic coupling vectors
      allocate(nacv(3,mat,mat*atoms))      !non-adiabatic coupling vectors
      nacv = 0.0D0
@@ -552,7 +550,7 @@ CONTAINS
                                    do m=1,orb
                                         !These diagonals are 1 by definition
                                         Stptp(orb*(i-1)+d,orb*(k-1)+m) = 1.0D0
-                                        H_tp(orb*(i-1)+d,orb*(k-1)+d) = cmplx(0.0D0, (-siteenergies(3,k)),dp)
+                                        aom_env%H_tp(orb*(i-1)+d,orb*(k-1)+d) = cmplx(0.0D0, (-siteenergies(3,k)),dp)
                                    end do
                               end do
 
@@ -563,7 +561,7 @@ CONTAINS
                               if (k < i) then
                                    do m=1,orb
                                         do d=1,orb
-                                             H_tp(orb*(i-1)+d,orb*(k-1)+m)  = H_tp(orb*(k-1)+m,orb*(i-1)+d)
+                                             aom_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = aom_env%H_tp(orb*(k-1)+m,orb*(i-1)+d)
                                              Stptp(orb*(i-1)+d,orb*(k-1)+m) = Stptp(orb*(k-1)+m,orb*(i-1)+d)
                                         end do
                                    end do
@@ -573,7 +571,7 @@ CONTAINS
                                              call calc_sab(Atp, aom_env%connlist2, pcoeffsrun(1:atoms,orb*(i-1)+d,3),&
                                               S, Btp, aom_env%connlist2, pcoeffsrun(1:atoms,orb*(k-1)+m,3))
                                              Stptp(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
-                                             H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0, -scaling*S,dp)
+                                             aom_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0, -scaling*S,dp)
 
                                              call calc_dRSab(Atp, aom_env%atomlist, aom_env%connlist1, &
                                              pcoeffsrun(1:atoms,orb*(i-1)+d,3), aom_env%scoeffs, &
@@ -592,7 +590,7 @@ CONTAINS
                          do d=1,orb
                               do m=1,orb
                                    !fill in elements of non-overlapping pairs with 0
-                                   H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0, 0.0D0,dp)
+                                   aom_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0, 0.0D0,dp)
                                    Stptp(orb*(i-1)+d,orb*(k-1)+m) = 0.0D0
                               end do
                          end do
@@ -607,7 +605,7 @@ CONTAINS
      !> CONVERT NACV AND CALCULATE EIGENPROPERTIES 
      !> THESE ASSOCIATIONS ARE NEEDED FOR THE NACV CALC
      nacv = cbar*nacv
-     CALL adiabaticity(-AIMAG(H_tp), aom_env%C_tp, aom_env%E_tp)
+     CALL adiabaticity(-AIMAG(aom_env%H_tp), aom_env%C_tp, aom_env%E_tp)
      
      
      !> first part: CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE RESULT OF THE SURFACE
@@ -623,7 +621,7 @@ CONTAINS
      call adiab_print_pvecs(adiab_section, PC_allrvecs, itimes, deltatMD, times, atoms, nadiab)
      sh_print_env%times = times
      sh_print_env%times = DBLE(itimes)
-     CALL adiab_print_hamiltonian(adiab_section, -AIMAG(H_tp), nadiab,norbitals,itimes, deltatMD)
+     CALL adiab_print_hamiltonian(adiab_section, -AIMAG(aom_env%H_tp), nadiab,norbitals,itimes, deltatMD)
      CALL adiab_print_nacv(adiab_section, nacv, nadiab, norbitals, aom_atoms,itimes, deltatMD)
 
      !> INITIALIZE  
@@ -687,7 +685,7 @@ CONTAINS
      !> second part CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE
      !RESULT OF THE SURFACE HOP ROUTINE IS.
      print*, "ACTIVE STATE = ", active_state
-     call calcforces(state=active_state,Hin=-AIMAG(H_tp), C=aom_env%C_tp, nacv=nacv, NN=NN, atoms=atoms, & 
+     call calcforces(state=active_state,Hin=-AIMAG(aom_env%H_tp), C=aom_env%C_tp, nacv=nacv, NN=NN, atoms=atoms, & 
                      scaling=scaling, cbar=cbar, Fin=F, forces_adiab=aom_env%forces_adiab, &
                      ext_pres=aom_env%ext_pres)
      IF (analytics) THEN
@@ -715,7 +713,9 @@ CONTAINS
      aom_env%rm_t       = positions_com_tp
      aom_env%sh_print_env = sh_print_env
      aom_env%ctin        = ctin
-     aom_env%H_t = H_tp
+     aom_env%H_t = aom_env%H_tp
+     aom_env%E_t = aom_env%E_tp
+     aom_env%C_t = aom_env%C_tp
      aom_env%nacv        = nacv
      aom_env%new_state = new_state
      aom_env%active_state = active_state
@@ -740,7 +740,6 @@ CONTAINS
     deallocate(NN)
     deallocate(Atp)
     deallocate(Btp)
-    deallocate(H_tp)
     deallocate(Stptp)
     deallocate(nacv, dist)
     deallocate(exact_forces)
