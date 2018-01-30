@@ -1781,9 +1781,7 @@ print *, "RANDOM_NUMBER_FISRT_ADIAB", random
               !rescale_factor = SQRT(  delta_energy /kinetic_energy_prime )
               !velocities = rescale_factor*velocities
               force_env%mixed_env%aom_env%successful_hop = .TRUE.
-              !force_env%mixed_env%aom_env%old_state      = force_env%mixed_env%aom_env%active_state
               force_env%mixed_env%aom_env%active_state   = force_env%mixed_env%aom_env%new_state
-              force_env%mixed_env%aom_env%delta_energy   = delta_energy
               CALL simple_vel_rescaling(velocities, delta_energy, kinetic_energy_prime, rescale_factor)
            ENDIF
 
@@ -1809,7 +1807,6 @@ print *, "RANDOM_NUMBER_FISRT_ADIAB", random
               force_env%mixed_env%aom_env%successful_hop = .TRUE.
               !force_env%mixed_env%aom_env%old_state      = force_env%mixed_env%aom_env%active_state
               force_env%mixed_env%aom_env%active_state   = force_env%mixed_env%aom_env%new_state
-              force_env%mixed_env%aom_env%delta_energy   = delta_energy
               CALL simple_vel_resc_qsys(atomic_kind_set, local_particles,  &
                        force_env, nparticle_kind, velocities, delta_energy, kinetic_energy_qsys, &
                          rescale_factor)
@@ -1916,7 +1913,6 @@ ENDIF
               ELSE 
                   force_env%mixed_env%aom_env%successful_hop = .TRUE.
                   force_env%mixed_env%aom_env%active_state   = force_env%mixed_env%aom_env%new_state
-                  force_env%mixed_env%aom_env%delta_energy   = delta_energy
                   CALL hop_nacv_vel_rescaling(nparticle_kind, velocities, delta_energy, A, B, hop_nacv, &
                                               atomic_kind_set, local_particles, rescale_factor)
               ENDIF

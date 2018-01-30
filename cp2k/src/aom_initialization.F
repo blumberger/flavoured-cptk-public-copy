@@ -158,9 +158,7 @@ CONTAINS
      NULLIFY(rng_stream)
      NULLIFY(listcoeff)
 
-     !> Number of sites
      mol = nadiab ! CHANGE_AC
-     !> Number of atoms per site
      atoms = aom_atoms ! CHANGE_AC
 
      !> cutoff to define the neighborough list
@@ -171,26 +169,21 @@ CONTAINS
      mat = norbitals*nadiab !> Size of the vectorial space where the wavefunctions are projected
      c = nadiab*aom_atoms !> Numbers of active atoms
 
-     !allocate the arrays that will contain atomic coordinates for the overlap
-     !routine
+     ALLOCATE(aom_env%elements(c))
+     ALLOCATE(aom_env%neighbourlist(nadiab, nadiab,0:aom_atoms,0:aom_atoms))
+     ALLOCATE(aom_env%connlist1(4,aom_atoms))
+     ALLOCATE(aom_env%bneighbour(3,0:aom_atoms))
+     ALLOCATE(aom_env%pcoeffs(aom_atoms,norbitals))
+     ALLOCATE(aom_env%scoeffs(aom_atoms))
+
+     allocate(aom_env%coms(3,mol))
+     allocate(aom_env%crds(3,c,3))
+     allocate(aom_env%dist(mol,mol))
+     ALLOCATE(aom_env%NN(mat, mat))
+     allocate(aom_env%pcoeffsrun(atoms,mat,3)) !pcoeffsrun exists because the p-coefficients
+                                               !need to be renormalised for each structure
      !first column is now atomic number of atom (e.g. 6 for carbon)
      !Naming convention: At = A(t), Atp = A(t+1), Atm = A(t-1), etc
- 
-     !allocate(aom_env%exact_forces(3,natom))
-    ! ALLOCATE(aom_env%forces_active_state(3,natom))
-     ALLOCATE(aom_env%ctin_before_deco(mat))
-     ALLOCATE(aom_env%ctin_after_deco(mat))
-     allocate(aom_env%ctin_after_tranf_correction(mat))
-     ALLOCATE(aom_env%ctin(mat))
-     ALLOCATE(aom_env%ctin_t(mat))
-     ALLOCATE(aom_env%E_t(mat))
-     ALLOCATE(aom_env%E_tp(mat))
-     ALLOCATE(aom_env%C_t(mat,mat))
-     ALLOCATE(aom_env%C_tp(mat,mat))
-     allocate(aom_env%dist(mol,mol))
-     allocate(aom_env%F(3,natom,mol)) !array of diagonal atomic forces
-     allocate(aom_env%crds(3,c,3))
-     allocate(aom_env%coms(3,mol))
      allocate(aom_env%At(4,atoms))
      allocate(aom_env%Atp(4,atoms))
      allocate(aom_env%Atm(4,atoms))
@@ -198,17 +191,21 @@ CONTAINS
      allocate(aom_env%Btp(4,atoms))
      allocate(aom_env%Btm(4,atoms))
      allocate(aom_env%siteenergies(3,mat))
+     ALLOCATE(aom_env%nacv(3,mat, mat*aom_atoms))
+     allocate(aom_env%F(3,natom,mol)) !array of diagonal atomic forces
+     ALLOCATE(aom_env%forces_adiab(3,natom))
+     ALLOCATE(aom_env%forces_adiab_new(3,natom))
 
-     ALLOCATE(aom_env%class_forbidden_hop_t(mat))
+ 
+     ALLOCATE(aom_env%rm_t(3, natom))
+     ALLOCATE(aom_env%rm_tm(3, natom))
+     ALLOCATE(aom_env%velocities_tp(3, natom))
+     ALLOCATE(aom_env%C_t(mat,mat))
+     ALLOCATE(aom_env%C_tp(mat,mat))
+     ALLOCATE(aom_env%E_t(mat))
+     ALLOCATE(aom_env%E_tp(mat))
      ALLOCATE(aom_env%H_t(mat,mat))
      ALLOCATE(aom_env%H_tp(mat,mat))
-     allocate(aom_env%pcoeffsrun(atoms,mat,3)) !pcoeffsrun exists because the p-coefficients
-                                        !need to be renormalised for each structure
-     ALLOCATE(aom_env%connlist1(4,aom_atoms))
-     ALLOCATE(aom_env%neighbourlist(nadiab, nadiab,0:aom_atoms,0:aom_atoms))
-     
-     !need to allocate these square matrices
-     !first the real, S-related ones
      ALLOCATE(aom_env%Stt(mat,mat))
      ALLOCATE(aom_env%Sttp(mat,mat))
      ALLOCATE(aom_env%Stpt(mat,mat))
@@ -216,33 +213,34 @@ CONTAINS
      ALLOCATE(aom_env%Stmt(mat,mat))
      ALLOCATE(aom_env%Sttm(mat,mat))
      ALLOCATE(aom_env%Stmtm(mat,mat))
-     ALLOCATE(aom_env%NN(mat, mat))
-     ALLOCATE(aom_env%rm_t(3, natom))
-     ALLOCATE(aom_env%rm_tm(3, natom))
-     ALLOCATE(aom_env%bneighbour(3,0:aom_atoms))
-     !ALLOCATE(aom_env%nacv(3,mat,mat,mat*aom_atoms))
-     ALLOCATE(aom_env%nacv(3,mat, mat*aom_atoms))
-     ALLOCATE(aom_env%forces_adiab(3,natom))
-     ALLOCATE(aom_env%forces_adiab_new(3,natom))
-     !ALLOCATE(aom_env%actforces_after_hop(3,natom))
-     ALLOCATE(aom_env%pcoeffs(aom_atoms,norbitals))
-     ALLOCATE(aom_env%scoeffs(aom_atoms))
+     ALLOCATE(aom_env%ctin(mat))
+     ALLOCATE(aom_env%ctin_t(mat))
+
+     ALLOCATE(aom_env%ctin_before_deco(mat))
+     ALLOCATE(aom_env%ctin_after_deco(mat))
+     ALLOCATE(aom_env%ctin_after_tranf_correction(mat))
+     ALLOCATE(aom_env%active_region(mat))
+     aom_env%futur_decohere = .FALSE.
+     aom_env%decohere       = .FALSE.
+
+     aom_env%new_state   = -1
+     aom_env%old_state   = -1
+     aom_env%active_state   = -1
+     aom_env%attempt_hop = .FALSE.
+     aom_env%overlap_over_thresh = .FALSE.
+     aom_env%successful_hop = .FALSE.
+     
+     aom_env%HS_propagation = .FALSE.
+     ALLOCATE(aom_env%class_forbidden_hop_t(mat))
      allocate(aom_env%adiab_nace_t(mat,mat))
      allocate(aom_env%adiab_nace_tp(mat,mat))
-     ALLOCATE(aom_env%velocities_tp(3, natom))
-     aom_env%futur_decohere = .FALSE.
-     aom_env%successful_hop = .FALSE.
-     aom_env%attempt_hop = .FALSE.
+
+     !> Create the overlap look-up table for the AOM coupling calculation
      CALL section_vals_val_get(coupling_section,"PSIGMA_FILE_NAME",&
              c_val=file_name_s_psigma)
      CALL section_vals_val_get(coupling_section,"PPI_FILE_NAME",&
              c_val=file_name_s_ppi)
-
-     
      CALL build_s_tables(file_name_s_psigma, file_name_s_ppi)
-     allocate(aom_env%elements(c))
-     !allocate(aom_env%adiab_nace_t(mat,mat))
-
 
      !> Scaling factor Hab = scaling*Sab_bar
      CALL section_vals_val_get(coupling_section,"SCALING_FACTOR",&
@@ -250,7 +248,6 @@ CONTAINS
      !> cbar factor : Sab = cbar*Sab_bar
      CALL section_vals_val_get(coupling_section,"CBAR",&
              r_val=aom_env%cbar)
-
 
 
      !> INITIALIZE THE RANDOM GENERATOR

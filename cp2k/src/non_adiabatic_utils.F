@@ -182,7 +182,6 @@ SUBROUTINE define_active_region(aom_env)
      mat = size(aom_env%H_tp,1) 
 
      ALLOCATE(pop(mat))
-     ALLOCATE(aom_env%active_region(mat))
 
      ! do i=1, mol
      pop(:)  = real(aom_env%ctin_before_deco(:)*conjg(aom_env%ctin_before_deco(:)))
@@ -492,7 +491,7 @@ END SUBROUTINE classically_forbidden_hops
         
        
         mol = SIZE(aom_env%H_tp, 1) 
-        deltatMD = aom_env%deltatMD 
+        deltatMD = aom_env%deltat 
         !sh_print_env = aom_env%sh_print_env    
 
 

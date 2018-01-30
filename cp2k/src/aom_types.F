@@ -111,9 +111,10 @@ IMPLICIT NONE
 !in the code
    TYPE aom_env_type
 !> Constant over the simulations
-     integer                                :: atoms, natom
-     REAL(KIND=dp)                          :: deltatMD
-     REAL(KIND = dp)                        :: delta_energy, scaling, cbar, deltat
+     integer                                :: atoms !Number of active atoms
+     integer                                :: natom !Total number of atoms
+     REAL(KIND=dp)                          :: deltat !Timestep
+     REAL(KIND = dp)                        :: scaling, cbar !For AOM calculations
 
 !> Information for the overlap method: calculate at the first timestep
      INTEGER, DIMENSION(:), POINTER           :: elements, atomlist
@@ -150,25 +151,23 @@ IMPLICIT NONE
 
 !> Decoherence part
      LOGICAL                                 :: do_deco !should we do decoherence in that run?
-!> arrays used in the decoherence spurious transfer correction
+     !> arrays used in the decoherence spurious transfer correction
      COMPLEX(KIND=dp), dimension(:), POINTER :: ctin_before_deco 
      COMPLEX(KIND=dp), dimension(:), POINTER :: ctin_after_deco
      COMPLEX(KIND=dp), dimension(:), POINTER :: ctin_after_tranf_correction
      INTEGER, dimension(:), POINTER          :: active_region
-!> Logicals for instant collapse or IDA
-     LOGICAL                                 :: decohere
-     LOGICAL                                 :: futur_decohere
-     LOGICAL                                 :: ida_deco
+     !> Logicals for instant collapse or IDA
+     LOGICAL                                 :: decohere !activate the decoherence according to instant collapse criteria
+     LOGICAL                                 :: futur_decohere !futur decoherence possible in instant collapse
 
-
-!> Old and new state number
+!> States index and reordering
      INTEGER                                :: new_state, old_state, active_state
      LOGICAL                                :: overlap_over_thresh
      LOGICAL                                :: attempt_hop
      LOGICAL                                :: successful_hop
-     LOGICAL                                :: HS_propagation
 
-!> Adiabatic nace at time t and t-dt
+!> Required for HS propagation
+     LOGICAL                                     :: HS_propagation
      REAL(KIND=dp), dimension(:,:), POINTER      :: adiab_nace_tp, adiab_nace_t
      INTEGER, dimension(:), POINTER              :: class_forbidden_hop_t
 
