@@ -343,20 +343,18 @@ subroutine surf_hop_type(adiab_section, C1, C2, deltat, old_state, &
        overlap_key = .True.
 
        CALL section_vals_val_get(adiab_section,"SURF_HOP_CHOICE", c_val=surfhop_keyword)
-
        sh_print_env%additional_prints = .FALSE.
-       !if (surfhop_keyword == "TRIVIAL_HOP_CORRECT") then 
-       !                sh_print_env%additional_prints = .TRUE.
-       !end if
 
        SELECT CASE(surfhop_keyword)
        CASE("TRIVIAL_CORR_WITH_OVERLAP")
             sh_print_env%additional_prints = .TRUE.
+            do_trivial_corr = .TRUE.
             CALL modified_surfacehop(C1, C2, deltat, old_state, &
               new_state, attempt_hop, decohere_criterion, &
               sh_print_env, aom_env, adiab_section, do_trivial_corr, overlap_key)
        CASE("TRIVIAL_HOP_CORRECT")
             sh_print_env%additional_prints = .TRUE.
+            do_trivial_corr = .TRUE.
             CALL modified_surfacehop(C1, C2, deltat, old_state, &
               new_state, attempt_hop, decohere_criterion, &
               sh_print_env, aom_env, adiab_section, do_trivial_corr)
@@ -586,14 +584,13 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         routineP = moduleN//':'//routineN
 
         CHARACTER(LEN=default_string_length)         :: wfpropag_keyword
-        LOGICAL        :: trivial_correction, correct_for_negative 
         integer :: i, j, mol!, k, l
         REAL(KIND=dp) :: hop, sumg, ex_prob, min, g_exa, err
         REAL(KIND=dp), dimension(:), allocatable :: b, g
         !REAL(KIND=dp), dimension(:), allocatable :: g_before, g_after, g_renorm
         COMPLEX(KIND=dp), dimension(:), allocatable :: ct, cttm_ad
         COMPLEX(KIND=dp), dimension(:), allocatable :: ak, akttm
-        INTEGER        :: my_old_state, state_min 
+        INTEGER        :: state_min 
         REAL(KIND=dp), dimension(:), ALLOCATABLE :: enerdiff
  
         mol = size(aom_env%Stt,1)
@@ -608,18 +605,18 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         allocate(cttm_ad(mol)) 
         ALLOCATE(sh_print_env%proba(mol))
 
-        IF (.NOT.do_trivial_corr) THEN 
+        IF (do_trivial_corr) THEN 
              do i=1,mol
-                     if (i .ne. my_old_state) then 
+                     if (i .ne. aom_env%active_state) then 
                              enerdiff(i) = abs(aom_env%E_tp(i) - aom_env%E_tp(aom_env%active_state)) 
                      else if (i .eq. aom_env%active_state) then 
-                             enerdiff(my_old_state) = 0.0D0
+                             enerdiff(aom_env%active_state) = 0.0D0
                      end if
              end do
              if (enerdiff(1) == enerdiff(aom_env%active_state)) then
                      min = enerdiff(2)
                      do i= 3,mol
-                            if (enerdiff(i) < min .and. i .ne. my_old_state) then
+                            if (enerdiff(i) < min .and. i .ne. aom_env%active_state) then
                                     min = enerdiff(i)
                                      state_min = i
                              end if          
@@ -627,7 +624,7 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
              else 
                      min = enerdiff(1)
                      do i= 2,mol
-                            if (enerdiff(i) < min .and. i .ne. my_old_state) then
+                            if (enerdiff(i) < min .and. i .ne. aom_env%active_state) then
                                     min = enerdiff(i)
                                     state_min = i
                              end if          
@@ -698,30 +695,24 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
                 end if
         end do
         sh_print_env%sumflux   = sumg
-
+        err = abs(sumg - ex_prob)
+        IF (err.gt.0.1) THEN
+           print*, "FOBSH_WARNING: difference between exact flux and sum of Tully's proba is", err
+        ENDIF
 
         !EFFECTIVE TRIVIAL CROSSINGS CORRECTION
-        err = abs(sumg - ex_prob)
         g_exa = 0
-        trivial_correction = .FALSE.
-        !if (err >= 0.0D0) then      !WITHOUT THRESHOLD
-        !        trivial_correction = (state_min.NE.my_old_state)
-        !         if (trivial_correction) then  
-        !         g_exa = ex_prob - sumg + g(state_min)
-        !                        g(state_min) = g_exa
-        !         end if
-        !end if
-
+        if (do_trivial_corr) THEN
+           g_exa = ex_prob - sumg + g(state_min)
+           g(state_min) = g_exa
+        endif 
 
        !CORRECTION FOR NEGATIVE NUMBER
-       correct_for_negative = .FALSE.
        do i =1,mol
                 if (g(i) < 0.0D0) then
                         g(i) = 0.0D0
-                        correct_for_negative = .TRUE.
                 end if
        end do
-
 
        !NORMALIZATION
        !due to finite timestep, sometimes the probabilities may sum to greater than 1
@@ -733,6 +724,7 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
                end if
        end do
        if (sumg > 1.0D0) then
+               print*, "FOBSH_WARNING: We have to normalize the probability, the sum was:", sumg
                do i=1,mol
                        g(i) = g(i)/sumg
                        g(aom_env%active_state) = 0.0D0

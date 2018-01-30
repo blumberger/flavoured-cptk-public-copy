@@ -713,6 +713,7 @@ CONTAINS
      aom_env%rm_t       = positions_com_tp
      aom_env%sh_print_env = sh_print_env
      aom_env%ctin        = ctin
+     aom_env%ctin_t        = ctin
      aom_env%H_t = aom_env%H_tp
      aom_env%E_t = aom_env%E_tp
      aom_env%C_t = aom_env%C_tp

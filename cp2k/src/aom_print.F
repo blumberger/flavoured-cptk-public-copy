@@ -775,17 +775,15 @@ CONTAINS
            WRITE ( unit_nr, "( A,I8,A,I8)" ) "Surface Hopping Info,  nadiab =", nadiab, &
                                               " , norbitals = ", norbitals
            WRITE ( unit_nr, '(A,I0,A,F20.3,A,F0.10)' )   "   i = ",INT(times),", time = ",time, " (fs)"
+           WRITE( unit_nr, "(A,F20.10)" ) "   Exact sum of fluxes = ", &
+                                                   sh_print_env%exprob
+           WRITE( unit_nr, "(A,F20.10)" ) "   Approximate sum of fluxes = ", &
+                                                   sh_print_env%sumflux
            IF (sh_print_env%additional_prints) THEN
                WRITE( unit_nr, "(A,F20.10)" ) "   Minimum adiab. energy difference = ", &
                                                    sh_print_env%enermin
-               WRITE( unit_nr, "(A,F20.10)" ) "   Exact sum of fluxes = ", &
-                                                   sh_print_env%exprob
-               WRITE( unit_nr, "(A,F20.10)" ) "   Approximate sum of fluxes = ", &
-                                                   sh_print_env%sumflux
-               WRITE( unit_nr, "(A,F20.10)" ) "   Sum of probability = ", sumg
-           ELSE
-               WRITE( unit_nr, "(A,F20.10)" ) "   Sum of probability = ", sumg
-           END IF
+           ENDIF
+           WRITE( unit_nr, "(A,F20.10)" ) "   Sum of probability = ", sumg
            IF (renorm)  WRITE( unit_nr, "(A)" ) "   RE-NORMALIZATION!"
            WRITE( unit_nr, "(A)" ) "   Probability = "
             DO iadiab=1, nadiab
@@ -848,7 +846,7 @@ CONTAINS
            WRITE( unit_nr, "(A,F20.10)" ) "   Energy diff (Ha) = ", adiab_energies_t(new_state) - adiab_energies_t(old_state)
            WRITE( unit_nr, "(A,F20.10)" ) "   A-term   = ", A
            WRITE( unit_nr, "(A,F20.10)" ) "   B-term   = ", B
-           WRITE( unit_nr, "(A,F20.10)" ) "   NACV kinetic energy   = ", B**2/(4*A)
+           WRITE( unit_nr, "(A,F20.10)" ) "   NACV kinetic energy (Ha)  = ", B**2/(4*A)
            WRITE( unit_nr, "(A,F20.10)" ) "   Discriminant   = ", delta_energy
            IF (successful_hop) THEN
                WRITE( unit_nr, "(A)") "SUCCESSFUL HOP!"

@@ -248,7 +248,9 @@ SUBROUTINE calc_psi_after_correction(aom_env)
     else 
         lambda_scaling = sqrt((1-sum_ctin)/sum_ctin_after_deco)
     end if
-
+    IF (ABS(lambda_scaling-1).GT.1E-03) THEN
+       PRINT*, "FOBSH_WARNING: Projection to avoid spurious transfer get lambda = ", lambda_scaling
+    ENDIF
     aom_env%ctin_after_tranf_correction(:) = aom_env%ctin_before_deco(:)
     do i =1, mat
        if (aom_env%active_region(i) == 1) then
