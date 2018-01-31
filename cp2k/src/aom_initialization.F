@@ -309,6 +309,9 @@ CONTAINS
      CALL section_vals_val_get(adiab_section,"DECOHERENCE_CORRECTIONS",c_val=deco_keyword)
      IF (.NOT.(deco_keyword.EQ."NO_DECO_CORR"))  aom_env%do_deco = .TRUE.
 
+     aom_env%do_reorder = .FALSE.
+     CALL section_vals_val_get(adiab_section,"REORDERING_STATES_USING_OVERLAP",l_val=aom_env%do_reorder)
+
      DEALLOCATE(rng_stream)
   END SUBROUTINE create_aom_env
 

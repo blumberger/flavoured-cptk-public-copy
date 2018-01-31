@@ -165,6 +165,7 @@ IMPLICIT NONE
      LOGICAL                                :: overlap_over_thresh
      LOGICAL                                :: attempt_hop
      LOGICAL                                :: successful_hop
+     LOGICAL                                :: do_reorder
 
 !> Required for HS propagation
      LOGICAL                                     :: HS_propagation

@@ -232,7 +232,7 @@ CONTAINS
     CALL keyword_create(keyword, name="REORDERING_STATES_USING_OVERLAP",&
          description="Choose if you want to activate REORDERING_STATES_USING_OVERLAP",&
          usage="REORDERING_STATES_USING_OVERLAP: False", default_l_val=.False., &
-         lone_keyword_l_val=.False.) 
+         lone_keyword_l_val=.True.) 
         ! type_of_var=char_t,&
         ! n_var=-1)
     CALL section_add_keyword(subsection,keyword)

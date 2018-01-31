@@ -807,13 +807,14 @@ subroutine calc_adiab_nace(aom_env)
        routineP = moduleN//':'//routineN
 
         integer :: i, j, mol, k, l, new_index
-        REAL(KIND=dp), dimension(:,:), allocatable :: T1, T2, DT, TST, TDT, DS, DC
+        REAL(KIND=dp), dimension(:,:), allocatable :: T1, T2, DT, TST, TDT, DS!, DC
         REAL(KIND=dp), dimension(:,:), allocatable :: adiab_overlap
         REAL(KIND=dp), dimension(:,:), allocatable :: C1, C2
         INTEGER, dimension(:),  allocatable        :: map_new2old, map_old2new, basic
         INTEGER, dimension(:),  allocatable        :: not_associated, zeros
         REAL(KIND=dp)                              :: deltat, max_val, threshold
-        LOGICAL                                    :: go_on, print_here
+        LOGICAL                                    :: go_on, print_here, do_sign_change
+        REAL(kind=dp)  :: sum_
 
         mol = size(aom_env%Stt,1)
         deltat = aom_env%deltat
@@ -918,8 +919,8 @@ print*, "OVERLAP IS: ", adiab_overlap(i, map_old2new(i))
         IF (ANY(map_new2old.NE.basic)) print*, "AC_MAP_CHANGED_AGAIN", map_new2old
        ENDIF
 
-!> Finally, we associate the not associate j with the remaining j state by order
-!> of energy
+        !> Finally, we associate the not associate j with the remaining j state by order
+        !> of energy
         IF (ANY(map_new2old.EQ.zeros)) THEN
          k = 1
          do i=1, mol
@@ -953,32 +954,80 @@ print*, "OVERLAP IS: ", adiab_overlap(i, map_old2new(i))
        IF (SUM(map_new2old).NE.( mol*(mol+1)/2 )) THEN
            CPABORT("Problem in the mapping between old and new states.")
        ENDIF
-       !> End of 2.
+!> End of 2.
 
 
+! 3. Decide map
+       IF (.NOT.(aom_env%do_reorder)) THEN
+          map_new2old = basic
+          map_old2new = basic
+       ENDIF
+! End of 3        
 
-        !> 3. Reassociate state active_state
-        !aom_env%active_state = map_old2new(aom_env%old_state)
-        aom_env%active_state = aom_env%old_state 
+! 4. Change sign to keep constant convention
+       do_sign_change = .True.
+       IF (do_sign_change) THEN
+          DO i=1, mol
+             PRINT*, adiab_overlap(i, map_new2old(i))
+             if (adiab_overlap(i, map_new2old(i)).lt.0) then
+                !print*, "AC_PHASE_WARNING for ", imol
+                aom_env%C_tp(:,i) = - aom_env%C_tp(:, i)
+                adiab_overlap(i,:) = - adiab_overlap(i,:)
+             endif
+             sum_ = 0 
+             do j=1, mol
+                sum_ = sum_ + aom_env%C_tp(j, i) * aom_env%C_t(j, i)
+             enddo
+             print*, "AC_PHASE", i, sum_
+             print*, "adiab_overlap", adiab_overlap(i, :)
+             if (i.eq.aom_env%active_state) print*, "AC_STATE_WARNING"          
+          ENDDO
+       ENDIF
+! End of 4
+
+
+!> 5. Reassociate state active_state
+        aom_env%active_state = map_old2new(aom_env%old_state)
 print*, "Put ", aom_env%old_state, "in", aom_env%active_state 
+! End of 5
 
-
-        allocate(DC(mol,mol))
-        DC = (1.0D0/deltat)*(C2 - C1)
-        do i=1,mol
-                do j=1,mol
-                        aom_env%adiab_nace_tp(i,j) = 0.0D0
-                        do k=1,mol
-                                aom_env%adiab_nace_tp(i,j) = & 
-                                        aom_env%adiab_nace_tp(i,j) + C2(k,i)*DC(k,j)
-                                do l=1,mol
-                                        aom_env%adiab_nace_tp(i,j) = & 
+! 6. Calculate the NACE
+        DO i=1, mol
+           DO j=1, mol
+              aom_env%adiab_nace_tp(i,j) = - adiab_overlap(i, map_new2old(j))
+              IF (i ==j) THEN
+                 aom_env%adiab_nace_tp(i,j) = aom_env%adiab_nace_tp(i,j) + 1
+              ENDIF
+              aom_env%adiab_nace_tp(i,j) = aom_env%adiab_nace_tp(i,j) / deltat
+              DO k=1, mol
+                 DO l=1, mol
+                    aom_env%adiab_nace_tp(i,j) = & 
                                     aom_env%adiab_nace_tp(i,j) + C2(k,i)*C2(l,j)*(TST(k,l) + TDT(k,l))
-                                end do
-                        end do
-                end do
-                !print*, "nace", aom_env%adiab_nace_tp(i,:)
-        end do
+                 ENDDO
+              ENDDO  
+           ENDDO
+        ENDDO
+! End of 6
+
+ 
+        ! Older version of NACE calculation             
+        !allocate(DC(mol,mol))
+        !DC = (1.0D0/deltat)*(C2 - C1)
+        !do i=1,mol
+        !        do j=1,mol
+        !                aom_env%adiab_nace_tp(i,j) = 0.0D0
+        !                do k=1,mol
+        !                        aom_env%adiab_nace_tp(i,j) = & 
+        !                                aom_env%adiab_nace_tp(i,j) + C2(k,i)*DC(k,j)
+        !                        do l=1,mol
+        !                                aom_env%adiab_nace_tp(i,j) = & 
+        !                            aom_env%adiab_nace_tp(i,j) + C2(k,i)*C2(l,j)*(TST(k,l) + TDT(k,l))
+        !                        end do
+        !                end do
+        !   print*, aom_env%adiab_nace_tp(i,j), "Old"
+        !        end do
+        !        !print*, "nace", aom_env%adiab_nace_tp(i,:)
+        !end do
 
         deallocate(T1)
         deallocate(T2)
@@ -986,7 +1035,7 @@ print*, "Put ", aom_env%old_state, "in", aom_env%active_state
         deallocate(TST)
         deallocate(TDT)
         deallocate(DS)
-        deallocate(DC)
+        !deallocate(DC)
 end subroutine calc_adiab_nace
 
 
