@@ -230,7 +230,7 @@ SUBROUTINE calc_psi_after_correction(aom_env)
      mat = size(aom_env%H_tp,1) 
    
      !allocate(ctin_after_tranf_correction(mat))
-    
+   print*, "Active region", aom_env%active_region 
      sum_ctin = 0.0D0
      sum_ctin_after_deco = 0.0D0
      do i =1, mat
@@ -433,12 +433,13 @@ END SUBROUTINE classically_forbidden_hops
         CALL translate_com(velocities, translate_keyword, velocities_com_tp, &
               local_particles, nparticle_kind = nparticle_kind, atomic_kind_set = atomic_kind_set)
    
+print*, "ctin before deco", force_env%mixed_env%aom_env%ctin(1)
         CALL decohere_wf(adiab_section, force_env%mixed_env%aom_env, sh_print_env, itimes, &
                          velocities_com_tp, local_particles, nparticle_kind,atomic_kind_set)
         CALL section_vals_val_get(adiab_section,"SPURIOUS_TRANSFER_CORR", l_val=correct_transfer_keyword)
         
         if (correct_transfer_keyword) then
-
+print*, "DO_TRANSFER"
               force_env%mixed_env%aom_env%ctin_before_deco = force_env%mixed_env%aom_env%ctin
               !> this subroutine define the active regione for local decoherence, it
               !takes aom_env%ctin_before_deco  as argument
@@ -449,7 +450,10 @@ END SUBROUTINE classically_forbidden_hops
 
               !> the value of aom_env%ctin is updated again using the spurious charge
               !transfer correction
+print*, "ctin before", force_env%mixed_env%aom_env%ctin(1)
+print*, "ctin_transf before", force_env%mixed_env%aom_env%ctin_after_tranf_correction(1)
               force_env%mixed_env%aom_env%ctin = force_env%mixed_env%aom_env%ctin_after_tranf_correction                        
+print*, "ctin after", force_env%mixed_env%aom_env%ctin(1)
         end if
 
         DEALLOCATE(velocities_com_tp)
@@ -992,6 +996,8 @@ print *, "PURE_DEPHASING", i
     allocate(pop(mol)) !TEST
     allocate(ct(mol))  ! adiabatic states
 
+print*, "active_state", aom_env%active_state
+print*, "aom_env%ctin within", aom_env%ctin(1)
     sum = 0.0D0
     do i=1,mol 
            if (i .ne. aom_env%active_state) then
@@ -1042,6 +1048,7 @@ print *, "PURE_DEPHASING", i
           end do
          pop(j)= aom_env%ctin(j)*conjg(aom_env%ctin(j))
     end do
+print*, "aom_env%ctin within after", aom_env%ctin(1)
     
 !   CALL adiab_print_sh_info(sh_print_env, keyword = 'DAMPING')   
     

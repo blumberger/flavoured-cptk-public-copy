@@ -240,7 +240,7 @@ CONTAINS
   
     CALL keyword_create(keyword, name="SPURIOUS_TRANSFER_CORR",&
          description="Choose if you want to activate the spurious tranfer corre.",&
-         usage="SPURIOUS_TRANSFER_CORR: True", default_l_val=.TRUE., &
+         usage="SPURIOUS_TRANSFER_CORR: True", default_l_val=.FALSE., &
          lone_keyword_l_val=.TRUE.) 
         ! type_of_var=char_t,&
         ! n_var=-1)
