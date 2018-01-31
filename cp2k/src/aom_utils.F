@@ -673,8 +673,6 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
                 else 
                    b(i) = -2.0D0*REAL(conjg(ak(i))*aom_env%adiab_nace_tp(i,aom_env%active_state))
                 end if
-print*, "nace", i, aom_env%adiab_nace_tp(i,aom_env%active_state)
-print*, "b(i)", i, b(i)
         end do
 
         !calc exact total surface hopping probability (also termed g_tot) 
@@ -855,12 +853,6 @@ subroutine calc_adiab_nace(aom_env)
         end do
         !> End of 1.
 
-print*, "T1", T1(1,:)
-print*, "T2", T2(1,:)
-print*, "Stt", aom_env%Stt(1,:)
-print*, "DS", DS(1,:)
-print*, "TST", TST(1,:)
-print*, "TDT", TDT(1,:)
  
         !> 2. Check reordering of eigenvectors between the different timestep.
         ALLOCATE(adiab_overlap(mol, mol))
@@ -1018,7 +1010,7 @@ print*, "Put ", aom_env%old_state, "in", aom_env%active_state
         ENDDO
 ! End of 6
 
-           print*, aom_env%adiab_nace_tp(:,1), "New"
+        !   print*, aom_env%adiab_nace_tp(:,1), "New"
  
         ! Older version of NACE calculation             
         !allocate(DC(mol,mol))
