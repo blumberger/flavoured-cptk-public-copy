@@ -855,6 +855,12 @@ subroutine calc_adiab_nace(aom_env)
         end do
         !> End of 1.
 
+print*, "T1", T1(1,:)
+print*, "T2", T2(1,:)
+print*, "Stt", aom_env%Stt(1,:)
+print*, "DS", DS(1,:)
+print*, "TST", TST(1,:)
+print*, "TDT", TDT(1,:)
  
         !> 2. Check reordering of eigenvectors between the different timestep.
         ALLOCATE(adiab_overlap(mol, mol))
@@ -975,6 +981,7 @@ print*, "OVERLAP IS: ", adiab_overlap(i, map_old2new(i))
                 !print*, "AC_PHASE_WARNING for ", imol
                 aom_env%C_tp(:,i) = - aom_env%C_tp(:, i)
                 adiab_overlap(i,:) = - adiab_overlap(i,:)
+                C2(:,i) = -C2(:,i)
              endif
              sum_ = 0 
              do j=1, mol
@@ -1011,6 +1018,7 @@ print*, "Put ", aom_env%old_state, "in", aom_env%active_state
         ENDDO
 ! End of 6
 
+           print*, aom_env%adiab_nace_tp(:,1), "New"
  
         ! Older version of NACE calculation             
         !allocate(DC(mol,mol))
@@ -1020,16 +1028,18 @@ print*, "Put ", aom_env%old_state, "in", aom_env%active_state
         !                aom_env%adiab_nace_tp(i,j) = 0.0D0
         !                do k=1,mol
         !                        aom_env%adiab_nace_tp(i,j) = & 
-        !                                aom_env%adiab_nace_tp(i,j) + C2(k,i)*DC(k,j)
+        !                                aom_env%adiab_nace_tp(i,j) + C2(k,i)*( C2(k,j) - C1(k,j) ) / deltat
         !                        do l=1,mol
         !                                aom_env%adiab_nace_tp(i,j) = & 
         !                            aom_env%adiab_nace_tp(i,j) + C2(k,i)*C2(l,j)*(TST(k,l) + TDT(k,l))
         !                        end do
         !                end do
-        !   print*, aom_env%adiab_nace_tp(i,j), "Old"
         !        end do
         !        !print*, "nace", aom_env%adiab_nace_tp(i,:)
         !end do
+
+        !   print*, aom_env%adiab_nace_tp(:,1), "Old"
+
 
         deallocate(T1)
         deallocate(T2)
