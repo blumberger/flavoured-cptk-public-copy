@@ -673,6 +673,8 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
                 else 
                    b(i) = -2.0D0*REAL(conjg(ak(i))*aom_env%adiab_nace_tp(i,aom_env%active_state))
                 end if
+print*, "nace", i, aom_env%adiab_nace_tp(i,aom_env%active_state)
+print*, "b(i)", i, b(i)
         end do
 
         !calc exact total surface hopping probability (also termed g_tot) 
