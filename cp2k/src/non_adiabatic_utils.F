@@ -434,13 +434,13 @@ END SUBROUTINE classically_forbidden_hops
               local_particles, nparticle_kind = nparticle_kind, atomic_kind_set = atomic_kind_set)
    
 print*, "ctin before deco", force_env%mixed_env%aom_env%ctin(1)
+        force_env%mixed_env%aom_env%ctin_before_deco = force_env%mixed_env%aom_env%ctin
         CALL decohere_wf(adiab_section, force_env%mixed_env%aom_env, sh_print_env, itimes, &
                          velocities_com_tp, local_particles, nparticle_kind,atomic_kind_set)
         CALL section_vals_val_get(adiab_section,"SPURIOUS_TRANSFER_CORR", l_val=correct_transfer_keyword)
         
         if (correct_transfer_keyword) then
 print*, "DO_TRANSFER"
-              force_env%mixed_env%aom_env%ctin_before_deco = force_env%mixed_env%aom_env%ctin
               !> this subroutine define the active regione for local decoherence, it
               !takes aom_env%ctin_before_deco  as argument
               CALL define_active_region(force_env%mixed_env%aom_env)
@@ -1331,7 +1331,7 @@ print *, "KINETIC", K_tot
                          ctcomp = ctcomp + ctotal(i)
                     end do
                     ctmag = abs(ctcomp)
-                    IF ( ABS( ctmag - 1).GE.1E-6 ) THEN
+                    IF ( ABS( ctmag - 1).GE.1E-5 ) THEN
                        print*, "Norm is", ctmag
                        CPABORT("Problem in the electronic propagation, norm is not conserved.")
                     ENDIF
