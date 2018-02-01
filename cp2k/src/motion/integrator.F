@@ -616,8 +616,8 @@ CONTAINS
 !    " Ctp(f)= ", force_env%mixed_env%aom_env%C_tp(i, force_env%mixed_env%aom_env%new_state)
 !end do
              !We check if the attempted hop is successful or not     
-             print *, "ACTIVE_STATE_BEFORE", force_env%mixed_env%aom_env%active_state
              IF (force_env%mixed_env%aom_env%attempt_hop) THEN
+                print*, "FOBSH| Active state before the attempt to hop:", force_env%mixed_env%aom_env%active_state
                 CALL check_hop_attempt(tmp%vel, atomic_kind_set, nparticle_kind, local_particles, force_env)
                 IF (force_env%mixed_env%aom_env%successful_hop) THEN
                    ! If successful, we call again this subroutine to update the
@@ -626,8 +626,8 @@ CONTAINS
                    CALL force_env_calc_energy_force(force_env,require_consistent_energy_force=.FALSE., &
                                                     itimes = itimes)
                 ENDIF
+                print*, "FOBSH| Active state after the attempt to hop:", force_env%mixed_env%aom_env%active_state
              ENDIF
-             print *, "ACTIVE_STATE_END", force_env%mixed_env%aom_env%active_state
            
              IF (force_env%mixed_env%aom_env%do_deco) THEN
                 !> here we decohere the WF onto the active state  , that could be a new one in case of successful hop 
@@ -728,26 +728,21 @@ CONTAINS
     REAL(KIND=dp)                               :: sum_ov, max_val, resid
     LOGICAL                                     :: overlap_over_thresh
 
-    mat    = SIZE(aom_env%Stptp, 1)
+     mat    = SIZE(aom_env%Stptp, 1)
 
-    allocate(overlaps(2*mat))
+     allocate(overlaps(2*mat))
+     overlaps = 0.0D0
 
-    overlaps = 0.0D0
-
-    past_state = aom_env%old_state
-print *, "OLD_STATE", past_state
-print *, "NEW_STATE_here", aom_env%active_state    
-
+     past_state = aom_env%old_state
 
      overlaps(1) = abs(aom_env%adiab_overlap(aom_env%active_state, past_state))**2
-print *, "OVERALP_SQUARED", past_state, aom_env%active_state, overlaps(1)
 
      overlap_over_thresh = .False.
 
      if ( overlaps(1) .gt. 0.5) then
          overlap_over_thresh = .True.
      else
-        print *, "POSSIBLE_TRIVIAL_CROSSING"
+        print*, "FOBSH| Possible trivial crossing"
         sum_ov = overlaps(1)
         do j =2, 2*mat  !I want to be sure to count all the states
            res_mod = ((-1)**(modulo(j ,2)))*(j/2)   !this is +1,-1,+2,-2
@@ -772,41 +767,39 @@ print *, "OVERALP_SQUARED", past_state, aom_env%active_state, overlaps(1)
         end do
      end if
 
-print *, "OVERALP_CALC", overlaps
-print *, "MAX_OVERLAP_HOPPING", overlaps(1), maxval(overlaps(:))
 
-if ( overlaps(1) .gt. 0.5) then
-print *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, past_state)*&
-                            aom_env%C_t(:, past_state))), &
-      maxloc(abs(aom_env%C_tp(:,aom_env%active_state)*aom_env%C_tp(:,aom_env%active_state)))
-print *, "STATE_TOGOTO", past_state, aom_env%active_state
-else
-print *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, past_state)*&
-                            aom_env%C_t(:, past_state)))
+!if ( overlaps(1) .gt. 0.5) then
+!print *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, past_state)*&
+!                            aom_env%C_t(:, past_state))), &
+!      maxloc(abs(aom_env%C_tp(:,aom_env%active_state)*aom_env%C_tp(:,aom_env%active_state)))
+!print *, "STATE_TOGOTO", past_state, aom_env%active_state
+!else
+!print *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, past_state)*&
+!                            aom_env%C_t(:, past_state)))
 !            maxloc(abs(aom_env%C_tp(:,aom_env%enforced_active_state)*&
 !                            aom_env%C_tp(:,aom_env%enforced_active_state)))
 !print *, "STATE_TOGOTO", past_state, aom_env%enforced_active_state
-end if
+!end if
 
 
       if (.not. aom_env%attempt_hop) then
           if (overlap_over_thresh) then
-             print *, "CASE1"
+             print*, "FOBSH| CASE1: no hop and no trivial crossing"
           else
-             print *, "CASE2"
+             print*, "FOBSH| CASE2: no hop and maybe a crossing, final overlap is :", overlaps(1)
           end if
       else 
           if(.not. aom_env%successful_hop) then
             if (.not. overlap_over_thresh) then
-                print *, "CASE3" 
+                print*, "FOBSH| CASE3: rejected hop and maybe a crossing, final overlap is :", overlaps(1)
             else
-                print *, "CASE4"
+                print*, "FOBSH| CASE4: rejected hop and good overlap"
             end if
          else
            if (.not. overlap_over_thresh) then
-                print *, "CASE5"
+                print*, "FOBSH| CASE5: succsessful hop and maybe a crossing, final overlap is :", overlaps(1)
            else 
-                print *, "CASE6"
+                print*, "FOBSH| CASE6: successful hop and good overlap"
            end if
          end if
       end if

@@ -687,7 +687,7 @@ CONTAINS
 
      !> second part CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE
      !RESULT OF THE SURFACE HOP ROUTINE IS.
-     print*, "ACTIVE STATE = ", active_state
+     print*, "FOBSH| ACTIVE STATE = ", active_state
      call calcforces(state=active_state,Hin=-AIMAG(aom_env%H_tp), C=aom_env%C_tp, nacv=nacv, NN=NN, atoms=atoms, & 
                      scaling=scaling, cbar=cbar, Fin=F, forces_adiab=aom_env%forces_adiab, &
                      ext_pres=aom_env%ext_pres)

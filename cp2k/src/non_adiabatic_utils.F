@@ -248,7 +248,7 @@ SUBROUTINE calc_psi_after_correction(aom_env)
         lambda_scaling = sqrt((1-sum_ctin)/sum_ctin_after_deco)
     end if
     IF (ABS(lambda_scaling-1).GT.1E-03) THEN
-       PRINT*, "FOBSH_WARNING: Projection to avoid spurious transfer get lambda = ", lambda_scaling
+       PRINT*, "FOBSH| *** WARNING: Projection to avoid spurious transfer get lambda = ", lambda_scaling, "***"
     ENDIF
     aom_env%ctin_after_tranf_correction(:) = aom_env%ctin_before_deco(:)
     do i =1, mat
@@ -523,8 +523,6 @@ END SUBROUTINE classically_forbidden_hops
             END SELECT
         CASE("ADIABATIC_BASIS")
             SELECT CASE(deco_keyword)                                                          
-            CASE("NO_DECO_CORR")
-                 PRINT *, 'NO DECOHERENCE CORRECTIONS'
             CASE("INSTANT_COLLAPSE")
               CALL wf_collapse_adiab_prop(aom_env,sh_print_env, itimes)
             CASE("TRESH_ONLY_COLLAPSE")  
@@ -745,7 +743,6 @@ END SUBROUTINE classically_forbidden_hops
 !transfor the diabatic into the adiabatic coefficients and calculate tau
    
    CALL section_vals_val_get(adiab_section,"DECO_TIME",c_val=tau_param)
-print *, "aom_env%active_state", aom_env%active_state
     do i=1,mol 
            if (i .ne. aom_env%active_state) then
               SELECT CASE(tau_param)
@@ -807,7 +804,6 @@ print *, "aom_env%active_state", aom_env%active_state
                     else
 !                         sh_print_env%pure_deph(i) = .TRUE.
                          tau(i)= (1/abs(aom_env%E_tp(i) - aom_env%E_tp(aom_env%active_state)))
-print *, "PURE_DEPHASING", i
                     end if
 
               CASE("HYBRID_TAU")
@@ -865,7 +861,6 @@ print *, "PURE_DEPHASING", i
                     else
 !                         sh_print_env%pure_deph(i) = .TRUE.
                          tau(i)= (1/abs(aom_env%E_tp(i) - aom_env%E_tp(aom_env%active_state)))
-print *, "PURE_DEPHASING", i
                     end if
               
               CASE DEFAULT
@@ -919,9 +914,8 @@ print *, "PURE_DEPHASING", i
              do j=1,mol
                     ct(i) = ct(i) + cmplx(aom_env%C_tp(j,i), 0.0D0,dp)*aom_env%ctin(j)
              end do
-             print *, "ct_SUBOTNIK_BEFRE", ct(i)                
              pop(i) = ct(i)*conjg(ct(i))
-             print *, "POPU_BEFORE", pop(i)
+             !print *, "POPU_BEFORE", pop(i)
         
              !>evaluate which states will be collpased
              collapse_probability = deltatMD/tau(i)
@@ -1121,7 +1115,6 @@ print *, "PURE_DEPHASING", i
               END DO
            END DO
            K_tot = 0.5*K_tot
-print *, "KINETIC", K_tot
 
    END SUBROUTINE calc_kinetic_tot
  
@@ -1323,7 +1316,7 @@ print *, "KINETIC", K_tot
                     end do
                     ctmag = abs(ctcomp)
                     IF ( ABS( ctmag - 1).GE.1E-5 ) THEN
-                       print*, "Norm is", ctmag
+                       print*, "FOBSH| *** WARNING: Norm is", ctmag
                        CPABORT("Problem in the electronic propagation, norm is not conserved.")
                     ENDIF
                     renorm = .TRUE.

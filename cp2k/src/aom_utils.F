@@ -697,7 +697,7 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         sh_print_env%sumflux   = sumg
         err = abs(sumg - ex_prob)
         IF (err.gt.0.1) THEN
-           print*, "FOBSH_WARNING: difference between exact flux and sum of Tully's proba is", err
+           print*, "FOBSH| *** WARNING: difference between exact flux and sum of Tully's proba is", err, "***"
         ENDIF
 
         !EFFECTIVE TRIVIAL CROSSINGS CORRECTION
@@ -724,7 +724,7 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
                end if
        end do
        if (sumg > 1.0D0) then
-               print*, "FOBSH_WARNING: We have to normalize the probability, the sum was:", sumg
+               print*, "FOBSH| *** WARNING: We have to normalize the probability, the sum was:", sumg, "***"
                do i=1,mol
                        g(i) = g(i)/sumg
                        g(aom_env%active_state) = 0.0D0
@@ -744,7 +744,7 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
 
 
         hop = next_random_number(aom_env%rng_stream)
-        print *, "RANDOM_NUMBER_HOPPING_PROBA", hop
+        !print *, "RANDOM_NUMBER_HOPPING_PROBA", hop
         sh_print_env%hop       = hop
         sh_print_env%old_state = aom_env%active_state
         !and see if this random number causes a surface hop
@@ -758,7 +758,7 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
                                 !decohere = .FALSE.
                                 aom_env%decohere = .FALSE.
                                 attempt_hop = .TRUE.
-                                print *, "ATTEMPTED_HOP"
+                                print *, "FOBSH| ATTEMPTED_HOP"
                                 sh_print_env%attempt_hop    = attempt_hop
                                 sh_print_env%new_state = new_state
                                 EXIT
@@ -864,11 +864,11 @@ subroutine calc_adiab_nace(aom_env)
         zeros = 0
         basic = (/( i, i=1, mol )/)
         threshold = 0.1
-!> First, we associate the new state i with the old state k if overlap is above
-!> 1 - threshold
-        do i=1, mol
+        !> First, we associate the new state i with the old state k if overlap is above
+        !> (1 - threshold)
+        do i=1, mol !loop over new index
            max_val = 0.0
-           do j= 1, mol
+           do j= 1, mol !loop over old index
               aom_env%adiab_overlap(i,j) = 0.0
               do k = 1, mol
                  aom_env%adiab_overlap(i,j) = aom_env%adiab_overlap(i,j) + aom_env%C_tp(k,i)*aom_Env%C_t(k,j)
@@ -886,30 +886,29 @@ subroutine calc_adiab_nace(aom_env)
            if (print_here) then
               if (i.NE.new_index) then
                  if ( abs( max_val**2 - 1 ).LT.threshold) then
-                    print*, "AC_OVERLAP_CHANGE: For", i, " new index is", new_index, &
+                    print*, "FOBSH| Reordering: for state", i, "old index was", new_index, &
                             "with overlap", max_val, "and former", aom_env%adiab_overlap(i,i)
                  else 
-                    print*, "AC_OVERLAP_NO_CHANGE: For", i, " we stay in with overlap", &
+                    print*, "FOBSH! Reorgering: for state", i, " we stay in with overlap", &
                             aom_env%adiab_overlap(i,i), " instead of goind to ", new_index, "with overlap", max_val
                  endif
               endif
            endif
         enddo
-        IF (ANY(map_new2old.NE.basic)) print*, "AC_MAP_CHANGED", map_new2old
+        IF (ANY(map_new2old.NE.basic)) print*, "FOBSH| New map: ", map_new2old
 
-!> If we associate state i with state j, we try to associate j with if if the
-!> overlap is above 0.5
+        !> If we've associated state i with state j, we try to associate j with if if the
+        !> overlap is above 0.5
         IF (ANY(map_new2old.EQ.zeros)) THEN
          do i=1,mol
             IF ((map_new2old(i).EQ.0).AND.(map_old2new(i).NE.0)) THEN
-print*, "OVERLAP IS: ", aom_env%adiab_overlap(i, map_old2new(i))
                IF ( abs( (aom_env%adiab_overlap(i, map_old2new(i)))**2 - 1 ).LT.0.5 ) THEN
                   map_new2old(i) = map_old2new(i)
                   map_old2new( map_new2old(i) ) = i
                ENDIF
             ENDIF
          enddo
-        IF (ANY(map_new2old.NE.basic)) print*, "AC_MAP_CHANGED_AGAIN", map_new2old
+        IF (ANY(map_new2old.NE.basic)) print*, "FOBSH! New map again:", map_new2old
        ENDIF
 
         !> Finally, we associate the not associate j with the remaining j state by order
@@ -940,8 +939,8 @@ print*, "OVERLAP IS: ", aom_env%adiab_overlap(i, map_old2new(i))
            endif
         enddo 
         IF (ANY(map_new2old.NE.basic)) THEN 
-           print*, "AC_MAP_FINAL", map_new2old
-           print*, "AC_MAP_INVERSE_FINAL", map_old2new
+           print*, "FOBSH| New map final:", map_new2old
+           print*, "FOBSH| New map final, from old to new:", map_old2new
         ENDIF
        ENDIF
        IF (SUM(map_new2old).NE.( mol*(mol+1)/2 )) THEN
@@ -961,9 +960,8 @@ print*, "OVERLAP IS: ", aom_env%adiab_overlap(i, map_old2new(i))
        do_sign_change = .True.
        IF (do_sign_change) THEN
           DO i=1, mol
-             PRINT*, aom_env%adiab_overlap(i, map_new2old(i))
+             !PRINT*, aom_env%adiab_overlap(i, map_new2old(i))
              if (aom_env%adiab_overlap(i, map_new2old(i)).lt.0) then
-                !print*, "AC_PHASE_WARNING for ", imol
                 aom_env%C_tp(:,i) = - aom_env%C_tp(:, i)
                 aom_env%adiab_overlap(i,:) = - aom_env%adiab_overlap(i,:)
              endif
@@ -971,9 +969,9 @@ print*, "OVERLAP IS: ", aom_env%adiab_overlap(i, map_old2new(i))
              do j=1, mol
                 sum_ = sum_ + aom_env%C_tp(j, i) * aom_env%C_t(j, i)
              enddo
-             print*, "AC_PHASE", i, sum_
-             print*, "aom_env%adiab_overlap", aom_env%adiab_overlap(i, :)
-             if (i.eq.aom_env%active_state) print*, "AC_STATE_WARNING"          
+             !print*, "AC_PHASE", i, sum_
+             !print*, "aom_env%adiab_overlap", aom_env%adiab_overlap(i, :)
+             !if (i.eq.aom_env%active_state) print*, "AC_STATE_WARNING"          
           ENDDO
        ENDIF
 ! End of 4
@@ -981,7 +979,7 @@ print*, "OVERLAP IS: ", aom_env%adiab_overlap(i, map_old2new(i))
 
 !> 5. Reassociate state active_state
         aom_env%active_state = map_old2new(aom_env%old_state)
-print*, "Put ", aom_env%old_state, "in", aom_env%active_state 
+        print*, "FOBSH| Put former active state", aom_env%old_state, "in new active state", aom_env%active_state 
 ! End of 5
 
 ! 6. Calculate the NACE
@@ -1144,7 +1142,6 @@ subroutine surfacehop(deltat, old_state, C2, &
                                ! decohere = .FALSE.
                                 aom_env%decohere = .FALSE.
                                 attempt_hop = .TRUE.
-print *, "ATTEMPTED_HOP"
                                 sh_print_env%attempt_hop    = attempt_hop
                                 sh_print_env%new_state = new_state
                                 EXIT
@@ -1729,7 +1726,6 @@ end subroutine calcforces
 
         random = next_random_number(aom_env%rng_stream)
         sh_print_env%initrandom = random
-print *, "RANDOM_NUMBER_FISRT_ADIAB", random
         sumc = 0.0D0
         DO i=1, SIZE(C(init,:))
            sh_print_env%pop_init(i) = C(init,i)*C(init,i)
@@ -2179,7 +2175,7 @@ ENDIF
               old_state = i
            ELSE
               old_state = aom_env%active_state
-print *, "DELTAE_OLDSTATE", old_state
+!print *, "DELTAE_OLDSTATE", old_state
            ENDIF
            delta_energy = B**2 - 4 * A * (  &
                      aom_env%E_tp(new_state) - &
@@ -2227,7 +2223,7 @@ print *, "DELTAE_OLDSTATE", old_state
 
            new_state = force_env%mixed_env%aom_env%new_state
            old_state = force_env%mixed_env%aom_env%active_state
-print *, "OLD_STATE_ISOTROP", old_state
+!print *, "OLD_STATE_ISOTROP", old_state
            delta_energy = kinetic_energy_prime-( &
                      force_env%mixed_env%aom_env%E_tp(new_state) - &
                      force_env%mixed_env%aom_env%E_tp(old_state))
@@ -2264,7 +2260,6 @@ print *, "OLD_STATE_ISOTROP", old_state
               DO iparticle_local=1,nparticle_local
                  iparticle = local_particles%list(iparticle_kind)%array(iparticle_local)
                  if (force_env%mixed_env%aom_env%ext_pres(iparticle)) then 
-!print*, "HEY"
                       kinetic_energy_qsys = kinetic_energy_qsys +   &
                          mass*( &
                          velocities(1, iparticle)**2 + &
@@ -2275,7 +2270,7 @@ print *, "OLD_STATE_ISOTROP", old_state
            END DO
           kinetic_energy_qsys = 0.5*kinetic_energy_qsys
 
-print *, "kinetic_energy_qsys", kinetic_energy_qsys
+!print *, "kinetic_energy_qsys", kinetic_energy_qsys
            new_state = force_env%mixed_env%aom_env%new_state
            old_state = force_env%mixed_env%aom_env%active_state
            delta_energy = kinetic_energy_qsys-( &
@@ -2355,7 +2350,7 @@ print *, "kinetic_energy_qsys", kinetic_energy_qsys
                     mass*velocities(:, iparticle)
               END DO
            END DO
-           print*, "MOMENTUM = ", MOMENTUM
+           !print*, "MOMENTUM = ", MOMENTUM
         IF (ASSOCIATED(atomic_kind)) NULLIFY(atomic_kind)
    END SUBROUTINE total_momentum
         

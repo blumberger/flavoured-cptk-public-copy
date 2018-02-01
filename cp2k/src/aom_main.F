@@ -310,7 +310,7 @@ CONTAINS
            aom_env%F(:,iatom,imol) =  global_forces(imol)%forces(:,iatom)
         ENDDO
      ENDDO
-     print*, "ACTIVE STATE = ", aom_env%active_state
+     print*, "FOBSH| ACTIVE STATE = ", aom_env%active_state
      call calcforces(state=aom_env%active_state,Hin=-AIMAG(aom_env%H_tp), C=aom_env%C_tp, nacv=aom_env%nacv, &
                             NN=aom_env%NN, atoms=atoms, & 
                            scaling=scaling, cbar=cbar, Fin=aom_env%F, forces_adiab=aom_env%forces_adiab, &
