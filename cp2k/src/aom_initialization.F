@@ -226,8 +226,8 @@ CONTAINS
      aom_env%new_state   = -1
      aom_env%old_state   = -1
      aom_env%active_state   = -1
+     ALLOCATE(aom_env%adiab_overlap(mat, mat))
      aom_env%attempt_hop = .FALSE.
-     aom_env%overlap_over_thresh = .FALSE.
      aom_env%successful_hop = .FALSE.
      
      aom_env%HS_propagation = .FALSE.

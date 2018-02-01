@@ -136,8 +136,7 @@ IMPLICIT NONE
              calc_hop_nacv, &
              cal_delta_energy_nacv , &
              calc_diabatic_nace, &
-             rotation_diab_to_adiab, &
-             adiab_overlap_check
+             rotation_diab_to_adiab
 
 CONTAINS
 
@@ -466,6 +465,7 @@ SUBROUTINE adiab_overlap_check(aom_env, changed_state, itimes)
     integer                                     :: mat, i, j, res_mod, state, &
                                                      past_state
     REAL(KIND=dp)                               :: sum_ov, max_val, resid 
+    LOGICAL :: overlap_over_thresh
 !!ADD OPTIONAL
 
     mat    = SIZE(aom_env%Stptp, 1)
@@ -494,11 +494,11 @@ SUBROUTINE adiab_overlap_check(aom_env, changed_state, itimes)
      overlaps(1) = abs(overlaps(1))*abs(overlaps(1))
 print *, "OVERALP_SQUARED", past_state, aom_env%active_state, overlaps(1)
 
-     aom_env%overlap_over_thresh = .False.
+     overlap_over_thresh = .False.
   
      if ( overlaps(1) .gt. 0.5) then
 !        print *, "CARRY_ON_THE_SAME_STATE"
-         aom_env%overlap_over_thresh = .True.
+         overlap_over_thresh = .True.
      else
 !        print *, "POSSIBLE_TRIVIAL_CROSSING"
         sum_ov = overlaps(1)
@@ -808,8 +808,6 @@ subroutine calc_adiab_nace(aom_env)
 
         integer :: i, j, mol, k, l, new_index
         REAL(KIND=dp), dimension(:,:), allocatable :: T1, T2, DT, TST, TDT, DS!, DC
-        REAL(KIND=dp), dimension(:,:), allocatable :: adiab_overlap
-        REAL(KIND=dp), dimension(:,:), allocatable :: C1, C2
         INTEGER, dimension(:),  allocatable        :: map_new2old, map_old2new, basic
         INTEGER, dimension(:),  allocatable        :: not_associated, zeros
         REAL(KIND=dp)                              :: deltat, max_val, threshold
@@ -855,16 +853,11 @@ subroutine calc_adiab_nace(aom_env)
 
  
         !> 2. Check reordering of eigenvectors between the different timestep.
-        ALLOCATE(adiab_overlap(mol, mol))
-        ALLOCATE(C1(mol, mol))
-        ALLOCATE(C2(mol, mol))
         ALLOCATE(map_new2old(mol))
         ALLOCATE(map_old2new(mol))
         ALLOCATE(basic(mol))
         ALLOCATE(zeros(mol))
         ALLOCATE(not_associated(mol))
-        C1 = aom_env%C_t
-        C2 = aom_env%C_tp
         map_new2old = 0
         map_old2new = 0
         not_associated = 0
@@ -876,12 +869,12 @@ subroutine calc_adiab_nace(aom_env)
         do i=1, mol
            max_val = 0.0
            do j= 1, mol
-              adiab_overlap(i,j) = 0.0
+              aom_env%adiab_overlap(i,j) = 0.0
               do k = 1, mol
-                 adiab_overlap(i,j) = adiab_overlap(i,j) + C2(k,i)*C1(k,j)
+                 aom_env%adiab_overlap(i,j) = aom_env%adiab_overlap(i,j) + aom_env%C_tp(k,i)*aom_Env%C_t(k,j)
               enddo
-              if (abs(adiab_overlap(i,j)).GE.abs(max_val)) THEN
-                 max_val = adiab_overlap(i,j)
+              if (abs(aom_env%adiab_overlap(i,j)).GE.abs(max_val)) THEN
+                 max_val = aom_env%adiab_overlap(i,j)
                  new_index = j
               endif
            enddo
@@ -894,10 +887,10 @@ subroutine calc_adiab_nace(aom_env)
               if (i.NE.new_index) then
                  if ( abs( max_val**2 - 1 ).LT.threshold) then
                     print*, "AC_OVERLAP_CHANGE: For", i, " new index is", new_index, &
-                            "with overlap", max_val, "and former", adiab_overlap(i,i)
+                            "with overlap", max_val, "and former", aom_env%adiab_overlap(i,i)
                  else 
                     print*, "AC_OVERLAP_NO_CHANGE: For", i, " we stay in with overlap", &
-                            adiab_overlap(i,i), " instead of goind to ", new_index, "with overlap", max_val
+                            aom_env%adiab_overlap(i,i), " instead of goind to ", new_index, "with overlap", max_val
                  endif
               endif
            endif
@@ -909,8 +902,8 @@ subroutine calc_adiab_nace(aom_env)
         IF (ANY(map_new2old.EQ.zeros)) THEN
          do i=1,mol
             IF ((map_new2old(i).EQ.0).AND.(map_old2new(i).NE.0)) THEN
-print*, "OVERLAP IS: ", adiab_overlap(i, map_old2new(i))
-               IF ( abs( (adiab_overlap(i, map_old2new(i)))**2 - 1 ).LT.0.5 ) THEN
+print*, "OVERLAP IS: ", aom_env%adiab_overlap(i, map_old2new(i))
+               IF ( abs( (aom_env%adiab_overlap(i, map_old2new(i)))**2 - 1 ).LT.0.5 ) THEN
                   map_new2old(i) = map_old2new(i)
                   map_old2new( map_new2old(i) ) = i
                ENDIF
@@ -968,19 +961,18 @@ print*, "OVERLAP IS: ", adiab_overlap(i, map_old2new(i))
        do_sign_change = .True.
        IF (do_sign_change) THEN
           DO i=1, mol
-             PRINT*, adiab_overlap(i, map_new2old(i))
-             if (adiab_overlap(i, map_new2old(i)).lt.0) then
+             PRINT*, aom_env%adiab_overlap(i, map_new2old(i))
+             if (aom_env%adiab_overlap(i, map_new2old(i)).lt.0) then
                 !print*, "AC_PHASE_WARNING for ", imol
                 aom_env%C_tp(:,i) = - aom_env%C_tp(:, i)
-                adiab_overlap(i,:) = - adiab_overlap(i,:)
-                C2(:,i) = -C2(:,i)
+                aom_env%adiab_overlap(i,:) = - aom_env%adiab_overlap(i,:)
              endif
              sum_ = 0 
              do j=1, mol
                 sum_ = sum_ + aom_env%C_tp(j, i) * aom_env%C_t(j, i)
              enddo
              print*, "AC_PHASE", i, sum_
-             print*, "adiab_overlap", adiab_overlap(i, :)
+             print*, "aom_env%adiab_overlap", aom_env%adiab_overlap(i, :)
              if (i.eq.aom_env%active_state) print*, "AC_STATE_WARNING"          
           ENDDO
        ENDIF
@@ -995,7 +987,7 @@ print*, "Put ", aom_env%old_state, "in", aom_env%active_state
 ! 6. Calculate the NACE
         DO i=1, mol
            DO j=1, mol
-              aom_env%adiab_nace_tp(i,j) = - adiab_overlap(i, map_new2old(j))
+              aom_env%adiab_nace_tp(i,j) = - aom_env%adiab_overlap(i, map_new2old(j))
               IF (i ==j) THEN
                  aom_env%adiab_nace_tp(i,j) = aom_env%adiab_nace_tp(i,j) + 1
               ENDIF
@@ -1003,7 +995,7 @@ print*, "Put ", aom_env%old_state, "in", aom_env%active_state
               DO k=1, mol
                  DO l=1, mol
                     aom_env%adiab_nace_tp(i,j) = & 
-                                    aom_env%adiab_nace_tp(i,j) + C2(k,i)*C2(l,j)*(TST(k,l) + TDT(k,l))
+                                    aom_env%adiab_nace_tp(i,j) + aom_env%C_tp(k,i)*aom_env%C_tp(l,j)*(TST(k,l) + TDT(k,l))
                  ENDDO
               ENDDO  
            ENDDO

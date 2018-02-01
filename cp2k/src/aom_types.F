@@ -162,7 +162,7 @@ IMPLICIT NONE
 
 !> States index and reordering
      INTEGER                                :: new_state, old_state, active_state
-     LOGICAL                                :: overlap_over_thresh
+     REAL(KIND=dp), dimension(:,:), ALLOCATABLE  :: adiab_overlap 
      LOGICAL                                :: attempt_hop
      LOGICAL                                :: successful_hop
      LOGICAL                                :: do_reorder

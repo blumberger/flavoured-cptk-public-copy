@@ -118,9 +118,10 @@ MODULE integrator
   USE md_ener_types,                   ONLY: md_ener_type,&
                                              zero_md_ener
   USE aom_utils,                       ONLY: check_hop_attempt, &
-                                             total_momentum, &
-                                             adiab_overlap_check
+                                             total_momentum
  
+  USE aom_types,                       ONLY: aom_env_type
+
   USE non_adiabatic_utils,             ONLY: apply_decoherence
                                              !ida_collapse, &
                                              !apply_decoherence
@@ -634,28 +635,7 @@ CONTAINS
              ENDIF          
 
              !Probably I would need to check the overalp here
-             !CALL adiab_overlap_check(force_env%mixed_env%aom_env, force_env%mixed_env%aom_env%old_state, itimes)
-             !if (.not. force_env%mixed_env%aom_env%attempt_hop) then
-             !    if (force_env%mixed_env%aom_env%overlap_over_thresh) then
-             !       print *, "CASE1"
-             !    else
-             !       print *, "CASE2"
-             !    end if
-             !else 
-             !    if(.not. force_env%mixed_env%aom_env%successful_hop) then
-             !      if (.not. force_env%mixed_env%aom_env%overlap_over_thresh) then
-             !          print *, "CASE3" 
-             !      else
-             !          print *, "CASE4"
-             !      end if
-             !   else
-             !     if (.not. force_env%mixed_env%aom_env%overlap_over_thresh) then
-             !          print *, "CASE5"
-             !     else 
-             !          print *, "CASE6"
-             !     end if
-             !   end if
-             !end if
+             CALL adiab_overlap_check(force_env%mixed_env%aom_env)
 
              !UPDATE variables for the next time step
              force_env%mixed_env%aom_env%C_t = force_env%mixed_env%aom_env%C_tp
@@ -725,7 +705,6 @@ CONTAINS
 
     END DO
 
-!print *, "WHERE AM I???"
     ! Update virial
     IF ( simpar%constraint ) CALL pv_constraint ( gci, local_molecules, &
          molecule_set,molecule_kind_set,particle_set, virial,para_env%group )
@@ -734,6 +713,111 @@ CONTAINS
          local_particles, virial, para_env%group)
 
   END SUBROUTINE nve
+
+
+
+  SUBROUTINE adiab_overlap_check(aom_env)
+    TYPE(aom_env_type)                         :: aom_env
+
+    CHARACTER(len=*), PARAMETER :: routineN = 'adiab_overlap_check', &
+              routineP = moduleN//':'//routineN
+
+    REAL(KIND=dp), dimension(:), allocatable    :: overlaps
+    integer                                     :: mat, j, res_mod, state, &
+                                                     past_state
+    REAL(KIND=dp)                               :: sum_ov, max_val, resid
+    LOGICAL                                     :: overlap_over_thresh
+
+    mat    = SIZE(aom_env%Stptp, 1)
+
+    allocate(overlaps(2*mat))
+
+    overlaps = 0.0D0
+
+    past_state = aom_env%old_state
+print *, "OLD_STATE", past_state
+print *, "NEW_STATE_here", aom_env%active_state    
+
+
+     overlaps(1) = abs(aom_env%adiab_overlap(aom_env%active_state, past_state))**2
+print *, "OVERALP_SQUARED", past_state, aom_env%active_state, overlaps(1)
+
+     overlap_over_thresh = .False.
+
+     if ( overlaps(1) .gt. 0.5) then
+         overlap_over_thresh = .True.
+     else
+        print *, "POSSIBLE_TRIVIAL_CROSSING"
+        sum_ov = overlaps(1)
+        do j =2, 2*mat  !I want to be sure to count all the states
+           res_mod = ((-1)**(modulo(j ,2)))*(j/2)   !this is +1,-1,+2,-2
+           state = aom_env%active_state+res_mod
+           !two conditions in case state is negative or is larger than mat
+           if (state .le. 0 .or. state .gt. mat) then
+              cycle
+           else
+              overlaps(j) = abs(aom_env%adiab_overlap(past_state, state))**2
+           end if
+           max_val = maxval(overlaps(:))
+           sum_ov = sum_ov +  overlaps(j)
+           resid = 1.0D0 - sum_ov
+           if (resid .gt. max_val) then
+               cycle
+           else
+               if (max_val .le. 0.5) then
+                  print *, "WARNING: MORE THAN TWO STATES CROSS"
+               end if
+               exit
+           end if
+        end do
+     end if
+
+print *, "OVERALP_CALC", overlaps
+print *, "MAX_OVERLAP_HOPPING", overlaps(1), maxval(overlaps(:))
+
+if ( overlaps(1) .gt. 0.5) then
+print *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, past_state)*&
+                            aom_env%C_t(:, past_state))), &
+      maxloc(abs(aom_env%C_tp(:,aom_env%active_state)*aom_env%C_tp(:,aom_env%active_state)))
+print *, "STATE_TOGOTO", past_state, aom_env%active_state
+else
+print *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, past_state)*&
+                            aom_env%C_t(:, past_state)))
+!            maxloc(abs(aom_env%C_tp(:,aom_env%enforced_active_state)*&
+!                            aom_env%C_tp(:,aom_env%enforced_active_state)))
+!print *, "STATE_TOGOTO", past_state, aom_env%enforced_active_state
+end if
+
+
+      if (.not. aom_env%attempt_hop) then
+          if (overlap_over_thresh) then
+             print *, "CASE1"
+          else
+             print *, "CASE2"
+          end if
+      else 
+          if(.not. aom_env%successful_hop) then
+            if (.not. overlap_over_thresh) then
+                print *, "CASE3" 
+            else
+                print *, "CASE4"
+            end if
+         else
+           if (.not. overlap_over_thresh) then
+                print *, "CASE5"
+           else 
+                print *, "CASE6"
+           end if
+         end if
+      end if
+
+    deallocate(overlaps)
+
+END SUBROUTINE adiab_overlap_check
+
+
+
+
 
 ! *****************************************************************************
 !> \brief simplest version of the isokinetic gaussian thermostat
