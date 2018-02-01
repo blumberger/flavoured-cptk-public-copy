@@ -1977,11 +1977,11 @@ ENDIF
               CALL cal_delta_energy_nacv(nparticle_kind, velocities_com, force_env%mixed_env%aom_env, &
                                           atomic_kind_set, &
                                           local_particles, hop_nacv, delta_energy, A, B) 
-IF ((delta_energy).lt.0) THEN
-     print*, "LOGNACV = ", 0
-ELSE
-     print*, "LOGNACV = ", 1
-ENDIF
+!IF ((delta_energy).lt.0) THEN
+!     print*, "LOGNACV = ", 0
+!ELSE
+!     print*, "LOGNACV = ", 1
+!ENDIF
               If (delta_energy.lt.0) THEN
                   force_env%mixed_env%aom_env%successful_hop = .FALSE.
                   CALL section_vals_val_get(coupling_section,"METHOD_REVERSAL",c_val=reversal_keyword)

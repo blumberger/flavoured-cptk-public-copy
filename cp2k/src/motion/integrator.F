@@ -771,36 +771,28 @@ CONTAINS
      end if
 
 
-!if ( overlaps(1) .gt. 0.5) then
-!print *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, past_state)*&
-!                            aom_env%C_t(:, past_state))), &
-!      maxloc(abs(aom_env%C_tp(:,aom_env%active_state)*aom_env%C_tp(:,aom_env%active_state)))
-!print *, "STATE_TOGOTO", past_state, aom_env%active_state
-!else
-!print *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, past_state)*&
-!                            aom_env%C_t(:, past_state)))
-!            maxloc(abs(aom_env%C_tp(:,aom_env%enforced_active_state)*&
-!                            aom_env%C_tp(:,aom_env%enforced_active_state)))
-!print *, "STATE_TOGOTO", past_state, aom_env%enforced_active_state
-!end if
-
-
       if (.not. aom_env%attempt_hop) then
           if (overlap_over_thresh) then
              print*, "FOBSH| CASE1: no hop and no trivial crossing"
           else
              print*, "FOBSH| CASE2: no hop and maybe a crossing, final overlap is :", overlaps(1)
+             print*, "FOBSH| We were localized on molecule", maxloc(abs(aom_env%C_tp(:,past_state)))
+             print*, "FOBSH| And now on molecule", maxloc(abs(aom_env%C_tp(:, aom_env%active_state)))
           end if
       else 
           if(.not. aom_env%successful_hop) then
             if (.not. overlap_over_thresh) then
                 print*, "FOBSH| CASE3: rejected hop and maybe a crossing, final overlap is :", overlaps(1)
+                print*, "FOBSH| We were localized on molecule", maxloc(abs(aom_env%C_t(:,past_state)))
+                print*, "FOBSH| And now on molecule", maxloc(abs(aom_env%C_tp(:, aom_env%active_state)))
             else
                 print*, "FOBSH| CASE4: rejected hop and good overlap"
             end if
          else
            if (.not. overlap_over_thresh) then
-                print*, "FOBSH| CASE5: succsessful hop and maybe a crossing, final overlap is :", overlaps(1)
+                print*, "FOBSH| CASE5: successful hop and maybe a crossing, final overlap is :", overlaps(1)
+                print*, "FOBSH| We were localized on molecule", maxloc(abs(aom_env%C_tp(:,past_state)))
+                print*, "FOBSH| And now on molecule", maxloc(abs(aom_env%C_tp(:, aom_env%active_state)))
            else 
                 print*, "FOBSH| CASE6: successful hop and good overlap"
            end if
