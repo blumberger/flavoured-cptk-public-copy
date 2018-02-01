@@ -2192,6 +2192,8 @@ ENDIF
            A = 0
            B = 0
            DO iparticle_kind=1,nparticle_kind
+print *, "iparticle_kind", iparticle_kind
+print *, "nparticle_kind", nparticle_kind
               atomic_kind => atomic_kind_set(iparticle_kind)
               CALL get_atomic_kind(atomic_kind=atomic_kind,mass=mass)
               nparticle_local = local_particles%n_el(iparticle_kind)
