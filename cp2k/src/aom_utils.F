@@ -1005,6 +1005,28 @@ subroutine calc_adiab_nace(aom_env)
         ENDDO
 ! End of 6
 
+! 7. If reordering, we use the anti-symmetry of the NACE
+        IF (aom_env%do_reorder) THEN
+           Do i=1, mol
+              Do j=1, mol 
+                 !print*, i,j, aom_env%adiab_nace_tp(i,j), aom_env%adiab_nace_tp(j,i)
+                 !print*, i,j, ( aom_env%adiab_nace_tp(i,j) + aom_env%adiab_nace_tp(j,i) )
+                 IF (j.lt.i) THEN
+                     aom_env%adiab_nace_tp(i,j) = - aom_env%adiab_nace_tp(j,i)
+                 ELSE
+                     aom_env%adiab_nace_tp(i,j) = ( aom_env%adiab_nace_tp(i,j) - aom_env%adiab_nace_tp(j,i) ) / 2
+                 ENDIF
+              Enddo
+           Enddo
+           !Do i=1, mol
+           !   Do j=1, mol 
+           !      print*, i,j, aom_env%adiab_nace_tp(i,j), aom_env%adiab_nace_tp(j,i)
+           !   Enddo
+           !Enddo
+        ENDIF
+! End of 7
+
+
         !   print*, aom_env%adiab_nace_tp(:,1), "New"
  
         ! Older version of NACE calculation             
