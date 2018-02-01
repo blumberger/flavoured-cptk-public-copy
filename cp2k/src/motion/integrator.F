@@ -572,7 +572,7 @@ CONTAINS
 
 !> CHANGE_AC
 !> 1-01-25
-!> Check if we do Surface Hopping Calculation
+       !> Check if we do Surface Hopping Calculation
        IF (force_env%in_use.eq.use_mixed_force) THEN
           CALL force_env_get(force_env = force_env, &
                              force_env_section=force_env_section)
@@ -587,8 +587,9 @@ CONTAINS
                 force_env%mixed_env%aom_env%velocities_tp = tmp%vel
              ENDIF
 
-             !We calculate the forces, the Hamiltonian, propagate the wf. If we
-             !attempt to hop, we also calculate the forces in the new state
+             ! 1. Calculate the forces, Hamiltonian, propagate the wf and try to
+             !    hop. If we attempt to hop, we also calculate the forces in the
+             !    new state.
              CALL force_env_calc_energy_force(force_env,require_consistent_energy_force=.FALSE., &
                   itimes = itimes)
              IF(ehrenfest_md)THEN
@@ -599,8 +600,8 @@ CONTAINS
              CALL metadyn_integrator(force_env, itimes, tmp%vel)
 
              ! Velocity Verlet (second part)
-             !We always update the velocities with the forces in the active
-             !state, even if we attempt to hop
+             ! 2. Update the velocities with the forces in the active
+             !    state, even if we attempt to hop
               CALL vv_second(tmp, atomic_kind_set, local_particles, particle_set, &
                              core_particle_set, shell_particle_set, nparticle_kind, shell_adiabatic, dt)
              
@@ -615,7 +616,7 @@ CONTAINS
 !    " Ctp(a')= ", force_env%mixed_env%aom_env%C_tp(i, force_env%mixed_env%aom_env%active_state), &
 !    " Ctp(f)= ", force_env%mixed_env%aom_env%C_tp(i, force_env%mixed_env%aom_env%new_state)
 !end do
-             !We check if the attempted hop is successful or not     
+             ! 3. Check if an attempted hop is successuful or not
              IF (force_env%mixed_env%aom_env%attempt_hop) THEN
                 print*, "FOBSH| Active state before the attempt to hop:", force_env%mixed_env%aom_env%active_state
                 CALL check_hop_attempt(tmp%vel, atomic_kind_set, nparticle_kind, local_particles, force_env)
@@ -628,16 +629,18 @@ CONTAINS
                 ENDIF
                 print*, "FOBSH| Active state after the attempt to hop:", force_env%mixed_env%aom_env%active_state
              ENDIF
-           
+
+             ! 4.Apply the decoherence           
              IF (force_env%mixed_env%aom_env%do_deco) THEN
                 !> here we decohere the WF onto the active state  , that could be a new one in case of successful hop 
                 CALL apply_decoherence(itimes, tmp%vel, force_env, local_particles, nparticle_kind, atomic_kind_set)
              ENDIF          
 
-             !Probably I would need to check the overalp here
+             ! 5. Check if it's trivial crossing (only for printing purpose)
+             !    Probably I would need to check the overalp here
              CALL adiab_overlap_check(force_env%mixed_env%aom_env)
 
-             !UPDATE variables for the next time step
+             ! 6. Update all variables for the next time step.
              force_env%mixed_env%aom_env%C_t = force_env%mixed_env%aom_env%C_tp
              force_env%mixed_env%aom_env%H_t = force_env%mixed_env%aom_env%H_tp
              force_env%mixed_env%aom_env%E_t = force_env%mixed_env%aom_env%E_tp

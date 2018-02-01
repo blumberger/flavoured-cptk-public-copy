@@ -83,7 +83,7 @@ MODULE non_adiabatic_utils
 
 CONTAINS
 
-
+! Could be removed
 SUBROUTINE adiab_overalp_calc(active_state, aom_env, C_tp, mol, itimes, & 
                                    attempt_hop, enforced_active_state)
 

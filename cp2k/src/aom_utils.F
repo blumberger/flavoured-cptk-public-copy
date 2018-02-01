@@ -595,6 +595,9 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
  
         mol = size(aom_env%Stt,1)
 
+        ! Based on paper [Spencer16]: Spencer et al., J. Chem. Phys. 145, 064102 (2016)
+        ! and paper [Wang14] :
+
         !many allocations
         allocate(ak(mol))
         allocate(b(mol))
@@ -605,6 +608,7 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         allocate(cttm_ad(mol)) 
         ALLOCATE(sh_print_env%proba(mol))
 
+        ! Find the state closest in energy according to [Wang14]
         IF (do_trivial_corr) THEN 
              do i=1,mol
                      if (i .ne. aom_env%active_state) then 
@@ -640,8 +644,7 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
 
         !if the propagation occurs in the diabatic basis, transfor diabatic coefficients
         !into adiabatic coefficients
-        CALL section_vals_val_get(adiab_section,"REPRESENTATION", &
-                                                     c_val=wfpropag_keyword)
+        CALL section_vals_val_get(adiab_section,"REPRESENTATION", c_val=wfpropag_keyword)
         SELECT CASE(wfpropag_keyword)
         CASE("DIABATIC_BASIS")
                !CALL diab_to_adiab(aom_env, C2, old_state, mol, cstate, ct, &
@@ -682,6 +685,7 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         ex_prob = (abs(akttm(aom_env%old_state))- abs(ak(aom_env%active_state)))/abs(akttm(aom_env%old_state))
         sh_print_env%exprob = ex_prob 
 
+        ! Use Eq. (4) of [Spencer16]
         ! calculate sumg that can also be negative because each individual probability
         ! (flux) could be negative 
         !calculate g and sum(g)
@@ -701,6 +705,7 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         ENDIF
 
         !EFFECTIVE TRIVIAL CROSSINGS CORRECTION
+        ! Use Eq. () of [Wang14]
         g_exa = 0
         if (do_trivial_corr) THEN
            g_exa = ex_prob - sumg + g(state_min)
@@ -819,7 +824,7 @@ subroutine calc_adiab_nace(aom_env)
 
         !> Based on Eq. 19 of paper: Spencer et al., J. Chem. Phys. 145, 064102 (2016)
 
-        !> 1. Calculate the term U^dag D U (first term in Eq. 19)
+        !> 1. Calculate the term  D  (first term in Eq. 19)
         !many allocations
         allocate(T1(mol,mol))
         allocate(T2(mol,mol))
@@ -982,7 +987,7 @@ subroutine calc_adiab_nace(aom_env)
         print*, "FOBSH| Put former active state", aom_env%old_state, "in new active state", aom_env%active_state 
 ! End of 5
 
-! 6. Calculate the NACE
+! 6. Calculate the full NACE, Eq. (19) in paper 1.
         DO i=1, mol
            DO j=1, mol
               aom_env%adiab_nace_tp(i,j) = - aom_env%adiab_overlap(i, map_new2old(j))
@@ -1290,7 +1295,6 @@ subroutine adiabaticity(H, C, E)
 end subroutine adiabaticity
 
 
-!COMMENT: calc_hop_nacv and calc_forces could be cleaned massively
 SUBROUTINE calc_hop_nacv(aom_env, hop_nacv, ext_old_state, ext_new_state, symmetry, fast, &
                          exF_11, exF_1, exF_2, exF_3)
         TYPE(aom_env_type)                                       :: aom_env
@@ -1321,6 +1325,10 @@ SUBROUTINE calc_hop_nacv(aom_env, hop_nacv, ext_old_state, ext_new_state, symmet
         LOGICAL                                    :: my_fast
         REAL(KIND=dp) :: total_norm, error
         REAL(KIND=dp)                           :: convert_nacv 
+
+        ! Based on paper Carof, Giannini, Blumberger, J. Chem. Phys. 147,
+        ! 214113 (2017), [Carof17]
+
 
         mat    = SIZE(aom_env%Stptp, 1)
         natom  = SIZE(aom_env%F, 2)
@@ -1381,16 +1389,17 @@ SUBROUTINE calc_hop_nacv(aom_env, hop_nacv, ext_old_state, ext_new_state, symmet
         ENDIF  
 
      IF (.NOT.my_fast) THEN
+           ! Use the full Eq. (14) of [Carof17]
+
         T = S
         CALL matinvsqrt(mat, .FALSE., T)
-        X = matmul(T, C)
-        CALL adiabaticity(T, LL, Sdiag)
-        CALL adiabaticity(S, LL, Sdiag)
+        X = matmul(T, C)                   ! X is T*U
+        !CALL adiabaticity(T, LL, Sdiag)     
+        CALL adiabaticity(S, LL, Sdiag)    ! LL is L, the matrix that
+        ! diagonalizes S and T. Sdiag is the eigenvalues of S.
+        Y = matmul( transpose(LL), C)     ! Y is L^{dagger}C
 
-!CALCULATE Y = L^{dagger} U
-        Y = matmul( transpose(LL), C)
-
-        !CALCULATE W'
+        !CALCULATE W' with Eq. (21) if [Carof17]
         do d=1,3
            num_j = -1
            do j=1,natom
@@ -1453,8 +1462,8 @@ SUBROUTINE calc_hop_nacv(aom_env, hop_nacv, ext_old_state, ext_new_state, symmet
               ENDDO
            ENDDO 
 
-
-           hop_nacv = F_1 + F_11 + F_2 + F_3
+           ! Carefull with the sign! 
+           hop_nacv = -(F_1 + F_11) + F_2 + F_3
            IF (PRESENT(symmetry)) THEN
               DO j=1, natom
                  DO d=1, 3
@@ -1492,21 +1501,28 @@ SUBROUTINE calc_hop_nacv(aom_env, hop_nacv, ext_old_state, ext_new_state, symmet
               print*, "ERROR =  ", sqrt(error/total_norm)
            ENDIF
         ELSE
-           num_mol = 0
-           do d=1,3
-              num_j = 0
-              do j=1,natom
+           ! Only calculation of term a_{I, ij} in Eq. (14) of [Carof17], i.e.
+           ! Eq. (15)
+           num_mol = 0   ! Molecular index 
+           do d=1,3      ! Cartesian coordinates
+              num_j = 0  ! Active atom index
+              do j=1,natom ! Sum over all the atoms
                  F_1(d,j) = 0.0D0
                  F_11(d,j) = 0.0D0
                  IF (ext_pres(j)) THEN
-                    num_j   = num_j + 1
-                    num_mol = int((num_j-1)/atoms) + 1 
+                    num_j   = num_j + 1                  ! Update the active atom index
+                    num_mol = int((num_j-1)/atoms) + 1   ! Update the molecular index
+                    ! WARNING: we suppose that all molecules have the same
+                    ! number of atoms
                  ENDIF
                  do i=1,mat
                     !F_1(d,j) = F_1(d,j) + C(i,old_state)*DH(i,i,j,d)*C(i,new_state)*diff_energy
+                    ! Diagonal term, it depends on the forces
                     F_1(d,j) = F_1(d,j) + C(i,old_state)*Fin(d,j,i)*C(i,new_state)*diff_energy
                     IF (ext_pres(j)) THEN
                        IF (i.ne.num_mol) THEN
+                         ! Of diagonal term, only for active atom j present in
+                         ! molecule num_mol
                          F_11(d,j) = F_11(d,j) + diff_energy * convert_nacv*nacv(d, i, num_j) * (              &
                                                  C(num_mol, new_state) * C(i, old_state) +   &
                                                  C(num_mol, old_state) * C(i,new_state) )
@@ -1516,7 +1532,8 @@ SUBROUTINE calc_hop_nacv(aom_env, hop_nacv, ext_old_state, ext_new_state, symmet
               ENDDO
            ENDDO 
 
-           hop_nacv = F_1 + F_11 
+           ! minus sign to take the same convention of the paper.
+           hop_nacv = -(F_1 + F_11) 
         ENDIF
  
         deallocate(T)
@@ -1573,18 +1590,25 @@ subroutine calcforces(state, Hin, C, nacv, NN, atoms, scaling, cbar, Fin, forces
         nadiab= SIZE(Fin,3)
         mat = size(Hin,1)
 
-        convert_nacv = - scaling / cbar
-        num_mol = 0
-        do d=1,3
-                num_j = 0
-                do j=1,natom
+        ! Based on paper [Spencer16]: Spencer et al., J. Chem. Phys. 145, 064102 (2016)
+        ! Use Eq. (21) of paper [Spencer16]
+        convert_nacv = - scaling / cbar ! to convert the FOB NACV
+        num_mol = 0                     ! molecular index
+        do d=1,3                        ! sum of cartesian 
+                num_j = 0               ! active atom index
+                do j=1,natom            ! sum over all atoms
                    forces_adiab(d,j) = 0.0D0
-                   IF (ext_pres(j)) THEN
-                      num_j   = num_j + 1
-                      num_mol = int((num_j-1)/atoms) + 1 
+                   IF (ext_pres(j)) THEN   
+                      num_j   = num_j + 1                 ! update active atom index
+                      num_mol = int((num_j-1)/atoms) + 1  ! update molecular index
+                      ! WARNING: we suppose that all molecules have the same
+                      ! number of atoms
                    ENDIF
                    do i=1,mat
+                      ! Diagonal term, it depends on the forces
                       forces_adiab(d,j) = forces_adiab(d,j) + (abs(C(i,state))**2)*Fin(d,j,i)
+                      ! Of diagonal term, only for active atom j present in
+                      ! molecule num_mol
                       IF (ext_pres(j)) THEN
                          IF (i.ne.num_mol) THEN
                             forces_adiab(d,j) = forces_adiab(d,j) + &
