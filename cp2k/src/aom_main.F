@@ -159,7 +159,6 @@ CONTAINS
      integer :: mol, atoms, c,  mat, orb
      REAL(KIND=dp) :: cutoff_sites, cutoff_connect, scaling, deltatMD, deltatE
      REAL(KIND=dp)    :: cbar, minao
-     REAL(KIND=dp), dimension(:), allocatable    :: energy_conservation
      INTEGER, dimension(:), allocatable          :: class_forbidden_hop_tp
      LOGICAL                                      :: analytics
      INTEGER                                      :: ELsteps   
@@ -268,9 +267,9 @@ CONTAINS
            CALL prop_wf_HS_corr(aom_env%ctin, aom_env, nadiab,  norbitals, ELsteps, &
                            itimes, adiab_section, deltatMD, deltatE , times, &
                             mat, aom_env%class_forbidden_hop_t, aom_env%active_state)
-           CALL classically_forbidden_hops(aom_env%active_state, aom_env, mat, aom_env%E_tp, &
+           CALL classically_forbidden_hops(aom_env%active_state, aom_env, mat,  &
                   velocities_com_tp, local_particles, atomic_kinds, nparticle_kind, &
-                          atomic_kind_set, energy_conservation, class_forbidden_hop_tp)
+                          atomic_kind_set, class_forbidden_hop_tp)
            aom_env%class_forbidden_hop_t = class_forbidden_hop_tp 
            CALL section_vals_val_get(coupling_section,"METHOD_REVERSAL",c_val=reversal_keyword)
            if (reversal_keyword .eq. "ALWAYS") then

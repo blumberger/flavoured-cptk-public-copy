@@ -259,20 +259,18 @@ SUBROUTINE calc_psi_after_correction(aom_env)
 
 END SUBROUTINE calc_psi_after_correction
 
-SUBROUTINE classically_forbidden_hops(active_state, aom_env, mat, E_tp, &
+SUBROUTINE classically_forbidden_hops(active_state, aom_env, mat,  &
                   velocities_com_tp, local_particles, atomic_kinds, nparticle_kind, &
-                          atomic_kind_set, energy_conservation, class_forbidden_hop)
+                          atomic_kind_set, class_forbidden_hop)
 
      INTEGER, INTENT(IN)                                :: active_state, mat
      TYPE(aom_env_type), INTENT(IN)                     :: aom_env
-     REAL(KIND=dp), DIMENSION(:), INTENT(IN)         ::  E_tp
      REAL(kind=dp), DIMENSION(:,:), POINTER       :: velocities_com_tp
      TYPE(distribution_1d_type), POINTER                :: local_particles
      TYPE(atomic_kind_list_type), POINTER, OPTIONAL     :: atomic_kinds
      INTEGER, INTENT(IN), OPTIONAL                      :: nparticle_kind
      TYPE(atomic_kind_type), DIMENSION(:), &
                    POINTER, OPTIONAL                        :: atomic_kind_set
-     REAL(KIND=dp), dimension(:), allocatable, INTENT(OUT)    :: energy_conservation
      INTEGER, dimension(:), allocatable, INTENT(OUT)          :: class_forbidden_hop
 
 
@@ -281,6 +279,7 @@ SUBROUTINE classically_forbidden_hops(active_state, aom_env, mat, E_tp, &
      REAL(kind=dp)                               :: delta_energy
      REAL(kind=dp)                               :: A, B
      REAL(kind=dp)                               :: K_tot, E_cutoff  
+     REAL(KIND=dp), dimension(:), allocatable    :: energy_conservation
      
      ALLOCATE(energy_conservation(mat)) 
      ALLOCATE(class_forbidden_hop(mat))
@@ -288,15 +287,15 @@ SUBROUTINE classically_forbidden_hops(active_state, aom_env, mat, E_tp, &
      CALL calc_kinetic_tot(aom_env, velocities_com_tp, local_particles, atomic_kinds, &
                   nparticle_kind, atomic_kind_set, K_tot)
      E_cutoff = 0.0D0
-     E_cutoff = E_tp(active_state) + K_tot  !THIS CUTOFF IS TO LARGE ALL THE
+     E_cutoff = aom_env%E_tp(active_state) + K_tot  !THIS CUTOFF IS TO LARGE ALL THE
                                             !STATE ARE BELOW IT
      do j=1, mat
-           if ((j .gt. active_state) .and. (E_tp(j) .le. E_cutoff)) then
+           if ((j .gt. active_state) .and. (aom_env%E_tp(j) .le. E_cutoff)) then
                
               CALL calc_hop_nacv(aom_env, hop_nacv, active_state, j, fast=.TRUE.)
               CALL evaluate_delta_energy_nacv(velocities_com_tp, local_particles, atomic_kinds, &
                                      nparticle_kind, atomic_kind_set, &
-                                    aom_env, E_tp, hop_nacv, delta_energy, A, B, & 
+                                    aom_env, aom_env%E_tp, hop_nacv, delta_energy, A, B, & 
                                               active_state, j)
               energy_conservation(j) = delta_energy
               if (energy_conservation(j) .lt. 0.0D0) then 
@@ -304,7 +303,7 @@ SUBROUTINE classically_forbidden_hops(active_state, aom_env, mat, E_tp, &
               else 
                    class_forbidden_hop(j) = -1
               end if
-           else if ((j .gt. active_state) .and. (E_tp(j) .gt. E_cutoff)) then
+           else if ((j .gt. active_state) .and. (aom_env%E_tp(j) .gt. E_cutoff)) then
               class_forbidden_hop(j) = j
               energy_conservation(j) = -2  
            else if (j .le. active_state) then
@@ -312,6 +311,7 @@ SUBROUTINE classically_forbidden_hops(active_state, aom_env, mat, E_tp, &
               class_forbidden_hop(j) = -1
            end if  
      end do
+     deallocate(energy_conservation) 
 END SUBROUTINE classically_forbidden_hops
 
 

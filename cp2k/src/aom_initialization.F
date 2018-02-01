@@ -374,7 +374,6 @@ CONTAINS
      real(kind=dp), allocatable :: PC_rvecs(:,:)
      LOGICAL    :: do_random
      INTEGER                                    :: nparticle_kind
-     REAL(KIND=dp), dimension(:), allocatable    :: energy_conservation
      INTEGER, dimension(:), allocatable          :: class_forbidden_hop_tp
 
      NULLIFY(positions_com_tp, velocities_com_tp)
@@ -702,9 +701,9 @@ CONTAINS
      CASE("ADIABATIC_RK")
      CASE("HS_CORRECTED_RK")  
           !> CALC ARRAY OF CLASSICALLY FORBIDDEN HOPS
-          CALL classically_forbidden_hops(active_state, aom_env, mat, aom_env%E_tp, &
+          CALL classically_forbidden_hops(active_state, aom_env, mat,  &
                   velocities_com_tp, local_particles, atomic_kinds, nparticle_kind, &
-                          atomic_kind_set, energy_conservation, class_forbidden_hop_tp)
+                          atomic_kind_set, class_forbidden_hop_tp)
           aom_env%class_forbidden_hop_t = class_forbidden_hop_tp
      CASE DEFAULT                                           
            CPABORT("There is no method to propagate the wavefunction.") 
