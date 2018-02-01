@@ -265,7 +265,7 @@ SUBROUTINE classically_forbidden_hops(active_state, aom_env, mat,  &
 
      INTEGER, INTENT(IN)                                :: active_state, mat
      TYPE(aom_env_type), INTENT(IN)                     :: aom_env
-     REAL(kind=dp), DIMENSION(:,:), POINTER       :: velocities_com_tp
+     REAL(kind=dp), DIMENSION(:,:), POINTER             :: velocities_com_tp
      TYPE(distribution_1d_type), POINTER                :: local_particles
      TYPE(atomic_kind_list_type), POINTER, OPTIONAL     :: atomic_kinds
      INTEGER, INTENT(IN), OPTIONAL                      :: nparticle_kind
@@ -273,7 +273,8 @@ SUBROUTINE classically_forbidden_hops(active_state, aom_env, mat,  &
                    POINTER, OPTIONAL                        :: atomic_kind_set
      INTEGER, dimension(:), allocatable, INTENT(OUT)          :: class_forbidden_hop
 
-
+     !INTEGER                                  :: my_nparticle_kind
+     !TYPE(atomic_kind_type), ALLOCATABLE, TARGET, DIMENSION(:)     :: my_atomic_kind_set 
      INTEGER :: j
      REAL(kind=dp), DIMENSION(:,:), allocatable     :: hop_nacv
      REAL(kind=dp)                               :: delta_energy
@@ -293,10 +294,8 @@ SUBROUTINE classically_forbidden_hops(active_state, aom_env, mat,  &
            if ((j .gt. active_state) .and. (aom_env%E_tp(j) .le. E_cutoff)) then
                
               CALL calc_hop_nacv(aom_env, hop_nacv, active_state, j, fast=.TRUE.)
-              CALL evaluate_delta_energy_nacv(velocities_com_tp, local_particles, atomic_kinds, &
-                                     nparticle_kind, atomic_kind_set, &
-                                    aom_env, aom_env%E_tp, hop_nacv, delta_energy, A, B, & 
-                                              active_state, j)
+              CALL cal_delta_energy_nacv(atomic_kinds%n_els, velocities_com_tp, aom_env, atomic_kinds%els, &
+                                local_particles, hop_nacv, delta_energy, A, B, active_state, j)
               energy_conservation(j) = delta_energy
               if (energy_conservation(j) .lt. 0.0D0) then 
                    class_forbidden_hop(j) = j
@@ -316,87 +315,87 @@ END SUBROUTINE classically_forbidden_hops
 
 
 !COMMENT: IS THIS SUBROUTINE REDUNDANT WITH cal_delta_energy IN aom_utils.F?
-   SUBROUTINE evaluate_delta_energy_nacv(velocities, local_particles, atomic_kinds, &
-                                     nparticle_kind, atomic_kind_set, &
-                                    aom_env,E_tp, hop_nacv, delta_energy, A, B, &
-                                               i, j) 
-
-        REAL(kind=dp), DIMENSION(:,:), POINTER             :: velocities
-        TYPE(distribution_1d_type), POINTER                :: local_particles
-        TYPE(atomic_kind_list_type), POINTER, OPTIONAL     :: atomic_kinds
-        INTEGER, INTENT(IN), OPTIONAL                      :: nparticle_kind
-        TYPE(atomic_kind_type), DIMENSION(:), &
-             POINTER, OPTIONAL                             :: atomic_kind_set
-        TYPE(aom_env_type)                                 :: aom_env
-        INTEGER, OPTIONAL, INTENT(IN)                      :: i, j
-        REAL(kind=dp), DIMENSION(:,:), INTENT(IN)          :: hop_nacv
-        REAL(kind=dp), INTENT(OUT)                         :: delta_energy
-        REAL(kind=dp), INTENT(OUT)                         :: A, B
-        REAL(KIND=dp), DIMENSION(:), INTENT(IN)            ::  E_tp
-
-
-        CHARACTER(len=*), PARAMETER :: routineN = 'evaluate_delta_energy_nacv', &
-        routineP = moduleN//':'//routineN
-
-        TYPE(atomic_kind_type), ALLOCATABLE, TARGET, DIMENSION(:)     :: my_atomic_kind_set
-        INTEGER                                  :: my_nparticle_kind
-        REAL(kind=dp)                            :: mass
-        INTEGER                                  :: iparticle_kind, new_state, old_state
-        INTEGER                                  :: nparticle_local, coord
-        INTEGER                                  :: iparticle_local, iparticle
-        TYPE(atomic_kind_type), POINTER          :: atomic_kind
-
-
+!  SUBROUTINE evaluate_delta_energy_nacv(velocities, local_particles, atomic_kinds, &
+!                                    nparticle_kind, atomic_kind_set, &
+!                                   aom_env,E_tp, hop_nacv, delta_energy, A, B, &
+!                                              i, j) 
+!
+!       REAL(kind=dp), DIMENSION(:,:), POINTER             :: velocities
+!       TYPE(distribution_1d_type), POINTER                :: local_particles
+!       TYPE(atomic_kind_list_type), POINTER, OPTIONAL     :: atomic_kinds
+!       INTEGER, INTENT(IN), OPTIONAL                      :: nparticle_kind
+!       TYPE(atomic_kind_type), DIMENSION(:), &
+!            POINTER, OPTIONAL                             :: atomic_kind_set
+!       TYPE(aom_env_type)                                 :: aom_env
+!       INTEGER, OPTIONAL, INTENT(IN)                      :: i, j
+!       REAL(kind=dp), DIMENSION(:,:), INTENT(IN)          :: hop_nacv
+!       REAL(kind=dp), INTENT(OUT)                         :: delta_energy
+!       REAL(kind=dp), INTENT(OUT)                         :: A, B
+!       REAL(KIND=dp), DIMENSION(:), INTENT(IN)            ::  E_tp
+!
+!
+!       CHARACTER(len=*), PARAMETER :: routineN = 'evaluate_delta_energy_nacv', &
+!       routineP = moduleN//':'//routineN
+!
+!       TYPE(atomic_kind_type), ALLOCATABLE, TARGET, DIMENSION(:)     :: my_atomic_kind_set
+!       INTEGER                                  :: my_nparticle_kind
+!       REAL(kind=dp)                            :: mass
+!       INTEGER                                  :: iparticle_kind, new_state, old_state
+!       INTEGER                                  :: nparticle_local, coord
+!       INTEGER                                  :: iparticle_local, iparticle
+!       TYPE(atomic_kind_type), POINTER          :: atomic_kind
+!
+!
 !From Fabiano E, Keal TW, Thiel W. Implementation of surface hopping molecular dynamics using semiempirical methods. 
 !     Chem Phys 2008, 349:334–347.
-
-
-        IF (PRESENT(atomic_kinds)) THEN
-           my_nparticle_kind = atomic_kinds%n_els
-           ALLOCATE(my_atomic_kind_set(SIZE(atomic_kinds%els)))
-           my_atomic_kind_set = atomic_kinds%els
-        ELSE
-           IF ((PRESENT(nparticle_kind)).AND.(PRESENT(atomic_kind_set))) THEN
-              my_nparticle_kind = nparticle_kind
-              ALLOCATE(my_atomic_kind_set(SIZE(atomic_kind_set)))
-              my_atomic_kind_set = atomic_kind_set
-           END IF
-        END IF
-
-           A = 0
-           B = 0
-           DO iparticle_kind=1, my_nparticle_kind
-              atomic_kind => my_atomic_kind_set(iparticle_kind)
-              CALL get_atomic_kind(atomic_kind=atomic_kind,mass=mass)
-              nparticle_local = local_particles%n_el(iparticle_kind)
-              DO iparticle_local=1,nparticle_local
-                 iparticle = local_particles%list(iparticle_kind)%array(iparticle_local)
-                 DO coord = 1, 3
-                    IF ((velocities(1, iparticle)**2 + velocities(2, iparticle)**2 + &
-                       velocities(3, iparticle)**2 ).NE.0.0d0) THEN
-                       A = A + hop_nacv(coord, iparticle)**2 / mass
-                    ELSE IF ( SUM(velocities).EQ.0) THEN
-                       A = A + hop_nacv(coord, iparticle)**2 / mass
-                    ENDIF
-                    B = B + velocities(coord, iparticle) * hop_nacv(coord, iparticle)
-                 ENDDO
-              END DO
-           END DO
-           A = 0.5*A
-
-           IF (PRESENT(j)) THEN
-              new_state = j
-           ELSE    
-              new_state = aom_env%new_state
-           ENDIF
-           IF (PRESENT(i)) THEN
-              old_state = i
-           ELSE
-              old_state = aom_env%active_state
-           ENDIF
-           delta_energy = B**2 - 4 * A * (  &
-                     E_tp(new_state) - E_tp(old_state))
-   END SUBROUTINE evaluate_delta_energy_nacv
+!
+!
+!       IF (PRESENT(atomic_kinds)) THEN
+!          my_nparticle_kind = atomic_kinds%n_els
+!          ALLOCATE(my_atomic_kind_set(SIZE(atomic_kinds%els)))
+!          my_atomic_kind_set = atomic_kinds%els
+!       ELSE
+!          IF ((PRESENT(nparticle_kind)).AND.(PRESENT(atomic_kind_set))) THEN
+!             my_nparticle_kind = nparticle_kind
+!             ALLOCATE(my_atomic_kind_set(SIZE(atomic_kind_set)))
+!             my_atomic_kind_set = atomic_kind_set
+!          END IF
+!       END IF
+!
+!          A = 0
+!          B = 0
+!          DO iparticle_kind=1, my_nparticle_kind
+!             atomic_kind => my_atomic_kind_set(iparticle_kind)
+!             CALL get_atomic_kind(atomic_kind=atomic_kind,mass=mass)
+!             nparticle_local = local_particles%n_el(iparticle_kind)
+!             DO iparticle_local=1,nparticle_local
+!                iparticle = local_particles%list(iparticle_kind)%array(iparticle_local)
+!                DO coord = 1, 3
+!                   IF ((velocities(1, iparticle)**2 + velocities(2, iparticle)**2 + &
+!                      velocities(3, iparticle)**2 ).NE.0.0d0) THEN
+!                      A = A + hop_nacv(coord, iparticle)**2 / mass
+!                   ELSE IF ( SUM(velocities).EQ.0) THEN
+!                      A = A + hop_nacv(coord, iparticle)**2 / mass
+!                   ENDIF
+!                   B = B + velocities(coord, iparticle) * hop_nacv(coord, iparticle)
+!                ENDDO
+!             END DO
+!          END DO
+!          A = 0.5*A
+!
+!          IF (PRESENT(j)) THEN
+!             new_state = j
+!          ELSE    
+!             new_state = aom_env%new_state
+!          ENDIF
+!          IF (PRESENT(i)) THEN
+!             old_state = i
+!          ELSE
+!             old_state = aom_env%active_state
+!          ENDIF
+!          delta_energy = B**2 - 4 * A * (  &
+!                    E_tp(new_state) - E_tp(old_state))
+!  END SUBROUTINE evaluate_delta_energy_nacv
 
 
   SUBROUTINE apply_decoherence(itimes, velocities, force_env, local_particles, nparticle_kind, atomic_kind_set)
