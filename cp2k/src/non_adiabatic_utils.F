@@ -716,7 +716,7 @@ END SUBROUTINE classically_forbidden_hops
 
     adiab_nace_vector(:) = aom_env%adiab_nace_tp(aom_env%active_state,:)
     !>number of degrees of freedom intensive EDC
-    deg_of_freedom = (aom_env%atoms*3-6)
+    deg_of_freedom = (mol*aom_env%atoms*3-6)
 
 
     IF (PRESENT(atomic_kinds)) THEN
@@ -759,7 +759,7 @@ END SUBROUTINE classically_forbidden_hops
 
               CASE("FORCES_BASED")
                     !Boltzmann factor to use in alpha parameter
-                     KbT = (2*K_tot)/(3*aom_env%atoms)
+                     KbT = (2*K_tot)/(3*mol*aom_env%atoms)
                     !instead of using the exact boltzmann factor, at the moment the code uses Temp =
                     !298 K, maybe this point should be modified in future
                     
@@ -808,7 +808,7 @@ END SUBROUTINE classically_forbidden_hops
 
               CASE("HYBRID_TAU")
                     !Boltzmann factor to use in alpha parameter
-                     KbT = (2*K_tot)/(3*aom_env%atoms)
+                     KbT = (2*K_tot)/(3*mol*aom_env%atoms)
                     !instead of using the exact boltzmann factor, at the moment the code uses Temp =
                     !298 K, maybe this point should be modified in future
                     
@@ -1210,7 +1210,8 @@ END SUBROUTINE classically_forbidden_hops
 
      allocate(my_H_t(mat, mat))
      allocate(my_H_tp(mat, mat))
- 
+
+    
      offset = .TRUE.
      my_H_t = aom_env%H_t
      my_H_tp = aom_env%H_tp
@@ -1380,6 +1381,7 @@ END SUBROUTINE classically_forbidden_hops
      REAL(KIND=dp), dimension(:,:), allocatable      :: Sttdiff, Sttmdiff, Sttpdiff, Stmtmdiff, Stptpdiff
      REAL(KIND=dp), dimension(:,:), allocatable      :: NACE , modified_diab_nace
 !     REAL(KIND=dp), dimension(:,:), allocatable      :: NACE1
+      COMPLEX(KIND=dp), dimension(:,:), allocatable   :: my_H_t, my_H_tp
      COMPLEX(KIND=dp), dimension(:,:), allocatable   :: H_1, Hdiff, H_0, H_2, X1, X2, X12!, Ytot
      COMPLEX(KIND=dp), dimension(:,:), allocatable   :: Ktot, K2, K3, K4
      REAL(KIND=dp), dimension(:,:), allocatable      :: Imat 
@@ -1390,6 +1392,7 @@ END SUBROUTINE classically_forbidden_hops
      REAL(KIND=dp), DIMENSION(:,:,:,:), ALLOCATABLE     :: interm_umatrix, udot_matrices 
      REAL(KIND=dp), DIMENSION(:), ALLOCATABLE         :: Eig_val_t, Eig_val_t1, Eig_val_t2, Eig_val_t0,& 
                                                           Eig_val_tp
+     LOGICAL                                         :: renorm, offset
 
 
      INTEGER                                         :: ELsteps   
@@ -1476,15 +1479,33 @@ END SUBROUTINE classically_forbidden_hops
      !used to give correct commands to ZGEMX subroutines later
      zgemm_type = 'N'
 
+     allocate(my_H_t(mat, mat))
+     allocate(my_H_tp(mat, mat))
+
+     offset = .TRUE.
+     my_H_t = aom_env%H_t
+     my_H_tp = aom_env%H_tp
+     if (offset) then
+        do i = 1, mat
+           my_H_t(i,i) = my_H_t(i,i) - aom_env%H_t(1,1)
+           my_H_tp(i,i) = my_H_tp(i,i) - aom_env%H_tp(1,1)
+        enddo
+     endif
+
+    
+      
 !COMMENT: INDENTATION
-             Hdiff = (deltatE/deltatMD)*(aom_env%H_tp - aom_env%H_t)
+             !Hdiff = (deltatE/deltatMD)*(aom_env%H_tp - aom_env%H_t)
+             Hdiff = (deltatE/deltatMD)*(my_H_tp - my_H_t)
              Sttdiff = (deltatE/deltatMD)*(aom_env%Stptp - aom_env%Stt)
              Sttpdiff = (deltatE/deltatMD)*(aom_env%Sttp - aom_env%Stmt)
              Sttmdiff = (deltatE/deltatMD)*(aom_env%Stpt - aom_env%Sttm)
              Stptpdiff = Sttdiff
              Stmtmdiff = (deltatE/deltatMD)*(aom_env%Stt - aom_env%Stmtm)
-             H_0  = aom_env%H_t
-             H_2 = aom_env%H_tp
+             !H_0  = aom_env%H_t
+             H_0  = my_H_t
+             !H_2 = aom_env%H_tp
+             H_2 = my_H_tp
 
 
             !> LOOP TO BUILD INTERMEDIATE HAMILTONIANS AND CALCULATE 
@@ -1496,8 +1517,8 @@ END SUBROUTINE classically_forbidden_hops
 !INDEED: interm_hamil(3,1,:,:) = interm_hamil(1,2,:,:), etc.
 !PROBABLY interm_hamil and intemr_umatrix could be only: 
 !interm( 9, :, :)
-            CALL adiabaticity(-AIMAG(aom_env%H_t), U_t, Eig_val_t)
-            CALL adiabaticity(-AIMAG(aom_env%H_tp), U_tp, Eig_val_tp)
+            CALL adiabaticity(-AIMAG(my_H_t), U_t, Eig_val_t)
+            CALL adiabaticity(-AIMAG(my_H_tp), U_tp, Eig_val_tp)
             do t2=1,int(deltatMD/deltatE)
 
                    !create 3 others intermediate hamiltonians usefull to build the X
@@ -1654,10 +1675,18 @@ END SUBROUTINE classically_forbidden_hops
                          ctcomp = ctcomp + ctotal(i)
                     end do
                     ctmag = abs(ctcomp)
-                    !rescale to conserve norm = 1
-                    do i=1,mat
-                         ctout(i) = cmplx((1.0D0/sqrt(ctmag))*REAL(ctout(i)), (1.0D0/sqrt(ctmag))*AIMAG(ctout(i)),dp)
-                    end do
+
+                    IF ( ABS( ctmag - 1).GE.1E-1 ) THEN
+                       print*, "Norm is", ctmag
+                       CPABORT("Problem in the electronic propagation, norm is not conserved.")
+                    ENDIF
+                    renorm = .TRUE.
+                    if (renorm) then
+                       !rescale to conserve norm = 1
+                       do i=1,mat
+                            ctout(i) = cmplx((1.0D0/sqrt(ctmag))*REAL(ctout(i)), (1.0D0/sqrt(ctmag))*AIMAG(ctout(i)),dp)
+                       end do
+                    end if
                     do i=1,mat
                          ctotal(i) = conjg(ctout(i))*ctout(i)
                     end do
@@ -1669,7 +1698,7 @@ END SUBROUTINE classically_forbidden_hops
 
                     ctout = cmplx(0.0D0, 0.0D0,dp)
 
-                    times = DBLE(itimes) + (t2-1)*1/DBLE(ELsteps)
+                    !times = DBLE(itimes) + (t2-1)*1/DBLE(ELsteps)
 
 
 !!TEST> TO COMPARE OLD AND NEW NACE!
@@ -1717,16 +1746,16 @@ END SUBROUTINE classically_forbidden_hops
 
 !END_TEST
 
-                    CALL adiab_print_nace(adiab_section, NACE, nadiab, norbitals, itimes, deltatMD, times)
-                    CALL adiab_print_coeff(adiab_section, ctin,nadiab, norbitals,itimes, deltatMD, &
-                                           times)
-                    CALL adiab_print_pop(adiab_section, abs(ctotal),nadiab,norbitals,itimes, deltatMD, &
-                                         times)
-                    CALL adiab_print_matrix_density(adiab_section, ctin, nadiab,norbitals,itimes,deltatMD, &
-                                                    times)
 
              end do
 
+             CALL adiab_print_nace(adiab_section, NACE, nadiab, norbitals, itimes, deltatMD, times)
+             CALL adiab_print_coeff(adiab_section, ctin,nadiab, norbitals,itimes, deltatMD, &
+                                    times)
+             CALL adiab_print_pop(adiab_section, abs(ctotal),nadiab,norbitals,itimes, deltatMD, &
+                                  times)
+             CALL adiab_print_matrix_density(adiab_section, ctin, nadiab,norbitals,itimes,deltatMD, &
+                                                    times)
 !stop
 
 !END PROPAGATE THE ELECTRON FOR ONE MOLECULAR TIMESTEP
