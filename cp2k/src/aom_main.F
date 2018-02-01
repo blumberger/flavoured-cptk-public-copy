@@ -264,13 +264,16 @@ CONTAINS
                                    itimes, adiab_section, deltatMD, deltatE , times,  mat)
      CASE("HS_CORRECTED_RK")  
            !> ADIABATIC NACV EVALUATION FOR HS CORRECTION
-           CALL prop_wf_HS_corr(aom_env%ctin, aom_env, nadiab,  norbitals, ELsteps, &
-                           itimes, adiab_section, deltatMD, deltatE , times, &
-                            mat, aom_env%class_forbidden_hop_t, aom_env%active_state)
            CALL classically_forbidden_hops(aom_env%active_state, aom_env, mat,  &
                   velocities_com_tp, local_particles, atomic_kinds, nparticle_kind, &
                           atomic_kind_set, class_forbidden_hop_tp)
-           aom_env%class_forbidden_hop_t = class_forbidden_hop_tp 
+           CALL prop_wf_HS_corr(aom_env%ctin, aom_env, nadiab,  norbitals, ELsteps, &
+                           itimes, adiab_section, deltatMD, deltatE , times, &
+                            mat, class_forbidden_hop_tp, aom_env%active_state)
+           !CALL classically_forbidden_hops(aom_env%active_state, aom_env, mat,  &
+           !       velocities_com_tp, local_particles, atomic_kinds, nparticle_kind, &
+           !               atomic_kind_set, class_forbidden_hop_tp)
+           !aom_env%class_forbidden_hop_t = class_forbidden_hop_tp 
            CALL section_vals_val_get(coupling_section,"METHOD_REVERSAL",c_val=reversal_keyword)
            if (reversal_keyword .eq. "ALWAYS") then
                 aom_env%HS_propagation = .FALSE.
