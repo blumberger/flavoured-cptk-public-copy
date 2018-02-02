@@ -725,15 +725,17 @@ CONTAINS
     CHARACTER(len=*), PARAMETER :: routineN = 'adiab_overlap_check', &
               routineP = moduleN//':'//routineN
 
-    REAL(KIND=dp), dimension(:), allocatable    :: overlaps
+    REAL(KIND=dp), dimension(:), allocatable    :: overlaps, abs_array
     integer                                     :: mat, j, res_mod, state, &
                                                      past_state
     REAL(KIND=dp)                               :: sum_ov, max_val, resid
-    LOGICAL                                     :: overlap_over_thresh
+    LOGICAL                                     :: overlap_over_thresh, debug
+    REAL(KIND=dp)                               :: max1, max2
 
      mat    = SIZE(aom_env%Stptp, 1)
 
      allocate(overlaps(2*mat))
+     ALLOCATE(abs_array(mat))
      overlaps = 0.0D0
 
      past_state = aom_env%old_state
@@ -771,13 +773,27 @@ CONTAINS
      end if
 
 
+      debug = .TRUE.
       if (.not. aom_env%attempt_hop) then
           if (overlap_over_thresh) then
              print*, "FOBSH| CASE1: no hop and no trivial crossing"
           else
              print*, "FOBSH| CASE2: no hop and maybe a crossing, final overlap is :", overlaps(1)
-             print*, "FOBSH| We were localized on molecule", maxloc(abs(aom_env%C_tp(:,past_state)))
+             print*, "FOBSH| We were localized on molecule", maxloc(abs(aom_env%C_t(:,past_state)))
              print*, "FOBSH| And now on molecule", maxloc(abs(aom_env%C_tp(:, aom_env%active_state)))
+             IF (debug) THEN
+                abs_array = maxloc(abs(aom_env%C_t(:,past_state)))
+                max1 = abs_array(1)
+                abs_array = maxloc(abs(aom_env%C_tp(:,aom_env%active_state)))
+                max2 = abs_array(1)
+                IF ( ABS(max1 - max2).GT.1 ) THEN
+                   print*, "Before,    After"
+                   print*, past_state, aom_env%active_state
+                   do j=1, mat
+                      print*, aom_env%C_t(j,past_state), aom_env%C_tp(j, aom_env%active_state)
+                   enddo
+                ENDIF
+             ENDIF
           end if
       else 
           if(.not. aom_env%successful_hop) then
@@ -785,14 +801,40 @@ CONTAINS
                 print*, "FOBSH| CASE3: rejected hop and maybe a crossing, final overlap is :", overlaps(1)
                 print*, "FOBSH| We were localized on molecule", maxloc(abs(aom_env%C_t(:,past_state)))
                 print*, "FOBSH| And now on molecule", maxloc(abs(aom_env%C_tp(:, aom_env%active_state)))
+                IF (debug) THEN
+                   abs_array = maxloc(abs(aom_env%C_t(:,past_state)))
+                   max1 = abs_array(1)
+                   abs_array = maxloc(abs(aom_env%C_tp(:,aom_env%active_state)))
+                   max2 = abs_array(1)
+                   IF ( ABS(max1 - max2).GT.1 ) THEN
+                      print*, "Before,    After"
+                      print*, past_state, aom_env%active_state
+                      do j=1, mat
+                         print*, aom_env%C_t(j,past_state), aom_env%C_tp(j, aom_env%active_state)
+                      enddo
+                   ENDIF
+                ENDIF
             else
                 print*, "FOBSH| CASE4: rejected hop and good overlap"
             end if
          else
            if (.not. overlap_over_thresh) then
                 print*, "FOBSH| CASE5: successful hop and maybe a crossing, final overlap is :", overlaps(1)
-                print*, "FOBSH| We were localized on molecule", maxloc(abs(aom_env%C_tp(:,past_state)))
+                print*, "FOBSH| We were localized on molecule", maxloc(abs(aom_env%C_t(:,past_state)))
                 print*, "FOBSH| And now on molecule", maxloc(abs(aom_env%C_tp(:, aom_env%active_state)))
+                IF (debug) THEN
+                   abs_array = maxloc(abs(aom_env%C_t(:,past_state)))
+                   max1 = abs_array(1)
+                   abs_array = maxloc(abs(aom_env%C_tp(:,aom_env%active_state)))
+                   max2 = abs_array(1)
+                   IF ( ABS(max1 - max2).GT.1 ) THEN
+                      print*, "Before,    After"
+                      print*, past_state, aom_env%active_state
+                      do j=1, mat
+                         print*, aom_env%C_t(j,past_state), aom_env%C_tp(j, aom_env%active_state)
+                      enddo
+                   ENDIF
+                ENDIF
            else 
                 print*, "FOBSH| CASE6: successful hop and good overlap"
            end if
