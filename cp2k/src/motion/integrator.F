@@ -573,6 +573,7 @@ CONTAINS
 !> CHANGE_AC
 !> 1-01-25
        !> Check if we do Surface Hopping Calculation
+       do_fssh = .FALSE.
        IF (force_env%in_use.eq.use_mixed_force) THEN
           CALL force_env_get(force_env = force_env, &
                              force_env_section=force_env_section)
