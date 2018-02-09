@@ -248,7 +248,7 @@ CONTAINS
      CALL adiabaticity(-AIMAG(aom_env%H_tp), aom_env%C_tp, aom_env%E_tp)
      !Calculate the overlap between C_tp and C_t, reorder state if required,
      !calculate the nace
-     CALL calc_adiab_nace(aom_env)
+     CALL calc_adiab_nace(aom_env, adiab_section)
 
 
      !> PROPAGATE THE ELECTRON FOR ONE MOLECULAR TIMESTEP

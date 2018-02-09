@@ -740,8 +740,10 @@ CONTAINS
     deltatMD       = sh_print_env%deltatMD
     unit_nr=cp_print_key_unit_nr(logger,adiab_section,"PRINT%SH_INFO",&
                extension=".log", middle_name="sh",log_filename=.FALSE.)
-
-    print_all = .False.
+   
+    CALL section_vals_val_get(adiab_section,"PRINT_MORE", &
+                                          l_val=print_all)
+    !print_all = .False.
 
     IF (unit_nr>0) THEN
        SELECT CASE(keyword)

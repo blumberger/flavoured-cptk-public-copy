@@ -803,10 +803,11 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
 end subroutine modified_surfacehop
 
 
-subroutine calc_adiab_nace(aom_env)
+subroutine calc_adiab_nace(aom_env, adiab_section)
         !this subroutine calculates the adiabatic nace used in the calculation
         !of the hopping probability and also in the RK adiabatic propagation 
-        TYPE(aom_env_type)        :: aom_env
+        TYPE(aom_env_type)                         :: aom_env
+        TYPE(section_vals_type), POINTER           :: adiab_section
 
        CHARACTER(len=*), PARAMETER :: routineN ='calc_adiab_nace', &
        routineP = moduleN//':'//routineN
@@ -821,6 +822,9 @@ subroutine calc_adiab_nace(aom_env)
 
         mol = size(aom_env%Stt,1)
         deltat = aom_env%deltat
+
+        CALL section_vals_val_get(adiab_section,"PRINT_MORE", &
+                                                   l_val=print_here)
 
         !> Based on Eq. 19 of paper: Spencer et al., J. Chem. Phys. 145, 064102 (2016)
 
@@ -887,7 +891,7 @@ subroutine calc_adiab_nace(aom_env)
               map_new2old(i) = new_index
               map_old2new( map_new2old(i) ) = i
            endif
-           print_here = .TRUE.
+           !print_here = .TRUE.
            if (print_here) then
               if (i.NE.new_index) then
                  if ( abs( max_val**2 - 1 ).LT.threshold) then
@@ -900,7 +904,7 @@ subroutine calc_adiab_nace(aom_env)
               endif
            endif
         enddo
-        IF (ANY(map_new2old.NE.basic)) print*, "FOBSH| New map: ", map_new2old
+        IF (ANY(map_new2old.NE.basic) .and. print_here) print*, "FOBSH| New map: ", map_new2old
 
         !> If we've associated state i with state j, we try to associate j with if if the
         !> overlap is above 0.5
@@ -913,7 +917,7 @@ subroutine calc_adiab_nace(aom_env)
                ENDIF
             ENDIF
          enddo
-        IF (ANY(map_new2old.NE.basic)) print*, "FOBSH! New map again:", map_new2old
+        IF (ANY(map_new2old.NE.basic) .and. print_here) print*, "FOBSH! New map again:", map_new2old
        ENDIF
 
         !> Finally, we associate the not associate j with the remaining j state by order
@@ -943,7 +947,7 @@ subroutine calc_adiab_nace(aom_env)
               j = j+1
            endif
         enddo 
-        IF (ANY(map_new2old.NE.basic)) THEN 
+        IF (ANY(map_new2old.NE.basic) .and. print_here) THEN 
            print*, "FOBSH| New map final:", map_new2old
            print*, "FOBSH| New map final, from old to new:", map_old2new
         ENDIF

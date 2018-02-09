@@ -238,6 +238,15 @@ CONTAINS
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
   
+    CALL keyword_create(keyword, name="PRINT_MORE",&
+         description="Choose if you want to print more stuff",&
+         usage="PRINT_MORE: True", default_l_val=.True., &
+         lone_keyword_l_val=.TRUE.) 
+        ! type_of_var=char_t,&
+        ! n_var=-1)
+    CALL section_add_keyword(subsection,keyword)
+    CALL keyword_release(keyword)
+
     CALL keyword_create(keyword, name="SPURIOUS_TRANSFER_CORR",&
          description="Choose if you want to activate the spurious tranfer corre.",&
          usage="SPURIOUS_TRANSFER_CORR: True", default_l_val=.FALSE., &
