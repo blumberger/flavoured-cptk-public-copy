@@ -726,6 +726,7 @@ CONTAINS
     INTEGER                                     :: new_state, first_adiabat
     REAL(KIND = dp)                             :: delta_energy, initrandom, kinetic_energy, A, B
     LOGICAL                                     :: attempt_hop, successful_hop
+    LOGICAL                                     :: print_all
     REAL(KIND = dp), ALLOCATABLE, DIMENSION(:)  :: adiab_energies_t
     REAL(KIND = dp), DIMENSION(3)               :: momentum_shift
     
@@ -739,6 +740,8 @@ CONTAINS
     deltatMD       = sh_print_env%deltatMD
     unit_nr=cp_print_key_unit_nr(logger,adiab_section,"PRINT%SH_INFO",&
                extension=".log", middle_name="sh",log_filename=.FALSE.)
+
+    print_all = .False.
 
     IF (unit_nr>0) THEN
        SELECT CASE(keyword)
@@ -770,34 +773,64 @@ CONTAINS
            new_state    = sh_print_env%new_state
 
            unit_conv_fs = cp_unit_from_cp2k(1.0_dp,"fs")
-           time = times*deltatMD*unit_conv_fs
+           time = times*deltatMD*unit_conv_fs           
 
-           WRITE ( unit_nr, "( A,I8,A,I8)" ) "Surface Hopping Info,  nadiab =", nadiab, &
-                                              " , norbitals = ", norbitals
-           WRITE ( unit_nr, '(A,I0,A,F20.3,A,F0.10)' )   "   i = ",INT(times),", time = ",time, " (fs)"
-           WRITE( unit_nr, "(A,F20.10)" ) "   Exact sum of fluxes = ", &
-                                                   sh_print_env%exprob
-           WRITE( unit_nr, "(A,F20.10)" ) "   Approximate sum of fluxes = ", &
-                                                   sh_print_env%sumflux
-           IF (sh_print_env%additional_prints) THEN
-               WRITE( unit_nr, "(A,F20.10)" ) "   Minimum adiab. energy difference = ", &
-                                                   sh_print_env%enermin
-           ENDIF
-           WRITE( unit_nr, "(A,F20.10)" ) "   Sum of probability = ", sumg
-           IF (renorm)  WRITE( unit_nr, "(A)" ) "   RE-NORMALIZATION!"
-           WRITE( unit_nr, "(A)" ) "   Probability = "
-            DO iadiab=1, nadiab
-               my_format="(I4,"
-               WRITE(unit_nr,TRIM(my_format)//"1X,F20.10)") iadiab, proba(iadiab)
-           ENDDO
-           WRITE( unit_nr, "(A,F20.10)" ) "   Random number = ", hop
-           IF (attempt_hop) THEN
-             WRITE( unit_nr, "(A,I8,A,I8)" ) "   ATTEMPT between old_state = ", old_state, " and new_state = ", new_state
-           ELSE
-             WRITE( unit_nr, "(A)" ) "NO HOP!"
-             WRITE( unit_nr, "(A,I8)" ) "Final state   = ", old_state
-             WRITE( unit_nr, "(A)") "  "
-           ENDIF
+           !WRITE ( unit_nr, "( A,I8,A,I8)" ) "Surface Hopping Info,  nadiab =", nadiab, &
+           !                                   " , norbitals = ", norbitals
+           if (print_all) then
+               WRITE ( unit_nr, '(A,I0,A,F20.3,A,F0.10)' )   "   i = ",INT(times),", time = ",time, " (fs)"
+               WRITE( unit_nr, "(A,F20.10)" ) "   Exact sum of fluxes = ", &
+                                                       sh_print_env%exprob
+               WRITE( unit_nr, "(A,F20.10)" ) "   Approximate sum of fluxes = ", &
+                                                       sh_print_env%sumflux
+               IF (sh_print_env%additional_prints) THEN
+                   WRITE( unit_nr, "(A,F20.10)" ) "   Minimum adiab. energy difference = ", &
+                                                       sh_print_env%enermin
+               ENDIF
+               WRITE( unit_nr, "(A,F20.10)" ) "   Sum of probability = ", sumg
+               IF (renorm)  WRITE( unit_nr, "(A)" ) "   RE-NORMALIZATION!"
+               WRITE( unit_nr, "(A)" ) "   Probability = "
+                DO iadiab=1, nadiab
+                   my_format="(I4,"
+                   WRITE(unit_nr,TRIM(my_format)//"1X,F20.10)") iadiab, proba(iadiab)
+               ENDDO
+               WRITE( unit_nr, "(A,F20.10)" ) "   Random number = ", hop
+               IF (attempt_hop) THEN
+                 WRITE( unit_nr, "(A,I8,A,I8)" ) "   ATTEMPT between old_state = ", old_state, & 
+                                                                    " and new_state = ", new_state
+               ELSE
+                 WRITE( unit_nr, "(A)" ) "NO HOP!"
+                 WRITE( unit_nr, "(A,I8)" ) "Final state   = ", old_state
+                 WRITE( unit_nr, "(A)") "  "
+               ENDIF
+           else
+               WRITE ( unit_nr, '(A,I0,A,F20.3,A,F0.10)' )   "   i = ",INT(times),", time = ",time, " (fs)"
+               !WRITE( unit_nr, "(A,F20.10)" ) "   Exact sum of fluxes = ", &
+               !                                        sh_print_env%exprob
+               !WRITE( unit_nr, "(A,F20.10)" ) "   Approximate sum of fluxes = ", &
+               !                                        sh_print_env%sumflux
+               !IF (sh_print_env%additional_prints) THEN
+               !    WRITE( unit_nr, "(A,F20.10)" ) "   Minimum adiab. energy difference = ", &
+               !                                        sh_print_env%enermin
+               !ENDIF
+               !WRITE( unit_nr, "(A,F20.10)" ) "   Sum of probability = ", sumg
+               !IF (renorm)  WRITE( unit_nr, "(A)" ) "   RE-NORMALIZATION!"
+               !WRITE( unit_nr, "(A)" ) "   Probability = "
+               ! DO iadiab=1, nadiab
+               !    my_format="(I4,"
+               !    WRITE(unit_nr,TRIM(my_format)//"1X,F20.10)") iadiab, proba(iadiab)
+               !ENDDO
+               !WRITE( unit_nr, "(A,F20.10)" ) "   Random number = ", hop
+               IF (attempt_hop) THEN
+                 WRITE( unit_nr, "(A,I8,A,I8)" ) "   ATTEMPT between old_state = ", old_state, & 
+                                                                    " and new_state = ", new_state
+               ELSE
+                 !WRITE( unit_nr, "(A)" ) "NO HOP!"
+                 WRITE( unit_nr, "(A,I8)" ) "Final state   = ", old_state
+                 WRITE( unit_nr, "(A)") "  "
+               ENDIF
+
+           end if
            DEALLOCATE(proba)
        CASE("SIMPLE_RESCALING")
            ALLOCATE(adiab_energies_t(nadiab))
@@ -837,37 +870,70 @@ CONTAINS
            old_state        = sh_print_env%old_state
            new_state        = sh_print_env%new_state
            kinetic_energy   = sh_print_env%kinetic_energy
-
-           WRITE( unit_nr, "(A)") "TRY ENERGY CONSERVATION WITH ISOTROPIC RESCALING: PASSED!"
-           WRITE( unit_nr, "(A,F20.10)" ) "   Kinetic energy   (Ha) = ", kinetic_energy
-           WRITE( unit_nr, "(A)") "TRY ENERGY CONSERVATION WITH NACV-ORIENTED RESCALING:"
-           WRITE( unit_nr, "(A,F20.10)" ) "   Energy old state (Ha) = ", adiab_energies_t(old_state)
-           WRITE( unit_nr, "(A,F20.10)" ) "   Energy new state (Ha) = ", adiab_energies_t(new_state)
-           WRITE( unit_nr, "(A,F20.10)" ) "   Energy diff (Ha) = ", adiab_energies_t(new_state) - adiab_energies_t(old_state)
-           WRITE( unit_nr, "(A,F20.10)" ) "   A-term   = ", A
-           WRITE( unit_nr, "(A,F20.10)" ) "   B-term   = ", B
-           WRITE( unit_nr, "(A,F20.10)" ) "   NACV kinetic energy (Ha)  = ", B**2/(4*A)
-           WRITE( unit_nr, "(A,F20.10)" ) "   Discriminant   = ", delta_energy
-           IF (successful_hop) THEN
-               WRITE( unit_nr, "(A)") "SUCCESSFUL HOP!"
-               WRITE( unit_nr, "(A,F20.10)") "   Directional rescale factor  = ", rescale_factor
-               WRITE( unit_nr, "(A,3F20.10)") "   Momentum change  = ",  momentum_shift             
-               WRITE( unit_nr, "(A,I8)" ) "Final state   = ", new_state
-               WRITE( unit_nr, "(A)") "  "
-           ELSE
-               WRITE( unit_nr, "(A)") "REJECTED HOP!"
-               WRITE( unit_nr, "(A,A)") "METHOD OF REVERSING: ", sh_print_env%reversal_keyword
-               WRITE( unit_nr, "(A,F20.10)" ) "   Product NACV*Momentum = ", sh_print_env%product_pd
-               WRITE( unit_nr, "(A,F20.10)" ) "   Product NACV*Old forces = ", sh_print_env%product_dfo
-               WRITE( unit_nr, "(A,F20.10)" ) "   Product NACV*New forces = ", sh_print_env%product_dfn
-               IF (sh_print_env%reverse) THEN
-                  WRITE( unit_nr, "(A)" ) "REVERSAL OF VELOCITIES!"
+ 
+           if (print_all) then
+               WRITE( unit_nr, "(A)") "TRY ENERGY CONSERVATION WITH ISOTROPIC RESCALING: PASSED!"
+               WRITE( unit_nr, "(A,F20.10)" ) "   Kinetic energy   (Ha) = ", kinetic_energy
+               WRITE( unit_nr, "(A)") "TRY ENERGY CONSERVATION WITH NACV-ORIENTED RESCALING:"
+               WRITE( unit_nr, "(A,F20.10)" ) "   Energy old state (Ha) = ", adiab_energies_t(old_state)
+               WRITE( unit_nr, "(A,F20.10)" ) "   Energy new state (Ha) = ", adiab_energies_t(new_state)
+               WRITE( unit_nr, "(A,F20.10)" ) "   Energy diff (Ha) = ", adiab_energies_t(new_state) - adiab_energies_t(old_state)
+               WRITE( unit_nr, "(A,F20.10)" ) "   A-term   = ", A
+               WRITE( unit_nr, "(A,F20.10)" ) "   B-term   = ", B
+               WRITE( unit_nr, "(A,F20.10)" ) "   NACV kinetic energy (Ha)  = ", B**2/(4*A)
+               WRITE( unit_nr, "(A,F20.10)" ) "   Discriminant   = ", delta_energy
+               IF (successful_hop) THEN
+                   WRITE( unit_nr, "(A)") "SUCCESSFUL HOP!"
+                   WRITE( unit_nr, "(A,F20.10)") "   Directional rescale factor  = ", rescale_factor
+                   WRITE( unit_nr, "(A,3F20.10)") "   Momentum change  = ",  momentum_shift             
+                   WRITE( unit_nr, "(A,I8)" ) "Final state   = ", new_state
+                   WRITE( unit_nr, "(A)") "  "
                ELSE
-                  WRITE( unit_nr, "(A)" ) "NO REVERSAL!"
+                   WRITE( unit_nr, "(A)") "REJECTED HOP!"
+                   WRITE( unit_nr, "(A,A)") "METHOD OF REVERSING: ", sh_print_env%reversal_keyword
+                   WRITE( unit_nr, "(A,F20.10)" ) "   Product NACV*Momentum = ", sh_print_env%product_pd
+                   WRITE( unit_nr, "(A,F20.10)" ) "   Product NACV*Old forces = ", sh_print_env%product_dfo
+                   WRITE( unit_nr, "(A,F20.10)" ) "   Product NACV*New forces = ", sh_print_env%product_dfn
+                   IF (sh_print_env%reverse) THEN
+                      WRITE( unit_nr, "(A)" ) "REVERSAL OF VELOCITIES!"
+                   ELSE
+                      WRITE( unit_nr, "(A)" ) "NO REVERSAL!"
+                   ENDIF
+                   WRITE( unit_nr, "(A,I8)" ) "Final state   = ", old_state
+                   WRITE( unit_nr, "(A)") "  "
                ENDIF
-               WRITE( unit_nr, "(A,I8)" ) "Final state   = ", old_state
-               WRITE( unit_nr, "(A)") "  "
-           ENDIF
+           else
+               WRITE( unit_nr, "(A)") "TRY ENERGY CONSERVATION WITH ISOTROPIC RESCALING: PASSED!"
+               WRITE( unit_nr, "(A,F20.10)" ) "   Kinetic energy   (Ha) = ", kinetic_energy
+               WRITE( unit_nr, "(A)") "TRY ENERGY CONSERVATION WITH NACV-ORIENTED RESCALING:"
+               !WRITE( unit_nr, "(A,F20.10)" ) "   Energy old state (Ha) = ", adiab_energies_t(old_state)
+               !WRITE( unit_nr, "(A,F20.10)" ) "   Energy new state (Ha) = ", adiab_energies_t(new_state)
+               WRITE( unit_nr, "(A,F20.10)" ) "   Energy diff (Ha) = ", adiab_energies_t(new_state) - adiab_energies_t(old_state)
+               !WRITE( unit_nr, "(A,F20.10)" ) "   A-term   = ", A
+               !WRITE( unit_nr, "(A,F20.10)" ) "   B-term   = ", B
+               !WRITE( unit_nr, "(A,F20.10)" ) "   NACV kinetic energy (Ha)  = ", B**2/(4*A)
+               WRITE( unit_nr, "(A,F20.10)" ) "   Discriminant   = ", delta_energy
+               IF (successful_hop) THEN
+                   WRITE( unit_nr, "(A)") "SUCCESSFUL HOP!"
+                   !WRITE( unit_nr, "(A,F20.10)") "   Directional rescale factor  = ", rescale_factor
+                   !WRITE( unit_nr, "(A,3F20.10)") "   Momentum change  = ",  momentum_shift             
+                   WRITE( unit_nr, "(A,I8)" ) "Final state   = ", new_state
+                   WRITE( unit_nr, "(A)") "  "
+               ELSE
+                   WRITE( unit_nr, "(A)") "REJECTED HOP!"
+                   WRITE( unit_nr, "(A,A)") "METHOD OF REVERSING: ", sh_print_env%reversal_keyword
+                   !WRITE( unit_nr, "(A,F20.10)" ) "   Product NACV*Momentum = ", sh_print_env%product_pd
+                   !WRITE( unit_nr, "(A,F20.10)" ) "   Product NACV*Old forces = ", sh_print_env%product_dfo
+                   !WRITE( unit_nr, "(A,F20.10)" ) "   Product NACV*New forces = ", sh_print_env%product_dfn
+                   IF (sh_print_env%reverse) THEN
+                      WRITE( unit_nr, "(A)" ) "REVERSAL OF VELOCITIES!"
+                   ELSE
+                      WRITE( unit_nr, "(A)" ) "NO REVERSAL!"
+                   ENDIF
+                   WRITE( unit_nr, "(A,I8)" ) "Final state   = ", old_state
+                   WRITE( unit_nr, "(A)") "  "
+               ENDIF
+           end if
            DEALLOCATE(adiab_energies_t)
        CASE("DECOHERENCE")
           ! IF (sh_print_env%collapse) THEN
@@ -878,19 +944,35 @@ CONTAINS
               ENDIF
           ! ENDIF
        CASE("DAMPING")
-           WRITE( unit_nr, "(A)") "  "
-           WRITE( unit_nr, "(A)" ) "METHOD FOR DECOHERENCE: DAMPING."
-           WRITE( unit_nr, "(A)" ) "    Damping time (fs) = "
-           unit_conv_fs = cp_unit_from_cp2k(1.0_dp,"fs")
-           DO iadiab=1, nadiab
-               my_format="(I4,"
-               WRITE(unit_nr,TRIM(my_format)//"1X,F20.10,A)") iadiab, &
-                       unit_conv_fs * sh_print_env%tau_deco(iadiab)
-               !if (sh_print_env%pure_deph(iadiab)) then
-               !    WRITE( unit_nr, "(A,I8)" ) "    PURE_DEPHASING state", iadiab
-               !end if 
-           ENDDO
-           WRITE( unit_nr, "(A)") "  "
+           if (print_all) then
+              WRITE( unit_nr, "(A)") "  "
+              WRITE( unit_nr, "(A)" ) "METHOD FOR DECOHERENCE: DAMPING."
+              WRITE( unit_nr, "(A)" ) "    Damping time (fs) = "
+              unit_conv_fs = cp_unit_from_cp2k(1.0_dp,"fs")
+              DO iadiab=1, nadiab
+                  my_format="(I4,"
+                  WRITE(unit_nr,TRIM(my_format)//"1X,F20.10,A)") iadiab, &
+                          unit_conv_fs * sh_print_env%tau_deco(iadiab)
+                  !if (sh_print_env%pure_deph(iadiab)) then
+                  !    WRITE( unit_nr, "(A,I8)" ) "    PURE_DEPHASING state", iadiab
+                  !end if 
+              ENDDO
+              WRITE( unit_nr, "(A)") "  "
+           else
+              WRITE( unit_nr, "(A)") "  "
+              WRITE( unit_nr, "(A)" ) "METHOD FOR DECOHERENCE: DAMPING."
+              !WRITE( unit_nr, "(A)" ) "    Damping time (fs) = "
+              !unit_conv_fs = cp_unit_from_cp2k(1.0_dp,"fs")
+              !DO iadiab=1, nadiab
+              !    my_format="(I4,"
+              !    WRITE(unit_nr,TRIM(my_format)//"1X,F20.10,A)") iadiab, &
+              !            unit_conv_fs * sh_print_env%tau_deco(iadiab)
+                  !if (sh_print_env%pure_deph(iadiab)) then
+                  !    WRITE( unit_nr, "(A,I8)" ) "    PURE_DEPHASING state", iadiab
+                  !end if 
+              !ENDDO
+              WRITE( unit_nr, "(A)") "  "
+           end if
        CASE DEFAULT
        END SELECT 
     ENDIF
