@@ -537,6 +537,24 @@ CONTAINS
      CALL section_release(print_key)
 
      CALL cp_print_key_section_create(print_key_section=print_key,&
+          name="SITE_ENERGIES",&
+          description="Control the output of the site energies.",&
+          common_iter_levels=1,&
+          filename="",         &
+          unit_str = "hartree")
+     CALL section_add_subsection(sub2section,print_key)
+     CALL section_release(print_key)
+
+     CALL cp_print_key_section_create(print_key_section=print_key,&
+          name="OFF_DIAGONALS",&
+          description="Control the output of the couplings.",&
+          common_iter_levels=1,&
+          filename="",         &
+          unit_str = "hartree")
+     CALL section_add_subsection(sub2section,print_key)
+     CALL section_release(print_key)
+
+     CALL cp_print_key_section_create(print_key_section=print_key,&
           name="HAMILTONIAN",&
           description="Control the output of the Hamiltonian.",&
           common_iter_levels=1,&

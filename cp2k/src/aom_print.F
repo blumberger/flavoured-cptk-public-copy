@@ -72,6 +72,8 @@ IMPLICIT NONE
    PUBLIC :: adiab_print_coeff,          &
              adiab_print_pop,            &
              adiab_print_adiabat_energies,&
+             adiab_print_site_energies,  &
+             adiab_print_off_diagonals,  &
              adiab_print_matrix_density, &
              adiab_print_hamiltonian,    &
              adiab_print_nace,           &
@@ -252,7 +254,93 @@ CONTAINS
    END SUBROUTINE adiab_print_adiabat_energies
 
 
+   SUBROUTINE adiab_print_site_energies(adiab_section, energies, nadiab, deltatMD, times)
+    TYPE(section_vals_type), POINTER         :: adiab_section
+    REAL(KIND=dp), DIMENSION(:), INTENT(IN)  :: energies
+    INTEGER, INTENT(IN)                      :: nadiab
+    REAL(KIND=dp), INTENT(IN)                :: times
+    REAL(KIND=dp), INTENT(IN)                :: deltatMD
 
+    CHARACTER(len=*), PARAMETER :: routineN = 'adiab_print_pop', &
+      routineP = moduleN//':'//routineN
+
+    INTEGER                                  :: unit_nr
+    REAL(KIND=dp)                            :: unit_conv_fs, unit_conv, time
+    INTEGER                                  :: iadiab
+    CHARACTER(LEN=default_string_length)     :: my_format
+    TYPE(cp_logger_type), POINTER            :: logger
+    CHARACTER(LEN=default_string_length)     :: unit_str 
+
+    NULLIFY(logger)
+    logger => cp_get_default_logger()
+
+    unit_nr=cp_print_key_unit_nr(logger,adiab_section,"PRINT%SITE_ENERGIES",&
+               extension=".xyz", middle_name="site",log_filename=.FALSE.)
+    unit_conv_fs = cp_unit_from_cp2k(1.0_dp,"fs")
+
+    IF (unit_nr>0) THEN
+       CALL section_vals_val_get(adiab_section,"PRINT%SITE_ENERGIES%UNIT",&
+            c_val=unit_str)
+       unit_conv = cp_unit_from_cp2k(1.0_dp,TRIM(unit_str))
+       unit_conv_fs = cp_unit_from_cp2k(1.0_dp,"fs")
+       time = times*deltatMD*unit_conv_fs
+
+       WRITE ( unit_nr, "( A,A,A,I8,A,I8)" ) "Site Energies (",TRIM(unit_str),");  nadiab =", nadiab
+       WRITE ( unit_nr, '(A,I0,A,F20.3,A,F0.10)' )   " i = ",INT(times),", time = ",time, " (fs)"
+
+       DO iadiab=1, nadiab
+         my_format="(I4,"
+         WRITE(unit_nr,TRIM(my_format)//"1X,F20.10)") iadiab, energies(iadiab) 
+       ENDDO
+
+    END IF
+
+    CALL cp_print_key_finished_output(unit_nr,logger,adiab_section,"PRINT%SITE_ENERGIES")
+   END SUBROUTINE adiab_print_site_energies
+
+   SUBROUTINE adiab_print_off_diagonals(adiab_section, coupling, nadiab, deltatMD, times)
+    TYPE(section_vals_type), POINTER         :: adiab_section
+    REAL(KIND=dp), DIMENSION(:), INTENT(IN)  :: coupling
+    INTEGER, INTENT(IN)                      :: nadiab
+    REAL(KIND=dp), INTENT(IN)                :: times
+    REAL(KIND=dp), INTENT(IN)                :: deltatMD
+
+    CHARACTER(len=*), PARAMETER :: routineN = 'adiab_print_pop', &
+      routineP = moduleN//':'//routineN
+
+    INTEGER                                  :: unit_nr
+    REAL(KIND=dp)                            :: unit_conv_fs, unit_conv, time
+    INTEGER                                  :: iadiab
+    CHARACTER(LEN=default_string_length)     :: my_format
+    TYPE(cp_logger_type), POINTER            :: logger
+    CHARACTER(LEN=default_string_length)     :: unit_str 
+
+    NULLIFY(logger)
+    logger => cp_get_default_logger()
+
+    unit_nr=cp_print_key_unit_nr(logger,adiab_section,"PRINT%OFF_DIAGONALS",&
+               extension=".xyz", middle_name="couplings",log_filename=.FALSE.)
+    unit_conv_fs = cp_unit_from_cp2k(1.0_dp,"fs")
+
+    IF (unit_nr>0) THEN
+       CALL section_vals_val_get(adiab_section,"PRINT%OFF_DIAGONALS%UNIT",&
+            c_val=unit_str)
+       unit_conv = cp_unit_from_cp2k(1.0_dp,TRIM(unit_str))
+       unit_conv_fs = cp_unit_from_cp2k(1.0_dp,"fs")
+       time = times*deltatMD*unit_conv_fs
+
+       WRITE ( unit_nr, "( A,A,A,I8,A,I8)" ) "Couplings (",TRIM(unit_str),");  ncouplings =", nadiab
+       WRITE ( unit_nr, '(A,I0,A,F20.3,A,F0.10)' )   " i = ",INT(times),", time = ",time, " (fs)"
+
+       DO iadiab=1, nadiab
+         my_format="(I4,"
+         WRITE(unit_nr,TRIM(my_format)//"1X,F20.10)") iadiab, coupling(iadiab) 
+       ENDDO
+
+    END IF
+
+    CALL cp_print_key_finished_output(unit_nr,logger,adiab_section,"PRINT%SITE_ENERGIES")
+   END SUBROUTINE adiab_print_off_diagonals
 
    SUBROUTINE adiab_print_pop(adiab_section, populations, nadiab, norbitals,itimes, deltatMD, times)
     TYPE(section_vals_type), POINTER         :: adiab_section

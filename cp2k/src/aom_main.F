@@ -83,6 +83,8 @@ MODULE aom_main
      USE aom_print,                    ONLY: adiab_print_coeff,              &
                                              adiab_print_pop,                &
                                              adiab_print_adiabat_energies,   &
+                                             adiab_print_site_energies,   &
+                                             adiab_print_off_diagonals,   &
                                              adiab_print_matrix_density,     &
                                              adiab_print_exact_forces,       &
                                              adiab_print_active_state,       &
@@ -166,6 +168,7 @@ CONTAINS
      REAL(KIND=dp)                                :: decohere_criterion
      INTEGER                                      :: imol, iatom, natom
      REAL(kind=dp), DIMENSION(:,:), ALLOCATABLE   :: exact_forces
+     REAL(kind=dp), DIMENSION(:), ALLOCATABLE     :: site_energies, couplings
      LOGICAL                                      :: keyword_translate
      TYPE(sh_print_env_type)                      :: sh_print_env
      REAL(kind=dp), DIMENSION(:,:),POINTER        :: positions_com_tp, velocities_com_tp
@@ -327,6 +330,19 @@ CONTAINS
 
      !> PRINT
      CALL adiab_print_hamiltonian(adiab_section, -AIMAG(aom_env%H_tp), nadiab,norbitals,itimes, deltatMD)
+
+     !> print site energies 
+     allocate(site_energies(mat))
+     allocate(couplings(mat-1))
+     do imol=1,mat
+         site_energies(imol) = -AIMAG(aom_env%H_tp(imol,imol))
+         if (imol .ne. mat) then
+           couplings(imol) = -AIMAG(aom_env%H_tp(imol,imol+1))
+         end if
+     end do
+   
+     CALL adiab_print_site_energies(adiab_section, site_energies, nadiab, deltatMD, times)
+     CALL adiab_print_off_diagonals(adiab_section, couplings, nadiab-1, deltatMD, times)
      CALL adiab_print_nacv(adiab_section, aom_env%nacv, nadiab, norbitals, aom_atoms,itimes, deltatMD)
      CALL adiab_print_adiabat_energies(adiab_section, aom_env%E_tp, nadiab, deltatMD, times)
      CALL adiab_print_pvecs(adiab_section, PC_allrvecs, itimes, deltatMD, times, atoms, nadiab)
@@ -343,6 +359,7 @@ CONTAINS
      DEALLOCATE(positions_com_tp) 
      DEALLOCATE(velocities_com_tp)
      deallocate(exact_forces)
+     deallocate(site_energies, couplings)
     END SUBROUTINE construct_ham_X_SH
 
 

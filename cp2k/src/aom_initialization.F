@@ -81,6 +81,8 @@ MODULE aom_initialization
      USE aom_print,                    ONLY: adiab_print_coeff,              &
                                              adiab_print_pop,                &
                                              adiab_print_adiabat_energies,   &
+                                             adiab_print_site_energies,   &
+                                             adiab_print_off_diagonals,   &
                                              adiab_print_matrix_density,     &
                                              adiab_print_exact_forces,       &
                                              adiab_print_active_state,       &
@@ -373,6 +375,7 @@ CONTAINS
      real(kind=dp), DIMENSION(:,:), allocatable :: PC_allrvecs
      real(kind=dp), allocatable :: PC_rvecs(:,:)
      LOGICAL    :: do_random
+     REAL(kind=dp), DIMENSION(:), ALLOCATABLE     :: site_energies, couplings
      !INTEGER                                    :: nparticle_kind
      !INTEGER, dimension(:), allocatable          :: class_forbidden_hop_tp
 
@@ -618,7 +621,19 @@ CONTAINS
         ENDDO
      ENDDO
 
-     !> PRINT 
+     !> PRINT
+     !> print site energies 
+     allocate(site_energies(mat))
+     allocate(couplings(mat-1))
+     do imol=1,mat
+         site_energies(imol) = -AIMAG(aom_env%H_tp(imol,imol))
+         if (imol .ne. mat) then
+           couplings(imol) = -AIMAG(aom_env%H_tp(imol,imol+1))
+         end if
+     end do 
+
+     CALL adiab_print_site_energies(adiab_section, site_energies, nadiab,deltatMD, times) 
+     CALL adiab_print_off_diagonals(adiab_section, couplings, nadiab-1, deltatMD, times)
      CALL adiab_print_adiabat_energies(adiab_section, aom_env%E_tp, nadiab, deltatMD, times)
      call adiab_print_pvecs(adiab_section, PC_allrvecs, itimes, deltatMD, times, atoms, nadiab)
      sh_print_env%times = times
@@ -747,7 +762,7 @@ CONTAINS
     deallocate(nacv, dist)
     deallocate(exact_forces)
     deallocate(F)
-
+    deallocate(site_energies, couplings)
     DEALLOCATE(positions_com_tp)
     DEALLOCATE(velocities_com_tp)
 
