@@ -62,7 +62,7 @@ MODULE aom_main
                                              calc_adiab_nace, &
                                              calc_hop_nacv, &
                                              cal_delta_energy_nacv, &
-                                             rotation_diab_to_adiab
+                                             diab_to_adiab
 
      USE aom_types,                    ONLY: aom_env_type, &
                                                 sh_print_env_type
@@ -82,6 +82,7 @@ MODULE aom_main
 
      USE aom_print,                    ONLY: adiab_print_coeff,              &
                                              adiab_print_adiab_pop,                &
+                                             adiab_print_pop,                &
                                              adiab_print_adiabat_energies,   &
                                              adiab_print_site_energies,   &
                                              adiab_print_off_diagonals,   &
@@ -177,7 +178,7 @@ CONTAINS
      real(kind=dp), DIMENSION(:,:), allocatable   :: PC_allrvecs
      LOGICAL                                      :: do_random 
      REAL(KIND=dp), dimension(:), allocatable     :: adiab_pop
-     COMPLEX(KIND=dp), dimension(:)               :: adiab_c
+     COMPLEX(KIND=dp), dimension(:), allocatable               :: adiab_c
 
      !> cutoff to define the neighborough list
      CALL section_vals_val_get(coupling_section,"CUT_OFF_BETWEEN_SITES",&
@@ -336,6 +337,9 @@ CONTAINS
      !> print site energies 
      allocate(site_energies(mat))
      allocate(couplings(mat-1))
+     allocate(adiab_c(mat))
+     allocate(adiab_pop(mat))
+ 
      do imol=1,mat
          site_energies(imol) = -AIMAG(aom_env%H_tp(imol,imol))
          if (imol .ne. mat) then
@@ -345,8 +349,9 @@ CONTAINS
 
      !CALL rotation_diab_to_adiab(aom_env%C_tp, aom_env%ctin, mat, adiab_ctin, adiab_pop)
      CALL diab_to_adiab( aom_env%C_tp, aom_env%ctin, adiab_c, adiab_pop)
+print *, "adiab_pop", adiab_pop
  
-     CALL adiab_print_adiab_pop(adiab_section, abs(ctotal),nadiab,norbitals,itimes, deltatMD, times) 
+     CALL adiab_print_adiab_pop(adiab_section, adiab_pop, nadiab,norbitals,itimes, deltatMD, times) 
      CALL adiab_print_site_energies(adiab_section, site_energies, nadiab, deltatMD, times)
      CALL adiab_print_off_diagonals(adiab_section, couplings, nadiab-1, deltatMD, times)
      CALL adiab_print_nacv(adiab_section, aom_env%nacv, nadiab, norbitals, aom_atoms,itimes, deltatMD)
@@ -365,7 +370,7 @@ CONTAINS
      DEALLOCATE(positions_com_tp) 
      DEALLOCATE(velocities_com_tp)
      deallocate(exact_forces)
-     deallocate(site_energies, couplings)
+     deallocate(site_energies, couplings, adiab_c, adiab_pop)
     END SUBROUTINE construct_ham_X_SH
 
 

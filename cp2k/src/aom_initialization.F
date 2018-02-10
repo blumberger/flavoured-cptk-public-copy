@@ -60,7 +60,8 @@ MODULE aom_initialization
                                              simple_vel_rescaling, &
                                              translate_com, &
                                               calc_hop_nacv, &
-                                              cal_delta_energy_nacv
+                                              cal_delta_energy_nacv, &
+                                              diab_to_adiab
 
      USE aom_types,                    ONLY: aom_env_type, &
                                                 sh_print_env_type
@@ -80,6 +81,7 @@ MODULE aom_initialization
 
      USE aom_print,                    ONLY: adiab_print_coeff,              &
                                              adiab_print_pop,                &
+                                             adiab_print_adiab_pop,                &
                                              adiab_print_adiabat_energies,   &
                                              adiab_print_site_energies,   &
                                              adiab_print_off_diagonals,   &
@@ -376,6 +378,8 @@ CONTAINS
      real(kind=dp), allocatable :: PC_rvecs(:,:)
      LOGICAL    :: do_random
      REAL(kind=dp), DIMENSION(:), ALLOCATABLE     :: site_energies, couplings
+     REAL(KIND=dp), dimension(:), allocatable     :: adiab_pop
+     COMPLEX(KIND=dp), dimension(:), allocatable               :: adiab_c
      !INTEGER                                    :: nparticle_kind
      !INTEGER, dimension(:), allocatable          :: class_forbidden_hop_tp
 
@@ -687,6 +691,14 @@ CONTAINS
              CPABORT("INITIALIZATION implemented: DIABATIC, ADIABATIC")
          END SELECT
          times = 0.0
+    
+         allocate(adiab_c(mat)) 
+         allocate(adiab_pop(mat)) 
+         CALL diab_to_adiab( aom_env%C_tp, ctin, adiab_c, adiab_pop)
+print *, "adiab_pop", adiab_pop
+
+         CALL adiab_print_adiab_pop(adiab_section, adiab_pop, nadiab,norbitals,itimes,deltatMD, times)
+
          CALL adiab_print_coeff(adiab_section, ctin,nadiab, norbitals,itimes, deltatMD, times)
          CALL adiab_print_pop(adiab_section, abs(ctin),nadiab,norbitals,itimes,deltatMD, times)
          CALL adiab_print_matrix_density(adiab_section, ctin, nadiab,norbitals,itimes, &
@@ -762,7 +774,7 @@ CONTAINS
     deallocate(nacv, dist)
     deallocate(exact_forces)
     deallocate(F)
-    deallocate(site_energies, couplings)
+    deallocate(site_energies, couplings, adiab_c, adiab_pop)
     DEALLOCATE(positions_com_tp)
     DEALLOCATE(velocities_com_tp)
 

@@ -136,7 +136,7 @@ IMPLICIT NONE
              calc_hop_nacv, &
              cal_delta_energy_nacv , &
              calc_diabatic_nace, &
-             rotation_diab_to_adiab
+             diab_to_adiab
 
 CONTAINS
 
@@ -402,25 +402,20 @@ SUBROUTINE diab_to_adiab( C, diab_c, adiab_c, pop)
         REAL(KIND=dp), dimension(:,:), intent(in) :: C
         COMPLEX(KIND=dp), dimension(:), intent(in) :: diab_c
         COMPLEX(KIND=dp), dimension(:), intent(out) :: adiab_c
-        REAL(KIND=dp), dimension(:), allocatable, optional    :: pop        
+        REAL(KIND=dp), dimension(:), intent(out), optional    :: pop        
 
         CHARACTER(len=*), PARAMETER :: routineN ='diab_to_adiab', &
                                routineP = moduleN//':'//routineN
 
         integer :: i, j!, mol!, k, l
 
-        if(PRESENT(pop)) then 
-           ALLOCATE(pop(mat))
-           pop(:) = 0.0D0
-        end if 
-        
         do i=1, SIZE(diab_c)
            adiab_c(i) = cmplx(0.0, 0.0, dp)
            do j=1, SIZE(diab_c)
               adiab_c(i) = adiab_c(i) + cmplx(C(j,i), 0.0D0,dp)*diab_c(j)
            enddo
            if(PRESENT(pop)) then
-              pop(i) = abs(adiab_ctin(i)*conjg(adiab_ctin(i)))
+              pop(i) = abs(adiab_c(i)*conjg(adiab_c(i)))
            end if
         enddo
 END SUBROUTINE
