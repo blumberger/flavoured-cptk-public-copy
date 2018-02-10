@@ -748,21 +748,40 @@ CONTAINS
     IF (unit_nr>0) THEN
        SELECT CASE(keyword)
        CASE("START")
-           ALLOCATE(pop_init(nadiab))
-           pop_init     = sh_print_env%pop_init
-           first_adiabat= sh_print_env%first_adiabat    
-           initrandom   = sh_print_env%initrandom
+           if (print_all) then
+               ALLOCATE(pop_init(nadiab))
+               pop_init     = sh_print_env%pop_init
+               first_adiabat= sh_print_env%first_adiabat    
+               initrandom   = sh_print_env%initrandom
 
-           WRITE( unit_nr, "(A)")   "LET'S START. "
-           WRITE( unit_nr, "(A)")   "Adiabatic Initial Population = "
-           DO iadiab=1, nadiab
-              my_format="(I4,"
-              WRITE(unit_nr,TRIM(my_format)//"1X,F20.10)") iadiab, pop_init(iadiab)
-           ENDDO
-           WRITE( unit_nr, "(A,F20.10)" ) "Initial Random Number = ", initrandom
-           WRITE( unit_nr, "(A,I8)" ) "First Adiabatic State = ", first_adiabat
-           WRITE( unit_nr, "(A)") "  "
-           DEALLOCATE(pop_init)
+               WRITE( unit_nr, "(A)")   "LET'S START. "
+               WRITE( unit_nr, "(A)")   "Adiabatic Initial Population = "
+               DO iadiab=1, nadiab
+                  my_format="(I4,"
+                  WRITE(unit_nr,TRIM(my_format)//"1X,F20.10)") iadiab, pop_init(iadiab)
+               ENDDO
+               WRITE( unit_nr, "(A,F20.10)" ) "Initial Random Number = ", initrandom
+               WRITE( unit_nr, "(A,I8)" ) "First Adiabatic State = ", first_adiabat
+               WRITE( unit_nr, "(A)") "  "
+               DEALLOCATE(pop_init)
+           else
+               !ALLOCATE(pop_init(nadiab))
+               !pop_init     = sh_print_env%pop_init
+               !first_adiabat= sh_print_env%first_adiabat    
+               !initrandom   = sh_print_env%initrandom
+
+               WRITE( unit_nr, "(A)")   "LET'S START. "
+               !WRITE( unit_nr, "(A)")   "Adiabatic Initial Population = "
+               !DO iadiab=1, nadiab
+               !   my_format="(I4,"
+               !   WRITE(unit_nr,TRIM(my_format)//"1X,F20.10)") iadiab, pop_init(iadiab)
+               !ENDDO
+               !WRITE( unit_nr, "(A,F20.10)" ) "Initial Random Number = ", initrandom
+               WRITE( unit_nr, "(A,I8)" ) "First Adiabatic State = ", first_adiabat
+               WRITE( unit_nr, "(A)") "  "
+               !DEALLOCATE(pop_init)
+ 
+           end if
        CASE("TULLY_TEST")
            ALLOCATE(proba(nadiab))
            sumg         = sh_print_env%sumprob
