@@ -81,7 +81,7 @@ MODULE aom_main
          cp_sll_val_set_el_at, cp_sll_val_type
 
      USE aom_print,                    ONLY: adiab_print_coeff,              &
-                                             adiab_print_pop,                &
+                                             adiab_print_adiab_pop,                &
                                              adiab_print_adiabat_energies,   &
                                              adiab_print_site_energies,   &
                                              adiab_print_off_diagonals,   &
@@ -176,6 +176,8 @@ CONTAINS
      CHARACTER(LEN=default_string_length)         :: reversal_keyword
      real(kind=dp), DIMENSION(:,:), allocatable   :: PC_allrvecs
      LOGICAL                                      :: do_random 
+     REAL(KIND=dp), dimension(:), allocatable     :: adiab_pop
+     COMPLEX(KIND=dp), dimension(:)               :: adiab_c
 
      !> cutoff to define the neighborough list
      CALL section_vals_val_get(coupling_section,"CUT_OFF_BETWEEN_SITES",&
@@ -338,9 +340,13 @@ CONTAINS
          site_energies(imol) = -AIMAG(aom_env%H_tp(imol,imol))
          if (imol .ne. mat) then
            couplings(imol) = -AIMAG(aom_env%H_tp(imol,imol+1))
-         end if
+         end if 
      end do
-   
+
+     !CALL rotation_diab_to_adiab(aom_env%C_tp, aom_env%ctin, mat, adiab_ctin, adiab_pop)
+     CALL diab_to_adiab( aom_env%C_tp, aom_env%ctin, adiab_c, adiab_pop)
+ 
+     CALL adiab_print_adiab_pop(adiab_section, abs(ctotal),nadiab,norbitals,itimes, deltatMD, times) 
      CALL adiab_print_site_energies(adiab_section, site_energies, nadiab, deltatMD, times)
      CALL adiab_print_off_diagonals(adiab_section, couplings, nadiab-1, deltatMD, times)
      CALL adiab_print_nacv(adiab_section, aom_env%nacv, nadiab, norbitals, aom_atoms,itimes, deltatMD)

@@ -71,6 +71,7 @@ IMPLICIT NONE
    
    PUBLIC :: adiab_print_coeff,          &
              adiab_print_pop,            &
+             adiab_print_adiab_pop,      &
              adiab_print_adiabat_energies,&
              adiab_print_site_energies,  &
              adiab_print_off_diagonals,  &
@@ -384,7 +385,47 @@ CONTAINS
     CALL cp_print_key_finished_output(unit_nr,logger,adiab_section,"PRINT%POPULATIONS")
    END SUBROUTINE adiab_print_pop
 
+   SUBROUTINE adiab_print_adiab_pop(adiab_section, populations, nadiab, norbitals,itimes, deltatMD, times)
+    TYPE(section_vals_type), POINTER         :: adiab_section
+    REAL(KIND=dp), DIMENSION(:), INTENT(IN)  :: populations
+    INTEGER, INTENT(IN)                      :: nadiab, norbitals, itimes
+    REAL(KIND=dp),INTENT(IN)                 :: deltatMD, times
 
+    CHARACTER(len=*), PARAMETER :: routineN = 'adiab_print_pop', &
+      routineP = moduleN//':'//routineN
+
+    INTEGER                                  :: unit_nr
+    REAL(KIND=dp)                            :: unit_conv_fs, time
+    INTEGER                                  :: iadiab, iorbitals
+    CHARACTER(LEN=default_string_length)     :: my_format
+    TYPE(cp_logger_type), POINTER            :: logger
+
+    NULLIFY(logger)
+    logger => cp_get_default_logger()
+
+    unit_nr=cp_print_key_unit_nr(logger,adiab_section,"PRINT%ADIAB_POPULATIONS",&
+               extension=".xyz", middle_name="adiab_pop",log_filename=.FALSE.)
+    unit_conv_fs = cp_unit_from_cp2k(1.0_dp,"fs")
+
+    IF (unit_nr>0) THEN
+
+       time = unit_conv_fs*times*deltatMD
+       WRITE ( unit_nr, "( A,A,I8,A,I8)" ) "Pop.", "; nadiab =", nadiab, "; norbitals =",&
+                                   norbitals
+       WRITE ( unit_nr, '(A,I0,A,F20.3,A,F0.10)' )   " i = ",itimes,", time = ",time, " (fs)" 
+
+       DO iadiab=1, nadiab
+          DO iorbitals=1,norbitals
+         my_format="(I4,1X,I4,"
+         WRITE(unit_nr,TRIM(my_format)//"1X,F20.10)") iadiab, iorbitals, &
+                   populations((iadiab-1)*norbitals + iorbitals)
+         ENDDO
+       ENDDO
+
+    END IF
+
+    CALL cp_print_key_finished_output(unit_nr,logger,adiab_section,"PRINT%ADIAB_POPULATIONS")
+   END SUBROUTINE adiab_print_adiab_pop
 
    SUBROUTINE adiab_print_active_state(adiab_section, state, energy, vector, & 
               nadiab, norbitals, itimes, deltatMD)
