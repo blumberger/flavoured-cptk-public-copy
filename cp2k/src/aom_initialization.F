@@ -695,7 +695,6 @@ CONTAINS
          allocate(adiab_c(mat)) 
          allocate(adiab_pop(mat)) 
          CALL diab_to_adiab( aom_env%C_tp, ctin, adiab_c, adiab_pop)
-print *, "adiab_pop", adiab_pop
 
          CALL adiab_print_adiab_pop(adiab_section, adiab_pop, nadiab,norbitals,itimes,deltatMD, times)
 

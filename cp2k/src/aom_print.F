@@ -1110,7 +1110,7 @@ CONTAINS
               WRITE( unit_nr, "(A)") "  "
            else
               WRITE( unit_nr, "(A)") "  "
-              WRITE( unit_nr, "(A)" ) "METHOD FOR DECOHERENCE: DAMPING."
+              !WRITE( unit_nr, "(A)" ) "METHOD FOR DECOHERENCE: DAMPING."
               !WRITE( unit_nr, "(A)" ) "    Damping time (fs) = "
               !unit_conv_fs = cp_unit_from_cp2k(1.0_dp,"fs")
               !DO iadiab=1, nadiab
@@ -1121,7 +1121,7 @@ CONTAINS
                   !    WRITE( unit_nr, "(A,I8)" ) "    PURE_DEPHASING state", iadiab
                   !end if 
               !ENDDO
-              WRITE( unit_nr, "(A)") "  "
+              !WRITE( unit_nr, "(A)") "  "
            end if
        CASE DEFAULT
        END SELECT 

@@ -349,7 +349,6 @@ CONTAINS
 
      !CALL rotation_diab_to_adiab(aom_env%C_tp, aom_env%ctin, mat, adiab_ctin, adiab_pop)
      CALL diab_to_adiab( aom_env%C_tp, aom_env%ctin, adiab_c, adiab_pop)
-print *, "adiab_pop", adiab_pop
  
      CALL adiab_print_adiab_pop(adiab_section, adiab_pop, nadiab,norbitals,itimes, deltatMD, times) 
      CALL adiab_print_site_energies(adiab_section, site_energies, nadiab, deltatMD, times)

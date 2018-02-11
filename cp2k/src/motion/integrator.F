@@ -790,9 +790,10 @@ CONTAINS
                 IF ( ABS(max1 - max2).GT.1 ) THEN
                    print*, "Before,    After"
                    print*, past_state, aom_env%active_state
-                   do j=1, mat
-                      print*, aom_env%C_t(j,past_state), aom_env%C_tp(j, aom_env%active_state)
-                   enddo
+                   !> print active state before and after reordering
+                   !do j=1, mat
+                   !   print*, aom_env%C_t(j,past_state), aom_env%C_tp(j, aom_env%active_state)
+                   !enddo
                 ENDIF
              ENDIF
           end if
@@ -810,9 +811,9 @@ CONTAINS
                    IF ( ABS(max1 - max2).GT.1 ) THEN
                       print*, "Before,    After"
                       print*, past_state, aom_env%active_state
-                      do j=1, mat
-                         print*, aom_env%C_t(j,past_state), aom_env%C_tp(j, aom_env%active_state)
-                      enddo
+                      !do j=1, mat
+                      !   print*, aom_env%C_t(j,past_state), aom_env%C_tp(j, aom_env%active_state)
+                      !enddo
                    ENDIF
                 ENDIF
             else
@@ -831,9 +832,9 @@ CONTAINS
                    IF ( ABS(max1 - max2).GT.1 ) THEN
                       print*, "Before,    After"
                       print*, past_state, aom_env%active_state
-                      do j=1, mat
-                         print*, aom_env%C_t(j,past_state), aom_env%C_tp(j, aom_env%active_state)
-                      enddo
+                      !do j=1, mat
+                      !   print*, aom_env%C_t(j,past_state), aom_env%C_tp(j, aom_env%active_state)
+                      !enddo
                    ENDIF
                 ENDIF
            else 
