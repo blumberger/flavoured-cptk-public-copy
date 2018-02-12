@@ -340,7 +340,7 @@ CONTAINS
 
     END IF
 
-    CALL cp_print_key_finished_output(unit_nr,logger,adiab_section,"PRINT%SITE_ENERGIES")
+    CALL cp_print_key_finished_output(unit_nr,logger,adiab_section,"PRINT%OFF_DIAGONALS")
    END SUBROUTINE adiab_print_off_diagonals
 
    SUBROUTINE adiab_print_pop(adiab_section, populations, nadiab, norbitals,itimes, deltatMD, times)
