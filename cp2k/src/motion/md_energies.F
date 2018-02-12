@@ -639,6 +639,11 @@ CONTAINS
     iw = cp_print_key_unit_nr(logger,motion_section,"MD%PRINT%PROGRAM_RUN_INFO",&
          extension=".mdLog",file_position=my_pos,file_action=my_act)
 
+print *, &
+      'STEP NUMBER                  = ', itimes
+print *, &
+                'CPU TIME [s]                 = ',used_time,averages%avecpu
+
     ! Performing protocol relevant to the first step of an MD run
     IF (iw>0) THEN
        CALL create_md_section(section)
