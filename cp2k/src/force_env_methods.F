@@ -853,6 +853,10 @@ CONTAINS
     TYPE(mixed_environment_type), POINTER    :: mixed_env
     TYPE(atomic_kind_list_type), POINTER     :: atomic_kinds
     TYPE(distribution_1d_type), POINTER      :: local_particles
+    LOGICAL                                  :: do_speedup_lj
+    TYPE(mixed_force_type), DIMENSION(:), &
+      POINTER                                :: my_global_forces
+    REAL(KIND=dp), DIMENSION(:), POINTER     :: my_energies
 
     NULLIFY(atomic_kinds, local_particles)
 !> End CHANGE_AC
@@ -1101,11 +1105,27 @@ CONTAINS
                  CPABORT("Illegal use of CLASSICAL_PATH methods")
               END IF
            ENDDO 
+           !print*, "AC_energies", energies 
+           CALL section_vals_val_get(adiab_section, "DO_SPEEDUP_LJ", l_val=do_speedup_lj)
+           !do_speedup_lj = .TRUE.
+           CALL add_energies_forces(energies, global_forces, my_energies, my_global_forces, do_speedup_lj)
+           !print*, "AC_energies", my_energies 
            CALL adiab_fssh_routines(particles_mix, virial_mix, results_mix,   &
-                global_forces, energies, virials, results, nforce_eval,&
+                my_global_forces, my_energies, virials, results, nforce_eval,&
                 map_index, mapping_section,adiab_section,mixed_env,my_itimes, &
                 adiab_keyword, mixed_energy%pot,atomic_kinds, &
                 local_particles)
+           IF (do_speedup_lj) THEN
+              DO iforce_eval=1, nforce_eval -1
+                 DEALLOCATE(my_global_forces(iforce_eval)%forces)
+              ENDDO
+           ELSE
+              DO iforce_eval=1, nforce_eval 
+                 DEALLOCATE(my_global_forces(iforce_eval)%forces)
+              ENDDO
+           ENDIF
+           DEALLOCATE(my_global_forces)
+           DEALLOCATE(my_energies)
         !CASE("FROZEN_HAMILTONIAN")
            !Check that all the FF have the same number of atoms than the 1st FF
            !because in the subroutine the number of atoms will be the one of 1st
@@ -1184,5 +1204,41 @@ CONTAINS
     END IF
     CALL cp_print_key_finished_output(unit_nr,logger,mixed_section,"PRINT%DIPOLE")
   END SUBROUTINE mixed_energy_forces
+
+
+  SUBROUTINE add_energies_forces(energies, global_forces, my_energies, my_global_forces, do_speedup_lj)
+    TYPE(mixed_force_type), DIMENSION(:), &
+      POINTER                                :: global_forces
+    REAL(KIND=dp), DIMENSION(:), POINTER     :: energies
+    TYPE(mixed_force_type), DIMENSION(:), &
+      POINTER                                :: my_global_forces
+    REAL(KIND=dp), DIMENSION(:), POINTER     :: my_energies
+    LOGICAL :: do_speedup_lj
+
+    INTEGER :: i, natom
+
+    NULLIFY(my_global_forces, my_energies)
+    if (do_speedup_lj) then
+       ALLOCATE(my_global_forces(SIZE(energies)-1))
+       ALLOCATE(my_energies(SIZE(energies)-1))
+       DO i = 2, SIZE(energies)
+          my_energies(i-1) = energies(i) + energies(1)
+          natom = SIZE(global_forces(i)%forces(:,:), 2)
+          ALLOCATE(my_global_forces(i-1)%forces( 3,natom))
+          my_global_forces(i-1)%forces = global_forces(i)%forces + global_forces(1)%forces
+       ENDDO
+    ELSE
+       ALLOCATE(my_global_forces(SIZE(energies)))
+       ALLOCATE(my_energies(SIZE(energies)))
+       DO i = 1, SIZE(energies)
+          my_energies(i) = energies(i)
+          natom = SIZE(global_forces(i)%forces(:,:), 2)
+          ALLOCATE(my_global_forces(i)%forces( 3,natom))
+          my_global_forces(i)%forces = global_forces(i)%forces
+        ENDDO
+    ENDIF
+
+  END SUBROUTINE add_energies_forces
+
 
 END MODULE force_env_methods

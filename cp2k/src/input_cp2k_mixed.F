@@ -179,6 +179,17 @@ CONTAINS
          description="Defines the methods to obtain the adiabatic forces.",&
          n_keywords=1, n_subsections=0, repeats=.FALSE.)
 
+    
+    CALL keyword_create(keyword, name="DO_SPEEDUP_LJ",&
+         description="If DO_SPEEDUP_LJ is TRUE, the first force_eval section will only calculate LJ interactions",&
+         usage="True", default_l_val=.False., &
+         lone_keyword_l_val=.True.) 
+        ! type_of_var=char_t,&
+        ! n_var=-1)
+    CALL section_add_keyword(subsection,keyword)
+    CALL keyword_release(keyword)
+
+
     CALL keyword_create(keyword, name="METHOD_PROPAGATION",&
          description="Defines the methods to obtain the adiabatic forces.",&
          usage="METHOD_PROPAGATION : CLASSICAL_PATH, FSSH",  type_of_var=char_t,&
