@@ -1347,7 +1347,7 @@ SUBROUTINE calc_hop_nacv(aom_env, hop_nacv, ext_old_state, ext_new_state, symmet
         REAL(KIND=dp), dimension(:,:,:,:), allocatable :: Wprime
         integer, dimension(:,:), allocatable :: NN
         integer :: i, j, k, mat, d, l, atoms
-        REAL(KIND=dp), dimension(:,:,:,:), allocatable :: DH, my_DP
+        !REAL(KIND=dp), dimension(:,:,:,:), allocatable :: DH, my_DP
         REAL(KIND=dp), dimension(:,:), allocatable :: F_1, F_11, F_2, F_22, F_3
         REAL(KIND=dp), dimension(:), allocatable ::   Sdiag
         REAL(KIND=dp), dimension(:,:), allocatable :: S, C, T, X, LL, Y
@@ -1379,10 +1379,9 @@ SUBROUTINE calc_hop_nacv(aom_env, hop_nacv, ext_old_state, ext_new_state, symmet
         allocate(Sdiag(mat))
         allocate(ext_pres(natom))
 
-        allocate(DH(mat,mat,natom,3))
-        allocate(my_DP(mat,mat,natom,3)) 
+        !allocate(DH(mat,mat,natom,3))
+        !allocate(my_DP(mat,mat,natom,3)) 
         allocate(nacv(3,mat, mat*atoms)) 
-        allocate(Wprime(mat,mat,natom,3)) 
         allocate(F_1(3,natom))
         allocate(F_11(3,natom))
         allocate(F_2(3,natom))
@@ -1430,6 +1429,7 @@ SUBROUTINE calc_hop_nacv(aom_env, hop_nacv, ext_old_state, ext_new_state, symmet
         Y = matmul( transpose(LL), C)     ! Y is L^{dagger}C
 
         !CALCULATE W' with Eq. (21) if [Carof17]
+        allocate(Wprime(mat,mat,natom,3)) 
         do d=1,3
            num_j = -1
            do j=1,natom
@@ -1567,8 +1567,8 @@ SUBROUTINE calc_hop_nacv(aom_env, hop_nacv, ext_old_state, ext_new_state, symmet
         ENDIF
  
         deallocate(T)
-        deallocate(DH)
-        deallocate(my_DP)
+        !deallocate(DH)
+        !deallocate(my_DP)
         deallocate(F_1)
         deallocate(F_11)
         deallocate(F_2)
