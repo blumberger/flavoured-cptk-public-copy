@@ -106,6 +106,27 @@ IMPLICIT NONE
 !> First adiabat after the random choice
    END TYPE sh_print_env_type
 
+!***************************************************************************************
+!> \brief A storage container for the arrays used in calculating the adiab NACE.
+!> \authour Matt
+!> \note I have kept this seperate to make it easy to see what changes I've
+!        made. Feel free to hard-code it into the aom_env_type.
+!***************************************************************************************
+TYPE adiab_nace_env_type
+   REAL(KIND=dp), dimension(:,:), allocatable :: T1
+   REAL(KIND=dp), dimension(:,:), allocatable :: T2
+   REAL(KIND=dp), dimension(:,:), allocatable :: DT
+   REAL(KIND=dp), dimension(:,:), allocatable :: TST
+   REAL(KIND=dp), dimension(:,:), allocatable :: TDT
+   REAL(KIND=dp), dimension(:,:), allocatable :: DS
+
+   INTEGER, dimension(:),  allocatable        :: map_new2old
+   INTEGER, dimension(:),  allocatable        :: map_old2new
+   INTEGER, dimension(:),  allocatable        :: basic
+   INTEGER, dimension(:),  allocatable        :: zeros
+   INTEGER, dimension(:),  allocatable        :: not_associated
+
+END TYPE adiab_nace_env_type
 
 !COMMENT: one should check that all those variables are actually used somewhere
 !in the code
@@ -168,12 +189,16 @@ IMPLICIT NONE
      LOGICAL                                :: do_reorder
 
 !> Required for HS propagation
-     LOGICAL                                     :: HS_propagation
-     REAL(KIND=dp), dimension(:,:), POINTER      :: adiab_nace_tp, adiab_nace_t
-     INTEGER, dimension(:), POINTER              :: class_forbidden_hop_t
+     LOGICAL                                :: HS_propagation
+     REAL(KIND=dp), dimension(:,:), POINTER :: adiab_nace_tp, adiab_nace_t
+     INTEGER, dimension(:), POINTER         :: class_forbidden_hop_t
 
 !> To print
-     TYPE(sh_print_env_type)                     :: sh_print_env
+     TYPE(sh_print_env_type)                :: sh_print_env
+
+!> CHANGE ME, added nace_allocatables
+    TYPE(adiab_nace_env_type)                   :: adiab_nace_env
+
    END TYPE aom_env_type
 
    PUBLIC :: aom_env_type, &

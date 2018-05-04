@@ -224,6 +224,9 @@ CONTAINS
      ALLOCATE(aom_env%ctin_after_deco(mat))
      ALLOCATE(aom_env%ctin_after_tranf_correction(mat))
      ALLOCATE(aom_env%active_region(mat))
+   
+     CALL create_adiab_nace_env(mol, aom_env)
+
      aom_env%futur_decohere = .FALSE.
      aom_env%decohere       = .FALSE.
 
@@ -318,6 +321,28 @@ CONTAINS
 
      DEALLOCATE(rng_stream)
   END SUBROUTINE create_aom_env
+
+  SUBROUTINE create_adiab_nace_env(mol, aom_env)
+   
+     INTEGER                       :: mol
+     TYPE(aom_env_type)            :: aom_env
+
+     CHARACTER(len=*), PARAMETER :: routineN ='create_adiab_nace_env', &
+     routineP = moduleN//':'//routineN
+
+      ALLOCATE(aom_env%adiab_nace_env%T1(mol,mol))
+      ALLOCATE(aom_env%adiab_nace_env%T2(mol,mol))
+      ALLOCATE(aom_env%adiab_nace_env%DT(mol,mol))
+      ALLOCATE(aom_env%adiab_nace_env%TST(mol,mol))
+      ALLOCATE(aom_env%adiab_nace_env%TDT(mol,mol))
+      ALLOCATE(aom_env%adiab_nace_env%DS(mol,mol))
+      ALLOCATE(aom_env%adiab_nace_env%map_new2old(mol))
+      ALLOCATE(aom_env%adiab_nace_env%map_old2new(mol))
+      ALLOCATE(aom_env%adiab_nace_env%basic(mol))
+      ALLOCATE(aom_env%adiab_nace_env%zeros(mol))
+      ALLOCATE(aom_env%adiab_nace_env%not_associated(mol))
+
+  END SUBROUTINE create_adiab_nace_env
 
   SUBROUTINE propagate_aom_namd_first_step(nadiab, aom_atoms, norbitals,  &
                                   positions_tp,  &
