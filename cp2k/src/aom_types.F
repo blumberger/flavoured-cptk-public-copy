@@ -116,8 +116,7 @@ TYPE adiab_nace_env_type
    REAL(KIND=dp), dimension(:,:), allocatable :: T1
    REAL(KIND=dp), dimension(:,:), allocatable :: T2
    REAL(KIND=dp), dimension(:,:), allocatable :: DT
-   REAL(KIND=dp), dimension(:,:), allocatable :: TST
-   REAL(KIND=dp), dimension(:,:), allocatable :: TDT
+   REAL(KIND=dp), dimension(:,:), allocatable :: diab_D
    REAL(KIND=dp), dimension(:,:), allocatable :: DS
 
    INTEGER, dimension(:),  allocatable        :: map_new2old
