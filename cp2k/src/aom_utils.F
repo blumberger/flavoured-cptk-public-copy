@@ -1100,25 +1100,47 @@ subroutine nace6(aom_env, adiab_section, mol, deltat)
 
         ! For this part add the 2 matricies together
 
+        !2. T1 = D*U
+        CALL DGEMM('N', 'N', mol, mol, mol, 1.0_DP, &
+            aom_env%adiab_nace_env%diab_D, mol, &    
+            aom_env%C_tp,                  mol, &     ! C_tp = U
+            0.0_DP, aom_env%adiab_nace_env%T1, mol)
 
-        ! 6. Calculate the full NACE, Eq. (19) in paper 1.
-        DO i=1, mol
-           DO j=1, mol
-              aom_env%adiab_nace_tp(i,j) = - aom_env%adiab_overlap(i, aom_env%adiab_nace_env%map_new2old(j))
-              IF (i ==j) THEN
-                 aom_env%adiab_nace_tp(i,j) = aom_env%adiab_nace_tp(i,j) + 1
-              ENDIF
-              aom_env%adiab_nace_tp(i,j) = aom_env%adiab_nace_tp(i,j) / deltat
-              DO k=1, mol
-                 DO l=1, mol
-                    aom_env%adiab_nace_tp(i,j) = & 
-                         aom_env%adiab_nace_tp(i,j) + aom_env%C_tp(k,i)*aom_env%C_tp(l,j)* &
-                         (aom_env%adiab_nace_env%diab_D(k,l))
-                 ENDDO
-              ENDDO  
-           ENDDO
-        ENDDO
-        ! End of 6
+
+        !2. adiab_nace_tp = U^{dagg}*T1
+        CALL DGEMM('T', 'N', mol, mol, mol, 1.0_DP, &
+            aom_env%C_tp,                  mol, &     ! C_tp = U
+            aom_env%adiab_nace_env%T1,   mol, &   
+            0.0_DP, aom_env%adiab_nace_tp, mol)
+
+!aom_env%adiab_nace_tp = 0.0_DP
+!
+!        ! 6. Calculate the full NACE, Eq. (19) in paper 1.
+!        DO i=1, mol
+!           DO j=1, mol
+!              aom_env%adiab_nace_tp(i,j) = - aom_env%adiab_overlap(i, aom_env%adiab_nace_env%map_new2old(j))
+!              IF (i ==j) THEN
+!                 aom_env%adiab_nace_tp(i,j) = aom_env%adiab_nace_tp(i,j) + 1
+!              ENDIF
+!              aom_env%adiab_nace_tp(i,j) = aom_env%adiab_nace_tp(i,j) / deltat
+!              DO k=1, mol
+!                 DO l=1, mol
+!                    aom_env%adiab_nace_tp(i,j) = & 
+!                         aom_env%adiab_nace_tp(i,j) + aom_env%C_tp(k,i)*aom_env%C_tp(l,j)* &
+!                         (aom_env%adiab_nace_env%diab_D(k,l))
+!                 ENDDO
+!              ENDDO  
+!           ENDDO
+!        ENDDO
+!        ! End of 6
+!
+!PRINT *, "adiab_D:"
+!DO i=1, mol
+!   DO j=1, mol
+!      WRITE(6, "(A2, e12.4, A2)", advance='no') "| ", aom_env%adiab_nace_tp(i,j), " "
+!   END DO
+!   PRINT *, " "
+!END DO
 end subroutine nace6
 
 !**********************************************************************************
@@ -1187,30 +1209,6 @@ subroutine calc_adiab_nace(aom_env, adiab_section)
         CALL nace6(aom_env, adiab_section, mol, deltat)
         CALL nace7(aom_env, adiab_section, mol)
  
-        !   print*, aom_env%adiab_nace_tp(:,1), "New"
- 
-        ! Older version of NACE calculation             
-        !allocate(DC(mol,mol))
-        !DC = (1.0D0/deltat)*(C2 - C1)
-        !do i=1,mol
-        !        do j=1,mol
-        !                aom_env%adiab_nace_tp(i,j) = 0.0D0
-        !                do k=1,mol
-        !                        aom_env%adiab_nace_tp(i,j) = & 
-        !                                aom_env%adiab_nace_tp(i,j) + C2(k,i)*( C2(k,j) - C1(k,j) ) / deltat
-        !                        do l=1,mol
-        !                                aom_env%adiab_nace_tp(i,j) = & 
-        !                            aom_env%adiab_nace_tp(i,j) + C2(k,i)*C2(l,j)*(aom_env%adiab_nace_env%TST(k,l) + aom_env%adiab_nace_env%TDT(k,l))
-        !                        end do
-        !                end do
-        !        end do
-        !        !print*, "nace", aom_env%adiab_nace_tp(i,:)
-        !end do
-
-        !   print*, aom_env%adiab_nace_tp(:,1), "Old"
-
-
-        !deallocate(DC)
 end subroutine calc_adiab_nace
 
 
