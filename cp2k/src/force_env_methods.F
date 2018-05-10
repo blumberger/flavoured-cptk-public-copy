@@ -853,7 +853,7 @@ CONTAINS
     TYPE(mixed_environment_type), POINTER    :: mixed_env
     TYPE(atomic_kind_list_type), POINTER     :: atomic_kinds
     TYPE(distribution_1d_type), POINTER      :: local_particles
-    LOGICAL                                  :: do_speedup_lj
+    LOGICAL                                  :: do_speedup_lj, do_speedup_intra
     TYPE(mixed_force_type), DIMENSION(:), &
       POINTER                                :: my_global_forces
     REAL(KIND=dp), DIMENSION(:), POINTER     :: my_energies
@@ -1107,23 +1107,25 @@ CONTAINS
            ENDDO 
            !print*, "AC_energies", energies 
            CALL section_vals_val_get(adiab_section, "DO_SPEEDUP_LJ", l_val=do_speedup_lj)
+           CALL section_vals_val_get(adiab_section, "DO_SPEEDUP_INTRA", l_val=do_speedup_intra)
            !do_speedup_lj = .TRUE.
-           CALL add_energies_forces(energies, global_forces, my_energies, my_global_forces, do_speedup_lj)
+           !do_speedup_intra = .TRUE.
+           CALL add_energies_forces(energies, global_forces, my_energies, my_global_forces, do_speedup_lj, do_speedup_intra)
            !print*, "AC_energies", my_energies 
            CALL adiab_fssh_routines(particles_mix, virial_mix, results_mix,   &
                 my_global_forces, my_energies, virials, results, nforce_eval,&
                 map_index, mapping_section,adiab_section,mixed_env,my_itimes, &
                 adiab_keyword, mixed_energy%pot,atomic_kinds, &
                 local_particles)
-           IF (do_speedup_lj) THEN
-              DO iforce_eval=1, nforce_eval -1
+           !IF (do_speedup_lj) THEN
+              DO iforce_eval=1, SIZE(my_global_forces)
                  DEALLOCATE(my_global_forces(iforce_eval)%forces)
               ENDDO
-           ELSE
-              DO iforce_eval=1, nforce_eval 
-                 DEALLOCATE(my_global_forces(iforce_eval)%forces)
-              ENDDO
-           ENDIF
+           !ELSE
+           !   DO iforce_eval=1, nforce_eval 
+           !      DEALLOCATE(my_global_forces(iforce_eval)%forces)
+           !   ENDDO
+           !ENDIF
            DEALLOCATE(my_global_forces)
            DEALLOCATE(my_energies)
         !CASE("FROZEN_HAMILTONIAN")
@@ -1206,19 +1208,19 @@ CONTAINS
   END SUBROUTINE mixed_energy_forces
 
 
-  SUBROUTINE add_energies_forces(energies, global_forces, my_energies, my_global_forces, do_speedup_lj)
+  SUBROUTINE add_energies_forces(energies, global_forces, my_energies, my_global_forces, do_speedup_lj, do_speedup_intra)
     TYPE(mixed_force_type), DIMENSION(:), &
       POINTER                                :: global_forces
     REAL(KIND=dp), DIMENSION(:), POINTER     :: energies
     TYPE(mixed_force_type), DIMENSION(:), &
       POINTER                                :: my_global_forces
     REAL(KIND=dp), DIMENSION(:), POINTER     :: my_energies
-    LOGICAL :: do_speedup_lj
+    LOGICAL, INTENT(IN) :: do_speedup_lj, do_speedup_intra
 
-    INTEGER :: i, natom
+    INTEGER :: i, natom, number_state
 
     NULLIFY(my_global_forces, my_energies)
-    if (do_speedup_lj) then
+    if ((do_speedup_lj).AND.(.NOT.(do_speedup_intra))) then
        ALLOCATE(my_global_forces(SIZE(energies)-1))
        ALLOCATE(my_energies(SIZE(energies)-1))
        DO i = 2, SIZE(energies)
@@ -1227,7 +1229,17 @@ CONTAINS
           ALLOCATE(my_global_forces(i-1)%forces( 3,natom))
           my_global_forces(i-1)%forces = global_forces(i)%forces + global_forces(1)%forces
        ENDDO
-    ELSE
+    else if ((do_speedup_lj).AND.(do_speedup_intra)) then
+       number_state = (SIZE(energies)-1) /2
+       ALLOCATE(my_global_forces( number_state ))
+       ALLOCATE(my_energies(      number_state ))
+       DO i = 1, number_state
+          my_energies(i) =  energies(1) + energies(2*i) - energies(2*i + 1)
+          natom = SIZE(global_forces(i)%forces(:,:), 2)
+          ALLOCATE(my_global_forces(i)%forces( 3,natom))
+          my_global_forces(i)%forces =  global_forces(1)%forces + global_forces(2*i)%forces - global_forces(2*i + 1)%forces
+       ENDDO
+    else if ((.NOT.(do_speedup_lj)).AND.(.NOT.(do_speedup_intra))) then
        ALLOCATE(my_global_forces(SIZE(energies)))
        ALLOCATE(my_energies(SIZE(energies)))
        DO i = 1, SIZE(energies)
@@ -1236,6 +1248,8 @@ CONTAINS
           ALLOCATE(my_global_forces(i)%forces( 3,natom))
           my_global_forces(i)%forces = global_forces(i)%forces
         ENDDO
+    ELSE
+        CPABORT("Cannot do speed-up intra without speedup-lj")
     ENDIF
 
   END SUBROUTINE add_energies_forces

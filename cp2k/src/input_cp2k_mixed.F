@@ -189,6 +189,18 @@ CONTAINS
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
 
+    CALL keyword_create(keyword, name="DO_SPEEDUP_INTRA",&
+         description="If DO_SPEEDUP_INTRA is TRUE, the first force_eval section will only calculate LJ interactions,"//&
+                      "the pair force eval section will calculate intramolecular"//&
+                      "interaction for one charged molecule only and the impair for one neutral"//&
+                      "molecule only. WARNING: DO_SPEEDUP_LJ should be put to TRUE.",&
+         usage="True", default_l_val=.False., &
+         lone_keyword_l_val=.True.) 
+        ! type_of_var=char_t,&
+        ! n_var=-1)
+    CALL section_add_keyword(subsection,keyword)
+    CALL keyword_release(keyword)
+
 
     CALL keyword_create(keyword, name="METHOD_PROPAGATION",&
          description="Defines the methods to obtain the adiabatic forces.",&
