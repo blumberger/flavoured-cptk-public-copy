@@ -318,7 +318,7 @@ subroutine make_adiabX(mol, E_t, NACE_ad_t, X) !deltat, NACE)
 end subroutine make_adiabX
 
 
-subroutine surf_hop_type(adiab_section, C1, C2, deltat, old_state, &
+subroutine surf_hop_type(adiab_section, C1, C2, deltat, &
            new_state, attempt_hop, decohere_criterion, sh_print_env, aom_env)
 !Choose whether doing surface hopping with trivial hopping correction or without
 !it following the old code 
@@ -326,7 +326,6 @@ subroutine surf_hop_type(adiab_section, C1, C2, deltat, old_state, &
        TYPE(section_vals_type), POINTER               :: adiab_section
        REAL(KIND=dp), dimension(:,:), intent(in) :: C1, C2
        REAL(KIND=dp), intent(in) :: deltat
-       integer, intent(inout) :: old_state
        INTEGER, INTENT(INOUT)        :: new_state
        LOGICAL, INTENT(OUT)        :: attempt_hop
        REAL(KIND=dp), INTENT(IN) :: decohere_criterion
@@ -348,13 +347,13 @@ subroutine surf_hop_type(adiab_section, C1, C2, deltat, old_state, &
        CASE("TRIVIAL_CORR_WITH_OVERLAP")
             sh_print_env%additional_prints = .TRUE.
             do_trivial_corr = .TRUE.
-            CALL modified_surfacehop(C1, C2, deltat, old_state, &
+            CALL modified_surfacehop(C1, C2, deltat, &
               new_state, attempt_hop, decohere_criterion, &
-              sh_print_env, aom_env, adiab_section, do_trivial_corr, overlap_key)
+              sh_print_env, aom_env, adiab_section, do_trivial_corr)
        CASE("TRIVIAL_HOP_CORRECT")
             sh_print_env%additional_prints = .TRUE.
             do_trivial_corr = .TRUE.
-            CALL modified_surfacehop(C1, C2, deltat, old_state, &
+            CALL modified_surfacehop(C1, C2, deltat, &
               new_state, attempt_hop, decohere_criterion, &
               sh_print_env, aom_env, adiab_section, do_trivial_corr)
        CASE("UNMODIFIED_SURF_HOP")
@@ -362,7 +361,7 @@ subroutine surf_hop_type(adiab_section, C1, C2, deltat, old_state, &
             !CALL  surfacehop(deltat, old_state, C2, &
             !  new_state, attempt_hop, decohere_criterion, sh_print_env, &
             !                                  aom_env, adiab_section)
-            CALL modified_surfacehop(C1, C2, deltat, old_state, &
+            CALL modified_surfacehop(C1, C2, deltat, &
               new_state, attempt_hop, decohere_criterion, &
               sh_print_env, aom_env, adiab_section, do_trivial_corr) 
        CASE DEFAULT
@@ -566,15 +565,14 @@ end if
 END SUBROUTINE adiab_overlap_check
 
 
-subroutine modified_surfacehop(C1, C2, deltat, old_state, &
+subroutine modified_surfacehop(C1, C2, deltat, &
               new_state, attempt_hop, decohere_criterion, &
               sh_print_env, aom_env, adiab_section,       & 
-              do_trivial_corr, overlap_key) 
+              do_trivial_corr) 
         !using the method outlined in John Tully's Electronic Transitions paper
         !calculate the probability of the molecular dynamics switching to evolve on a different potential surface
         REAL(KIND=dp), dimension(:,:), intent(in) :: C1, C2
         REAL(KIND=dp), intent(in) :: deltat
-        integer, intent(inout) :: old_state
         INTEGER, INTENT(INOUT)        :: new_state
         LOGICAL, INTENT(OUT)        :: attempt_hop
         REAL(KIND=dp), INTENT(IN) :: decohere_criterion
@@ -582,7 +580,6 @@ subroutine modified_surfacehop(C1, C2, deltat, old_state, &
         TYPE(aom_env_type), INTENT(INOUT)             :: aom_env
         TYPE(section_vals_type), POINTER              :: adiab_section
         LOGICAL, INTENT(IN)                           :: do_trivial_corr
-        LOGICAL, OPTIONAL, INTENT(IN)                 :: overlap_key
 
         CHARACTER(len=*), PARAMETER :: routineN ='modified_surfacehop', &
         routineP = moduleN//':'//routineN
@@ -810,10 +807,9 @@ end subroutine modified_surfacehop
 !> \brief I've divided the calc_adiab_nace subroutine into discrete chunks in
 !         order to profiling it with a finer resolution. This is chunk 1.
 !**********************************************************************************
-subroutine nace1(aom_env, adiab_section, mol, deltat)
+subroutine nace1(aom_env, mol, deltat)
    
         TYPE(aom_env_type)                         :: aom_env
-        TYPE(section_vals_type), POINTER           :: adiab_section
         INTEGER                                    :: mol, i, j, sub, add
         REAL(KIND=dp)                              :: deltat
 
@@ -859,6 +855,14 @@ CALL DGEMM('T', 'N', mol, mol, mol, 1.0_DP, &
             aom_env%adiab_nace_env%T2, mol, &       ! diab_D = TST
             0.0_DP, aom_env%adiab_nace_env%diab_D, mol)
 
+
+! SHOULD CHECK IF THIS IS FASTER THAN LAPACK.
+!    IF IT IS: TRY TO WRITE A SYMMETRIC MATRIX MULTIPLIER IF NOT DON'T AND USE
+!    LAPACK
+! IS THIS SUBROUTINE NECESSARY (TST + TDT = D, isn't D very small?) -TEST IT!
+
+
+
 ! This part takes advantage of the sparse nature of the DS matrix
 ! Again the mat-mat mult is done in 2 steps:
 !1. T2 = DS*T1
@@ -892,12 +896,10 @@ end subroutine nace1
 !> \brief I've divided the calc_adiab_nace subroutine into discrete chunks in
 !         order to profiling it with a finer resolution. This is chunk 2.
 !**********************************************************************************
-subroutine nace2(aom_env, adiab_section, mol, deltat, print_here)
+subroutine nace2(aom_env, mol, print_here)
    
         TYPE(aom_env_type)                         :: aom_env
-        TYPE(section_vals_type), POINTER           :: adiab_section
         INTEGER                                    :: mol
-        REAL(KIND=dp)                              :: deltat
         LOGICAL                                    :: print_here
 
         CHARACTER(len=*), PARAMETER :: routineN ='nace2', &
@@ -1008,10 +1010,9 @@ end subroutine nace2
 !> \brief I've divided the calc_adiab_nace subroutine into discrete chunks in
 !         order to profiling it with a finer resolution. This is chunk 3.
 !**********************************************************************************
-subroutine nace3(aom_env, adiab_section)
+subroutine nace3(aom_env)
    
         TYPE(aom_env_type)                         :: aom_env
-        TYPE(section_vals_type), POINTER           :: adiab_section
 
         CHARACTER(len=*), PARAMETER :: routineN ='nace3', &
                     routineP = moduleN//':'//routineN
@@ -1029,10 +1030,9 @@ end subroutine nace3
 !> \brief I've divided the calc_adiab_nace subroutine into discrete chunks in
 !         order to profiling it with a finer resolution. This is chunk 4.
 !**********************************************************************************
-subroutine nace4(aom_env, adiab_section, mol, sum_)
+subroutine nace4(aom_env, mol)
    
         TYPE(aom_env_type)                         :: aom_env
-        TYPE(section_vals_type), POINTER           :: adiab_section
         INTEGER                                    :: mol
         REAL(KIND=dp)                              :: sum_
 
@@ -1067,10 +1067,9 @@ end subroutine nace4
 !> \brief I've divided the calc_adiab_nace subroutine into discrete chunks in
 !         order to profiling it with a finer resolution. This is chunk 5.
 !**********************************************************************************
-subroutine nace5(aom_env, adiab_section)
+subroutine nace5(aom_env)
    
         TYPE(aom_env_type)                         :: aom_env
-        TYPE(section_vals_type), POINTER           :: adiab_section
 
         CHARACTER(len=*), PARAMETER :: routineN ='nace5', &
                     routineP = moduleN//':'//routineN
@@ -1086,17 +1085,13 @@ end subroutine nace5
 !> \brief I've divided the calc_adiab_nace subroutine into discrete chunks in
 !         order to profiling it with a finer resolution. This is chunk 6.
 !**********************************************************************************
-subroutine nace6(aom_env, adiab_section, mol, deltat)
+subroutine nace6(aom_env, mol)
    
         TYPE(aom_env_type)                         :: aom_env
-        TYPE(section_vals_type), POINTER           :: adiab_section
         INTEGER                                    :: mol
-        REAL(KIND=dp)                              :: deltat
 
         CHARACTER(len=*), PARAMETER :: routineN ='nace6', &
                     routineP = moduleN//':'//routineN
-
-        INTEGER                                    :: i,j,k,l
 
         ! For this part add the 2 matricies together
 
@@ -1147,10 +1142,9 @@ end subroutine nace6
 !> \brief I've divided the calc_adiab_nace subroutine into discrete chunks in
 !         order to profiling it with a finer resolution. This is chunk 7.
 !**********************************************************************************
-subroutine nace7(aom_env, adiab_section, mol)
+subroutine nace7(aom_env, mol)
    
         TYPE(aom_env_type)                         :: aom_env
-        TYPE(section_vals_type), POINTER           :: adiab_section
         INTEGER                                    :: mol
 
         CHARACTER(len=*), PARAMETER :: routineN ='nace7', &
@@ -1187,27 +1181,49 @@ subroutine calc_adiab_nace(aom_env, adiab_section)
         TYPE(aom_env_type)                         :: aom_env
         TYPE(section_vals_type), POINTER           :: adiab_section
 
-       CHARACTER(len=*), PARAMETER :: routineN ='calc_adiab_nace', &
-       routineP = moduleN//':'//routineN
+        CHARACTER(len=*), PARAMETER :: routineN ='calc_adiab_nace', &
+          routineP = moduleN//':'//routineN
 
-        integer :: i, j, mol, k, l, new_index
-        REAL(KIND=dp)                              :: deltat, max_val, threshold
-        LOGICAL                                    :: go_on, print_here, do_sign_change
-        REAL(kind=dp)  :: sum_
+        INTEGER                                    :: mol
+        LOGICAL                                    :: print_here
+        REAL(kind=dp)                              :: t1, t2, t3, t4, t5,&
+                                                      t6, t7, t8, tT
 
         mol = size(aom_env%Stt,1)
-        deltat = aom_env%deltat
 
 
         CALL section_vals_val_get(adiab_section,"PRINT_MORE", &
                                                    l_val=print_here)
-        CALL nace1(aom_env, adiab_section, mol, aom_env%deltat)
-        CALL nace2(aom_env, adiab_section, mol, aom_env%deltat, print_here)
-        CALL nace3(aom_env, adiab_section)
-        CALL nace4(aom_env, adiab_section, mol, sum_)
-        CALL nace5(aom_env, adiab_section)
-        CALL nace6(aom_env, adiab_section, mol, deltat)
-        CALL nace7(aom_env, adiab_section, mol)
+        CALL CPU_TIME(t1)
+        CALL nace1(aom_env, mol, aom_env%deltat)
+        CALL CPU_TIME(t2)
+        CALL nace2(aom_env, mol, print_here)
+        CALL CPU_TIME(t3)
+        CALL nace3(aom_env)
+        CALL CPU_TIME(t4)
+        CALL nace4(aom_env, mol)
+        CALL CPU_TIME(t5)
+        CALL nace5(aom_env)
+        CALL CPU_TIME(t6)
+        CALL nace6(aom_env, mol)
+        CALL CPU_TIME(t7)
+        CALL nace7(aom_env, mol)
+        CALL CPU_TIME(t8)
+
+        tT = t8-t1
+        !PRINT *, "" 
+        !PRINT *, "" 
+        !PRINT *, "   Time Taken = ", tT 
+        !WRITE(6, "(A, F5.2, A)") "       * Percentage Time 1 = ", 100*(t2-t1)/tT, "%"
+        !WRITE(6, "(A, F5.2, A)") "       * Percentage Time 2 = ", 100*(t3-t2)/tT, "%" 
+        !WRITE(6, "(A, F5.2, A)") "       * Percentage Time 3 = ", 100*(t4-t3)/tT, "%" 
+        !WRITE(6, "(A, F5.2, A)") "       * Percentage Time 4 = ", 100*(t5-t4)/tT, "%" 
+        !WRITE(6, "(A, F5.2, A)") "       * Percentage Time 5 = ", 100*(t6-t5)/tT, "%" 
+        !WRITE(6, "(A, F5.2, A)") "       * Percentage Time 6 = ", 100*(t7-t6)/tT, "%" 
+        !WRITE(6, "(A, F5.2, A)") "       * Percentage Time 7 = ", 100*(t8-t7)/tT, "%" 
+        !PRINT *, "" 
+        !PRINT *, "" 
+        
  
 end subroutine calc_adiab_nace
 
@@ -1735,22 +1751,19 @@ FUNCTION NORM2(array) RESULT(norm)
 END FUNCTION NORM2
 
 
-subroutine calcforces(state, Hin, C, nacv, NN, atoms, scaling, cbar, Fin, forces_adiab, & 
-                  ext_pres, analytics,  exact_forces)
+subroutine calcforces(state, Hin, C, nacv, atoms, scaling, cbar, Fin, forces_adiab, & 
+                  ext_pres)
 
         !per our full force expression derivation, this calculates the adiabatic forces
         !on each atom
         integer, intent(in) :: state
         REAL(KIND=dp), intent(in), dimension(:,:) :: Hin, C
         REAL(KIND=dp), intent(in), dimension(:,:,:) :: nacv
-        integer, intent(in), dimension(:,:) :: NN
         integer, intent(in) :: atoms
         REAL(KIND=dp), intent(in) :: scaling, cbar
         REAL(KIND=dp), intent(in), dimension(:,:,:) :: Fin
         REAL(KIND=dp), dimension(:,:), POINTER                  :: forces_adiab
         LOGICAL, dimension(:), INTENT(IN)       :: ext_pres
-        LOGICAL, INTENT(IN), OPTIONAL  :: analytics
-        REAL(KIND=dp), dimension(:,:),OPTIONAL, INTENT(OUT) :: exact_forces
 
         CHARACTER(len=*), PARAMETER :: routineN ='calcforces', &
                                routineP = moduleN//':'//routineN
@@ -2518,13 +2531,13 @@ ENDIF
 
 
    SUBROUTINE total_momentum(velocities, atomic_kind_set, nparticle_kind, &
-                               local_particles, force_env) 
+                               local_particles)!, force_env) 
         REAL(kind=dp), DIMENSION(:,:),POINTER    :: velocities
         TYPE(atomic_kind_type), DIMENSION(:), &
              POINTER                                :: atomic_kind_set
         INTEGER, INTENT(IN)                      :: nparticle_kind
         TYPE(distribution_1d_type), POINTER      :: local_particles
-        TYPE(force_env_type), POINTER            :: force_env
+        !TYPE(force_env_type), POINTER            :: force_env
  
         CHARACTER(len=*), PARAMETER :: routineN = 'total_momentum', &
         routineP = moduleN//':'//routineN

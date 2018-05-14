@@ -35,7 +35,6 @@ MODULE non_adiabatic_utils
      USE aom_utils,                    ONLY: makeX,    &
                                              make_adiabX,      &
                                              adiabaticity,   &
-                                             surf_hop_type,     &
                                              calcforces,     &
                                              read_listcoeff, &
                                              choose_firstadiabat, &
@@ -773,7 +772,7 @@ END SUBROUTINE classically_forbidden_hops
                                          .ge. mixing_threshold) then
                          !if there is mixing then we use force otherwise we use !pure dephasing
                          call calcforces(i ,-AIMAG(aom_env%H_tp), aom_env%C_tp, aom_env%nacv, &
-                              aom_env%NN, aom_env%atoms, &
+                              aom_env%atoms, &
                               aom_env%scaling, aom_env%cbar, aom_env%F, my_forces_adiab, &
                              aom_env%ext_pres)
                          tau(i) = 0.0D0
@@ -822,9 +821,9 @@ END SUBROUTINE classically_forbidden_hops
                                          .ge. mixing_threshold) then
                          !if there is mixing then we use force otherwise we use !pure dephasing
                          call calcforces(i ,-AIMAG(aom_env%H_tp), aom_env%C_tp, aom_env%nacv, &
-                              aom_env%NN, aom_env%atoms, &
+                              aom_env%atoms, &
                               aom_env%scaling, aom_env%cbar, aom_env%F, my_forces_adiab, &
-                             aom_env%ext_pres)
+                              aom_env%ext_pres)
                          tau(i) = 0.0D0
                          tau_forces(i) =  0.0D0
                           tau_pure_deph(i) = 0.0D0
