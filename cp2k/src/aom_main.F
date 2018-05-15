@@ -304,7 +304,7 @@ CONTAINS
         IF ((aom_env%new_state).EQ.0) aom_env%new_state = mat
      ELSE IF (.NOT.my_bo_keyword) THEN ! THEN IT IS A FSSH RUN
             call surf_hop_type(adiab_section, aom_env%C_t, aom_env%C_tp,   &
-                                 deltatMD, aom_env%active_state, &
+                                 deltatMD, &
                                  aom_env%new_state, &
                                  aom_env%attempt_hop, &
                                  decohere_criterion, &
