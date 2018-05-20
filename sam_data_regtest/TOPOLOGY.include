@@ -1,0 +1,4542 @@
+
+                
+            &CELL
+       			ABC                    160.0    60.0    60.0     
+       			PERIODIC  XYZ
+     		&END CELL
+
+                
+                &KIND CP
+                        ELEMENT C
+                &END KIND
+                &KIND H
+                        ELEMENT H
+                &END KIND
+                &KIND CN
+                        ELEMENT C
+                &END KIND
+
+                &KIND Ne
+                        ELEMENT Ne
+                &END KIND
+            
+                &TOPOLOGY
+                        COORD_FILE_FORMAT XYZ
+                        COORD_FILE_NAME   pos-init.xyz
+                        NUMBER_OF_ATOMS                   685
+                        CONN_FILE_FORMAT  MOL_SET
+                        &MOL_SET
+                
+                           @IF ${ACTIVE_MOL} == 1
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 1
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 2
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 2
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 3
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 3
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 4
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 4
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 5
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 5
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 6
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 6
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 7
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 7
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 8
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 8
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 9
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 9
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 10
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 10
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 11
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 11
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 12
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 12
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 13
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 13
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 14
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 14
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 15
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 15
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 16
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 16
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 17
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 17
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 18
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 18
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 19
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 19
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 20
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 20
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 21
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 21
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 22
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 22
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 23
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 23
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 24
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 24
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 25
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 25
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 26
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 26
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 27
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 27
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 28
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 28
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 29
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 29
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                           @IF ${ACTIVE_MOL} == 30
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_CHARGE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                            @IF ${ACTIVE_MOL} /= 30
+                                &MOLECULE
+                                    NMOL              1
+                                    CONN_FILE_NAME    ../topologies/ETHYLENE_NEUTRE.psf
+                                    CONN_FILE_FORMAT  UPSF
+                               &END MOLECULE
+                            @ENDIF
+                   
+                            &MOLECULE
+                                NMOL              505
+                                CONN_FILE_NAME    ../topologies/Ne.psf
+                                CONN_FILE_FORMAT  UPSF
+                            &END MOLECULE
+                    
+                        &END MOL_SET
+                        &DUMP_PSF
+                                &EACH
+                                   MD          1
+                                &END EACH
+                                FILENAME ./input
+                        &END DUMP_PSF
+                &END TOPOLOGY
+                
+                
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 1	4
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 7	10
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 1	4
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 13	16
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 1	4
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 19	22
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 1	4
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 25	28
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 1	4
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 31	34
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 1	4
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 37	40
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 1	4
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 43	46
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 1	4
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 49	52
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 1	4
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 55	58
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 1	4
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 61	64
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 1	4
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 67	70
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 1	4
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 73	76
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 1	4
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 79	82
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 1	4
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 13	16
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 7	10
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 13	16
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 19	22
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 13	16
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 25	28
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 13	16
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 31	34
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 13	16
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 37	40
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 13	16
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 43	46
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 13	16
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 49	52
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 13	16
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 55	58
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 13	16
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 61	64
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 13	16
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 67	70
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 13	16
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 73	76
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 13	16
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 79	82
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 13	16
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 13	16
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 91	94
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 13	16
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 97	100
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 25	28
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 7	10
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 25	28
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 19	22
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 25	28
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 31	34
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 25	28
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 37	40
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 25	28
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 43	46
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 25	28
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 49	52
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 25	28
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 55	58
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 25	28
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 61	64
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 25	28
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 67	70
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 25	28
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 73	76
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 25	28
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 79	82
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 25	28
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 25	28
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 91	94
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 25	28
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 97	100
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 25	28
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 103	106
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 25	28
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 109	112
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 37	40
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 7	10
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 37	40
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 19	22
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 37	40
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 31	34
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 37	40
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 43	46
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 37	40
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 49	52
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 37	40
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 55	58
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 37	40
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 61	64
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 37	40
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 67	70
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 37	40
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 73	76
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 37	40
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 79	82
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 37	40
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 37	40
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 91	94
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 37	40
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 97	100
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 37	40
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 103	106
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 37	40
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 109	112
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 37	40
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 115	118
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 37	40
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 121	124
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 49	52
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 7	10
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 49	52
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 19	22
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 49	52
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 31	34
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 49	52
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 43	46
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 49	52
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 55	58
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 49	52
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 61	64
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 49	52
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 67	70
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 49	52
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 73	76
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 49	52
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 79	82
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 49	52
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 49	52
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 91	94
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 49	52
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 97	100
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 49	52
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 103	106
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 49	52
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 109	112
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 49	52
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 115	118
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 49	52
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 121	124
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 49	52
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 127	130
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 49	52
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 133	136
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 61	64
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 7	10
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 61	64
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 19	22
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 61	64
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 31	34
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 61	64
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 43	46
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 61	64
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 55	58
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 61	64
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 67	70
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 61	64
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 73	76
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 61	64
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 79	82
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 61	64
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 61	64
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 91	94
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 61	64
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 97	100
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 61	64
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 103	106
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 61	64
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 109	112
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 61	64
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 115	118
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 61	64
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 121	124
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 61	64
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 127	130
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 61	64
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 133	136
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 61	64
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 139	142
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 61	64
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 145	148
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 73	76
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 7	10
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 73	76
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 19	22
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 73	76
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 31	34
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 73	76
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 43	46
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 73	76
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 55	58
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 73	76
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 67	70
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 73	76
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 79	82
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 73	76
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 73	76
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 91	94
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 73	76
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 97	100
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 73	76
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 103	106
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 73	76
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 109	112
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 73	76
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 115	118
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 73	76
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 121	124
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 73	76
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 127	130
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 73	76
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 133	136
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 73	76
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 139	142
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 73	76
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 145	148
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 73	76
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 151	154
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 73	76
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 157	160
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 7	10
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 19	22
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 31	34
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 43	46
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 55	58
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 67	70
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 79	82
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 91	94
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 97	100
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 103	106
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 109	112
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 115	118
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 121	124
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 127	130
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 133	136
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 139	142
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 145	148
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 151	154
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 157	160
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 163	166
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 85	88
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 169	172
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 97	100
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 19	22
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 97	100
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 31	34
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 97	100
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 43	46
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 97	100
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 55	58
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 97	100
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 67	70
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 97	100
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 79	82
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 97	100
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 91	94
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 97	100
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 103	106
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 97	100
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 109	112
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 97	100
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 115	118
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 97	100
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 121	124
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 97	100
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 127	130
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 97	100
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 133	136
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 97	100
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 139	142
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 97	100
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 145	148
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 97	100
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 151	154
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 97	100
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 157	160
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 97	100
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 163	166
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 97	100
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 169	172
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 97	100
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 175	178
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 109	112
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 31	34
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 109	112
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 43	46
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 109	112
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 55	58
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 109	112
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 67	70
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 109	112
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 79	82
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 109	112
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 91	94
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 109	112
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 103	106
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 109	112
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 115	118
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 109	112
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 121	124
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 109	112
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 127	130
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 109	112
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 133	136
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 109	112
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 139	142
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 109	112
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 145	148
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 109	112
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 151	154
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 109	112
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 157	160
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 109	112
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 163	166
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 109	112
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 169	172
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 109	112
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 175	178
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 121	124
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 43	46
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 121	124
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 55	58
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 121	124
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 67	70
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 121	124
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 79	82
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 121	124
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 91	94
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 121	124
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 103	106
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 121	124
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 115	118
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 121	124
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 127	130
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 121	124
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 133	136
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 121	124
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 139	142
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 121	124
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 145	148
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 121	124
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 151	154
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 121	124
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 157	160
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 121	124
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 163	166
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 121	124
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 169	172
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 121	124
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 175	178
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 133	136
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 55	58
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 133	136
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 67	70
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 133	136
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 79	82
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 133	136
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 91	94
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 133	136
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 103	106
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 133	136
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 115	118
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 133	136
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 127	130
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 133	136
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 139	142
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 133	136
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 145	148
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 133	136
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 151	154
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 133	136
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 157	160
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 133	136
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 163	166
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 133	136
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 169	172
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 133	136
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 175	178
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 145	148
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 67	70
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 145	148
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 79	82
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 145	148
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 91	94
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 145	148
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 103	106
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 145	148
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 115	118
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 145	148
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 127	130
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 145	148
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 139	142
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 145	148
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 151	154
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 145	148
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 157	160
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 145	148
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 163	166
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 145	148
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 169	172
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 145	148
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 175	178
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 157	160
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 79	82
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 157	160
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 91	94
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 157	160
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 103	106
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 157	160
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 115	118
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 157	160
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 127	130
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 157	160
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 139	142
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 157	160
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 151	154
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 157	160
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 163	166
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 157	160
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 169	172
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 157	160
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 175	178
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 169	172
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 91	94
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 169	172
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 103	106
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 169	172
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 115	118
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 169	172
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 127	130
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 169	172
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 139	142
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 169	172
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 151	154
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 169	172
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 163	166
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+
+                        &COLVAR
+                             &DISTANCE
+                                  &POINT
+                                       ATOMS 169	172
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  &POINT
+                                       ATOMS 175	178
+                                       TYPE  GEO_CENTER
+                                  &END POINT
+                                  POINTS 1 2
+                             &END DISTANCE
+                        &END COLVAR
+                        
+
+                        
+            

@@ -1,0 +1,2620 @@
+        &CONSTRAINT
+
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                1
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                2
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          8.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                3
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          12.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                4
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          16.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                5
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          20.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                6
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          24.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                7
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          28.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                8
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          32.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                9
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          36.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                10
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          40.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                11
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          44.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                12
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          48.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                13
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          52.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                14
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          56.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                15
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                16
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                17
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          8.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                18
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          12.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                19
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          16.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                20
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          20.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                21
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          24.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                22
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          28.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                23
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          32.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                24
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          36.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                25
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          40.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                26
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          44.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                27
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          48.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                28
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          52.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                29
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          56.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                30
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          12.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                31
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                32
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                33
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          8.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                34
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          12.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                35
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          16.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                36
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          20.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                37
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          24.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                38
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          28.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                39
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          32.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                40
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          36.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                41
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          40.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                42
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          44.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                43
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          48.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                44
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          52.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                45
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          56.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                46
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          20.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                47
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          12.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                48
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                49
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                50
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          8.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                51
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          12.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                52
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          16.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                53
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          20.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                54
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          24.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                55
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          28.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                56
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          32.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                57
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          36.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                58
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          40.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                59
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          44.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                60
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          48.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                61
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          52.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                62
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          56.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                63
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          28.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                64
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          20.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                65
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          12.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                66
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                67
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                68
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          8.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                69
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          12.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                70
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          16.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                71
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          20.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                72
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          24.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                73
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          28.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                74
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          32.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                75
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          36.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                76
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          40.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                77
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          44.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                78
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          48.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                79
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          52.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                80
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          56.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                81
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          36.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                82
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          28.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                83
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          20.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                84
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          12.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                85
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                86
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                87
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          8.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                88
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          12.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                89
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          16.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                90
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          20.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                91
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          24.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                92
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          28.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                93
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          32.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                94
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          36.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                95
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          40.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                96
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          44.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                97
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          48.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                98
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          52.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                99
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          56.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                100
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          44.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                101
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          36.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                102
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          28.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                103
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          20.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                104
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          12.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                105
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                106
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                107
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          8.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                108
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          12.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                109
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          16.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                110
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          20.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                111
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          24.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                112
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          28.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                113
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          32.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                114
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          36.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                115
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          40.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                116
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          44.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                117
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          48.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                118
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          52.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                119
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          56.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                120
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          52.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                121
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          44.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                122
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          36.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                123
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          28.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                124
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          20.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                125
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          12.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                126
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                127
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                128
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          8.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                129
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          12.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                130
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          16.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                131
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          20.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                132
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          24.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                133
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          28.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                134
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          32.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                135
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          36.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                136
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          40.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                137
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          44.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                138
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          48.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                139
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          52.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                140
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          56.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                141
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          52.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                142
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          44.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                143
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          36.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                144
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          28.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                145
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          20.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                146
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          12.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                147
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                148
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                149
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          8.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                150
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          12.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                151
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          16.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                152
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          20.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                153
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          24.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                154
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          28.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                155
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          32.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                156
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          36.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                157
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          40.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                158
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          44.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                159
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          48.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                160
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          52.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                161
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          52.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                162
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          44.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                163
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          36.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                164
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          28.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                165
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          20.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                166
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          12.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                167
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                168
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                169
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          8.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                170
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          12.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                171
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          16.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                172
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          20.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                173
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          24.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                174
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          28.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                175
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          32.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                176
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          36.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                177
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          40.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                178
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          44.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                179
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          52.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                180
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          44.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                181
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          36.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                182
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          28.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                183
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          20.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                184
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          12.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                185
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                186
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                187
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          8.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                188
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          12.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                189
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          16.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                190
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          20.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                191
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          24.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                192
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          28.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                193
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          32.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                194
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          36.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                195
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          52.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                196
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          44.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                197
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          36.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                198
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          28.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                199
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          20.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                200
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          12.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                201
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                202
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                203
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          8.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                204
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          12.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                205
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          16.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                206
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          20.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                207
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          24.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                208
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          28.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                209
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          52.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                210
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          44.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                211
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          36.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                212
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          28.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                213
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          20.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                214
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          12.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                215
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                216
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                217
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          8.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                218
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          12.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                219
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          16.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                220
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          20.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                221
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          52.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                222
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          44.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                223
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          36.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                224
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          28.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                225
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          20.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                226
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          12.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                227
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                228
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                229
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          8.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                230
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          12.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                231
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          52.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                232
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          44.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                233
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          36.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                234
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          28.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                235
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          20.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                236
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          12.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                237
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+     
+
+                     &COLLECTIVE
+                          &RESTRAINT
+                                 K              0.005000
+                          &END RESTRAINT
+                          COLVAR                238
+                          INTERMOLECULAR
+                          TARGET      [angstrom]          4.000000
+                     &END COLLECTIVE
+                                 
+             &END CONSTRAINT

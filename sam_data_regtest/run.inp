@@ -1,0 +1,223 @@
+
+&GLOBAL
+  BLACS_GRID             SQUARE
+  PREFERRED_FFT_LIBRARY  FFTW
+  PRINT_LEVEL            LOW
+  PROGRAM_NAME           CP2K
+  PROJECT_NAME           run
+  RUN_TYPE               MD
+&END GLOBAL
+&MOTION
+	&MD
+        ENSEMBLE      NVE
+        STEPS         1000
+        TIMESTEP      0.1
+        TEMPERATURE   1000
+        &THERMOSTAT
+            REGION  GLOBAL
+            &NOSE
+                 LENGTH      3
+                 YOSHIDA     3
+                 TIMECON     1000
+                 MTS         2
+            &END NOSE
+        &END THERMOSTAT
+   	&END MD
+  	&PRINT
+	 &TRAJECTORY  LOW
+            FORMAT  XYZ
+            &EACH
+                MD          100
+            &END EACH
+        &END TRAJECTORY
+        #&VELOCITIES  LOW
+        #    FORMAT  XYZ
+        #    &EACH
+        #        MD          20
+        #    &END EACH
+        #&END VELOCITIES
+        #&FORCES  LOW
+        #    FORMAT  XYZ
+        #    &EACH
+        #        MD          20
+        #    &END EACH
+        #&END FORCES
+        &RESTART_HISTORY OFF
+        &END RESTART_HISTORY
+        &RESTART OFF
+        &END RESTART
+   	&END PRINT
+   	@INCLUDE CONSTRAINT.include
+&END MOTION
+&MULTIPLE_FORCE_EVALS
+   FORCE_EVAL_ORDER 1..31
+   MULTIPLE_SUBSYS
+&END
+&FORCE_EVAL
+        METHOD MIXED
+        &MIXED
+                MIXING_TYPE ADIABATIC
+                &ADIABATIC
+                        METHOD_PROPAGATION                    FSSH
+                        METHOD_COUPLING                       AOM
+                        SURF_HOP_CHOICE                       TRIVIAL_HOP_CORRECT
+                        DECOHERENCE_CORRECTIONS               NO_DECO_CORR
+                        DECO_TIME                             EDC
+                        THRESHOLD_TAU_FORCES                  1e-20
+                        SPURIOUS_TRANSFER_CORR                T
+                        REORDERING_STATES_USING_OVERLAP       T
+                        TEMPERATURE_FG_WIDTH                  1000
+                        EDC_C                                 1.0
+                        EDC_E0                                0.0
+                        INITIALIZATION                        DIABATIC
+                        FIRST_DIABAT                          1
+                        FIRST_ADIABAT                         1
+                        SEED                                  823061426
+                        REPRESENTATION                        DIABATIC_BASIS
+                        RK_PROPAGATION                        DIABATIC_RK
+                        &AOM
+                             PSIGMA_FILE_NAME                 ../topologies/S_psigma.txt
+                             PPI_FILE_NAME                    ../topologies/S_ppi.txt
+                             NUMBER_DIABATIC_STATES                30
+                             NUMBER_ATOMS_PER_SITE                 6
+                             NUMBER_ORBITALS                       1
+                             CUT_OFF_BETWEEN_SITES [angstrom]      12.0
+                             CUT_OFF_CONNECTIVITY                  3.5
+                             SCALING_FACTOR   [hartree]            0.013
+                             DECOHERENCE_CRITERION                 1e-06
+                             CBAR                                  0.5082
+                             ATOMIC_OVERLAP_CUTOFF                 1e-17
+                             NUCLEAR_TIMESTEP  [fs]                0.1
+                             ELECTRONIC_PARTIAL_STEP               5
+                             ANALYTICS                             F
+                             CENTER_OF_MASS                        T
+                             METHOD_RESCALING                      NACV
+                             METHOD_ADIABATIC_NACV                 FAST
+                             METHOD_REVERSAL                       ALWAYS
+                             NACV_INCREMENT   [bohr]               0.0018872589
+                             @INCLUDE AOM_COEFF.include
+                        &END AOM
+                        &PRINT
+                            #&PVECS LOW
+                            #   &EACH
+                            #       MD          2
+                            #   &END EACH
+                            #&END PVECS
+
+                            &COEFFICIENTS  LOW
+                               &EACH
+                                   MD          1
+                               &END EACH
+                            &END COEFFICIENTS
+                            &HAMILTONIAN
+                               UNIT     hartree
+                               &EACH
+                                   MD          1
+                               &END EACH
+                            &END HAMILTONIAN
+                            #&HOP_NACV
+                            #   &EACH
+                            #       MD          1
+                            #   &END EACH
+                            #&END HOP_NACV
+                            #&NACV
+                            #   &EACH
+                            #       MD          10000
+                            #   &END EACH
+                            #&END NACV
+                            #&NACE
+                            #   &EACH
+                            #       MD          10000
+                            #   &END EACH
+                            #&END NACE
+                            &SH_INFO
+                               &EACH
+                                   MD          1
+                               &END EACH
+                            &END SH_INFO
+                            #&ADIABAT_ENERGIES
+                            #   &EACH
+                            #       MD          20
+                            #   &END EACH
+                            #&END ADIABAT_ENERGIES
+                        &END PRINT
+                &END ADIABATIC
+                &PRINT
+                        &PROGRAM_RUN_INFO LOW
+                                        &EACH
+                                                MD 1
+                                        &END EACH
+                        &END PROGRAM_RUN_INFO
+                &END PRINT
+        &END MIXED
+        &SUBSYS
+                #&COORD
+                #    @INCLUDE COORD.init
+                #:&END COORD
+                &VELOCITY
+                    @INCLUDE VELOC.init
+                &END VELOCITY
+                 @SET ACTIVE_MOL 1
+                @INCLUDE TOPOLOGY.include
+        &END SUBSYS
+&END FORCE_EVAL
+@SET  ACTIVE_MOL 1
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 2
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 3
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 4
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 5
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 6
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 7
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 8
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 9
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 10
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 11
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 12
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 13
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 14
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 15
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 16
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 17
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 18
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 19
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 20
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 21
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 22
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 23
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 24
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 25
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 26
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 27
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 28
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 29
+@INCLUDE FORCE_EVAL.include
+@SET  ACTIVE_MOL 30
+@INCLUDE FORCE_EVAL.include

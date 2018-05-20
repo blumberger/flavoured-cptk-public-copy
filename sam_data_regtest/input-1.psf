@@ -1,0 +1,872 @@
+PSF EXT
+
+         1 !NTITLE
+   CP2K generated DUMP of connectivity
+
+       685 !NATOM
+         1 MOL2     1        TIP      CN      CN      0.000000        12.010           0
+         2 MOL2     1        TIP      H       H       0.000000         1.008           0
+         3 MOL2     1        TIP      H       H       0.000000         1.008           0
+         4 MOL2     1        TIP      CN      CN      0.000000        12.010           0
+         5 MOL2     1        TIP      H       H       0.000000         1.008           0
+         6 MOL2     1        TIP      H       H       0.000000         1.008           0
+         7 MOL2     2        TIP      CN      CN      0.000000        12.010           0
+         8 MOL2     2        TIP      H       H       0.000000         1.008           0
+         9 MOL2     2        TIP      H       H       0.000000         1.008           0
+        10 MOL2     2        TIP      CN      CN      0.000000        12.010           0
+        11 MOL2     2        TIP      H       H       0.000000         1.008           0
+        12 MOL2     2        TIP      H       H       0.000000         1.008           0
+        13 MOL2     3        TIP      CN      CN      0.000000        12.010           0
+        14 MOL2     3        TIP      H       H       0.000000         1.008           0
+        15 MOL2     3        TIP      H       H       0.000000         1.008           0
+        16 MOL2     3        TIP      CN      CN      0.000000        12.010           0
+        17 MOL2     3        TIP      H       H       0.000000         1.008           0
+        18 MOL2     3        TIP      H       H       0.000000         1.008           0
+        19 MOL2     4        TIP      CN      CN      0.000000        12.010           0
+        20 MOL2     4        TIP      H       H       0.000000         1.008           0
+        21 MOL2     4        TIP      H       H       0.000000         1.008           0
+        22 MOL2     4        TIP      CN      CN      0.000000        12.010           0
+        23 MOL2     4        TIP      H       H       0.000000         1.008           0
+        24 MOL2     4        TIP      H       H       0.000000         1.008           0
+        25 MOL2     5        TIP      CN      CN      0.000000        12.010           0
+        26 MOL2     5        TIP      H       H       0.000000         1.008           0
+        27 MOL2     5        TIP      H       H       0.000000         1.008           0
+        28 MOL2     5        TIP      CN      CN      0.000000        12.010           0
+        29 MOL2     5        TIP      H       H       0.000000         1.008           0
+        30 MOL2     5        TIP      H       H       0.000000         1.008           0
+        31 MOL2     6        TIP      CN      CN      0.000000        12.010           0
+        32 MOL2     6        TIP      H       H       0.000000         1.008           0
+        33 MOL2     6        TIP      H       H       0.000000         1.008           0
+        34 MOL2     6        TIP      CN      CN      0.000000        12.010           0
+        35 MOL2     6        TIP      H       H       0.000000         1.008           0
+        36 MOL2     6        TIP      H       H       0.000000         1.008           0
+        37 MOL2     7        TIP      CN      CN      0.000000        12.010           0
+        38 MOL2     7        TIP      H       H       0.000000         1.008           0
+        39 MOL2     7        TIP      H       H       0.000000         1.008           0
+        40 MOL2     7        TIP      CN      CN      0.000000        12.010           0
+        41 MOL2     7        TIP      H       H       0.000000         1.008           0
+        42 MOL2     7        TIP      H       H       0.000000         1.008           0
+        43 MOL2     8        TIP      CN      CN      0.000000        12.010           0
+        44 MOL2     8        TIP      H       H       0.000000         1.008           0
+        45 MOL2     8        TIP      H       H       0.000000         1.008           0
+        46 MOL2     8        TIP      CN      CN      0.000000        12.010           0
+        47 MOL2     8        TIP      H       H       0.000000         1.008           0
+        48 MOL2     8        TIP      H       H       0.000000         1.008           0
+        49 MOL2     9        TIP      CN      CN      0.000000        12.010           0
+        50 MOL2     9        TIP      H       H       0.000000         1.008           0
+        51 MOL2     9        TIP      H       H       0.000000         1.008           0
+        52 MOL2     9        TIP      CN      CN      0.000000        12.010           0
+        53 MOL2     9        TIP      H       H       0.000000         1.008           0
+        54 MOL2     9        TIP      H       H       0.000000         1.008           0
+        55 MOL2     10       TIP      CN      CN      0.000000        12.010           0
+        56 MOL2     10       TIP      H       H       0.000000         1.008           0
+        57 MOL2     10       TIP      H       H       0.000000         1.008           0
+        58 MOL2     10       TIP      CN      CN      0.000000        12.010           0
+        59 MOL2     10       TIP      H       H       0.000000         1.008           0
+        60 MOL2     10       TIP      H       H       0.000000         1.008           0
+        61 MOL2     11       TIP      CN      CN      0.000000        12.010           0
+        62 MOL2     11       TIP      H       H       0.000000         1.008           0
+        63 MOL2     11       TIP      H       H       0.000000         1.008           0
+        64 MOL2     11       TIP      CN      CN      0.000000        12.010           0
+        65 MOL2     11       TIP      H       H       0.000000         1.008           0
+        66 MOL2     11       TIP      H       H       0.000000         1.008           0
+        67 MOL2     12       TIP      CN      CN      0.000000        12.010           0
+        68 MOL2     12       TIP      H       H       0.000000         1.008           0
+        69 MOL2     12       TIP      H       H       0.000000         1.008           0
+        70 MOL2     12       TIP      CN      CN      0.000000        12.010           0
+        71 MOL2     12       TIP      H       H       0.000000         1.008           0
+        72 MOL2     12       TIP      H       H       0.000000         1.008           0
+        73 MOL2     13       TIP      CN      CN      0.000000        12.010           0
+        74 MOL2     13       TIP      H       H       0.000000         1.008           0
+        75 MOL2     13       TIP      H       H       0.000000         1.008           0
+        76 MOL2     13       TIP      CN      CN      0.000000        12.010           0
+        77 MOL2     13       TIP      H       H       0.000000         1.008           0
+        78 MOL2     13       TIP      H       H       0.000000         1.008           0
+        79 MOL2     14       TIP      CN      CN      0.000000        12.010           0
+        80 MOL2     14       TIP      H       H       0.000000         1.008           0
+        81 MOL2     14       TIP      H       H       0.000000         1.008           0
+        82 MOL2     14       TIP      CN      CN      0.000000        12.010           0
+        83 MOL2     14       TIP      H       H       0.000000         1.008           0
+        84 MOL2     14       TIP      H       H       0.000000         1.008           0
+        85 MOL2     15       TIP      CN      CN      0.000000        12.010           0
+        86 MOL2     15       TIP      H       H       0.000000         1.008           0
+        87 MOL2     15       TIP      H       H       0.000000         1.008           0
+        88 MOL2     15       TIP      CN      CN      0.000000        12.010           0
+        89 MOL2     15       TIP      H       H       0.000000         1.008           0
+        90 MOL2     15       TIP      H       H       0.000000         1.008           0
+        91 MOL2     16       TIP      CN      CN      0.000000        12.010           0
+        92 MOL2     16       TIP      H       H       0.000000         1.008           0
+        93 MOL2     16       TIP      H       H       0.000000         1.008           0
+        94 MOL2     16       TIP      CN      CN      0.000000        12.010           0
+        95 MOL2     16       TIP      H       H       0.000000         1.008           0
+        96 MOL2     16       TIP      H       H       0.000000         1.008           0
+        97 MOL2     17       TIP      CN      CN      0.000000        12.010           0
+        98 MOL2     17       TIP      H       H       0.000000         1.008           0
+        99 MOL2     17       TIP      H       H       0.000000         1.008           0
+       100 MOL2     17       TIP      CN      CN      0.000000        12.010           0
+       101 MOL2     17       TIP      H       H       0.000000         1.008           0
+       102 MOL2     17       TIP      H       H       0.000000         1.008           0
+       103 MOL2     18       TIP      CN      CN      0.000000        12.010           0
+       104 MOL2     18       TIP      H       H       0.000000         1.008           0
+       105 MOL2     18       TIP      H       H       0.000000         1.008           0
+       106 MOL2     18       TIP      CN      CN      0.000000        12.010           0
+       107 MOL2     18       TIP      H       H       0.000000         1.008           0
+       108 MOL2     18       TIP      H       H       0.000000         1.008           0
+       109 MOL2     19       TIP      CN      CN      0.000000        12.010           0
+       110 MOL2     19       TIP      H       H       0.000000         1.008           0
+       111 MOL2     19       TIP      H       H       0.000000         1.008           0
+       112 MOL2     19       TIP      CN      CN      0.000000        12.010           0
+       113 MOL2     19       TIP      H       H       0.000000         1.008           0
+       114 MOL2     19       TIP      H       H       0.000000         1.008           0
+       115 MOL2     20       TIP      CN      CN      0.000000        12.010           0
+       116 MOL2     20       TIP      H       H       0.000000         1.008           0
+       117 MOL2     20       TIP      H       H       0.000000         1.008           0
+       118 MOL2     20       TIP      CN      CN      0.000000        12.010           0
+       119 MOL2     20       TIP      H       H       0.000000         1.008           0
+       120 MOL2     20       TIP      H       H       0.000000         1.008           0
+       121 MOL2     21       TIP      CN      CN      0.000000        12.010           0
+       122 MOL2     21       TIP      H       H       0.000000         1.008           0
+       123 MOL2     21       TIP      H       H       0.000000         1.008           0
+       124 MOL2     21       TIP      CN      CN      0.000000        12.010           0
+       125 MOL2     21       TIP      H       H       0.000000         1.008           0
+       126 MOL2     21       TIP      H       H       0.000000         1.008           0
+       127 MOL2     22       TIP      CN      CN      0.000000        12.010           0
+       128 MOL2     22       TIP      H       H       0.000000         1.008           0
+       129 MOL2     22       TIP      H       H       0.000000         1.008           0
+       130 MOL2     22       TIP      CN      CN      0.000000        12.010           0
+       131 MOL2     22       TIP      H       H       0.000000         1.008           0
+       132 MOL2     22       TIP      H       H       0.000000         1.008           0
+       133 MOL2     23       TIP      CN      CN      0.000000        12.010           0
+       134 MOL2     23       TIP      H       H       0.000000         1.008           0
+       135 MOL2     23       TIP      H       H       0.000000         1.008           0
+       136 MOL2     23       TIP      CN      CN      0.000000        12.010           0
+       137 MOL2     23       TIP      H       H       0.000000         1.008           0
+       138 MOL2     23       TIP      H       H       0.000000         1.008           0
+       139 MOL2     24       TIP      CN      CN      0.000000        12.010           0
+       140 MOL2     24       TIP      H       H       0.000000         1.008           0
+       141 MOL2     24       TIP      H       H       0.000000         1.008           0
+       142 MOL2     24       TIP      CN      CN      0.000000        12.010           0
+       143 MOL2     24       TIP      H       H       0.000000         1.008           0
+       144 MOL2     24       TIP      H       H       0.000000         1.008           0
+       145 MOL2     25       TIP      CN      CN      0.000000        12.010           0
+       146 MOL2     25       TIP      H       H       0.000000         1.008           0
+       147 MOL2     25       TIP      H       H       0.000000         1.008           0
+       148 MOL2     25       TIP      CN      CN      0.000000        12.010           0
+       149 MOL2     25       TIP      H       H       0.000000         1.008           0
+       150 MOL2     25       TIP      H       H       0.000000         1.008           0
+       151 MOL2     26       TIP      CN      CN      0.000000        12.010           0
+       152 MOL2     26       TIP      H       H       0.000000         1.008           0
+       153 MOL2     26       TIP      H       H       0.000000         1.008           0
+       154 MOL2     26       TIP      CN      CN      0.000000        12.010           0
+       155 MOL2     26       TIP      H       H       0.000000         1.008           0
+       156 MOL2     26       TIP      H       H       0.000000         1.008           0
+       157 MOL2     27       TIP      CN      CN      0.000000        12.010           0
+       158 MOL2     27       TIP      H       H       0.000000         1.008           0
+       159 MOL2     27       TIP      H       H       0.000000         1.008           0
+       160 MOL2     27       TIP      CN      CN      0.000000        12.010           0
+       161 MOL2     27       TIP      H       H       0.000000         1.008           0
+       162 MOL2     27       TIP      H       H       0.000000         1.008           0
+       163 MOL2     28       TIP      CN      CN      0.000000        12.010           0
+       164 MOL2     28       TIP      H       H       0.000000         1.008           0
+       165 MOL2     28       TIP      H       H       0.000000         1.008           0
+       166 MOL2     28       TIP      CN      CN      0.000000        12.010           0
+       167 MOL2     28       TIP      H       H       0.000000         1.008           0
+       168 MOL2     28       TIP      H       H       0.000000         1.008           0
+       169 MOL2     29       TIP      CN      CN      0.000000        12.010           0
+       170 MOL2     29       TIP      H       H       0.000000         1.008           0
+       171 MOL2     29       TIP      H       H       0.000000         1.008           0
+       172 MOL2     29       TIP      CN      CN      0.000000        12.010           0
+       173 MOL2     29       TIP      H       H       0.000000         1.008           0
+       174 MOL2     29       TIP      H       H       0.000000         1.008           0
+       175 MOL1     30       TIP      CP      CP      0.000000        12.010           0
+       176 MOL1     30       TIP      H       H       0.000000         1.008           0
+       177 MOL1     30       TIP      H       H       0.000000         1.008           0
+       178 MOL1     30       TIP      CP      CP      0.000000        12.010           0
+       179 MOL1     30       TIP      H       H       0.000000         1.008           0
+       180 MOL1     30       TIP      H       H       0.000000         1.008           0
+       181 MOL3     30       TIP      Ne      Ne      0.000000        20.180           0
+       182 MOL3     31       TIP      Ne      Ne      0.000000        20.180           0
+       183 MOL3     32       TIP      Ne      Ne      0.000000        20.180           0
+       184 MOL3     33       TIP      Ne      Ne      0.000000        20.180           0
+       185 MOL3     34       TIP      Ne      Ne      0.000000        20.180           0
+       186 MOL3     35       TIP      Ne      Ne      0.000000        20.180           0
+       187 MOL3     36       TIP      Ne      Ne      0.000000        20.180           0
+       188 MOL3     37       TIP      Ne      Ne      0.000000        20.180           0
+       189 MOL3     38       TIP      Ne      Ne      0.000000        20.180           0
+       190 MOL3     39       TIP      Ne      Ne      0.000000        20.180           0
+       191 MOL3     40       TIP      Ne      Ne      0.000000        20.180           0
+       192 MOL3     41       TIP      Ne      Ne      0.000000        20.180           0
+       193 MOL3     42       TIP      Ne      Ne      0.000000        20.180           0
+       194 MOL3     43       TIP      Ne      Ne      0.000000        20.180           0
+       195 MOL3     44       TIP      Ne      Ne      0.000000        20.180           0
+       196 MOL3     45       TIP      Ne      Ne      0.000000        20.180           0
+       197 MOL3     46       TIP      Ne      Ne      0.000000        20.180           0
+       198 MOL3     47       TIP      Ne      Ne      0.000000        20.180           0
+       199 MOL3     48       TIP      Ne      Ne      0.000000        20.180           0
+       200 MOL3     49       TIP      Ne      Ne      0.000000        20.180           0
+       201 MOL3     50       TIP      Ne      Ne      0.000000        20.180           0
+       202 MOL3     51       TIP      Ne      Ne      0.000000        20.180           0
+       203 MOL3     52       TIP      Ne      Ne      0.000000        20.180           0
+       204 MOL3     53       TIP      Ne      Ne      0.000000        20.180           0
+       205 MOL3     54       TIP      Ne      Ne      0.000000        20.180           0
+       206 MOL3     55       TIP      Ne      Ne      0.000000        20.180           0
+       207 MOL3     56       TIP      Ne      Ne      0.000000        20.180           0
+       208 MOL3     57       TIP      Ne      Ne      0.000000        20.180           0
+       209 MOL3     58       TIP      Ne      Ne      0.000000        20.180           0
+       210 MOL3     59       TIP      Ne      Ne      0.000000        20.180           0
+       211 MOL3     60       TIP      Ne      Ne      0.000000        20.180           0
+       212 MOL3     61       TIP      Ne      Ne      0.000000        20.180           0
+       213 MOL3     62       TIP      Ne      Ne      0.000000        20.180           0
+       214 MOL3     63       TIP      Ne      Ne      0.000000        20.180           0
+       215 MOL3     64       TIP      Ne      Ne      0.000000        20.180           0
+       216 MOL3     65       TIP      Ne      Ne      0.000000        20.180           0
+       217 MOL3     66       TIP      Ne      Ne      0.000000        20.180           0
+       218 MOL3     67       TIP      Ne      Ne      0.000000        20.180           0
+       219 MOL3     68       TIP      Ne      Ne      0.000000        20.180           0
+       220 MOL3     69       TIP      Ne      Ne      0.000000        20.180           0
+       221 MOL3     70       TIP      Ne      Ne      0.000000        20.180           0
+       222 MOL3     71       TIP      Ne      Ne      0.000000        20.180           0
+       223 MOL3     72       TIP      Ne      Ne      0.000000        20.180           0
+       224 MOL3     73       TIP      Ne      Ne      0.000000        20.180           0
+       225 MOL3     74       TIP      Ne      Ne      0.000000        20.180           0
+       226 MOL3     75       TIP      Ne      Ne      0.000000        20.180           0
+       227 MOL3     76       TIP      Ne      Ne      0.000000        20.180           0
+       228 MOL3     77       TIP      Ne      Ne      0.000000        20.180           0
+       229 MOL3     78       TIP      Ne      Ne      0.000000        20.180           0
+       230 MOL3     79       TIP      Ne      Ne      0.000000        20.180           0
+       231 MOL3     80       TIP      Ne      Ne      0.000000        20.180           0
+       232 MOL3     81       TIP      Ne      Ne      0.000000        20.180           0
+       233 MOL3     82       TIP      Ne      Ne      0.000000        20.180           0
+       234 MOL3     83       TIP      Ne      Ne      0.000000        20.180           0
+       235 MOL3     84       TIP      Ne      Ne      0.000000        20.180           0
+       236 MOL3     85       TIP      Ne      Ne      0.000000        20.180           0
+       237 MOL3     86       TIP      Ne      Ne      0.000000        20.180           0
+       238 MOL3     87       TIP      Ne      Ne      0.000000        20.180           0
+       239 MOL3     88       TIP      Ne      Ne      0.000000        20.180           0
+       240 MOL3     89       TIP      Ne      Ne      0.000000        20.180           0
+       241 MOL3     90       TIP      Ne      Ne      0.000000        20.180           0
+       242 MOL3     91       TIP      Ne      Ne      0.000000        20.180           0
+       243 MOL3     92       TIP      Ne      Ne      0.000000        20.180           0
+       244 MOL3     93       TIP      Ne      Ne      0.000000        20.180           0
+       245 MOL3     94       TIP      Ne      Ne      0.000000        20.180           0
+       246 MOL3     95       TIP      Ne      Ne      0.000000        20.180           0
+       247 MOL3     96       TIP      Ne      Ne      0.000000        20.180           0
+       248 MOL3     97       TIP      Ne      Ne      0.000000        20.180           0
+       249 MOL3     98       TIP      Ne      Ne      0.000000        20.180           0
+       250 MOL3     99       TIP      Ne      Ne      0.000000        20.180           0
+       251 MOL3     100      TIP      Ne      Ne      0.000000        20.180           0
+       252 MOL3     101      TIP      Ne      Ne      0.000000        20.180           0
+       253 MOL3     102      TIP      Ne      Ne      0.000000        20.180           0
+       254 MOL3     103      TIP      Ne      Ne      0.000000        20.180           0
+       255 MOL3     104      TIP      Ne      Ne      0.000000        20.180           0
+       256 MOL3     105      TIP      Ne      Ne      0.000000        20.180           0
+       257 MOL3     106      TIP      Ne      Ne      0.000000        20.180           0
+       258 MOL3     107      TIP      Ne      Ne      0.000000        20.180           0
+       259 MOL3     108      TIP      Ne      Ne      0.000000        20.180           0
+       260 MOL3     109      TIP      Ne      Ne      0.000000        20.180           0
+       261 MOL3     110      TIP      Ne      Ne      0.000000        20.180           0
+       262 MOL3     111      TIP      Ne      Ne      0.000000        20.180           0
+       263 MOL3     112      TIP      Ne      Ne      0.000000        20.180           0
+       264 MOL3     113      TIP      Ne      Ne      0.000000        20.180           0
+       265 MOL3     114      TIP      Ne      Ne      0.000000        20.180           0
+       266 MOL3     115      TIP      Ne      Ne      0.000000        20.180           0
+       267 MOL3     116      TIP      Ne      Ne      0.000000        20.180           0
+       268 MOL3     117      TIP      Ne      Ne      0.000000        20.180           0
+       269 MOL3     118      TIP      Ne      Ne      0.000000        20.180           0
+       270 MOL3     119      TIP      Ne      Ne      0.000000        20.180           0
+       271 MOL3     120      TIP      Ne      Ne      0.000000        20.180           0
+       272 MOL3     121      TIP      Ne      Ne      0.000000        20.180           0
+       273 MOL3     122      TIP      Ne      Ne      0.000000        20.180           0
+       274 MOL3     123      TIP      Ne      Ne      0.000000        20.180           0
+       275 MOL3     124      TIP      Ne      Ne      0.000000        20.180           0
+       276 MOL3     125      TIP      Ne      Ne      0.000000        20.180           0
+       277 MOL3     126      TIP      Ne      Ne      0.000000        20.180           0
+       278 MOL3     127      TIP      Ne      Ne      0.000000        20.180           0
+       279 MOL3     128      TIP      Ne      Ne      0.000000        20.180           0
+       280 MOL3     129      TIP      Ne      Ne      0.000000        20.180           0
+       281 MOL3     130      TIP      Ne      Ne      0.000000        20.180           0
+       282 MOL3     131      TIP      Ne      Ne      0.000000        20.180           0
+       283 MOL3     132      TIP      Ne      Ne      0.000000        20.180           0
+       284 MOL3     133      TIP      Ne      Ne      0.000000        20.180           0
+       285 MOL3     134      TIP      Ne      Ne      0.000000        20.180           0
+       286 MOL3     135      TIP      Ne      Ne      0.000000        20.180           0
+       287 MOL3     136      TIP      Ne      Ne      0.000000        20.180           0
+       288 MOL3     137      TIP      Ne      Ne      0.000000        20.180           0
+       289 MOL3     138      TIP      Ne      Ne      0.000000        20.180           0
+       290 MOL3     139      TIP      Ne      Ne      0.000000        20.180           0
+       291 MOL3     140      TIP      Ne      Ne      0.000000        20.180           0
+       292 MOL3     141      TIP      Ne      Ne      0.000000        20.180           0
+       293 MOL3     142      TIP      Ne      Ne      0.000000        20.180           0
+       294 MOL3     143      TIP      Ne      Ne      0.000000        20.180           0
+       295 MOL3     144      TIP      Ne      Ne      0.000000        20.180           0
+       296 MOL3     145      TIP      Ne      Ne      0.000000        20.180           0
+       297 MOL3     146      TIP      Ne      Ne      0.000000        20.180           0
+       298 MOL3     147      TIP      Ne      Ne      0.000000        20.180           0
+       299 MOL3     148      TIP      Ne      Ne      0.000000        20.180           0
+       300 MOL3     149      TIP      Ne      Ne      0.000000        20.180           0
+       301 MOL3     150      TIP      Ne      Ne      0.000000        20.180           0
+       302 MOL3     151      TIP      Ne      Ne      0.000000        20.180           0
+       303 MOL3     152      TIP      Ne      Ne      0.000000        20.180           0
+       304 MOL3     153      TIP      Ne      Ne      0.000000        20.180           0
+       305 MOL3     154      TIP      Ne      Ne      0.000000        20.180           0
+       306 MOL3     155      TIP      Ne      Ne      0.000000        20.180           0
+       307 MOL3     156      TIP      Ne      Ne      0.000000        20.180           0
+       308 MOL3     157      TIP      Ne      Ne      0.000000        20.180           0
+       309 MOL3     158      TIP      Ne      Ne      0.000000        20.180           0
+       310 MOL3     159      TIP      Ne      Ne      0.000000        20.180           0
+       311 MOL3     160      TIP      Ne      Ne      0.000000        20.180           0
+       312 MOL3     161      TIP      Ne      Ne      0.000000        20.180           0
+       313 MOL3     162      TIP      Ne      Ne      0.000000        20.180           0
+       314 MOL3     163      TIP      Ne      Ne      0.000000        20.180           0
+       315 MOL3     164      TIP      Ne      Ne      0.000000        20.180           0
+       316 MOL3     165      TIP      Ne      Ne      0.000000        20.180           0
+       317 MOL3     166      TIP      Ne      Ne      0.000000        20.180           0
+       318 MOL3     167      TIP      Ne      Ne      0.000000        20.180           0
+       319 MOL3     168      TIP      Ne      Ne      0.000000        20.180           0
+       320 MOL3     169      TIP      Ne      Ne      0.000000        20.180           0
+       321 MOL3     170      TIP      Ne      Ne      0.000000        20.180           0
+       322 MOL3     171      TIP      Ne      Ne      0.000000        20.180           0
+       323 MOL3     172      TIP      Ne      Ne      0.000000        20.180           0
+       324 MOL3     173      TIP      Ne      Ne      0.000000        20.180           0
+       325 MOL3     174      TIP      Ne      Ne      0.000000        20.180           0
+       326 MOL3     175      TIP      Ne      Ne      0.000000        20.180           0
+       327 MOL3     176      TIP      Ne      Ne      0.000000        20.180           0
+       328 MOL3     177      TIP      Ne      Ne      0.000000        20.180           0
+       329 MOL3     178      TIP      Ne      Ne      0.000000        20.180           0
+       330 MOL3     179      TIP      Ne      Ne      0.000000        20.180           0
+       331 MOL3     180      TIP      Ne      Ne      0.000000        20.180           0
+       332 MOL3     181      TIP      Ne      Ne      0.000000        20.180           0
+       333 MOL3     182      TIP      Ne      Ne      0.000000        20.180           0
+       334 MOL3     183      TIP      Ne      Ne      0.000000        20.180           0
+       335 MOL3     184      TIP      Ne      Ne      0.000000        20.180           0
+       336 MOL3     185      TIP      Ne      Ne      0.000000        20.180           0
+       337 MOL3     186      TIP      Ne      Ne      0.000000        20.180           0
+       338 MOL3     187      TIP      Ne      Ne      0.000000        20.180           0
+       339 MOL3     188      TIP      Ne      Ne      0.000000        20.180           0
+       340 MOL3     189      TIP      Ne      Ne      0.000000        20.180           0
+       341 MOL3     190      TIP      Ne      Ne      0.000000        20.180           0
+       342 MOL3     191      TIP      Ne      Ne      0.000000        20.180           0
+       343 MOL3     192      TIP      Ne      Ne      0.000000        20.180           0
+       344 MOL3     193      TIP      Ne      Ne      0.000000        20.180           0
+       345 MOL3     194      TIP      Ne      Ne      0.000000        20.180           0
+       346 MOL3     195      TIP      Ne      Ne      0.000000        20.180           0
+       347 MOL3     196      TIP      Ne      Ne      0.000000        20.180           0
+       348 MOL3     197      TIP      Ne      Ne      0.000000        20.180           0
+       349 MOL3     198      TIP      Ne      Ne      0.000000        20.180           0
+       350 MOL3     199      TIP      Ne      Ne      0.000000        20.180           0
+       351 MOL3     200      TIP      Ne      Ne      0.000000        20.180           0
+       352 MOL3     201      TIP      Ne      Ne      0.000000        20.180           0
+       353 MOL3     202      TIP      Ne      Ne      0.000000        20.180           0
+       354 MOL3     203      TIP      Ne      Ne      0.000000        20.180           0
+       355 MOL3     204      TIP      Ne      Ne      0.000000        20.180           0
+       356 MOL3     205      TIP      Ne      Ne      0.000000        20.180           0
+       357 MOL3     206      TIP      Ne      Ne      0.000000        20.180           0
+       358 MOL3     207      TIP      Ne      Ne      0.000000        20.180           0
+       359 MOL3     208      TIP      Ne      Ne      0.000000        20.180           0
+       360 MOL3     209      TIP      Ne      Ne      0.000000        20.180           0
+       361 MOL3     210      TIP      Ne      Ne      0.000000        20.180           0
+       362 MOL3     211      TIP      Ne      Ne      0.000000        20.180           0
+       363 MOL3     212      TIP      Ne      Ne      0.000000        20.180           0
+       364 MOL3     213      TIP      Ne      Ne      0.000000        20.180           0
+       365 MOL3     214      TIP      Ne      Ne      0.000000        20.180           0
+       366 MOL3     215      TIP      Ne      Ne      0.000000        20.180           0
+       367 MOL3     216      TIP      Ne      Ne      0.000000        20.180           0
+       368 MOL3     217      TIP      Ne      Ne      0.000000        20.180           0
+       369 MOL3     218      TIP      Ne      Ne      0.000000        20.180           0
+       370 MOL3     219      TIP      Ne      Ne      0.000000        20.180           0
+       371 MOL3     220      TIP      Ne      Ne      0.000000        20.180           0
+       372 MOL3     221      TIP      Ne      Ne      0.000000        20.180           0
+       373 MOL3     222      TIP      Ne      Ne      0.000000        20.180           0
+       374 MOL3     223      TIP      Ne      Ne      0.000000        20.180           0
+       375 MOL3     224      TIP      Ne      Ne      0.000000        20.180           0
+       376 MOL3     225      TIP      Ne      Ne      0.000000        20.180           0
+       377 MOL3     226      TIP      Ne      Ne      0.000000        20.180           0
+       378 MOL3     227      TIP      Ne      Ne      0.000000        20.180           0
+       379 MOL3     228      TIP      Ne      Ne      0.000000        20.180           0
+       380 MOL3     229      TIP      Ne      Ne      0.000000        20.180           0
+       381 MOL3     230      TIP      Ne      Ne      0.000000        20.180           0
+       382 MOL3     231      TIP      Ne      Ne      0.000000        20.180           0
+       383 MOL3     232      TIP      Ne      Ne      0.000000        20.180           0
+       384 MOL3     233      TIP      Ne      Ne      0.000000        20.180           0
+       385 MOL3     234      TIP      Ne      Ne      0.000000        20.180           0
+       386 MOL3     235      TIP      Ne      Ne      0.000000        20.180           0
+       387 MOL3     236      TIP      Ne      Ne      0.000000        20.180           0
+       388 MOL3     237      TIP      Ne      Ne      0.000000        20.180           0
+       389 MOL3     238      TIP      Ne      Ne      0.000000        20.180           0
+       390 MOL3     239      TIP      Ne      Ne      0.000000        20.180           0
+       391 MOL3     240      TIP      Ne      Ne      0.000000        20.180           0
+       392 MOL3     241      TIP      Ne      Ne      0.000000        20.180           0
+       393 MOL3     242      TIP      Ne      Ne      0.000000        20.180           0
+       394 MOL3     243      TIP      Ne      Ne      0.000000        20.180           0
+       395 MOL3     244      TIP      Ne      Ne      0.000000        20.180           0
+       396 MOL3     245      TIP      Ne      Ne      0.000000        20.180           0
+       397 MOL3     246      TIP      Ne      Ne      0.000000        20.180           0
+       398 MOL3     247      TIP      Ne      Ne      0.000000        20.180           0
+       399 MOL3     248      TIP      Ne      Ne      0.000000        20.180           0
+       400 MOL3     249      TIP      Ne      Ne      0.000000        20.180           0
+       401 MOL3     250      TIP      Ne      Ne      0.000000        20.180           0
+       402 MOL3     251      TIP      Ne      Ne      0.000000        20.180           0
+       403 MOL3     252      TIP      Ne      Ne      0.000000        20.180           0
+       404 MOL3     253      TIP      Ne      Ne      0.000000        20.180           0
+       405 MOL3     254      TIP      Ne      Ne      0.000000        20.180           0
+       406 MOL3     255      TIP      Ne      Ne      0.000000        20.180           0
+       407 MOL3     256      TIP      Ne      Ne      0.000000        20.180           0
+       408 MOL3     257      TIP      Ne      Ne      0.000000        20.180           0
+       409 MOL3     258      TIP      Ne      Ne      0.000000        20.180           0
+       410 MOL3     259      TIP      Ne      Ne      0.000000        20.180           0
+       411 MOL3     260      TIP      Ne      Ne      0.000000        20.180           0
+       412 MOL3     261      TIP      Ne      Ne      0.000000        20.180           0
+       413 MOL3     262      TIP      Ne      Ne      0.000000        20.180           0
+       414 MOL3     263      TIP      Ne      Ne      0.000000        20.180           0
+       415 MOL3     264      TIP      Ne      Ne      0.000000        20.180           0
+       416 MOL3     265      TIP      Ne      Ne      0.000000        20.180           0
+       417 MOL3     266      TIP      Ne      Ne      0.000000        20.180           0
+       418 MOL3     267      TIP      Ne      Ne      0.000000        20.180           0
+       419 MOL3     268      TIP      Ne      Ne      0.000000        20.180           0
+       420 MOL3     269      TIP      Ne      Ne      0.000000        20.180           0
+       421 MOL3     270      TIP      Ne      Ne      0.000000        20.180           0
+       422 MOL3     271      TIP      Ne      Ne      0.000000        20.180           0
+       423 MOL3     272      TIP      Ne      Ne      0.000000        20.180           0
+       424 MOL3     273      TIP      Ne      Ne      0.000000        20.180           0
+       425 MOL3     274      TIP      Ne      Ne      0.000000        20.180           0
+       426 MOL3     275      TIP      Ne      Ne      0.000000        20.180           0
+       427 MOL3     276      TIP      Ne      Ne      0.000000        20.180           0
+       428 MOL3     277      TIP      Ne      Ne      0.000000        20.180           0
+       429 MOL3     278      TIP      Ne      Ne      0.000000        20.180           0
+       430 MOL3     279      TIP      Ne      Ne      0.000000        20.180           0
+       431 MOL3     280      TIP      Ne      Ne      0.000000        20.180           0
+       432 MOL3     281      TIP      Ne      Ne      0.000000        20.180           0
+       433 MOL3     282      TIP      Ne      Ne      0.000000        20.180           0
+       434 MOL3     283      TIP      Ne      Ne      0.000000        20.180           0
+       435 MOL3     284      TIP      Ne      Ne      0.000000        20.180           0
+       436 MOL3     285      TIP      Ne      Ne      0.000000        20.180           0
+       437 MOL3     286      TIP      Ne      Ne      0.000000        20.180           0
+       438 MOL3     287      TIP      Ne      Ne      0.000000        20.180           0
+       439 MOL3     288      TIP      Ne      Ne      0.000000        20.180           0
+       440 MOL3     289      TIP      Ne      Ne      0.000000        20.180           0
+       441 MOL3     290      TIP      Ne      Ne      0.000000        20.180           0
+       442 MOL3     291      TIP      Ne      Ne      0.000000        20.180           0
+       443 MOL3     292      TIP      Ne      Ne      0.000000        20.180           0
+       444 MOL3     293      TIP      Ne      Ne      0.000000        20.180           0
+       445 MOL3     294      TIP      Ne      Ne      0.000000        20.180           0
+       446 MOL3     295      TIP      Ne      Ne      0.000000        20.180           0
+       447 MOL3     296      TIP      Ne      Ne      0.000000        20.180           0
+       448 MOL3     297      TIP      Ne      Ne      0.000000        20.180           0
+       449 MOL3     298      TIP      Ne      Ne      0.000000        20.180           0
+       450 MOL3     299      TIP      Ne      Ne      0.000000        20.180           0
+       451 MOL3     300      TIP      Ne      Ne      0.000000        20.180           0
+       452 MOL3     301      TIP      Ne      Ne      0.000000        20.180           0
+       453 MOL3     302      TIP      Ne      Ne      0.000000        20.180           0
+       454 MOL3     303      TIP      Ne      Ne      0.000000        20.180           0
+       455 MOL3     304      TIP      Ne      Ne      0.000000        20.180           0
+       456 MOL3     305      TIP      Ne      Ne      0.000000        20.180           0
+       457 MOL3     306      TIP      Ne      Ne      0.000000        20.180           0
+       458 MOL3     307      TIP      Ne      Ne      0.000000        20.180           0
+       459 MOL3     308      TIP      Ne      Ne      0.000000        20.180           0
+       460 MOL3     309      TIP      Ne      Ne      0.000000        20.180           0
+       461 MOL3     310      TIP      Ne      Ne      0.000000        20.180           0
+       462 MOL3     311      TIP      Ne      Ne      0.000000        20.180           0
+       463 MOL3     312      TIP      Ne      Ne      0.000000        20.180           0
+       464 MOL3     313      TIP      Ne      Ne      0.000000        20.180           0
+       465 MOL3     314      TIP      Ne      Ne      0.000000        20.180           0
+       466 MOL3     315      TIP      Ne      Ne      0.000000        20.180           0
+       467 MOL3     316      TIP      Ne      Ne      0.000000        20.180           0
+       468 MOL3     317      TIP      Ne      Ne      0.000000        20.180           0
+       469 MOL3     318      TIP      Ne      Ne      0.000000        20.180           0
+       470 MOL3     319      TIP      Ne      Ne      0.000000        20.180           0
+       471 MOL3     320      TIP      Ne      Ne      0.000000        20.180           0
+       472 MOL3     321      TIP      Ne      Ne      0.000000        20.180           0
+       473 MOL3     322      TIP      Ne      Ne      0.000000        20.180           0
+       474 MOL3     323      TIP      Ne      Ne      0.000000        20.180           0
+       475 MOL3     324      TIP      Ne      Ne      0.000000        20.180           0
+       476 MOL3     325      TIP      Ne      Ne      0.000000        20.180           0
+       477 MOL3     326      TIP      Ne      Ne      0.000000        20.180           0
+       478 MOL3     327      TIP      Ne      Ne      0.000000        20.180           0
+       479 MOL3     328      TIP      Ne      Ne      0.000000        20.180           0
+       480 MOL3     329      TIP      Ne      Ne      0.000000        20.180           0
+       481 MOL3     330      TIP      Ne      Ne      0.000000        20.180           0
+       482 MOL3     331      TIP      Ne      Ne      0.000000        20.180           0
+       483 MOL3     332      TIP      Ne      Ne      0.000000        20.180           0
+       484 MOL3     333      TIP      Ne      Ne      0.000000        20.180           0
+       485 MOL3     334      TIP      Ne      Ne      0.000000        20.180           0
+       486 MOL3     335      TIP      Ne      Ne      0.000000        20.180           0
+       487 MOL3     336      TIP      Ne      Ne      0.000000        20.180           0
+       488 MOL3     337      TIP      Ne      Ne      0.000000        20.180           0
+       489 MOL3     338      TIP      Ne      Ne      0.000000        20.180           0
+       490 MOL3     339      TIP      Ne      Ne      0.000000        20.180           0
+       491 MOL3     340      TIP      Ne      Ne      0.000000        20.180           0
+       492 MOL3     341      TIP      Ne      Ne      0.000000        20.180           0
+       493 MOL3     342      TIP      Ne      Ne      0.000000        20.180           0
+       494 MOL3     343      TIP      Ne      Ne      0.000000        20.180           0
+       495 MOL3     344      TIP      Ne      Ne      0.000000        20.180           0
+       496 MOL3     345      TIP      Ne      Ne      0.000000        20.180           0
+       497 MOL3     346      TIP      Ne      Ne      0.000000        20.180           0
+       498 MOL3     347      TIP      Ne      Ne      0.000000        20.180           0
+       499 MOL3     348      TIP      Ne      Ne      0.000000        20.180           0
+       500 MOL3     349      TIP      Ne      Ne      0.000000        20.180           0
+       501 MOL3     350      TIP      Ne      Ne      0.000000        20.180           0
+       502 MOL3     351      TIP      Ne      Ne      0.000000        20.180           0
+       503 MOL3     352      TIP      Ne      Ne      0.000000        20.180           0
+       504 MOL3     353      TIP      Ne      Ne      0.000000        20.180           0
+       505 MOL3     354      TIP      Ne      Ne      0.000000        20.180           0
+       506 MOL3     355      TIP      Ne      Ne      0.000000        20.180           0
+       507 MOL3     356      TIP      Ne      Ne      0.000000        20.180           0
+       508 MOL3     357      TIP      Ne      Ne      0.000000        20.180           0
+       509 MOL3     358      TIP      Ne      Ne      0.000000        20.180           0
+       510 MOL3     359      TIP      Ne      Ne      0.000000        20.180           0
+       511 MOL3     360      TIP      Ne      Ne      0.000000        20.180           0
+       512 MOL3     361      TIP      Ne      Ne      0.000000        20.180           0
+       513 MOL3     362      TIP      Ne      Ne      0.000000        20.180           0
+       514 MOL3     363      TIP      Ne      Ne      0.000000        20.180           0
+       515 MOL3     364      TIP      Ne      Ne      0.000000        20.180           0
+       516 MOL3     365      TIP      Ne      Ne      0.000000        20.180           0
+       517 MOL3     366      TIP      Ne      Ne      0.000000        20.180           0
+       518 MOL3     367      TIP      Ne      Ne      0.000000        20.180           0
+       519 MOL3     368      TIP      Ne      Ne      0.000000        20.180           0
+       520 MOL3     369      TIP      Ne      Ne      0.000000        20.180           0
+       521 MOL3     370      TIP      Ne      Ne      0.000000        20.180           0
+       522 MOL3     371      TIP      Ne      Ne      0.000000        20.180           0
+       523 MOL3     372      TIP      Ne      Ne      0.000000        20.180           0
+       524 MOL3     373      TIP      Ne      Ne      0.000000        20.180           0
+       525 MOL3     374      TIP      Ne      Ne      0.000000        20.180           0
+       526 MOL3     375      TIP      Ne      Ne      0.000000        20.180           0
+       527 MOL3     376      TIP      Ne      Ne      0.000000        20.180           0
+       528 MOL3     377      TIP      Ne      Ne      0.000000        20.180           0
+       529 MOL3     378      TIP      Ne      Ne      0.000000        20.180           0
+       530 MOL3     379      TIP      Ne      Ne      0.000000        20.180           0
+       531 MOL3     380      TIP      Ne      Ne      0.000000        20.180           0
+       532 MOL3     381      TIP      Ne      Ne      0.000000        20.180           0
+       533 MOL3     382      TIP      Ne      Ne      0.000000        20.180           0
+       534 MOL3     383      TIP      Ne      Ne      0.000000        20.180           0
+       535 MOL3     384      TIP      Ne      Ne      0.000000        20.180           0
+       536 MOL3     385      TIP      Ne      Ne      0.000000        20.180           0
+       537 MOL3     386      TIP      Ne      Ne      0.000000        20.180           0
+       538 MOL3     387      TIP      Ne      Ne      0.000000        20.180           0
+       539 MOL3     388      TIP      Ne      Ne      0.000000        20.180           0
+       540 MOL3     389      TIP      Ne      Ne      0.000000        20.180           0
+       541 MOL3     390      TIP      Ne      Ne      0.000000        20.180           0
+       542 MOL3     391      TIP      Ne      Ne      0.000000        20.180           0
+       543 MOL3     392      TIP      Ne      Ne      0.000000        20.180           0
+       544 MOL3     393      TIP      Ne      Ne      0.000000        20.180           0
+       545 MOL3     394      TIP      Ne      Ne      0.000000        20.180           0
+       546 MOL3     395      TIP      Ne      Ne      0.000000        20.180           0
+       547 MOL3     396      TIP      Ne      Ne      0.000000        20.180           0
+       548 MOL3     397      TIP      Ne      Ne      0.000000        20.180           0
+       549 MOL3     398      TIP      Ne      Ne      0.000000        20.180           0
+       550 MOL3     399      TIP      Ne      Ne      0.000000        20.180           0
+       551 MOL3     400      TIP      Ne      Ne      0.000000        20.180           0
+       552 MOL3     401      TIP      Ne      Ne      0.000000        20.180           0
+       553 MOL3     402      TIP      Ne      Ne      0.000000        20.180           0
+       554 MOL3     403      TIP      Ne      Ne      0.000000        20.180           0
+       555 MOL3     404      TIP      Ne      Ne      0.000000        20.180           0
+       556 MOL3     405      TIP      Ne      Ne      0.000000        20.180           0
+       557 MOL3     406      TIP      Ne      Ne      0.000000        20.180           0
+       558 MOL3     407      TIP      Ne      Ne      0.000000        20.180           0
+       559 MOL3     408      TIP      Ne      Ne      0.000000        20.180           0
+       560 MOL3     409      TIP      Ne      Ne      0.000000        20.180           0
+       561 MOL3     410      TIP      Ne      Ne      0.000000        20.180           0
+       562 MOL3     411      TIP      Ne      Ne      0.000000        20.180           0
+       563 MOL3     412      TIP      Ne      Ne      0.000000        20.180           0
+       564 MOL3     413      TIP      Ne      Ne      0.000000        20.180           0
+       565 MOL3     414      TIP      Ne      Ne      0.000000        20.180           0
+       566 MOL3     415      TIP      Ne      Ne      0.000000        20.180           0
+       567 MOL3     416      TIP      Ne      Ne      0.000000        20.180           0
+       568 MOL3     417      TIP      Ne      Ne      0.000000        20.180           0
+       569 MOL3     418      TIP      Ne      Ne      0.000000        20.180           0
+       570 MOL3     419      TIP      Ne      Ne      0.000000        20.180           0
+       571 MOL3     420      TIP      Ne      Ne      0.000000        20.180           0
+       572 MOL3     421      TIP      Ne      Ne      0.000000        20.180           0
+       573 MOL3     422      TIP      Ne      Ne      0.000000        20.180           0
+       574 MOL3     423      TIP      Ne      Ne      0.000000        20.180           0
+       575 MOL3     424      TIP      Ne      Ne      0.000000        20.180           0
+       576 MOL3     425      TIP      Ne      Ne      0.000000        20.180           0
+       577 MOL3     426      TIP      Ne      Ne      0.000000        20.180           0
+       578 MOL3     427      TIP      Ne      Ne      0.000000        20.180           0
+       579 MOL3     428      TIP      Ne      Ne      0.000000        20.180           0
+       580 MOL3     429      TIP      Ne      Ne      0.000000        20.180           0
+       581 MOL3     430      TIP      Ne      Ne      0.000000        20.180           0
+       582 MOL3     431      TIP      Ne      Ne      0.000000        20.180           0
+       583 MOL3     432      TIP      Ne      Ne      0.000000        20.180           0
+       584 MOL3     433      TIP      Ne      Ne      0.000000        20.180           0
+       585 MOL3     434      TIP      Ne      Ne      0.000000        20.180           0
+       586 MOL3     435      TIP      Ne      Ne      0.000000        20.180           0
+       587 MOL3     436      TIP      Ne      Ne      0.000000        20.180           0
+       588 MOL3     437      TIP      Ne      Ne      0.000000        20.180           0
+       589 MOL3     438      TIP      Ne      Ne      0.000000        20.180           0
+       590 MOL3     439      TIP      Ne      Ne      0.000000        20.180           0
+       591 MOL3     440      TIP      Ne      Ne      0.000000        20.180           0
+       592 MOL3     441      TIP      Ne      Ne      0.000000        20.180           0
+       593 MOL3     442      TIP      Ne      Ne      0.000000        20.180           0
+       594 MOL3     443      TIP      Ne      Ne      0.000000        20.180           0
+       595 MOL3     444      TIP      Ne      Ne      0.000000        20.180           0
+       596 MOL3     445      TIP      Ne      Ne      0.000000        20.180           0
+       597 MOL3     446      TIP      Ne      Ne      0.000000        20.180           0
+       598 MOL3     447      TIP      Ne      Ne      0.000000        20.180           0
+       599 MOL3     448      TIP      Ne      Ne      0.000000        20.180           0
+       600 MOL3     449      TIP      Ne      Ne      0.000000        20.180           0
+       601 MOL3     450      TIP      Ne      Ne      0.000000        20.180           0
+       602 MOL3     451      TIP      Ne      Ne      0.000000        20.180           0
+       603 MOL3     452      TIP      Ne      Ne      0.000000        20.180           0
+       604 MOL3     453      TIP      Ne      Ne      0.000000        20.180           0
+       605 MOL3     454      TIP      Ne      Ne      0.000000        20.180           0
+       606 MOL3     455      TIP      Ne      Ne      0.000000        20.180           0
+       607 MOL3     456      TIP      Ne      Ne      0.000000        20.180           0
+       608 MOL3     457      TIP      Ne      Ne      0.000000        20.180           0
+       609 MOL3     458      TIP      Ne      Ne      0.000000        20.180           0
+       610 MOL3     459      TIP      Ne      Ne      0.000000        20.180           0
+       611 MOL3     460      TIP      Ne      Ne      0.000000        20.180           0
+       612 MOL3     461      TIP      Ne      Ne      0.000000        20.180           0
+       613 MOL3     462      TIP      Ne      Ne      0.000000        20.180           0
+       614 MOL3     463      TIP      Ne      Ne      0.000000        20.180           0
+       615 MOL3     464      TIP      Ne      Ne      0.000000        20.180           0
+       616 MOL3     465      TIP      Ne      Ne      0.000000        20.180           0
+       617 MOL3     466      TIP      Ne      Ne      0.000000        20.180           0
+       618 MOL3     467      TIP      Ne      Ne      0.000000        20.180           0
+       619 MOL3     468      TIP      Ne      Ne      0.000000        20.180           0
+       620 MOL3     469      TIP      Ne      Ne      0.000000        20.180           0
+       621 MOL3     470      TIP      Ne      Ne      0.000000        20.180           0
+       622 MOL3     471      TIP      Ne      Ne      0.000000        20.180           0
+       623 MOL3     472      TIP      Ne      Ne      0.000000        20.180           0
+       624 MOL3     473      TIP      Ne      Ne      0.000000        20.180           0
+       625 MOL3     474      TIP      Ne      Ne      0.000000        20.180           0
+       626 MOL3     475      TIP      Ne      Ne      0.000000        20.180           0
+       627 MOL3     476      TIP      Ne      Ne      0.000000        20.180           0
+       628 MOL3     477      TIP      Ne      Ne      0.000000        20.180           0
+       629 MOL3     478      TIP      Ne      Ne      0.000000        20.180           0
+       630 MOL3     479      TIP      Ne      Ne      0.000000        20.180           0
+       631 MOL3     480      TIP      Ne      Ne      0.000000        20.180           0
+       632 MOL3     481      TIP      Ne      Ne      0.000000        20.180           0
+       633 MOL3     482      TIP      Ne      Ne      0.000000        20.180           0
+       634 MOL3     483      TIP      Ne      Ne      0.000000        20.180           0
+       635 MOL3     484      TIP      Ne      Ne      0.000000        20.180           0
+       636 MOL3     485      TIP      Ne      Ne      0.000000        20.180           0
+       637 MOL3     486      TIP      Ne      Ne      0.000000        20.180           0
+       638 MOL3     487      TIP      Ne      Ne      0.000000        20.180           0
+       639 MOL3     488      TIP      Ne      Ne      0.000000        20.180           0
+       640 MOL3     489      TIP      Ne      Ne      0.000000        20.180           0
+       641 MOL3     490      TIP      Ne      Ne      0.000000        20.180           0
+       642 MOL3     491      TIP      Ne      Ne      0.000000        20.180           0
+       643 MOL3     492      TIP      Ne      Ne      0.000000        20.180           0
+       644 MOL3     493      TIP      Ne      Ne      0.000000        20.180           0
+       645 MOL3     494      TIP      Ne      Ne      0.000000        20.180           0
+       646 MOL3     495      TIP      Ne      Ne      0.000000        20.180           0
+       647 MOL3     496      TIP      Ne      Ne      0.000000        20.180           0
+       648 MOL3     497      TIP      Ne      Ne      0.000000        20.180           0
+       649 MOL3     498      TIP      Ne      Ne      0.000000        20.180           0
+       650 MOL3     499      TIP      Ne      Ne      0.000000        20.180           0
+       651 MOL3     500      TIP      Ne      Ne      0.000000        20.180           0
+       652 MOL3     501      TIP      Ne      Ne      0.000000        20.180           0
+       653 MOL3     502      TIP      Ne      Ne      0.000000        20.180           0
+       654 MOL3     503      TIP      Ne      Ne      0.000000        20.180           0
+       655 MOL3     504      TIP      Ne      Ne      0.000000        20.180           0
+       656 MOL3     505      TIP      Ne      Ne      0.000000        20.180           0
+       657 MOL3     506      TIP      Ne      Ne      0.000000        20.180           0
+       658 MOL3     507      TIP      Ne      Ne      0.000000        20.180           0
+       659 MOL3     508      TIP      Ne      Ne      0.000000        20.180           0
+       660 MOL3     509      TIP      Ne      Ne      0.000000        20.180           0
+       661 MOL3     510      TIP      Ne      Ne      0.000000        20.180           0
+       662 MOL3     511      TIP      Ne      Ne      0.000000        20.180           0
+       663 MOL3     512      TIP      Ne      Ne      0.000000        20.180           0
+       664 MOL3     513      TIP      Ne      Ne      0.000000        20.180           0
+       665 MOL3     514      TIP      Ne      Ne      0.000000        20.180           0
+       666 MOL3     515      TIP      Ne      Ne      0.000000        20.180           0
+       667 MOL3     516      TIP      Ne      Ne      0.000000        20.180           0
+       668 MOL3     517      TIP      Ne      Ne      0.000000        20.180           0
+       669 MOL3     518      TIP      Ne      Ne      0.000000        20.180           0
+       670 MOL3     519      TIP      Ne      Ne      0.000000        20.180           0
+       671 MOL3     520      TIP      Ne      Ne      0.000000        20.180           0
+       672 MOL3     521      TIP      Ne      Ne      0.000000        20.180           0
+       673 MOL3     522      TIP      Ne      Ne      0.000000        20.180           0
+       674 MOL3     523      TIP      Ne      Ne      0.000000        20.180           0
+       675 MOL3     524      TIP      Ne      Ne      0.000000        20.180           0
+       676 MOL3     525      TIP      Ne      Ne      0.000000        20.180           0
+       677 MOL3     526      TIP      Ne      Ne      0.000000        20.180           0
+       678 MOL3     527      TIP      Ne      Ne      0.000000        20.180           0
+       679 MOL3     528      TIP      Ne      Ne      0.000000        20.180           0
+       680 MOL3     529      TIP      Ne      Ne      0.000000        20.180           0
+       681 MOL3     530      TIP      Ne      Ne      0.000000        20.180           0
+       682 MOL3     531      TIP      Ne      Ne      0.000000        20.180           0
+       683 MOL3     532      TIP      Ne      Ne      0.000000        20.180           0
+       684 MOL3     533      TIP      Ne      Ne      0.000000        20.180           0
+       685 MOL3     534      TIP      Ne      Ne      0.000000        20.180           0
+
+
+       150 !NBOND
+         1         2         1         3         1         4         4         5
+         4         6         7         8         7         9         7        10
+        10        11        10        12        13        14        13        15
+        13        16        16        17        16        18        19        20
+        19        21        19        22        22        23        22        24
+        25        26        25        27        25        28        28        29
+        28        30        31        32        31        33        31        34
+        34        35        34        36        37        38        37        39
+        37        40        40        41        40        42        43        44
+        43        45        43        46        46        47        46        48
+        49        50        49        51        49        52        52        53
+        52        54        55        56        55        57        55        58
+        58        59        58        60        61        62        61        63
+        61        64        64        65        64        66        67        68
+        67        69        67        70        70        71        70        72
+        73        74        73        75        73        76        76        77
+        76        78        79        80        79        81        79        82
+        82        83        82        84        85        86        85        87
+        85        88        88        89        88        90        91        92
+        91        93        91        94        94        95        94        96
+        97        98        97        99        97       100       100       101
+       100       102       103       104       103       105       103       106
+       106       107       106       108       109       110       109       111
+       109       112       112       113       112       114       115       116
+       115       117       115       118       118       119       118       120
+       121       122       121       123       121       124       124       125
+       124       126       127       128       127       129       127       130
+       130       131       130       132       133       134       133       135
+       133       136       136       137       136       138       139       140
+       139       141       139       142       142       143       142       144
+       145       146       145       147       145       148       148       149
+       148       150       151       152       151       153       151       154
+       154       155       154       156       157       158       157       159
+       157       160       160       161       160       162       163       164
+       163       165       163       166       166       167       166       168
+       169       170       169       171       169       172       172       173
+       172       174       175       176       175       177       175       178
+       178       179       178       180
+
+
+       180 !NTHETA
+         2         1         3         2         1         4         3         1         4
+         5         4         6         5         4         1         6         4         1
+         8         7         9         8         7        10         9         7        10
+        11        10        12        11        10         7        12        10         7
+        14        13        15        14        13        16        15        13        16
+        17        16        18        17        16        13        18        16        13
+        20        19        21        20        19        22        21        19        22
+        23        22        24        23        22        19        24        22        19
+        26        25        27        26        25        28        27        25        28
+        29        28        30        29        28        25        30        28        25
+        32        31        33        32        31        34        33        31        34
+        35        34        36        35        34        31        36        34        31
+        38        37        39        38        37        40        39        37        40
+        41        40        42        41        40        37        42        40        37
+        44        43        45        44        43        46        45        43        46
+        47        46        48        47        46        43        48        46        43
+        50        49        51        50        49        52        51        49        52
+        53        52        54        53        52        49        54        52        49
+        56        55        57        56        55        58        57        55        58
+        59        58        60        59        58        55        60        58        55
+        62        61        63        62        61        64        63        61        64
+        65        64        66        65        64        61        66        64        61
+        68        67        69        68        67        70        69        67        70
+        71        70        72        71        70        67        72        70        67
+        74        73        75        74        73        76        75        73        76
+        77        76        78        77        76        73        78        76        73
+        80        79        81        80        79        82        81        79        82
+        83        82        84        83        82        79        84        82        79
+        86        85        87        86        85        88        87        85        88
+        89        88        90        89        88        85        90        88        85
+        92        91        93        92        91        94        93        91        94
+        95        94        96        95        94        91        96        94        91
+        98        97        99        98        97       100        99        97       100
+       101       100       102       101       100        97       102       100        97
+       104       103       105       104       103       106       105       103       106
+       107       106       108       107       106       103       108       106       103
+       110       109       111       110       109       112       111       109       112
+       113       112       114       113       112       109       114       112       109
+       116       115       117       116       115       118       117       115       118
+       119       118       120       119       118       115       120       118       115
+       122       121       123       122       121       124       123       121       124
+       125       124       126       125       124       121       126       124       121
+       128       127       129       128       127       130       129       127       130
+       131       130       132       131       130       127       132       130       127
+       134       133       135       134       133       136       135       133       136
+       137       136       138       137       136       133       138       136       133
+       140       139       141       140       139       142       141       139       142
+       143       142       144       143       142       139       144       142       139
+       146       145       147       146       145       148       147       145       148
+       149       148       150       149       148       145       150       148       145
+       152       151       153       152       151       154       153       151       154
+       155       154       156       155       154       151       156       154       151
+       158       157       159       158       157       160       159       157       160
+       161       160       162       161       160       157       162       160       157
+       164       163       165       164       163       166       165       163       166
+       167       166       168       167       166       163       168       166       163
+       170       169       171       170       169       172       171       169       172
+       173       172       174       173       172       169       174       172       169
+       176       175       177       176       175       178       177       175       178
+       179       178       180       179       178       175       180       178       175
+
+
+       120 !NPHI
+         3         1         4         5         3         1         4         6
+         2         1         4         5         2         1         4         6
+         9         7        10        11         9         7        10        12
+         8         7        10        11         8         7        10        12
+        15        13        16        17        15        13        16        18
+        14        13        16        17        14        13        16        18
+        21        19        22        23        21        19        22        24
+        20        19        22        23        20        19        22        24
+        27        25        28        29        27        25        28        30
+        26        25        28        29        26        25        28        30
+        33        31        34        35        33        31        34        36
+        32        31        34        35        32        31        34        36
+        39        37        40        41        39        37        40        42
+        38        37        40        41        38        37        40        42
+        45        43        46        47        45        43        46        48
+        44        43        46        47        44        43        46        48
+        51        49        52        53        51        49        52        54
+        50        49        52        53        50        49        52        54
+        57        55        58        59        57        55        58        60
+        56        55        58        59        56        55        58        60
+        63        61        64        65        63        61        64        66
+        62        61        64        65        62        61        64        66
+        69        67        70        71        69        67        70        72
+        68        67        70        71        68        67        70        72
+        75        73        76        77        75        73        76        78
+        74        73        76        77        74        73        76        78
+        81        79        82        83        81        79        82        84
+        80        79        82        83        80        79        82        84
+        87        85        88        89        87        85        88        90
+        86        85        88        89        86        85        88        90
+        93        91        94        95        93        91        94        96
+        92        91        94        95        92        91        94        96
+        99        97       100       101        99        97       100       102
+        98        97       100       101        98        97       100       102
+       105       103       106       107       105       103       106       108
+       104       103       106       107       104       103       106       108
+       111       109       112       113       111       109       112       114
+       110       109       112       113       110       109       112       114
+       117       115       118       119       117       115       118       120
+       116       115       118       119       116       115       118       120
+       123       121       124       125       123       121       124       126
+       122       121       124       125       122       121       124       126
+       129       127       130       131       129       127       130       132
+       128       127       130       131       128       127       130       132
+       135       133       136       137       135       133       136       138
+       134       133       136       137       134       133       136       138
+       141       139       142       143       141       139       142       144
+       140       139       142       143       140       139       142       144
+       147       145       148       149       147       145       148       150
+       146       145       148       149       146       145       148       150
+       153       151       154       155       153       151       154       156
+       152       151       154       155       152       151       154       156
+       159       157       160       161       159       157       160       162
+       158       157       160       161       158       157       160       162
+       165       163       166       167       165       163       166       168
+       164       163       166       167       164       163       166       168
+       171       169       172       173       171       169       172       174
+       170       169       172       173       170       169       172       174
+       177       175       178       179       177       175       178       180
+       176       175       178       179       176       175       178       180
+
+
+         0 !NIMPHI
+
+
+         0 !NDON
+
+
+         0 !NACC
+
+
+         0 !NNB
+
+
