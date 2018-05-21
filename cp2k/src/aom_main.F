@@ -304,7 +304,7 @@ CONTAINS
         IF ((aom_env%new_state).EQ.0) aom_env%new_state = mat
      ELSE IF (.NOT.my_bo_keyword) THEN ! THEN IT IS A FSSH RUN
             call surf_hop_type(adiab_section, aom_env%C_t, aom_env%C_tp,   &
-                                 deltatMD, aom_env%active_state, &
+                                 deltatMD, &
                                  aom_env%new_state, &
                                  aom_env%attempt_hop, &
                                  decohere_criterion, &
@@ -320,12 +320,12 @@ CONTAINS
      ENDDO
      print*, "FOBSH| ACTIVE STATE = ", aom_env%active_state
      call calcforces(state=aom_env%active_state,Hin=-AIMAG(aom_env%H_tp), C=aom_env%C_tp, nacv=aom_env%nacv, &
-                            NN=aom_env%NN, atoms=atoms, & 
+                           atoms=atoms, & 
                            scaling=scaling, cbar=cbar, Fin=aom_env%F, forces_adiab=aom_env%forces_adiab, &
                            ext_pres=aom_env%ext_pres)
      IF (aom_env%attempt_hop) THEN
          call calcforces(state=aom_env%new_state,Hin=-AIMAG(aom_env%H_tp), C=aom_env%C_tp, nacv=aom_env%nacv, &
-                               NN=aom_env%NN, atoms=atoms, & 
+                              atoms=atoms, & 
                               scaling=scaling, cbar=cbar, Fin=aom_env%F, forces_adiab=aom_env%forces_adiab_new, &
                               ext_pres=aom_env%ext_pres)
      ENDIF

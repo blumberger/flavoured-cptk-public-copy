@@ -657,7 +657,7 @@ CONTAINS
              force_env%mixed_env%aom_env%Stmt  = force_env%mixed_env%aom_env%Sttp
 
              force_env%mixed_env%aom_env%ctin_t = force_env%mixed_env%aom_env%ctin
-             CALL total_momentum(tmp%vel, atomic_kind_set, nparticle_kind, local_particles, force_env)
+             CALL total_momentum(tmp%vel, atomic_kind_set, nparticle_kind, local_particles)!, force_env)
 
        ELSE
 !> END CHANGE_AC
@@ -674,7 +674,7 @@ CONTAINS
           ! Velocity Verlet (second part)
           CALL vv_second(tmp, atomic_kind_set, local_particles, particle_set, &
                          core_particle_set, shell_particle_set, nparticle_kind, shell_adiabatic, dt)
-          CALL total_momentum(tmp%vel, atomic_kind_set, nparticle_kind, local_particles, force_env)
+          CALL total_momentum(tmp%vel, atomic_kind_set, nparticle_kind, local_particles)!, force_env)
        ENDIF
 
        IF (simpar%constraint) CALL rattle_control(gci,local_molecules, molecule_set, &
