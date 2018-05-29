@@ -227,12 +227,15 @@ CONTAINS
      !> OBTAIN COORDINATES, ENERGIES, STATES, etc. FROM PREVIOUS STEP
      CALL translate_com(positions_tp, keyword_translate, positions_com_tp, local_particles, atomic_kinds = atomic_kinds)  
      CALL translate_com(aom_env%velocities_tp, keyword_translate, velocities_com_tp, local_particles, atomic_kinds = atomic_kinds)  
+     aom_env%siteenergies = 0.0_dp
      do coord=1,3
         aom_env%crds(coord,:,1) = PACK(aom_env%rm_tm(coord,:), aom_env%ext_pres)
         aom_env%crds(coord,:,2) = PACK(aom_env%rm_t(coord,:), aom_env%ext_pres)
         aom_env%crds(coord,:,3) = PACK(positions_com_tp(coord,:), aom_env%ext_pres)
         aom_env%siteenergies(3,:) = energies_tp(:) ! CHANGE_AC
      enddo
+
+
      !ctin(:) = aom_env%ctin(:)
      aom_env%adiab_nace_t = aom_env%adiab_nace_tp
 
@@ -245,6 +248,7 @@ CONTAINS
 
      !> CONVERT THE diabatic NACV WITH THE GOOD UNITS
      aom_env%nacv = cbar*aom_env%nacv
+
 
      !> HAMILTONIAN DIAGONALIZATION
      !The adiabaticity subroutine diagonalises the diabatic Hamiltonian H_tp
@@ -319,6 +323,8 @@ CONTAINS
         ENDDO
      ENDDO
      print*, "FOBSH| ACTIVE STATE = ", aom_env%active_state
+
+
      call calcforces(state=aom_env%active_state,Hin=-AIMAG(aom_env%H_tp), C=aom_env%C_tp, nacv=aom_env%nacv, &
                            atoms=atoms, & 
                            scaling=scaling, cbar=cbar, Fin=aom_env%F, forces_adiab=aom_env%forces_adiab, &
@@ -459,7 +465,7 @@ SUBROUTINE calc_Xmatrix_elements(aom_env, itimes, atoms, mol, dR, do_random, cba
                          aom_env%Atp(d,j) = aom_env%crds(d-1,(i-1)*atoms+j,3)
                     end do
                end do
-               
+
                !then for each other molecule
                do k=1,mol
                     !create the array of its atomic coordinates at both t and t+dt

@@ -199,17 +199,17 @@ CONTAINS
      ALLOCATE(aom_env%forces_adiab(3,natom))
      ALLOCATE(aom_env%forces_adiab_new(3,natom))
 
-     aom_env%At = 0.0_dp
-     aom_env%Atp = 0.0_dp
-     aom_env%Atm = 0.0_dp
-     aom_env%Bt  = 0.0_dp
-     aom_env%Btp = 0.0_dp
-     aom_env%Btm = 0.0_dp
-     aom_env%siteenergies = 0.0_dp
-     aom_env%nacv = 0.0_dp
-     aom_env%F = 0.0_dp
-     aom_env%forces_adiab = 0.0_dp
-     aom_env%forces_adiab_new = 0.0_dp
+     aom_env%At = 0.0_DP
+     aom_env%Atp= 0.0_DP
+     aom_env%Atm= 0.0_DP
+     aom_env%Bt = 0.0_DP
+     aom_env%Btp= 0.0_DP
+     aom_env%Btm= 0.0_DP
+     aom_env%siteenergies = 0.0_DP
+     aom_env%nacv          = 0.0_DP
+     aom_env%F             = 0.0_DP
+     aom_env%forces_adiab  = 0.0_DP
+     aom_env%forces_adiab_new= 0.0_DP
  
      ALLOCATE(aom_env%rm_t(3, natom))
      ALLOCATE(aom_env%rm_tm(3, natom))
@@ -809,6 +809,13 @@ CONTAINS
     deallocate(site_energies, couplings, adiab_c, adiab_pop)
     DEALLOCATE(positions_com_tp)
     DEALLOCATE(velocities_com_tp)
+
+    PRINT *, "ME Atp = ", aom_env%Atp
+    PRINT *, "ME At = ",  aom_env%At
+    PRINT *, "ME Atm = ", aom_env%Atm
+    PRINT *, "ME Btp = ", aom_env%Btp
+    PRINT *, "ME Bt = ",  aom_env%Bt
+    PRINT *, "ME Btm = ", aom_env%Btm
 
   END SUBROUTINE propagate_aom_namd_first_step
 

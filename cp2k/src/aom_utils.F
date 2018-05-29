@@ -1176,36 +1176,13 @@ subroutine calc_adiab_nace(aom_env, adiab_section)
 
         CALL section_vals_val_get(adiab_section,"PRINT_MORE", &
                                                    l_val=print_here)
-        CALL CPU_TIME(t1)
         CALL nace1(aom_env, mol, aom_env%deltat)
-        CALL CPU_TIME(t2)
         CALL nace2(aom_env, mol, print_here)
-        CALL CPU_TIME(t3)
         CALL nace3(aom_env)
-        CALL CPU_TIME(t4)
         CALL nace4(aom_env, mol)
-        CALL CPU_TIME(t5)
         CALL nace5(aom_env)
-        CALL CPU_TIME(t6)
         CALL nace6(aom_env, mol, aom_env%deltat)
-        CALL CPU_TIME(t7)
         CALL nace7(aom_env, mol)
-        CALL CPU_TIME(t8)
-
-        tT = t8-t1
-        PRINT *, "" 
-        PRINT *, "" 
-        PRINT *, "   Time Taken = ", tT 
-        WRITE(6, "(A, F5.2, A)") "       * Percentage Time 1 = ", 100*(t2-t1)/tT, "%"
-        WRITE(6, "(A, F5.2, A)") "       * Percentage Time 2 = ", 100*(t3-t2)/tT, "%" 
-        WRITE(6, "(A, F5.2, A)") "       * Percentage Time 3 = ", 100*(t4-t3)/tT, "%" 
-        WRITE(6, "(A, F5.2, A)") "       * Percentage Time 4 = ", 100*(t5-t4)/tT, "%" 
-        WRITE(6, "(A, F5.2, A)") "       * Percentage Time 5 = ", 100*(t6-t5)/tT, "%" 
-        WRITE(6, "(A, F5.2, A)") "       * Percentage Time 6 = ", 100*(t7-t6)/tT, "%" 
-        WRITE(6, "(A, F5.2, A)") "       * Percentage Time 7 = ", 100*(t8-t7)/tT, "%" 
-        PRINT *, "" 
-        PRINT *, "" 
-        
  
 end subroutine calc_adiab_nace
 
