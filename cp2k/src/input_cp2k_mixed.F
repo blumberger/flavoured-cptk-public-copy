@@ -202,6 +202,16 @@ CONTAINS
     CALL keyword_release(keyword)
 
 
+    CALL keyword_create(keyword, name="DO_SPEEDUP_NACE",&
+         description="If set to TRUE will apply nace optimisations.",&
+         usage="True", default_l_val=.TRUE., &
+         lone_keyword_l_val=.True.) 
+        ! type_of_var=char_t,&
+        ! n_var=-1)
+    CALL section_add_keyword(subsection,keyword)
+    CALL keyword_release(keyword)
+
+
     CALL keyword_create(keyword, name="METHOD_PROPAGATION",&
          description="Defines the methods to obtain the adiabatic forces.",&
          usage="METHOD_PROPAGATION : CLASSICAL_PATH, FSSH",  type_of_var=char_t,&

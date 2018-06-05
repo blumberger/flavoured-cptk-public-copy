@@ -133,6 +133,7 @@ IMPLICIT NONE
              translate_com,       &
              surf_hop_type,    &
              calc_adiab_nace, &
+             calc_adiab_nace_old, &
              calc_hop_nacv, &
              cal_delta_energy_nacv , &
              calc_diabatic_nace, &
@@ -1185,6 +1186,243 @@ subroutine calc_adiab_nace(aom_env, adiab_section)
         CALL nace7(aom_env, mol)
  
 end subroutine calc_adiab_nace
+
+
+subroutine calc_adiab_nace_old(aom_env, adiab_section)
+        !this subroutine calculates the adiabatic nace used in the calculation
+        !of the hopping probability and also in the RK adiabatic propagation 
+        TYPE(aom_env_type)                         :: aom_env
+        TYPE(section_vals_type), POINTER           :: adiab_section
+
+       CHARACTER(len=*), PARAMETER :: routineN ='calc_adiab_nace_old', &
+       routineP = moduleN//':'//routineN
+
+        integer :: i, j, mol, k, l, new_index
+        REAL(KIND=dp), dimension(:,:), allocatable :: T1, T2, DT, TST, TDT, DS!, DC
+        INTEGER, dimension(:),  allocatable        :: map_new2old, map_old2new, basic
+        INTEGER, dimension(:),  allocatable        :: not_associated, zeros
+        REAL(KIND=dp)                              :: deltat, max_val, threshold
+        LOGICAL                                    :: go_on, print_here, do_sign_change
+        REAL(kind=dp)  :: sum_
+
+        mol = size(aom_env%Stt,1)
+        deltat = aom_env%deltat
+
+        CALL section_vals_val_get(adiab_section,"PRINT_MORE", &
+                                                   l_val=print_here)
+
+        !> Based on Eq. 19 of paper: Spencer et al., J. Chem. Phys. 145, 064102 (2016)
+
+        !> 1. Calculate the term  D  (first term in Eq. 19)
+        !many allocations
+        allocate(T1(mol,mol))
+        allocate(T2(mol,mol))
+        allocate(DT(mol,mol))
+        allocate(TST(mol,mol))
+        allocate(TDT(mol,mol))
+        allocate(DS(mol,mol))
+        !use the matinvsqrt subroutine to find T = S^(-1/2)
+        T1 = aom_env%Stmtm
+        T2 = aom_env%Stptp
+        call matinvsqrt(mol, .TRUE., T1)
+        call matinvsqrt(mol, .TRUE., T2)
+        !and do some straightforward first-order numerical derivatives
+        DT = (0.5D0/deltat)*(T2 - T1)
+        DS = (0.5D0/deltat)*(aom_env%Sttp - aom_env%Sttm)
+        !with these two loops, calculate the nacv in the time domain between adiabatic wavefunctions
+        !by transforming from the diabatic overlaps
+        do i=1,mol
+                do j=1,mol
+                        TST(i,j) = 0.0D0
+                        TDT(i,j) = 0.0D0
+                        do k=1,mol
+                                do l=1,mol
+                                        TST(i,j) = TST(i,j) + T1(k,i)*aom_env%Stt(k,l)*DT(l,j)
+                                        TDT(i,j) = TDT(i,j) + T1(k,i)*DS(k,l)*T1(l,j)
+                                end do
+                        end do
+                end do
+        end do
+        !> End of 1.
+
+ 
+        !> 2. Check reordering of eigenvectors between the different timestep.
+        ALLOCATE(map_new2old(mol))
+        ALLOCATE(map_old2new(mol))
+        ALLOCATE(basic(mol))
+        ALLOCATE(zeros(mol))
+        ALLOCATE(not_associated(mol))
+        map_new2old = 0
+        map_old2new = 0
+        not_associated = 0
+        zeros = 0
+        basic = (/( i, i=1, mol )/)
+        threshold = 0.1
+        !> First, we associate the new state i with the old state k if overlap is above
+        !> (1 - threshold)
+        do i=1, mol !loop over new index
+           max_val = 0.0
+           do j= 1, mol !loop over old index
+              aom_env%adiab_overlap(i,j) = 0.0
+              do k = 1, mol
+                 aom_env%adiab_overlap(i,j) = aom_env%adiab_overlap(i,j) + aom_env%C_tp(k,i)*aom_Env%C_t(k,j)
+              enddo
+              if (abs(aom_env%adiab_overlap(i,j)).GE.abs(max_val)) THEN
+                 max_val = aom_env%adiab_overlap(i,j)
+                 new_index = j
+              endif
+           enddo
+           if ( abs( max_val**2 - 1 ).LT.threshold) then
+              map_new2old(i) = new_index
+              map_old2new( map_new2old(i) ) = i
+           endif
+           !print_here = .TRUE.
+           if (print_here) then
+              if (i.NE.new_index) then
+                 if ( abs( max_val**2 - 1 ).LT.threshold) then
+                    print*, "FOBSH| Reordering: for state", i, "old index was", new_index, &
+                            "with overlap", max_val, "and former", aom_env%adiab_overlap(i,i)
+                 else 
+                    print*, "FOBSH! Reorgering: for state", i, " we stay in with overlap", &
+                            aom_env%adiab_overlap(i,i), " instead of goind to ", new_index, "with overlap", max_val
+                 endif
+              endif
+           endif
+        enddo
+        IF (ANY(map_new2old.NE.basic) .and. print_here) print*, "FOBSH| New map: ", map_new2old
+
+        !> If we've associated state i with state j, we try to associate j with if if the
+        !> overlap is above 0.5
+        IF (ANY(map_new2old.EQ.zeros)) THEN
+         do i=1,mol
+            IF ((map_new2old(i).EQ.0).AND.(map_old2new(i).NE.0)) THEN
+               IF ( abs( (aom_env%adiab_overlap(i, map_old2new(i)))**2 - 1 ).LT.0.5 ) THEN
+                  map_new2old(i) = map_old2new(i)
+                  map_old2new( map_new2old(i) ) = i
+               ENDIF
+            ENDIF
+         enddo
+        IF (ANY(map_new2old.NE.basic) .and. print_here) print*, "FOBSH! New map again:", map_new2old
+       ENDIF
+
+        !> Finally, we associate the not associate j with the remaining j state by order
+        !> of energy
+        IF (ANY(map_new2old.EQ.zeros)) THEN
+         k = 1
+         do i=1, mol
+               j = 1
+               go_on = .TRUE.
+               do while ((go_on).AND.(j.LE.mol))
+                  if (i.eq.map_new2old(j)) then
+                     go_on = .FALSE.
+                  else
+                     j = j + 1
+                  endif
+               enddo
+               if (go_on) then
+                  not_associated(k) = i
+                  k = k +1
+               endif
+         enddo
+        j = 1
+        do i=1, mol
+           if (map_new2old(i).EQ.0) then
+              map_new2old(i) = not_associated(j)
+              map_old2new( map_new2old(i) ) = i
+              j = j+1
+           endif
+        enddo 
+        IF (ANY(map_new2old.NE.basic) .and. print_here) THEN 
+           print*, "FOBSH| New map final:", map_new2old
+           print*, "FOBSH| New map final, from old to new:", map_old2new
+        ENDIF
+       ENDIF
+       IF (SUM(map_new2old).NE.( mol*(mol+1)/2 )) THEN
+           CPABORT("Problem in the mapping between old and new states.")
+       ENDIF
+!> End of 2.
+
+
+! 3. Decide map
+       IF (.NOT.(aom_env%do_reorder)) THEN
+          map_new2old = basic
+          map_old2new = basic
+       ENDIF
+! End of 3        
+
+! 4. Change sign to keep constant convention
+       do_sign_change = .True.
+       IF (do_sign_change) THEN
+          DO i=1, mol
+             !PRINT*, aom_env%adiab_overlap(i, map_new2old(i))
+             if (aom_env%adiab_overlap(i, map_new2old(i)).lt.0) then
+                aom_env%C_tp(:,i) = - aom_env%C_tp(:, i)
+                aom_env%adiab_overlap(i,:) = - aom_env%adiab_overlap(i,:)
+             endif
+             sum_ = 0 
+             do j=1, mol
+                sum_ = sum_ + aom_env%C_tp(j, i) * aom_env%C_t(j, i)
+             enddo
+             !print*, "AC_PHASE", i, sum_
+             !print*, "aom_env%adiab_overlap", aom_env%adiab_overlap(i, :)
+             !if (i.eq.aom_env%active_state) print*, "AC_STATE_WARNING"          
+          ENDDO
+       ENDIF
+! End of 4
+
+
+!> 5. Reassociate state active_state
+        aom_env%active_state = map_old2new(aom_env%old_state)
+        print*, "FOBSH| Put former active state", aom_env%old_state, "in new active state", aom_env%active_state 
+! End of 5
+
+! 6. Calculate the full NACE, Eq. (19) in paper 1.
+        DO i=1, mol
+           DO j=1, mol
+              aom_env%adiab_nace_tp(i,j) = - aom_env%adiab_overlap(i, map_new2old(j))
+              IF (i ==j) THEN
+                 aom_env%adiab_nace_tp(i,j) = aom_env%adiab_nace_tp(i,j) + 1
+              ENDIF
+              aom_env%adiab_nace_tp(i,j) = aom_env%adiab_nace_tp(i,j) / deltat
+              DO k=1, mol
+                 DO l=1, mol
+                    aom_env%adiab_nace_tp(i,j) = & 
+                                    aom_env%adiab_nace_tp(i,j) + aom_env%C_tp(k,i)*aom_env%C_tp(l,j)*(TST(k,l) + TDT(k,l))
+                 ENDDO
+              ENDDO  
+           ENDDO
+        ENDDO
+! End of 6
+
+! 7. If reordering, we use the anti-symmetry of the NACE
+        IF (aom_env%do_reorder) THEN
+           Do i=1, mol
+              Do j=1, mol 
+                 !print*, i,j, aom_env%adiab_nace_tp(i,j), aom_env%adiab_nace_tp(j,i)
+                 !print*, i,j, ( aom_env%adiab_nace_tp(i,j) + aom_env%adiab_nace_tp(j,i) )
+                 IF (j.lt.i) THEN
+                     aom_env%adiab_nace_tp(i,j) = - aom_env%adiab_nace_tp(j,i)
+                 ELSE
+                     aom_env%adiab_nace_tp(i,j) = ( aom_env%adiab_nace_tp(i,j) - aom_env%adiab_nace_tp(j,i) ) / 2
+                 ENDIF
+              Enddo
+           Enddo
+           !Do i=1, mol
+           !   Do j=1, mol 
+           !      print*, i,j, aom_env%adiab_nace_tp(i,j), aom_env%adiab_nace_tp(j,i)
+           !   Enddo
+           !Enddo
+        ENDIF
+! End of 7
+
+        deallocate(T1)
+        deallocate(T2)
+        deallocate(DT)
+        deallocate(TST)
+        deallocate(TDT)
+        deallocate(DS)
+        !deallocate(DC)
+end subroutine calc_adiab_nace_old
 
 
 subroutine surfacehop(deltat, old_state, C2, &

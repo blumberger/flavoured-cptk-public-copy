@@ -60,6 +60,7 @@ MODULE aom_main
                                              simple_vel_rescaling, &
                                              translate_com, &
                                              calc_adiab_nace, &
+                                             calc_adiab_nace_old, &
                                              calc_hop_nacv, &
                                              cal_delta_energy_nacv, &
                                              diab_to_adiab
@@ -163,7 +164,7 @@ CONTAINS
      REAL(KIND=dp) :: cutoff_sites, cutoff_connect, scaling, deltatMD, deltatE
      REAL(KIND=dp)    :: cbar, minao
      INTEGER, dimension(:), allocatable          :: class_forbidden_hop_tp
-     LOGICAL                                      :: analytics
+     LOGICAL                                      :: analytics, do_nace_speedup
      INTEGER                                      :: ELsteps   
      REAL(KIND=dp)                                :: dR, times 
      REAL(KIND=dp)                                :: decohere_criterion
@@ -198,6 +199,7 @@ CONTAINS
      CALL section_vals_val_get(coupling_section,"ANALYTICS", l_val=analytics)
      CALL section_vals_val_get(coupling_section,"RANDOM_DERIVATIVE", l_val=do_random)
      CALL section_vals_val_get(coupling_section,"CENTER_OF_MASS", l_val=keyword_translate)
+     CALL section_vals_val_get(adiab_section, "DO_SPEEDUP_NACE", l_val=do_nace_speedup)
 
      scaling = aom_env%scaling
      cbar = aom_env%cbar
@@ -258,8 +260,11 @@ CONTAINS
      CALL adiabaticity(-AIMAG(aom_env%H_tp), aom_env%C_tp, aom_env%E_tp)
      !Calculate the overlap between C_tp and C_t, reorder state if required,
      !calculate the nace
-     CALL calc_adiab_nace(aom_env, adiab_section)
-
+     IF (do_nace_speedup) THEN
+        CALL calc_adiab_nace(aom_env, adiab_section)
+     ELSE
+        CALL calc_adiab_nace_old(aom_env, adiab_section)
+     END IF
 
      !> PROPAGATE THE ELECTRON FOR ONE MOLECULAR TIMESTEP
      !>the CHARGE CARRIER WF is called aom_env%ctin
