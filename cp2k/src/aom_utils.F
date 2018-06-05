@@ -808,14 +808,14 @@ end subroutine modified_surfacehop
 !> \brief Calculate the diabatic NACE first
 !**********************************************************************************
 subroutine nace1(aom_env, mol, deltat)
-   
+
     TYPE(aom_env_type)                         :: aom_env
     INTEGER                                    :: mol, i, j, sub, add
     REAL(KIND=dp)                              :: deltat
 
     CHARACTER(len=*), PARAMETER :: routineN ='nace1', &
                 routineP = moduleN//':'//routineN
-    
+
     !> Based on Eq. 19 of paper: Spencer et al., J. Chem. Phys. 145, 064102 (2016)
 
     !> 1. Calculate the term  D  (first term in Eq. 19)
@@ -848,35 +848,35 @@ subroutine nace1(aom_env, mol, deltat)
                 aom_env%Stt,               mol, &
                 aom_env%adiab_nace_env%DT, mol, &
                 0.0_DP, aom_env%adiab_nace_env%T2, mol)
-                
+
     !2. TST = T1^{dagg}*T2
     CALL DGEMM('T', 'N', mol, mol, mol, 1.0_DP, &
                 aom_env%adiab_nace_env%T1,  mol, &
                 aom_env%adiab_nace_env%T2, mol, &       ! diab_D = TST
                 0.0_DP, aom_env%adiab_nace_env%diab_D, mol)
-    
+
     ! This part takes advantage of the sparse nature of the DS matrix
     ! Again the mat-mat mult is done in 2 steps:
     !1. T2 = DS*T1
     DO j=1, mol
-      aom_env%adiab_nace_env%T2(1,j) = & 
+      aom_env%adiab_nace_env%T2(1,j) = &
        aom_env%adiab_nace_env%DS(1,2)*aom_env%adiab_nace_env%T1(2,j)
     END DO
     DO i=2, mol-1
        DO j=1, mol
          sub = i-1
          add = i+1
-         aom_env%adiab_nace_env%T2(i,j) = & 
+         aom_env%adiab_nace_env%T2(i,j) = &
            aom_env%adiab_nace_env%DS(i,sub)*aom_env%adiab_nace_env%T1(sub,j) &
          + aom_env%adiab_nace_env%DS(i,add)*aom_env%adiab_nace_env%T1(add,j)
        END DO
     END DO
     sub = mol-1
     DO j=1, mol
-      aom_env%adiab_nace_env%T2(mol,j) = & 
+      aom_env%adiab_nace_env%T2(mol,j) = &
        aom_env%adiab_nace_env%DS(mol,sub)*aom_env%adiab_nace_env%T1(sub,j)
     END DO
-    
+
     ! If the loop above doesn't work then try using this.
 !    !1. T2 = DS*T1
 !    CALL DGEMM('N', 'N', mol, mol, mol, 1.0_DP, &
@@ -891,19 +891,20 @@ subroutine nace1(aom_env, mol, deltat)
                 1.0_DP, aom_env%adiab_nace_env%diab_D, mol)
 end subroutine nace1
 
+
 !**********************************************************************************
 !> \brief I've divided the calc_adiab_nace subroutine into discrete chunks in
 !         order to profiling it with a finer resolution. This is chunk 2.
 !**********************************************************************************
 subroutine nace2(aom_env, mol, print_here)
-   
+
         TYPE(aom_env_type)                         :: aom_env
         INTEGER                                    :: mol
         LOGICAL                                    :: print_here
 
         CHARACTER(len=*), PARAMETER :: routineN ='nace2', &
                     routineP = moduleN//':'//routineN
-        
+
         INTEGER                                    :: i, j, k, new_index
         REAL(KIND=dp)                              :: max_val, threshold
         LOGICAL                                    :: go_on
@@ -939,7 +940,7 @@ subroutine nace2(aom_env, mol, print_here)
                  if ( abs( max_val**2 - 1 ).LT.threshold) then
                     print*, "FOBSH| Reordering: for state", i, "old index was", new_index, &
                             "with overlap", max_val, "and former", aom_env%adiab_overlap(i,i)
-                 else 
+                 else
                     print*, "FOBSH! Reorgering: for state", i, " we stay in with overlap", &
                             aom_env%adiab_overlap(i,i), " instead of goind to ", new_index, "with overlap", max_val
                  endif
@@ -992,8 +993,8 @@ subroutine nace2(aom_env, mol, print_here)
               aom_env%adiab_nace_env%map_old2new( aom_env%adiab_nace_env%map_new2old(i) ) = i
               j = j+1
            endif
-        enddo 
-        IF (ANY(aom_env%adiab_nace_env%map_new2old.NE.aom_env%adiab_nace_env%basic) .and. print_here) THEN 
+        enddo
+        IF (ANY(aom_env%adiab_nace_env%map_new2old.NE.aom_env%adiab_nace_env%basic) .and. print_here) THEN
            print*, "FOBSH| New map final:", aom_env%adiab_nace_env%map_new2old
            print*, "FOBSH| New map final, from old to new:", aom_env%adiab_nace_env%map_old2new
         ENDIF
@@ -1010,7 +1011,7 @@ end subroutine nace2
 !         order to profiling it with a finer resolution. This is chunk 3.
 !**********************************************************************************
 subroutine nace3(aom_env)
-   
+
         TYPE(aom_env_type)                         :: aom_env
 
         CHARACTER(len=*), PARAMETER :: routineN ='nace3', &
@@ -1030,7 +1031,7 @@ end subroutine nace3
 !         order to profiling it with a finer resolution. This is chunk 4.
 !**********************************************************************************
 subroutine nace4(aom_env, mol)
-   
+
         TYPE(aom_env_type)                         :: aom_env
         INTEGER                                    :: mol
         REAL(KIND=dp)                              :: sum_
@@ -1050,7 +1051,7 @@ subroutine nace4(aom_env, mol)
                  aom_env%C_tp(:,i) = - aom_env%C_tp(:, i)
                  aom_env%adiab_overlap(i,:) = - aom_env%adiab_overlap(i,:)
               endif
-              sum_ = 0 
+              sum_ = 0  
               do j=1, mol
                  sum_ = sum_ + aom_env%C_tp(j, i) * aom_env%C_t(j, i)
               enddo
@@ -1061,6 +1062,7 @@ subroutine nace4(aom_env, mol)
         ENDIF
         ! End of 4
 end subroutine nace4
+
 
 !**********************************************************************************
 !> \brief I've divided the calc_adiab_nace subroutine into discrete chunks in
@@ -1099,7 +1101,7 @@ subroutine nace6(aom_env, mol, deltat)
     DO i=1, mol
        DO j=1, mol
           aom_env%adiab_nace_tp(i,j) = - aom_env%adiab_overlap(i, aom_env%adiab_nace_env%map_new2old(j))
-          IF (i ==j) THEN
+          IF (i ==j) THEN 
              aom_env%adiab_nace_tp(i,j) = aom_env%adiab_nace_tp(i,j) + 1
           ENDIF
        ENDDO
@@ -1110,22 +1112,22 @@ subroutine nace6(aom_env, mol, deltat)
    CALL DGEMM('N', 'N', mol, mol, mol, 1.0_DP, &
         aom_env%adiab_nace_env%diab_D, mol, &    
         aom_env%C_tp,                  mol, &     ! C_tp = U
-        0.0_DP, aom_env%adiab_nace_env%T1, mol)
+        0.0_DP, aom_env%adiab_nace_env%T1, mol) 
 
 
     !2. adiab_nace_tp <= U^{dagg}*T1 + (1/dt)*adiab_nace_tp
     CALL DGEMM('T', 'N', mol, mol, mol, 1.0_DP, &
         aom_env%C_tp,                  mol, &     ! C_tp = U
-        aom_env%adiab_nace_env%T1,   mol, &   
-        inv_deltat, aom_env%adiab_nace_tp, mol)
-        
+        aom_env%adiab_nace_env%T1,   mol, &    
+        inv_deltat, aom_env%adiab_nace_tp, mol) 
+     
 end subroutine nace6
 
 !**********************************************************************************
 !> \brief I've divided the calc_adiab_nace subroutine into discrete chunks in
 !         order to profiling it with a finer resolution. This is chunk 7.
 !**********************************************************************************
-subroutine nace7(aom_env, mol)
+subroutine nace7(aom_env, mol) 
    
         TYPE(aom_env_type)                         :: aom_env
         INTEGER                                    :: mol
@@ -1136,12 +1138,12 @@ subroutine nace7(aom_env, mol)
         INTEGER                                    :: i,j
 
         ! 7. If reordering, we use the anti-symmetry of the NACE
-        IF (aom_env%do_reorder) THEN
+        IF (aom_env%do_reorder) THEN 
            Do i=1, mol
-              Do j=1, mol 
+              Do j=1, mol  
                  !print*, i,j, aom_env%adiab_nace_tp(i,j), aom_env%adiab_nace_tp(j,i)
                  !print*, i,j, ( aom_env%adiab_nace_tp(i,j) + aom_env%adiab_nace_tp(j,i) )
-                 IF (j.lt.i) THEN
+                 IF (j.lt.i) THEN 
                      aom_env%adiab_nace_tp(i,j) = - aom_env%adiab_nace_tp(j,i)
                  ELSE
                      aom_env%adiab_nace_tp(i,j) = ( aom_env%adiab_nace_tp(i,j) - aom_env%adiab_nace_tp(j,i) ) / 2
@@ -1164,16 +1166,19 @@ subroutine calc_adiab_nace(aom_env, adiab_section)
         TYPE(aom_env_type)                         :: aom_env
         TYPE(section_vals_type), POINTER           :: adiab_section
 
-        CHARACTER(len=*), PARAMETER :: routineN ='calc_adiab_nace', &
-          routineP = moduleN//':'//routineN
+       CHARACTER(len=*), PARAMETER :: routineN ='calc_adiab_nace', &
+       routineP = moduleN//':'//routineN
 
-        INTEGER                                    :: mol
-        LOGICAL                                    :: print_here
-        REAL(kind=dp)                              :: t1, t2, t3, t4, t5,&
-                                                      t6, t7, t8, tT
+        integer :: i, j, mol, k, l, new_index
+        REAL(KIND=dp), dimension(:,:), allocatable :: T1, T2, DT, TST, TDT, DS!, DC
+        INTEGER, dimension(:),  allocatable        :: map_new2old, map_old2new, basic
+        INTEGER, dimension(:),  allocatable        :: not_associated, zeros
+        REAL(KIND=dp)                              :: deltat, max_val, threshold
+        LOGICAL                                    :: go_on, print_here, do_sign_change
+        REAL(kind=dp)  :: sum_ 
 
         mol = size(aom_env%Stt,1)
-
+        deltat = aom_env%deltat
 
         CALL section_vals_val_get(adiab_section,"PRINT_MORE", &
                                                    l_val=print_here)
@@ -1423,7 +1428,6 @@ subroutine calc_adiab_nace_old(aom_env, adiab_section)
         deallocate(DS)
         !deallocate(DC)
 end subroutine calc_adiab_nace_old
-
 
 subroutine surfacehop(deltat, old_state, C2, &
               new_state, attempt_hop, decohere_criterion, sh_print_env, &
