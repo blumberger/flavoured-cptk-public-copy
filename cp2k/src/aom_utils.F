@@ -1166,19 +1166,13 @@ subroutine calc_adiab_nace(aom_env, adiab_section)
         TYPE(aom_env_type)                         :: aom_env
         TYPE(section_vals_type), POINTER           :: adiab_section
 
-       CHARACTER(len=*), PARAMETER :: routineN ='calc_adiab_nace', &
-       routineP = moduleN//':'//routineN
+        CHARACTER(len=*), PARAMETER :: routineN ='calc_adiab_nace', &
+                                       routineP = moduleN//':'//routineN
 
-        integer :: i, j, mol, k, l, new_index
-        REAL(KIND=dp), dimension(:,:), allocatable :: T1, T2, DT, TST, TDT, DS!, DC
-        INTEGER, dimension(:),  allocatable        :: map_new2old, map_old2new, basic
-        INTEGER, dimension(:),  allocatable        :: not_associated, zeros
-        REAL(KIND=dp)                              :: deltat, max_val, threshold
-        LOGICAL                                    :: go_on, print_here, do_sign_change
-        REAL(kind=dp)  :: sum_ 
+        INTEGER                                    :: mol
+        LOGICAL                                    :: print_here
 
         mol = size(aom_env%Stt,1)
-        deltat = aom_env%deltat
 
         CALL section_vals_val_get(adiab_section,"PRINT_MORE", &
                                                    l_val=print_here)
