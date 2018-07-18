@@ -53,6 +53,7 @@ MODULE fist_environment
   USE force_fields,                    ONLY: force_field_control
   USE header,                          ONLY: fist_header
   USE input_section_types,             ONLY: section_vals_get_subs_vals,&
+                                             section_vals_val_get, &
                                              section_vals_type
   USE kinds,                           ONLY: dp
   USE molecule_kind_types,             ONLY: molecule_kind_type,&
@@ -222,6 +223,8 @@ CONTAINS
 !> \date    22.05.2000
 !> \author  MK
 !> \version 1.0
+!> \note Changed by Matt (17/07/2017). Added a method for doing energy
+!>         decomposition.
 ! *****************************************************************************
   SUBROUTINE fist_init_subsys ( fist_env, subsys, cell, cell_ref, fist_nonbond_env,&
                                 ewald_env, force_env_section, subsys_section, &
@@ -257,6 +260,7 @@ CONTAINS
     TYPE(particle_type), DIMENSION(:), &
       POINTER                                :: particle_set
     TYPE(section_vals_type), POINTER         :: grid_print_section
+    LOGICAL :: do_decomposition !CHANGE MATT
 
     CALL timeset(routineN,handle)
     NULLIFY ( thermo, ewald_pw, local_molecules, local_particles, multipoles)
@@ -273,8 +277,16 @@ CONTAINS
       NULLIFY(prev_local_molecules)
     ENDIF
 
+!CHANGE MATT
+    CALL section_vals_val_get(force_env_section, "DO_DECOMP", &
+                                         l_val=do_decomposition)
     ! Create the fist_energy_type
-    CALL allocate_fist_energy( thermo )
+    IF (do_decomposition) THEN
+       CALL allocate_fist_energy( thermo, subsys_section )
+    ELSE
+       CALL allocate_fist_energy( thermo )
+    END IF
+!END CHANGE
 
     ! Print the molecule kind set
     CALL write_molecule_kind_set(molecule_kind_set,subsys_section)

@@ -14,6 +14,10 @@ MODULE fist_energy_types
   USE kinds,                           ONLY: dp,&
                                              dp_size
   USE termination,                     ONLY: stop_memory
+!CHANGE MATT
+  USE input_section_types,             ONLY: section_vals_val_get,&
+                                             section_vals_type
+!END CHANGE
 #include "./base/base_uses.f90"
 
   IMPLICIT NONE
@@ -25,6 +29,7 @@ MODULE fist_energy_types
   TYPE fist_energy_type
      REAL ( kind = dp ) :: kin, pot, e_gspace, e_self, e_neut, e_bonded, e_induction
      REAL ( kind = dp ) :: kin_shell, harm_shell
+     REAL(KIND=dp), ALLOCATABLE :: pot_list(:) !CHANGE MATT
   END TYPE fist_energy_type
 
 ! *** Public data types ***
@@ -43,21 +48,32 @@ CONTAINS
 !> \param fist_energy ...
 !> \date    13.06.2002
 !> \author  MK
-!> \version 1.0
+!> \version 1.1
+!> \note Changed by Matt to allow enery decomposition
 ! *****************************************************************************
-  SUBROUTINE allocate_fist_energy(fist_energy)
+  SUBROUTINE allocate_fist_energy(fist_energy, subsys_section)!CHANGE MATT
     TYPE(fist_energy_type), POINTER          :: fist_energy
+    TYPE(section_vals_type), POINTER,OPTIONAL :: subsys_section !CHANGE MATT
 
     CHARACTER(len=*), PARAMETER :: routineN = 'allocate_fist_energy', &
       routineP = moduleN//':'//routineN
 
-    INTEGER                                  :: istat
+    INTEGER                                  :: istat, num_decomp !CHANGE MATT
 
     IF (.NOT.ASSOCIATED(fist_energy)) THEN
       ALLOCATE (fist_energy,STAT=istat)
       IF (istat /= 0) CALL stop_memory(routineN,moduleN,__LINE__,&
                                        "fist_energy",8*dp_size)
     END IF
+!CHANGE MATT
+    IF (PRESENT(subsys_section)) THEN
+      CALL section_vals_val_get(subsys_section, "NUM_DECOMP", &
+                                      i_val=num_decomp)
+      ALLOCATE(fist_energy%pot_list(num_decomp), STAT=istat)
+      IF (istat /= 0) CALL stop_memory(routineN,moduleN,__LINE__,&
+                             "fist_energy",8*dp_size)
+    END IF
+!END CHANGE
 
     CALL init_fist_energy(fist_energy)
 
@@ -69,6 +85,7 @@ CONTAINS
 !> \date    13.06.2002
 !> \author  MK
 !> \version 1.0
+!> \note Changed by Matt to allow energy decomposition
 ! *****************************************************************************
   SUBROUTINE deallocate_fist_energy(fist_energy)
     TYPE(fist_energy_type), POINTER          :: fist_energy
@@ -77,6 +94,9 @@ CONTAINS
       routineP = moduleN//':'//routineN
 
     IF (ASSOCIATED(fist_energy)) THEN
+      IF (ALLOCATED(fist_energy%pot_list)) THEN
+        DEALLOCATE (fist_energy%pot_list)
+      END IF
       DEALLOCATE (fist_energy)
     ELSE
       CALL cp_abort(__LOCATION__,&
@@ -92,6 +112,7 @@ CONTAINS
 !> \date    13.06.2002
 !> \author  MK
 !> \version 1.0
+!> \note Changed by Matt to allow energy decomposition
 ! *****************************************************************************
   SUBROUTINE init_fist_energy(fist_energy)
     TYPE(fist_energy_type), POINTER          :: fist_energy
@@ -109,6 +130,9 @@ CONTAINS
       fist_energy%e_induction = 0.0_dp
       fist_energy%kin_shell = 0.0_dp
       fist_energy%harm_shell = 0.0_dp
+      IF (ALLOCATED(fist_energy%pot_list)) THEN
+          fist_energy%pot_list = 0.0_dp
+      END IF
     ELSE
       CALL cp_abort(__LOCATION__,&
            "The fist_energy pointer is not associated "//&

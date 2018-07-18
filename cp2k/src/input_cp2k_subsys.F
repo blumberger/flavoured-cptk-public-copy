@@ -252,6 +252,8 @@ CONTAINS
 !>      atoms+mol+bounds+cell
 !> \param section the section to create
 !> \author fawzi
+!> \note A keyword added "number_decompositions" by Matt to enable a different 
+!>        energy decomposition for non-adiabatic dynamics
 ! *****************************************************************************
   SUBROUTINE create_subsys_section(section)
     TYPE(section_type), POINTER              :: section
@@ -260,13 +262,22 @@ CONTAINS
       routineP = moduleN//':'//routineN
 
     TYPE(section_type), POINTER              :: subsection
+    TYPE(keyword_type), POINTER :: keyword !CHANGE MATT 
 
     CPASSERT(.NOT.ASSOCIATED(section))
     CALL section_create(section,name="subsys",&
          description="a subsystem: coordinates, topology, molecules and cell",&
          n_keywords=0, n_subsections=9, repeats=.FALSE.)
 
-    NULLIFY(subsection)
+    NULLIFY(subsection, keyword) !CHANGE MATT
+
+!CHANGE MATT
+    CALL keyword_create(keyword,"NUM_DECOMP",& 
+         description="Lets CP2K know how many energy decompositions there are",&
+         default_i_val=0)
+    CALL section_add_keyword(section,keyword)
+    CALL keyword_release(keyword)
+!END CHANGE
 
     CALL create_rng_section(subsection)
     CALL section_add_subsection(section,subsection)

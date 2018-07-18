@@ -58,6 +58,8 @@ CONTAINS
 !> \brief creates the force_eval section
 !> \param section the section to be created
 !> \author fawzi
+!> \note Added a keyword letting CP2K know that we want to decompose the
+!>        intra-energy per molecule.
 ! *****************************************************************************
   SUBROUTINE create_force_eval_section(section)
     TYPE(section_type), POINTER              :: section
@@ -111,6 +113,17 @@ CONTAINS
                        "Compute the diagonal part only of the stress tensor numerically"))
     CALL section_add_keyword(section,keyword)
     CALL keyword_release(keyword)
+   
+ !CHANGE MATT
+   CALL keyword_create(keyword, name="DO_DECOMP",&
+                       description="Number of decompositions for the energy and forces.",&
+                       usage="NUM_DECOMP {logical}",&
+                       default_l_val=.FALSE.)
+   CALL section_add_keyword(section,keyword)
+   CALL keyword_release(keyword)
+ !END CHANGE
+
+
 
     CALL create_ext_pot_section(subsection)
     CALL section_add_subsection(section, subsection)
