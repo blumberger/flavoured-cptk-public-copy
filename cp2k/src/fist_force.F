@@ -166,10 +166,12 @@ CONTAINS
                                                 particle_set, &
                                                 shell_particle_set
     TYPE(section_vals_type), POINTER         :: force_env_section, &
-                                                mm_section, print_section
+                                                mm_section, print_section, &
+                                                subsys_section !CHANGE S/M
     TYPE(shell_kind_type), POINTER           :: shell
     TYPE(virial_type), POINTER               :: virial
 
+    
     CALL timeset(routineN,handle)
     NULLIFY(logger)
     NULLIFY(subsys,virial,atprop_env,para_env,force_env_section)
@@ -184,6 +186,7 @@ CONTAINS
                        virial=virial,&
                        atprop=atprop_env)
 
+
     use_virial = virial%pv_availability.AND.(.NOT.virial%pv_numer)
     NULLIFY(atomic_kind,atomic_kind_set,cell,ewald_pw,ewald_env,&
          fist_nonbond_env,mm_section,local_molecules,local_particles,&
@@ -196,6 +199,9 @@ CONTAINS
          extension=".mmLog")
     iw2= cp_print_key_unit_nr(logger,mm_section,"PRINT%EWALD_INFO",&
          extension=".mmLog")
+    
+    subsys_section => section_vals_get_subs_vals(force_env_section, "SUBSYS")
+        !CHANGE s/m
 
     CALL fist_env_get(fist_env, ewald_pw=ewald_pw, ewald_env=ewald_env, &
          local_particles=local_particles, particle_set=particle_set, &
@@ -532,7 +538,7 @@ CONTAINS
 
     ! Get intramolecular forces
     IF(PRESENT(debug))THEN
-       CALL force_intra_control(molecule_set, molecule_kind_set, &
+       CALL force_intra_control(subsys_section, molecule_set, molecule_kind_set, &
             local_molecules, particle_set, shell_particle_set, &
             core_particle_set, pot_bond, pot_bend, pot_urey_bradley, &
             pot_torsion, pot_imptors, pot_opbend, pot_shell, pv_bond, pv_bend, &
@@ -541,7 +547,7 @@ CONTAINS
             debug%f_imptors, debug%f_opbend, cell, use_virial, atprop_env)
 
     ELSE
-       CALL force_intra_control(molecule_set, molecule_kind_set, &
+       CALL force_intra_control(subsys_section, molecule_set, molecule_kind_set, &
             local_molecules, particle_set, shell_particle_set, &
             core_particle_set, pot_bond, pot_bend, pot_urey_bradley, &
             pot_torsion, pot_imptors, pot_opbend, pot_shell, pv_bond, pv_bend, &

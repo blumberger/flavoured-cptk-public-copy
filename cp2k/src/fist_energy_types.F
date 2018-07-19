@@ -58,22 +58,33 @@ CONTAINS
     CHARACTER(len=*), PARAMETER :: routineN = 'allocate_fist_energy', &
       routineP = moduleN//':'//routineN
 
-    INTEGER                                  :: istat, num_decomp !CHANGE MATT
+    INTEGER                                  :: istat!, num_decomp !CHANGE MATT
+    INTEGER, DIMENSION(:), POINTER           :: my_mol_index !CHANGE SAM
 
     IF (.NOT.ASSOCIATED(fist_energy)) THEN
       ALLOCATE (fist_energy,STAT=istat)
       IF (istat /= 0) CALL stop_memory(routineN,moduleN,__LINE__,&
                                        "fist_energy",8*dp_size)
     END IF
-!CHANGE MATT
+!!CHANGE MATT
+!    IF (PRESENT(subsys_section)) THEN
+!      CALL section_vals_val_get(subsys_section, "NUM_DECOMP", &
+!                                      i_val=num_decomp)
+!      ALLOCATE(fist_energy%pot_list(num_decomp), STAT=istat)
+!      IF (istat /= 0) CALL stop_memory(routineN,moduleN,__LINE__,&
+!                             "fist_energy",8*dp_size)
+!    END IF
+!!END MATT
+
     IF (PRESENT(subsys_section)) THEN
-      CALL section_vals_val_get(subsys_section, "NUM_DECOMP", &
-                                      i_val=num_decomp)
-      ALLOCATE(fist_energy%pot_list(num_decomp), STAT=istat)
+      CALL section_vals_val_get(subsys_section, "INDEX_MOL_DECOMP",&
+                                         i_vals=my_mol_index)
+      PRINT *, "my_mol_index", my_mol_index
+      ALLOCATE(fist_energy%pot_list(SIZE(my_mol_index)), STAT=istat)
       IF (istat /= 0) CALL stop_memory(routineN,moduleN,__LINE__,&
-                             "fist_energy",8*dp_size)
+                            "fist_energy",8*dp_size)
     END IF
-!END CHANGE
+!END SAM
 
     CALL init_fist_energy(fist_energy)
 

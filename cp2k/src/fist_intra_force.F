@@ -32,6 +32,8 @@ MODULE fist_intra_force
   USE molecule_types_new,              ONLY: get_molecule,&
                                              molecule_type
   USE particle_types,                  ONLY: particle_type
+  USE input_section_types,             ONLY: section_vals_type, &
+                                             section_vals_val_get
 #include "./base/base_uses.f90"
 
   IMPLICIT NONE
@@ -76,13 +78,14 @@ CONTAINS
 !>      none
 !> \author CJM
 ! *****************************************************************************
-  SUBROUTINE force_intra_control(molecule_set, molecule_kind_set, &
+  SUBROUTINE force_intra_control(subsys_section, molecule_set, molecule_kind_set, &
        local_molecules, particle_set, shell_particle_set, core_particle_set, &
        pot_bond, pot_bend, pot_urey_bradley, pot_torsion, pot_imp_torsion, &
        pot_opbend, pot_shell, pv_bond, pv_bend, pv_urey_bradley, pv_torsion, &
        pv_imp_torsion, pv_opbend, f_bond, f_bend, f_torsion, f_ub, &
        f_imptor, f_opbend, cell, use_virial, atprop_env)
 
+    TYPE(section_vals_type), POINTER         :: subsys_section
     TYPE(molecule_type), POINTER             :: molecule_set( : )
     TYPE(molecule_kind_type), POINTER        :: molecule_kind_set( : )
     TYPE(distribution_1d_type), POINTER      :: local_molecules
@@ -128,6 +131,7 @@ CONTAINS
     TYPE(shell_type), POINTER                :: shell_list( : )
     TYPE(torsion_type), POINTER              :: torsion_list( : )
     TYPE(ub_type), POINTER                   :: ub_list( : )
+    INTEGER, DIMENSION(:), POINTER           :: my_mol_index !CHANGE SAM
 
     CALL timeset ( routineN, handle )
     NULLIFY(logger)
@@ -151,6 +155,10 @@ CONTAINS
     IF (atener) ener_a => atprop_env%atener
     atstress = atprop_env%stress
     IF (atstress) pv_a => atprop_env%atstress
+
+    CALL section_vals_val_get(subsys_section, "INDEX_MOL_DECOMP",& !CHANGE SAM
+                                  i_vals=my_mol_index)
+print *, "NOW_I_PRINT_my_mol_index ", my_mol_index
 
     nkind = SIZE ( molecule_kind_set )
     MOL: DO ikind = 1, nkind
