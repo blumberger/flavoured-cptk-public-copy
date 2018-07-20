@@ -132,6 +132,14 @@ CONTAINS
     TYPE(torsion_type), POINTER              :: torsion_list( : )
     TYPE(ub_type), POINTER                   :: ub_list( : )
     INTEGER, DIMENSION(:), POINTER           :: my_mol_index !CHANGE SAM
+    INTEGER                                  :: count_mol, idx
+    LOGICAL                                  :: store
+    REAL(kind=dp), DIMENSION(:), ALLOCATABLE :: pot_1_mol_list
+    REAL(KIND=dp)                            :: pot_bond_1_mol, &  
+                                                pot_shell_1_mol, pot_urey_bradley_1_mol, &
+                                                pot_bend_1_mol, pot_torsion_1_mol, & 
+                                                pot_imp_torsion_1_mol, pot_opbend_1_mol
+
 
     CALL timeset ( routineN, handle )
     NULLIFY(logger)
@@ -143,6 +151,10 @@ CONTAINS
     IF ( PRESENT ( f_imptor)) f_imptor = 0.0_dp
     IF ( PRESENT ( f_ub)) f_ub = 0.0_dp
 
+    CALL section_vals_val_get(subsys_section, "INDEX_MOL_DECOMP",& !CHANGE SAM
+                                  i_vals=my_mol_index)
+print *, "NOW_I_PRINT_my_mol_index ", my_mol_index
+
     pot_bond =  0.0_dp
     pot_bend =  0.0_dp
     pot_urey_bradley =  0.0_dp
@@ -151,15 +163,18 @@ CONTAINS
     pot_opbend =0.0_dp
     pot_shell =  0.0_dp
 
+    ALLOCATE(pot_1_mol_list(SIZE(my_mol_index)))
+    pot_1_mol_list(:) = 0.0_dp
+print *, "pot_1_mol_list", pot_1_mol_list
+
     atener = atprop_env%energy
     IF (atener) ener_a => atprop_env%atener
     atstress = atprop_env%stress
     IF (atstress) pv_a => atprop_env%atstress
 
-    CALL section_vals_val_get(subsys_section, "INDEX_MOL_DECOMP",& !CHANGE SAM
-                                  i_vals=my_mol_index)
-print *, "NOW_I_PRINT_my_mol_index ", my_mol_index
-
+    
+    store = .FALSE. 
+    count_mol = 0
     nkind = SIZE ( molecule_kind_set )
     MOL: DO ikind = 1, nkind
        nmol_per_kind = local_molecules % n_el ( ikind )
@@ -168,6 +183,19 @@ print *, "NOW_I_PRINT_my_mol_index ", my_mol_index
           i = local_molecules % list ( ikind ) % array ( imol )
           molecule => molecule_set ( i )
           molecule_kind => molecule % molecule_kind
+          count_mol = count_mol + 1
+!print *, "MOL_COUNTER", count_mol
+
+!          DO idx =1, SIZE(my_mol_index)
+!             IF (idx==count_mol) THEN
+!                store = .TRUE.
+!print *, "TRUE_STORE"
+!             ELSE 
+!                store = .FALSE.
+!print *, "FALSE STORE"
+!             END IF
+!          END DO
+
           CALL get_molecule_kind ( molecule_kind, nbend = nbends, nbond = nbonds,  &
                                    nimpr = nimptors, nub = nub, ntorsion = ntorsions, &
                                    nopbend = nopbends, nshell=nshell, &
@@ -177,7 +205,8 @@ print *, "NOW_I_PRINT_my_mol_index ", my_mol_index
                                    shell_list=shell_list )
 
           CALL get_molecule ( molecule, first_atom=first_atom )
-
+         
+          pot_bond_1_mol = 0.0_dp
           BOND: DO ibond = 1, nbonds
              index_a = bond_list ( ibond ) % a + first_atom - 1
              index_b = bond_list ( ibond ) % b + first_atom - 1
@@ -188,7 +217,10 @@ print *, "NOW_I_PRINT_my_mol_index ", my_mol_index
                               bond_list ( ibond ) % bond_kind % k, &
                               bond_list ( ibond ) % bond_kind % cs, &
                               energy, fscalar)
+
+             pot_bond_1_mol = pot_bond_1_mol + energy
              pot_bond = pot_bond + energy
+
              IF (atener) THEN
                 ener_a(index_a) = ener_a(index_a) + 0.5_dp*energy
                 ener_a(index_b) = ener_a(index_b) + 0.5_dp*energy
@@ -221,6 +253,8 @@ print *, "NOW_I_PRINT_my_mol_index ", my_mol_index
 
           END DO BOND
 
+          
+          pot_shell_1_mol = 0.0_dp
           SHELL: DO ishell=1,nshell
              index_a = shell_list(ishell)%a + first_atom - 1
              index_b = particle_set(index_a)%shell_index
@@ -231,7 +265,10 @@ print *, "NOW_I_PRINT_my_mol_index ", my_mol_index
              r2  = DOT_PRODUCT(rij,rij)
              energy  = 0.5_dp*(k2_spring + k4_spring*r2/12.0_dp)*r2
              fscalar = k2_spring + k4_spring*r2/6.0_dp
+
+             pot_shell_1_mol = pot_shell_1_mol + energy
              pot_shell = pot_shell + energy
+
              IF (atener) THEN
                 ener_a(index_a) = ener_a(index_a) + energy
              END IF
@@ -251,6 +288,7 @@ print *, "NOW_I_PRINT_my_mol_index ", my_mol_index
              END IF
           END DO SHELL
 
+          pot_urey_bradley_1_mol = 0.0_dp
           UREY_BRADLEY: DO ibend = 1, nub
              index_a = ub_list ( ibend ) % a + first_atom - 1
              index_b = ub_list ( ibend ) % c + first_atom - 1
@@ -259,6 +297,8 @@ print *, "NOW_I_PRINT_my_mol_index ", my_mol_index
              CALL force_bonds (ub_list(ibend)%ub_kind%id_type, rij, &
                                ub_list(ibend)%ub_kind%r0, &
                                ub_list(ibend)%ub_kind%k, 0.0_dp, energy, fscalar)
+
+             pot_urey_bradley_1_mol = pot_urey_bradley_1_mol + energy
              pot_urey_bradley = pot_urey_bradley + energy
              IF (atener) THEN
                 ener_a(index_a) = ener_a(index_a) + 0.5_dp*energy
@@ -287,6 +327,7 @@ print *, "NOW_I_PRINT_my_mol_index ", my_mol_index
 
           END DO UREY_BRADLEY
 
+          pot_bend_1_mol = 0.0_dp
           BEND: DO ibend = 1, nbends
              index_a = bend_list ( ibend ) % a + first_atom - 1
              index_b = bend_list ( ibend ) % b + first_atom - 1
@@ -316,6 +357,8 @@ print *, "NOW_I_PRINT_my_mol_index ", my_mol_index
                                bend_list(ibend)%bend_kind%kss, &
                                bend_list(ibend)%bend_kind%legendre,&
                                g1,g2,g3,energy,fscalar)
+
+             pot_bend_1_mol = pot_bend_1_mol + energy
              pot_bend = pot_bend + energy
              IF (atener) THEN
                 ener_a(index_a) = ener_a(index_a) + energy/3._dp
@@ -352,6 +395,7 @@ print *, "NOW_I_PRINT_my_mol_index ", my_mol_index
              END IF
           END DO BEND
 
+          pot_torsion_1_mol = 0.0_dp
           TORSION: DO itorsion = 1, ntorsions
              index_a = torsion_list ( itorsion ) % a + first_atom - 1
              index_b = torsion_list ( itorsion ) % b + first_atom - 1
@@ -388,6 +432,7 @@ print *, "NOW_I_PRINT_my_mol_index ", my_mol_index
                                     torsion_list(itorsion)%torsion_kind%phi0(imul), &
                                     torsion_list(itorsion)%torsion_kind%m(imul), &
                                     gt1,gt2,gt3,gt4,energy,fscalar)
+                pot_torsion_1_mol = pot_torsion_1_mol + energy
                 pot_torsion = pot_torsion + energy
                 IF (atener) THEN
                    ener_a(index_a) = ener_a(index_a) + energy*0.25_dp
@@ -432,7 +477,8 @@ print *, "NOW_I_PRINT_my_mol_index ", my_mol_index
                 END IF
              END DO
           END DO TORSION
-
+ 
+          pot_imp_torsion_1_mol = 0.0_dp 
           IMP_TORSION: DO itorsion = 1, nimptors
              index_a = impr_list ( itorsion ) % a + first_atom - 1
              index_b = impr_list ( itorsion ) % b + first_atom - 1
@@ -467,6 +513,8 @@ print *, "NOW_I_PRINT_my_mol_index ", my_mol_index
                                       impr_list(itorsion)%impr_kind%k, &
                                       impr_list(itorsion)%impr_kind%phi0, &
                                       gt1,gt2,gt3,gt4,energy,fscalar)
+
+             pot_imp_torsion_1_mol = pot_imp_torsion_1_mol + energy
              pot_imp_torsion = pot_imp_torsion + energy
              IF (atener) THEN
                 ener_a(index_a) = ener_a(index_a) + energy*0.25_dp
@@ -511,6 +559,7 @@ print *, "NOW_I_PRINT_my_mol_index ", my_mol_index
              END IF
           END DO IMP_TORSION
 
+          pot_opbend_1_mol = 0.0_dp
           OPBEND: DO iopbend = 1, nopbends
              index_a = opbend_list ( iopbend ) % a + first_atom - 1
              index_b = opbend_list ( iopbend ) % b + first_atom - 1
@@ -538,6 +587,8 @@ print *, "NOW_I_PRINT_my_mol_index ", my_mol_index
                                       opbend_list(iopbend)%opbend_kind%k, &
                                       opbend_list(iopbend)%opbend_kind%phi0, &
                                       gt1,gt2,gt3,gt4,energy,fscalar)
+
+             pot_opbend_1_mol = pot_opbend_1_mol + energy
              pot_opbend = pot_opbend + energy
              IF (atener) THEN
                 ener_a(index_a) = ener_a(index_a) + energy*0.25_dp
@@ -582,10 +633,34 @@ print *, "NOW_I_PRINT_my_mol_index ", my_mol_index
                 f_opbend(:,index_d) = f_opbend(:,index_d) + fscalar*gt4
              END IF
           END DO OPBEND
+
+
+!print *, "pot_bond_1_mol", count_mol, pot_bond_1_mol
+!print *, "pot_shell_1_mol", count_mol, pot_shell_1_mol
+!print *, "pot_urey_bradley_1_mol", count_mol, pot_urey_bradley_1_mol
+!print *, "pot_bend_1_mol", count_mol, pot_bend_1_mol
+!print *, "pot_torsion_1_mol", count_mol, pot_torsion_1_mol
+!print *, "pot_imp_torsion_1_mol", count_mol, pot_imp_torsion_1_mol
+!print *, "pot_opbend_1_mol", count_mol, pot_opbend_1_mol
+
+!print*, "count_mol", count_mol 
+          DO idx=1, SIZE(my_mol_index)
+              IF (my_mol_index(idx) .eq. count_mol) THEN
+                 print *, "idx and count", my_mol_index(idx), count_mol
+                 pot_1_mol_list(idx) = pot_bond_1_mol + pot_shell_1_mol + &
+                    pot_urey_bradley_1_mol + pot_bend_1_mol + pot_torsion_1_mol + &
+                    pot_imp_torsion_1_mol + pot_opbend_1_mol
+              END IF
+          END DO
        END DO
     END DO MOL
 
+print *, "pot_1_mol_list", pot_1_mol_list
+
+
     CALL timestop(handle)
+  
+    DEALLOCATE(pot_1_mol_list)
 
   END SUBROUTINE force_intra_control
 
