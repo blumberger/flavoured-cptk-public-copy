@@ -76,6 +76,7 @@ CONTAINS
 !    END IF
 !!END MATT
 
+PRINT *, "SUBSYS", PRESENT(subsys_section)
     IF (PRESENT(subsys_section)) THEN
       CALL section_vals_val_get(subsys_section, "INDEX_MOL_DECOMP",&
                                          i_vals=my_mol_index)

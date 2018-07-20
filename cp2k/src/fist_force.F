@@ -538,21 +538,43 @@ CONTAINS
 
     ! Get intramolecular forces
     IF(PRESENT(debug))THEN
-       CALL force_intra_control(subsys_section, molecule_set, molecule_kind_set, &
-            local_molecules, particle_set, shell_particle_set, &
-            core_particle_set, pot_bond, pot_bend, pot_urey_bradley, &
-            pot_torsion, pot_imptors, pot_opbend, pot_shell, pv_bond, pv_bend, &
-            pv_urey_bradley, pv_torsion, pv_imptors, pv_opbend, &
-            debug%f_bond, debug%f_bend, debug%f_torsion, debug%f_ub, &
-            debug%f_imptors, debug%f_opbend, cell, use_virial, atprop_env)
+       IF (ALLOCATED(thermo%pot_list)) THEN
+          CALL force_intra_control(subsys_section, molecule_set, molecule_kind_set, &
+               local_molecules, particle_set, shell_particle_set, &
+               core_particle_set, pot_bond, pot_bend, pot_urey_bradley, &
+               pot_torsion, pot_imptors, pot_opbend, pot_shell, pv_bond, pv_bend, &
+               pv_urey_bradley, pv_torsion, pv_imptors, pv_opbend, &
+               debug%f_bond, debug%f_bend, debug%f_torsion, debug%f_ub, &
+               debug%f_imptors, debug%f_opbend, cell, use_virial, atprop_env, &
+               pot_1_mol_list=thermo%pot_list)
+       ELSE
+          CALL force_intra_control(subsys_section, molecule_set, molecule_kind_set, &
+               local_molecules, particle_set, shell_particle_set, &
+               core_particle_set, pot_bond, pot_bend, pot_urey_bradley, &
+               pot_torsion, pot_imptors, pot_opbend, pot_shell, pv_bond, pv_bend, &
+               pv_urey_bradley, pv_torsion, pv_imptors, pv_opbend, &
+               debug%f_bond, debug%f_bend, debug%f_torsion, debug%f_ub, &
+               debug%f_imptors, debug%f_opbend, cell, use_virial, atprop_env)
+       END IF
 
     ELSE
-       CALL force_intra_control(subsys_section, molecule_set, molecule_kind_set, &
-            local_molecules, particle_set, shell_particle_set, &
-            core_particle_set, pot_bond, pot_bend, pot_urey_bradley, &
-            pot_torsion, pot_imptors, pot_opbend, pot_shell, pv_bond, pv_bend, &
-            pv_urey_bradley, pv_torsion, pv_imptors, pv_opbend, &
-            cell=cell, use_virial=use_virial, atprop_env=atprop_env)
+PRINT *,  "BOB" , ALLOCATED(thermo%pot_list)
+       IF (ALLOCATED(thermo%pot_list)) THEN
+          CALL force_intra_control(subsys_section, molecule_set, molecule_kind_set, &
+               local_molecules, particle_set, shell_particle_set, &
+               core_particle_set, pot_bond, pot_bend, pot_urey_bradley, &
+               pot_torsion, pot_imptors, pot_opbend, pot_shell, pv_bond, pv_bend, &
+               pv_urey_bradley, pv_torsion, pv_imptors, pv_opbend, &
+               cell=cell, use_virial=use_virial, atprop_env=atprop_env, &
+               pot_1_mol_list=thermo%pot_list)
+       ELSE
+          CALL force_intra_control(subsys_section, molecule_set, molecule_kind_set, &
+               local_molecules, particle_set, shell_particle_set, &
+               core_particle_set, pot_bond, pot_bend, pot_urey_bradley, &
+               pot_torsion, pot_imptors, pot_opbend, pot_shell, pv_bond, pv_bend, &
+               pv_urey_bradley, pv_torsion, pv_imptors, pv_opbend, &
+               cell=cell, use_virial=use_virial, atprop_env=atprop_env)
+       END IF
     ENDIF
 
     IF(iw>0)THEN
@@ -583,6 +605,11 @@ CONTAINS
     ! add up all the potential energies
     thermo%pot = pot_nonbond + pot_bond + pot_bend + pot_torsion + pot_opbend + &
          pot_imptors + pot_urey_bradley + pot_manybody + pot_shell
+
+print *, "TOTAL_ENERGY_TO_COMPARE", pot_bond + pot_bend + pot_torsion + pot_opbend + &
+              pot_imptors + pot_urey_bradley + pot_manybody + pot_shell   
+
+print *, "TOTAL_ENERGY_NEW_POT_LIST",  SUM(thermo%pot_list) 
 
     CALL mp_sum(thermo%pot, para_env%group)
     IF(shell_present)THEN

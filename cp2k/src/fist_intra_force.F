@@ -84,7 +84,7 @@ CONTAINS
        pot_bond, pot_bend, pot_urey_bradley, pot_torsion, pot_imp_torsion, &
        pot_opbend, pot_shell, pv_bond, pv_bend, pv_urey_bradley, pv_torsion, &
        pv_imp_torsion, pv_opbend, f_bond, f_bend, f_torsion, f_ub, &
-       f_imptor, f_opbend, cell, use_virial, atprop_env)
+       f_imptor, f_opbend, cell, use_virial, atprop_env, pot_1_mol_list)
 
     TYPE(section_vals_type), POINTER         :: subsys_section
     TYPE(molecule_type), POINTER             :: molecule_set( : )
@@ -105,6 +105,7 @@ CONTAINS
     TYPE(cell_type), POINTER                 :: cell
     LOGICAL, INTENT(IN)                      :: use_virial
     TYPE(atprop_type), POINTER               :: atprop_env
+    REAL(kind=dp), ALLOCATABLE, OPTIONAL         :: pot_1_mol_list(:) !CHANGE S/M
 
     CHARACTER(len=*), PARAMETER :: routineN = 'force_intra_control', &
       routineP = moduleN//':'//routineN
@@ -135,7 +136,6 @@ CONTAINS
     INTEGER, DIMENSION(:), POINTER           :: my_mol_index !CHANGE SAM
     INTEGER                                  :: count_mol, idx
     LOGICAL                                  :: store
-    REAL(kind=dp), DIMENSION(:), ALLOCATABLE :: pot_1_mol_list
     REAL(KIND=dp)                            :: pot_bond_1_mol, &  
                                                 pot_shell_1_mol, pot_urey_bradley_1_mol, &
                                                 pot_bend_1_mol, pot_torsion_1_mol, & 
@@ -153,9 +153,12 @@ CONTAINS
     IF ( PRESENT ( f_imptor)) f_imptor = 0.0_dp
     IF ( PRESENT ( f_ub)) f_ub = 0.0_dp
 
+IF (PRESENT(pot_1_mol_list)) THEN
     CALL section_vals_val_get(subsys_section, "INDEX_MOL_DECOMP",& !CHANGE SAM
                                   i_vals=my_mol_index)
+!DELETE ME
 print *, "NOW_I_PRINT_my_mol_index ", my_mol_index
+END IF
 
     pot_bond =  0.0_dp
     pot_bend =  0.0_dp
@@ -164,11 +167,13 @@ print *, "NOW_I_PRINT_my_mol_index ", my_mol_index
     pot_imp_torsion =  0.0_dp
     pot_opbend =0.0_dp
     pot_shell =  0.0_dp
-
-    ALLOCATE(pot_1_mol_list(SIZE(my_mol_index)))
-    pot_1_mol_list(:) = 0.0_dp
+!CHANGE S/M
+    IF (PRESENT(pot_1_mol_list))  pot_1_mol_list(:) = 0.0_dp
+!DELETE ME
+        IF (PRESENT(pot_1_mol_list)) THEN
 print *, "pot_1_mol_list", pot_1_mol_list
-
+    END IF
+!END CHANGE
     unit_conv = cp_unit_from_cp2k(1.0_dp, "angstrom")
 
     atener = atprop_env%energy
@@ -210,7 +215,7 @@ print *, "nmol_per_kind", nmol_per_kind
 
           CALL get_molecule ( molecule, first_atom=first_atom )
          
-          pot_bond_1_mol = 0.0_dp
+          pot_bond_1_mol = 0.0_dp !CHANGE SAM
 
 
           BOND: DO ibond = 1, nbonds
@@ -224,7 +229,7 @@ print *, "nmol_per_kind", nmol_per_kind
                               bond_list ( ibond ) % bond_kind % cs, &
                               energy, fscalar)
 
-             pot_bond_1_mol = pot_bond_1_mol + energy
+             pot_bond_1_mol = pot_bond_1_mol + energy !CHANGE SAM
              pot_bond = pot_bond + energy
 
              IF (atener) THEN
@@ -642,32 +647,36 @@ print *, "nmol_per_kind", nmol_per_kind
 
 
 
+        IF (PRESENT(pot_1_mol_list)) THEN
 !print*, "count_mol", count_mol 
-          DO idx=1, SIZE(my_mol_index)
-              IF (my_mol_index(idx) .eq. count_mol) THEN
-print *, "idx and count", my_mol_index(idx), count_mol
-print *, "particle_set ( 68 ) % r", particle_set (68) % r *unit_conv
-print *, "pot_bond_1_mol", count_mol, pot_bond_1_mol
-print *, "pot_shell_1_mol", count_mol, pot_shell_1_mol
-print *, "pot_urey_bradley_1_mol", count_mol, pot_urey_bradley_1_mol
-print *, "pot_bend_1_mol", count_mol, pot_bend_1_mol
-print *, "pot_torsion_1_mol", count_mol, pot_torsion_1_mol
-print *, "pot_imp_torsion_1_mol", count_mol, pot_imp_torsion_1_mol
-print *, "pot_opbend_1_mol", count_mol, pot_opbend_1_mol
-                 pot_1_mol_list(idx) = pot_bond_1_mol + pot_shell_1_mol + &
-                    pot_urey_bradley_1_mol + pot_bend_1_mol + pot_torsion_1_mol + &
-                    pot_imp_torsion_1_mol + pot_opbend_1_mol
-              END IF
-          END DO
+             DO idx=1, SIZE(my_mol_index)
+                 IF (my_mol_index(idx) .eq. count_mol) THEN
+   print *, "idx and count", my_mol_index(idx), count_mol
+   print *, "particle_set ( 68 ) % r", particle_set (68) % r *unit_conv
+   print *, "pot_bond_1_mol", count_mol, pot_bond_1_mol
+   print *, "pot_shell_1_mol", count_mol, pot_shell_1_mol
+   print *, "pot_urey_bradley_1_mol", count_mol, pot_urey_bradley_1_mol
+   print *, "pot_bend_1_mol", count_mol, pot_bend_1_mol
+   print *, "pot_torsion_1_mol", count_mol, pot_torsion_1_mol
+   print *, "pot_imp_torsion_1_mol", count_mol, pot_imp_torsion_1_mol
+   print *, "pot_opbend_1_mol", count_mol, pot_opbend_1_mol
+                    pot_1_mol_list(idx) = pot_bond_1_mol + pot_shell_1_mol + &
+                       pot_urey_bradley_1_mol + pot_bend_1_mol + pot_torsion_1_mol + &
+                       pot_imp_torsion_1_mol + pot_opbend_1_mol
+                 END IF
+             END DO
+          END IF
        END DO
     END DO MOL
 
+!DELETE ME
+        IF (PRESENT(pot_1_mol_list)) THEN
 print *, "pot_1_mol_list", pot_1_mol_list
+                 END IF
 
 
     CALL timestop(handle)
   
-    DEALLOCATE(pot_1_mol_list)
 
   END SUBROUTINE force_intra_control
 

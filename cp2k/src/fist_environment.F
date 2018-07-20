@@ -280,6 +280,7 @@ CONTAINS
 !CHANGE MATT
     CALL section_vals_val_get(force_env_section, "DO_DECOMP", &
                                          l_val=do_decomposition)
+PRINT *, "BOB2", do_decomposition
     ! Create the fist_energy_type
     IF (do_decomposition) THEN
        CALL allocate_fist_energy( thermo, subsys_section )
