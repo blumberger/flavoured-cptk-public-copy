@@ -34,6 +34,7 @@ MODULE fist_intra_force
   USE particle_types,                  ONLY: particle_type
   USE input_section_types,             ONLY: section_vals_type, &
                                              section_vals_val_get
+  USE cp_units,                        ONLY: cp_unit_from_cp2k
 #include "./base/base_uses.f90"
 
   IMPLICIT NONE
@@ -138,7 +139,8 @@ CONTAINS
     REAL(KIND=dp)                            :: pot_bond_1_mol, &  
                                                 pot_shell_1_mol, pot_urey_bradley_1_mol, &
                                                 pot_bend_1_mol, pot_torsion_1_mol, & 
-                                                pot_imp_torsion_1_mol, pot_opbend_1_mol
+                                                pot_imp_torsion_1_mol, pot_opbend_1_mol, &
+                                                unit_conv
 
 
     CALL timeset ( routineN, handle )
@@ -167,18 +169,20 @@ print *, "NOW_I_PRINT_my_mol_index ", my_mol_index
     pot_1_mol_list(:) = 0.0_dp
 print *, "pot_1_mol_list", pot_1_mol_list
 
+    unit_conv = cp_unit_from_cp2k(1.0_dp, "angstrom")
+
     atener = atprop_env%energy
     IF (atener) ener_a => atprop_env%atener
     atstress = atprop_env%stress
     IF (atstress) pv_a => atprop_env%atstress
-
     
     store = .FALSE. 
     count_mol = 0
     nkind = SIZE ( molecule_kind_set )
     MOL: DO ikind = 1, nkind
+print *, "nkind", nkind
        nmol_per_kind = local_molecules % n_el ( ikind )
-
+print *, "nmol_per_kind", nmol_per_kind
        DO imol = 1, nmol_per_kind
           i = local_molecules % list ( ikind ) % array ( imol )
           molecule => molecule_set ( i )
@@ -207,6 +211,8 @@ print *, "pot_1_mol_list", pot_1_mol_list
           CALL get_molecule ( molecule, first_atom=first_atom )
          
           pot_bond_1_mol = 0.0_dp
+
+
           BOND: DO ibond = 1, nbonds
              index_a = bond_list ( ibond ) % a + first_atom - 1
              index_b = bond_list ( ibond ) % b + first_atom - 1
@@ -635,18 +641,19 @@ print *, "pot_1_mol_list", pot_1_mol_list
           END DO OPBEND
 
 
-!print *, "pot_bond_1_mol", count_mol, pot_bond_1_mol
-!print *, "pot_shell_1_mol", count_mol, pot_shell_1_mol
-!print *, "pot_urey_bradley_1_mol", count_mol, pot_urey_bradley_1_mol
-!print *, "pot_bend_1_mol", count_mol, pot_bend_1_mol
-!print *, "pot_torsion_1_mol", count_mol, pot_torsion_1_mol
-!print *, "pot_imp_torsion_1_mol", count_mol, pot_imp_torsion_1_mol
-!print *, "pot_opbend_1_mol", count_mol, pot_opbend_1_mol
 
 !print*, "count_mol", count_mol 
           DO idx=1, SIZE(my_mol_index)
               IF (my_mol_index(idx) .eq. count_mol) THEN
-                 print *, "idx and count", my_mol_index(idx), count_mol
+print *, "idx and count", my_mol_index(idx), count_mol
+print *, "particle_set ( 68 ) % r", particle_set (68) % r *unit_conv
+print *, "pot_bond_1_mol", count_mol, pot_bond_1_mol
+print *, "pot_shell_1_mol", count_mol, pot_shell_1_mol
+print *, "pot_urey_bradley_1_mol", count_mol, pot_urey_bradley_1_mol
+print *, "pot_bend_1_mol", count_mol, pot_bend_1_mol
+print *, "pot_torsion_1_mol", count_mol, pot_torsion_1_mol
+print *, "pot_imp_torsion_1_mol", count_mol, pot_imp_torsion_1_mol
+print *, "pot_opbend_1_mol", count_mol, pot_opbend_1_mol
                  pot_1_mol_list(idx) = pot_bond_1_mol + pot_shell_1_mol + &
                     pot_urey_bradley_1_mol + pot_bend_1_mol + pot_torsion_1_mol + &
                     pot_imp_torsion_1_mol + pot_opbend_1_mol
