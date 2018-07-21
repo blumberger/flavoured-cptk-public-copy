@@ -694,7 +694,9 @@ CONTAINS
     force_env_sections => section_vals_get_subs_vals(root_section,"FORCE_EVAL")
     CALL section_vals_val_get(root_section,"MULTIPLE_FORCE_EVALS%MULTIPLE_SUBSYS",&
          l_val=multiple_subsys)
+print *, "multiple_subsys", multiple_subsys
     CALL multiple_fe_list(force_env_sections, root_section, i_force_eval, nforce_eval)
+print *, "first_nforce_eval", nforce_eval
     ! Enforce the deletion of the subsys (unless not explicitly required)
     IF (.NOT.multiple_subsys) THEN
        DO iforce_eval = 2, nforce_eval

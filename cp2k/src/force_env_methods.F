@@ -54,7 +54,9 @@ MODULE force_env_methods
                                              eip_lenosky
   USE external_potential_methods,      ONLY: add_external_potential
   USE fist_environment_types,          ONLY: fist_env_retain,&
-                                             fist_environment_type
+                                             fist_environment_type, &
+                                             fist_env_get
+  USE fist_energy_types,               ONLY: fist_energy_type
   USE fist_force,                      ONLY: fist_calc_energy_force
   USE force_env_types,                 ONLY: &
        force_env_get, force_env_get_natom, force_env_p_type, force_env_set, &
@@ -824,6 +826,7 @@ CONTAINS
       lambda, lerr, restraint_strength, restraint_target, sd
     REAL(KIND=dp), DIMENSION(3)              :: dip_mix
     REAL(KIND=dp), DIMENSION(:), POINTER     :: energies
+    REAL(KIND=dp), DIMENSION(:,:), POINTER     :: energies_1_mol_list
     TYPE(cell_type), POINTER                 :: cell_mix
     TYPE(cp_logger_type), POINTER            :: logger, my_logger
     TYPE(cp_result_p_type), DIMENSION(:), &
@@ -858,6 +861,9 @@ CONTAINS
       POINTER                                :: my_global_forces
     REAL(KIND=dp), DIMENSION(:), POINTER     :: my_energies
 
+TYPE(fist_energy_type), POINTER              :: thermo
+TYPE(fist_environment_type), POINTER         :: fist_env
+
     NULLIFY(atomic_kinds, local_particles)
 !> End CHANGE_AC
 
@@ -876,6 +882,12 @@ CONTAINS
                        particles=particles_mix,&
                        virial=virial_mix,&
                        results=results_mix)
+
+!CHANGE SAM: NB FOLLOWING LINE IS NOT GENERAL ENOUGH, FIND SOMETHING BETTER
+    CALL force_env_get(force_env%sub_force_env(1)%force_env, fist_env=fist_env)
+    CALL fist_env_get(fist_env, thermo=thermo)
+!END CHANGE
+
     NULLIFY(map_index, glob_natoms, global_forces)
     nforce_eval = SIZE(force_env%sub_force_env)
     mixed_section => section_vals_get_subs_vals(force_env_section,"MIXED")
@@ -886,11 +898,16 @@ CONTAINS
     ! Local Info to sync
     ALLOCATE(global_forces(nforce_eval))
     ALLOCATE(energies(nforce_eval))
+    ALLOCATE(energies_1_mol_list(nforce_eval, SIZE(thermo%pot_list) )) !CHANGE SAM
     ALLOCATE(glob_natoms(nforce_eval))
     ALLOCATE(virials(nforce_eval))
     ALLOCATE(results(nforce_eval))
     energies    = 0.0_dp
+    energies_1_mol_list = 0.0_dp
+
+print *, "energies_1_mol_list", energies_1_mol_list
     glob_natoms = 0
+print *, "nforce_eval", nforce_eval
     DO iforce_eval = 1, nforce_eval
        NULLIFY(subsystems(iforce_eval)%subsys, particles(iforce_eval)%list)
        NULLIFY(results(iforce_eval)%results, virials(iforce_eval)%virial)
@@ -937,6 +954,15 @@ CONTAINS
           CALL cp_subsys_get(subsystems(iforce_eval)%subsys,&
                              virial=loc_virial, results=loc_results)
           energies(iforce_eval)    = energy
+print *, "ENERGY_INSIDE_FORCE_EVAL", energy
+
+          CALL force_env_get(force_env%sub_force_env(iforce_eval)%force_env, fist_env=fist_env)
+          CALL fist_env_get(fist_env, thermo=thermo)
+          energies_1_mol_list(iforce_eval, :) = thermo%pot_list
+print *, "energies_1_mol_list(iforce_eval, :)", thermo%pot_list
+PRINT *, "POT_LIST_NOWWWWW", thermo%pot_list
+PRINT *, iforce_eval
+
           glob_natoms(iforce_eval) = natom
           CALL cp_virial(loc_virial, virials(iforce_eval)%virial)
           CALL cp_result_copy(loc_results, results(iforce_eval)%results)
@@ -986,8 +1012,9 @@ CONTAINS
        CALL cp_results_mp_bcast(results(iforce_eval)%results, source, force_env%para_env)
     END DO
 
-
+!>SAM COMMENT TAKE CARE OF THIS LINE TO STORE energies_1_mol_list
     force_env%mixed_env%energies = energies
+
     ! Start combining the different sub_force_env
     CALL get_mixed_env(mixed_env=force_env%mixed_env,&
                        mixed_energy=mixed_energy)
@@ -1056,6 +1083,7 @@ CONTAINS
        gen_section => section_vals_get_subs_vals(mixed_section,"GENERIC")
        CALL get_generic_info(gen_section, "MIXING_FUNCTION", coupling_function, force_env%mixed_env%par,&
             force_env%mixed_env%val, energies)
+print *, "ENERGIES_mix_generic", energies
        CALL initf(1)
        CALL parsef(1,TRIM(coupling_function),force_env%mixed_env%par)
        ! Now the hardest part.. map energy with corresponding force_eval
@@ -1186,7 +1214,7 @@ CONTAINS
     DEALLOCATE(global_forces)
     DEALLOCATE(subsystems)
     DEALLOCATE(particles)
-    DEALLOCATE(energies)
+    DEALLOCATE(energies, energies_1_mol_list)
     DEALLOCATE(glob_natoms)
     DEALLOCATE(virials)
     DEALLOCATE(results)
@@ -1209,15 +1237,38 @@ CONTAINS
 
 
   SUBROUTINE add_energies_forces(energies, global_forces, my_energies, my_global_forces, do_speedup_lj, do_speedup_intra)
+
+!TYPE(force_env_type), POINTER                :: force_env
+
     TYPE(mixed_force_type), DIMENSION(:), &
       POINTER                                :: global_forces
     REAL(KIND=dp), DIMENSION(:), POINTER     :: energies
     TYPE(mixed_force_type), DIMENSION(:), &
       POINTER                                :: my_global_forces
     REAL(KIND=dp), DIMENSION(:), POINTER     :: my_energies
+
+!    TYPE(force_env_type), POINTER            :: sub_force_envs
+!    TYPE(fist_env_type), POINTER             :: charge_fist_env, &
+!                                                neutral_fist_env
+!    TYPE(fist_energy_type), POINTER          :: charged_thermo, &
+!                                                neutral_thermo
+
+
     LOGICAL, INTENT(IN) :: do_speedup_lj, do_speedup_intra
 
     INTEGER :: i, natom, number_state
+
+    
+!CALL force_env_get(force_env, sub_force_env=sub_force_envs)
+!CALL force_env_get(force_env=sub_force_envs(0), fist_env=neutral_fist_env)
+!CALL force_env_get(force_env=sub_force_envs(1), fist_env=charged_fist_env)
+!CALL fist_env_get(fist_env=neutral_fist_env, thermo=neutral_thermo)
+
+!pot_list_netural = neutral_thermo%pot_list
+
+
+
+
 
     NULLIFY(my_global_forces, my_energies)
     if ((do_speedup_lj).AND.(.NOT.(do_speedup_intra))) then

@@ -611,6 +611,8 @@ print *, "TOTAL_ENERGY_TO_COMPARE", pot_bond + pot_bend + pot_torsion + pot_opbe
 
 print *, "TOTAL_ENERGY_NEW_POT_LIST",  SUM(thermo%pot_list) 
 
+print *, "thermo%pot", thermo%pot
+
     CALL mp_sum(thermo%pot, para_env%group)
     IF(shell_present)THEN
        thermo%harm_shell = pot_shell
