@@ -93,6 +93,7 @@ CONTAINS
           CALL section_vals_val_get(force_env_section,"MIXED%NGROUPS",i_val=ngroup_wish)
        ELSE
           ngroup_wish = n_subforce_eval
+print *, "NOTE:n_subforce_eval", n_subforce_eval
        END IF
        group_size_wish_set=.TRUE.
        group_size_wish = MAX(1,para_env%num_pe/ ngroup_wish)

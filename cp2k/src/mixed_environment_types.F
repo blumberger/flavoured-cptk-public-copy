@@ -73,6 +73,7 @@ MODULE mixed_environment_types
      TYPE ( cp_subsys_type ), POINTER                 :: subsys
      TYPE(section_vals_type), POINTER                 :: input
      REAL(KIND=dp), DIMENSION(:), POINTER             :: energies
+     REAL(KIND=dp), DIMENSION(:,:), POINTER             :: energies_1_mol_list
      ! Parallelization of multiple force_eval
      INTEGER                                          :: new_group, ngroups
      INTEGER, DIMENSION(:), POINTER                   :: group_distribution
@@ -218,6 +219,7 @@ CONTAINS
     NULLIFY (mixed_env%sub_para_env)
     NULLIFY (mixed_env%sub_logger)
     NULLIFY (mixed_env%energies)
+    NULLIFY (mixed_env%energies_1_mol_list)
     NULLIFY (mixed_env%par)
     NULLIFY (mixed_env%val)
     NULLIFY (mixed_env%subsys)
@@ -396,6 +398,7 @@ CONTAINS
           DEALLOCATE(mixed_env%sub_para_env)
           DEALLOCATE(mixed_env%sub_logger)
           DEALLOCATE(mixed_env%energies)
+          DEALLOCATE(mixed_env%energies_1_mol_list)
           IF (ASSOCIATED(mixed_env%par)) THEN
              DEALLOCATE(mixed_env%par)
           END IF

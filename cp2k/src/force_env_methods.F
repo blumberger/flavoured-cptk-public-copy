@@ -826,7 +826,7 @@ CONTAINS
       lambda, lerr, restraint_strength, restraint_target, sd
     REAL(KIND=dp), DIMENSION(3)              :: dip_mix
     REAL(KIND=dp), DIMENSION(:), POINTER     :: energies
-    REAL(KIND=dp), DIMENSION(:,:), POINTER     :: energies_1_mol_list
+    REAL(KIND=dp), DIMENSION(:,:), POINTER   :: energies_1_mol_list
     TYPE(cell_type), POINTER                 :: cell_mix
     TYPE(cp_logger_type), POINTER            :: logger, my_logger
     TYPE(cp_result_p_type), DIMENSION(:), &
@@ -899,6 +899,9 @@ TYPE(fist_environment_type), POINTER         :: fist_env
     ALLOCATE(global_forces(nforce_eval))
     ALLOCATE(energies(nforce_eval))
     ALLOCATE(energies_1_mol_list(nforce_eval, SIZE(thermo%pot_list) )) !CHANGE SAM
+!CHANGE SAM: WE MUST CHECK CAREFULLY THIS ALLOCATION I AM NOT SURE IF IT IS THE
+!CORRECT STYLE (HAVE A LOOK AT mixed_main.F)
+    ALLOCATE(force_env%mixed_env%energies_1_mol_list(nforce_eval, SIZE(thermo%pot_list) )) !CHANGE SAM
     ALLOCATE(glob_natoms(nforce_eval))
     ALLOCATE(virials(nforce_eval))
     ALLOCATE(results(nforce_eval))
@@ -978,6 +981,7 @@ PRINT *, iforce_eval
     CALL mp_sync(force_env%para_env%group)
     ! Let's transfer energy, natom, forces, virials
     CALL mp_sum(energies, force_env%para_env%group)
+    !CALL mp_sum(energies_1_mol_list, force_env%para_env%group)
     CALL mp_sum(glob_natoms, force_env%para_env%group)
     ! Transfer forces
     DO iforce_eval = 1, nforce_eval
@@ -1014,7 +1018,8 @@ PRINT *, iforce_eval
 
 !>SAM COMMENT TAKE CARE OF THIS LINE TO STORE energies_1_mol_list
     force_env%mixed_env%energies = energies
-
+    force_env%mixed_env%energies_1_mol_list = energies_1_mol_list
+print *, "force_env%mixed_env%energies_1_mol_list", force_env%mixed_env%energies_1_mol_list
     ! Start combining the different sub_force_env
     CALL get_mixed_env(mixed_env=force_env%mixed_env,&
                        mixed_energy=mixed_energy)
@@ -1083,6 +1088,7 @@ PRINT *, iforce_eval
        gen_section => section_vals_get_subs_vals(mixed_section,"GENERIC")
        CALL get_generic_info(gen_section, "MIXING_FUNCTION", coupling_function, force_env%mixed_env%par,&
             force_env%mixed_env%val, energies)
+print *, "force_env%mixed_env%energies_1_mol_list INSIDE GENMIX",force_env%mixed_env%energies_1_mol_list
 print *, "ENERGIES_mix_generic", energies
        CALL initf(1)
        CALL parsef(1,TRIM(coupling_function),force_env%mixed_env%par)
@@ -1123,6 +1129,7 @@ print *, "ENERGIES_mix_generic", energies
         adiab_section => section_vals_get_subs_vals(mixed_section, "ADIABATIC")
         CALL section_vals_val_get(adiab_section,"METHOD_PROPAGATION",c_val=adiab_keyword)
         mixed_env => force_env%mixed_env
+print *, "force_env%mixed_env%energies_1_mol_list INSIDE", mixed_env%energies_1_mol_list
         !SELECT CASE(adiab_keyword)
         !CASE("CLASSICAL_PATH")
            !Check that all the FF have the same number of atoms than the 1st FF
