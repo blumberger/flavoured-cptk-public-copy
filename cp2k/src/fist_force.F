@@ -609,9 +609,9 @@ PRINT *,  "BOB" , ALLOCATED(thermo%pot_list)
 print *, "TOTAL_ENERGY_TO_COMPARE", pot_bond + pot_bend + pot_torsion + pot_opbend + &
               pot_imptors + pot_urey_bradley + pot_manybody + pot_shell   
 
-print *, "TOTAL_ENERGY_NEW_POT_LIST",  SUM(thermo%pot_list) 
+!print *, "TOTAL_ENERGY_NEW_POT_LIST",  SUM(thermo%pot_list) 
 
-print *, "thermo%pot", thermo%pot
+!print *, "thermo%pot", thermo%pot
 
     CALL mp_sum(thermo%pot, para_env%group)
     IF(shell_present)THEN

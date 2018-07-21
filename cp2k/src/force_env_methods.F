@@ -856,13 +856,17 @@ CONTAINS
     TYPE(mixed_environment_type), POINTER    :: mixed_env
     TYPE(atomic_kind_list_type), POINTER     :: atomic_kinds
     TYPE(distribution_1d_type), POINTER      :: local_particles
-    LOGICAL                                  :: do_speedup_lj, do_speedup_intra
+    LOGICAL                                  :: do_speedup_lj, do_speedup_intra,&
+                                                do_mem_save
     TYPE(mixed_force_type), DIMENSION(:), &
       POINTER                                :: my_global_forces
     REAL(KIND=dp), DIMENSION(:), POINTER     :: my_energies
 
-TYPE(fist_energy_type), POINTER              :: thermo
-TYPE(fist_environment_type), POINTER         :: fist_env
+    TYPE(fist_energy_type), POINTER              :: thermo !CHANGE SAM
+    TYPE(fist_environment_type), POINTER         :: fist_env  !CHANGE SAM
+!    TYPE(section_vals_type), POINTER             :: subsys_section  !CHANGE SAM
+!    INTEGER, DIMENSION(:), POINTER           :: my_mol_index !CHANGE SAM
+!    LOGICAL :: do_decomposition !CHANGE SAM
 
     NULLIFY(atomic_kinds, local_particles)
 !> End CHANGE_AC
@@ -1141,15 +1145,27 @@ print *, "force_env%mixed_env%energies_1_mol_list INSIDE", mixed_env%energies_1_
               END IF
            ENDDO 
            !print*, "AC_energies", energies 
-           CALL section_vals_val_get(force_env_section, "DO_DECOMP", &
-                                         l_val=do_decomposition)
-print *, "do_decomposition", do_decomposition
-   
-           CALL section_vals_val_get(adiab_section, "DO_SPEEDUP_LJ", l_val=do_speedup_lj)
-           CALL section_vals_val_get(adiab_section, "DO_SPEEDUP_INTRA", l_val=do_speedup_intra)
-           !do_speedup_lj = .TRUE.
-           !do_speedup_intra = .TRUE.
-           CALL add_energies_forces(energies, global_forces, my_energies, my_global_forces, do_speedup_lj, do_speedup_intra)
+!           CALL section_vals_val_get(force_env_section, "DO_DECOMP", &
+!                                         l_val=do_decomposition)
+!print *, "do_decomposition", do_decompositioin
+! SAM COMMENT: I could not use the previous keyword because for some reason was
+! false
+           
+           CALL section_vals_val_get(adiab_section, "DO_MEMORY_SAVE", l_val=do_mem_save)
+print *, "do_mem_save", do_mem_save
+           IF (do_mem_save) THEN
+               !subsys_section => section_vals_get_subs_vals(force_env_section, "SUBSYS")
+               !CALL section_vals_val_get(subsys_section, "INDEX_MOL_DECOMP",& !CHANGE SAM
+               !                   i_vals=my_mol_index)
+               !print *, "my_mol_index", my_mol_index
+
+                CALL add_energies_forces_mem_saver( mixed_env, energies, global_forces, my_energies, my_global_forces)
+!stop
+           ELSE
+                CALL section_vals_val_get(adiab_section, "DO_SPEEDUP_LJ", l_val=do_speedup_lj)
+                CALL section_vals_val_get(adiab_section, "DO_SPEEDUP_INTRA", l_val=do_speedup_intra)
+                CALL add_energies_forces(energies, global_forces, my_energies, my_global_forces, do_speedup_lj, do_speedup_intra)
+           END IF
            !print*, "AC_energies", my_energies 
            CALL adiab_fssh_routines(particles_mix, virial_mix, results_mix,   &
                 my_global_forces, my_energies, virials, results, nforce_eval,&
@@ -1201,6 +1217,46 @@ print *, "do_decomposition", do_decomposition
     CALL cp_print_key_finished_output(unit_nr,logger,mixed_section,"PRINT%DIPOLE")
   END SUBROUTINE mixed_energy_forces
 
+
+
+ SUBROUTINE add_energies_forces_mem_saver( mixed_env, energies, global_forces, my_energies, my_global_forces)
+
+
+   TYPE(mixed_environment_type), OPTIONAL, &
+      POINTER                                :: mixed_env
+   TYPE(mixed_force_type), DIMENSION(:), &
+     POINTER                                :: global_forces
+   REAL(KIND=dp), DIMENSION(:), POINTER     :: energies
+   TYPE(mixed_force_type), DIMENSION(:), &
+     POINTER                                :: my_global_forces
+   REAL(KIND=dp), DIMENSION(:), POINTER     :: my_energies
+
+   INTEGER :: i, natom 
+
+
+  
+   NULLIFY(my_global_forces, my_energies)
+
+   ALLOCATE(my_global_forces(SIZE(mixed_env%energies_1_mol_list(1,:))))
+!SAM COMMENT: MAYBE FIND A BETTER WAY TO ALLOCATE THIS
+   ALLOCATE(my_energies(SIZE(mixed_env%energies_1_mol_list(1,:))))
+   
+print *, "SIZE(mixed_env%energies_1_mol_list(1,:))", SIZE(mixed_env%energies_1_mol_list(1,:))
+!print *, " SIZE(global_forces(1)", SIZE(global_forces(1))
+print *, "SIZE(global_forces(i)%forces(:,:), 1)", SIZE(global_forces(2)%forces(:,:), 1)
+print *, "SIZE(global_forces(i)%forces(:,:), 2)", SIZE(global_forces(2)%forces(:,:), 2)
+
+   DO i = 1, SIZE(mixed_env%energies_1_mol_list(1,:))
+print *, "LOOP", i
+      my_energies(i) = energies(1) + mixed_env%energies_1_mol_list(1,i) - mixed_env%energies_1_mol_list(2,i)
+      natom = SIZE(global_forces(1)%forces(:,:), 2)
+print *, "natom", natom
+      ALLOCATE(my_global_forces(i)%forces( 3,natom))
+print *, "OKAY UP TO HERE"
+      my_global_forces(i)%forces = global_forces(1)%forces
+   END DO
+
+  END SUBROUTINE add_energies_forces_mem_saver
 
   SUBROUTINE add_energies_forces(energies, global_forces, my_energies, my_global_forces, do_speedup_lj, do_speedup_intra)
 

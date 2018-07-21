@@ -653,7 +653,7 @@ print *, "nmol_per_kind", nmol_per_kind
              DO idx=1, SIZE(my_mol_index)
                  IF (my_mol_index(idx) .eq. count_mol) THEN
 !   print *, "idx and count", my_mol_index(idx), count_mol
-!   print *, "particle_set ( 68 ) % r", particle_set (68) % r *unit_conv
+   print *, "particle_set (idx ) % r", particle_set (idx*18) % r *unit_conv
 !   print *, "pot_bond_1_mol", count_mol, pot_bond_1_mol
 !   print *, "pot_shell_1_mol", count_mol, pot_shell_1_mol
 !   print *, "pot_urey_bradley_1_mol", count_mol, pot_urey_bradley_1_mol
