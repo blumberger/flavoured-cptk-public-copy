@@ -609,6 +609,7 @@ PRINT *,  "BOB" , ALLOCATED(thermo%pot_list)
 print *, "TOTAL_ENERGY_TO_COMPARE", pot_bond + pot_bend + pot_torsion + pot_opbend + &
               pot_imptors + pot_urey_bradley + pot_manybody + pot_shell   
 
+print *, "LJ contribution", pot_nonbond
 !print *, "TOTAL_ENERGY_NEW_POT_LIST",  SUM(thermo%pot_list) 
 
 !print *, "thermo%pot", thermo%pot

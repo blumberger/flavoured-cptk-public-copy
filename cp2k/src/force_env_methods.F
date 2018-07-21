@@ -1242,13 +1242,13 @@ print *, "do_mem_save", do_mem_save
    ALLOCATE(my_energies(SIZE(mixed_env%energies_1_mol_list(1,:))))
    
 print *, "SIZE(mixed_env%energies_1_mol_list(1,:))", SIZE(mixed_env%energies_1_mol_list(1,:))
-!print *, " SIZE(global_forces(1)", SIZE(global_forces(1))
-print *, "SIZE(global_forces(i)%forces(:,:), 1)", SIZE(global_forces(2)%forces(:,:), 1)
 print *, "SIZE(global_forces(i)%forces(:,:), 2)", SIZE(global_forces(2)%forces(:,:), 2)
 
    DO i = 1, SIZE(mixed_env%energies_1_mol_list(1,:))
 print *, "LOOP", i
-      my_energies(i) = energies(1) + mixed_env%energies_1_mol_list(1,i) - mixed_env%energies_1_mol_list(2,i)
+print *, "INTRA+LJ", energies(1), "   ", energies(2)
+print *, "mixed_env%energies_1_mol_list(2,i)", mixed_env%energies_1_mol_list(2,i)
+      my_energies(i) = energies(1) + mixed_env%energies_1_mol_list(2,i) - mixed_env%energies_1_mol_list(1,i)
       natom = SIZE(global_forces(1)%forces(:,:), 2)
 print *, "natom", natom
       ALLOCATE(my_global_forces(i)%forces( 3,natom))

@@ -648,12 +648,15 @@ print *, "nmol_per_kind", nmol_per_kind
 
 
 
-        IF (PRESENT(pot_1_mol_list)) THEN
+          IF (PRESENT(pot_1_mol_list)) THEN
 !print*, "count_mol", count_mol 
              DO idx=1, SIZE(my_mol_index)
-                 IF (my_mol_index(idx) .eq. count_mol) THEN
+                !> we need to start from my_mol_index(idx)+1 becuase the atoms
+                !position is zero-based in accordange with AOM.coeff whereas the energy here starts from 1
+                 IF (my_mol_index(idx)+1 .eq. count_mol) THEN
+print *, "MOL_INDEX", my_mol_index(idx) +1
 !   print *, "idx and count", my_mol_index(idx), count_mol
-   print *, "particle_set (idx ) % r", particle_set (idx*18) % r *unit_conv
+!  print *, "particle_set (idx ) % r", particle_set (my_mol_index(idx)*18) % r *unit_conv
 !   print *, "pot_bond_1_mol", count_mol, pot_bond_1_mol
 !   print *, "pot_shell_1_mol", count_mol, pot_shell_1_mol
 !   print *, "pot_urey_bradley_1_mol", count_mol, pot_urey_bradley_1_mol
@@ -664,15 +667,17 @@ print *, "nmol_per_kind", nmol_per_kind
                     pot_1_mol_list(idx) = pot_bond_1_mol + pot_shell_1_mol + &
                        pot_urey_bradley_1_mol + pot_bend_1_mol + pot_torsion_1_mol + &
                        pot_imp_torsion_1_mol + pot_opbend_1_mol
+print *, "pot_1_mol_list(idx)", pot_1_mol_list(idx)
                  END IF
              END DO
           END IF
+
        END DO
     END DO MOL
 
 !DELETE ME
         IF (PRESENT(pot_1_mol_list)) THEN
-print *, "pot_1_mol_list", pot_1_mol_list
+print *, "pot_1_mol_list", SUM(pot_1_mol_list)
                  END IF
 
 
