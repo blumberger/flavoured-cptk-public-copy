@@ -135,7 +135,7 @@ CONTAINS
     TYPE(ub_type), POINTER                   :: ub_list( : )
     INTEGER, DIMENSION(:), POINTER           :: my_mol_index !CHANGE SAM
     INTEGER                                  :: count_mol, idx
-    LOGICAL                                  :: store
+  !  LOGICAL                                  :: store
     REAL(KIND=dp)                            :: pot_bond_1_mol, &  
                                                 pot_shell_1_mol, pot_urey_bradley_1_mol, &
                                                 pot_bend_1_mol, pot_torsion_1_mol, & 
@@ -182,7 +182,9 @@ print *, "pot_1_mol_list"
     atstress = atprop_env%stress
     IF (atstress) pv_a => atprop_env%atstress
     
-    store = .FALSE. 
+ !   store = .FALSE. 
+!SAM COMMENT: probably cout_mol is not useful, already i = ... is counting the
+!molecular index
     count_mol = 0
     nkind = SIZE ( molecule_kind_set )
     MOL: DO ikind = 1, nkind
@@ -655,6 +657,7 @@ print *, "nmol_per_kind", nmol_per_kind
                 !position is zero-based in accordange with AOM.coeff whereas the energy here starts from 1
                  IF (my_mol_index(idx)+1 .eq. count_mol) THEN
 print *, "MOL_INDEX", my_mol_index(idx) +1
+!print *, "forces_particle_set", particle_set ( my_mol_index(idx) +1 )% f 
 !   print *, "idx and count", my_mol_index(idx), count_mol
 !  print *, "particle_set (idx ) % r", particle_set (my_mol_index(idx)*18) % r *unit_conv
 !   print *, "pot_bond_1_mol", count_mol, pot_bond_1_mol

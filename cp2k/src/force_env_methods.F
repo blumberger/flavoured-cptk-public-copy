@@ -941,6 +941,7 @@ print *, "nforce_eval", nforce_eval
 
        ! Get Mapping index array
        natom = SIZE(particles(iforce_eval)%list%els)
+print *, "NATOM", natom
        CALL get_subsys_map_index(mapping_section, natom, iforce_eval, nforce_eval, &
             map_index)
 
@@ -996,8 +997,10 @@ PRINT *, iforce_eval
                force_env%sub_force_env(iforce_eval)%force_env%para_env%source) THEN
              ! Forces
              DO iparticle = 1, glob_natoms(iforce_eval)
+print *, "iparticle", iparticle
                 global_forces(iforce_eval)%forces(:,iparticle) = &
                      particles(iforce_eval)%list%els(iparticle)%f
+!print *, "particles(iforce_eval)%list%els(iparticle)%f", particles(iforce_eval)%list%els(iparticle)%f
              END DO
           END IF
        END IF

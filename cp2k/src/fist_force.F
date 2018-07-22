@@ -170,6 +170,12 @@ CONTAINS
                                                 subsys_section !CHANGE S/M
     TYPE(shell_kind_type), POINTER           :: shell
     TYPE(virial_type), POINTER               :: virial
+    INTEGER, DIMENSION(:), POINTER           :: my_mol_index !CHANGE SAM
+    
+!TEST
+!    TYPE(molecule_type), POINTER             :: molecule   
+!    TYPE(molecule_kind_type), POINTER        :: molecule_kind
+!    INTEGER ::  imol, nkind,  nmol_per_kind 
 
     
     CALL timeset(routineN,handle)
@@ -203,6 +209,12 @@ CONTAINS
     subsys_section => section_vals_get_subs_vals(force_env_section, "SUBSYS")
         !CHANGE s/m
 
+!TEST SAM
+   CALL section_vals_val_get(subsys_section, "INDEX_MOL_DECOMP",& !CHANGE SAM
+                                               i_vals=my_mol_index)
+print *, "INDEX_MOL_DECOMP", my_mol_index
+!END TEST
+ 
     CALL fist_env_get(fist_env, ewald_pw=ewald_pw, ewald_env=ewald_env, &
          local_particles=local_particles, particle_set=particle_set, &
          atomic_kind_set=atomic_kind_set, molecule_set=molecule_set, &
@@ -218,10 +230,28 @@ CONTAINS
     CALL init_cell(cell)
     CALL ewald_pw_grid_update(ewald_pw, ewald_env, cell%hmat)
 
+
+!!TEST LOOP
+!    nkind = SIZE ( molecule_kind_set )
+!    MOL: DO ikind = 1, nkind
+!       nmol_per_kind = local_molecules % n_el ( ikind )
+!       DO imol = 1, nmol_per_kind
+!           i = local_molecules % list ( ikind ) % array ( imol )
+!print *, "i", i
+!           molecule => molecule_set ( i )
+!           molecule_kind => molecule % molecule_kind
+!       END DO
+!    END DO MOL
+       
+!!END TEST
+
+
+
     natoms = SIZE(particle_set)
     nlocal_particles = 0
     nparticle_kind = SIZE(atomic_kind_set)
     DO ikind = 1, nparticle_kind
+print *, "local_particles%n_el(ikind)", local_particles%n_el(ikind)
        nlocal_particles = nlocal_particles + local_particles%n_el(ikind)
     ENDDO
 
@@ -577,6 +607,10 @@ PRINT *,  "BOB" , ALLOCATED(thermo%pot_list)
        END IF
     ENDIF
 
+!TEST
+!WRITE(iw,'(A)')" FIST:: TOSTORE"
+!WRITE(iw,'(3f15.9)')((particle_set(i)%f(j),j=1,3), i = 1, SIZE(particle_set))
+! END
     IF(iw>0)THEN
        xdum1 = cp_unit_from_cp2k(pot_bond,"kcalmol")
        xdum2 = cp_unit_from_cp2k(pot_bend,"kcalmol")
