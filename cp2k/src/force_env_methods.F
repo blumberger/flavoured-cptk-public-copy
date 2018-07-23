@@ -1000,6 +1000,9 @@ PRINT *, iforce_eval
 !print *, "iparticle", iparticle
                 global_forces(iforce_eval)%forces(:,iparticle) = &
                      particles(iforce_eval)%list%els(iparticle)%f
+!NB: here is where the forces from each particles in els are passed to the global
+!environment that store all of them and then they will be used in
+!add_energies_forces
 !print *, "particles(iforce_eval)%list%els(iparticle)%f", particles(iforce_eval)%list%els(iparticle)%f
              END DO
           END IF

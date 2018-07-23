@@ -178,7 +178,8 @@ CONTAINS
     TYPE(molecule_type), POINTER             :: molecule   
     TYPE(molecule_kind_type), POINTER        :: molecule_kind
     INTEGER ::  imol, nkind,  nmol_per_kind, first_atom, last_atom,& 
-                atoms_active_region 
+                atoms_active_region, aoi 
+    REAL(KIND=dp), ALLOCATABLE, DIMENSION(:, :) :: forces_intra_aoi
 
     
     CALL timeset(routineN,handle)
@@ -255,7 +256,7 @@ print *, "atoms_active_region", atoms_active_region
 
 !  NULLIFY(particle_set_intra)
 !  CALL allocate_particle_set_intra(particle_set_intra,atoms_active_region)
-!ALLOCATE(forces_intra_aoi(3:))
+ALLOCATE(forces_intra_aoi(3, atoms_active_region))
        
 !END TEST
 
@@ -620,10 +621,30 @@ PRINT *,  "BOB" , ALLOCATED(thermo%pot_list)
        END IF
     ENDIF
 
-!TEST
-!WRITE(iw,'(A)')" FIST:: TOSTORE"
-!WRITE(iw,'(3f15.9)')((particle_set(i)%f(j),j=1,3), i = 1, SIZE(particle_set))
-! END
+!TEST: store the forces that we need
+
+    nkind = SIZE ( molecule_kind_set )
+    DO ikind = 1, nkind
+       nmol_per_kind = local_molecules % n_el ( ikind )
+       DO imol = 1, nmol_per_kind
+           i = local_molecules % list ( ikind ) % array ( imol )
+           molecule => molecule_set ( i )
+           molecule_kind => molecule % molecule_kind
+           IF (ANY(my_mol_index==i)) THEN
+              CALL get_molecule ( molecule, first_atom=first_atom, last_atom=last_atom )
+              DO aoi=first_atom, last_atom
+                  forces_intra_aoi(:, aoi) = particle_set(i)%f(:)
+print *, "TEST_NEEDED_FORCES"!, particle_set(aoi)%f(:) 
+WRITE(*,'(3f15.9)')(particle_set(aoi)%f(j),j=1,3)           
+              END DO
+           END IF
+       END DO
+    END DO
+
+
+WRITE(iw,'(A)')" FIST:: TOSTORE"
+WRITE(iw,'(3f15.9)')((particle_set(i)%f(j),j=1,3), i = 1, SIZE(particle_set))
+
     IF(iw>0)THEN
        xdum1 = cp_unit_from_cp2k(pot_bond,"kcalmol")
        xdum2 = cp_unit_from_cp2k(pot_bend,"kcalmol")
@@ -935,6 +956,9 @@ print *, "LJ contribution", pot_nonbond
     CALL print_fist(fist_env, print_section, atomic_kind_set, particle_set, cell)
 
     ! deallocating all local variables
+    IF(ALLOCATED(forces_intra_aoi))THEN 
+       DEALLOCATE(forces_intra_aoi)
+    END IF
     IF(ALLOCATED(fg_coulomb))THEN
        DEALLOCATE(fg_coulomb)
     END IF
