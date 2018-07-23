@@ -74,6 +74,7 @@ MODULE mixed_environment_types
      TYPE(section_vals_type), POINTER                 :: input
      REAL(KIND=dp), DIMENSION(:), POINTER             :: energies
      REAL(KIND=dp), DIMENSION(:,:), POINTER             :: energies_1_mol_list
+!CHANGE SAM
      ! Parallelization of multiple force_eval
      INTEGER                                          :: new_group, ngroups
      INTEGER, DIMENSION(:), POINTER                   :: group_distribution

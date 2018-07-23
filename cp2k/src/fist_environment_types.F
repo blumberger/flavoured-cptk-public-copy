@@ -76,6 +76,9 @@ MODULE fist_environment_types
     INTEGER                                      :: id_nr, ref_count
     LOGICAL                                      :: qmmm
     LOGICAL                                      :: shell_model, shell_model_ad
+!!!!!!!!!!!!!!!!!!!
+    REAL(KIND=dp), ALLOCATABLE                   :: fist_forces_decomposed(:,:,:)
+!!!!!!!!!!!!!!!!!!!
     TYPE (qmmm_env_mm_type), POINTER             :: qmmm_env
     TYPE (cell_type), POINTER                    :: cell_ref
     TYPE (ewald_environment_type), POINTER       :: ewald_env
@@ -438,6 +441,10 @@ CONTAINS
       routineP = moduleN//':'//routineN
 
     ALLOCATE(fist_env)
+! CALL section_vals_get_val(decomp...
+!!!!!!!!!!!!!!!!!!!!!
+!    ALLOCATE(fist_env%fist_forces_decomposed(2,3,num_atoms)
+!!!!!!!!!!!!!!!!!!!!!
     CALL init_fist_env(fist_env,para_env=para_env)
   END SUBROUTINE fist_env_create
 
