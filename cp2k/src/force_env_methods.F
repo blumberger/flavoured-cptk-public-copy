@@ -864,6 +864,7 @@ CONTAINS
 
     TYPE(fist_energy_type), POINTER              :: thermo !CHANGE SAM
     TYPE(fist_environment_type), POINTER         :: fist_env  !CHANGE SAM
+    LOGICAL                                  :: do_decomposition !CHANGE SAM
 !    TYPE(section_vals_type), POINTER             :: subsys_section  !CHANGE SAM
 !    INTEGER, DIMENSION(:), POINTER           :: my_mol_index !CHANGE SAM
 !    LOGICAL :: do_decomposition !CHANGE SAM
@@ -887,6 +888,10 @@ CONTAINS
                        virial=virial_mix,&
                        results=results_mix)
 
+    CALL section_vals_val_get(force_env_section, "DO_DECOMP", &
+                                         l_val=do_decomposition)
+
+print *, "in force_env_method_do_decomp", do_decomposition
 !CHANGE SAM: NB FOLLOWING LINE IS NOT GENERAL ENOUGH, FIND SOMETHING BETTER
     CALL force_env_get(force_env%sub_force_env(1)%force_env, fist_env=fist_env)
     CALL fist_env_get(fist_env, thermo=thermo)
@@ -910,7 +915,7 @@ CONTAINS
     ALLOCATE(virials(nforce_eval))
     ALLOCATE(results(nforce_eval))
     energies    = 0.0_dp
-    energies_1_mol_list = 0.0_dp
+    energies_1_mol_list = 0.0_dp !CHANGE SAM
 
 print *, "energies_1_mol_list", energies_1_mol_list
     glob_natoms = 0

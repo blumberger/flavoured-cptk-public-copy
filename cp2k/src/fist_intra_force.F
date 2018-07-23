@@ -658,7 +658,7 @@ print *, "pot_1_mol_list"
                 !> we need to start from my_mol_index(idx)+1 becuase the atoms
                 !position is zero-based in accordange with AOM.coeff whereas the energy here starts from 1
                  IF (my_mol_index(idx) .eq. count_mol) THEN
-print *, "MOL_INDEX _TO GET", my_mol_index(idx)
+!print *, "MOL_INDEX _TO GET", my_mol_index(idx)
 !print *, "forces_particle_set", particle_set ( my_mol_index(idx) +1 )% f 
 !   print *, "idx and count", my_mol_index(idx), count_mol
 !  print *, "particle_set (idx ) % r", particle_set (my_mol_index(idx)*18) % r *unit_conv

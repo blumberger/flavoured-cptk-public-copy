@@ -178,7 +178,7 @@ CONTAINS
     TYPE(molecule_type), POINTER             :: molecule   
     TYPE(molecule_kind_type), POINTER        :: molecule_kind
     INTEGER ::  imol, nkind,  nmol_per_kind, first_atom, last_atom,& 
-                atoms_active_region, aoi 
+                atoms_active_region, aoi, count_idx 
     REAL(KIND=dp), ALLOCATABLE, DIMENSION(:, :) :: forces_intra_aoi
 
     
@@ -622,7 +622,7 @@ PRINT *,  "BOB" , ALLOCATED(thermo%pot_list)
     ENDIF
 
 !TEST: store the forces that we need
-
+    count_idx = 0
     nkind = SIZE ( molecule_kind_set )
     DO ikind = 1, nkind
        nmol_per_kind = local_molecules % n_el ( ikind )
@@ -633,9 +633,14 @@ PRINT *,  "BOB" , ALLOCATED(thermo%pot_list)
            IF (ANY(my_mol_index==i)) THEN
               CALL get_molecule ( molecule, first_atom=first_atom, last_atom=last_atom )
               DO aoi=first_atom, last_atom
-                  forces_intra_aoi(:, aoi) = particle_set(i)%f(:)
+                  count_idx = count_idx + 1
+                  forces_intra_aoi(1, count_idx) = particle_set(aoi)%f(1)
+                  forces_intra_aoi(2, count_idx) = particle_set(aoi)%f(2)
+                  forces_intra_aoi(3, count_idx) = particle_set(aoi)%f(3)
 print *, "TEST_NEEDED_FORCES"!, particle_set(aoi)%f(:) 
-WRITE(*,'(3f15.9)')(particle_set(aoi)%f(j),j=1,3)           
+WRITE(*,'(3f15.9)')(particle_set(aoi)%f(j),j=1,3) 
+!print *, "STORED"
+!WRITE(*,'(3f15.9)')(forces_intra_aoi(j,count_idx),j=1,3)          
               END DO
            END IF
        END DO
