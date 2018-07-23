@@ -130,6 +130,9 @@ MODULE force_env_methods
                                              virial_release,&
                                              virial_type,&
                                              zero_virial
+  USE molecule_kind_types,             ONLY: molecule_kind_type
+  USE molecule_types_new,              ONLY: molecule_type,&
+                                                get_molecule
 #include "./base/base_uses.f90"
 !> CHANGE_AC
 !> 15-12-11
@@ -864,13 +867,16 @@ CONTAINS
 
     TYPE(fist_energy_type), POINTER              :: thermo !CHANGE SAM
     TYPE(fist_environment_type), POINTER         :: fist_env  !CHANGE SAM
-    LOGICAL                                  :: do_decomposition !CHANGE SAM
-!    TYPE(section_vals_type), POINTER             :: subsys_section  !CHANGE SAM
-!    INTEGER, DIMENSION(:), POINTER           :: my_mol_index !CHANGE SAM
-!    LOGICAL :: do_decomposition !CHANGE SAM
+!    TYPE(molecule_kind_type), POINTER        :: molecule_kind
+    TYPE(molecule_kind_type), DIMENSION(:), &
+      POINTER                                :: molecule_kind_set
+    TYPE(distribution_1d_type), POINTER      :: local_molecules
+      TYPE(molecule_type), DIMENSION(:), &
+       POINTER                                :: molecule_set    
 
-    NULLIFY(atomic_kinds, local_particles)
-!> End CHANGE_AC
+
+    NULLIFY(atomic_kinds, local_particles, molecule_set, molecule_kind_set, local_molecules)
+!> End CHANGE_AC and SAM
 
 
     logger => cp_get_default_logger()
@@ -884,14 +890,17 @@ CONTAINS
     CALL cp_subsys_get(subsys=subsys_mix,&
                        atomic_kinds=atomic_kinds,& !CHANGE_AC
                        local_particles=local_particles,& !CHANGE_AC
+                       molecule_set=molecule_set, & !CHANGE SAM
+                       molecule_kind_set=molecule_kind_set,& !CHANGE SAM
+                       local_molecules_new=local_molecules,& !CHANGE SAM
                        particles=particles_mix,&
                        virial=virial_mix,&
                        results=results_mix)
 
-    CALL section_vals_val_get(force_env_section, "DO_DECOMP", &
-                                         l_val=do_decomposition)
+!    CALL section_vals_val_get(force_env_section, "DO_DECOMP", &
+!                                         l_val=do_decomposition)
 
-print *, "in force_env_method_do_decomp", do_decomposition
+!print *, "in force_env_method_do_decomp", do_decomposition
 !CHANGE SAM: NB FOLLOWING LINE IS NOT GENERAL ENOUGH, FIND SOMETHING BETTER
     CALL force_env_get(force_env%sub_force_env(1)%force_env, fist_env=fist_env)
     CALL fist_env_get(fist_env, thermo=thermo)
@@ -1183,7 +1192,8 @@ print *, "force_env%mixed_env%energies_1_mol_list INSIDE", mixed_env%energies_1_
                !                   i_vals=my_mol_index)
                !print *, "my_mol_index", my_mol_index
 
-                CALL add_energies_forces_mem_saver( mixed_env, energies, global_forces, my_energies, my_global_forces)
+                CALL add_energies_forces_mem_saver( mixed_env, energies, global_forces, my_energies, my_global_forces, &
+                                                      molecule_kind_set, local_molecules, molecule_set )
 !stop
            ELSE
                 CALL section_vals_val_get(adiab_section, "DO_SPEEDUP_LJ", l_val=do_speedup_lj)
@@ -1244,8 +1254,8 @@ print *, "force_env%mixed_env%energies_1_mol_list INSIDE", mixed_env%energies_1_
 
 
 
- SUBROUTINE add_energies_forces_mem_saver( mixed_env, energies, global_forces, my_energies, my_global_forces)
-
+ SUBROUTINE add_energies_forces_mem_saver( mixed_env, energies, global_forces, my_energies, my_global_forces,& 
+                                            molecule_kind_set, local_molecules, molecule_set )
 
    TYPE(mixed_environment_type), OPTIONAL, &
       POINTER                                :: mixed_env
@@ -1255,16 +1265,37 @@ print *, "force_env%mixed_env%energies_1_mol_list INSIDE", mixed_env%energies_1_
    TYPE(mixed_force_type), DIMENSION(:), &
      POINTER                                :: my_global_forces
    REAL(KIND=dp), DIMENSION(:), POINTER     :: my_energies
+   TYPE(molecule_type), POINTER             :: molecule  
+   TYPE(molecule_kind_type), POINTER        :: molecule_kind
+     TYPE(molecule_kind_type), DIMENSION(:), &
+      POINTER                                :: molecule_kind_set
+   TYPE(distribution_1d_type), POINTER      :: local_molecules
+      TYPE(molecule_type), DIMENSION(:), &
+      POINTER                                :: molecule_set
+  
 
    INTEGER :: i, natom 
+   INTEGER ::  imol, nkind,  nmol_per_kind,  ikind
 
-
-  
    NULLIFY(my_global_forces, my_energies)
 
    ALLOCATE(my_global_forces(SIZE(mixed_env%energies_1_mol_list(1,:))))
 !SAM COMMENT: MAYBE FIND A BETTER WAY TO ALLOCATE THIS
    ALLOCATE(my_energies(SIZE(mixed_env%energies_1_mol_list(1,:))))
+
+
+ !TEST SAM
+ nkind = SIZE ( molecule_kind_set )
+ MOL: DO ikind = 1, nkind
+     nmol_per_kind = local_molecules % n_el ( ikind )
+     DO imol = 1, nmol_per_kind
+         i = local_molecules % list ( ikind ) % array ( imol )
+print *, "i_in_FORCE_ENV", i
+         molecule => molecule_set ( i )
+         molecule_kind => molecule % molecule_kind
+     END DO
+ END DO MOL
+!END TEST
    
 print *, "SIZE(mixed_env%energies_1_mol_list(1,:))", SIZE(mixed_env%energies_1_mol_list(1,:))
 print *, "SIZE(global_forces(i)%forces(:,:), 2)", SIZE(global_forces(2)%forces(:,:), 2)
