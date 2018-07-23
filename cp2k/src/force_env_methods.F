@@ -1185,7 +1185,7 @@ print *, "force_env%mixed_env%energies_1_mol_list INSIDE", mixed_env%energies_1_
 ! SAM COMMENT: I could not use the previous keyword because for some reason was
 ! false
            
-           
+           PRINT *, "dO decomp = ", ALLOCATED(thermo%pot_list) 
            IF (ALLOCATED(thermo%pot_list)) THEN
                !subsys_section => section_vals_get_subs_vals(force_env_section, "SUBSYS")
                !CALL section_vals_val_get(subsys_section, "INDEX_MOL_DECOMP",& !CHANGE SAM

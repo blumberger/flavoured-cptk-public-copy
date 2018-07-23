@@ -22,7 +22,9 @@ MODULE fist_main
   USE force_env_methods,               ONLY: force_env_create
   USE force_env_types,                 ONLY: force_env_type
   USE global_types,                    ONLY: global_environment_type
-  USE input_section_types,             ONLY: section_vals_type
+  USE input_section_types,             ONLY: section_vals_type, &
+                                             section_vals_val_get, &
+                                             section_vals_get_subs_vals
   USE qmmm_types_low,                  ONLY: qmmm_env_mm_type
 #include "./base/base_uses.f90"
 
@@ -78,16 +80,26 @@ CONTAINS
       routineP = moduleN//':'//routineN
 
     INTEGER                                  :: handle
-    LOGICAL                                  :: myqmmm
+    LOGICAL                                  :: myqmmm, do_decomp
     TYPE(fist_environment_type), POINTER     :: fist_env
+    TYPE(section_vals_type), POINTER         :: energy_decomp_section
 
+    NULLIFY(energy_decomp_section, fist_env)
     CALL timeset(routineN,handle)
     myqmmm=.FALSE.
     IF (PRESENT(qmmm)) THEN
        myqmmm=qmmm
     END IF
 
-    CALL fist_env_create( fist_env, para_env = para_env)
+    CALL section_vals_val_get( force_env_section,"DO_DECOMP", &
+                              l_val=do_decomp)
+    IF (do_decomp) THEN 
+        energy_decomp_section => section_vals_get_subs_vals(force_env_section,"ENERGY_DECOMP")
+        CALL fist_env_create( fist_env, para_env = para_env, &
+                              energy_decomp_section=energy_decomp_section)
+    ELSE 
+        CALL fist_env_create( fist_env, para_env = para_env)
+    END IF
     IF (PRESENT(qmmm_env)) THEN
        CALL fist_env_set (fist_env, qmmm=myqmmm, qmmm_env=qmmm_env)
     ELSE

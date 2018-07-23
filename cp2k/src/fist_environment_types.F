@@ -41,9 +41,11 @@ MODULE fist_environment_types
   USE fist_nonbond_env_types,          ONLY: fist_nonbond_env_release,&
                                              fist_nonbond_env_retain,&
                                              fist_nonbond_env_type
+  USE kinds,                           ONLY: dp
   USE input_section_types,             ONLY: section_vals_release,&
                                              section_vals_retain,&
-                                             section_vals_type
+                                             section_vals_type, &
+                                             section_vals_val_get
   USE mol_kind_new_list_types,         ONLY: mol_kind_new_list_create,&
                                              mol_kind_new_list_release,&
                                              mol_kind_new_list_type
@@ -77,7 +79,7 @@ MODULE fist_environment_types
     LOGICAL                                      :: qmmm
     LOGICAL                                      :: shell_model, shell_model_ad
 !!!!!!!!!!!!!!!!!!!
-!    REAL(KIND=dp), ALLOCATABLE                   :: fist_forces_decomposed(:,:,:)
+    REAL(KIND=dp), ALLOCATABLE                   :: intra_forces(:,:)
 !!!!!!!!!!!!!!!!!!!
     TYPE (qmmm_env_mm_type), POINTER             :: qmmm_env
     TYPE (cell_type), POINTER                    :: cell_ref
@@ -154,7 +156,7 @@ CONTAINS
        local_particles, local_molecules, molecule_kind_set, molecule_set, cell,&
        cell_ref, ewald_env, fist_nonbond_env, thermo, para_env, subsys, qmmm,&
        qmmm_env, input, shell_model, shell_model_ad, shell_particle_set,&
-       core_particle_set, multipoles, results, exclusions)
+       core_particle_set, multipoles, results, exclusions, intra_forces)
 
     TYPE(fist_environment_type), INTENT(IN)  :: fist_env
     TYPE(atomic_kind_type), OPTIONAL, &
@@ -189,6 +191,7 @@ CONTAINS
     TYPE(cp_result_type), OPTIONAL, POINTER  :: results
     TYPE(exclusion_type), DIMENSION(:), &
       OPTIONAL, POINTER                      :: exclusions
+    REAL(KIND=dp), ALLOCATABLE, OPTIONAL     :: intra_forces(:,:)
 
     CHARACTER(len=*), PARAMETER :: routineN = 'fist_env_get', &
       routineP = moduleN//':'//routineN
@@ -214,7 +217,7 @@ CONTAINS
     IF ( PRESENT ( fist_nonbond_env ) ) fist_nonbond_env => fist_env % fist_nonbond_env
     IF ( PRESENT ( shell_model ) ) shell_model = fist_env % shell_model
     IF ( PRESENT ( shell_model_ad ) ) shell_model_ad = fist_env % shell_model_ad
-    IF (PRESENT(subsys)) subsys => fist_env%subsys
+    IF ( PRESENT (subsys)) subsys => fist_env%subsys
 
     IF(ASSOCIATED(fist_env%subsys)) &
        CALL cp_subsys_get(fist_env%subsys,&
@@ -229,13 +232,14 @@ CONTAINS
                           multipoles=fist_multipoles,&
                           results=results,&
                           cell=cell)
-    IF (PRESENT(atomic_kind_set)) atomic_kind_set => atomic_kinds%els
-    IF (PRESENT(particle_set)) particle_set => particles%els
-    IF (PRESENT(molecule_kind_set)) molecule_kind_set => molecule_kinds_new%els
-    IF (PRESENT(molecule_set)) molecule_set => molecules_new%els
-    IF (PRESENT(shell_particle_set)) shell_particle_set => shell_particles%els
-    IF (PRESENT(core_particle_set)) core_particle_set => core_particles%els
-    IF (PRESENT(multipoles)) multipoles => fist_multipoles
+    IF ( PRESENT(atomic_kind_set)) atomic_kind_set => atomic_kinds%els
+    IF ( PRESENT(particle_set)) particle_set => particles%els
+    IF ( PRESENT(molecule_kind_set)) molecule_kind_set => molecule_kinds_new%els
+    IF ( PRESENT(molecule_set)) molecule_set => molecules_new%els
+    IF ( PRESENT(shell_particle_set)) shell_particle_set => shell_particles%els
+    IF ( PRESENT(core_particle_set)) core_particle_set => core_particles%els
+    IF ( PRESENT(multipoles)) multipoles => fist_multipoles
+    IF ( PRESENT (intra_forces)) intra_forces = fist_env%intra_forces
   END SUBROUTINE fist_env_get
 
 ! *****************************************************************************
@@ -302,7 +306,8 @@ CONTAINS
                            local_particles, local_molecules, molecule_kind_set, &
                            molecule_set, cell_ref, ewald_env,  &
                            fist_nonbond_env, thermo, subsys, qmmm, qmmm_env, &
-                           input, shell_model, shell_model_ad, exclusions)
+                           input, shell_model, shell_model_ad, exclusions, &
+                           intra_forces)
 
     TYPE(fist_environment_type), POINTER     :: fist_env
     TYPE(atomic_kind_type), OPTIONAL, &
@@ -331,6 +336,7 @@ CONTAINS
     LOGICAL, OPTIONAL                        :: shell_model, shell_model_ad
     TYPE(exclusion_type), DIMENSION(:), &
       OPTIONAL, POINTER                      :: exclusions
+    REAL(KIND=dp), ALLOCATABLE, OPTIONAL     :: intra_forces(:,:)
 
     CHARACTER(len=*), PARAMETER :: routineN = 'fist_env_set', &
       routineP = moduleN//':'//routineN
@@ -422,6 +428,9 @@ CONTAINS
     IF (PRESENT(shell_model_ad)) THEN
        fist_env%shell_model_ad = shell_model_ad
     END IF
+    IF (PRESENT(intra_forces)) THEN
+       fist_env%intra_forces = intra_forces
+    END IF
 
   END SUBROUTINE fist_env_set
 
@@ -433,18 +442,21 @@ CONTAINS
 !>      12.2002 created [fawzi]
 !> \author Fawzi Mohamed
 ! *****************************************************************************
-  SUBROUTINE fist_env_create(fist_env,para_env)
-    TYPE(fist_environment_type), POINTER     :: fist_env
-    TYPE(cp_para_env_type), POINTER          :: para_env
+  SUBROUTINE fist_env_create(fist_env,para_env, energy_decomp_section)
+    TYPE(fist_environment_type), POINTER      :: fist_env
+    TYPE(cp_para_env_type), POINTER           :: para_env
+    TYPE(section_vals_type), POINTER,OPTIONAL :: energy_decomp_section
+    INTEGER                                   :: num_atoms
 
     CHARACTER(len=*), PARAMETER :: routineN = 'fist_env_create', &
       routineP = moduleN//':'//routineN
 
     ALLOCATE(fist_env)
-! CALL section_vals_get_val(decomp...
-!!!!!!!!!!!!!!!!!!!!!
-!    ALLOCATE(fist_env%fist_forces_decomposed(2,3,num_atoms)
-!!!!!!!!!!!!!!!!!!!!!
+    IF (PRESENT(energy_decomp_section)) THEN
+        CALL section_vals_val_get(energy_decomp_section, "NUM_ACTIVE_ATOMS", &
+                                  i_val=num_atoms)
+        ALLOCATE(fist_env%intra_forces(3,num_atoms))
+    END IF
     CALL init_fist_env(fist_env,para_env=para_env)
   END SUBROUTINE fist_env_create
 
@@ -494,7 +506,9 @@ CONTAINS
           CALL cp_subsys_release(fist_env%subsys)
           CALL section_vals_release(fist_env%input)
           CALL exclusion_release(fist_env%exclusions)
-
+          IF (ALLOCATED(fist_env%intra_forces)) THEN
+              DEALLOCATE(fist_env%intra_forces)
+          END IF
           DEALLOCATE(fist_env)
        END IF
     END IF
