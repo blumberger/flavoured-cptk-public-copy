@@ -399,7 +399,9 @@ CONTAINS
           DEALLOCATE(mixed_env%sub_para_env)
           DEALLOCATE(mixed_env%sub_logger)
           DEALLOCATE(mixed_env%energies)
-          DEALLOCATE(mixed_env%energies_1_mol_list)
+          IF(ASSOCIATED(mixed_env%energies_1_mol_list)) THEN
+               DEALLOCATE(mixed_env%energies_1_mol_list)
+          END IF
           IF (ASSOCIATED(mixed_env%par)) THEN
              DEALLOCATE(mixed_env%par)
           END IF

@@ -856,8 +856,8 @@ CONTAINS
     TYPE(mixed_environment_type), POINTER    :: mixed_env
     TYPE(atomic_kind_list_type), POINTER     :: atomic_kinds
     TYPE(distribution_1d_type), POINTER      :: local_particles
-    LOGICAL                                  :: do_speedup_lj, do_speedup_intra,&
-                                                do_mem_save
+    LOGICAL                                  :: do_speedup_lj, do_speedup_intra!,&
+!                                                do_mem_save
     TYPE(mixed_force_type), DIMENSION(:), &
       POINTER                                :: my_global_forces
     REAL(KIND=dp), DIMENSION(:), POINTER     :: my_energies

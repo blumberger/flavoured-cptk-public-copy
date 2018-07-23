@@ -211,7 +211,7 @@ CONTAINS
          extension=".mmLog")
     
     ener_decomp_section => section_vals_get_subs_vals(force_env_section, &
-                                                      "ENERGY_DECOMPOSITION")
+                                                      "ENERGY_DECOMP")
  
     CALL fist_env_get(fist_env, ewald_pw=ewald_pw, ewald_env=ewald_env, &
          local_particles=local_particles, particle_set=particle_set, &

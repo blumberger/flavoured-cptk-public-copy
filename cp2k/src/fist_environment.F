@@ -279,7 +279,7 @@ CONTAINS
     ENDIF
 
     IF (.NOT.ASSOCIATED(energy_decomp_section)) THEN
-       energy_decomp_section => section_vals_get_subs_vals(force_env_section,"ENERGY_DECOMPOSITION", can_return_null=.TRUE.)
+       energy_decomp_section => section_vals_get_subs_vals(force_env_section,"ENERGY_DECOMP", can_return_null=.TRUE.)
     END IF
 
 !CHANGE MATT

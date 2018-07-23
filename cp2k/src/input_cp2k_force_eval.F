@@ -188,7 +188,7 @@ CONTAINS
     TYPE(keyword_type), POINTER              :: keyword
 
     NULLIFY(section, keyword)
-    CALL section_create(section,name="ENERGY_DECOMPOSITION",&
+    CALL section_create(section,name="ENERGY_DECOMP",&
          description="Section controlling the decomposition of energies for"//&
          " individual molecules in fist.",&
          n_keywords=2, n_subsections=0, repeats=.FALSE.)
