@@ -44,6 +44,7 @@ MODULE fist_force
   USE exclusion_types,                 ONLY: exclusion_type
   USE fist_energy_types,               ONLY: fist_energy_type
   USE fist_environment_types,          ONLY: fist_env_get,&
+                                             fist_env_set, &
                                              fist_environment_type
   USE fist_intra_force,                ONLY: force_intra_control
   USE fist_neighbor_list_control,      ONLY: list_control
@@ -178,7 +179,7 @@ CONTAINS
     TYPE(molecule_type), POINTER             :: molecule   
     TYPE(molecule_kind_type), POINTER        :: molecule_kind
     INTEGER ::  imol, nkind,  nmol_per_kind, first_atom, last_atom,& 
-                atoms_active_region, aoi, count_idx 
+                atoms_active_region, aoi, count_idx, act_atoms
     REAL(KIND=dp), ALLOCATABLE, DIMENSION(:, :) :: forces_intra_aoi
 
     
@@ -250,6 +251,11 @@ IF (ALLOCATED(thermo%pot_list)) THEN
           END DO
        END DO MOL
    print *, "atoms_active_region", atoms_active_region 
+   CALL section_vals_val_get(ener_decomp_section, "NUM_ACTIVE_ATOMS", &
+                             i_val=act_atoms)
+   IF (act_atoms /= atoms_active_region) THEN
+      CPABORT("num_act_atoms incorrect")
+   END IF
 ALLOCATE(forces_intra_aoi(3, atoms_active_region))
 END IF
 
@@ -651,6 +657,7 @@ WRITE(*,'(3f15.9)')(particle_set(aoi)%f(j),j=1,3)
 
 END IF
 
+CALL fist_env_set(fist_env=fist_env, intra_forces=forces_intra_aoi)
 
     IF(iw>0)THEN
        xdum1 = cp_unit_from_cp2k(pot_bond,"kcalmol")

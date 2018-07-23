@@ -909,6 +909,9 @@ CONTAINS
     NULLIFY(map_index, glob_natoms, global_forces)
     nforce_eval = SIZE(force_env%sub_force_env)
     mixed_section => section_vals_get_subs_vals(force_env_section,"MIXED")
+    !TO FINISH
+    !energy_decomp_section => section_vals_get_subs_vals(force_env_section,"ENERGY_DECOMP")
+    !CALL section_vals_val_get(energy_decomp_section, "VALUE")
     mapping_section => section_vals_get_subs_vals(mixed_section,"MAPPING")
     ! Global Info
     ALLOCATE(subsystems(nforce_eval))
@@ -983,9 +986,11 @@ print *, "NATOM", natom
                              virial=loc_virial, results=loc_results)
           energies(iforce_eval)    = energy
 print *, "ENERGY_INSIDE_FORCE_EVAL", energy
+        
+
 
           CALL force_env_get(force_env%sub_force_env(iforce_eval)%force_env, fist_env=fist_env)
-          CALL fist_env_get(fist_env, thermo=thermo)
+          CALL fist_env_get(fist_env, thermo=thermo)!, intra_forces=intra_forces)
           IF (ALLOCATED(thermo%pot_list)) THEN
              energies_1_mol_list(iforce_eval, :) = thermo%pot_list
 print *, "energies_1_mol_list(iforce_eval, :)", thermo%pot_list
@@ -1184,7 +1189,9 @@ print *, "force_env%mixed_env%energies_1_mol_list INSIDE", mixed_env%energies_1_
 !print *, "do_decomposition", do_decompositioin
 ! SAM COMMENT: I could not use the previous keyword because for some reason was
 ! false
-           
+           !TOFINISH
+           !CALL fist_env_get(fist_env)
+
            PRINT *, "dO decomp = ", ALLOCATED(thermo%pot_list) 
            IF (ALLOCATED(thermo%pot_list)) THEN
                !subsys_section => section_vals_get_subs_vals(force_env_section, "SUBSYS")
