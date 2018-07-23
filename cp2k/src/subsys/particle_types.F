@@ -34,7 +34,8 @@ MODULE particle_types
      TYPE(atomic_kind_type), POINTER       :: atomic_kind ! atomic kind information
      REAL(KIND = dp), DIMENSION(3)         :: f,&         ! force
                                               r,&         ! position
-                                              v           ! velocity
+                                              v!, &           ! velocity
+                                              !f_intra    !CHANGE_SAM
      ! Particle dependent terms for shell-model
      INTEGER                               :: atom_index, t_region_index, shell_index
   END TYPE particle_type
@@ -49,9 +50,47 @@ MODULE particle_types
             deallocate_particle_set,&
             update_particle_set,&
             update_particle_pos_or_vel,&
-            get_particle_pos_or_vel
+            get_particle_pos_or_vel!,&
+            !allocate_particle_set_intra
 
 CONTAINS
+
+
+
+! SUBROUTINE allocate_particle_set_intra(particle_set_intra,nparticle)
+!   TYPE(particle_type), DIMENSION(:), &
+!     POINTER                                :: particle_set_intra
+!   INTEGER, INTENT(IN)                      :: nparticle
+!
+!   CHARACTER(len=*), PARAMETER :: routineN = 'allocate_particle_set', &
+!     routineP = moduleN//':'//routineN
+!
+!
+!   IF (ASSOCIATED(particle_set_intra)) THEN
+!      CALL deallocate_particle_set_intra(particle_set_intra)
+!   END IF
+!   ALLOCATE (particle_set_intra(nparticle))
+!
+! END SUBROUTINE allocate_particle_set_intra
+!
+!
+! SUBROUTINE deallocate_particle_set_intra(particle_set_intra)
+!   TYPE(particle_type), DIMENSION(:), &
+!     POINTER                                :: particle_set_intra
+!
+!   CHARACTER(len=*), PARAMETER :: routineN = 'deallocate_particle_set', &
+!     routineP = moduleN//':'//routineN
+!
+!   IF (ASSOCIATED(particle_set_intra)) THEN
+!     DEALLOCATE (particle_set_intra)
+!   ELSE
+!     CALL cp_abort(__LOCATION__,&
+!          "The pointer particle_set is not associated and "//&
+!          "cannot be deallocated")
+!   END IF
+!
+! END SUBROUTINE deallocate_particle_set_intra
+
 
 ! *****************************************************************************
 !> \brief   Allocate a particle set.

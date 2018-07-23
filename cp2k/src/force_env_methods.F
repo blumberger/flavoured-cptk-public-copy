@@ -997,7 +997,7 @@ PRINT *, iforce_eval
                force_env%sub_force_env(iforce_eval)%force_env%para_env%source) THEN
              ! Forces
              DO iparticle = 1, glob_natoms(iforce_eval)
-print *, "iparticle", iparticle
+!print *, "iparticle", iparticle
                 global_forces(iforce_eval)%forces(:,iparticle) = &
                      particles(iforce_eval)%list%els(iparticle)%f
 !print *, "particles(iforce_eval)%list%els(iparticle)%f", particles(iforce_eval)%list%els(iparticle)%f

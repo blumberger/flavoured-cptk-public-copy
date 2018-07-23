@@ -64,7 +64,8 @@ MODULE fist_force
   USE mathconstants,                   ONLY: twopi
   USE message_passing,                 ONLY: mp_sum
   USE molecule_kind_types,             ONLY: molecule_kind_type
-  USE molecule_types_new,              ONLY: molecule_type
+  USE molecule_types_new,              ONLY: molecule_type,&
+                                             get_molecule
   USE moments_utils,                   ONLY: get_reference_point
   USE multipole_types,                 ONLY: multipole_type
   USE particle_types,                  ONLY: particle_type
@@ -164,7 +165,8 @@ CONTAINS
     TYPE(particle_type), DIMENSION(:), &
       POINTER                                :: core_particle_set, &
                                                 particle_set, &
-                                                shell_particle_set
+                                                shell_particle_set!, &
+                                                ! particle_set_intra
     TYPE(section_vals_type), POINTER         :: force_env_section, &
                                                 mm_section, print_section, &
                                                 subsys_section !CHANGE S/M
@@ -173,9 +175,10 @@ CONTAINS
     INTEGER, DIMENSION(:), POINTER           :: my_mol_index !CHANGE SAM
     
 !TEST
-!    TYPE(molecule_type), POINTER             :: molecule   
-!    TYPE(molecule_kind_type), POINTER        :: molecule_kind
-!    INTEGER ::  imol, nkind,  nmol_per_kind 
+    TYPE(molecule_type), POINTER             :: molecule   
+    TYPE(molecule_kind_type), POINTER        :: molecule_kind
+    INTEGER ::  imol, nkind,  nmol_per_kind, first_atom, last_atom,& 
+                atoms_active_region 
 
     
     CALL timeset(routineN,handle)
@@ -231,20 +234,30 @@ print *, "INDEX_MOL_DECOMP", my_mol_index
     CALL ewald_pw_grid_update(ewald_pw, ewald_env, cell%hmat)
 
 
-!!TEST LOOP
-!    nkind = SIZE ( molecule_kind_set )
-!    MOL: DO ikind = 1, nkind
-!       nmol_per_kind = local_molecules % n_el ( ikind )
-!       DO imol = 1, nmol_per_kind
-!           i = local_molecules % list ( ikind ) % array ( imol )
-!print *, "i", i
-!           molecule => molecule_set ( i )
-!           molecule_kind => molecule % molecule_kind
-!       END DO
-!    END DO MOL
-       
-!!END TEST
+!TEST LOOP
+    atoms_active_region = 0
+    nkind = SIZE ( molecule_kind_set )
+    MOL: DO ikind = 1, nkind
+       nmol_per_kind = local_molecules % n_el ( ikind )
+       DO imol = 1, nmol_per_kind
+           i = local_molecules % list ( ikind ) % array ( imol )
+print *, "i", i
+           molecule => molecule_set ( i )
+           molecule_kind => molecule % molecule_kind
+           IF (ANY(my_mol_index==i)) THEN
+print *, "TRUE", i
+              CALL get_molecule ( molecule, first_atom=first_atom, last_atom=last_atom )
+              atoms_active_region =  atoms_active_region + (last_atom - first_atom + 1)
+           END IF
+       END DO
+    END DO MOL
+print *, "atoms_active_region", atoms_active_region 
 
+!  NULLIFY(particle_set_intra)
+!  CALL allocate_particle_set_intra(particle_set_intra,atoms_active_region)
+!ALLOCATE(forces_intra_aoi(3:))
+       
+!END TEST
 
 
     natoms = SIZE(particle_set)

@@ -185,19 +185,19 @@ print *, "pot_1_mol_list"
  !   store = .FALSE. 
 !SAM COMMENT: probably cout_mol is not useful, already i = ... is counting the
 !molecular index
-    count_mol = 0
+    count_mol = 0 !not needed we could just use i
     nkind = SIZE ( molecule_kind_set )
     MOL: DO ikind = 1, nkind
-print *, "nkind", nkind
+!print *, "nkind", nkind
        nmol_per_kind = local_molecules % n_el ( ikind )
-print *, "nmol_per_kind", nmol_per_kind
+!print *, "nmol_per_kind", nmol_per_kind
        DO imol = 1, nmol_per_kind
           i = local_molecules % list ( ikind ) % array ( imol )
           molecule => molecule_set ( i )
           molecule_kind => molecule % molecule_kind
           count_mol = count_mol + 1
-print *, "i index", i
-print *, "COUNT", count_mol
+!print *, "i index", i
+!print *, "COUNT", count_mol
 !print *, "MOL_COUNTER", count_mol
 
 !          DO idx =1, SIZE(my_mol_index)
