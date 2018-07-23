@@ -51,9 +51,9 @@ CONTAINS
 !> \version 1.1
 !> \note Changed by Matt to allow enery decomposition
 ! *****************************************************************************
-  SUBROUTINE allocate_fist_energy(fist_energy, subsys_section)!CHANGE MATT
+  SUBROUTINE allocate_fist_energy(fist_energy, energy_decomp_section)
     TYPE(fist_energy_type), POINTER          :: fist_energy
-    TYPE(section_vals_type), POINTER,OPTIONAL :: subsys_section !CHANGE MATT
+    TYPE(section_vals_type), POINTER,OPTIONAL :: energy_decomp_section
 
     CHARACTER(len=*), PARAMETER :: routineN = 'allocate_fist_energy', &
       routineP = moduleN//':'//routineN
@@ -76,9 +76,8 @@ CONTAINS
 !    END IF
 !!END MATT
 
-PRINT *, "SUBSYS", PRESENT(subsys_section)
-    IF (PRESENT(subsys_section)) THEN
-      CALL section_vals_val_get(subsys_section, "INDEX_MOL_DECOMP",&
+    IF (PRESENT(energy_decomp_section)) THEN
+      CALL section_vals_val_get(energy_decomp_section, "INDEX_MOL_DECOMP",&
                                          i_vals=my_mol_index)
       PRINT *, "my_mol_index", my_mol_index
       ALLOCATE(fist_energy%pot_list(SIZE(my_mol_index)), STAT=istat)

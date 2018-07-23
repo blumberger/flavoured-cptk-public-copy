@@ -77,7 +77,7 @@ MODULE fist_environment_types
     LOGICAL                                      :: qmmm
     LOGICAL                                      :: shell_model, shell_model_ad
 !!!!!!!!!!!!!!!!!!!
-    REAL(KIND=dp), ALLOCATABLE                   :: fist_forces_decomposed(:,:,:)
+!    REAL(KIND=dp), ALLOCATABLE                   :: fist_forces_decomposed(:,:,:)
 !!!!!!!!!!!!!!!!!!!
     TYPE (qmmm_env_mm_type), POINTER             :: qmmm_env
     TYPE (cell_type), POINTER                    :: cell_ref

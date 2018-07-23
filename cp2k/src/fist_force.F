@@ -169,7 +169,7 @@ CONTAINS
                                                 ! particle_set_intra
     TYPE(section_vals_type), POINTER         :: force_env_section, &
                                                 mm_section, print_section, &
-                                                subsys_section !CHANGE S/M
+                                                ener_decomp_section !CHANGE S/M
     TYPE(shell_kind_type), POINTER           :: shell
     TYPE(virial_type), POINTER               :: virial
     INTEGER, DIMENSION(:), POINTER           :: my_mol_index !CHANGE SAM
@@ -210,14 +210,8 @@ CONTAINS
     iw2= cp_print_key_unit_nr(logger,mm_section,"PRINT%EWALD_INFO",&
          extension=".mmLog")
     
-    subsys_section => section_vals_get_subs_vals(force_env_section, "SUBSYS")
-        !CHANGE s/m
-
-!TEST SAM
-   CALL section_vals_val_get(subsys_section, "INDEX_MOL_DECOMP",& !CHANGE SAM
-                                               i_vals=my_mol_index)
-print *, "INDEX_MOL_DECOMP", my_mol_index
-!END TEST
+    ener_decomp_section => section_vals_get_subs_vals(force_env_section, &
+                                                      "ENERGY_DECOMPOSITION")
  
     CALL fist_env_get(fist_env, ewald_pw=ewald_pw, ewald_env=ewald_env, &
          local_particles=local_particles, particle_set=particle_set, &
@@ -234,29 +228,34 @@ print *, "INDEX_MOL_DECOMP", my_mol_index
     CALL init_cell(cell)
     CALL ewald_pw_grid_update(ewald_pw, ewald_env, cell%hmat)
 
+atoms_active_region = 0
+IF (ALLOCATED(thermo%pot_list)) THEN
+   CALL section_vals_val_get(ener_decomp_section, "INDEX_MOL_DECOMP",& !CHANGE SAM
+                             i_vals=my_mol_index)
+   print *, "INDEX_MOL_DECOMP", my_mol_index
+   !TEST LOOP
+       nkind = SIZE ( molecule_kind_set )
+       MOL: DO ikind = 1, nkind
+          nmol_per_kind = local_molecules % n_el ( ikind )
+          DO imol = 1, nmol_per_kind
+              i = local_molecules % list ( ikind ) % array ( imol )
+   print *, "i", i
+              molecule => molecule_set ( i )
+              molecule_kind => molecule % molecule_kind
+              IF (ANY(my_mol_index==i)) THEN
+   print *, "TRUE", i
+                 CALL get_molecule ( molecule, first_atom=first_atom, last_atom=last_atom )
+                 atoms_active_region =  atoms_active_region + (last_atom - first_atom + 1)
+              END IF
+          END DO
+       END DO MOL
+   print *, "atoms_active_region", atoms_active_region 
+ALLOCATE(forces_intra_aoi(3, atoms_active_region))
+END IF
 
-!TEST LOOP
-    atoms_active_region = 0
-    nkind = SIZE ( molecule_kind_set )
-    MOL: DO ikind = 1, nkind
-       nmol_per_kind = local_molecules % n_el ( ikind )
-       DO imol = 1, nmol_per_kind
-           i = local_molecules % list ( ikind ) % array ( imol )
-print *, "i", i
-           molecule => molecule_set ( i )
-           molecule_kind => molecule % molecule_kind
-           IF (ANY(my_mol_index==i)) THEN
-print *, "TRUE", i
-              CALL get_molecule ( molecule, first_atom=first_atom, last_atom=last_atom )
-              atoms_active_region =  atoms_active_region + (last_atom - first_atom + 1)
-           END IF
-       END DO
-    END DO MOL
-print *, "atoms_active_region", atoms_active_region 
 
 !  NULLIFY(particle_set_intra)
 !  CALL allocate_particle_set_intra(particle_set_intra,atoms_active_region)
-ALLOCATE(forces_intra_aoi(3, atoms_active_region))
        
 !END TEST
 
@@ -583,44 +582,48 @@ print *, "local_particles%n_el(ikind)", local_particles%n_el(ikind)
     ! Get intramolecular forces
     IF(PRESENT(debug))THEN
        IF (ALLOCATED(thermo%pot_list)) THEN
-          CALL force_intra_control(subsys_section, molecule_set, molecule_kind_set, &
+          CALL force_intra_control(molecule_set, molecule_kind_set, &
                local_molecules, particle_set, shell_particle_set, &
                core_particle_set, pot_bond, pot_bend, pot_urey_bradley, &
                pot_torsion, pot_imptors, pot_opbend, pot_shell, pv_bond, pv_bend, &
                pv_urey_bradley, pv_torsion, pv_imptors, pv_opbend, &
                debug%f_bond, debug%f_bend, debug%f_torsion, debug%f_ub, &
                debug%f_imptors, debug%f_opbend, cell, use_virial, atprop_env, &
-               pot_1_mol_list=thermo%pot_list)
+               pot_1_mol_list=thermo%pot_list, ener_decomp_section=ener_decomp_section)
        ELSE
-          CALL force_intra_control(subsys_section, molecule_set, molecule_kind_set, &
+          CALL force_intra_control(molecule_set, molecule_kind_set, &
                local_molecules, particle_set, shell_particle_set, &
                core_particle_set, pot_bond, pot_bend, pot_urey_bradley, &
                pot_torsion, pot_imptors, pot_opbend, pot_shell, pv_bond, pv_bend, &
                pv_urey_bradley, pv_torsion, pv_imptors, pv_opbend, &
                debug%f_bond, debug%f_bend, debug%f_torsion, debug%f_ub, &
-               debug%f_imptors, debug%f_opbend, cell, use_virial, atprop_env)
+               debug%f_imptors, debug%f_opbend, cell, use_virial, atprop_env, &
+               ener_decomp_section=ener_decomp_section)
        END IF
 
     ELSE
-PRINT *,  "BOB" , ALLOCATED(thermo%pot_list)
        IF (ALLOCATED(thermo%pot_list)) THEN
-          CALL force_intra_control(subsys_section, molecule_set, molecule_kind_set, &
+          CALL force_intra_control(molecule_set, molecule_kind_set, &
                local_molecules, particle_set, shell_particle_set, &
                core_particle_set, pot_bond, pot_bend, pot_urey_bradley, &
                pot_torsion, pot_imptors, pot_opbend, pot_shell, pv_bond, pv_bend, &
                pv_urey_bradley, pv_torsion, pv_imptors, pv_opbend, &
                cell=cell, use_virial=use_virial, atprop_env=atprop_env, &
-               pot_1_mol_list=thermo%pot_list)
+               pot_1_mol_list=thermo%pot_list,ener_decomp_section=ener_decomp_section )
        ELSE
-          CALL force_intra_control(subsys_section, molecule_set, molecule_kind_set, &
+          CALL force_intra_control(molecule_set, molecule_kind_set, &
                local_molecules, particle_set, shell_particle_set, &
                core_particle_set, pot_bond, pot_bend, pot_urey_bradley, &
                pot_torsion, pot_imptors, pot_opbend, pot_shell, pv_bond, pv_bend, &
                pv_urey_bradley, pv_torsion, pv_imptors, pv_opbend, &
-               cell=cell, use_virial=use_virial, atprop_env=atprop_env)
+               cell=cell, use_virial=use_virial, atprop_env=atprop_env, &
+               ener_decomp_section=ener_decomp_section)
        END IF
     ENDIF
 
+PRINT *, "THERMO%POT_LIST ALLOCATED = ", ALLOCATED(thermo%pot_list)
+
+IF (ALLOCATED(thermo%pot_list)) THEN
 !TEST: store the forces that we need
     count_idx = 0
     nkind = SIZE ( molecule_kind_set )
@@ -646,9 +649,8 @@ WRITE(*,'(3f15.9)')(particle_set(aoi)%f(j),j=1,3)
        END DO
     END DO
 
+END IF
 
-WRITE(iw,'(A)')" FIST:: TOSTORE"
-WRITE(iw,'(3f15.9)')((particle_set(i)%f(j),j=1,3), i = 1, SIZE(particle_set))
 
     IF(iw>0)THEN
        xdum1 = cp_unit_from_cp2k(pot_bond,"kcalmol")

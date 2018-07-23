@@ -113,7 +113,7 @@ CONTAINS
                        "Compute the diagonal part only of the stress tensor numerically"))
     CALL section_add_keyword(section,keyword)
     CALL keyword_release(keyword)
-   
+
  !CHANGE MATT
    CALL keyword_create(keyword, name="DO_DECOMP",&
                        description="Number of decompositions for the energy and forces.",&
@@ -121,9 +121,7 @@ CONTAINS
                        default_l_val=.FALSE.)
    CALL section_add_keyword(section,keyword)
    CALL keyword_release(keyword)
- !END CHANGE
-
-
+ !END CHANGE 
 
     CALL create_ext_pot_section(subsection)
     CALL section_add_subsection(section, subsection)
@@ -169,8 +167,50 @@ CONTAINS
     CALL section_add_subsection(section, subsection)
     CALL section_release(subsection)
 
+    CALL create_ener_decomp_section(subsection)
+    CALL section_add_subsection(section, subsection)
+    CALL section_release(subsection)
+
   END SUBROUTINE create_force_eval_section
 
+! *****************************************************************************
+!> \brief Creates the section for decomposing the energies in fist
+!> \param section ... 
+!> \date 07.2018
+!> \author Matt
+! *****************************************************************************
+  SUBROUTINE create_ener_decomp_section(section)
+    TYPE(section_type), POINTER              :: section
+
+    CHARACTER(len=*), PARAMETER :: routineN = 'create_ener_decomp_section', &
+      routineP = moduleN//':'//routineN
+
+    TYPE(keyword_type), POINTER              :: keyword
+
+    NULLIFY(section, keyword)
+    CALL section_create(section,name="ENERGY_DECOMPOSITION",&
+         description="Section controlling the decomposition of energies for"//&
+         " individual molecules in fist.",&
+         n_keywords=2, n_subsections=0, repeats=.FALSE.)
+
+    CALL keyword_create(keyword, name="NUM_ACTIVE_ATOMS", &
+                        description="Number of atoms in all active molecules", &
+                        type_of_var=integer_t, &
+                        usage="NUM_ACTIVE_ATOMS {INT}")
+    CALL section_add_keyword(section, keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="INDEX_MOL_DECOMP",&
+         description='Specify the index of the molecules we want to get the'//&
+                     ' intramolecular energy of.', &
+         usage="INDEX_MOL_DECOMP <INTEGER> .. <INTEGER>", &
+         type_of_var=integer_t,  n_var=-1, default_i_vals=(/1/))
+    CALL section_add_keyword(section,keyword)
+    CALL keyword_release(keyword)
+
+
+
+  END SUBROUTINE create_ener_decomp_section
 ! *****************************************************************************
 !> \brief Creates the section for applying an external potential
 !> \param section ...

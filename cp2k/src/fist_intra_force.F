@@ -79,14 +79,14 @@ CONTAINS
 !>      none
 !> \author CJM
 ! *****************************************************************************
-  SUBROUTINE force_intra_control(subsys_section, molecule_set, molecule_kind_set, &
+  SUBROUTINE force_intra_control(molecule_set, molecule_kind_set, &
        local_molecules, particle_set, shell_particle_set, core_particle_set, &
        pot_bond, pot_bend, pot_urey_bradley, pot_torsion, pot_imp_torsion, &
        pot_opbend, pot_shell, pv_bond, pv_bend, pv_urey_bradley, pv_torsion, &
        pv_imp_torsion, pv_opbend, f_bond, f_bend, f_torsion, f_ub, &
-       f_imptor, f_opbend, cell, use_virial, atprop_env, pot_1_mol_list)
+       f_imptor, f_opbend, cell, use_virial, atprop_env, pot_1_mol_list, &
+       ener_decomp_section)
 
-    TYPE(section_vals_type), POINTER         :: subsys_section
     TYPE(molecule_type), POINTER             :: molecule_set( : )
     TYPE(molecule_kind_type), POINTER        :: molecule_kind_set( : )
     TYPE(distribution_1d_type), POINTER      :: local_molecules
@@ -106,6 +106,7 @@ CONTAINS
     LOGICAL, INTENT(IN)                      :: use_virial
     TYPE(atprop_type), POINTER               :: atprop_env
     REAL(kind=dp), ALLOCATABLE, OPTIONAL         :: pot_1_mol_list(:) !CHANGE S/M
+    TYPE(section_vals_type), POINTER             :: ener_decomp_section
 
     CHARACTER(len=*), PARAMETER :: routineN = 'force_intra_control', &
       routineP = moduleN//':'//routineN
@@ -154,7 +155,7 @@ CONTAINS
     IF ( PRESENT ( f_ub)) f_ub = 0.0_dp
 
 IF (PRESENT(pot_1_mol_list)) THEN
-    CALL section_vals_val_get(subsys_section, "INDEX_MOL_DECOMP",& !CHANGE SAM
+    CALL section_vals_val_get(ener_decomp_section, "INDEX_MOL_DECOMP",& !CHANGE SAM
                                   i_vals=my_mol_index)
 !DELETE ME
 !print *, "NOW_I_PRINT_my_mol_index ", my_mol_index

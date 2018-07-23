@@ -243,7 +243,7 @@ CONTAINS
       routineP = moduleN//':'//routineN
 
     INTEGER                                  :: handle, max_multipole
-    LOGICAL                                  :: do_multipoles
+    LOGICAL                                  :: do_multipoles, do_ener_decomp
     TYPE(atomic_kind_type), DIMENSION(:), &
       POINTER                                :: atomic_kind_set
     TYPE(distribution_1d_type), POINTER      :: local_molecules, &
@@ -259,11 +259,12 @@ CONTAINS
     TYPE(multipole_type), POINTER            :: multipoles
     TYPE(particle_type), DIMENSION(:), &
       POINTER                                :: particle_set
-    TYPE(section_vals_type), POINTER         :: grid_print_section
-    LOGICAL :: do_decomposition !CHANGE MATT
+    TYPE(section_vals_type), POINTER         :: grid_print_section, &
+                                                energy_decomp_section
 
     CALL timeset(routineN,handle)
-    NULLIFY ( thermo, ewald_pw, local_molecules, local_particles, multipoles)
+    NULLIFY ( thermo, ewald_pw, local_molecules, local_particles, multipoles, &
+              energy_decomp_section)
     particle_set => subsys % particles % els
     atomic_kind_set => subsys % atomic_kinds % els
     molecule_set => subsys % molecules_new % els
@@ -277,16 +278,21 @@ CONTAINS
       NULLIFY(prev_local_molecules)
     ENDIF
 
+    IF (.NOT.ASSOCIATED(energy_decomp_section)) THEN
+       energy_decomp_section => section_vals_get_subs_vals(force_env_section,"ENERGY_DECOMPOSITION", can_return_null=.TRUE.)
+    END IF
+
 !CHANGE MATT
     CALL section_vals_val_get(force_env_section, "DO_DECOMP", &
-                                         l_val=do_decomposition)
-PRINT *, "BOB2", do_decomposition
+                                         l_val=do_ener_decomp)
+    PRINT *, "DECOMP = ", do_ener_decomp
     ! Create the fist_energy_type
-    IF (do_decomposition) THEN
-       CALL allocate_fist_energy( thermo, subsys_section )
+    IF (do_ener_decomp) THEN
+       CALL allocate_fist_energy( thermo, energy_decomp_section )
     ELSE
        CALL allocate_fist_energy( thermo )
     END IF
+
 !END CHANGE
 
     ! Print the molecule kind set

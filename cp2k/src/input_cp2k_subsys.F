@@ -271,25 +271,6 @@ CONTAINS
 
     NULLIFY(subsection, keyword) !CHANGE MATT
 
-!!CHANGE MATT
-!    CALL keyword_create(keyword,"NUM_DECOMP",& 
-!         description="Lets CP2K know how many energy decompositions there are",&
-!         default_i_val=0)
-!    CALL section_add_keyword(section,keyword)
-!    CALL keyword_release(keyword)
-!!END CHANGE
-
-
-!CHANGE SAM
-    CALL keyword_create(keyword, name="INDEX_MOL_DECOMP",&
-         description='Specify the index of the molecules we want to get the intramolecular energy of', &
-         usage="INDEX_MOL_DECOMP <INTEGER> .. <INTEGER>", type_of_var=integer_t, n_var=-1, &
-        default_i_vals=(/1/))
-    CALL section_add_keyword(section,keyword)
-    CALL keyword_release(keyword)
-
-!END CHANGE
-
     CALL create_rng_section(subsection)
     CALL section_add_subsection(section,subsection)
     CALL section_release(subsection)

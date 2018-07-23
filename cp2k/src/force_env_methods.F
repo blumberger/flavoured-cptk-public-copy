@@ -826,7 +826,7 @@ CONTAINS
       lambda, lerr, restraint_strength, restraint_target, sd
     REAL(KIND=dp), DIMENSION(3)              :: dip_mix
     REAL(KIND=dp), DIMENSION(:), POINTER     :: energies
-    REAL(KIND=dp), DIMENSION(:,:), POINTER   :: energies_1_mol_list
+    REAL(KIND=dp), ALLOCATABLE               :: energies_1_mol_list(:,:)
     TYPE(cell_type), POINTER                 :: cell_mix
     TYPE(cp_logger_type), POINTER            :: logger, my_logger
     TYPE(cp_result_p_type), DIMENSION(:), &
@@ -907,17 +907,23 @@ print *, "in force_env_method_do_decomp", do_decomposition
     ! Local Info to sync
     ALLOCATE(global_forces(nforce_eval))
     ALLOCATE(energies(nforce_eval))
-    ALLOCATE(energies_1_mol_list(nforce_eval, SIZE(thermo%pot_list) )) !CHANGE SAM
+    IF (ALLOCATED(thermo%pot_list)) THEN
+       ALLOCATE(energies_1_mol_list(nforce_eval, SIZE(thermo%pot_list) )) !CHANGE SAM
+    END IF
 !CHANGE SAM: WE MUST CHECK CAREFULLY THIS ALLOCATION I AM NOT SURE IF IT IS THE
 !CORRECT STYLE (HAVE A LOOK AT mixed_main.F)
-    ALLOCATE(force_env%mixed_env%energies_1_mol_list(nforce_eval, SIZE(thermo%pot_list) )) !CHANGE SAM
+    IF (ALLOCATED(thermo%pot_list)) THEN
+       ALLOCATE(force_env%mixed_env%energies_1_mol_list(nforce_eval, SIZE(thermo%pot_list) )) !CHANGE SAM
+    END IF
     ALLOCATE(glob_natoms(nforce_eval))
     ALLOCATE(virials(nforce_eval))
     ALLOCATE(results(nforce_eval))
     energies    = 0.0_dp
-    energies_1_mol_list = 0.0_dp !CHANGE SAM
-
+    IF (ALLOCATED(thermo%pot_list)) THEN
+        energies_1_mol_list = 0.0_dp !CHANGE SAM
 print *, "energies_1_mol_list", energies_1_mol_list
+    END IF
+
     glob_natoms = 0
 print *, "nforce_eval", nforce_eval
     DO iforce_eval = 1, nforce_eval
@@ -971,9 +977,11 @@ print *, "ENERGY_INSIDE_FORCE_EVAL", energy
 
           CALL force_env_get(force_env%sub_force_env(iforce_eval)%force_env, fist_env=fist_env)
           CALL fist_env_get(fist_env, thermo=thermo)
-          energies_1_mol_list(iforce_eval, :) = thermo%pot_list
+          IF (ALLOCATED(thermo%pot_list)) THEN
+             energies_1_mol_list(iforce_eval, :) = thermo%pot_list
 print *, "energies_1_mol_list(iforce_eval, :)", thermo%pot_list
 PRINT *, "POT_LIST_NOWWWWW", thermo%pot_list
+          END IF
 PRINT *, iforce_eval
 
           glob_natoms(iforce_eval) = natom
@@ -1033,8 +1041,10 @@ PRINT *, iforce_eval
 
 !>SAM COMMENT TAKE CARE OF THIS LINE TO STORE energies_1_mol_list
     force_env%mixed_env%energies = energies
-    force_env%mixed_env%energies_1_mol_list = energies_1_mol_list
+    IF (ALLOCATED(thermo%pot_list)) THEN
+       force_env%mixed_env%energies_1_mol_list = energies_1_mol_list
 print *, "force_env%mixed_env%energies_1_mol_list", force_env%mixed_env%energies_1_mol_list
+    END IF
     ! Start combining the different sub_force_env
     CALL get_mixed_env(mixed_env=force_env%mixed_env,&
                        mixed_energy=mixed_energy)
@@ -1103,8 +1113,10 @@ print *, "force_env%mixed_env%energies_1_mol_list", force_env%mixed_env%energies
        gen_section => section_vals_get_subs_vals(mixed_section,"GENERIC")
        CALL get_generic_info(gen_section, "MIXING_FUNCTION", coupling_function, force_env%mixed_env%par,&
             force_env%mixed_env%val, energies)
+    IF (ALLOCATED(thermo%pot_list)) THEN
 print *, "force_env%mixed_env%energies_1_mol_list INSIDE GENMIX",force_env%mixed_env%energies_1_mol_list
 print *, "ENERGIES_mix_generic", energies
+    END IF
        CALL initf(1)
        CALL parsef(1,TRIM(coupling_function),force_env%mixed_env%par)
        ! Now the hardest part.. map energy with corresponding force_eval
@@ -1144,7 +1156,9 @@ print *, "ENERGIES_mix_generic", energies
         adiab_section => section_vals_get_subs_vals(mixed_section, "ADIABATIC")
         CALL section_vals_val_get(adiab_section,"METHOD_PROPAGATION",c_val=adiab_keyword)
         mixed_env => force_env%mixed_env
+        IF (ALLOCATED(thermo%pot_list)) THEN
 print *, "force_env%mixed_env%energies_1_mol_list INSIDE", mixed_env%energies_1_mol_list
+        END IF
         !SELECT CASE(adiab_keyword)
         !CASE("CLASSICAL_PATH")
            !Check that all the FF have the same number of atoms than the 1st FF
@@ -1162,9 +1176,8 @@ print *, "force_env%mixed_env%energies_1_mol_list INSIDE", mixed_env%energies_1_
 ! SAM COMMENT: I could not use the previous keyword because for some reason was
 ! false
            
-           CALL section_vals_val_get(adiab_section, "DO_MEMORY_SAVE", l_val=do_mem_save)
-print *, "do_mem_save", do_mem_save
-           IF (do_mem_save) THEN
+           
+           IF (ALLOCATED(thermo%pot_list)) THEN
                !subsys_section => section_vals_get_subs_vals(force_env_section, "SUBSYS")
                !CALL section_vals_val_get(subsys_section, "INDEX_MOL_DECOMP",& !CHANGE SAM
                !                   i_vals=my_mol_index)
@@ -1207,7 +1220,8 @@ print *, "do_mem_save", do_mem_save
     DEALLOCATE(global_forces)
     DEALLOCATE(subsystems)
     DEALLOCATE(particles)
-    DEALLOCATE(energies, energies_1_mol_list)
+    DEALLOCATE(energies)
+    IF (ALLOCATED(energies_1_mol_list)) DEALLOCATE(energies_1_mol_list)
     DEALLOCATE(glob_natoms)
     DEALLOCATE(virials)
     DEALLOCATE(results)
