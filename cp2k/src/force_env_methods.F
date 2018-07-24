@@ -917,14 +917,6 @@ CONTAINS
     nforce_eval = SIZE(force_env%sub_force_env)
 print *, "NOFORCE_EVAL_TO_USE", nforce_eval
     mixed_section => section_vals_get_subs_vals(force_env_section,"MIXED")
-    !TO FINISH
-   energy_decomp_section => section_vals_get_subs_vals(force_env_section, &
-                                                      "ENERGY_DECOMP")
-   CALL section_vals_val_get(energy_decomp_section, "INDEX_MOL_DECOMP",& !CHANGE SAM
-                                      i_vals=my_mol_index) 
-   CALL section_vals_val_get(energy_decomp_section, "NUM_ACTIVE_ATOMS", &
-                             i_val=act_atoms)
-print *, "act_atoms_TOUSE", my_mol_index
 
     mapping_section => section_vals_get_subs_vals(mixed_section,"MAPPING")
     ! Global Info
@@ -935,8 +927,13 @@ print *, "act_atoms_TOUSE", my_mol_index
     ALLOCATE(energies(nforce_eval))
     IF (ALLOCATED(thermo%pot_list)) THEN
        ALLOCATE(energies_1_mol_list(nforce_eval, SIZE(thermo%pot_list) )) !CHANGE SAM
-!WARING:::::HARDCODED VALUE SHOULD BE TAKEN FROM INPUT INSTEAD
-!       !act_atoms = 36
+       energy_decomp_section => section_vals_get_subs_vals(force_env_section, &
+                                                      "ENERGY_DECOMP")
+       CALL section_vals_val_get(energy_decomp_section, "INDEX_MOL_DECOMP",& !CHANGE SAM
+                                      i_vals=my_mol_index) 
+       CALL section_vals_val_get(energy_decomp_section, "NUM_ACTIVE_ATOMS", &
+                                     i_val=act_atoms)
+print *, "act_atoms_TOUSE", my_mol_index
 print *, "act_atoms", act_atoms
        ALLOCATE(intra_forces_global(nforce_eval, 3, act_atoms))
     END IF
@@ -1224,6 +1221,7 @@ print *, "energies_1_mol_list INSIDE", energies_1_mol_list
                !print *, "my_mol_index", my_mol_index
 
                 CALL add_energies_forces_mem_saver( energies_1_mol_list, energies, intra_forces_global, &
+                                                      my_mol_index, act_atoms, &
                                                       global_forces, my_energies, my_global_forces, &
                                                       molecule_kind_set, local_molecules, molecule_set )
 !stop
@@ -1288,6 +1286,7 @@ print *, "energies_1_mol_list INSIDE", energies_1_mol_list
 
 
  SUBROUTINE add_energies_forces_mem_saver( energies_1_mol_list, energies, intra_forces_global, &
+                                              my_mol_index, act_atoms, &
                                               global_forces, my_energies, my_global_forces,& 
                                             molecule_kind_set, local_molecules, molecule_set )
 
@@ -1308,9 +1307,12 @@ print *, "energies_1_mol_list INSIDE", energies_1_mol_list
       POINTER                                :: molecule_set
    REAL(KIND=dp), ALLOCATABLE                 :: intra_forces_global(:,:,:) 
    REAL(KIND=dp), ALLOCATABLE               :: energies_1_mol_list(:,:)
+   INTEGER                                  :: act_atoms
+   INTEGER, DIMENSION(:), POINTER           :: my_mol_index !CHANGE SAM
 
-   INTEGER :: i, natom 
-   INTEGER ::  imol, nkind,  nmol_per_kind,  ikind
+   INTEGER :: i, natom, my_mol
+   INTEGER :: imol, nkind,  nmol_per_kind,  ikind, first_atom, &
+              last_atom, aoi 
 
    NULLIFY(my_global_forces, my_energies)
 
@@ -1319,20 +1321,8 @@ print *, "energies_1_mol_list INSIDE", energies_1_mol_list
    ALLOCATE(my_energies(SIZE(energies_1_mol_list(1,:))))
 
 
-
-
- !TEST SAM
- nkind = SIZE ( molecule_kind_set )
- MOL: DO ikind = 1, nkind
-     nmol_per_kind = local_molecules % n_el ( ikind )
-     DO imol = 1, nmol_per_kind
-         i = local_molecules % list ( ikind ) % array ( imol )
-print *, "i_in_FORCE_ENV", i
-         molecule => molecule_set ( i )
-         molecule_kind => molecule % molecule_kind
-     END DO
- END DO MOL
-!END TEST
+print *, "INFO_NEED_act_atoms", act_atoms
+print *, "my_mol_index_NEED", my_mol_index
 
 print *, "intra_forces_glob_NEEDED", intra_forces_global 
 print *, "SIZE(mixed_env%energies_1_mol_list(1,:))", SIZE(energies_1_mol_list(1,:))
@@ -1341,12 +1331,31 @@ print *, "SIZE(global_forces(i)%forces(:,:), 2)", SIZE(global_forces(2)%forces(:
    DO i = 1, SIZE(energies_1_mol_list(1,:))
 print *, "LOOP", i
 print *, "INTRA+LJ", energies(1), "   ", energies(2)
-print *, "mixed_env%energies_1_mol_list(2,i)", energies_1_mol_list(2,i)
       my_energies(i) = energies(1) + energies_1_mol_list(2,i) - energies_1_mol_list(1,i)
       natom = SIZE(global_forces(1)%forces(:,:), 2)
 print *, "natom", natom
       ALLOCATE(my_global_forces(i)%forces( 3,natom))
-print *, "OKAY UP TO HERE"
+      
+      nkind = SIZE ( molecule_kind_set )
+      MOL: DO ikind = 1, nkind
+          nmol_per_kind = local_molecules % n_el ( ikind )
+          DO imol = 1, nmol_per_kind
+              my_mol = local_molecules % list ( ikind ) % array ( imol )
+              molecule => molecule_set ( my_mol )
+              molecule_kind => molecule % molecule_kind
+              IF (ANY(my_mol_index==my_mol)) THEN
+                 print *, "i_in_FORCE_ENV", my_mol
+                 CALL get_molecule ( molecule, first_atom=first_atom, last_atom=last_atom )
+                 DO aoi=first_atom, last_atom
+                    print *, "aoi", aoi
+
+
+                 END DO
+             END IF
+          END DO
+      END DO MOL
+      
+
       my_global_forces(i)%forces = global_forces(1)%forces
    END DO
 
