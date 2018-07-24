@@ -181,6 +181,7 @@ CONTAINS
     INTEGER ::  imol, nkind,  nmol_per_kind, first_atom, last_atom,& 
                 atoms_active_region, aoi, count_idx, act_atoms
     REAL(KIND=dp), ALLOCATABLE, DIMENSION(:, :) :: forces_intra_aoi
+!    REAL(KIND=dp), ALLOCATABLE                 :: intra_forces(:,:)
 
     
     CALL timeset(routineN,handle)
@@ -240,7 +241,7 @@ IF (ALLOCATED(thermo%pot_list)) THEN
           nmol_per_kind = local_molecules % n_el ( ikind )
           DO imol = 1, nmol_per_kind
               i = local_molecules % list ( ikind ) % array ( imol )
-   print *, "i", i
+   !print *, "i", i
               molecule => molecule_set ( i )
               molecule_kind => molecule % molecule_kind
               IF (ANY(my_mol_index==i)) THEN
@@ -646,8 +647,8 @@ IF (ALLOCATED(thermo%pot_list)) THEN
                   forces_intra_aoi(1, count_idx) = particle_set(aoi)%f(1)
                   forces_intra_aoi(2, count_idx) = particle_set(aoi)%f(2)
                   forces_intra_aoi(3, count_idx) = particle_set(aoi)%f(3)
-print *, "TEST_NEEDED_FORCES"!, particle_set(aoi)%f(:) 
-WRITE(*,'(3f15.9)')(particle_set(aoi)%f(j),j=1,3) 
+!print *, "TEST_NEEDED_FORCES"!, particle_set(aoi)%f(:) 
+!WRITE(*,'(3f15.9)')(particle_set(aoi)%f(j),j=1,3) 
 !print *, "STORED"
 !WRITE(*,'(3f15.9)')(forces_intra_aoi(j,count_idx),j=1,3)          
               END DO
@@ -657,7 +658,19 @@ WRITE(*,'(3f15.9)')(particle_set(aoi)%f(j),j=1,3)
 
 END IF
 
+print *, "forces_intra_aoi", forces_intra_aoi
+
 CALL fist_env_set(fist_env=fist_env, intra_forces=forces_intra_aoi)
+!CALL fist_env_get(fist_env=fist_env, intra_forces=intra_forces)
+
+!print *, "GET_FORCES_FROM_ENV", intra_forces
+
+!WRITE(*,'(3f15.9)')((particle_set(i)%f(j),j=1,3), i = 1, SIZE(particle_set))
+
+IF(iw>0)THEN
+WRITE(iw,'(A)')" FIST:: TOSTORE"
+WRITE(iw,'(3f15.9)')((particle_set(i)%f(j),j=1,3), i = 1, SIZE(particle_set))
+END IF
 
     IF(iw>0)THEN
        xdum1 = cp_unit_from_cp2k(pot_bond,"kcalmol")

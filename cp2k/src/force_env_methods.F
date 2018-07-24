@@ -249,6 +249,7 @@ CONTAINS
     CPASSERT(ASSOCIATED(force_env))
     CPASSERT(force_env%ref_count>0)
     CALL force_env_get(force_env,subsys=subsys)
+!      force_env_section=force_env_section) !CHANGE SAM
     CALL force_env_set(force_env,additional_potential=0.0_dp)
     CALL cp_subsys_get(subsys, virial=virial, atprop=atprop_env, cell=cell)
     IF (virial%pv_availability) CALL zero_virial(virial,reset=.FALSE.)
@@ -275,6 +276,7 @@ CONTAINS
                calculate_forces,energy_consistency,linres=linres_run,&
                require_consistent_energy_force=require_consistent_energy_force)
        CASE ( use_mixed_force )
+          
           CALL mixed_energy_forces(force_env,calculate_forces, my_itimes) !CHANGE_AC
        CASE default
           CPABORT("")
@@ -871,8 +873,13 @@ CONTAINS
     TYPE(molecule_kind_type), DIMENSION(:), &
       POINTER                                :: molecule_kind_set
     TYPE(distribution_1d_type), POINTER      :: local_molecules
-      TYPE(molecule_type), DIMENSION(:), &
+    TYPE(molecule_type), DIMENSION(:), &
        POINTER                                :: molecule_set    
+    REAL(KIND=dp), ALLOCATABLE                 :: intra_forces(:,:)
+    REAL(KIND=dp), ALLOCATABLE                 :: intra_forces_global(:,:,:)
+    !TYPE(section_vals_type), POINTER         :: energy_decomp_section
+    INTEGER                                  :: act_atoms
+    !INTEGER, DIMENSION(:), POINTER           :: my_mol_index !CHANGE SAM
 
 
     NULLIFY(atomic_kinds, local_particles, molecule_set, molecule_kind_set, local_molecules)
@@ -908,10 +915,17 @@ CONTAINS
 
     NULLIFY(map_index, glob_natoms, global_forces)
     nforce_eval = SIZE(force_env%sub_force_env)
+print *, "NOFORCE_EVAL_TO_USE", nforce_eval
     mixed_section => section_vals_get_subs_vals(force_env_section,"MIXED")
     !TO FINISH
-    !energy_decomp_section => section_vals_get_subs_vals(force_env_section,"ENERGY_DECOMP")
-    !CALL section_vals_val_get(energy_decomp_section, "VALUE")
+   !energy_decomp_section => section_vals_get_subs_vals(force_env_section, &
+   !                                                   "ENERGY_DECOMP")
+   !CALL section_vals_val_get(energy_decomp_section, "INDEX_MOL_DECOMP",& !CHANGE SAM
+   !                                   i_vals=my_mol_index) 
+   !CALL section_vals_val_get(energy_decomp_section, "NUM_ACTIVE_ATOMS", &
+   !                          i_val=act_atoms)
+! print *, "act_atoms_TOUSE", my_mol_index
+
     mapping_section => section_vals_get_subs_vals(mixed_section,"MAPPING")
     ! Global Info
     ALLOCATE(subsystems(nforce_eval))
@@ -921,6 +935,9 @@ CONTAINS
     ALLOCATE(energies(nforce_eval))
     IF (ALLOCATED(thermo%pot_list)) THEN
        ALLOCATE(energies_1_mol_list(nforce_eval, SIZE(thermo%pot_list) )) !CHANGE SAM
+!WARING:::::HARDCODED VALUE SHOULD BE TAKEN FROM INPUT INSTEAD
+       act_atoms = 36
+       ALLOCATE(intra_forces_global(nforce_eval, 3, act_atoms))
     END IF
 !CHANGE SAM: WE MUST CHECK CAREFULLY THIS ALLOCATION I AM NOT SURE IF IT IS THE
 !CORRECT STYLE (HAVE A LOOK AT mixed_main.F)
@@ -933,7 +950,8 @@ CONTAINS
     energies    = 0.0_dp
     IF (ALLOCATED(thermo%pot_list)) THEN
         energies_1_mol_list = 0.0_dp !CHANGE SAM
-print *, "energies_1_mol_list", energies_1_mol_list
+        intra_forces_global = 0.0_dp
+print *, "intra_forces_global", intra_forces_global
     END IF
 
     glob_natoms = 0
@@ -987,10 +1005,13 @@ print *, "NATOM", natom
           energies(iforce_eval)    = energy
 print *, "ENERGY_INSIDE_FORCE_EVAL", energy
         
-
-
           CALL force_env_get(force_env%sub_force_env(iforce_eval)%force_env, fist_env=fist_env)
-          CALL fist_env_get(fist_env, thermo=thermo)!, intra_forces=intra_forces)
+          CALL fist_env_get(fist_env, thermo=thermo, intra_forces=intra_forces)
+          IF (ALLOCATED(intra_forces)) THEN 
+print *, "GET_FORCES_FROM_ENV", intra_forces
+             intra_forces_global(iforce_eval, :, :) = intra_forces(:,:)
+          END IF 
+
           IF (ALLOCATED(thermo%pot_list)) THEN
              energies_1_mol_list(iforce_eval, :) = thermo%pot_list
 print *, "energies_1_mol_list(iforce_eval, :)", thermo%pot_list
@@ -1058,6 +1079,7 @@ PRINT *, iforce_eval
     IF (ALLOCATED(thermo%pot_list)) THEN
        force_env%mixed_env%energies_1_mol_list = energies_1_mol_list
 print *, "force_env%mixed_env%energies_1_mol_list", force_env%mixed_env%energies_1_mol_list
+print *, "intra_forces_global_NOW", intra_forces_global
     END IF
     ! Start combining the different sub_force_env
     CALL get_mixed_env(mixed_env=force_env%mixed_env,&
@@ -1239,6 +1261,7 @@ print *, "force_env%mixed_env%energies_1_mol_list INSIDE", mixed_env%energies_1_
     DEALLOCATE(particles)
     DEALLOCATE(energies)
     IF (ALLOCATED(energies_1_mol_list)) DEALLOCATE(energies_1_mol_list)
+    IF (ALLOCATED(intra_forces_global)) DEALLOCATE(intra_forces_global)
     DEALLOCATE(glob_natoms)
     DEALLOCATE(virials)
     DEALLOCATE(results)
