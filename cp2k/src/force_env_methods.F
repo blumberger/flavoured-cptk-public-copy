@@ -1006,7 +1006,7 @@ print *, "ENERGY_INSIDE_FORCE_EVAL", energy
           CALL force_env_get(force_env%sub_force_env(iforce_eval)%force_env, fist_env=fist_env)
           CALL fist_env_get(fist_env, thermo=thermo, intra_forces=intra_forces)
           IF (ALLOCATED(intra_forces)) THEN 
-print *, "GET_FORCES_FROM_ENV", intra_forces
+!print *, "GET_FORCES_FROM_ENV", intra_forces
              intra_forces_global(iforce_eval, :, :) = intra_forces(:,:)
           END IF 
 
@@ -1307,12 +1307,13 @@ print *, "energies_1_mol_list INSIDE", energies_1_mol_list
       POINTER                                :: molecule_set
    REAL(KIND=dp), ALLOCATABLE                 :: intra_forces_global(:,:,:) 
    REAL(KIND=dp), ALLOCATABLE               :: energies_1_mol_list(:,:)
+   INTEGER, ALLOCATABLE                     :: used_mols(:)
    INTEGER                                  :: act_atoms
    INTEGER, DIMENSION(:), POINTER           :: my_mol_index !CHANGE SAM
 
-   INTEGER :: i, natom, my_mol
+   INTEGER :: i, natom, my_mol, count_idx, count2, count3, j
    INTEGER :: imol, nkind,  nmol_per_kind,  ikind, first_atom, &
-              last_atom, aoi 
+              last_atom, aoi, test
 
    NULLIFY(my_global_forces, my_energies)
 
@@ -1324,11 +1325,31 @@ print *, "energies_1_mol_list INSIDE", energies_1_mol_list
 print *, "INFO_NEED_act_atoms", act_atoms
 print *, "my_mol_index_NEED", my_mol_index
 
-print *, "intra_forces_glob_NEEDED", intra_forces_global 
+print *, "NEUTRAL"
+test = 0
+do i = 1, SIZE(intra_forces_global, 3)
+   test = test + 1 
+   print *, test, intra_forces_global(1, :, i)
+end do 
+   
+print *, "CHARGE"
+test = 0
+do i = 1, SIZE(intra_forces_global, 3)
+   test = test + 1 
+   print *, test, intra_forces_global(2, :, i)
+end do 
+ 
 print *, "SIZE(mixed_env%energies_1_mol_list(1,:))", SIZE(energies_1_mol_list(1,:))
 print *, "SIZE(global_forces(i)%forces(:,:), 2)", SIZE(global_forces(2)%forces(:,:), 2)
 
-   DO i = 1, SIZE(energies_1_mol_list(1,:))
+  ALLOCATE(used_mols(SIZE(energies_1_mol_list(1,:))))
+  count2 = 1
+  count3 = 0
+  used_mols(:) = -1
+!  count_mol = 0
+
+    count_idx = 0
+   DO i = 1, SIZE(energies_1_mol_list(1,:)) !loop over num of adiabatic states 
 print *, "LOOP", i
 print *, "INTRA+LJ", energies(1), "   ", energies(2)
       my_energies(i) = energies(1) + energies_1_mol_list(2,i) - energies_1_mol_list(1,i)
@@ -1336,28 +1357,46 @@ print *, "INTRA+LJ", energies(1), "   ", energies(2)
 print *, "natom", natom
       ALLOCATE(my_global_forces(i)%forces( 3,natom))
       
+      my_global_forces(i)%forces = global_forces(1)%forces
       nkind = SIZE ( molecule_kind_set )
-      MOL: DO ikind = 1, nkind
+      count3 = 0
+      MOL: DO ikind = 1, nkind !loop over molecules
           nmol_per_kind = local_molecules % n_el ( ikind )
           DO imol = 1, nmol_per_kind
               my_mol = local_molecules % list ( ikind ) % array ( imol )
               molecule => molecule_set ( my_mol )
               molecule_kind => molecule % molecule_kind
-              IF (ANY(my_mol_index==my_mol)) THEN
-                 print *, "i_in_FORCE_ENV", my_mol
-                 CALL get_molecule ( molecule, first_atom=first_atom, last_atom=last_atom )
-                 DO aoi=first_atom, last_atom
-                    print *, "aoi", aoi
-
-
-                 END DO
-             END IF
+              !IF (ANY(my_mol_index==my_mol) .and. count3 .eq. 0) THEN
+              DO j = 1, SIZE(my_mol_index)
+                   IF ( my_mol_index(j)==my_mol  .and. my_mol_index(j) /= used_mols(j) .and. count3==0 ) THEN
+                    print *, "my_mol_index(j)", my_mol_index(j)
+                    print *, "used_mols(j)", used_mols(j)
+                    print *, "i_in_FORCE_ENV", my_mol
+                    CALL get_molecule ( molecule, first_atom=first_atom, last_atom=last_atom )
+                    !loop over mol 60
+                    DO aoi=first_atom, last_atom !loop over atoms of interest
+                       count_idx = count_idx + 1
+                       print *, "aoi", aoi
+                       print *, "force_charge_to_add_xyz", intra_forces_global(2,:,count_idx)
+                       print *, "force_neutral_to_add_xyz", intra_forces_global(1,:,count_idx)
+                       print *, "force_already_there", global_forces(1)%forces(:,aoi)
+                       my_global_forces(i)%forces(:, aoi) =  &
+                                  intra_forces_global(2,:,count_idx) - intra_forces_global(1,:,count_idx)
+                       
+                    END DO
+                    used_mols(count2) = my_mol
+                    count3 = 1
+                    count2 = count2 + 1  
+ print *, "used_mols", used_mols
+                   END IF
+              END DO
+              !END IF
           END DO
       END DO MOL
-      
 
-      my_global_forces(i)%forces = global_forces(1)%forces
    END DO
+
+ DEALLOCATE(used_mols)
 
   END SUBROUTINE add_energies_forces_mem_saver
 

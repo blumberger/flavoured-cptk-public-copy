@@ -650,7 +650,8 @@ IF (ALLOCATED(thermo%pot_list)) THEN
 !print *, "TEST_NEEDED_FORCES"!, particle_set(aoi)%f(:) 
 !WRITE(*,'(3f15.9)')(particle_set(aoi)%f(j),j=1,3) 
 !print *, "STORED"
-!WRITE(*,'(3f15.9)')(forces_intra_aoi(j,count_idx),j=1,3)          
+!WRITE(*,'(3f15.9)')(forces_intra_aoi(j,count_idx),j=1,3) 
+print *, "forces_intra_aoi", count_idx, forces_intra_aoi(:, count_idx)         
               END DO
            END IF
        END DO
@@ -658,7 +659,7 @@ IF (ALLOCATED(thermo%pot_list)) THEN
 
 END IF
 
-print *, "forces_intra_aoi", forces_intra_aoi
+!print *, "forces_intra_aoi", forces_intra_aoi
 
 CALL fist_env_set(fist_env=fist_env, intra_forces=forces_intra_aoi)
 !CALL fist_env_get(fist_env=fist_env, intra_forces=intra_forces)
