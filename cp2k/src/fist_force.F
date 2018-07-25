@@ -234,7 +234,7 @@ atoms_active_region = 0
 IF (ALLOCATED(thermo%pot_list)) THEN
    CALL section_vals_val_get(ener_decomp_section, "INDEX_MOL_DECOMP",& !CHANGE SAM
                              i_vals=my_mol_index)
-   print *, "INDEX_MOL_DECOMP", my_mol_index
+!print *, "INDEX_MOL_DECOMP", my_mol_index
    !TEST LOOP
        nkind = SIZE ( molecule_kind_set )
        MOL: DO ikind = 1, nkind
@@ -245,13 +245,13 @@ IF (ALLOCATED(thermo%pot_list)) THEN
               molecule => molecule_set ( i )
               molecule_kind => molecule % molecule_kind
               IF (ANY(my_mol_index==i)) THEN
-   print *, "TRUE", i
+   !print *, "TRUE", i
                  CALL get_molecule ( molecule, first_atom=first_atom, last_atom=last_atom )
                  atoms_active_region =  atoms_active_region + (last_atom - first_atom + 1)
               END IF
           END DO
        END DO MOL
-   print *, "atoms_active_region", atoms_active_region 
+   !print *, "atoms_active_region", atoms_active_region 
    CALL section_vals_val_get(ener_decomp_section, "NUM_ACTIVE_ATOMS", &
                              i_val=act_atoms)
    IF (act_atoms /= atoms_active_region) THEN
@@ -271,7 +271,7 @@ END IF
     nlocal_particles = 0
     nparticle_kind = SIZE(atomic_kind_set)
     DO ikind = 1, nparticle_kind
-print *, "local_particles%n_el(ikind)", local_particles%n_el(ikind)
+!print *, "local_particles%n_el(ikind)", local_particles%n_el(ikind)
        nlocal_particles = nlocal_particles + local_particles%n_el(ikind)
     ENDDO
 
@@ -651,7 +651,7 @@ IF (ALLOCATED(thermo%pot_list)) THEN
 !WRITE(*,'(3f15.9)')(particle_set(aoi)%f(j),j=1,3) 
 !print *, "STORED"
 !WRITE(*,'(3f15.9)')(forces_intra_aoi(j,count_idx),j=1,3) 
-print *, "forces_intra_aoi", count_idx, forces_intra_aoi(:, count_idx)         
+!print *, "forces_intra_aoi", count_idx, forces_intra_aoi(:, count_idx)         
               END DO
            END IF
        END DO
@@ -704,10 +704,10 @@ END IF
     thermo%pot = pot_nonbond + pot_bond + pot_bend + pot_torsion + pot_opbend + &
          pot_imptors + pot_urey_bradley + pot_manybody + pot_shell
 
-print *, "TOTAL_ENERGY_TO_COMPARE", pot_bond + pot_bend + pot_torsion + pot_opbend + &
-              pot_imptors + pot_urey_bradley + pot_manybody + pot_shell   
+!print *, "TOTAL_ENERGY_TO_COMPARE", pot_bond + pot_bend + pot_torsion + pot_opbend + &
+!              pot_imptors + pot_urey_bradley + pot_manybody + pot_shell   
 
-print *, "LJ contribution", pot_nonbond
+!print *, "LJ contribution", pot_nonbond
 !print *, "TOTAL_ENERGY_NEW_POT_LIST",  SUM(thermo%pot_list) 
 
 !print *, "thermo%pot", thermo%pot

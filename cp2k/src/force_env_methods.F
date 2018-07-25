@@ -915,7 +915,7 @@ CONTAINS
 
     NULLIFY(map_index, glob_natoms, global_forces)
     nforce_eval = SIZE(force_env%sub_force_env)
-print *, "NOFORCE_EVAL_TO_USE", nforce_eval
+!print *, "NOFORCE_EVAL_TO_USE", nforce_eval
     mixed_section => section_vals_get_subs_vals(force_env_section,"MIXED")
 
     mapping_section => section_vals_get_subs_vals(mixed_section,"MAPPING")
@@ -933,7 +933,7 @@ print *, "NOFORCE_EVAL_TO_USE", nforce_eval
                                       i_vals=my_mol_index) 
        CALL section_vals_val_get(energy_decomp_section, "NUM_ACTIVE_ATOMS", &
                                      i_val=act_atoms)
-print *, "act_atoms_TOUSE", my_mol_index
+!print *, "act_atoms_TOUSE", my_mol_index
 print *, "act_atoms", act_atoms
        ALLOCATE(intra_forces_global(nforce_eval, 3, act_atoms))
     END IF
@@ -949,11 +949,11 @@ print *, "act_atoms", act_atoms
     IF (ALLOCATED(thermo%pot_list)) THEN
         energies_1_mol_list = 0.0_dp !CHANGE SAM
         intra_forces_global = 0.0_dp
-print *, "intra_forces_global", intra_forces_global
+!print *, "intra_forces_global", intra_forces_global
     END IF
 
     glob_natoms = 0
-print *, "nforce_eval", nforce_eval
+!print *, "nforce_eval", nforce_eval
     DO iforce_eval = 1, nforce_eval
        NULLIFY(subsystems(iforce_eval)%subsys, particles(iforce_eval)%list)
        NULLIFY(results(iforce_eval)%results, virials(iforce_eval)%virial)
@@ -1001,7 +1001,7 @@ print *, "NATOM", natom
           CALL cp_subsys_get(subsystems(iforce_eval)%subsys,&
                              virial=loc_virial, results=loc_results)
           energies(iforce_eval)    = energy
-print *, "ENERGY_INSIDE_FORCE_EVAL", energy
+!print *, "ENERGY_INSIDE_FORCE_EVAL", energy
            
           CALL force_env_get(force_env%sub_force_env(iforce_eval)%force_env, fist_env=fist_env)
           CALL fist_env_get(fist_env, thermo=thermo, intra_forces=intra_forces)
@@ -1013,10 +1013,10 @@ print *, "ENERGY_INSIDE_FORCE_EVAL", energy
             END IF 
 
              energies_1_mol_list(iforce_eval, :) = thermo%pot_list
-print *, "energies_1_mol_list(iforce_eval, :)", thermo%pot_list
-PRINT *, "POT_LIST_NOWWWWW", thermo%pot_list
+!print *, "energies_1_mol_list(iforce_eval, :)", thermo%pot_list
+!PRINT *, "POT_LIST_NOWWWWW", thermo%pot_list
           END IF
-PRINT *, iforce_eval
+!PRINT *, iforce_eval
 
           glob_natoms(iforce_eval) = natom
           CALL cp_virial(loc_virial, virials(iforce_eval)%virial)
@@ -1078,7 +1078,7 @@ PRINT *, iforce_eval
     IF (ALLOCATED(thermo%pot_list)) THEN
        !force_env%mixed_env%energies_1_mol_list = energies_1_mol_list
 !print *, "force_env%mixed_env%energies_1_mol_list", force_env%mixed_env%energies_1_mol_list
-print *, "intra_forces_global_NOW", intra_forces_global
+!print *, "intra_forces_global_NOW", intra_forces_global
     END IF
     ! Start combining the different sub_force_env
     CALL get_mixed_env(mixed_env=force_env%mixed_env,&
@@ -1150,7 +1150,7 @@ print *, "intra_forces_global_NOW", intra_forces_global
             force_env%mixed_env%val, energies)
     IF (ALLOCATED(thermo%pot_list)) THEN
 !print *, "force_env%mixed_env%energies_1_mol_list INSIDE GENMIX",force_env%mixed_env%energies_1_mol_list
-print *, "ENERGIES_mix_generic", energies
+!print *, "ENERGIES_mix_generic", energies
     END IF
        CALL initf(1)
        CALL parsef(1,TRIM(coupling_function),force_env%mixed_env%par)
@@ -1193,7 +1193,7 @@ print *, "ENERGIES_mix_generic", energies
         mixed_env => force_env%mixed_env
         IF (ALLOCATED(thermo%pot_list)) THEN
 !print *, "force_env%mixed_env%energies_1_mol_list INSIDE", mixed_env%energies_1_mol_list
-print *, "energies_1_mol_list INSIDE", energies_1_mol_list
+!print *, "energies_1_mol_list INSIDE", energies_1_mol_list
         END IF
         !SELECT CASE(adiab_keyword)
         !CASE("CLASSICAL_PATH")
@@ -1314,7 +1314,7 @@ print *, "energies_1_mol_list INSIDE", energies_1_mol_list
 
    INTEGER :: i, natom, my_mol, count_idx, count2, count3, j
    INTEGER :: imol, nkind,  nmol_per_kind,  ikind, first_atom, &
-              last_atom, aoi, test
+              last_atom, aoi!, test
 
    NULLIFY(my_global_forces, my_energies)
 
@@ -1323,25 +1323,25 @@ print *, "energies_1_mol_list INSIDE", energies_1_mol_list
    ALLOCATE(my_energies(SIZE(energies_1_mol_list(1,:))))
 
 
-print *, "INFO_NEED_act_atoms", act_atoms
-print *, "my_mol_index_NEED", my_mol_index
+!print *, "INFO_NEED_act_atoms", act_atoms
+!print *, "my_mol_index_NEED", my_mol_index
 
-print *, "NEUTRAL"
-test = 0
-do i = 1, SIZE(intra_forces_global, 3)
-   test = test + 1 
-   print *, test, intra_forces_global(1, :, i)
-end do 
+!print *, "NEUTRAL"
+!test = 0
+!do i = 1, SIZE(intra_forces_global, 3)
+!   test = test + 1 
+!   print *, test, intra_forces_global(1, :, i)
+!end do 
    
-print *, "CHARGE"
-test = 0
-do i = 1, SIZE(intra_forces_global, 3)
-   test = test + 1 
-   print *, test, intra_forces_global(2, :, i)
-end do 
+!print *, "CHARGE"
+!test = 0
+!do i = 1, SIZE(intra_forces_global, 3)
+!   test = test + 1 
+!   print *, test, intra_forces_global(2, :, i)
+!end do 
  
-print *, "SIZE(mixed_env%energies_1_mol_list(1,:))", SIZE(energies_1_mol_list(1,:))
-print *, "SIZE(global_forces(i)%forces(:,:), 2)", SIZE(global_forces(2)%forces(:,:), 2)
+!print *, "SIZE(mixed_env%energies_1_mol_list(1,:))", SIZE(energies_1_mol_list(1,:))
+!print *, "SIZE(global_forces(i)%forces(:,:), 2)", SIZE(global_forces(2)%forces(:,:), 2)
 
   ALLOCATE(used_mols(SIZE(energies_1_mol_list(1,:))))
   count2 = 1
@@ -1351,11 +1351,11 @@ print *, "SIZE(global_forces(i)%forces(:,:), 2)", SIZE(global_forces(2)%forces(:
 
     count_idx = 0
    DO i = 1, SIZE(energies_1_mol_list(1,:)) !loop over num of adiabatic states 
-print *, "LOOP", i
-print *, "INTRA+LJ", energies(1), "   ", energies(2)
+!print *, "LOOP", i
+!print *, "INTRA+LJ", energies(1), "   ", energies(2)
       my_energies(i) = energies(1) + energies_1_mol_list(2,i) - energies_1_mol_list(1,i)
       natom = SIZE(global_forces(1)%forces(:,:), 2)
-print *, "natom", natom
+!print *, "natom", natom
       ALLOCATE(my_global_forces(i)%forces( 3,natom))
       
       my_global_forces(i)%forces = global_forces(1)%forces
@@ -1370,18 +1370,17 @@ print *, "natom", natom
               !IF (ANY(my_mol_index==my_mol) .and. count3 .eq. 0) THEN
               DO j = 1, SIZE(my_mol_index)
                    IF ( my_mol_index(j)==my_mol  .and. my_mol_index(j) /= used_mols(j) .and. count3==0 ) THEN
-                    print *, "my_mol_index(j)", my_mol_index(j)
-                    print *, "used_mols(j)", used_mols(j)
-                    print *, "i_in_FORCE_ENV", my_mol
+                    !print *, "my_mol_index(j)", my_mol_index(j)
+                    !print *, "used_mols(j)", used_mols(j)
+                    !print *, "i_in_FORCE_ENV", my_mol
                     CALL get_molecule ( molecule, first_atom=first_atom, last_atom=last_atom )
-                    !loop over mol 60
                     DO aoi=first_atom, last_atom !loop over atoms of interest
                        count_idx = count_idx + 1
-                       print *, "count_idx", count_idx
-                       print *, "aoi", aoi
-                       print *, "force_charge_to_add_xyz", intra_forces_global(2,:,count_idx)
-                       print *, "force_neutral_to_add_xyz", intra_forces_global(1,:,count_idx)
-                       print *, "force_already_there", global_forces(1)%forces(:,aoi)
+                       !print *, "count_idx", count_idx
+                       !print *, "aoi", aoi
+                       !print *, "force_charge_to_add_xyz", intra_forces_global(2,:,count_idx)
+                       !print *, "force_neutral_to_add_xyz", intra_forces_global(1,:,count_idx)
+                       !print *, "force_already_there", global_forces(1)%forces(:,aoi)
                        my_global_forces(i)%forces(:, aoi) = my_global_forces(i)%forces(:, aoi) + &
                                   intra_forces_global(2,:,count_idx) - intra_forces_global(1,:,count_idx)
                        
@@ -1389,7 +1388,7 @@ print *, "natom", natom
                     used_mols(count2) = my_mol
                     count3 = 1
                     count2 = count2 + 1  
- print *, "used_mols", used_mols
+! print *, "used_mols", used_mols
                    END IF
               END DO
               !END IF

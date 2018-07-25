@@ -159,7 +159,7 @@ IF (PRESENT(pot_1_mol_list)) THEN
                                   i_vals=my_mol_index)
 !DELETE ME
 !print *, "NOW_I_PRINT_my_mol_index ", my_mol_index
-print *, "NEW_FORCE_EVA"
+!print *, "NEW_FORCE_EVA"
 END IF
 
     pot_bond =  0.0_dp
@@ -171,10 +171,10 @@ END IF
     pot_shell =  0.0_dp
 !CHANGE S/M
     IF (PRESENT(pot_1_mol_list))  pot_1_mol_list(:) = 0.0_dp
-!DELETE ME
-        IF (PRESENT(pot_1_mol_list)) THEN
-print *, "pot_1_mol_list"
-    END IF
+!!DELETE ME
+!        IF (PRESENT(pot_1_mol_list)) THEN
+!print *, "pot_1_mol_list"
+!    END IF
 !END CHANGE
     unit_conv = cp_unit_from_cp2k(1.0_dp, "angstrom")
 
@@ -673,7 +673,7 @@ print *, "pot_1_mol_list"
                     pot_1_mol_list(idx) = pot_bond_1_mol + pot_shell_1_mol + &
                        pot_urey_bradley_1_mol + pot_bend_1_mol + pot_torsion_1_mol + &
                        pot_imp_torsion_1_mol + pot_opbend_1_mol
-print *, "pot_1_mol_list(idx)", pot_1_mol_list(idx)
+!print *, "pot_1_mol_list(idx)", pot_1_mol_list(idx)
                  END IF
              END DO
           END IF
