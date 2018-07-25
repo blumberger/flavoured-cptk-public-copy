@@ -1002,15 +1002,16 @@ print *, "NATOM", natom
                              virial=loc_virial, results=loc_results)
           energies(iforce_eval)    = energy
 print *, "ENERGY_INSIDE_FORCE_EVAL", energy
-        
+           
           CALL force_env_get(force_env%sub_force_env(iforce_eval)%force_env, fist_env=fist_env)
           CALL fist_env_get(fist_env, thermo=thermo, intra_forces=intra_forces)
-          IF (ALLOCATED(intra_forces)) THEN 
-!print *, "GET_FORCES_FROM_ENV", intra_forces
-             intra_forces_global(iforce_eval, :, :) = intra_forces(:,:)
-          END IF 
-
           IF (ALLOCATED(thermo%pot_list)) THEN
+
+            IF (ALLOCATED(intra_forces)) THEN 
+!print *, "GET_FORCES_FROM_ENV", intra_forces
+              intra_forces_global(iforce_eval, :, :) = intra_forces(:,:)
+            END IF 
+
              energies_1_mol_list(iforce_eval, :) = thermo%pot_list
 print *, "energies_1_mol_list(iforce_eval, :)", thermo%pot_list
 PRINT *, "POT_LIST_NOWWWWW", thermo%pot_list
@@ -1376,11 +1377,12 @@ print *, "natom", natom
                     !loop over mol 60
                     DO aoi=first_atom, last_atom !loop over atoms of interest
                        count_idx = count_idx + 1
+                       print *, "count_idx", count_idx
                        print *, "aoi", aoi
                        print *, "force_charge_to_add_xyz", intra_forces_global(2,:,count_idx)
                        print *, "force_neutral_to_add_xyz", intra_forces_global(1,:,count_idx)
                        print *, "force_already_there", global_forces(1)%forces(:,aoi)
-                       my_global_forces(i)%forces(:, aoi) =  &
+                       my_global_forces(i)%forces(:, aoi) = my_global_forces(i)%forces(:, aoi) + &
                                   intra_forces_global(2,:,count_idx) - intra_forces_global(1,:,count_idx)
                        
                     END DO

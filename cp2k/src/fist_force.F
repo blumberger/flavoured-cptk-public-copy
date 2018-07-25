@@ -657,11 +657,13 @@ print *, "forces_intra_aoi", count_idx, forces_intra_aoi(:, count_idx)
        END DO
     END DO
 
+
+    CALL fist_env_set(fist_env=fist_env, intra_forces=forces_intra_aoi)
+
 END IF
 
 !print *, "forces_intra_aoi", forces_intra_aoi
 
-CALL fist_env_set(fist_env=fist_env, intra_forces=forces_intra_aoi)
 !CALL fist_env_get(fist_env=fist_env, intra_forces=intra_forces)
 
 !print *, "GET_FORCES_FROM_ENV", intra_forces
