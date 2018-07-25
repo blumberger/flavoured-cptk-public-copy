@@ -239,7 +239,10 @@ CONTAINS
     IF ( PRESENT(shell_particle_set)) shell_particle_set => shell_particles%els
     IF ( PRESENT(core_particle_set)) core_particle_set => core_particles%els
     IF ( PRESENT(multipoles)) multipoles => fist_multipoles
-    IF ( PRESENT (intra_forces)) intra_forces = fist_env%intra_forces
+    IF ( PRESENT (intra_forces)) THEN 
+                PRINT *, "BOB"
+                intra_forces = fist_env%intra_forces
+        END IF
   END SUBROUTINE fist_env_get
 
 ! *****************************************************************************

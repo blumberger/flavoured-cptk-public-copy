@@ -1003,10 +1003,10 @@ CONTAINS
           energies(iforce_eval)    = energy
 !print *, "ENERGY_INSIDE_FORCE_EVAL", energy
            
-          CALL force_env_get(force_env%sub_force_env(iforce_eval)%force_env, fist_env=fist_env)
-          CALL fist_env_get(fist_env, thermo=thermo, intra_forces=intra_forces)
           IF (ALLOCATED(thermo%pot_list)) THEN
 
+          CALL force_env_get(force_env%sub_force_env(iforce_eval)%force_env, fist_env=fist_env)
+          CALL fist_env_get(fist_env, thermo=thermo, intra_forces=intra_forces)
             IF (ALLOCATED(intra_forces)) THEN 
 !print *, "GET_FORCES_FROM_ENV", intra_forces
               intra_forces_global(iforce_eval, :, :) = intra_forces(:,:)
