@@ -878,7 +878,7 @@ CONTAINS
     REAL(KIND=dp), ALLOCATABLE                 :: intra_forces(:,:)
     REAL(KIND=dp), ALLOCATABLE                 :: intra_forces_global(:,:,:)
     TYPE(section_vals_type), POINTER         :: energy_decomp_section
-    INTEGER                                  :: act_atoms
+    INTEGER                                  :: act_atoms, output_unit
     INTEGER, DIMENSION(:), POINTER           :: my_mol_index !CHANGE SAM
 
 
@@ -934,7 +934,7 @@ CONTAINS
        CALL section_vals_val_get(energy_decomp_section, "NUM_ACTIVE_ATOMS", &
                                      i_val=act_atoms)
 !print *, "act_atoms_TOUSE", my_mol_index
-print *, "act_atoms", act_atoms
+!print *, "act_atoms", act_atoms
        ALLOCATE(intra_forces_global(nforce_eval, 3, act_atoms))
     END IF
 !CHANGE SAM: WE MUST CHECK CAREFULLY THIS ALLOCATION I AM NOT SURE IF IT IS THE
@@ -980,7 +980,7 @@ print *, "act_atoms", act_atoms
 
        ! Get Mapping index array
        natom = SIZE(particles(iforce_eval)%list%els)
-print *, "NATOM", natom
+!print *, "NATOM", natom
        CALL get_subsys_map_index(mapping_section, natom, iforce_eval, nforce_eval, &
             map_index)
 
@@ -1097,6 +1097,14 @@ print *, "NATOM", natom
        CPASSERT(nforce_eval==2)
        CALL section_vals_val_get(mixed_section,"LINEAR%LAMBDA",r_val=lambda)
        mixed_energy%pot=lambda*energies(1) + (1.0_dp-lambda)*energies(2)
+       !CHANGE SAM 
+       output_unit = cp_print_key_unit_nr(logger,force_env%force_env_section,& 
+                 "PRINT%PROGRAM_RUN_INFO", extension=".Log")
+       IF (output_unit > 0) THEN
+          WRITE(*,'(A,F16.13)') "delta_energy in Ha = ", energies(2) - energies(1)
+       END IF
+
+       !END CHANGE SAM
        ! General Mapping of forces...
        CALL mixed_map_forces(particles_mix, virial_mix, results_mix, global_forces, virials, results,&
             lambda, 1, nforce_eval, map_index, mapping_section, .TRUE.)
@@ -1214,7 +1222,7 @@ print *, "NATOM", natom
            !TOFINISH
            !CALL fist_env_get(fist_env)
 
-           PRINT *, "dO decomp = ", ALLOCATED(thermo%pot_list) 
+!           PRINT *, "dO decomp = ", ALLOCATED(thermo%pot_list) 
            IF (ALLOCATED(thermo%pot_list)) THEN
                !subsys_section => section_vals_get_subs_vals(force_env_section, "SUBSYS")
                !CALL section_vals_val_get(subsys_section, "INDEX_MOL_DECOMP",& !CHANGE SAM

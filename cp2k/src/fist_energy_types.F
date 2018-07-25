@@ -79,7 +79,7 @@ CONTAINS
     IF (PRESENT(energy_decomp_section)) THEN
       CALL section_vals_val_get(energy_decomp_section, "INDEX_MOL_DECOMP",&
                                          i_vals=my_mol_index)
-      PRINT *, "my_mol_index", my_mol_index
+      !PRINT *, "my_mol_index", my_mol_index
       ALLOCATE(fist_energy%pot_list(SIZE(my_mol_index)), STAT=istat)
       IF (istat /= 0) CALL stop_memory(routineN,moduleN,__LINE__,&
                             "fist_energy",8*dp_size)

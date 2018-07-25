@@ -115,7 +115,7 @@ CONTAINS
 
 
     natom = SIZE(global_forces(1)%forces,2)
-print *, "natom_inside_non_adiab_method", natom
+!print *, "natom_inside_non_adiab_method", natom
     ALLOCATE(positions_tp(3,natom))
     ALLOCATE(velocities_tp(3,natom))
     ALLOCATE(forces_adiab(3,natom))

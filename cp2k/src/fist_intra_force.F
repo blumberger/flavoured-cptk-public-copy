@@ -681,10 +681,10 @@ END IF
        END DO
     END DO MOL
 
-!DELETE ME
-        IF (PRESENT(pot_1_mol_list)) THEN
-print *, "pot_1_mol_list", SUM(pot_1_mol_list)
-                 END IF
+!!DELETE ME
+!        IF (PRESENT(pot_1_mol_list)) THEN
+!print *, "pot_1_mol_list", SUM(pot_1_mol_list)
+!                 END IF
 
 
     CALL timestop(handle)

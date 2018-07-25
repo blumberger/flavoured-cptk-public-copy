@@ -628,7 +628,7 @@ END IF
        END IF
     ENDIF
 
-PRINT *, "THERMO%POT_LIST ALLOCATED = ", ALLOCATED(thermo%pot_list)
+!PRINT *, "THERMO%POT_LIST ALLOCATED = ", ALLOCATED(thermo%pot_list)
 
 IF (ALLOCATED(thermo%pot_list)) THEN
 !TEST: store the forces that we need
