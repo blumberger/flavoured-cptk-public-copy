@@ -1329,7 +1329,7 @@ END SUBROUTINE classically_forbidden_hops
 
                     !update
                      H_0 = H_2
-                     X1 = X2
+                     X1  = X2
 
                     ctin = ctout
 !COMMENT: WHY CTOUT?
