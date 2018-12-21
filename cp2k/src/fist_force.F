@@ -254,6 +254,8 @@ IF (ALLOCATED(thermo%pot_list)) THEN
    !print *, "atoms_active_region", atoms_active_region 
    CALL section_vals_val_get(ener_decomp_section, "NUM_ACTIVE_ATOMS", &
                              i_val=act_atoms)
+   !print *, "act_atoms", act_atoms
+   !print *, "atoms_active_region", atoms_active_region
    IF (act_atoms /= atoms_active_region) THEN
       CPABORT("num_act_atoms incorrect")
    END IF

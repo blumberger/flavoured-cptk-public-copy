@@ -1241,11 +1241,9 @@ END SUBROUTINE classically_forbidden_hops
              Sttm_int = aom_env%Sttm
              Stmtm_int = aom_env%Stmtm
 
-             do t2=1,int(deltatMD/deltatE)
-                    call makeX(mat, H_0, Stt_int, Sttp_int, Sttm_int, Stptp_int, &
+             call makeX(mat, H_0, Stt_int, Sttp_int, Sttm_int, Stptp_int, &
                                              Stmtm_int, X1, deltatMD)
-
-
+             do t2=1,int(deltatMD/deltatE)
 
                     !create timestepped equivalents
                     H_1 = H_0 + 0.5D0*Hdiff
@@ -1331,6 +1329,7 @@ END SUBROUTINE classically_forbidden_hops
 
                     !update
                      H_0 = H_2
+                     X1 = X2
 
                     ctin = ctout
 !COMMENT: WHY CTOUT?

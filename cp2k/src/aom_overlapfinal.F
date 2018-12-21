@@ -1242,14 +1242,22 @@ deallocate(prervecsa)
       REAL(KIND=dp), dimension(:), allocatable :: musbp
       REAL(KIND=dp) :: muap
       REAL(KIND=dp), dimension(:,:,:), allocatable :: unitvecs
-      REAL(KIND=dp), dimension(8,2) :: slaters
+      ! OZ: change slaters sizes
+      REAL(KIND=dp), dimension(16,2) :: slaters
       integer :: stat_err
       integer :: i,j,k
       REAL(KIND=dp) :: c
       REAL(KIND=dp) :: DDOT
 
-      slaters(:,1)=(/0.0D0, 0.0D0, 3.0D0, 0.9560D0, 1.2881D0, 1.100D0, 1.9237D0, 2.2458D0/)
-      slaters(:,2)=(/0.0D0, 0.0D0, 0.0D0, 0.0000D0, 1.2107D0, 1.000D0, 1.6000D0, 2.2266D0/)
+      ! OZ: use array atomicZb and int atomicZa to store atomic numbers
+      ! OZ: mimicking the utilization of muap and musbp
+      integer, dimension(:), allocatable ::  atomicZb
+      integer :: atomicZa
+      ! OZ: augmented the slaters matrix - added sulfur sigma and pi mu coeffs
+      slaters(:,1)=(/0.0D0, 0.0D0, 3.0D0, 0.9560D0, 1.2881D0, 1.100D0, 1.9237D0,2.2458D0,&
+                     0.0D0, 0.0D0, 0.0D0, 0.0000D0, 0.0000D0, 0.000D0, 0.0000D0,2.1223D0/)
+      slaters(:,2)=(/0.0D0, 0.0D0, 0.0D0, 0.0000D0, 1.2107D0, 1.000D0, 1.6000D0,2.2266D0,&
+                     0.0D0, 0.0D0, 0.0D0, 0.0000D0, 0.0000D0, 0.000D0, 0.0000D0,1.8273D0/)
 
       allocate(coeffap(size(connlistal,2)),stat=stat_err)
       allocate(xyza(4, size(connlistal,2)),stat=stat_err)
@@ -1306,13 +1314,20 @@ deallocate(prervecsa)
 
          allocate(musbp(size(prexyzb,2)),stat=stat_err)
          
+        ! OZ: preallocate atomicZb
+        allocate(atomicZb(size(prexyzb,2)),stat=stat_err)
+
          do i=1,size(prexyzb,2)
+            ! OZ: populate atomicZb array
+            atomicZb(i)=int(prexyzb(1,i))
             musbp(i)=slaters(int(prexyzb(1,i)),2)
          end do
 
         do j=1,size(linecol)
           i=linecol(j)
           muap=slaters(int(prexyza(1,i)),2)
+          ! OZ: resolve atomic Z
+          atomicZa=int(prexyza(1,i))
           dist=0
           call calc_unit_vecs(prexyza(2:4,i), prexyzb(2:4,:), dist, unitvecs)
 
@@ -1323,14 +1338,17 @@ deallocate(prervecsa)
           call project_onto_unitvectors(unitvecs, rvecsb, expcoeffb)
 
           !Calculate the overlaps
-          call calc_overlap_p(expcoeffa, expcoeffb, muap, musbp, dist, sarray(:,i))
+          !call calc_overlap_p(expcoeffa, expcoeffb, muap, musbp, dist, sarray(:,i))
+          !Calculate the overlaps
+          call calc_overlap_p_Z(expcoeffa, expcoeffb, muap, musbp, dist,sarray(:,i),&
+                                atomicZa, atomicZb)
         end do
 
         call DGEMV('t', size(sarray,1), size(sarray,2), 1.0d0, sarray,&
                    & size(sarray,1), coeffbp, 1, 0.d0, stc, 1)
 
         sab = DDOT(size(coeffap,1),coeffap,1,stc,1)
-        deallocate(expcoeffb, expcoeffa, unitvecs, dist, musbp, rvecsb, coeffbp)
+        deallocate(expcoeffb, expcoeffa, unitvecs, dist, musbp, rvecsb,coeffbp,atomicZb)
    
        elseif ((present(prexyzb) .and. present(precoeffbp) .and. &
          present(sab) .and. present(connlistbl)) .eqv. .false.) then
@@ -1339,21 +1357,29 @@ deallocate(prervecsa)
 
         allocate(unitvecs(3,size(prexyza,2),3),stat=stat_err)
         allocate(dist(size(prexyza,2)),stat=stat_err)
+        ! OZ: preallocate atomicZb array - this is for SAB normalization
+        allocate(atomicZb(size(prexyza,2)),stat=stat_err)
         allocate(musbp(size(prexyza,2)),stat=stat_err)
         allocate(expcoeffa(3,size(prexyza,2)),stat=stat_err)
         allocate(expcoeffb(3,size(prexyza,2)),stat=stat_err)
 
         do i=1,size(prexyza,2)
+         ! OZ: populate atomicZb - SAB normalization
+         atomicZb(i)=int(prexyza(1,i))
          musbp(i)=slaters(int(prexyza(1,i)),2)
         end do
 
           do j=1,size(linecol)
              i=linecol(j)
+             ! OZ: resolve atomic Z - SAB norm
+             atomicZa=int(prexyza(1,i))
              muap=slaters(int(prexyza(1,i)),2)
              call calc_unit_vecs(prexyza(2:4,i), prexyza(2:4,:), dist, unitvecs)
              call project_onto_unitvectors(unitvecs, rvecsa(:,i), expcoeffa)
              call project_onto_unitvectors(unitvecs, rvecsa, expcoeffb)
-             call calc_overlap_p(expcoeffa, expcoeffb, muap, musbp, dist, sarray(:,i))
+             !call calc_overlap_p(expcoeffa, expcoeffb, muap, musbp, dist, sarray(:,i))
+              call calc_overlap_p_Z(expcoeffa,expcoeffb, muap, musbp, dist, sarray(:,i),&
+                                   atomicZa, atomicZb)
 
              do k=1,size(sarray,2)
                 sarray(i,k)=sarray(k,i)
@@ -1366,7 +1392,7 @@ deallocate(prervecsa)
           c = DDOT(size(prexyza,2),coeffap,1,stc,1)
           coeffap = coeffap / sqrt(c)
           precoeffap = coeffap
-          deallocate(expcoeffb, expcoeffa, unitvecs, dist, musbp)
+          deallocate(expcoeffb, expcoeffa, unitvecs, dist, musbp,atomicZb)
       else
 !         print*, 'Wrong argument passing to calc_sab'
       end if
@@ -1663,12 +1689,24 @@ deallocate(prervecsa)
       REAL(KIND=dp) :: muap
       REAL(KIND=dp), intent(in) :: minAO
       REAL(KIND=dp), dimension(:,:,:), allocatable :: unitvecs
-      REAL(KIND=dp), dimension(8,2) :: slaters
+      ! OZ: change slaters... btw, the usage of slaters and mu's is obsolete due
+      ! to the lookup tables...
+      REAL(KIND=dp), dimension(16,2) :: slaters
       integer :: stat_err
       integer :: i,j,k
 
-      slaters(:,1)=(/0.0D0, 0.0D0, 3.0D0, 0.9560D0, 1.2881D0, 1.100D0, 1.9237D0, 2.2458D0/)
-      slaters(:,2)=(/0.0D0, 0.0D0, 0.0D0, 0.0000D0, 1.2107D0, 1.000D0, 1.6000D0, 2.2266D0/)
+      ! OZ: use array atomicZb and int atomicZa to store atomic numbers
+      ! OZ: mimicking the utilization of muap and musbp
+      integer, dimension(:), allocatable ::  atomicZb
+      integer :: atomicZa
+
+
+      ! OZ: augmented the slaters matrix - added sulfur sigma and pi mu
+      ! coeffs
+      slaters(:,1)=(/0.0D0, 0.0D0, 3.0D0, 0.9560D0, 1.2881D0, 1.100D0, 1.9237D0,2.2458D0,&
+                     0.0D0, 0.0D0, 0.0D0, 0.0000D0, 0.0000D0, 0.000D0, 0.0000D0,2.1223D0/)
+      slaters(:,2)=(/0.0D0, 0.0D0, 0.0D0, 0.0000D0, 1.2107D0, 1.000D0, 1.6000D0,2.2266D0,&
+                     0.0D0, 0.0D0, 0.0D0, 0.0000D0, 0.0000D0, 0.000D0, 0.0000D0,1.8273D0/)
 
       allocate(coeffap(size(connlistal,2)),stat=stat_err)
       allocate(xyza(4, size(connlistal,2)),stat=stat_err)
@@ -1725,8 +1763,12 @@ deallocate(prervecsa)
       coeffbp=precoeffbp
 
       allocate(musbp(size(prexyzb,2)),stat=stat_err)
+      ! OZ: preallocate atomicZb
+      allocate(atomicZb(size(prexyzb,2)),stat=stat_err)
          
       do i=1,size(prexyzb,2)
+         ! OZ: populate atomicZb   
+         atomicZb(i)=int(prexyzb(1,i))
          musbp(i)=slaters(int(prexyzb(1,i)),2)
       end do
 
@@ -1734,6 +1776,8 @@ deallocate(prervecsa)
       do j=1,size(linecol)
          i=linecol(j)
          muap=slaters(int(prexyza(1,i)),2)
+         ! OZ: resolve atomic Z
+         atomicZa=int(prexyza(1,i))
          dist=0
          call calc_unit_vecs(prexyza(2:4,i), prexyzb(2:4,:), dist, unitvecs)
 
@@ -1744,7 +1788,11 @@ deallocate(prervecsa)
          call project_onto_unitvectors(unitvecs, rvecsb, expcoeffb)
 
 !        Calculate the overlaps
-         call calc_overlap_p(expcoeffa, expcoeffb, muap, musbp, dist, sarray(:,i))
+         !call calc_overlap_p(expcoeffa, expcoeffb, muap, musbp, dist, sarray(:,i))
+         ! OZ: sulfur support - SAB
+         !Calculate the overlaps
+          call calc_overlap_p_Z(expcoeffa, expcoeffb, muap, musbp, dist,sarray(:,i),&
+                                atomicZa, atomicZb)
 
 !        If the atomic overlap between to atoms of either of the molecule is smaller than
 !        a certain 'minAO' value the given (aindex, bindex) position in screenlist becomes
@@ -1769,6 +1817,8 @@ deallocate(prervecsa)
       deallocate(rvecsb)
       deallocate(stc,dist,expcoeffa,unitvecs)
       deallocate(rvecsa)
+      ! OZ: free atomicZb
+      deallocate(atomicZb)
 
       return
   end subroutine sab_screen_new
@@ -1805,14 +1855,21 @@ deallocate(prervecsa)
       REAL(KIND=dp) :: muap
       REAL(KIND=dp), dimension(:,:,:), allocatable :: unitvecs
       integer, dimension(:,:), allocatable :: grandconb
-      REAL(KIND=dp), dimension(8,2) :: slaters
+      ! OZ: changed slaters dimensions from 8,2 to 16,2
+      REAL(KIND=dp), dimension(16,2) :: slaters
       integer :: stat_err
       integer :: i,j,k
       REAL(KIND=dp) :: c
       REAL(KIND=dp) :: DDOT
-
-      slaters(:,1)=(/0.0D0, 0.0D0, 3.0D0, 0.9560D0, 1.2881D0, 1.100D0, 1.9237D0, 2.2458D0/)
-      slaters(:,2)=(/0.0D0, 0.0D0, 0.0D0, 0.0000D0, 1.2107D0, 1.000D0, 1.6000D0, 2.2266D0/)
+      ! OZ: use array atomicZb and int atomicZa to store atomic numbers
+      ! OZ: mimicking the utilization of muap and musbp
+      integer, dimension(:), allocatable ::  atomicZb
+      integer :: atomicZa
+      ! OZ: augmented the slaters matrix - added sulfur sigma and pi mu coeffs
+      slaters(:,1)=(/0.0D0, 0.0D0, 3.0D0, 0.9560D0, 1.2881D0, 1.100D0, 1.9237D0,2.2458D0,&
+                     0.0D0, 0.0D0, 0.0D0, 0.0000D0, 0.0000D0, 0.000D0, 0.0000D0,2.1223D0/)
+      slaters(:,2)=(/0.0D0, 0.0D0, 0.0D0, 0.0000D0, 1.2107D0, 1.000D0, 1.6000D0,2.2266D0,&
+                     0.0D0, 0.0D0, 0.0D0, 0.0000D0, 0.0000D0, 0.000D0, 0.0000D0,1.8273D0/)
 
       allocate(coeffap(size(connlistal,2)),stat=stat_err)
       allocate(xyza(4, size(connlistal,2)),stat=stat_err)
@@ -1888,12 +1945,18 @@ deallocate(prervecsa)
              end do
 
              allocate(musbp(size(prexyzb,2)),stat=stat_err)
+             ! OZ: preallocate atomicZb
+             allocate(atomicZb(size(prexyzb,2)),stat=stat_err)
          
              do k=1,size(xyzb,2)
+                 ! OZ: populate atomicZb array
+                 atomicZb(k)=int(xyzb(1,k))
                  musbp(k)=slaters(int(xyzb(1,k)),2)
              end do
 
              muap=slaters(int(prexyza(1,i)),2)
+             ! OZ: resolve atomic Z
+             atomicZa=int(prexyza(1,i))
              dist=0
 
              call calc_unit_vecs(prexyza(2:4,i), xyzb(2:4,:), dist, unitvecs)
@@ -1905,7 +1968,9 @@ deallocate(prervecsa)
              call project_onto_unitvectors(unitvecs, rvecsb, expcoeffb)
 
 !            Calculate the overlaps
-             call calc_overlap_p(expcoeffa, expcoeffb, muap, musbp, dist, sarrayline)
+             !call calc_overlap_p(expcoeffa, expcoeffb, muap, musbp, dist, sarrayline)
+             call calc_overlap_p_Z(expcoeffa, expcoeffb, muap, musbp, dist,sarrayline,&
+                                atomicZa, atomicZb)
 
 !            Changing relelvant elements of atomic overlap matrix
              do k=1,aneighbour(1,i)
@@ -1913,7 +1978,7 @@ deallocate(prervecsa)
              end do
 
              deallocate(expcoeffa, expcoeffb, rvecsb, sarrayline)
-             deallocate(dist, unitvecs, musbp, xyzb)
+             deallocate(dist, unitvecs, musbp, xyzb, atomicZb)
         end do
         call DGEMV('t', size(sarray,1), size(sarray,2), 1.0d0, sarray,&
                     size(sarray,1), coeffbp, 1, 0.d0, stc, 1)
@@ -1926,22 +1991,30 @@ deallocate(prervecsa)
 
         allocate(unitvecs(3,size(prexyza,2),3),stat=stat_err)
         allocate(dist(size(prexyza,2)),stat=stat_err)
+        ! OZ: preallocate atomicZb array - this is for SAB normalization
+        allocate(atomicZb(size(prexyza,2)),stat=stat_err)
         allocate(musbp(size(prexyza,2)),stat=stat_err)
         allocate(expcoeffa(3,size(prexyza,2)),stat=stat_err)
         allocate(expcoeffb(3,size(prexyza,2)),stat=stat_err)
 
         do i=1,size(prexyza,2)
+            ! OZ: populate atomicZb - SAB normalization
+            atomicZb(i)=int(prexyza(1,i))
             musbp(i)=slaters(int(prexyza(1,i)),2)
         end do
 
         do j=1,size(linecol)
              i=linecol(j)
              muap=slaters(int(prexyza(1,i)),2)
+             ! OZ: resolve atomic Z - SAB norm
+             atomicZa=int(prexyza(1,i))
              call calc_unit_vecs(prexyza(2:4,i), prexyza(2:4,:), dist, unitvecs)
              call project_onto_unitvectors(unitvecs, rvecsa(:,i), expcoeffa)
              call project_onto_unitvectors(unitvecs, rvecsa, expcoeffb)
-             call calc_overlap_p(expcoeffa, expcoeffb, muap, musbp, dist, sarray(:,i))
-
+             !call calc_overlap_p(expcoeffa, expcoeffb, muap, musbp, dist, sarray(:,i))
+             call calc_overlap_p_Z(expcoeffa, expcoeffb, muap,musbp, dist, sarray(:,i),&
+                                   atomicZa, atomicZb)
+ 
              do k=1,size(sarray,2)
                 sarray(i,k)=sarray(k,i)
              end do
@@ -1954,7 +2027,7 @@ deallocate(prervecsa)
         coeffap = coeffap / sqrt(c)
         precoeffap = coeffap
 
-        deallocate(expcoeffb)
+        deallocate(expcoeffb,atomicZb)
       else
 !         print*, 'Wrong argument passing to calc_sab'
       end if
