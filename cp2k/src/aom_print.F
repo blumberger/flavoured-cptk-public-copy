@@ -896,7 +896,7 @@ CONTAINS
            else
                !ALLOCATE(pop_init(nadiab))
                !pop_init     = sh_print_env%pop_init
-               !first_adiabat= sh_print_env%first_adiabat    
+               first_adiabat= sh_print_env%first_adiabat    
                !initrandom   = sh_print_env%initrandom
 
                WRITE( unit_nr, "(A)")   "LET'S START. "
