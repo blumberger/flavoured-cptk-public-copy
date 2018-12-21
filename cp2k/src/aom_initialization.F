@@ -157,6 +157,9 @@ CONTAINS
      TYPE(rng_stream_type), POINTER           :: rng_stream
      LOGICAL                                  :: continue_while
      CHARACTER(LEN=default_string_length)     :: file_name_s_psigma, file_name_s_ppi, deco_keyword
+     ! OZ: extra strings for C-S and S-S SAB calc
+     CHARACTER(LEN=default_string_length)     :: file_name_s_psigma_C_S,file_name_s_ppi_C_S
+     CHARACTER(LEN=default_string_length)     :: file_name_s_psigma_S_S,file_name_s_ppi_S_S
 
      NULLIFY(rng_stream)
      NULLIFY(listcoeff)
@@ -257,7 +260,20 @@ CONTAINS
              c_val=file_name_s_psigma)
      CALL section_vals_val_get(coupling_section,"PPI_FILE_NAME",&
              c_val=file_name_s_ppi)
-     CALL build_s_tables(file_name_s_psigma, file_name_s_ppi)
+     ! OZ: C-S and S-S
+     CALL section_vals_val_get(coupling_section,"PSIGMA_C_S_FILE_NAME",&
+             c_val=file_name_s_psigma_C_S)
+     CALL section_vals_val_get(coupling_section,"PPI_C_S_FILE_NAME",&
+             c_val=file_name_s_ppi_C_S)
+     CALL section_vals_val_get(coupling_section,"PSIGMA_S_S_FILE_NAME",&
+             c_val=file_name_s_psigma_S_S)
+     CALL section_vals_val_get(coupling_section,"PPI_S_S_FILE_NAME",&
+             c_val=file_name_s_ppi_S_S)
+     ! OZ: add extra arguments...
+     CALL build_s_tables(file_name_s_psigma, file_name_s_ppi,&
+                         file_name_s_psigma_C_S, file_name_s_ppi_C_S,&
+                         file_name_s_psigma_S_S, file_name_s_ppi_S_S)
+     
 
      !> Scaling factor Hab = scaling*Sab_bar
      CALL section_vals_val_get(coupling_section,"SCALING_FACTOR",&

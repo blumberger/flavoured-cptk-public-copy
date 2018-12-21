@@ -38,10 +38,17 @@ module aom_overlapfinal
       end interface
 
 ! _PC_
-
-DOUBLE PRECISION, DIMENSION(:), ALLOCATABLE :: s_ppi_table, s_psigma_table 
+! OZ: added extra table variables for carbon-sulfur and sulfur-sulfur SAB calc
+DOUBLE PRECISION, DIMENSION(:), ALLOCATABLE :: s_ppi_table, s_psigma_table,&
+                                               s_ppi_table_C_S,&
+                                               s_psigma_table_C_S,&
+                                               s_ppi_table_S_S,&
+                                               s_psigma_table_S_S 
 DOUBLE PRECISION, DIMENSION(:), ALLOCATABLE :: s_ppi_table2, s_psigma_table2
-REAL(kind=dp), DIMENSION(3) :: s_ppi_table_dims, s_psigma_table_dims
+! OZ: added extra variables for C-S, S-S SAB calc
+REAL(kind=dp), DIMENSION(3) :: s_ppi_table_dims, s_psigma_table_dims,&
+                               s_ppi_table_dims_C_S, s_psigma_table_dims_C_S,&
+                               s_ppi_table_dims_S_S, s_psigma_table_dims_S_S
 REAL(kind=dp), PARAMETER :: factorials(13) = (/1.0d0, 1.0d0, 2.0d0, 6.0d0, 24.0d0, &
             & 120.0d0, 720.0d0, 5040.0d0, 40320.0d0, 362880.0d0, 3628800.0d0, 39916800.0d0, 47900160.0d0 /)
 
@@ -49,8 +56,16 @@ contains
 
 !--------PC added functino to build S lookuptable----------
 
-  subroutine build_s_tables(file_name_s_psigma, file_name_s_ppi)
+! OZ: add extra arguments
+  subroutine build_s_tables(file_name_s_psigma, file_name_s_ppi,&
+                            file_name_s_psigma_C_S, file_name_s_ppi_C_S,&
+                            file_name_s_psigma_S_S, file_name_s_ppi_S_S)
       CHARACTER(LEN=default_string_length)     :: file_name_s_psigma, file_name_s_ppi  
+      ! OZ: C-S and S-S file paths
+      CHARACTER(LEN=default_string_length)     :: file_name_s_psigma_C_S,&
+                                                  file_name_s_ppi_C_S,&
+                                                  file_name_s_psigma_S_S,&
+                                                  file_name_s_ppi_S_S
       !CHARACTER(len=*), PARAMETER :: routineN = 'build_s_tables', &
       !   routineP = moduleN//':'//routineN
 
@@ -62,6 +77,16 @@ contains
  
  
       Bohr = 5.29177E-011
+
+      ! OZ: print lookup table file names
+      print*,"Lookup table files:"
+      print*,file_name_s_psigma
+      print*,file_name_s_ppi
+      print*,file_name_s_psigma_C_S
+      print*,file_name_s_ppi_C_S
+      print*,file_name_s_psigma_S_S
+      print*,file_name_s_ppi_S_S
+      
 
       !open(1, file="S_psigma.txt")
       !read(1,*) s_psigma_table_dims
@@ -133,6 +158,88 @@ contains
       !   print*, "S_PPI EQUAL"
       !ENDIF
 
+      ! OZ: read C-S and S-S
+      NULLIFY (parser)
+      CALL parser_create(parser, file_name_s_psigma_C_S)
+      CALL parser_get_next_line(parser,1)
+      READ (parser%input_line, *)  s_psigma_table_dims_C_S
+      nrows = NINT((s_psigma_table_dims_C_S(2)-s_psigma_table_dims_C_S(1))/s_psigma_table_dims_C_S(3))
+      print*, "C-S psigma nrows", nrows
+      allocate(s_psigma_table_C_S(nrows))
+      i = 1
+      Lookup_C_S: DO
+          CALL parser_get_next_line(parser,1,at_end=my_end)
+          IF ((my_end).OR.( i > nrows)) THEN
+             EXIT Lookup_C_S
+          ELSE
+             READ (parser%input_line,*) s_psigma_table_C_S(i)
+             i = i + 1
+          ENDIF
+      END DO Lookup_C_S
+      CALL parser_release(parser)
+
+      NULLIFY (parser)
+      CALL parser_create(parser, file_name_s_ppi_C_S)
+      CALL parser_get_next_line(parser,1)
+      READ (parser%input_line, *)  s_ppi_table_dims_C_S
+      nrows = NINT((s_ppi_table_dims_C_S(2)-s_ppi_table_dims_C_S(1))/s_ppi_table_dims_C_S(3))
+      allocate(s_ppi_table_C_S(nrows))
+      print*, "C-S ppi nrows", nrows
+      i = 1
+      Lookup_sppi_C_S: DO
+          CALL parser_get_next_line(parser,1,at_end=my_end)
+          IF ((my_end).OR.( i > nrows)) THEN
+             EXIT Lookup_sppi_C_S
+          ELSE
+             !print*, "i", i
+             READ (parser%input_line,*) s_ppi_table_C_S(i)
+             i = i + 1
+          ENDIF
+      END DO Lookup_sppi_C_S
+      CALL parser_release(parser)
+
+      NULLIFY (parser)
+      CALL parser_create(parser, file_name_s_psigma_S_S)
+      CALL parser_get_next_line(parser,1)
+      READ (parser%input_line, *)  s_psigma_table_dims_S_S
+      nrows = NINT((s_psigma_table_dims_S_S(2)-s_psigma_table_dims_S_S(1))/s_psigma_table_dims_S_S(3))
+      print*, "S-S psigma nrows", nrows
+      allocate(s_psigma_table_S_S(nrows))
+      i = 1
+      Lookup_S_S: DO
+          CALL parser_get_next_line(parser,1,at_end=my_end)
+          IF ((my_end).OR.( i > nrows)) THEN
+             EXIT Lookup_S_S
+          ELSE
+             READ (parser%input_line,*) s_psigma_table_S_S(i)
+             i = i + 1
+          ENDIF
+      END DO Lookup_S_S
+      CALL parser_release(parser)
+
+      NULLIFY (parser)
+      CALL parser_create(parser, file_name_s_ppi_S_S)
+      CALL parser_get_next_line(parser,1)
+      READ (parser%input_line, *)  s_ppi_table_dims_S_S
+      nrows = NINT((s_ppi_table_dims_S_S(2)-s_ppi_table_dims_S_S(1))/s_ppi_table_dims_S_S(3))
+      allocate(s_ppi_table_S_S(nrows))
+      print*, "S-S ppi nrows", nrows
+      i = 1
+      Lookup_sppi_S_S: DO
+          CALL parser_get_next_line(parser,1,at_end=my_end)
+          IF ((my_end).OR.( i > nrows)) THEN
+             EXIT Lookup_sppi_S_S
+          ELSE
+             !print*, "i", i
+             READ (parser%input_line,*) s_ppi_table_S_S(i)
+             i = i + 1
+          ENDIF
+      END DO Lookup_sppi_S_S
+      CALL parser_release(parser)
+      
+      !-------------------------------------------
+
+
   end subroutine 
 
   subroutine center_of_mass(xyz, mass, com)
@@ -196,7 +303,6 @@ contains
          !N in pyridine O in ethers
          elseif(j .eq. 3) then
              connectlist(j,i) = atomlist(i)
-
          !O in ketones
          elseif(j .eq. 2) then
 
@@ -476,6 +582,45 @@ contains
 !                                                                                   !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+! OZ: this is the variation of calc_overlap_p that accounts for atomic species
+  subroutine calc_overlap_p_Z(expcoeffa, expcoeffb, mua, musb, dist, sarray, atomicZa, atomicZb)
+      REAL(KIND=dp), intent(in) :: expcoeffa(:,:)
+      REAL(KIND=dp), intent(in) :: expcoeffb(:,:)
+      REAL(KIND=dp), intent(in) :: mua, musb(:)
+      REAL(KIND=dp), intent(in) :: dist(:)
+      REAL(KIND=dp), intent(out) :: sarray(:)
+      REAL(KIND=dp), allocatable :: c(:,:)
+      REAL(KIND=dp) :: t
+      integer :: stat_err
+      integer :: i
+      ! OZ: new arguments atomicZa, atomicZb types
+      integer, intent(in) :: atomicZa, atomicZb(:)
+      allocate(c(3,size(expcoeffa,2)), stat=stat_err)
+      if (stat_err .ne. 0) CPABORT(" ")
+      c = expcoeffa * expcoeffb !
+      do i=1,size(expcoeffa,2)
+        if (dist(i) .gt. abs(epsilon(0.d0))) then
+          t = (mua - musb(i))/(mua + musb(i)) !abs??? 
+          !if (abs(t) .lt. epsilon(0.D0)) then
+            ! OZ: species check
+            if ((atomicZa .eq. 6) .and. (atomicZb(i) .eq. 6)) then
+             sarray(i) = (c(1,i) + c(2,i)) * S_ppi_lookup(dist(i)) + c(3,i) * S_psigma_lookup(dist(i))
+            else if ((atomicZa .eq. 6) .and. (atomicZb(i) .eq. 16) .or. &
+                     (atomicZa .eq. 16) .and. (atomicZb(i) .eq. 6)) then
+             sarray(i) = (c(1,i) + c(2,i)) * S_ppi_lookup_C_S(dist(i)) + c(3,i) * S_psigma_lookup_C_S(dist(i))
+            else if ((atomicZa .eq. 16) .and. (atomicZb(i) .eq. 16)) then
+             sarray(i) = (c(1,i) + c(2,i)) * S_ppi_lookup_S_S(dist(i)) + c(3,i) * S_psigma_lookup_S_S(dist(i))
+            end if
+          !else
+          !  sarray(i) = 0.0D0
+          !end if
+        else
+         sarray(i) = 1.d0
+        end if
+      end do
+      deallocate(c)
+      return
+  end subroutine calc_overlap_p_Z
 
 
   subroutine calc_overlap_p(expcoeffa, expcoeffb, mua, musb, dist, sarray)
@@ -680,6 +825,58 @@ contains
 
   end function
 
+  ! OZ: C-S ppi
+  function S_ppi_lookup_C_S(R)
+      REAL(kind=dp), intent(in) :: R
+      REAL(kind=dp) :: S_ppi_lookup_C_S
+      integer :: row
+      row = int((R-s_ppi_table_dims_C_S(1))/s_ppi_table_dims_C_S(3))
+      IF (row .GE. SIZE(s_ppi_table_C_S)) THEN
+        S_ppi_lookup_C_S = 0.0_dp
+      ELSE
+        S_ppi_lookup_C_S = s_ppi_table_C_S(row)
+      ENDIF
+  end function
+  ! OZ: S-S ppi
+  function S_ppi_lookup_S_S(R)
+      REAL(kind=dp), intent(in) :: R
+      REAL(kind=dp) :: S_ppi_lookup_S_S
+      integer :: row
+      row = int((R-s_ppi_table_dims_S_S(1))/s_ppi_table_dims_S_S(3))
+      IF (row .GE. SIZE(s_ppi_table_S_S)) THEN
+        S_ppi_lookup_S_S = 0.0_dp
+      ELSE
+        S_ppi_lookup_S_S = s_ppi_table_S_S(row)
+      ENDIF
+  end function
+  ! OZ: C-S psigma
+  function S_psigma_lookup_C_S(R)
+      REAL(kind=dp), intent(in) :: R
+      REAL(kind=dp) :: S_psigma_lookup_C_S
+      integer :: row
+      row = int((R-s_psigma_table_dims_C_S(1))/s_psigma_table_dims_C_S(3))
+      IF (row .GE. SIZE(s_psigma_table_C_S)) THEN
+        S_psigma_lookup_C_S = 0.0_dp
+      ELSE
+        S_psigma_lookup_C_S = s_psigma_table_C_S(row)
+      END IF
+  end function
+  ! OZ: S-S psigma
+  function S_psigma_lookup_S_S(R)
+      REAL(kind=dp), intent(in) :: R
+      REAL(kind=dp) :: S_psigma_lookup_S_S
+      integer :: row
+      row = int((R-s_psigma_table_dims_S_S(1))/s_psigma_table_dims_S_S(3))
+      IF (row .GE. SIZE(s_psigma_table_S_S)) THEN
+        S_psigma_lookup_S_S = 0.0_dp
+      ELSE
+        S_psigma_lookup_S_S = s_psigma_table_S_S(row)
+      END IF
+  end function
+
+
+
+
 !     Subroutines factorial, A and B are only needed for hetero atompair calculations or
 !     s-p overlaps.
 
@@ -833,14 +1030,23 @@ contains
       REAL(KIND=dp), dimension(:), allocatable ::  musbp
       REAL(KIND=dp) :: muap 
       REAL(KIND=dp), dimension(:,:,:), allocatable :: unitvecs
-      REAL(KIND=dp), dimension(8,2) :: slaters
+      ! OZ: changed slaters dimensions from 8,2 to 16,2
+      REAL(KIND=dp), dimension(16,2) :: slaters
       integer :: stat_err !, ioerr, ioread
       integer :: i,j
       REAL(KIND=dp) :: c
       REAL(KIND=dp) :: DDOT
 !      REAL(KIND=dp), dimension(:,:), allocatable :: arraytoprint
-      slaters(:,1)=(/0.0D0, 0.0D0, 3.0D0, 0.9560D0, 1.2881D0, 1.100D0, 1.9237D0, 2.2458D0/)
-      slaters(:,2)=(/0.0D0, 0.0D0, 0.0D0, 0.0000D0, 1.2107D0, 1.000D0, 1.6000D0, 2.2266D0/)
+
+      ! OZ: use array atomicZb and int atomicZa to store atomic numbers
+      ! OZ: mimicking the utilization of muap and musbp
+      integer, dimension(:), allocatable ::  atomicZb
+      integer :: atomicZa
+      ! OZ: augmented the slaters matrix - added sulfur sigma and pi mu coeffs
+      slaters(:,1)=(/0.0D0, 0.0D0, 3.0D0, 0.9560D0, 1.2881D0, 1.100D0, 1.9237D0, 2.2458D0,&
+                     0.0D0, 0.0D0, 0.0D0, 0.0000D0, 0.0000D0, 0.000D0, 0.0000D0, 2.1223D0/)
+      slaters(:,2)=(/0.0D0, 0.0D0, 0.0D0, 0.0000D0, 1.2107D0, 1.000D0, 1.6000D0, 2.2266D0,&
+                     0.0D0, 0.0D0, 0.0D0, 0.0000D0, 0.0000D0, 0.000D0, 0.0000D0, 1.8273D0/)
 
         allocate(prervecsa(3,size(prexyza,2)),stat=stat_err)
         allocate(xyza(4,size(connlista,2)),stat=stat_err)
@@ -857,6 +1063,11 @@ call calc_rvecs(prexyza(2:4,:), prervecsa, connlista)
 rvecsa(:,i)=prervecsa(:,connlista(1,i))      
         end do
 deallocate(prervecsa)
+
+        ! OZ: print rvecs
+        !do i=1,size(connlista,2)
+        ! print*,rvecsa(1,i),rvecsa(2,i),rvecsa(3,i)
+        !end do
 
         ! These variables are recaculated for each atom in A
         ! Inherent for B atom
@@ -883,15 +1094,21 @@ deallocate(prervecsa)
        deallocate(prervecsb)
        
         allocate(musbp(size(xyzb,2)),stat=stat_err)
+        ! OZ: preallocate atomicZb
+        allocate(atomicZb(size(xyzb,2)),stat=stat_err)
         allocate(sarrayp(size(xyzb,2),size(xyza,2)), stat=stat_err)
 
         do i=1,size(xyzb,2)
+         ! OZ: populate atomicZb array
+         atomicZb(i)=int(xyzb(1,i))
          musbp(i)=slaters(int(xyzb(1,i)),2)
-         !print *, "musbp is", musbp
+         !print *, "musbp is", musbp(i)
         end do
 
         do i=1,size(xyza,2)
           muap=slaters(int(xyza(1,i)),2)
+          ! OZ: resolve atomic Z
+          atomicZa=int(xyza(1,i))
           !print *, "muap is", muap 
           !calculate unitvectors for each atom in monomer A
           !and distance array
@@ -904,14 +1121,16 @@ deallocate(prervecsa)
           call project_onto_unitvectors(unitvecs, rvecsb, expcoeffb)
 
           !Calculate the overlaps
-          call calc_overlap_p(expcoeffa, expcoeffb, muap, musbp, dist, sarrayp(:,i))
+          call calc_overlap_p_Z(expcoeffa, expcoeffb, muap, musbp, dist, sarrayp(:,i),&
+                                atomicZa, atomicZb)
         end do
 
         call DGEMV('t', size(sarrayp,1), size(sarrayp,2), 1.0d0, sarrayp,&
                    & size(sarrayp,1), coeffbp, 1, 0.d0, stc, 1)
         sab = DDOT(size(coeffap,1),coeffap,1,stc,1)
 
-        deallocate(rvecsb,  expcoeffa, expcoeffb, sarrayp, dist, unitvecs, coeffbp, musbp)
+        ! OZ: add atomicZb array to deallocation statement
+        deallocate(rvecsb,  expcoeffa, expcoeffb, sarrayp, dist, unitvecs, coeffbp, musbp, atomicZb)
 
       elseif ((present(prexyzb) .and. present(precoeffbp) .and. &
           present(sab) .and. present(connlistb)) .eqv. .false.) then
@@ -919,6 +1138,8 @@ deallocate(prervecsa)
         !Normalize
         allocate(unitvecs(3,size(xyza,2),3),stat=stat_err)
         allocate(dist(size(xyza,2)),stat=stat_err)
+        ! OZ: preallocate atomicZb array - this is for SAB normalization
+        allocate(atomicZb(size(xyza,2)),stat=stat_err)
         allocate(musbp(size(xyza,2)),stat=stat_err)
         allocate(sarrayp(size(xyza,2),size(xyza,2)), stat=stat_err)
         allocate(expcoeffa(3,size(xyza,2)),stat=stat_err)
@@ -927,10 +1148,14 @@ deallocate(prervecsa)
         sarrayp=0.0D0
 
         do i=1,size(xyza,2)
+         ! OZ: populate atomicZb - SAB normalization
+         atomicZb(i)=int(xyza(1,i))
          musbp(i)=slaters(int(xyza(1,i)),2)
         end do
 
           do i=2,size(xyza,2)
+             ! OZ: resolve atomic Z - SAB norm
+             atomicZa=int(xyza(1,i))
              muap=slaters(int(xyza(1,i)),2)
 
 !            Only calculates lower triangle of the overlap matrix in the normalisation step
@@ -944,7 +1169,11 @@ deallocate(prervecsa)
              call calc_unit_vecs(xyza(2:4,i), xyza(2:4,1:j), dist(1:j), unitvecs(:,1:j,:))    
              call project_onto_unitvectors(unitvecs(:,1:j,:), rvecsa(:,i), expcoeffa(:,1:j))
              call project_onto_unitvectors(unitvecs(:,1:j,:), rvecsa(:,1:j), expcoeffb(:,1:j))
-             call calc_overlap_p(expcoeffa(:,1:j), expcoeffb(:,1:j), muap, musbp(1:j), dist(1:j), sarrayp(1:j,i))
+
+             
+
+             call calc_overlap_p_Z(expcoeffa(:,1:j), expcoeffb(:,1:j), muap, musbp(1:j), dist(1:j), sarrayp(1:j,i),&
+                                   atomicZa, atomicZb(1:j))
           end do
 
           sarrayp=sarrayp+transpose(sarrayp)         
@@ -962,8 +1191,8 @@ deallocate(prervecsa)
           do i=1,size(connlista,2)
               precoeffap(connlista(1,i)) = coeffap(i)
           end do
-         
-         deallocate(sarrayp, expcoeffa, expcoeffb, dist, unitvecs, musbp) 
+         ! OZ: free atomicZb array - SAB norm
+         deallocate(sarrayp, expcoeffa, expcoeffb, dist, unitvecs, musbp, atomicZb) 
 
       else
 !         print*, 'Wrong argument passing to calc_sab' 
