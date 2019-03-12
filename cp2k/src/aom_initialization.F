@@ -160,8 +160,8 @@ CONTAINS
      TYPE(rng_stream_type), POINTER           :: rng_stream
      LOGICAL                                  :: continue_while
      CHARACTER(LEN=default_string_length)     :: file_name_s_psigma, file_name_s_ppi, deco_keyword
-     COMPLEX(KIND=dp), dimension(:), allocatable  :: readcoeff
-     INTEGER :: active_state_res
+!     COMPLEX(KIND=dp), dimension(:), allocatable  :: readcoeff
+!     INTEGER :: active_state_res
 
      NULLIFY(rng_stream)
      NULLIFY(listcoeff)
@@ -290,14 +290,16 @@ print *, "LOOK", norbitals, nadiab
 
 
      !> Get wavefunction diabatic coefficients from the input file
+     !this section should be optional somehow---STILL TO DO USING e.g.
+     !STEP_START_EVAL keyword in the input 
      wf_restart_section => section_vals_get_subs_vals(adiab_section,"WAVEFUNCTION_RESTART")
      CALL section_vals_val_get(wf_restart_section,"TEST_KEY", l_val=test_key)
-     CALL section_vals_val_get(wf_restart_section,"ACTIVE_STATE_RESTART", i_val=active_state_res)
+     CALL section_vals_val_get(wf_restart_section,"ACTIVE_STATE_RESTART", i_val=aom_env%active_state_res)
 print *, "MY_TEST_KEY", test_key
-print *, "ACTIVE_STATE_RES", active_state_res
+print *, "ACTIVE_STATE_RES", aom_env%active_state_res
      CALL section_vals_list_get(wf_restart_section,"_DEFAULT_KEYWORD_",list=listdiabcoeff) !Read them in the input files
-     CALL read_listdiabcoeff(listdiabcoeff, norbitals, nadiab, ctin=readcoeff) !Transform them into four arrays
-print *, "readcoeff", readcoeff
+     CALL read_listdiabcoeff(listdiabcoeff, norbitals, nadiab, ctin=aom_env%readcoeff) !Transform them into four arrays
+print *, "readcoeff", aom_env%readcoeff
      
 
      !> READ THE AOM COEFFICIENT
@@ -743,6 +745,9 @@ print *, "TIME", itimes
              CASE DEFAULT
                  CPABORT("Choose REPRESENTATION, only: DIABATIC_BASIS or ADIABATIC_BASIS")
              END SELECT
+         CASE("DIABATIC_RESTART")
+                 ctin(:) = aom_env%readcoeff(:)
+                 active_state = aom_env%active_state_res 
          CASE DEFAULT
              CPABORT("INITIALIZATION implemented: DIABATIC, ADIABATIC")
          END SELECT

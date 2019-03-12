@@ -168,6 +168,8 @@ END TYPE adiab_nace_env_type
      REAL(KIND=dp), dimension(:,:), POINTER       :: Stt, Stmt, Sttm, Stmtm, &
                                                      Stptp, Sttp, Stpt
      COMPLEX(KIND=dp), DIMENSION(:),POINTER  :: ctin, ctin_t !wavefunction at tp and t
+     COMPLEX(KIND=dp), dimension(:), allocatable  :: readcoeff
+     INTEGER                                      :: active_state_res
 
 !> Decoherence part
      LOGICAL                                 :: do_deco !should we do decoherence in that run?
