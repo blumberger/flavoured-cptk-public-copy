@@ -154,7 +154,8 @@ CONTAINS
      TYPE(cp_sll_val_type), POINTER               :: listcoeff
      TYPE(cp_sll_val_type), POINTER               :: listdiabcoeff
 
-     LOGICAL    :: do_random, test_key
+     LOGICAL    :: do_random
+!  test_key
      REAL(KIND=dp), DIMENSION(3, 2)           :: initial_seed
      INTEGER    :: input_seed
      TYPE(rng_stream_type), POINTER           :: rng_stream
@@ -293,9 +294,9 @@ print *, "LOOK", norbitals, nadiab
      !this section should be optional somehow---STILL TO DO USING e.g.
      !STEP_START_EVAL keyword in the input 
      wf_restart_section => section_vals_get_subs_vals(adiab_section,"WAVEFUNCTION_RESTART")
-     CALL section_vals_val_get(wf_restart_section,"TEST_KEY", l_val=test_key)
+     CALL section_vals_val_get(wf_restart_section,"TEST_KEY", l_val=aom_env%test_key)
      CALL section_vals_val_get(wf_restart_section,"ACTIVE_STATE_RESTART", i_val=aom_env%active_state_res)
-print *, "MY_TEST_KEY", test_key
+print *, "MY_TEST_KEY", aom_env%test_key
 print *, "ACTIVE_STATE_RES", aom_env%active_state_res
      CALL section_vals_list_get(wf_restart_section,"_DEFAULT_KEYWORD_",list=listdiabcoeff) !Read them in the input files
      CALL read_listdiabcoeff(listdiabcoeff, norbitals, nadiab, ctin=aom_env%readcoeff) !Transform them into four arrays
@@ -747,7 +748,9 @@ print *, "TIME", itimes
              END SELECT
          CASE("DIABATIC_RESTART")
                  ctin(:) = aom_env%readcoeff(:)
-                 active_state = aom_env%active_state_res 
+                 active_state = aom_env%active_state_res
+                 sh_print_env%first_adiabat = active_state 
+                 CALL adiab_print_sh_info(sh_print_env, keyword = 'START') 
          CASE DEFAULT
              CPABORT("INITIALIZATION implemented: DIABATIC, ADIABATIC")
          END SELECT
@@ -757,6 +760,7 @@ print *, "TIME", itimes
          allocate(adiab_pop(mat)) 
          CALL diab_to_adiab( aom_env%C_tp, ctin, adiab_c, adiab_pop)
 
+print *, "itimes_START", itimes, times
          CALL adiab_print_adiab_pop(adiab_section, adiab_pop, nadiab,norbitals,itimes,deltatMD, times)
 
          CALL adiab_print_coeff(adiab_section, ctin,nadiab, norbitals,itimes, deltatMD, times)

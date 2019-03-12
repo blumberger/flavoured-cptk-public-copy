@@ -252,7 +252,8 @@ write(*,*) "C_BEFORE",  aom_env%ctin
 
      !> CONVERT THE diabatic NACV WITH THE GOOD UNITS
      aom_env%nacv = cbar*aom_env%nacv
-
+!THIS KEYWORK IT'S JUST A TEST 
+     aom_env%test_key = .False.
 
      !> HAMILTONIAN DIAGONALIZATION
      !The adiabaticity subroutine diagonalises the diabatic Hamiltonian H_tp
@@ -564,7 +565,8 @@ SUBROUTINE diagonal_elem(i,k,orb,itimes,aom_env)
                                          (-aom_env%siteenergies(3,k)),dp)
           end do
      end do
-     if (itimes.eq.1) then
+print *, "aom_env%test_key", aom_env%test_key
+     if (itimes.eq.1 .or. aom_env%test_key)  then
           do d=1,orb
                do m=1,orb
                !These diagonals are 1 by definition
@@ -613,7 +615,8 @@ SUBROUTINE off_diagonal_elem(aom_env,i,k,orb,itimes, atoms, &
                                              aom_env%Stpt(orb*(k-1)+m,orb*(i-1)+d)
                     aom_env%Stpt(orb*(i-1)+d,orb*(k-1)+m)  = & 
                                               aom_env%Sttp(orb*(k-1)+m,orb*(i-1)+d)
-                    IF (itimes.eq.1) THEN
+                    print *, "aom_env%test_key", aom_env%test_key
+                    if (itimes.eq.1 .or. aom_env%test_key)  then
                        aom_env%Sttm(orb*(i-1)+d,orb*(k-1)+m)  = &
                                               aom_env%Stmt(orb*(k-1)+m,orb*(i-1)+d)
                        aom_env%Stmt(orb*(i-1)+d,orb*(k-1)+m)  = &
@@ -659,7 +662,8 @@ SUBROUTINE off_diagonal_elem(aom_env,i,k,orb,itimes, atoms, &
                     aom_env%Stpt(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
                end do
           end do
-          if (itimes.eq.1) then
+print *, "aom_env%test_key", aom_env%test_key
+          if (itimes.eq.1 .or. aom_env%test_key)  then
                do d=1,orb
                     do m=1,orb
 
