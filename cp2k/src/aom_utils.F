@@ -137,7 +137,9 @@ IMPLICIT NONE
              calc_hop_nacv, &
              cal_delta_energy_nacv , &
              calc_diabatic_nace, &
-             diab_to_adiab
+             diab_to_adiab, & 
+             read_listdiabcoeff
+ 
 
 CONTAINS
 
@@ -2002,6 +2004,109 @@ subroutine calcforces(state, Hin, C, nacv, atoms, scaling, cbar, Fin, forces_adi
         ENDDO
 end subroutine calcforces
 
+  SUBROUTINE read_listdiabcoeff(listdiabcoeff, norbitals, nadiab, ctin)
+   TYPE(cp_sll_val_type), POINTER                         :: listdiabcoeff
+   INTEGER, INTENT(IN)                                    :: norbitals, nadiab
+   COMPLEX(KIND=dp), dimension(:), allocatable, INTENT(OUT):: ctin
+
+   CHARACTER(len=*), PARAMETER :: routineN = 'read_listdiabcoeff', &
+     routineP = moduleN//':'//routineN
+
+   CHARACTER(len=2*default_string_length)   :: line_att
+   CHARACTER(len=default_string_length)     :: error_message
+   INTEGER                                  :: default_id, end_c, &
+                                               iatom, j,  &
+                                               start_c, wrd, mat
+   LOGICAL                                  :: is_ok
+   TYPE(val_type), POINTER                  :: val
+   REAL(KIND=dp), DIMENSION(:), ALLOCATABLE :: realcoeff, imagcoeff
+!   INTEGER                                  :: my_pres
+!   REAL(KIND=dp)                            :: my_ext_elements, my_pres2
+
+   NULLIFY(val)
+
+   mat = norbitals*nadiab
+!   ALLOCATE(ext_elements(natom))
+!   ALLOCATE(ext_pres(natom))
+   ALLOCATE(realcoeff(mat))
+   ALLOCATE(imagcoeff(mat))
+   ALLOCATE(ctin(mat))
+
+
+      DO iatom=1,mat
+         ! we use only the first default_string_length characters of each line
+         is_ok=cp_sll_val_next(listdiabcoeff,val) !logical 
+         CALL val_get(val,c_val=line_att)
+         default_id = str2id(s2s(""))
+         ! Read name and atomic coordinates
+         start_c=1
+         DO wrd=1,4  !loop over entries in DIAB_COEFF.inc
+            DO j=start_c,LEN(line_att)
+               IF (line_att(j:j)/=' ') THEN
+                  start_c=j
+                  EXIT
+               END IF
+            END DO
+            end_c=LEN(line_att)+1
+            DO j=start_c,LEN(line_att)
+               IF (line_att(j:j)==' ') THEN
+                  end_c=j
+                  EXIT
+               END IF
+            END DO
+            IF(LEN_TRIM(line_att(start_c:end_c-1)) == 0)& !length of the number
+                                                           ! without space
+               CALL cp_abort(__LOCATION__,&
+                    "Incorrectly formatted input line for atom "//&
+                    TRIM(ADJUSTL(cp_to_string(iatom)))//&
+                    " found in COORD section. Input line: <"//&
+                    TRIM(line_att)//"> ")
+            SELECT CASE (wrd)
+! We ignore case 1 and 2 since they report state and orbital per state
+! this may be used in case of multiple orbitals per state
+!!             CASE (1)
+!!                 = str2id(s2s(line_att(start_c:end_c-1)))
+!            CASE (2)
+!               CALL read_float_object(line_att(start_c:end_c-1),&
+!                                      my_ext_elements,error_message)
+!              ext_elements(iatom) = INT(my_ext_elements)
+!              IF(LEN_TRIM(error_message) /= 0)&
+!                 CALL cp_abort(__LOCATION__,&
+!                      "Incorrectly formatted input line for atom "//&
+!                      TRIM(ADJUSTL(cp_to_string(iatom)))//&
+!                      " found in COORD section. "//TRIM(error_message)//&
+!                      " Input line: <"//TRIM(line_att)//"> ")
+           CASE (3)
+              CALL read_float_object(line_att(start_c:end_c-1),&
+                                     realcoeff(iatom),error_message)
+              IF(LEN_TRIM(error_message) /= 0)&
+                 CALL cp_abort(__LOCATION__,&
+                      "Incorrectly formatted input line for atom "//&
+                      TRIM(ADJUSTL(cp_to_string(iatom)))//&
+                      " found in COORD section. "//TRIM(error_message)//&
+                      " Input line: <"//TRIM(line_att)//"> ")
+           CASE (4)
+              CALL read_float_object(line_att(start_c:end_c-1),&
+                                     imagcoeff(iatom),error_message)
+              IF(LEN_TRIM(error_message) /= 0)&
+                 CALL cp_abort(__LOCATION__,&
+                      "Incorrectly formatted input line for atom "//&
+                      TRIM(ADJUSTL(cp_to_string(iatom)))//&
+                      " found in COORD section. "//TRIM(error_message)//&
+                      " Input line: <"//TRIM(line_att)//"> ")
+           END SELECT
+           start_c = end_c
+            IF (start_c > LEN_TRIM(line_att)) EXIT
+         END DO
+print *, "real", realcoeff(iatom)
+print *, "imag", imagcoeff(iatom)
+!store diabatic coeff as a complex number
+         ctin(iatom) = CMPLX(realcoeff(iatom), imagcoeff(iatom),dp)
+     END DO
+print *, "CTIN", ctin
+
+     !DEALLOCATE(val)
+  END SUBROUTINE read_listdiabcoeff
 
    SUBROUTINE read_listcoeff(listcoeff, ext_elements, ext_pres, &
                             ext_scoeff, ext_pcoeff, natom)
@@ -2033,12 +2138,16 @@ end subroutine calcforces
 
        DO iatom=1,natom
           ! we use only the first default_string_length characters of each line
-          is_ok=cp_sll_val_next(listcoeff,val)
+          is_ok=cp_sll_val_next(listcoeff,val) !logical 
           CALL val_get(val,c_val=line_att)
           default_id = str2id(s2s(""))
+!print *, "default_id", default_id
           ! Read name and atomic coordinates
           start_c=1
           DO wrd=1,5
+!print *, "wrd", wrd
+!print *, "line_att: ", line_att
+!print *, "LEN(line_att)", LEN(line_att)
              DO j=start_c,LEN(line_att)
                 IF (line_att(j:j)/=' ') THEN
                    start_c=j
@@ -2052,7 +2161,10 @@ end subroutine calcforces
                    EXIT
                 END IF
              END DO
-             IF(LEN_TRIM(line_att(start_c:end_c-1)) == 0)&
+!print *, "start_c_BEG", start_c
+!print *, "LEN_TRIM(line_att(start_c:end_c-1)", LEN_TRIM(line_att(start_c:end_c-1))
+             IF(LEN_TRIM(line_att(start_c:end_c-1)) == 0)& !length of the number
+                                                            ! without space
                 CALL cp_abort(__LOCATION__,&
                      "Incorrectly formatted input line for atom "//&
                      TRIM(ADJUSTL(cp_to_string(iatom)))//&
@@ -2107,6 +2219,7 @@ end subroutine calcforces
 
              END SELECT
              start_c = end_c
+!print *, "start_c_END", start_c
              IF (start_c > LEN_TRIM(line_att)) EXIT
           END DO
       END DO

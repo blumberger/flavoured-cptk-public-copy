@@ -1231,6 +1231,13 @@ END SUBROUTINE classically_forbidden_hops
              H_0  = my_H_t
              !H_2 =  my_H_tp
 
+write(*,*) "Stmtm", aom_env%Stmtm
+write(*,*) "aom_env%Sttm", aom_env%Sttm
+write(*,*) "aom_env%Stmt", aom_env%Stmt
+write(*,*) "aom_env%Stt", aom_env%Stt
+write(*,*) "aom_env%Stptp", aom_env%Stptp
+write(*,*) "aom_env%Stpt", aom_env%Stpt
+write(*,*) "aom_env%Sttp", aom_env%Sttp
 !Assignment internal variabls used in the RK
              
              Stt_int = aom_env%Stt 
@@ -1243,6 +1250,8 @@ END SUBROUTINE classically_forbidden_hops
 
              call makeX(mat, H_0, Stt_int, Sttp_int, Sttm_int, Stptp_int, &
                                              Stmtm_int, X1, deltatMD)
+write(*,*) "H_0", H_0
+
              do t2=1,int(deltatMD/deltatE)
 
                     !create timestepped equivalents
@@ -1281,6 +1290,9 @@ END SUBROUTINE classically_forbidden_hops
                     alpha = cmplx(deltatE/2.0D0, 0.0D0,dp)
                     beta = cmplx(0.0D0, 0.0D0,dp)
      
+write(*,*) "X1", X1
+write(*,*) "X12", X12
+write(*,*) "X2", X2
                     !second term
                     call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X12, mat, X1, &
                     &mat, beta, K2, mat)
@@ -1304,7 +1316,10 @@ END SUBROUTINE classically_forbidden_hops
                     !alpha = dcmplx(1.0D0, 0.0D0)
                     alpha = cmplx(1.0D0, 0.0D0,dp)
                     inc = 1
+write(*,*) "C_PROP_1",  ctin
+write(*,*) "K_PROP_1",  Ktot
                     call ZGEMV(zgemm_type, mat, mat, alpha, Ktot, mat, ctin, inc, beta, ctout, inc)
+write(*,*) "C_PROP_2",  ctout
                     ctmag = 0.0D0
                     ctcomp = cmplx(0.0D0, 0.0D0,dp)
                     do i=1,mat

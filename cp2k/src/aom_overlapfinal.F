@@ -114,7 +114,7 @@ contains
       READ (parser%input_line, *)  s_ppi_table_dims
       nrows = NINT((s_ppi_table_dims(2)-s_ppi_table_dims(1))/s_ppi_table_dims(3))
       allocate(s_ppi_table(nrows))
-      print*, "nrows", nrows 
+!      print*, "nrows", nrows 
       i = 1
       Lookup_sppi: DO
           CALL parser_get_next_line(parser,1,at_end=my_end)

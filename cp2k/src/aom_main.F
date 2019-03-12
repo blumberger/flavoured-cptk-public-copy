@@ -220,6 +220,7 @@ CONTAINS
 
      sh_print_env = aom_env%sh_print_env
      times = DBLE(itimes)
+print *, "TIME", itimes
      sh_print_env%times = times
      
      ALLOCATE(positions_com_tp(3, natom))
@@ -239,6 +240,7 @@ CONTAINS
 
 
      !ctin(:) = aom_env%ctin(:)
+write(*,*) "C_BEFORE",  aom_env%ctin
      aom_env%adiab_nace_t = aom_env%adiab_nace_tp
 
      !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
@@ -274,6 +276,7 @@ CONTAINS
      CASE("DIABATIC_RK")
            CALL propagate_wf(aom_env%ctin, aom_env, nadiab,  norbitals, ELsteps, &
                              itimes, adiab_section, deltatMD, deltatE , times, mat)
+write(*,*) "C_PROP",  aom_env%ctin
      CASE("ADIABATIC_RK")
            CALL propagate_adiab_wf(aom_env%E_t, aom_env%E_tp, aom_env%ctin, aom_env, nadiab, norbitals, ELsteps, &
                                    itimes, adiab_section, deltatMD, deltatE , times,  mat)
@@ -359,6 +362,7 @@ CONTAINS
      end do
 
      !CALL rotation_diab_to_adiab(aom_env%C_tp, aom_env%ctin, mat, adiab_ctin, adiab_pop)
+write(*,*) "COEFF", aom_env%ctin
      CALL diab_to_adiab( aom_env%C_tp, aom_env%ctin, adiab_c, adiab_pop)
  
      CALL adiab_print_adiab_pop(adiab_section, adiab_pop, nadiab,norbitals,itimes, deltatMD, times) 

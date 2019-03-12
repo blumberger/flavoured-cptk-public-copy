@@ -369,6 +369,8 @@ CONTAINS
          description="Defines the methods to obtain the adiabatic forces.",&
          n_keywords=1, n_subsections=0, repeats=.FALSE.)
 
+
+
     CALL keyword_create(keyword, name="NUMBER_DIABATIC_STATES",&
          description="Number of diabatic states to consider",&
          usage="2", type_of_var=integer_t)
@@ -529,6 +531,43 @@ CONTAINS
 
     CALL section_add_subsection(subsection,sub2section)
     CALL section_release(sub2section)
+
+    NULLIFY(sub2section)
+    CALL section_create(sub2section,name="WAVEFUNCTION_RESTART",&
+         description="WF restart",&
+         n_keywords=1, n_subsections=0, repeats=.FALSE.)
+
+    CALL keyword_create(keyword, name="_DEFAULT_KEYWORD_",&
+         description="Diabatic WF cofficients in the format:"//&
+         "molecule orbital real imaginary",&
+         repeats=.TRUE., usage="{{Int} {Int} {Real} {Real}}",&
+         type_of_var=lchar_t)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="ACTIVE_STATE_RESTART",&
+         description="Active state for the restart",&
+         usage="1", type_of_var=integer_t)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="TEST_KEY",&
+         description="Decide if we use the decoherence procedure",&
+         usage="True", &
+         default_l_val=.FALSE., &
+         lone_keyword_l_val=.TRUE.)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL section_add_subsection(subsection,sub2section)
+    CALL section_release(sub2section)
+
+!    CALL section_add_subsection(sub2section,sub3section)
+!    CALL section_release(sub3section)
+!    CALL section_add_subsection(subsection,sub2section)
+!    CALL section_release(sub2section)
+
+
 
     CALL section_create(sub2section,name="PRINT",&
          description="Section of possible print options in ADIABATIC env.",&

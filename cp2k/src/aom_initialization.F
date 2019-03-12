@@ -55,6 +55,7 @@ MODULE aom_initialization
                                              !surfacehop,     &
                                              calcforces,     &
                                              read_listcoeff, &
+                                             read_listdiabcoeff, &
                                              choose_firstadiabat, &
                                              simple_vel_rescaling, &
                                              translate_com, &
@@ -137,6 +138,7 @@ CONTAINS
      REAL(kind=dp), DIMENSION(:,:),POINTER          :: positions_tp
      TYPE(section_vals_type), POINTER               :: coupling_section
      TYPE(section_vals_type), POINTER               :: adiab_section
+     TYPE(section_vals_type), POINTER               :: wf_restart_section
      TYPE(aom_env_type), INTENT(INOUT)              :: aom_env
 
      CHARACTER(len=*), PARAMETER :: routineN ='create_aom_env', &
@@ -150,13 +152,16 @@ CONTAINS
      LOGICAL, DIMENSION(:), ALLOCATABLE :: atomlist_mask, submask
      integer, dimension(:), ALLOCATABLE           :: ext_elements
      TYPE(cp_sll_val_type), POINTER               :: listcoeff
+     TYPE(cp_sll_val_type), POINTER               :: listdiabcoeff
 
-     LOGICAL    :: do_random
+     LOGICAL    :: do_random, test_key
      REAL(KIND=dp), DIMENSION(3, 2)           :: initial_seed
      INTEGER    :: input_seed
      TYPE(rng_stream_type), POINTER           :: rng_stream
      LOGICAL                                  :: continue_while
      CHARACTER(LEN=default_string_length)     :: file_name_s_psigma, file_name_s_ppi, deco_keyword
+     COMPLEX(KIND=dp), dimension(:), allocatable  :: readcoeff
+     INTEGER :: active_state_res
 
      NULLIFY(rng_stream)
      NULLIFY(listcoeff)
@@ -168,8 +173,12 @@ CONTAINS
      CALL section_vals_val_get(coupling_section,"CUT_OFF_CONNECTIVITY",&
              r_val=cutoff_connect)
      CALL section_vals_val_get(coupling_section,"RANDOM_DERIVATIVE", l_val=do_random)
+    
+
+
 
      mat = norbitals*nadiab !> Size of the vectorial space where the wavefunctions are projected
+print *, "LOOK", norbitals, nadiab
      c = nadiab*aom_atoms !> Numbers of active atoms
 
      ALLOCATE(aom_env%elements(c))
@@ -279,6 +288,17 @@ CONTAINS
      ALLOCATE(aom_env%rng_stream)
      aom_env%rng_stream = rng_stream
 
+
+     !> Get wavefunction diabatic coefficients from the input file
+     wf_restart_section => section_vals_get_subs_vals(adiab_section,"WAVEFUNCTION_RESTART")
+     CALL section_vals_val_get(wf_restart_section,"TEST_KEY", l_val=test_key)
+     CALL section_vals_val_get(wf_restart_section,"ACTIVE_STATE_RESTART", i_val=active_state_res)
+print *, "MY_TEST_KEY", test_key
+print *, "ACTIVE_STATE_RES", active_state_res
+     CALL section_vals_list_get(wf_restart_section,"_DEFAULT_KEYWORD_",list=listdiabcoeff) !Read them in the input files
+     CALL read_listdiabcoeff(listdiabcoeff, norbitals, nadiab, ctin=readcoeff) !Transform them into four arrays
+print *, "readcoeff", readcoeff
+     
 
      !> READ THE AOM COEFFICIENT
      CALL section_vals_list_get(coupling_section,"_DEFAULT_KEYWORD_",list=listcoeff) !Read them in the input files
@@ -666,7 +686,11 @@ CONTAINS
          if (imol .ne. mat) then
            couplings(imol) = -AIMAG(aom_env%H_tp(imol,imol+1))
          end if
-     end do 
+     end do
+   
+times = DBLE(itimes)
+
+print *, "TIME", itimes
 
      CALL adiab_print_site_energies(adiab_section, site_energies, nadiab,deltatMD, times) 
      CALL adiab_print_off_diagonals(adiab_section, couplings, nadiab-1, deltatMD, times)
@@ -722,7 +746,7 @@ CONTAINS
          CASE DEFAULT
              CPABORT("INITIALIZATION implemented: DIABATIC, ADIABATIC")
          END SELECT
-         times = 0.0
+!         times = 0.0
 
          allocate(adiab_c(mat)) 
          allocate(adiab_pop(mat)) 
@@ -731,6 +755,7 @@ CONTAINS
          CALL adiab_print_adiab_pop(adiab_section, adiab_pop, nadiab,norbitals,itimes,deltatMD, times)
 
          CALL adiab_print_coeff(adiab_section, ctin,nadiab, norbitals,itimes, deltatMD, times)
+write(*,*) "COEFF", ctin
          CALL adiab_print_pop(adiab_section, abs(ctin),nadiab,norbitals,itimes,deltatMD, times)
          CALL adiab_print_matrix_density(adiab_section, ctin, nadiab,norbitals,itimes, &
                                          deltatMD, times)
@@ -783,6 +808,7 @@ CONTAINS
      aom_env%active_state = active_state
      !> IMPORTANT FOR THE FIRST TIME STEP
      aom_env%Stt = Stptp
+write(*,*) "aom_env%Stt", aom_env%Stt
      aom_env%old_state = aom_env%active_state
      !aom_env%active_state = -1
      aom_env%new_state = -1
