@@ -1037,6 +1037,7 @@ END SUBROUTINE fist_calc_energy_force
     TYPE(section_vals_type), POINTER         :: print_key
 
     NULLIFY(logger,print_key,fist_nonbond_env)
+
     logger => cp_get_default_logger()
     print_key => section_vals_get_subs_vals(print_section,"dipole")
     CALL fist_env_get(fist_env, fist_nonbond_env=fist_nonbond_env)

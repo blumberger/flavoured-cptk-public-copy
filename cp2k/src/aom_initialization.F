@@ -114,6 +114,13 @@ MODULE aom_initialization
      USE parallel_rng_types,           ONLY: UNIFORM,&
                                              create_rng_stream,&
                                              rng_stream_type
+ 
+!     USE cp_log_handling,                 ONLY: cp_get_default_logger, &
+!                                                cp_logger_type
+
+!     USE cp_output_handling,              ONLY: cp_print_key_should_output
+
+
 #include "./base/base_uses.f90"
 
      IMPLICIT NONE
@@ -153,6 +160,11 @@ CONTAINS
      integer, dimension(:), ALLOCATABLE           :: ext_elements
      TYPE(cp_sll_val_type), POINTER               :: listcoeff
      TYPE(cp_sll_val_type), POINTER               :: listdiabcoeff
+!     TYPE(section_vals_type), POINTER             :: input_key
+!     TYPE(cp_logger_type), POINTER                :: logger
+
+!     INTEGER                              :: should_output
+ !    LOGICAL                              :: my_do_restart = .FALSE.
 
      LOGICAL    :: do_random
 !  test_key
@@ -166,6 +178,9 @@ CONTAINS
 
      NULLIFY(rng_stream)
      NULLIFY(listcoeff)
+!     NULLIFY(logger)
+!     logger => cp_get_default_logger()
+
 
      mol = nadiab ! CHANGE_AC
      atoms = aom_atoms ! CHANGE_AC
@@ -174,9 +189,7 @@ CONTAINS
      CALL section_vals_val_get(coupling_section,"CUT_OFF_CONNECTIVITY",&
              r_val=cutoff_connect)
      CALL section_vals_val_get(coupling_section,"RANDOM_DERIVATIVE", l_val=do_random)
-    
-
-
+   
 
      mat = norbitals*nadiab !> Size of the vectorial space where the wavefunctions are projected
 print *, "LOOK", norbitals, nadiab
@@ -289,18 +302,32 @@ print *, "LOOK", norbitals, nadiab
      ALLOCATE(aom_env%rng_stream)
      aom_env%rng_stream = rng_stream
 
+  
+!     input_key => section_vals_get_subs_vals(adiab_section,&
+!                                       "WAVEFUNCTION_RESTART")
+
+!     should_output = cp_print_key_should_output(&
+!                     iteration_info=logger%iter_info,&
+!                     basis_section=input_key)
+
+     
+!     IF (should_output .ne. 0) THEN
+!        my_do_restart = .TRUE.
+!     END IF
+!print *, "my_do_restart", my_do_restart
 
      !> Get wavefunction diabatic coefficients from the input file
      !this section should be optional somehow---STILL TO DO USING e.g.
      !STEP_START_EVAL keyword in the input 
      wf_restart_section => section_vals_get_subs_vals(adiab_section,"WAVEFUNCTION_RESTART")
+print *, "ASSOCIATED(wf_restart_section)", ASSOCIATED(wf_restart_section)
      CALL section_vals_val_get(wf_restart_section,"TEST_KEY", l_val=aom_env%test_key)
      CALL section_vals_val_get(wf_restart_section,"ACTIVE_STATE_RESTART", i_val=aom_env%active_state_res)
-print *, "MY_TEST_KEY", aom_env%test_key
-print *, "ACTIVE_STATE_RES", aom_env%active_state_res
+     print *, "MY_TEST_KEY", aom_env%test_key
+     print *, "ACTIVE_STATE_RES", aom_env%active_state_res
      CALL section_vals_list_get(wf_restart_section,"_DEFAULT_KEYWORD_",list=listdiabcoeff) !Read them in the input files
      CALL read_listdiabcoeff(listdiabcoeff, norbitals, nadiab, ctin=aom_env%readcoeff) !Transform them into four arrays
-print *, "readcoeff", aom_env%readcoeff
+     print *, "readcoeff", aom_env%readcoeff
      
 
      !> READ THE AOM COEFFICIENT
