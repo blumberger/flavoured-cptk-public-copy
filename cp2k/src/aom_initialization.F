@@ -321,15 +321,16 @@ print *, "LOOK", norbitals, nadiab
      !STEP_START_EVAL keyword in the input 
      wf_restart_section => section_vals_get_subs_vals(adiab_section,"WAVEFUNCTION_RESTART")
 print *, "ASSOCIATED(wf_restart_section)", ASSOCIATED(wf_restart_section)
-     CALL section_vals_val_get(wf_restart_section,"TEST_KEY", l_val=aom_env%test_key)
-     CALL section_vals_val_get(wf_restart_section,"ACTIVE_STATE_RESTART", i_val=aom_env%active_state_res)
-     print *, "MY_TEST_KEY", aom_env%test_key
-     print *, "ACTIVE_STATE_RES", aom_env%active_state_res
-     CALL section_vals_list_get(wf_restart_section,"_DEFAULT_KEYWORD_",list=listdiabcoeff) !Read them in the input files
-     CALL read_listdiabcoeff(listdiabcoeff, norbitals, nadiab, ctin=aom_env%readcoeff) !Transform them into four arrays
-     print *, "readcoeff", aom_env%readcoeff
+     CALL section_vals_val_get(wf_restart_section,"RESTART_KEY", l_val=aom_env%restart_key)
+     print *, "RESTART_KEY", aom_env%restart_key
+     if (aom_env%restart_key) then
+         CALL section_vals_val_get(wf_restart_section,"ACTIVE_STATE_RESTART", i_val=aom_env%active_state_res)
+         print *, "ACTIVE_STATE_RES", aom_env%active_state_res
+         CALL section_vals_list_get(wf_restart_section,"_DEFAULT_KEYWORD_",list=listdiabcoeff) !Read them in the input files
+         CALL read_listdiabcoeff(listdiabcoeff, norbitals, nadiab, ctin=aom_env%readcoeff) !Transform them in the complex ctin
+         print *, "readcoeff", aom_env%readcoeff
+     end if
      
-
      !> READ THE AOM COEFFICIENT
      CALL section_vals_list_get(coupling_section,"_DEFAULT_KEYWORD_",list=listcoeff) !Read them in the input files
      CALL read_listcoeff(listcoeff, ext_elements, aom_env%ext_pres, &
@@ -720,23 +721,30 @@ print *, "ASSOCIATED(wf_restart_section)", ASSOCIATED(wf_restart_section)
    
 times = DBLE(itimes)
 
-print *, "TIME", itimes
 
-     CALL adiab_print_site_energies(adiab_section, site_energies, nadiab,deltatMD, times) 
-     CALL adiab_print_off_diagonals(adiab_section, couplings, nadiab-1, deltatMD, times)
-     CALL adiab_print_adiabat_energies(adiab_section, aom_env%E_tp, nadiab, deltatMD, times)
-     call adiab_print_pvecs(adiab_section, PC_allrvecs, itimes, deltatMD, times, atoms, nadiab)
+     !> print info in the output only if we do not restart the file
      sh_print_env%times = times
      sh_print_env%times = DBLE(itimes)
-     CALL adiab_print_hamiltonian(adiab_section, -AIMAG(aom_env%H_tp), nadiab,norbitals,itimes, deltatMD)
-     CALL adiab_print_nacv(adiab_section, nacv, nadiab, norbitals, aom_atoms,itimes, deltatMD)
+     if (.NOT. aom_env%restart_key) then
+        CALL adiab_print_site_energies(adiab_section, site_energies, nadiab,deltatMD, times) 
+        CALL adiab_print_off_diagonals(adiab_section, couplings, nadiab-1, deltatMD, times)
+        CALL adiab_print_adiabat_energies(adiab_section, aom_env%E_tp, nadiab, deltatMD, times)
+        call adiab_print_pvecs(adiab_section, PC_allrvecs, itimes, deltatMD, times, atoms, nadiab)
+        CALL adiab_print_hamiltonian(adiab_section, -AIMAG(aom_env%H_tp), nadiab,norbitals,itimes, deltatMD)
+        CALL adiab_print_nacv(adiab_section, nacv, nadiab, norbitals, aom_atoms,itimes, deltatMD)
+     end if
 
      !> INITIALIZE  
      IF  (.NOT. my_test_keyword) THEN
          decohere = .FALSE.
          aom_env%decohere = .FALSE.
          aom_env%attempt_hop = .FALSE.
-         CALL section_vals_val_get(adiab_section, "INITIALIZATION", c_val=keyword_init)
+         !if we want to restart wavefunction then
+         if (aom_env%restart_key) then
+             keyword_init = "DIABATIC_RESTART"
+         else
+             CALL section_vals_val_get(adiab_section, "INITIALIZATION", c_val=keyword_init)
+         end if
          CALL section_vals_val_get(adiab_section, "REPRESENTATION", c_val=keyword_basis_repr)
          SELECT CASE(keyword_init)
          CASE("DIABATIC")
@@ -776,25 +784,29 @@ print *, "TIME", itimes
          CASE("DIABATIC_RESTART")
                  ctin(:) = aom_env%readcoeff(:)
                  active_state = aom_env%active_state_res
-                 sh_print_env%first_adiabat = active_state 
-                 CALL adiab_print_sh_info(sh_print_env, keyword = 'START') 
+                 ! do not print this duplicated step in run-sh.log
+                 !sh_print_env%first_adiabat = active_state 
+                 !CALL adiab_print_sh_info(sh_print_env, keyword = 'START') 
          CASE DEFAULT
              CPABORT("INITIALIZATION implemented: DIABATIC, ADIABATIC")
          END SELECT
 !         times = 0.0
 
          allocate(adiab_c(mat)) 
-         allocate(adiab_pop(mat)) 
-         CALL diab_to_adiab( aom_env%C_tp, ctin, adiab_c, adiab_pop)
+         allocate(adiab_pop(mat))
 
-print *, "itimes_START", itimes, times
-         CALL adiab_print_adiab_pop(adiab_section, adiab_pop, nadiab,norbitals,itimes,deltatMD, times)
-
-         CALL adiab_print_coeff(adiab_section, ctin,nadiab, norbitals,itimes, deltatMD, times)
-write(*,*) "COEFF", ctin
-         CALL adiab_print_pop(adiab_section, abs(ctin),nadiab,norbitals,itimes,deltatMD, times)
-         CALL adiab_print_matrix_density(adiab_section, ctin, nadiab,norbitals,itimes, &
-                                         deltatMD, times)
+         !> print info in the output only if we do not restart the file
+         if (.NOT. aom_env%restart_key) then
+             !NB: this subroutine is wasted computational work if adiab_pop is not
+             !printed out, same probably for AOM.main
+             CALL diab_to_adiab( aom_env%C_tp, ctin, adiab_c, adiab_pop)     
+             CALL adiab_print_adiab_pop(adiab_section, adiab_pop, nadiab,norbitals,itimes,deltatMD, times)
+     
+             CALL adiab_print_coeff(adiab_section, ctin,nadiab, norbitals,itimes, deltatMD, times)
+             CALL adiab_print_pop(adiab_section, abs(ctin),nadiab,norbitals,itimes,deltatMD, times)
+             CALL adiab_print_matrix_density(adiab_section, ctin, nadiab,norbitals,itimes, &
+                                        deltatMD, times)
+         end if
      ELSE 
          aom_env%attempt_hop = .TRUE.
          active_state = 1
@@ -844,7 +856,6 @@ write(*,*) "COEFF", ctin
      aom_env%active_state = active_state
      !> IMPORTANT FOR THE FIRST TIME STEP
      aom_env%Stt = Stptp
-write(*,*) "aom_env%Stt", aom_env%Stt
      aom_env%old_state = aom_env%active_state
      !aom_env%active_state = -1
      aom_env%new_state = -1

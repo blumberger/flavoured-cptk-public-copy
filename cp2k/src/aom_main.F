@@ -220,7 +220,6 @@ CONTAINS
 
      sh_print_env = aom_env%sh_print_env
      times = DBLE(itimes)
-print *, "TIME", itimes
      sh_print_env%times = times
      
      ALLOCATE(positions_com_tp(3, natom))
@@ -240,7 +239,6 @@ print *, "TIME", itimes
 
 
      !ctin(:) = aom_env%ctin(:)
-write(*,*) "C_BEFORE",  aom_env%ctin
      aom_env%adiab_nace_t = aom_env%adiab_nace_tp
 
      !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
@@ -252,8 +250,9 @@ write(*,*) "C_BEFORE",  aom_env%ctin
 
      !> CONVERT THE diabatic NACV WITH THE GOOD UNITS
      aom_env%nacv = cbar*aom_env%nacv
-!THIS KEYWORK IT'S JUST A TEST 
-     aom_env%test_key = .False.
+!THIS KEYWORD helps treating initial itimes correctly in case of restart file
+!usage 
+     aom_env%restart_key = .False.
 
      !> HAMILTONIAN DIAGONALIZATION
      !The adiabaticity subroutine diagonalises the diabatic Hamiltonian H_tp
@@ -277,7 +276,6 @@ write(*,*) "C_BEFORE",  aom_env%ctin
      CASE("DIABATIC_RK")
            CALL propagate_wf(aom_env%ctin, aom_env, nadiab,  norbitals, ELsteps, &
                              itimes, adiab_section, deltatMD, deltatE , times, mat)
-write(*,*) "C_PROP",  aom_env%ctin
      CASE("ADIABATIC_RK")
            CALL propagate_adiab_wf(aom_env%E_t, aom_env%E_tp, aom_env%ctin, aom_env, nadiab, norbitals, ELsteps, &
                                    itimes, adiab_section, deltatMD, deltatE , times,  mat)
@@ -363,7 +361,6 @@ write(*,*) "C_PROP",  aom_env%ctin
      end do
 
      !CALL rotation_diab_to_adiab(aom_env%C_tp, aom_env%ctin, mat, adiab_ctin, adiab_pop)
-write(*,*) "COEFF", aom_env%ctin
      CALL diab_to_adiab( aom_env%C_tp, aom_env%ctin, adiab_c, adiab_pop)
  
      CALL adiab_print_adiab_pop(adiab_section, adiab_pop, nadiab,norbitals,itimes, deltatMD, times) 
@@ -565,8 +562,7 @@ SUBROUTINE diagonal_elem(i,k,orb,itimes,aom_env)
                                          (-aom_env%siteenergies(3,k)),dp)
           end do
      end do
-print *, "aom_env%test_key", aom_env%test_key
-     if (itimes.eq.1 .or. aom_env%test_key)  then
+     if (itimes.eq.1 .or. aom_env%restart_key)  then
           do d=1,orb
                do m=1,orb
                !These diagonals are 1 by definition
@@ -615,8 +611,7 @@ SUBROUTINE off_diagonal_elem(aom_env,i,k,orb,itimes, atoms, &
                                              aom_env%Stpt(orb*(k-1)+m,orb*(i-1)+d)
                     aom_env%Stpt(orb*(i-1)+d,orb*(k-1)+m)  = & 
                                               aom_env%Sttp(orb*(k-1)+m,orb*(i-1)+d)
-                    print *, "aom_env%test_key", aom_env%test_key
-                    if (itimes.eq.1 .or. aom_env%test_key)  then
+                    if (itimes.eq.1 .or. aom_env%restart_key)  then
                        aom_env%Sttm(orb*(i-1)+d,orb*(k-1)+m)  = &
                                               aom_env%Stmt(orb*(k-1)+m,orb*(i-1)+d)
                        aom_env%Stmt(orb*(i-1)+d,orb*(k-1)+m)  = &
@@ -662,8 +657,7 @@ SUBROUTINE off_diagonal_elem(aom_env,i,k,orb,itimes, atoms, &
                     aom_env%Stpt(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
                end do
           end do
-print *, "aom_env%test_key", aom_env%test_key
-          if (itimes.eq.1 .or. aom_env%test_key)  then
+          if (itimes.eq.1 .or. aom_env%restart_key)  then
                do d=1,orb
                     do m=1,orb
 

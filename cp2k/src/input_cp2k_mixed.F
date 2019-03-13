@@ -547,11 +547,11 @@ CONTAINS
 
     CALL keyword_create(keyword, name="ACTIVE_STATE_RESTART",&
          description="Active state for the restart",&
-         usage="1", type_of_var=integer_t)
+         usage="1",  default_i_val=-1, type_of_var=integer_t)
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
-    CALL keyword_create(keyword, name="TEST_KEY",&
+    CALL keyword_create(keyword, name="RESTART_KEY",&
          description="Decide if we use the decoherence procedure",&
          usage="True", &
          default_l_val=.FALSE., &

@@ -281,7 +281,7 @@ CONTAINS
     CALL cp_subsys_get(subsys, particles=particles, molecules_new=molecules,&
          shell_particles=shell_particles, core_particles=core_particles,&
          multipoles=multipoles)
-
+print *, "CALLED"
     ! Remove the multiple_unit_cell from the input structure.. at this point we have
     ! already all the information we need..
     ALLOCATE(multiple_unit_cell(3))
