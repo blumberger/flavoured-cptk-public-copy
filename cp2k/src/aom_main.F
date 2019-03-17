@@ -117,6 +117,13 @@ MODULE aom_main
                                              create_rng_stream,&
                                              delete_rng_stream
 
+     USE cp_log_handling,                 ONLY: cp_get_default_logger, &
+                                                cp_logger_type
+
+     USE cp_output_handling,              ONLY: cp_print_key_unit_nr, &
+                                                cp_print_key_should_output
+
+
 #include "./base/base_uses.f90"
 
 
@@ -180,6 +187,11 @@ CONTAINS
      LOGICAL                                      :: do_random 
      REAL(KIND=dp), dimension(:), allocatable     :: adiab_pop
      COMPLEX(KIND=dp), dimension(:), allocatable               :: adiab_c
+     TYPE(cp_logger_type), POINTER                :: logger
+     INTEGER                                    :: unit_nr
+
+     NULLIFY(logger)
+     logger => cp_get_default_logger()
 
      !> cutoff to define the neighborough list
      CALL section_vals_val_get(coupling_section,"CUT_OFF_BETWEEN_SITES",&
@@ -360,10 +372,16 @@ CONTAINS
          end if 
      end do
 
-     !CALL rotation_diab_to_adiab(aom_env%C_tp, aom_env%ctin, mat, adiab_ctin, adiab_pop)
-     CALL diab_to_adiab( aom_env%C_tp, aom_env%ctin, adiab_c, adiab_pop)
- 
-     CALL adiab_print_adiab_pop(adiab_section, adiab_pop, nadiab,norbitals,itimes, deltatMD, times) 
+
+     unit_nr=cp_print_key_unit_nr(logger,adiab_section,"PRINT%ADIAB_POPULATIONS",&
+               extension=".xyz", middle_name="adiab_pop",log_filename=.FALSE.)
+     print *, "UNIT NR", unit_nr
+     if (unit_nr > 0) then
+        !CALL rotation_diab_to_adiab(aom_env%C_tp, aom_env%ctin, mat, adiab_ctin, adiab_pop)
+        CALL diab_to_adiab( aom_env%C_tp, aom_env%ctin, adiab_c, adiab_pop)
+        CALL adiab_print_adiab_pop(adiab_section, adiab_pop, nadiab,norbitals,itimes, deltatMD, times) 
+     end if
+
      CALL adiab_print_site_energies(adiab_section, site_energies, nadiab, deltatMD, times)
      CALL adiab_print_off_diagonals(adiab_section, couplings, nadiab-1, deltatMD, times)
      CALL adiab_print_nacv(adiab_section, aom_env%nacv, nadiab, norbitals, aom_atoms,itimes, deltatMD)

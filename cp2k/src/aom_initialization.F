@@ -115,10 +115,11 @@ MODULE aom_initialization
                                              create_rng_stream,&
                                              rng_stream_type
  
-!     USE cp_log_handling,                 ONLY: cp_get_default_logger, &
-!                                                cp_logger_type
+     USE cp_log_handling,                 ONLY: cp_get_default_logger, &
+                                                cp_logger_type
 
-!     USE cp_output_handling,              ONLY: cp_print_key_should_output
+     USE cp_output_handling,              ONLY: cp_print_key_unit_nr, &
+                                                cp_print_key_should_output
 
 
 #include "./base/base_uses.f90"
@@ -466,10 +467,16 @@ print *, "ASSOCIATED(wf_restart_section)", ASSOCIATED(wf_restart_section)
      REAL(kind=dp), DIMENSION(:), ALLOCATABLE     :: site_energies, couplings
      REAL(KIND=dp), dimension(:), allocatable     :: adiab_pop
      COMPLEX(KIND=dp), dimension(:), allocatable               :: adiab_c
+     TYPE(cp_logger_type), POINTER                :: logger
+     INTEGER                                    :: unit_nr
      !INTEGER                                    :: nparticle_kind
      !INTEGER, dimension(:), allocatable          :: class_forbidden_hop_tp
 
      NULLIFY(positions_com_tp, velocities_com_tp)
+     NULLIFY(logger)
+
+     logger => cp_get_default_logger()
+
 
      !> cutoff to define the neighborough list
      CALL section_vals_val_get(coupling_section,"CUT_OFF_BETWEEN_SITES",&
@@ -799,6 +806,11 @@ times = DBLE(itimes)
          if (.NOT. aom_env%restart_key) then
              !NB: this subroutine is wasted computational work if adiab_pop is not
              !printed out, same probably for AOM.main
+
+             unit_nr=cp_print_key_unit_nr(logger,adiab_section,"PRINT%ADIAB_POPULATIONS",&
+               extension=".xyz", middle_name="adiab_pop",log_filename=.FALSE.)
+             print *, "UNIT NR", unit_nr
+
              CALL diab_to_adiab( aom_env%C_tp, ctin, adiab_c, adiab_pop)     
              CALL adiab_print_adiab_pop(adiab_section, adiab_pop, nadiab,norbitals,itimes,deltatMD, times)
      
