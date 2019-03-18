@@ -77,6 +77,7 @@ IMPLICIT NONE
              adiab_print_off_diagonals,  &
              adiab_print_matrix_density, &
              adiab_print_hamiltonian,    &
+             adiab_print_pseudo_hamiltonian,    &
              adiab_print_nace,           &
              adiab_print_nacv,           &
              adiab_print_hop_nacv,       &
@@ -538,6 +539,67 @@ CONTAINS
    END SUBROUTINE adiab_print_hamiltonian
 
 
+   SUBROUTINE adiab_print_pseudo_hamiltonian(adiab_section, hamiltonian, nadiab, &
+              norbitals, itimes, deltatMD)
+    TYPE(section_vals_type), POINTER         :: adiab_section
+    REAL(KIND=dp), DIMENSION(:,:)            :: hamiltonian
+    INTEGER                      :: nadiab, norbitals
+    INTEGER, POINTER                         :: itimes
+    REAL(KIND=dp),INTENT(IN)                 :: deltatMD
+
+    CHARACTER(len=*), PARAMETER :: routineN = 'adiab_print_hamiltonian', &
+      routineP = moduleN//':'//routineN
+
+    INTEGER                                  :: unit_nr
+    INTEGER                                  :: iadiab, jadiab
+    CHARACTER(LEN=default_string_length)     ::  my_format, my_format2
+    TYPE(cp_logger_type), POINTER            :: logger
+    LOGICAL                                  :: new_file
+    REAL(KIND=dp)                            :: unit_conv, unit_conv_fs, time
+    CHARACTER(LEN=default_string_length)     :: unit_str 
+
+
+    NULLIFY(logger)
+    logger => cp_get_default_logger()
+
+    unit_nr=cp_print_key_unit_nr(logger,adiab_section,"PRINT%PSEUDO_HAMILTONIAN",&
+               extension=".xyz",middle_name="pseudo-hamilt", log_filename=.FALSE.,&
+               is_new_file=new_file)
+
+    IF (norbitals .ne. 1) then 
+    CPABORT("This pseudo-H printing is not ready to cope with multiple orbitals per site")
+    END IF
+
+    IF (unit_nr>0) THEN
+
+       CALL section_vals_val_get(adiab_section,"PRINT%PSEUDO_HAMILTONIAN%UNIT",&
+            c_val=unit_str)
+       unit_conv = cp_unit_from_cp2k(1.0_dp,TRIM(unit_str))
+       unit_conv_fs = cp_unit_from_cp2k(1.0_dp,"fs")
+       time = unit_conv_fs*itimes*deltatMD
+
+       WRITE ( unit_nr, "( A,A,A,I8,A,I8)" ) "H (",TRIM(unit_str),");  nadiab =", nadiab, "; norbitals =",&
+                                   norbitals
+       WRITE ( unit_nr, '(A,I0,A,F20.3,A,F0.10)' )   " i = ",itimes,", time = ",time, " (fs)" 
+ 
+
+       ! here in practice nadiab =nabiab as norbitals=1
+       nadiab = nadiab*norbitals
+
+       DO iadiab=1, nadiab
+          DO jadiab=iadiab,nadiab
+            my_format="(I4,1X,I4,"
+            write(my_format2,"(I8)") nadiab*norbitals
+            if (hamiltonian(iadiab,jadiab) .ne. 0.0D0) then 
+               WRITE(unit_nr,TRIM(my_format)//"1X,"//TRIM(my_format2)//"F20.10)") iadiab, jadiab, &
+                           unit_conv*hamiltonian(iadiab,jadiab) 
+            end if
+          ENDDO
+       ENDDO
+
+    END IF
+    CALL cp_print_key_finished_output(unit_nr,logger,adiab_section,"PRINT%PSEUDO_HAMILTONIAN")
+   END SUBROUTINE adiab_print_pseudo_hamiltonian
 
    SUBROUTINE adiab_print_nace(adiab_section, nace, nadiab, &
               norbitals, itimes, deltatMD, times)

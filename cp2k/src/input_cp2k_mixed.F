@@ -652,6 +652,15 @@ CONTAINS
      CALL section_release(print_key)
 
      CALL cp_print_key_section_create(print_key_section=print_key,&
+          name="PSEUDO_HAMILTONIAN",&
+          description="Control the output of the Hamiltonian.",&
+          common_iter_levels=1,&
+          filename="",         &
+          unit_str = "hartree")
+     CALL section_add_subsection(sub2section,print_key)
+     CALL section_release(print_key)
+
+     CALL cp_print_key_section_create(print_key_section=print_key,&
           name="ACTIVE_STATE_INFO",&
           description="Print the info relative to the active state (state, energy, wavefunction.",&
           common_iter_levels=1,&

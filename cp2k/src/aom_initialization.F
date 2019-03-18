@@ -90,7 +90,7 @@ MODULE aom_initialization
                                              adiab_print_active_state,       &
                                              adiab_print_sh_info,            &
                                              adiab_print_hamiltonian, &
-                                        !     adiab_print_nace,        &
+                                             adiab_print_pseudo_hamiltonian,        &
                                              adiab_print_nacv, &
                                              adiab_print_pvecs
 
@@ -193,7 +193,6 @@ CONTAINS
    
 
      mat = norbitals*nadiab !> Size of the vectorial space where the wavefunctions are projected
-print *, "LOOK", norbitals, nadiab
      c = nadiab*aom_atoms !> Numbers of active atoms
 
      ALLOCATE(aom_env%elements(c))
@@ -321,15 +320,12 @@ print *, "LOOK", norbitals, nadiab
      !this section should be optional somehow---STILL TO DO USING e.g.
      !STEP_START_EVAL keyword in the input 
      wf_restart_section => section_vals_get_subs_vals(adiab_section,"WAVEFUNCTION_RESTART")
-print *, "ASSOCIATED(wf_restart_section)", ASSOCIATED(wf_restart_section)
      CALL section_vals_val_get(wf_restart_section,"RESTART_KEY", l_val=aom_env%restart_key)
      print *, "RESTART_KEY", aom_env%restart_key
      if (aom_env%restart_key) then
          CALL section_vals_val_get(wf_restart_section,"ACTIVE_STATE_RESTART", i_val=aom_env%active_state_res)
-         print *, "ACTIVE_STATE_RES", aom_env%active_state_res
          CALL section_vals_list_get(wf_restart_section,"_DEFAULT_KEYWORD_",list=listdiabcoeff) !Read them in the input files
          CALL read_listdiabcoeff(listdiabcoeff, norbitals, nadiab, ctin=aom_env%readcoeff) !Transform them in the complex ctin
-         print *, "readcoeff", aom_env%readcoeff
      end if
      
      !> READ THE AOM COEFFICIENT
@@ -738,6 +734,7 @@ times = DBLE(itimes)
         CALL adiab_print_adiabat_energies(adiab_section, aom_env%E_tp, nadiab, deltatMD, times)
         call adiab_print_pvecs(adiab_section, PC_allrvecs, itimes, deltatMD, times, atoms, nadiab)
         CALL adiab_print_hamiltonian(adiab_section, -AIMAG(aom_env%H_tp), nadiab,norbitals,itimes, deltatMD)
+        CALL adiab_print_pseudo_hamiltonian(adiab_section, -AIMAG(aom_env%H_tp), nadiab,norbitals,itimes, deltatMD)
         CALL adiab_print_nacv(adiab_section, nacv, nadiab, norbitals, aom_atoms,itimes, deltatMD)
      end if
 
@@ -809,11 +806,11 @@ times = DBLE(itimes)
 
              unit_nr=cp_print_key_unit_nr(logger,adiab_section,"PRINT%ADIAB_POPULATIONS",&
                extension=".xyz", middle_name="adiab_pop",log_filename=.FALSE.)
-             print *, "UNIT NR", unit_nr
-
-             CALL diab_to_adiab( aom_env%C_tp, ctin, adiab_c, adiab_pop)     
-             CALL adiab_print_adiab_pop(adiab_section, adiab_pop, nadiab,norbitals,itimes,deltatMD, times)
-     
+             if (unit_nr > 0) then 
+                CALL diab_to_adiab( aom_env%C_tp, ctin, adiab_c, adiab_pop)     
+                CALL adiab_print_adiab_pop(adiab_section, adiab_pop, & 
+                                  nadiab,norbitals,itimes,deltatMD, times)
+             end if 
              CALL adiab_print_coeff(adiab_section, ctin,nadiab, norbitals,itimes, deltatMD, times)
              CALL adiab_print_pop(adiab_section, abs(ctin),nadiab,norbitals,itimes,deltatMD, times)
              CALL adiab_print_matrix_density(adiab_section, ctin, nadiab,norbitals,itimes, &

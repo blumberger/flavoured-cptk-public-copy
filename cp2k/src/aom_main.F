@@ -92,6 +92,7 @@ MODULE aom_main
                                              adiab_print_active_state,       &
                                              adiab_print_sh_info,            &
                                              adiab_print_hamiltonian, &
+                                             adiab_print_pseudo_hamiltonian, &
                                              adiab_print_nacv, &
                                              adiab_print_pvecs
 
@@ -358,6 +359,7 @@ CONTAINS
 
      !> PRINT
      CALL adiab_print_hamiltonian(adiab_section, -AIMAG(aom_env%H_tp), nadiab,norbitals,itimes, deltatMD)
+     CALL adiab_print_pseudo_hamiltonian(adiab_section, -AIMAG(aom_env%H_tp), nadiab,norbitals,itimes, deltatMD)
 
      !> print site energies 
      allocate(site_energies(mat))
@@ -375,7 +377,6 @@ CONTAINS
 
      unit_nr=cp_print_key_unit_nr(logger,adiab_section,"PRINT%ADIAB_POPULATIONS",&
                extension=".xyz", middle_name="adiab_pop",log_filename=.FALSE.)
-     print *, "UNIT NR", unit_nr
      if (unit_nr > 0) then
         !CALL rotation_diab_to_adiab(aom_env%C_tp, aom_env%ctin, mat, adiab_ctin, adiab_pop)
         CALL diab_to_adiab( aom_env%C_tp, aom_env%ctin, adiab_c, adiab_pop)
