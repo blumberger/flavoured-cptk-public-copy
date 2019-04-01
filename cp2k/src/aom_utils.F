@@ -138,7 +138,8 @@ IMPLICIT NONE
              cal_delta_energy_nacv , &
              calc_diabatic_nace, &
              diab_to_adiab, & 
-             read_listdiabcoeff
+             read_listdiabcoeff, & 
+             print_matrix_standard_out
  
 
 CONTAINS
@@ -150,6 +151,8 @@ subroutine makeX(mol, H, Stt, Sttp, Sttm, Stptp, Stmtm, X, deltat, NACE)
         !X is the name I give to the matrix in the solution to the Schroedinger equation:
         !dc/dt = X*aom_env%ctin
         !makeX constructs an X matrix from inputs of S and H
+        ! the X matrix is = H - d^{diab}, note that elements of H are pure
+        ! imaginary = -iH_{kl} due to the construction of S matrix
 
         implicit none
 
@@ -165,7 +168,8 @@ subroutine makeX(mol, H, Stt, Sttp, Sttm, Stptp, Stmtm, X, deltat, NACE)
 
         REAL(KIND=dp), dimension(:,:), allocatable :: Sttinvsqrt, Sttsqrt, Stptpinvsqrt, Stmtminvsqrt
         REAL(KIND=dp), dimension(:,:), allocatable :: Sterm1, Sterm2, Splace1, Splace2
-        REAL(KIND=dp), dimension(:,:), allocatable     :: my_NACE   
+        REAL(KIND=dp), dimension(:,:), allocatable     :: my_NACE
+        integer                                        :: i, j 
 
         !allocate matrices
         allocate(Sttinvsqrt(mol,mol))
@@ -189,12 +193,17 @@ subroutine makeX(mol, H, Stt, Sttp, Sttm, Stptp, Stmtm, X, deltat, NACE)
 
         !subroutine DGEMM multiplies two matrices, from the BLAS
         !use to build the S terms in the X matrix
+       !centering difference are used through this subroutine
 
-        !first term: Sttsqrt*(Stptpinvsqrt - Stmtmtinvsqrt)
+       !first term: Sttsqrt*(Stptpinvsqrt - Stmtmtinvsqrt) this the second term
+       !in Eq 13 Spencer16 calculated constistently at time t-dt as
+       !S^{1/2}_{TT}*(S^{-1/2}_{TpTp} - S^{-1/2}_{TmTm}) 
         Splace1 = Stptpinvsqrt - Stmtminvsqrt
         call DGEMM('N', 'N', mol, mol, mol, 1.0D0, Sttsqrt, mol, Splace1, mol, 0.0D0, Sterm1, mol)
 
-        !second term: Sttinvsqrt*(Sttp - Sttm)*Sttinvsqrt
+       !second term: Sttinvsqrt*(Sttp - Sttm)*Sttinvsqrt
+       ! this is actually the first term in Eq 13 Spencer16 calculated
+       ! constistently at time t-dt (indeicated by T) as S^{-1/2}_{TT}*D'_{T}*S^{-1/2}_{TT}
         Splace1 = Sttp - Sttm
         call DGEMM('N', 'N', mol, mol, mol, 1.0D0, Splace1, mol, Sttinvsqrt, mol, 0.0D0, Splace2, mol)
         call DGEMM('N', 'N', mol, mol, mol, 1.0D0, Sttinvsqrt, mol, Splace2, mol, 0.0D0, Sterm2, mol)
@@ -203,6 +212,17 @@ subroutine makeX(mol, H, Stt, Sttp, Sttm, Stptp, Stmtm, X, deltat, NACE)
 
         my_NACE = (my_NACE - TRANSPOSE(my_NACE)) / 2
         !X = H - (0.5D0/deltat)*(Sterm1 + Sterm2)
+
+!   THE FOLLOWING CODE IS USEFUL FOR PRINTING NxN MATRICIES       
+PRINT *, "my_NACE"
+DO i=1, mol
+   DO j=1, mol
+      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", my_NACE(i,j), "  "
+   END DO
+   PRINT *, " "
+END DO
+
+
         X = H - my_NACE
 
         IF (PRESENT(NACE)) THEN
@@ -254,13 +274,18 @@ subroutine calc_diabatic_nace(mol, H, Stt, Sttp, Sttm, Stptp, Stmtm, deltat, NAC
        call matinvsqrt(mol, .TRUE., Stmtminvsqrt)
 
        !subroutine DGEMM multiplies two matrices, from the BLAS
-       !use to build the S terms in the X matrix
+       !use to build the S terms in the X matrix, 
+       !centering difference are used in all case for this subroutine
 
-       !first term: Sttsqrt*(Stptpinvsqrt - Stmtmtinvsqrt)
+       !first term: Sttsqrt*(Stptpinvsqrt - Stmtmtinvsqrt) this the second term
+       !in Eq 13 Spencer16 calculated constistently at time t-dt as
+       !S^{1/2}_{TT}*(S^{-1/2}_{TpTp} - S^{-1/2}_{TmTm}) 
        Splace1 = Stptpinvsqrt - Stmtminvsqrt
        call DGEMM('N', 'N', mol, mol, mol, 1.0D0, Sttsqrt, mol, Splace1, mol, 0.0D0, Sterm1, mol)
 
        !second term: Sttinvsqrt*(Sttp - Sttm)*Sttinvsqrt
+       ! this is actually the first term in Eq 13 Spencer16 calculated
+       ! constistently at time t-dt (indeicated by T) as S^{-1/2}_{TT}*D'_{T}*S^{-1/2}_{TT}
        Splace1 = Sttp - Sttm
        call DGEMM('N', 'N', mol, mol, mol, 1.0D0, Splace1, mol, Sttinvsqrt, mol, 0.0D0, Splace2, mol)
        call DGEMM('N', 'N', mol, mol, mol, 1.0D0, Sttinvsqrt, mol, Splace2, mol, 0.0D0, Sterm2, mol)
@@ -806,6 +831,26 @@ subroutine modified_surfacehop(C1, C2, deltat, &
         deallocate(akttm)
 end subroutine modified_surfacehop
 
+
+subroutine print_matrix_standard_out(matrix)
+     
+      INTEGER                                    :: mol,i,j
+      REAL(KIND=dp),  DIMENSION(:,:), INTENT(IN) :: matrix
+
+      mol = SIZE(matrix, 1)
+
+PRINT *, "----------------------------------------------------------"
+DO i=1, mol
+   DO j=1, mol
+      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", matrix(i,j), "  "
+   END DO
+   PRINT *, " "
+END DO
+PRINT *, "----------------------------------------------------------"
+
+end subroutine print_matrix_standard_out
+
+
 !**********************************************************************************
 !> \brief Calculate the diabatic NACE first
 !**********************************************************************************
@@ -845,7 +890,8 @@ subroutine nace1(aom_env, mol, deltat)
     !with these two loops, calculate the nacv in the time domain between adiabatic wavefunctions
     !by transforming from the diabatic overlaps
     !TST = T1*Stt*DT. This is done in 2 steps.
-    !1. T2 = DT*Stt
+    !Note that T2 is overwritten in the following DGEMM operation 
+    !1. T2 = Stt*DT
     CALL DGEMM('N', 'N', mol, mol, mol, 1.0D0, &
                 aom_env%Stt,               mol, &
                 aom_env%adiab_nace_env%DT, mol, &
@@ -854,7 +900,7 @@ subroutine nace1(aom_env, mol, deltat)
     !2. TST = T1^{dagg}*T2
     CALL DGEMM('T', 'N', mol, mol, mol, 1.0_DP, &
                 aom_env%adiab_nace_env%T1,  mol, &
-                aom_env%adiab_nace_env%T2, mol, &       ! diab_D = TST
+                aom_env%adiab_nace_env%T2, mol, &       ! at this point diab_D = TST
                 0.0_DP, aom_env%adiab_nace_env%diab_D, mol)
 
     ! This part takes advantage of the sparse nature of the DS matrix
@@ -889,8 +935,16 @@ subroutine nace1(aom_env, mol, deltat)
     !2. TDT = T1^{dagg}*T2 + TST
     CALL DGEMM('T', 'N', mol, mol, mol, 1.0_DP, &
                 aom_env%adiab_nace_env%T1,  mol, &
-                aom_env%adiab_nace_env%T2, mol, &       ! diab_D = TDT
+                aom_env%adiab_nace_env%T2, mol, &       ! Now diab_D becomes = TDT + TST
                 1.0_DP, aom_env%adiab_nace_env%diab_D, mol)
+!   THE FOLLOWING CODE IS USEFUL FOR PRINTING NxN MATRICIES       
+PRINT *, "D Bef:"
+DO i=1, mol
+   DO j=1, mol
+      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", aom_env%adiab_nace_env%diab_D(i,j), "  "
+   END DO
+   PRINT *, " "
+END DO
 end subroutine nace1
 
 
@@ -1116,7 +1170,7 @@ subroutine nace6(aom_env, mol, deltat)
         aom_env%C_tp,                  mol, &     ! C_tp = U
         0.0_DP, aom_env%adiab_nace_env%T1, mol) 
 
-
+    !U^{dagger}U^dot = (1/dt)*adiab_nace_tp
     !2. adiab_nace_tp <= U^{dagg}*T1 + (1/dt)*adiab_nace_tp
     CALL DGEMM('T', 'N', mol, mol, mol, 1.0_DP, &
         aom_env%C_tp,                  mol, &     ! C_tp = U

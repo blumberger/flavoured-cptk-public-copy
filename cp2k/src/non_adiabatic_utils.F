@@ -1253,7 +1253,6 @@ END SUBROUTINE classically_forbidden_hops
 !write(*,*) "H_0", H_0
 
              do t2=1,int(deltatMD/deltatE)
-
                     !create timestepped equivalents
                     H_1 = H_0 + 0.5D0*Hdiff
                     Stt_int = Stt_int + 0.5D0*Sttdiff

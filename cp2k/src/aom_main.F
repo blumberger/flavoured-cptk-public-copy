@@ -63,7 +63,8 @@ MODULE aom_main
                                              calc_adiab_nace_old, &
                                              calc_hop_nacv, &
                                              cal_delta_energy_nacv, &
-                                             diab_to_adiab
+                                             diab_to_adiab, & 
+                                             print_matrix_standard_out
 
      USE aom_types,                    ONLY: aom_env_type, &
                                                 sh_print_env_type
@@ -260,6 +261,21 @@ CONTAINS
      !> CALCULATE THE HAMILTONIAN, THE STTP MATRIX AND THE NACV
      CALL calc_Xmatrix_elements(aom_env, itimes, atoms, mol, dR, do_random, cbar, &
                       scaling, PC_allrvecs, orb)
+
+print *, "Stptp"
+CALL print_matrix_standard_out(aom_env%Stptp)
+print *, "Stt"
+CALL print_matrix_standard_out(aom_env%Stt)
+print *, "Sttp"
+CALL print_matrix_standard_out(aom_env%Sttp)
+print *, "Stpt"
+CALL print_matrix_standard_out(aom_env%Stpt)
+print *, "Stmt"
+CALL print_matrix_standard_out(aom_env%Stmt)
+print *, "Sttm"
+CALL print_matrix_standard_out(aom_env%Sttm)
+print *, "Stmtm"
+CALL print_matrix_standard_out(aom_env%Stmtm)
 
      !> CONVERT THE diabatic NACV WITH THE GOOD UNITS
      aom_env%nacv = cbar*aom_env%nacv
