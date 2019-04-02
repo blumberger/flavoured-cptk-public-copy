@@ -857,7 +857,7 @@ end subroutine print_matrix_standard_out
 subroutine nace1(aom_env, mol, deltat)
 
     TYPE(aom_env_type)                         :: aom_env
-    INTEGER                                    :: mol, i, j, sub, add
+    INTEGER                                    :: mol, i, j!, sub, add
     REAL(KIND=dp)                              :: deltat
 
     CHARACTER(len=*), PARAMETER :: routineN ='nace1', &
@@ -906,31 +906,40 @@ subroutine nace1(aom_env, mol, deltat)
     ! This part takes advantage of the sparse nature of the DS matrix
     ! Again the mat-mat mult is done in 2 steps:
     !1. T2 = DS*T1
-    DO j=1, mol
-      aom_env%adiab_nace_env%T2(1,j) = &
-       aom_env%adiab_nace_env%DS(1,2)*aom_env%adiab_nace_env%T1(2,j)
-    END DO
-    DO i=2, mol-1
-       DO j=1, mol
-         sub = i-1
-         add = i+1
-         aom_env%adiab_nace_env%T2(i,j) = &
-           aom_env%adiab_nace_env%DS(i,sub)*aom_env%adiab_nace_env%T1(sub,j) &
-         + aom_env%adiab_nace_env%DS(i,add)*aom_env%adiab_nace_env%T1(add,j)
-       END DO
-    END DO
-    sub = mol-1
-    DO j=1, mol
-      aom_env%adiab_nace_env%T2(mol,j) = &
-       aom_env%adiab_nace_env%DS(mol,sub)*aom_env%adiab_nace_env%T1(sub,j)
-    END DO
+!   DO j=1, mol
+!     aom_env%adiab_nace_env%T2(1,j) = &
+!      aom_env%adiab_nace_env%DS(1,2)*aom_env%adiab_nace_env%T1(2,j)
+!   END DO
+!   DO i=2, mol-1
+!      DO j=1, mol
+!        sub = i-1
+!        add = i+1
+!        aom_env%adiab_nace_env%T2(i,j) = &
+!          aom_env%adiab_nace_env%DS(i,sub)*aom_env%adiab_nace_env%T1(sub,j) &
+!        + aom_env%adiab_nace_env%DS(i,add)*aom_env%adiab_nace_env%T1(add,j)
+!      END DO
+!   END DO
+!   sub = mol-1
+!   DO j=1, mol
+!     aom_env%adiab_nace_env%T2(mol,j) = &
+!      aom_env%adiab_nace_env%DS(mol,sub)*aom_env%adiab_nace_env%T1(sub,j)
+!   END DO
 
-    ! If the loop above doesn't work then try using this.
-!    !1. T2 = DS*T1
-!    CALL DGEMM('N', 'N', mol, mol, mol, 1.0_DP, &
-!               aom_env%adiab_nace_env%DS, mol, &
-!               aom_env%adiab_nace_env%T1, mol, &
-!               0.0_DP, aom_env%adiab_nace_env%T2, mol)
+
+   ! If the loop above doesn't work then try using this.
+    !1. T2 = DS*T1
+    CALL DGEMM('N', 'N', mol, mol, mol, 1.0_DP, &
+               aom_env%adiab_nace_env%DS, mol, &
+               aom_env%adiab_nace_env%T1, mol, &
+               0.0_DP, aom_env%adiab_nace_env%T2, mol)
+
+PRINT *, "LOOOK"
+DO i=1, mol
+   DO j=1, mol
+      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", aom_env%adiab_nace_env%T2(i,j), "  "
+   END DO
+   PRINT *, " "
+END DO
 
     !2. TDT = T1^{dagg}*T2 + TST
     CALL DGEMM('T', 'N', mol, mol, mol, 1.0_DP, &
@@ -946,6 +955,131 @@ DO i=1, mol
    PRINT *, " "
 END DO
 end subroutine nace1
+
+
+!**********************************************************************************
+!> \brief Calculate the diabatic NACE first
+!**********************************************************************************
+subroutine nace1_modified(aom_env, mol, deltat)
+
+    TYPE(aom_env_type)                         :: aom_env
+    INTEGER                                    :: mol, i, j!, sub, add
+    REAL(KIND=dp)                              :: deltat
+
+    CHARACTER(len=*), PARAMETER :: routineN ='nace1', &
+                routineP = moduleN//':'//routineN
+    REAL(KIND=dp), dimension(:,:), allocatable     :: my_NACE
+
+    !> Based on Eq. 19 of paper: Spencer et al., J. Chem. Phys. 145, 064102 (2016)
+
+    !> 1. Calculate the term  D  (first term in Eq. 19)
+    !many allocations
+    !use the matinvsqrt subroutine to find T = S^(-1/2)
+    aom_env%adiab_nace_env%T1 = aom_env%Stmtm
+    aom_env%adiab_nace_env%T2 = aom_env%Stptp
+    call matinvsqrt(mol, .TRUE., aom_env%adiab_nace_env%T1)
+    call matinvsqrt(mol, .TRUE., aom_env%adiab_nace_env%T2)
+    !and do some straightforward first-order numerical derivatives
+
+    aom_env%adiab_nace_env%Ttt = aom_env%Stt
+    call matinvsqrt(mol, .TRUE., aom_env%adiab_nace_env%Ttt)
+
+    !Time deriv of overlap Tdot
+    aom_env%adiab_nace_env%DT = (0.5D0/deltat)*(aom_env%adiab_nace_env%T2 - aom_env%adiab_nace_env%T1)
+    !Time deriv of Lowdin Mat Dprime
+    aom_env%adiab_nace_env%DS = (0.5D0/deltat)*(aom_env%Sttp - aom_env%Sttm)
+
+!   THE FOLLOWING CODE IS USEFUL FOR PRINTING NxN MATRICIES       
+!PRINT *, "TST Bef:"
+!DO i=1, mol
+!   DO j=1, mol
+!      WRITE(6, "(A2, e12.4, A2)", advance='no') "| ", aom_env%adiab_nace_env%TST(i,j), " "
+!   END DO
+!   PRINT *, " "
+!END DO
+
+    !with these two loops, calculate the nacv in the time domain between adiabatic wavefunctions
+    !by transforming from the diabatic overlaps
+    !TST = T1*Stt*DT. This is done in 2 steps.
+    !Note that T2 is now overwritten in the following DGEMM operation 
+    !1. T2 = Stt*DT
+    CALL DGEMM('N', 'N', mol, mol, mol, 1.0D0, &
+                aom_env%Stt,               mol, &
+                aom_env%adiab_nace_env%DT, mol, &
+                0.0_DP, aom_env%adiab_nace_env%T2, mol)
+
+    !2. TST = T1^{dagg}*T2
+    CALL DGEMM('T', 'N', mol, mol, mol, 1.0_DP, &
+                aom_env%adiab_nace_env%Ttt,  mol, &
+                aom_env%adiab_nace_env%T2, mol, &       ! at this point diab_D = TST
+                0.0_DP, aom_env%adiab_nace_env%diab_D, mol)
+
+    ! This part takes advantage of the sparse nature of the DS matrix
+    ! Again the mat-mat mult is done in 2 steps:
+    !1. T2 = DS*T1
+!   DO j=1, mol
+!     aom_env%adiab_nace_env%T2(1,j) = &
+!      aom_env%adiab_nace_env%DS(1,2)*aom_env%adiab_nace_env%T1(2,j)
+!   END DO
+!   DO i=2, mol-1
+!      DO j=1, mol
+!        sub = i-1
+!        add = i+1
+!        aom_env%adiab_nace_env%T2(i,j) = &
+!          aom_env%adiab_nace_env%DS(i,sub)*aom_env%adiab_nace_env%T1(sub,j) &
+!        + aom_env%adiab_nace_env%DS(i,add)*aom_env%adiab_nace_env%T1(add,j)
+!      END DO
+!   END DO
+!   sub = mol-1
+!   DO j=1, mol
+!     aom_env%adiab_nace_env%T2(mol,j) = &
+!      aom_env%adiab_nace_env%DS(mol,sub)*aom_env%adiab_nace_env%T1(sub,j)
+!   END DO
+
+
+   ! If the loop above doesn't work then try using this.
+    !1. T2 = DS*T1
+    CALL DGEMM('N', 'N', mol, mol, mol, 1.0_DP, &
+               aom_env%adiab_nace_env%DS, mol, &
+               aom_env%adiab_nace_env%Ttt, mol, &
+               0.0_DP, aom_env%adiab_nace_env%T2, mol)
+
+PRINT *, "LOOOK"
+DO i=1, mol
+   DO j=1, mol
+      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", aom_env%adiab_nace_env%T2(i,j), "  "
+   END DO
+   PRINT *, " "
+END DO
+
+    !2. TDT = T1^{dagg}*T2 + TST
+    CALL DGEMM('T', 'N', mol, mol, mol, 1.0_DP, &
+                aom_env%adiab_nace_env%Ttt,  mol, &
+                aom_env%adiab_nace_env%T2, mol, &       ! Now diab_D becomes = TDT + TST
+                1.0_DP, aom_env%adiab_nace_env%diab_D, mol)
+!   THE FOLLOWING CODE IS USEFUL FOR PRINTING NxN MATRICIES       
+PRINT *, "D Bef:"
+DO i=1, mol
+   DO j=1, mol
+      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", aom_env%adiab_nace_env%diab_D(i,j), "  "
+   END DO
+   PRINT *, " "
+END DO
+
+!TEST AND PRINT
+allocate(my_NACE(mol,mol))
+my_NACE = (aom_env%adiab_nace_env%diab_D - TRANSPOSE(aom_env%adiab_nace_env%diab_D)) / 2
+PRINT *, "my_NACE D"
+DO i=1, mol
+   DO j=1, mol
+      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", my_NACE(i,j), "  "
+   END DO
+   PRINT *, " "
+END DO
+
+deallocate(my_NACE)
+
+end subroutine nace1_modified
 
 
 !**********************************************************************************
@@ -1232,7 +1366,7 @@ subroutine calc_adiab_nace(aom_env, adiab_section)
 
         CALL section_vals_val_get(adiab_section,"PRINT_MORE", &
                                                    l_val=print_here)
-        CALL nace1(aom_env, mol, aom_env%deltat)
+        CALL nace1_modified(aom_env, mol, aom_env%deltat)
         CALL nace2(aom_env, mol, print_here)
         CALL nace3(aom_env)
         CALL nace4(aom_env, mol)

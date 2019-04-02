@@ -125,6 +125,9 @@ TYPE adiab_nace_env_type
    INTEGER, dimension(:),  allocatable        :: zeros
    INTEGER, dimension(:),  allocatable        :: not_associated
 
+   !SG NEW VARIABLES
+   REAL(KIND=dp), dimension(:,:), allocatable :: Ttt
+
 END TYPE adiab_nace_env_type
 
 !COMMENT: one should check that all those variables are actually used somewhere
