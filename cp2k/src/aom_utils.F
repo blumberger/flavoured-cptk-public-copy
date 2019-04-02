@@ -214,7 +214,7 @@ subroutine makeX(mol, H, Stt, Sttp, Sttm, Stptp, Stmtm, X, deltat, NACE)
         !X = H - (0.5D0/deltat)*(Sterm1 + Sterm2)
 
 !   THE FOLLOWING CODE IS USEFUL FOR PRINTING NxN MATRICIES       
-PRINT *, "my_NACE"
+PRINT *, "DIABATIC NACE:"
 DO i=1, mol
    DO j=1, mol
       WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", my_NACE(i,j), "  "
@@ -222,8 +222,18 @@ DO i=1, mol
    PRINT *, " "
 END DO
 
+!   THE FOLLOWING CODE IS USEFUL FOR PRINTING NxN MATRICIES       
+PRINT *, "DIABATIC H:"
+DO i=1, mol
+   DO j=1, mol
+      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", -AIMAG(H(i,j)), "  "
+   END DO
+   PRINT *, " "
+END DO
 
-        X = H - my_NACE
+        !X = H - my_NACE
+!TEST 
+        X = H 
 
         IF (PRESENT(NACE)) THEN
            NACE = my_NACE
