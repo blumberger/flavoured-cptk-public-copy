@@ -127,6 +127,7 @@ TYPE adiab_nace_env_type
 
    !SG NEW VARIABLES
    REAL(KIND=dp), dimension(:,:), allocatable :: Ttt
+   REAL(KIND=dp), dimension(:,:), allocatable :: Sttsqrt_var
 
 END TYPE adiab_nace_env_type
 

@@ -400,6 +400,7 @@ CONTAINS
       ALLOCATE(aom_env%adiab_nace_env%zeros(mol))
       ALLOCATE(aom_env%adiab_nace_env%not_associated(mol))
       ALLOCATE(aom_env%adiab_nace_env%Ttt(mol,mol))
+      ALLOCATE(aom_env%adiab_nace_env%Sttsqrt_var(mol,mol))
 
   END SUBROUTINE create_adiab_nace_env
 
