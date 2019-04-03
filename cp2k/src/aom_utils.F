@@ -169,7 +169,8 @@ subroutine makeX(mol, H, Stt, Sttp, Sttm, Stptp, Stmtm, X, deltat, NACE)
         REAL(KIND=dp), dimension(:,:), allocatable :: Sttinvsqrt, Sttsqrt, Stptpinvsqrt, Stmtminvsqrt
         REAL(KIND=dp), dimension(:,:), allocatable :: Sterm1, Sterm2, Splace1, Splace2
         REAL(KIND=dp), dimension(:,:), allocatable     :: my_NACE
-        integer                                        :: i, j 
+!TEST
+!        integer                                        :: i, j 
 
         !allocate matrices
         allocate(Sttinvsqrt(mol,mol))
@@ -213,28 +214,28 @@ subroutine makeX(mol, H, Stt, Sttp, Sttm, Stptp, Stmtm, X, deltat, NACE)
         my_NACE = (my_NACE - TRANSPOSE(my_NACE)) / 2
         !X = H - (0.5D0/deltat)*(Sterm1 + Sterm2)
 
-!   THE FOLLOWING CODE IS USEFUL FOR PRINTING NxN MATRICIES       
-PRINT *, "DIABATIC NACE:"
-DO i=1, mol
-   DO j=1, mol
-      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", my_NACE(i,j), "  "
-   END DO
-   PRINT *, " "
-END DO
+!!   THE FOLLOWING CODE IS USEFUL FOR PRINTING NxN MATRICIES       
+!PRINT *, "DIABATIC NACE:"
+!DO i=1, mol
+!   DO j=1, mol
+!      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", my_NACE(i,j), "  "
+!   END DO
+!   PRINT *, " "
+!END DO
 
-!   THE FOLLOWING CODE IS USEFUL FOR PRINTING NxN MATRICIES       
-PRINT *, "DIABATIC H:"
-DO i=1, mol
-   DO j=1, mol
-      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", -AIMAG(H(i,j)), "  "
-   END DO
-   PRINT *, " "
-END DO
+!!   THE FOLLOWING CODE IS USEFUL FOR PRINTING NxN MATRICIES       
+!PRINT *, "DIABATIC H:"
+!DO i=1, mol
+!   DO j=1, mol
+!      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", -AIMAG(H(i,j)), "  "
+!   END DO
+!   PRINT *, " "
+!END DO
 
-        !X = H - my_NACE
+        X = H - my_NACE
 !TEST 
-        X = H 
-
+!        X = H 
+!END TEST
         IF (PRESENT(NACE)) THEN
            NACE = my_NACE
         ENDIF
@@ -970,12 +971,13 @@ end subroutine nace1
 subroutine nace1_modified(aom_env, mol, deltat)
 
     TYPE(aom_env_type)                         :: aom_env
-    INTEGER                                    :: mol, i, j!, sub, add
+    INTEGER                                    :: mol!, i, j!, sub, add
     REAL(KIND=dp)                              :: deltat
 
     CHARACTER(len=*), PARAMETER :: routineN ='nace1', &
                 routineP = moduleN//':'//routineN
-    REAL(KIND=dp), dimension(:,:), allocatable     :: my_NACE
+!TEST
+!    REAL(KIND=dp), dimension(:,:), allocatable     :: my_NACE
 
     !> Based on Eq. 19 of paper: Spencer et al., J. Chem. Phys. 145, 064102 (2016)
 
@@ -1061,47 +1063,39 @@ subroutine nace1_modified(aom_env, mol, deltat)
                aom_env%adiab_nace_env%Ttt, mol, &
                0.0_DP, aom_env%adiab_nace_env%T2, mol)
 
-PRINT *, "LOOOK"
-DO i=1, mol
-   DO j=1, mol
-      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", aom_env%adiab_nace_env%T2(i,j), "  "
-   END DO
-   PRINT *, " "
-END DO
 
     !2. TDT = T1^{dagg}*T2 + TST
     CALL DGEMM('T', 'N', mol, mol, mol, 1.0_DP, &
                 aom_env%adiab_nace_env%Ttt,  mol, &
                 aom_env%adiab_nace_env%T2, mol, &       ! Now diab_D becomes = TDT + TST
                 1.0_DP, aom_env%adiab_nace_env%diab_D, mol)
-!   THE FOLLOWING CODE IS USEFUL FOR PRINTING NxN MATRICIES       
-PRINT *, "D Bef:"
-DO i=1, mol
-   DO j=1, mol
-      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", aom_env%adiab_nace_env%diab_D(i,j), "  "
-   END DO
-   PRINT *, " "
-END DO
+!!   THE FOLLOWING CODE IS USEFUL FOR PRINTING NxN MATRICIES       
+!PRINT *, "D Bef:"
+!DO i=1, mol
+!   DO j=1, mol
+!      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", aom_env%adiab_nace_env%diab_D(i,j), "  "
+!   END DO
+!   PRINT *, " "
+!END DO
 
 !TEST PRINT AND ANTISIMMETRIZATION 
 !Antisimmetrizing D does not make any difference at all in the output
 !surface hopping probability (for a plane of NAPH)
-allocate(my_NACE(mol,mol))
-my_NACE = (aom_env%adiab_nace_env%diab_D - TRANSPOSE(aom_env%adiab_nace_env%diab_D)) / 2
+!allocate(my_NACE(mol,mol))
+!my_NACE = (aom_env%adiab_nace_env%diab_D - TRANSPOSE(aom_env%adiab_nace_env%diab_D)) / 2
 
-!TEST ANTISIMMETRIZATION:
 !aom_env%adiab_nace_env%diab_D = my_NACE
 
-PRINT *, "my_NACE D ANT"
-DO i=1, mol
-   DO j=1, mol
-      !WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", aom_env%adiab_nace_env%diab_D(i,j), "  "
-      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", my_NACE(i,j), "  "
-   END DO
-   PRINT *, " "
-END DO
+!PRINT *, "my_NACE D ANT"
+!DO i=1, mol
+!   DO j=1, mol
+!      !WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", aom_env%adiab_nace_env%diab_D(i,j), "  "
+!      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", my_NACE(i,j), "  "
+!   END DO
+!   PRINT *, " "
+!END DO
 
-deallocate(my_NACE)
+!deallocate(my_NACE)
 
 end subroutine nace1_modified
 

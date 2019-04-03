@@ -841,6 +841,7 @@ times = DBLE(itimes)
      CALL section_vals_val_get(adiab_section,"RK_PROPAGATION", c_val=prop_wf_keyword)
      SELECT CASE(prop_wf_keyword)                                 
      CASE("DIABATIC_RK")
+     CASE("DIABATIC_RK_FAST")
      CASE("ADIABATIC_RK")
      CASE("HS_CORRECTED_RK")  
           !> CALC ARRAY OF CLASSICALLY FORBIDDEN HOPS
