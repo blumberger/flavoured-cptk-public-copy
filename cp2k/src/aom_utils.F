@@ -1312,14 +1312,10 @@ subroutine nace6(aom_env, mol, deltat)
 
    if (aom_env%no_diab_nace) then 
      ! the adiabatic nace are just d = U^{dagger}Udot
-print *, "HEREEEEE"
      aom_env%adiab_nace_tp(:,:) = inv_deltat*aom_env%adiab_nace_tp(:,:)
-print *, aom_env%adiab_nace_tp(:,:) 
    else
      !NB read description about time inconsistency
      !1. T1 <= D*U
-print *, "HEREEEEE"
-print *, inv_deltat*aom_env%adiab_nace_tp(:,:)
      CALL DGEMM('N', 'N', mol, mol, mol, 1.0_DP, &
           aom_env%adiab_nace_env%diab_D, mol, &    
           aom_env%C_tp,                  mol, &     ! C_tp = U
@@ -1391,7 +1387,6 @@ subroutine calc_adiab_nace(aom_env, adiab_section)
 
         if (.NOT.aom_env%no_diab_nace) then
             CALL nace1_modified(aom_env, mol, aom_env%deltat)
-print *, "CALC NACE1"
         end if
         !CALL nace1(aom_env, mol, aom_env%deltat)
         CALL nace2(aom_env, mol, print_here)

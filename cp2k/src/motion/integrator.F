@@ -652,7 +652,6 @@ CONTAINS
              force_env%mixed_env%aom_env%successful_hop = .FALSE.
              force_env%mixed_env%aom_env%attempt_hop = .FALSE.
 
-print *, "force_env%mixed_env%aom_env%no_diab_nace", force_env%mixed_env%aom_env%no_diab_nace
              if (.NOT. force_env%mixed_env%aom_env%no_diab_nace) then
                 force_env%mixed_env%aom_env%Stmtm = force_env%mixed_env%aom_env%Stt
                 force_env%mixed_env%aom_env%Sttm  = force_env%mixed_env%aom_env%Stpt

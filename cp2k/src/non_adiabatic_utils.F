@@ -1243,8 +1243,8 @@ END SUBROUTINE classically_forbidden_hops
 !                                             Stmtm_int, X1, deltatMD)
              X1 = H_0 - D_0
 !write(*,*) "H_0", H_0
-print *, "D0"
-CALL print_matrix_standard_out(D_0)
+!print *, "D0"
+!CALL print_matrix_standard_out(D_0)
 
              do t2=1,int(deltatMD/deltatE)
                     !create timestepped equivalents
@@ -1334,8 +1334,8 @@ CALL print_matrix_standard_out(D_0)
                          ctotal(i) = conjg(ctout(i))*ctout(i)
                     end do
 
-print *, "D2"
-CALL print_matrix_standard_out(D_2)
+!print *, "D2"
+!CALL print_matrix_standard_out(D_2)
                     !update
                      H_0 = H_2
                      D_0 = D_2

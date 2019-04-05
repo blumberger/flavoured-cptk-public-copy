@@ -850,6 +850,11 @@ times = DBLE(itimes)
      SELECT CASE(prop_wf_keyword)                                 
      CASE("DIABATIC_RK")
      CASE("DIABATIC_RK_FAST")
+     ! in this case diabatic nace are never calculated, neither in the
+     ! propagate_wf nor in the adiabatic nace calculation for the hopping
+     ! probability
+     ! so that all the Sttp and co matrices are also not used and so the memory
+     ! allocate for thme can be deallocated 
          aom_env%no_diab_nace = .True.
          DEALLOCATE(aom_env%Sttp)
          DEALLOCATE(aom_env%Stpt)
@@ -868,12 +873,6 @@ times = DBLE(itimes)
            CPABORT("There is no method to propagate the wavefunction.") 
      END SELECT                                             
      
-print *, "NO_NACE", aom_env%no_diab_nace
-!TEST PRINT DIAB NACE
-print *, "DIAB NACE TO STORE FROM NOW ON"
-CALL print_matrix_standard_out(aom_env%diabatic_nace_tp)
-
-
      !> STORE THE COORDINATES IF NOT SUCCESSFUL RUN
      aom_env%rm_tm      = positions_com_tp - velocities_com_tp*deltatMD
      aom_env%rm_t       = positions_com_tp
