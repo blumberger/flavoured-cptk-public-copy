@@ -111,6 +111,7 @@ MODULE aom_main
                                                propagate_wf, &
                                                propagate_wf_fast, &
                                                propagate_adiab_wf, &
+                                               propagate_wf_diab_nace_interpol, &
                                                prop_wf_HS_corr, & 
                                                classically_forbidden_hops, &
                                                define_active_region, &
@@ -192,6 +193,8 @@ CONTAINS
      COMPLEX(KIND=dp), dimension(:), allocatable               :: adiab_c
      TYPE(cp_logger_type), POINTER                :: logger
      INTEGER                                    :: unit_nr
+!TEST
+!     INTEGER                                    :: d, i,j
 
      NULLIFY(logger)
      logger => cp_get_default_logger()
@@ -264,22 +267,26 @@ CONTAINS
                       scaling, PC_allrvecs, orb)
 
 print *, "Stptp"
-!CALL print_matrix_standard_out(aom_env%Stptp)
+CALL print_matrix_standard_out(aom_env%Stptp)
 print *, "Stt"
-!CALL print_matrix_standard_out(aom_env%Stt)
+CALL print_matrix_standard_out(aom_env%Stt)
 print *, "Sttp"
-!CALL print_matrix_standard_out(aom_env%Sttp)
+CALL print_matrix_standard_out(aom_env%Sttp)
 print *, "Stpt"
-!CALL print_matrix_standard_out(aom_env%Stpt)
+CALL print_matrix_standard_out(aom_env%Stpt)
 print *, "Stmt"
-!CALL print_matrix_standard_out(aom_env%Stmt)
+CALL print_matrix_standard_out(aom_env%Stmt)
 print *, "Sttm"
-!CALL print_matrix_standard_out(aom_env%Sttm)
+CALL print_matrix_standard_out(aom_env%Sttm)
 print *, "Stmtm"
-!CALL print_matrix_standard_out(aom_env%Stmtm)
+CALL print_matrix_standard_out(aom_env%Stmtm)
 
      !> CONVERT THE diabatic NACV WITH THE GOOD UNITS
      aom_env%nacv = cbar*aom_env%nacv
+!TEST NACV ABSENCE:
+!aom_env%nacv = 0.0D0
+
+
 !THIS KEYWORD helps treating initial itimes correctly in case of restart file
 !usage 
      aom_env%restart_key = .False.
@@ -298,6 +305,19 @@ print *, "Stmtm"
         CALL calc_adiab_nace_old(aom_env, adiab_section)
      END IF
 
+print *, "DIAB NACE TO STORE FROM NOW ON"
+CALL print_matrix_standard_out(aom_env%diabatic_nace_t)
+CALL print_matrix_standard_out(aom_env%diabatic_nace_tp)
+
+!this if statement is usefull at t=1 becuase aom_env%diabatic_nace_tp
+! is not present and we would need it in the interpolation scheme during the
+! wavefunction propagation, so no we approximate that aom_env%diabatic_nace_t =0
+! and aom_env%diabatic_nace_tp = aom_env%diabatic_nace_t
+     if (itimes.eq.1 .or. aom_env%restart_key)  then
+       aom_env%diabatic_nace_tp = aom_env%diabatic_nace_t
+     end if
+     
+
      !> PROPAGATE THE ELECTRON FOR ONE MOLECULAR TIMESTEP
      !>the CHARGE CARRIER WF is called aom_env%ctin
      aom_env%HS_propagation = .FALSE.
@@ -308,6 +328,9 @@ print *, "Stmtm"
                              itimes, adiab_section, deltatMD, deltatE , times, mat)
      CASE("DIABATIC_RK_FAST")
            CALL propagate_wf_fast(aom_env%ctin, aom_env, nadiab,  norbitals, ELsteps, &
+                             itimes, adiab_section, deltatMD, deltatE , times, mat)
+     CASE("DIABATIC_RK_DLI")
+           CALL propagate_wf_diab_nace_interpol(aom_env%ctin, aom_env, nadiab,  norbitals, ELsteps, &
                              itimes, adiab_section, deltatMD, deltatE , times, mat)
      CASE("ADIABATIC_RK")
            CALL propagate_adiab_wf(aom_env%E_t, aom_env%E_tp, aom_env%ctin, aom_env, nadiab, norbitals, ELsteps, &
@@ -364,6 +387,22 @@ print *, "Stmtm"
      ENDDO
      print*, "FOBSH| ACTIVE STATE = ", aom_env%active_state
 
+!TEST PRINTING DIAGONAL GRADIENTS 
+!do d=1,3 
+!   do j=1,natom
+!     do i=1,mat
+!print *, "DIAGONAL FORCE", aom_env%F(d,j,i)
+!     end do
+!   end do
+!end do
+!print *, "Fdiag", aom_env%F(1,:,:)
+
+print *, "TOTAL_NUM_ATOMS", natom
+print *, "aom_atoms", aom_atoms
+print *, "mat", mat
+!print *, "nacvx", aom_env%nacv(1,:,:)
+!print *, "nacvy", aom_env%nacv(2,:,:)
+!print *, "nacvz", aom_env%nacv(3,:,:)
 
      call calcforces(state=aom_env%active_state,Hin=-AIMAG(aom_env%H_tp), C=aom_env%C_tp, nacv=aom_env%nacv, &
                            atoms=atoms, & 

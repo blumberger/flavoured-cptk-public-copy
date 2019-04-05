@@ -971,7 +971,7 @@ end subroutine nace1
 subroutine nace1_modified(aom_env, mol, deltat)
 
     TYPE(aom_env_type)                         :: aom_env
-    INTEGER                                    :: mol!, i, j!, sub, add
+    INTEGER                                    :: mol, i, j!, sub, add
     REAL(KIND=dp)                              :: deltat
 
     CHARACTER(len=*), PARAMETER :: routineN ='nace1', &
@@ -1078,24 +1078,22 @@ subroutine nace1_modified(aom_env, mol, deltat)
 !   PRINT *, " "
 !END DO
 
-!TEST PRINT AND ANTISIMMETRIZATION 
-!Antisimmetrizing D does not make any difference at all in the output
-!surface hopping probability (for a plane of NAPH)
-!allocate(my_NACE(mol,mol))
-!my_NACE = (aom_env%adiab_nace_env%diab_D - TRANSPOSE(aom_env%adiab_nace_env%diab_D)) / 2
+!NB: becuase of the way finite differences are defined actually here
+!aom_env%diabatic_nace_t refers at time T (namely t-dt) not Tp
+   aom_env%diabatic_nace_t = (aom_env%adiab_nace_env%diab_D - & 
+                              TRANSPOSE(aom_env%adiab_nace_env%diab_D)) / 2
 
-!aom_env%adiab_nace_env%diab_D = my_NACE
+!aom_env%adiab_nace_env%diab_D = aom_env%diabatic_nace !this would
+!antisimmetrize NACE even in the calculation of adiab nace, 
+!We have shown that it makes no difference at all!
 
-!PRINT *, "my_NACE D ANT"
-!DO i=1, mol
-!   DO j=1, mol
-!      !WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", aom_env%adiab_nace_env%diab_D(i,j), "  "
-!      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", my_NACE(i,j), "  "
-!   END DO
-!   PRINT *, " "
-!END DO
-
-!deallocate(my_NACE)
+PRINT *, "aom_env%diabatic_nace"
+DO i=1, mol
+   DO j=1, mol
+      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", aom_env%diabatic_nace_tp(i,j), "  "
+   END DO
+   PRINT *, " "
+END DO
 
 end subroutine nace1_modified
 
@@ -1319,7 +1317,7 @@ subroutine nace6(aom_env, mol, deltat)
     ENDDO
     ! End of 6
 
-   !NB read describtion about time inconsistency
+   !NB read description about time inconsistency
    !1. T1 <= D*U
    CALL DGEMM('N', 'N', mol, mol, mol, 1.0_DP, &
         aom_env%adiab_nace_env%diab_D, mol, &    

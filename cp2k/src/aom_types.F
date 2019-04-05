@@ -167,6 +167,8 @@ END TYPE adiab_nace_env_type
                                                      rm_tm,&       ! position step min 2
                                                      velocities_tp ! velocities step
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE   :: C_t, C_tp
+     REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE   :: diabatic_nace_tp, & 
+                                                    diabatic_nace_t  !othogonal diab NACE
      REAL(KIND=dp), DIMENSION(:),   ALLOCATABLE   :: E_t, E_tp
      COMPLEX(KIND=dp), DIMENSION(:,:), POINTER    :: H_t, H_tp
      REAL(KIND=dp), dimension(:,:), POINTER       :: Stt, Stmt, Sttm, Stmtm, &

@@ -644,6 +644,7 @@ CONTAINS
              ! 6. Update all variables for the next time step.
              force_env%mixed_env%aom_env%C_t = force_env%mixed_env%aom_env%C_tp
              force_env%mixed_env%aom_env%H_t = force_env%mixed_env%aom_env%H_tp
+             force_env%mixed_env%aom_env%diabatic_nace_t = force_env%mixed_env%aom_env%diabatic_nace_tp
              force_env%mixed_env%aom_env%E_t = force_env%mixed_env%aom_env%E_tp
              force_env%mixed_env%aom_env%old_state = force_env%mixed_env%aom_env%active_state
              force_env%mixed_env%aom_env%active_state = -1

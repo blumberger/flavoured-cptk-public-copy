@@ -61,7 +61,8 @@ MODULE aom_initialization
                                              translate_com, &
                                               calc_hop_nacv, &
                                               cal_delta_energy_nacv, &
-                                              diab_to_adiab
+                                              diab_to_adiab, &
+                                              print_matrix_standard_out
 
      USE aom_types,                    ONLY: aom_env_type, &
                                                 sh_print_env_type
@@ -221,6 +222,8 @@ CONTAINS
      allocate(aom_env%F(3,natom,mol)) !array of diagonal atomic forces
      ALLOCATE(aom_env%forces_adiab(3,natom))
      ALLOCATE(aom_env%forces_adiab_new(3,natom))
+     ALLOCATE(aom_env%diabatic_nace_tp(mat,mat))
+     ALLOCATE(aom_env%diabatic_nace_t(mat,mat))
 
      aom_env%At = 0.0_dp
      aom_env%Atp = 0.0_dp
@@ -233,6 +236,7 @@ CONTAINS
      aom_env%F = 0.0_dp
      aom_env%forces_adiab = 0.0_dp
      aom_env%forces_adiab_new = 0.0_dp
+     aom_env%diabatic_nace_tp = 0.0_dp
  
      ALLOCATE(aom_env%rm_t(3, natom))
      ALLOCATE(aom_env%rm_tm(3, natom))
@@ -702,6 +706,9 @@ CONTAINS
      !> CONVERT NACV AND CALCULATE EIGENPROPERTIES 
      !> THESE ASSOCIATIONS ARE NEEDED FOR THE NACV CALC
      nacv = cbar*nacv
+!TEST NO NACV 
+!nacv = 0.0D0
+
      CALL adiabaticity(-AIMAG(aom_env%H_tp), aom_env%C_tp, aom_env%E_tp)
      
      
@@ -842,6 +849,7 @@ times = DBLE(itimes)
      SELECT CASE(prop_wf_keyword)                                 
      CASE("DIABATIC_RK")
      CASE("DIABATIC_RK_FAST")
+     CASE("DIABATIC_RK_DLI")
      CASE("ADIABATIC_RK")
      CASE("HS_CORRECTED_RK")  
           !> CALC ARRAY OF CLASSICALLY FORBIDDEN HOPS
@@ -853,6 +861,10 @@ times = DBLE(itimes)
            CPABORT("There is no method to propagate the wavefunction.") 
      END SELECT                                             
      
+!TEST PRINT DIAB NACE
+print *, "DIAB NACE TO STORE FROM NOW ON"
+CALL print_matrix_standard_out(aom_env%diabatic_nace_tp)
+
 
      !> STORE THE COORDINATES IF NOT SUCCESSFUL RUN
      aom_env%rm_tm      = positions_com_tp - velocities_com_tp*deltatMD
@@ -860,7 +872,8 @@ times = DBLE(itimes)
      aom_env%sh_print_env = sh_print_env
      aom_env%ctin        = ctin
      aom_env%ctin_t        = ctin
-     aom_env%H_t = aom_env%H_tp
+     aom_env%H_t = aom_env%H_tp 
+     aom_env%diabatic_nace_t = aom_env%diabatic_nace_tp
      aom_env%E_t = aom_env%E_tp
      aom_env%C_t = aom_env%C_tp
      aom_env%nacv        = nacv
