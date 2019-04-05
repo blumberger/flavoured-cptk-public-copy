@@ -195,6 +195,7 @@ END TYPE adiab_nace_env_type
      LOGICAL                                :: attempt_hop
      LOGICAL                                :: successful_hop
      LOGICAL                                :: do_reorder
+     LOGICAL                                :: no_diab_nace
 
 !> Required for HS propagation
      LOGICAL                                :: HS_propagation

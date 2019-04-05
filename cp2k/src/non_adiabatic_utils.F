@@ -1752,10 +1752,7 @@ CALL print_matrix_standard_out(D_2)
 
              call makeX(mat, H_0, Stt_int, Sttp_int, Sttm_int, Stptp_int, &
                                              Stmtm_int, X1, deltatMD, NACE)
-!write(*,*) "H_0", H_0
 
-print *, "D0"
-CALL print_matrix_standard_out(NACE)
              do t2=1,int(deltatMD/deltatE)
                     !create timestepped equivalents
                     H_1 = H_0 + 0.5D0*Hdiff
@@ -1793,9 +1790,6 @@ CALL print_matrix_standard_out(NACE)
                     alpha = cmplx(deltatE/2.0D0, 0.0D0,dp)
                     beta = cmplx(0.0D0, 0.0D0,dp)
      
-!write(*,*) "X1", X1
-!write(*,*) "X12", X12
-!write(*,*) "X2", X2
                     !second term
                     call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X12, mat, X1, &
                     &mat, beta, K2, mat)
@@ -1842,8 +1836,6 @@ CALL print_matrix_standard_out(NACE)
                          ctotal(i) = conjg(ctout(i))*ctout(i)
                     end do
 
-print *, "D2"
-CALL print_matrix_standard_out(NACE)
                     !update
                      H_0 = H_2
                      X1  = X2

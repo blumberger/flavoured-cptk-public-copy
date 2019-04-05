@@ -266,6 +266,7 @@ CONTAINS
 
      aom_env%futur_decohere = .FALSE.
      aom_env%decohere       = .FALSE.
+     aom_env%no_diab_nace       = .FALSE.
 
      aom_env%new_state   = -1
      aom_env%old_state   = -1
@@ -849,6 +850,7 @@ times = DBLE(itimes)
      SELECT CASE(prop_wf_keyword)                                 
      CASE("DIABATIC_RK")
      CASE("DIABATIC_RK_FAST")
+         aom_env%no_diab_nace = .True.
      CASE("DIABATIC_RK_DLI")
      CASE("ADIABATIC_RK")
      CASE("HS_CORRECTED_RK")  
@@ -861,6 +863,7 @@ times = DBLE(itimes)
            CPABORT("There is no method to propagate the wavefunction.") 
      END SELECT                                             
      
+print *, "NO_NACE", aom_env%no_diab_nace
 !TEST PRINT DIAB NACE
 print *, "DIAB NACE TO STORE FROM NOW ON"
 CALL print_matrix_standard_out(aom_env%diabatic_nace_tp)

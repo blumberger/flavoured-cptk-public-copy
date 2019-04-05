@@ -750,7 +750,6 @@ SUBROUTINE off_diagonal_elem(aom_env,i,k,orb,itimes, atoms, &
           if (itimes.eq.1 .or. aom_env%restart_key)  then
                do d=1,orb
                     do m=1,orb
-
 !print *, "call calc_sab 7"
                          call calc_sab(aom_env%Atm, aom_env%connlist2, &
                          &aom_env%pcoeffsrun(1:atoms,orb*(i-1)+d,1), S, &

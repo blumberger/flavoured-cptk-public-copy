@@ -971,7 +971,7 @@ end subroutine nace1
 subroutine nace1_modified(aom_env, mol, deltat)
 
     TYPE(aom_env_type)                         :: aom_env
-    INTEGER                                    :: mol, i, j!, sub, add
+    INTEGER                                    :: mol!, i, j!, sub, add
     REAL(KIND=dp)                              :: deltat
 
     CHARACTER(len=*), PARAMETER :: routineN ='nace1', &
@@ -1086,14 +1086,6 @@ subroutine nace1_modified(aom_env, mol, deltat)
 !aom_env%adiab_nace_env%diab_D = aom_env%diabatic_nace !this would
 !antisimmetrize NACE even in the calculation of adiab nace, 
 !We have shown that it makes no difference at all!
-
-PRINT *, "aom_env%diabatic_nace"
-DO i=1, mol
-   DO j=1, mol
-      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", aom_env%diabatic_nace_tp(i,j), "  "
-   END DO
-   PRINT *, " "
-END DO
 
 end subroutine nace1_modified
 
@@ -1234,7 +1226,8 @@ end subroutine nace3
 
 !**********************************************************************************
 !> \brief I've divided the calc_adiab_nace subroutine into discrete chunks in
-!         order to profiling it with a finer resolution. This is chunk 4.
+!         order to profiling it with a finer resolution. This is chunk 4. This
+!         does correct the phase as it would be arbitrary otherwise.
 !**********************************************************************************
 subroutine nace4(aom_env, mol)
 
@@ -1317,19 +1310,28 @@ subroutine nace6(aom_env, mol, deltat)
     ENDDO
     ! End of 6
 
-   !NB read description about time inconsistency
-   !1. T1 <= D*U
-   CALL DGEMM('N', 'N', mol, mol, mol, 1.0_DP, &
-        aom_env%adiab_nace_env%diab_D, mol, &    
-        aom_env%C_tp,                  mol, &     ! C_tp = U
-        0.0_DP, aom_env%adiab_nace_env%T1, mol) 
+   if (aom_env%no_diab_nace) then 
+     ! the adiabatic nace are just d = U^{dagger}Udot
+print *, "HEREEEEE"
+     aom_env%adiab_nace_tp(:,:) = inv_deltat*aom_env%adiab_nace_tp(:,:)
+print *, aom_env%adiab_nace_tp(:,:) 
+   else
+     !NB read description about time inconsistency
+     !1. T1 <= D*U
+print *, "HEREEEEE"
+print *, inv_deltat*aom_env%adiab_nace_tp(:,:)
+     CALL DGEMM('N', 'N', mol, mol, mol, 1.0_DP, &
+          aom_env%adiab_nace_env%diab_D, mol, &    
+          aom_env%C_tp,                  mol, &     ! C_tp = U
+          0.0_DP, aom_env%adiab_nace_env%T1, mol) 
 
-    !U^{dagger}U^dot = (1/dt)*adiab_nace_tp
-    !2. adiab_nace_tp <= U^{dagg}*T1 + (1/dt)*adiab_nace_tp
-    CALL DGEMM('T', 'N', mol, mol, mol, 1.0_DP, &
-        aom_env%C_tp,                  mol, &     ! C_tp = U
-        aom_env%adiab_nace_env%T1,   mol, &    
-        inv_deltat, aom_env%adiab_nace_tp, mol) 
+      !U^{dagger}U^dot = (1/dt)*adiab_nace_tp
+      !2. adiab_nace_tp <= U^{dagg}*T1 + (1/dt)*adiab_nace_tp
+      CALL DGEMM('T', 'N', mol, mol, mol, 1.0_DP, &
+          aom_env%C_tp,                  mol, &     ! C_tp = U
+          aom_env%adiab_nace_env%T1,   mol, &    
+          inv_deltat, aom_env%adiab_nace_tp, mol) 
+   end if 
      
 end subroutine nace6
 
@@ -1386,7 +1388,11 @@ subroutine calc_adiab_nace(aom_env, adiab_section)
 
         CALL section_vals_val_get(adiab_section,"PRINT_MORE", &
                                                    l_val=print_here)
-        CALL nace1_modified(aom_env, mol, aom_env%deltat)
+
+        if (.NOT.aom_env%no_diab_nace) then
+            CALL nace1_modified(aom_env, mol, aom_env%deltat)
+print *, "CALC NACE1"
+        end if
         !CALL nace1(aom_env, mol, aom_env%deltat)
         CALL nace2(aom_env, mol, print_here)
         CALL nace3(aom_env)
