@@ -271,15 +271,15 @@ CALL print_matrix_standard_out(aom_env%Stptp)
 print *, "Stt"
 CALL print_matrix_standard_out(aom_env%Stt)
 print *, "Sttp"
-CALL print_matrix_standard_out(aom_env%Sttp)
+!CALL print_matrix_standard_out(aom_env%Sttp)
 print *, "Stpt"
-CALL print_matrix_standard_out(aom_env%Stpt)
+!CALL print_matrix_standard_out(aom_env%Stpt)
 print *, "Stmt"
-CALL print_matrix_standard_out(aom_env%Stmt)
+!CALL print_matrix_standard_out(aom_env%Stmt)
 print *, "Sttm"
-CALL print_matrix_standard_out(aom_env%Sttm)
+!CALL print_matrix_standard_out(aom_env%Sttm)
 print *, "Stmtm"
-CALL print_matrix_standard_out(aom_env%Stmtm)
+!CALL print_matrix_standard_out(aom_env%Stmtm)
 
      !> CONVERT THE diabatic NACV WITH THE GOOD UNITS
      aom_env%nacv = cbar*aom_env%nacv
@@ -537,8 +537,9 @@ SUBROUTINE calc_Xmatrix_elements(aom_env, itimes, atoms, mol, dR, do_random, cba
 !one could duplicate this subroutine and create one only for the first timestep
      !for each molecule i
 !print *, "aom_env%NN", aom_env%NN
+print *, "aom_env%no_diab_nace in X", aom_env%no_diab_nace
      do i=1,mol
-!print *, "iiiii", i
+print *, "iiiii", i
                !create the array of all its atomic coordinates at t
                !numerical factor converts from Angstroms into Bohr radii
                do j=1,atoms
@@ -555,7 +556,7 @@ SUBROUTINE calc_Xmatrix_elements(aom_env, itimes, atoms, mol, dR, do_random, cba
 
                !then for each other molecule
                do k=1,mol
-!print *, "k", k
+print *, "k", k
                     !create the array of its atomic coordinates at both t and t+dt
                     do l=1,atoms
                          aom_env%Bt(1,l)  = dble(aom_env%elements(l))
@@ -572,17 +573,17 @@ SUBROUTINE calc_Xmatrix_elements(aom_env, itimes, atoms, mol, dR, do_random, cba
                          do d=1,orb
 !print *, "d", d
                               aom_env%pcoeffsrun(:,orb*(k-1)+d,1) = aom_env%pcoeffs(:,d)
-!print *, "call calc_sab 1"
+print *, "call calc_sab 1"
                               call calc_sab(aom_env%Btm, aom_env%connlist2, &
                                                  aom_env%pcoeffsrun(:,orb*(k-1)+d,1))
 
                               aom_env%pcoeffsrun(:,orb*(k-1)+d,2) = aom_env%pcoeffs(:,d)
-!print *, "call calc_sab 2"
+print *, "call calc_sab 2"
                               call calc_sab(aom_env%Bt, aom_env%connlist2, &
                                                  aom_env%pcoeffsrun(:,orb*(k-1)+d,2))
 
                               aom_env%pcoeffsrun(:,orb*(k-1)+d,3) = aom_env%pcoeffs(:,d)
-!print *, "call calc_sab 3"
+print *, "call calc_sab 3"
                               call calc_sab(aom_env%Btp, aom_env%connlist2, & 
                                                aom_env%pcoeffsrun(:,orb*(k-1)+d,3))
                          end do
@@ -605,12 +606,14 @@ SUBROUTINE calc_Xmatrix_elements(aom_env, itimes, atoms, mol, dR, do_random, cba
                                    !fill in elements of non-overlapping pairs with 0
                                    aom_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0, 0.0D0,dp)
                                    aom_env%Stt(orb*(i-1)+d,orb*(k-1)+m)   = 0.0D0
-                                   aom_env%Sttp(orb*(i-1)+d,orb*(k-1)+m)  = 0.0D0
                                    aom_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = 0.0D0
-                                   aom_env%Stpt(orb*(i-1)+d,orb*(k-1)+m) = 0.0D0
-                                   aom_env%Sttm(orb*(i-1)+d,orb*(k-1)+m) = 0.0D0
-                                   aom_env%Stmtm(orb*(i-1)+d,orb*(k-1)+m) = 0.0D0
-                                   aom_env%Stmt(orb*(i-1)+d,orb*(k-1)+m) = 0.0D0
+                                   if (.NOT. aom_env%no_diab_nace) then
+                                       aom_env%Sttp(orb*(i-1)+d,orb*(k-1)+m)  = 0.0D0
+                                       aom_env%Stpt(orb*(i-1)+d,orb*(k-1)+m) = 0.0D0
+                                       aom_env%Sttm(orb*(i-1)+d,orb*(k-1)+m) = 0.0D0
+                                       aom_env%Stmtm(orb*(i-1)+d,orb*(k-1)+m) = 0.0D0
+                                       aom_env%Stmt(orb*(i-1)+d,orb*(k-1)+m) = 0.0D0
+                                   end if
                               end do
                          end do
                     end if !(NN(i,k) == 1
@@ -642,8 +645,10 @@ SUBROUTINE diagonal_elem(i,k,orb,itimes,aom_env)
                !A bit of math to be convinced for Sttp,
                !Stpt: dSii/dt = 0
                aom_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = 1.0D0
-               aom_env%Sttp(orb*(i-1)+d,orb*(k-1)+m)  = 1.0D0
-               aom_env%Stpt(orb*(i-1)+d,orb*(k-1)+m)  = 1.0D0
+               if (.NOT. aom_env%no_diab_nace) then
+                  aom_env%Sttp(orb*(i-1)+d,orb*(k-1)+m)  = 1.0D0
+                  aom_env%Stpt(orb*(i-1)+d,orb*(k-1)+m)  = 1.0D0
+               end if
                aom_env%H_tp(orb*(i-1)+d,orb*(k-1)+d) = cmplx(0.0D0, &
                                          (-aom_env%siteenergies(3,k)),dp)
           end do
@@ -655,9 +660,11 @@ SUBROUTINE diagonal_elem(i,k,orb,itimes,aom_env)
                !A bit of math to be convinced for Sttp,
                !Stpt: dSii/dt = 0
                     aom_env%Stt(orb*(i-1)+d,orb*(k-1)+m)   = 1.0D0
-                    aom_env%Stmt(orb*(i-1)+d,orb*(k-1)+m)  = 1.0D0
-                    aom_env%Sttm(orb*(i-1)+d,orb*(k-1)+m)  = 1.0D0
-                    aom_env%Stmtm(orb*(i-1)+d,orb*(k-1)+m) = 1.0D0
+                    if (.NOT. aom_env%no_diab_nace) then
+                      aom_env%Stmt(orb*(i-1)+d,orb*(k-1)+m)  = 1.0D0
+                      aom_env%Sttm(orb*(i-1)+d,orb*(k-1)+m)  = 1.0D0
+                      aom_env%Stmtm(orb*(i-1)+d,orb*(k-1)+m) = 1.0D0
+                    end if
                end do
           end do     
      end if ! (.not.inrun)
@@ -689,27 +696,29 @@ SUBROUTINE off_diagonal_elem(aom_env,i,k,orb,itimes, atoms, &
                                              aom_env%Stt(orb*(k-1)+m,orb*(i-1)+d)
                     aom_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = &
                                             aom_env%Stptp(orb*(k-1)+m,orb*(i-1)+d)
-                    aom_env%Stmtm(orb*(i-1)+d,orb*(k-1)+m) = &
-                                             aom_env%Stmtm(orb*(k-1)+m,orb*(i-1)+d)
-                    !A cross symmetry for Sttp, Stpt,
-                    !Sttm, Stmt
-                    aom_env%Sttp(orb*(i-1)+d,orb*(k-1)+m)  = &
-                                             aom_env%Stpt(orb*(k-1)+m,orb*(i-1)+d)
-                    aom_env%Stpt(orb*(i-1)+d,orb*(k-1)+m)  = & 
-                                              aom_env%Sttp(orb*(k-1)+m,orb*(i-1)+d)
-                    if (itimes.eq.1 .or. aom_env%restart_key)  then
-                       aom_env%Sttm(orb*(i-1)+d,orb*(k-1)+m)  = &
-                                              aom_env%Stmt(orb*(k-1)+m,orb*(i-1)+d)
-                       aom_env%Stmt(orb*(i-1)+d,orb*(k-1)+m)  = &
-                                              aom_env%Sttm(orb*(k-1)+m,orb*(i-1)+d)
-                    ENDIF
+                    if (.NOT. aom_env%no_diab_nace) then
+                       aom_env%Stmtm(orb*(i-1)+d,orb*(k-1)+m) = &
+                                                aom_env%Stmtm(orb*(k-1)+m,orb*(i-1)+d)
+                       !A cross symmetry for Sttp, Stpt,
+                       !Sttm, Stmt
+                       aom_env%Sttp(orb*(i-1)+d,orb*(k-1)+m)  = &
+                                                aom_env%Stpt(orb*(k-1)+m,orb*(i-1)+d)
+                       aom_env%Stpt(orb*(i-1)+d,orb*(k-1)+m)  = & 
+                                                 aom_env%Sttp(orb*(k-1)+m,orb*(i-1)+d)
+                       if (itimes.eq.1 .or. aom_env%restart_key)  then
+                          aom_env%Sttm(orb*(i-1)+d,orb*(k-1)+m)  = &
+                                                 aom_env%Stmt(orb*(k-1)+m,orb*(i-1)+d)
+                          aom_env%Stmt(orb*(i-1)+d,orb*(k-1)+m)  = &
+                                                 aom_env%Sttm(orb*(k-1)+m,orb*(i-1)+d)
+                       ENDIF
+                    end if
                end do
           end do
      else
           do d=1,orb
                do m=1,orb
                !PC added print_rvecs =yes so p vectors and coords would be printed 
-!print *, "call calc_sab 4"
+print *, "call calc_sab 4"
                     call calc_sab(aom_env%Atp, aom_env%connlist2, &
                         aom_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3),&
                      S, aom_env%Btp, aom_env%connlist2, &
@@ -719,7 +728,7 @@ SUBROUTINE off_diagonal_elem(aom_env,i,k,orb,itimes, atoms, &
                     aom_env%H_tp(orb*(i-1)+d,orb*(k-1)+m) = cmplx(0.0D0, -scaling*S,dp)
 
                     !Calcul of the NACV
-!print *, "call calc_dRsab 1"
+print *, "call calc_dRsab 1"
                     call calc_dRSab(aom_env%Atp, aom_env%atomlist, aom_env%connlist1, &
                     aom_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3), aom_env%scoeffs, &
                     aom_env%nacv(1:3,orb*(k-1)+d,(i-1)*atoms+1:i*atoms), &
@@ -730,51 +739,53 @@ SUBROUTINE off_diagonal_elem(aom_env,i,k,orb,itimes, atoms, &
                      do_random, aom_env)
                end do
           end do
-          do d=1,orb
-               do m=1,orb
-!print *, "call calc_sab 5"
-                    call calc_sab(aom_env%At, aom_env%connlist2, &
-                     aom_env%pcoeffsrun(1:atoms,orb*(i-1)+d,2), S, &
-                     aom_env%Btp,&
-                    & aom_env%connlist2, aom_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3))
-                    aom_env%Sttp(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
-
-!print *, "call calc_sab 6"
-                    call calc_sab(aom_env%Atp, aom_env%connlist2, &
-                         aom_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3), S,& 
-                     aom_env%Bt,&
-                    & aom_env%connlist2, aom_env%pcoeffsrun(1:atoms,orb*(k-1)+m,2))
-                    aom_env%Stpt(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
-               end do
-          end do
-          if (itimes.eq.1 .or. aom_env%restart_key)  then
-               do d=1,orb
-                    do m=1,orb
-!print *, "call calc_sab 7"
-                         call calc_sab(aom_env%Atm, aom_env%connlist2, &
-                         &aom_env%pcoeffsrun(1:atoms,orb*(i-1)+d,1), S, &
-                             aom_env%Btm, aom_env%connlist2,&
-                         &aom_env%pcoeffsrun(1:atoms,orb*(k-1)+m,1))
-                         aom_env%Stmtm(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
-
-
-!print *, "call calc_sab 8"
-                         call calc_sab(aom_env%At, aom_env%connlist2, &
-                         &aom_env%pcoeffsrun(1:atoms,orb*(i-1)+d,2), S, &
-                                    aom_env%Btm, aom_env%connlist2,&
-                         &aom_env%pcoeffsrun(1:atoms,orb*(k-1)+m,1))
-                         aom_env%Sttm(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
-
-!print *, "call calc_sab 9"
-                         call calc_sab(aom_env%Atm, aom_env%connlist2, &
-                         &aom_env%pcoeffsrun(1:atoms,orb*(i-1)+d,1), S, &
-                           aom_env%Bt, aom_env%connlist2, &
-                         &aom_env%pcoeffsrun(1:atoms,orb*(k-1)+m,2))
-                         aom_env%Stmt(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
-                    end do
-               end do
-
-          end if ! (.not.inrun)
+         if (.NOT. aom_env%no_diab_nace) then
+             do d=1,orb
+                  do m=1,orb
+    print *, "call calc_sab 5"
+                       call calc_sab(aom_env%At, aom_env%connlist2, &
+                        aom_env%pcoeffsrun(1:atoms,orb*(i-1)+d,2), S, &
+                        aom_env%Btp,&
+                       & aom_env%connlist2, aom_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3))
+                       aom_env%Sttp(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
+    
+    print *, "call calc_sab 6"
+                       call calc_sab(aom_env%Atp, aom_env%connlist2, &
+                            aom_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3), S,& 
+                        aom_env%Bt,&
+                       & aom_env%connlist2, aom_env%pcoeffsrun(1:atoms,orb*(k-1)+m,2))
+                       aom_env%Stpt(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
+                  end do
+             end do
+             if (itimes.eq.1 .or. aom_env%restart_key)  then
+                  do d=1,orb
+                       do m=1,orb
+    print *, "call calc_sab 7"
+                            call calc_sab(aom_env%Atm, aom_env%connlist2, &
+                            &aom_env%pcoeffsrun(1:atoms,orb*(i-1)+d,1), S, &
+                                aom_env%Btm, aom_env%connlist2,&
+                            &aom_env%pcoeffsrun(1:atoms,orb*(k-1)+m,1))
+                            aom_env%Stmtm(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
+    
+    
+    print *, "call calc_sab 8"
+                            call calc_sab(aom_env%At, aom_env%connlist2, &
+                            &aom_env%pcoeffsrun(1:atoms,orb*(i-1)+d,2), S, &
+                                       aom_env%Btm, aom_env%connlist2,&
+                            &aom_env%pcoeffsrun(1:atoms,orb*(k-1)+m,1))
+                            aom_env%Sttm(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
+    
+    print *, "call calc_sab 9"
+                            call calc_sab(aom_env%Atm, aom_env%connlist2, &
+                            &aom_env%pcoeffsrun(1:atoms,orb*(i-1)+d,1), S, &
+                              aom_env%Bt, aom_env%connlist2, &
+                            &aom_env%pcoeffsrun(1:atoms,orb*(k-1)+m,2))
+                            aom_env%Stmt(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
+                       end do
+                  end do
+    
+             end if ! (.not.inrun)
+         end if 
      end if ! ( k < i)
 END SUBROUTINE off_diagonal_elem
 

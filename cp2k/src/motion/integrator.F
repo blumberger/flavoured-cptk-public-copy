@@ -652,10 +652,13 @@ CONTAINS
              force_env%mixed_env%aom_env%successful_hop = .FALSE.
              force_env%mixed_env%aom_env%attempt_hop = .FALSE.
 
-             force_env%mixed_env%aom_env%Stmtm = force_env%mixed_env%aom_env%Stt
+print *, "force_env%mixed_env%aom_env%no_diab_nace", force_env%mixed_env%aom_env%no_diab_nace
+             if (.NOT. force_env%mixed_env%aom_env%no_diab_nace) then
+                force_env%mixed_env%aom_env%Stmtm = force_env%mixed_env%aom_env%Stt
+                force_env%mixed_env%aom_env%Sttm  = force_env%mixed_env%aom_env%Stpt
+                force_env%mixed_env%aom_env%Stmt  = force_env%mixed_env%aom_env%Sttp
+             end if
              force_env%mixed_env%aom_env%Stt   = force_env%mixed_env%aom_env%Stptp
-             force_env%mixed_env%aom_env%Sttm  = force_env%mixed_env%aom_env%Stpt
-             force_env%mixed_env%aom_env%Stmt  = force_env%mixed_env%aom_env%Sttp
 
              force_env%mixed_env%aom_env%ctin_t = force_env%mixed_env%aom_env%ctin
              CALL total_momentum(tmp%vel, atomic_kind_set, nparticle_kind, local_particles)!, force_env)
