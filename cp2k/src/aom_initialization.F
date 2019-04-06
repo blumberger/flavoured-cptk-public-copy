@@ -716,7 +716,7 @@ CONTAINS
      nacv = cbar*nacv
 !TEST NO NACV 
 !nacv = 0.0D0
-print *, "NACV T1", nacv(1,:,:)
+!print *, "NACV T1", nacv(1,:,:)
 
      CALL adiabaticity(-AIMAG(aom_env%H_tp), aom_env%C_tp, aom_env%E_tp)
      

@@ -344,6 +344,12 @@ CONTAINS
     CALL keyword_release(keyword)
 
 
+    CALL keyword_create(keyword, name="MULTIPLE_TIME_STEP",&
+         description="starting molecule number",&
+         usage="1", type_of_var=integer_t)
+    CALL section_add_keyword(subsection,keyword)
+
+    CALL keyword_release(keyword)
     CALL keyword_create(keyword, name="FIRST_DIABAT",&
          description="starting molecule number",&
          usage="1", type_of_var=integer_t)

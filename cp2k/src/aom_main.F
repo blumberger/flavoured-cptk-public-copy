@@ -218,9 +218,12 @@ CONTAINS
      CALL section_vals_val_get(coupling_section,"RANDOM_DERIVATIVE", l_val=do_random)
      CALL section_vals_val_get(coupling_section,"CENTER_OF_MASS", l_val=keyword_translate)
      CALL section_vals_val_get(adiab_section, "DO_SPEEDUP_NACE", l_val=do_nace_speedup)
+     CALL section_vals_val_get(adiab_section,"MULTIPLE_TIME_STEP",&
+             i_val=aom_env%multiple_time_step)
 
 !TO READ FROM EXTERNAL FILE
-     aom_env%multiple_time_step = 10 
+!     aom_env%multiple_time_step = 10 
+print *, "MULTIPLE TIME STEP", aom_env%multiple_time_step
      scaling = aom_env%scaling
      cbar = aom_env%cbar
      atoms = aom_env%atoms !Number of atoms per site
@@ -263,7 +266,7 @@ CONTAINS
      !step
      aom_env%adiab_nace_t = aom_env%adiab_nace_tp
      aom_env%nacv_t = aom_env%nacv
-print *, "NACV from prev step", aom_env%nacv_t(1,:,:) 
+!print *, "NACV from prev step", aom_env%nacv_t(1,:,:) 
 
      !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
      CALL calc_coms_and_nlist(aom_env, atoms, mol, cutoff_sites, orb)
@@ -278,11 +281,11 @@ print *, "NACV from prev step", aom_env%nacv_t(1,:,:)
 !CALL print_matrix_standard_out(aom_env%Stt)
 
      !> CONVERT THE diabatic NACV WITH THE GOOD UNITS
-print *, "NACV from inside", aom_env%nacv(1,:,:)
+!print *, "NACV from inside", aom_env%nacv(1,:,:)
      aom_env%nacv = cbar*aom_env%nacv
 !TEST NACV ABSENCE:
 !aom_env%nacv = 0.0D0
-print *, "NACV tp", aom_env%nacv(1,:,:)
+!print *, "NACV tp", aom_env%nacv(1,:,:)
 
 
  !THIS KEYWORD helps treating initial itimes correctly in case of restart file
@@ -531,7 +534,7 @@ SUBROUTINE calc_Xmatrix_elements(aom_env, itimes, atoms, mol, dR, do_random, cba
 !COMMENT: I guess Atm and Btm are only need for the first timestep (itimes = 1)
 !one could duplicate this subroutine and create one only for the first timestep
      !for each molecule i
-print *, "aom_env%NN", aom_env%NN
+!print *, "aom_env%NN", aom_env%NN
      do i=1,mol
 !print *, "iiiii", i
                !create the array of all its atomic coordinates at t
@@ -738,8 +741,8 @@ SUBROUTINE off_diagonal_elem(aom_env,i,k,orb,itimes, atoms, &
                     aom_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
                     aom_env%H_tp(orb*(i-1)+d,orb*(k-1)+m) = cmplx(0.0D0, -scaling*S,dp)
 
-print *, "call calc_dRsab 1"
-print *, "REST", mod(itimes-1, aom_env%multiple_time_step)
+!print *, "call calc_dRsab 1"
+!print *, "REST", mod(itimes-1, aom_env%multiple_time_step)
                     !> In the following diabatic non-orthog. nace are
                     !calculated, since calculating them is very time consuming
                     !and expensive we opted for a multiple time step scheme.
