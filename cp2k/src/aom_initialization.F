@@ -218,7 +218,11 @@ CONTAINS
      allocate(aom_env%Btp(4,atoms))
      allocate(aom_env%Btm(4,atoms))
      allocate(aom_env%siteenergies(3,mat))
+     !> nacv are memory consuming to store however here we are storing them at time
+     !t and tp for the multiple time step feature avoing their calculations at
+     !each step
      ALLOCATE(aom_env%nacv(3,mat, mat*aom_atoms))
+     ALLOCATE(aom_env%nacv_t(3,mat, mat*aom_atoms))
      allocate(aom_env%F(3,natom,mol)) !array of diagonal atomic forces
      ALLOCATE(aom_env%forces_adiab(3,natom))
      ALLOCATE(aom_env%forces_adiab_new(3,natom))
@@ -233,6 +237,7 @@ CONTAINS
      aom_env%Btm = 0.0_dp
      aom_env%siteenergies = 0.0_dp
      aom_env%nacv = 0.0_dp
+     aom_env%nacv_t = 0.0_dp
      aom_env%F = 0.0_dp
      aom_env%forces_adiab = 0.0_dp
      aom_env%forces_adiab_new = 0.0_dp
@@ -539,6 +544,8 @@ CONTAINS
      !H_t etc are always -i*H.
      !This is why they're complex variables
      !allocate(nacv(3,mat,mat,mat*atoms))      !non-adiabatic coupling vectors
+! COMMENT: to save memory there is no point of allocating nacv as internal array
+! one could use already aom_env%nacv here
      allocate(nacv(3,mat,mat*atoms))      !non-adiabatic coupling vectors
      nacv = 0.0D0
      allocate(siteenergies(3,mat))      !diagonals of the Hamiltonian
@@ -709,6 +716,7 @@ CONTAINS
      nacv = cbar*nacv
 !TEST NO NACV 
 !nacv = 0.0D0
+print *, "NACV T1", nacv(1,:,:)
 
      CALL adiabaticity(-AIMAG(aom_env%H_tp), aom_env%C_tp, aom_env%E_tp)
      
@@ -893,7 +901,6 @@ times = DBLE(itimes)
      aom_env%new_state = -1
      aom_env%successful_hop = .FALSE.
      !aom_env%Stptp = Stptp
-     aom_env%nacv = nacv
      aom_env%NN = NN
 
 

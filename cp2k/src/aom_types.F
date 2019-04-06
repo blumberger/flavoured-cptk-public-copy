@@ -157,7 +157,7 @@ END TYPE adiab_nace_env_type
      REAL(KIND=dp), dimension(:,:,:), allocatable   :: pcoeffsrun
      REAL(KIND=dp), dimension(:,:), POINTER         :: At, Atm, Atp, Bt, Btm, & 
                                                        Btp, siteenergies
-     REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: nacv
+     REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: nacv, nacv_t
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: F
      REAL(KIND = dp), DIMENSION(:,:), POINTER       :: forces_adiab, &      ! forces at step 0
                                                        forces_adiab_new!, &
@@ -196,6 +196,8 @@ END TYPE adiab_nace_env_type
      LOGICAL                                :: successful_hop
      LOGICAL                                :: do_reorder
      LOGICAL                                :: no_diab_nace
+!> multiple time step
+     INTEGER                                      :: multiple_time_step
 
 !> Required for HS propagation
      LOGICAL                                :: HS_propagation

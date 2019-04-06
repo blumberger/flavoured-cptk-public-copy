@@ -219,6 +219,8 @@ CONTAINS
      CALL section_vals_val_get(coupling_section,"CENTER_OF_MASS", l_val=keyword_translate)
      CALL section_vals_val_get(adiab_section, "DO_SPEEDUP_NACE", l_val=do_nace_speedup)
 
+!TO READ FROM EXTERNAL FILE
+     aom_env%multiple_time_step = 10 
      scaling = aom_env%scaling
      cbar = aom_env%cbar
      atoms = aom_env%atoms !Number of atoms per site
@@ -257,7 +259,11 @@ CONTAINS
 
 
      !ctin(:) = aom_env%ctin(:)
+     !> store adiabatic nace and diabatic non-orthogonal nacv (aom_env%nacv) from the previous
+     !step
      aom_env%adiab_nace_t = aom_env%adiab_nace_tp
+     aom_env%nacv_t = aom_env%nacv
+print *, "NACV from prev step", aom_env%nacv_t(1,:,:) 
 
      !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
      CALL calc_coms_and_nlist(aom_env, atoms, mol, cutoff_sites, orb)
@@ -272,9 +278,11 @@ CONTAINS
 !CALL print_matrix_standard_out(aom_env%Stt)
 
      !> CONVERT THE diabatic NACV WITH THE GOOD UNITS
+print *, "NACV from inside", aom_env%nacv(1,:,:)
      aom_env%nacv = cbar*aom_env%nacv
 !TEST NACV ABSENCE:
 !aom_env%nacv = 0.0D0
+print *, "NACV tp", aom_env%nacv(1,:,:)
 
 
  !THIS KEYWORD helps treating initial itimes correctly in case of restart file
@@ -523,6 +531,7 @@ SUBROUTINE calc_Xmatrix_elements(aom_env, itimes, atoms, mol, dR, do_random, cba
 !COMMENT: I guess Atm and Btm are only need for the first timestep (itimes = 1)
 !one could duplicate this subroutine and create one only for the first timestep
      !for each molecule i
+print *, "aom_env%NN", aom_env%NN
      do i=1,mol
 !print *, "iiiii", i
                !create the array of all its atomic coordinates at t
@@ -576,7 +585,6 @@ SUBROUTINE calc_Xmatrix_elements(aom_env, itimes, atoms, mol, dR, do_random, cba
                     !neighbourlist(:,:,:,:) = aom_env%neighbourlist(:,:,:,:)
                     !only call overlap if neighbours list says so
                     if (aom_env%NN(i,k) == 1) then
-!print *, "aom_env%NN(i,k)", aom_env%NN(i,k)
                          !first the diagonals
                          if (i == k) then
                               CALL diagonal_elem(i,k,orb,itimes,aom_env)
@@ -730,16 +738,33 @@ SUBROUTINE off_diagonal_elem(aom_env,i,k,orb,itimes, atoms, &
                     aom_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
                     aom_env%H_tp(orb*(i-1)+d,orb*(k-1)+m) = cmplx(0.0D0, -scaling*S,dp)
 
+print *, "call calc_dRsab 1"
+print *, "REST", mod(itimes-1, aom_env%multiple_time_step)
+                    !> In the following diabatic non-orthog. nace are
+                    !calculated, since calculating them is very time consuming
+                    !and expensive we opted for a multiple time step scheme.
+                    !while the nacv are within the counter(chosen in the input 
+                    !file) they are considered a
+                    !constant and taken from the prevous time step.
+                    !When counter is reseted this nacv are
+                    !recalculated 
                     !Calcul of the NACV
-!print *, "call calc_dRsab 1"
-                    call calc_dRSab(aom_env%Atp, aom_env%atomlist, aom_env%connlist1, &
-                    aom_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3), aom_env%scoeffs, &
-                    aom_env%nacv(1:3,orb*(k-1)+d,(i-1)*atoms+1:i*atoms), &
-                    aom_env%nacv(1:3,orb*(i-1)+m,(k-1)*atoms+1:k*atoms), &
-                    aom_env%Btp, aom_env%atomlist, aom_env%connlist1, &
-                    aom_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3), &
-                     aom_env%scoeffs, aom_env%neighbourlist(k,i,:,:), aom_env%neighbourlist(i,k,:,:), dR, &
-                     do_random, aom_env)
+                    if (mod(itimes-1, aom_env%multiple_time_step) .eq. 0) then 
+                        call calc_dRSab(aom_env%Atp, aom_env%atomlist, &
+                                      aom_env%connlist1, &
+                        aom_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3), aom_env%scoeffs, &
+                        aom_env%nacv(1:3,orb*(k-1)+d,(i-1)*atoms+1:i*atoms), &
+                        aom_env%nacv(1:3,orb*(i-1)+m,(k-1)*atoms+1:k*atoms), &
+                        aom_env%Btp, aom_env%atomlist, aom_env%connlist1, &
+                        aom_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3), &
+                         aom_env%scoeffs, aom_env%neighbourlist(k,i,:,:), &
+                                  aom_env%neighbourlist(i,k,:,:), dR, &
+                         do_random, aom_env)
+                    else
+                        !> division for cbar is necessary to be consistent with
+                        !units  
+                        aom_env%nacv = aom_env%nacv_t/cbar
+                    end if
                end do
           end do
      ! in case no_diab_nace is true nace in the diabatic basis are not used

@@ -163,6 +163,7 @@ CONTAINS
            aom_env%atoms = aom_atoms
            aom_env%deltat = MDtimestep
            aom_env%natom = SIZE(global_forces(1)%forces,2)
+print *, "itimes", itimes
            CALL propagate_aom_namd_first_step(nadiab, aom_atoms, norbitals,     &
                      positions_tp, velocities_tp, energies_tp, aom_env, itimes, &
                      global_forces, coupling_section, adiab_section,& 
@@ -183,6 +184,7 @@ CONTAINS
               !aom_env%old_state = -1
            ELSE
               !> Main CALL: calculate the Hamiltonian, propagate the electronic dynamics
+print *, "itimes", itimes
               CALL construct_ham_X_SH(nadiab, aom_atoms, norbitals,         &
                             positions_tp, energies_tp, aom_env, itimes,     &
                             global_forces, coupling_section, adiab_section, & 
