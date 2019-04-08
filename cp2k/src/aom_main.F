@@ -223,7 +223,7 @@ CONTAINS
 
 !TO READ FROM EXTERNAL FILE
 !     aom_env%multiple_time_step = 10 
-print *, "MULTIPLE TIME STEP", aom_env%multiple_time_step
+!print *, "MULTIPLE TIME STEP", aom_env%multiple_time_step
      scaling = aom_env%scaling
      cbar = aom_env%cbar
      atoms = aom_env%atoms !Number of atoms per site
@@ -283,6 +283,7 @@ print *, "MULTIPLE TIME STEP", aom_env%multiple_time_step
      !> CONVERT THE diabatic NACV WITH THE GOOD UNITS
 !print *, "NACV from inside", aom_env%nacv(1,:,:)
     if (mod(itimes-1, aom_env%multiple_time_step) .eq. 0) then
+        print *, "FOBSH| *** OFF-DIAGONAL GRADIENT CALCULATION"
         aom_env%nacv = cbar*aom_env%nacv
     end if
 !TEST NACV ABSENCE:
