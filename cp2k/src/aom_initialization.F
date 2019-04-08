@@ -222,7 +222,7 @@ CONTAINS
      !t and tp for the multiple time step feature avoing their calculations at
      !each step
      ALLOCATE(aom_env%nacv(3,mat, mat*aom_atoms))
-     ALLOCATE(aom_env%nacv_t(3,mat, mat*aom_atoms))
+!     ALLOCATE(aom_env%nacv_t(3,mat, mat*aom_atoms))
      allocate(aom_env%F(3,natom,mol)) !array of diagonal atomic forces
      ALLOCATE(aom_env%forces_adiab(3,natom))
      ALLOCATE(aom_env%forces_adiab_new(3,natom))
@@ -237,7 +237,7 @@ CONTAINS
      aom_env%Btm = 0.0_dp
      aom_env%siteenergies = 0.0_dp
      aom_env%nacv = 0.0_dp
-     aom_env%nacv_t = 0.0_dp
+!     aom_env%nacv_t = 0.0_dp
      aom_env%F = 0.0_dp
      aom_env%forces_adiab = 0.0_dp
      aom_env%forces_adiab_new = 0.0_dp

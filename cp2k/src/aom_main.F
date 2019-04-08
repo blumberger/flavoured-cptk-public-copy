@@ -265,7 +265,7 @@ print *, "MULTIPLE TIME STEP", aom_env%multiple_time_step
      !> store adiabatic nace and diabatic non-orthogonal nacv (aom_env%nacv) from the previous
      !step
      aom_env%adiab_nace_t = aom_env%adiab_nace_tp
-     aom_env%nacv_t = aom_env%nacv
+!     aom_env%nacv_t = aom_env%nacv
 !print *, "NACV from prev step", aom_env%nacv_t(1,:,:) 
 
      !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
@@ -282,7 +282,9 @@ print *, "MULTIPLE TIME STEP", aom_env%multiple_time_step
 
      !> CONVERT THE diabatic NACV WITH THE GOOD UNITS
 !print *, "NACV from inside", aom_env%nacv(1,:,:)
-     aom_env%nacv = cbar*aom_env%nacv
+    if (mod(itimes-1, aom_env%multiple_time_step) .eq. 0) then
+        aom_env%nacv = cbar*aom_env%nacv
+    end if
 !TEST NACV ABSENCE:
 !aom_env%nacv = 0.0D0
 !print *, "NACV tp", aom_env%nacv(1,:,:)
@@ -749,8 +751,6 @@ SUBROUTINE off_diagonal_elem(aom_env,i,k,orb,itimes, atoms, &
                     !while the nacv are within the counter(chosen in the input 
                     !file) they are considered a
                     !constant and taken from the prevous time step.
-                    !When counter is reseted this nacv are
-                    !recalculated 
                     !Calcul of the NACV
                     if (mod(itimes-1, aom_env%multiple_time_step) .eq. 0) then 
                         call calc_dRSab(aom_env%Atp, aom_env%atomlist, &
@@ -763,10 +763,13 @@ SUBROUTINE off_diagonal_elem(aom_env,i,k,orb,itimes, atoms, &
                          aom_env%scoeffs, aom_env%neighbourlist(k,i,:,:), &
                                   aom_env%neighbourlist(i,k,:,:), dR, &
                          do_random, aom_env)
-                    else
-                        !> division for cbar is necessary to be consistent with
-                        !units  
-                        aom_env%nacv = aom_env%nacv_t/cbar
+                        !> note that calc_dRSab uses a radom number to randomize
+                        !forwards derivative in the NACV (this improves energy
+                        !conservation by one/two order of magnitude. To be
+                        !consistent with random sequence, one should:
+                   !else
+                         !call random generator function
+          
                     end if
                end do
           end do

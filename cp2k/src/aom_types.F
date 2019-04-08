@@ -157,7 +157,7 @@ END TYPE adiab_nace_env_type
      REAL(KIND=dp), dimension(:,:,:), allocatable   :: pcoeffsrun
      REAL(KIND=dp), dimension(:,:), POINTER         :: At, Atm, Atp, Bt, Btm, & 
                                                        Btp, siteenergies
-     REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: nacv, nacv_t
+     REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: nacv!, nacv_t
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: F
      REAL(KIND = dp), DIMENSION(:,:), POINTER       :: forces_adiab, &      ! forces at step 0
                                                        forces_adiab_new!, &
