@@ -199,7 +199,7 @@ CONTAINS
      ALLOCATE(aom_env%elements(c))
      ALLOCATE(aom_env%neighbourlist(nadiab, nadiab,0:aom_atoms,0:aom_atoms))
      ALLOCATE(aom_env%connlist1(4,aom_atoms))
-     ALLOCATE(aom_env%bneighbour(3,0:aom_atoms))
+!     ALLOCATE(aom_env%bneighbour(3,0:aom_atoms))
      ALLOCATE(aom_env%pcoeffs(aom_atoms,norbitals))
      ALLOCATE(aom_env%scoeffs(aom_atoms))
 
@@ -450,7 +450,7 @@ CONTAINS
      REAL(KIND=dp) :: cutoff_sites, cutoff_connect, scaling, deltatMD, deltatE
      REAL(KIND=dp) :: S
      REAL(KIND=dp)    :: cbar, minao
-     REAL(KIND=dp), dimension(:,:,:), allocatable :: nacv
+!     REAL(KIND=dp), dimension(:,:,:), allocatable :: nacv
      REAL(KIND=dp), dimension(:,:,:), allocatable :: crds, pcoeffsrun
      REAL(KIND=dp), dimension(:,:), allocatable :: Stptp
      REAL(KIND=dp), dimension(:,:), allocatable :: dist
@@ -546,8 +546,8 @@ CONTAINS
      !allocate(nacv(3,mat,mat,mat*atoms))      !non-adiabatic coupling vectors
 ! COMMENT: to save memory there is no point of allocating nacv as internal array
 ! one could use already aom_env%nacv here
-     allocate(nacv(3,mat,mat*atoms))      !non-adiabatic coupling vectors
-     nacv = 0.0D0
+!     allocate(nacv(3,mat,mat*atoms))      !non-adiabatic coupling vectors
+!     nacv = 0.0D0
      allocate(siteenergies(3,mat))      !diagonals of the Hamiltonian
      allocate(pcoeffsrun(atoms,mat,3)) !pcoeffsrun exists because the p-coefficients need to be renormalised for each structure
      allocate(scoefftot(c))
@@ -689,8 +689,8 @@ CONTAINS
                                              pcoeffsrun(1:atoms,orb*(i-1)+d,3), aom_env%scoeffs, &
                                              !nacv(1:3,orb*(k-1)+d,orb*(i-1)+m,(i-1)*atoms+1:i*atoms), &
                                              !nacv(1:3,orb*(i-1)+m,orb*(k-1)+d,(k-1)*atoms+1:k*atoms), &
-                                             nacv(1:3,orb*(k-1)+d,(i-1)*atoms+1:i*atoms), &
-                                             nacv(1:3,orb*(i-1)+m,(k-1)*atoms+1:k*atoms), &
+                                             aom_env%nacv(1:3,orb*(k-1)+d,(i-1)*atoms+1:i*atoms), &
+                                             aom_env%nacv(1:3,orb*(i-1)+m,(k-1)*atoms+1:k*atoms), &
                                              Btp, aom_env%atomlist, aom_env%connlist1, pcoeffsrun(1:atoms,orb*(k-1)+m,3),&
                                              aom_env%scoeffs, aom_env%neighbourlist(k,i,:,:), aom_env%neighbourlist(i,k,:,:), dR, &
                                              do_random, aom_env)
@@ -713,7 +713,7 @@ CONTAINS
 
      !> CONVERT NACV AND CALCULATE EIGENPROPERTIES 
      !> THESE ASSOCIATIONS ARE NEEDED FOR THE NACV CALC
-     nacv = cbar*nacv
+     aom_env%nacv = cbar*aom_env%nacv
 !TEST NO NACV 
 !nacv = 0.0D0
 !print *, "NACV T1", nacv(1,:,:)
@@ -753,7 +753,7 @@ times = DBLE(itimes)
         call adiab_print_pvecs(adiab_section, PC_allrvecs, itimes, deltatMD, times, atoms, nadiab)
         CALL adiab_print_hamiltonian(adiab_section, -AIMAG(aom_env%H_tp), nadiab,norbitals,itimes, deltatMD)
         CALL adiab_print_pseudo_hamiltonian(adiab_section, -AIMAG(aom_env%H_tp), nadiab,norbitals,itimes, deltatMD)
-        CALL adiab_print_nacv(adiab_section, nacv, nadiab, norbitals, aom_atoms,itimes, deltatMD)
+        CALL adiab_print_nacv(adiab_section, aom_env%nacv, nadiab, norbitals, aom_atoms,itimes, deltatMD)
      end if
 
      !> INITIALIZE  
@@ -845,7 +845,7 @@ times = DBLE(itimes)
      !> second part CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE
      !RESULT OF THE SURFACE HOP ROUTINE IS.
      print*, "FOBSH| ACTIVE STATE = ", active_state
-     call calcforces(state=active_state,Hin=-AIMAG(aom_env%H_tp), C=aom_env%C_tp, nacv=nacv, atoms=atoms, & 
+     call calcforces(state=active_state,Hin=-AIMAG(aom_env%H_tp), C=aom_env%C_tp, nacv=aom_env%nacv, atoms=atoms, & 
                      scaling=scaling, cbar=cbar, Fin=F, forces_adiab=aom_env%forces_adiab, &
                      ext_pres=aom_env%ext_pres)
 
@@ -891,7 +891,7 @@ times = DBLE(itimes)
      aom_env%diabatic_nace_t = aom_env%diabatic_nace_tp
      aom_env%E_t = aom_env%E_tp
      aom_env%C_t = aom_env%C_tp
-     aom_env%nacv        = nacv
+!     aom_env%nacv        = nacv
      aom_env%new_state = new_state
      aom_env%active_state = active_state
      !> IMPORTANT FOR THE FIRST TIME STEP
@@ -915,7 +915,8 @@ times = DBLE(itimes)
     deallocate(Atp)
     deallocate(Btp)
     deallocate(Stptp)
-    deallocate(nacv, dist)
+!    deallocate(nacv)
+    deallocate(dist)
     deallocate(exact_forces)
     deallocate(F)
     deallocate(site_energies, couplings, adiab_c, adiab_pop)
