@@ -457,7 +457,7 @@ CONTAINS
      COMPLEX(KIND=dp), dimension(:), allocatable :: ctin
      REAL(KIND=dp), dimension(:,:), allocatable ::  Atp, Btp, coms, siteenergies
      REAL(KIND=dp), DIMENSION(:), ALLOCATABLE ::  scoefftot
-     REAL(KIND=dp), DIMENSION(:,:,:), ALLOCATABLE :: F
+!     REAL(KIND=dp), DIMENSION(:,:,:), ALLOCATABLE :: F
      LOGICAL                                      :: decohere, analytics
      INTEGER                                      :: new_state , ELsteps   
      REAL(KIND=dp)                                :: dR, times 
@@ -559,7 +559,7 @@ CONTAINS
      !Naming convention: At = A(t), Atp = A(t+1), Atm = A(t-1), etc
      allocate(Atp(4,atoms))
      allocate(Btp(4,atoms))
-     allocate(F(3,natom,mol)) !array of diagonal atomic forces
+!     allocate(F(3,natom,mol)) !array of diagonal atomic forces
      !these arrays are data for the non-adiabatic coupling calculation
      !they help efficiency by telling the program which atoms are connected
      !and thus which pairs to carry out the calculation for
@@ -725,7 +725,7 @@ CONTAINS
      !> HOP ROUTINE IS. 
      DO imol=1,mol
         DO iatom=1, natom
-           F(:,iatom,imol) =  global_forces(imol)%forces(:,iatom)
+           aom_env%F(:,iatom,imol) =  global_forces(imol)%forces(:,iatom)
         ENDDO
      ENDDO
 
@@ -846,7 +846,7 @@ times = DBLE(itimes)
      !RESULT OF THE SURFACE HOP ROUTINE IS.
      print*, "FOBSH| ACTIVE STATE = ", active_state
      call calcforces(state=active_state,Hin=-AIMAG(aom_env%H_tp), C=aom_env%C_tp, nacv=aom_env%nacv, atoms=atoms, & 
-                     scaling=scaling, cbar=cbar, Fin=F, forces_adiab=aom_env%forces_adiab, &
+                     scaling=scaling, cbar=cbar, Fin=aom_env%F, forces_adiab=aom_env%forces_adiab, &
                      ext_pres=aom_env%ext_pres)
 
      IF (analytics) THEN
@@ -918,7 +918,7 @@ times = DBLE(itimes)
 !    deallocate(nacv)
     deallocate(dist)
     deallocate(exact_forces)
-    deallocate(F)
+!    deallocate(F)
     deallocate(site_energies, couplings, adiab_c, adiab_pop)
     DEALLOCATE(positions_com_tp)
     DEALLOCATE(velocities_com_tp)
