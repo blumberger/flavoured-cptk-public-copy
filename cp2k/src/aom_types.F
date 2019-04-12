@@ -143,7 +143,7 @@ END TYPE adiab_nace_env_type
 !> Information for the overlap method: calculate at the first timestep
      INTEGER, DIMENSION(:), POINTER           :: elements, atomlist
      INTEGER, DIMENSION(:,:,:,:), POINTER     :: neighbourlist
-     integer, dimension(:,:), POINTER         :: connlist1, connlist2, bneighbour
+     integer, dimension(:,:), POINTER         :: connlist1, connlist2, bneighbour, aneighbour
      REAL(KIND=dp), DIMENSION(:,:), POINTER   :: pcoeffs
      REAL(KIND=dp), DIMENSION(:), POINTER     :: scoeffs
      LOGICAL, DIMENSION(:), POINTER           :: ext_pres

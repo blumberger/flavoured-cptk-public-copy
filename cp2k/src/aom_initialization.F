@@ -197,9 +197,11 @@ CONTAINS
      c = nadiab*aom_atoms !> Numbers of active atoms
 
      ALLOCATE(aom_env%elements(c))
-     ALLOCATE(aom_env%neighbourlist(nadiab, nadiab,0:aom_atoms,0:aom_atoms))
+!     ALLOCATE(aom_env%neighbourlist(nadiab, nadiab,0:aom_atoms,0:aom_atoms))
      ALLOCATE(aom_env%connlist1(4,aom_atoms))
 !     ALLOCATE(aom_env%bneighbour(3,0:aom_atoms))
+     allocate(aom_env%aneighbour(0:atoms,0:atoms))
+     allocate(aom_env%bneighbour(0:atoms,0:atoms))
      ALLOCATE(aom_env%pcoeffs(aom_atoms,norbitals))
      ALLOCATE(aom_env%scoeffs(aom_atoms))
 
@@ -446,7 +448,7 @@ CONTAINS
 
      integer :: coord 
      integer :: mol, i, j, k, l, m, d, atoms, c,  first_diabat, active_state, mat, orb
-     integer, dimension(:,:), allocatable :: NN,  aneighbour, bneighbour  
+     integer, dimension(:,:), allocatable :: NN!,  aneighbour, bneighbour  
      REAL(KIND=dp) :: cutoff_sites, cutoff_connect, scaling, deltatMD, deltatE
      REAL(KIND=dp) :: S
      REAL(KIND=dp)    :: cbar, minao
@@ -563,12 +565,12 @@ CONTAINS
      !these arrays are data for the non-adiabatic coupling calculation
      !they help efficiency by telling the program which atoms are connected
      !and thus which pairs to carry out the calculation for
-     allocate(aneighbour(0:atoms,0:atoms))
-     allocate(bneighbour(0:atoms,0:atoms))
-     aneighbour = 0
-     bneighbour = 0
+!     allocate(aneighbour(0:atoms,0:atoms))
+!     allocate(bneighbour(0:atoms,0:atoms))
+     aom_env%aneighbour = 0
+     aom_env%bneighbour = 0
      !allocate(neighbourlist(mol,mol,0:atoms,0:atoms))
-     aom_env%neighbourlist = 0
+!     aom_env%neighbourlist = 0
 
 
      !READ THE COORDINATES, ENERGIES AND STATE
@@ -626,6 +628,7 @@ CONTAINS
 
      !CALCULATE THE HAMILTONIAN AND THE NACV
      do i=1,mol
+print *, "mol", i
                !create the array of all its atomic coordinates at t
                !numerical factor converts from Angstroms into Bohr radii
                Atp(1,1:atoms) = dble(aom_env%elements((i-1)*atoms+1:i*atoms))
@@ -650,11 +653,14 @@ CONTAINS
                          do m=1,orb
                               call sab_screen_new(Atp, aom_env%atomlist, aom_env%connlist1, pcoeffsrun(:,orb*(i-1)+d,3),&
                               & aom_env%atomlist, Btp, aom_env%atomlist, aom_env%connlist1, pcoeffsrun(:,orb*(k-1)+m,3),&
-                              & aneighbour(:,1:atoms), bneighbour(:,1:atoms), minao)
+                              & aom_env%aneighbour(:,1:atoms), aom_env%bneighbour(:,1:atoms), minao)
                          end do
                     end do
-                    aom_env%neighbourlist(i,k,:,1:atoms) = bneighbour(:,1:atoms)
-                    aom_env%neighbourlist(k,i,:,1:atoms) = aneighbour(:,1:atoms)
+!print *, "bneighbour", bneighbour(i,0)
+!                    aom_env%neighbourlist(i,k,:,1:atoms) = aom_env%bneighbour(:,1:atoms)
+!print *, "bneighbour", bneighbour(i,1:atoms)
+!                    aom_env%neighbourlist(k,i,:,1:atoms) = aom_env%aneighbour(:,1:atoms)
+!print *, "aneighbour", aneighbour(i,1:atoms)
                     if (NN(i,k) == 1) then
                          !first the diagonals
                          if (i == k) then
@@ -692,7 +698,8 @@ CONTAINS
                                              aom_env%nacv(1:3,orb*(k-1)+d,(i-1)*atoms+1:i*atoms), &
                                              aom_env%nacv(1:3,orb*(i-1)+m,(k-1)*atoms+1:k*atoms), &
                                              Btp, aom_env%atomlist, aom_env%connlist1, pcoeffsrun(1:atoms,orb*(k-1)+m,3),&
-                                             aom_env%scoeffs, aom_env%neighbourlist(k,i,:,:), aom_env%neighbourlist(i,k,:,:), dR, &
+                                             !aom_env%scoeffs, aom_env%neighbourlist(k,i,:,:), aom_env%neighbourlist(i,k,:,:), dR, &
+                                             aom_env%scoeffs, aom_env%aneighbour(:,:), aom_env%bneighbour(:,:), dR, &
                                              do_random, aom_env)
                                         end do
                                    end do

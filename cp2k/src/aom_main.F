@@ -273,7 +273,7 @@ CONTAINS
 
      !> CALCULATE THE HAMILTONIAN, THE STTP MATRIX AND THE NACV
      CALL calc_Xmatrix_elements(aom_env, itimes, atoms, mol, dR, do_random, cbar, &
-                      scaling, PC_allrvecs, orb)
+                      scaling, PC_allrvecs, orb, minao)
 
 !print *, "Stptp"
 !CALL print_matrix_standard_out(aom_env%Stptp)
@@ -513,7 +513,7 @@ END SUBROUTINE calc_coms_and_nlist
 
 
 SUBROUTINE calc_Xmatrix_elements(aom_env, itimes, atoms, mol, dR, do_random, cbar, &
-                      scaling, PC_allrvecs, orb)
+                      scaling, PC_allrvecs, orb, minao)
 
      TYPE(aom_env_type)                      :: aom_env
      INTEGER, POINTER                        :: itimes
@@ -522,6 +522,7 @@ SUBROUTINE calc_Xmatrix_elements(aom_env, itimes, atoms, mol, dR, do_random, cba
      REAL(KIND=dp), intent(in)                   :: dR  
      LOGICAL, intent(in)                         :: do_random
      REAL(KIND=dp), intent(in)                   :: cbar
+     REAL(KIND=dp), intent(in)                   :: minao
      REAL(KIND=dp), intent(in) :: scaling
      real(kind=dp), DIMENSION(:,:), allocatable, intent(out) :: PC_allrvecs
 
@@ -589,6 +590,19 @@ SUBROUTINE calc_Xmatrix_elements(aom_env, itimes, atoms, mol, dR, do_random, cba
                          end do
                     end if
                     !neighbourlist(:,:,:,:) = aom_env%neighbourlist(:,:,:,:)
+
+                    !!recalculate neighbouring lists from scratch 
+                    do d=1,orb
+                         do m=1,orb
+                              call sab_screen_new(aom_env%Atp, aom_env%atomlist, &
+                               aom_env%connlist1, aom_env%pcoeffsrun(:,orb*(i-1)+d,3),&
+                              & aom_env%atomlist, aom_env%Btp, aom_env%atomlist, &
+                               aom_env%connlist1, aom_env%pcoeffsrun(:,orb*(k-1)+m,3),&
+                              & aom_env%aneighbour(:,1:atoms), aom_env%bneighbour(:,1:atoms), & 
+                                                                              minao)
+                         end do
+                    end do
+
                     !only call overlap if neighbours list says so
                     if (aom_env%NN(i,k) == 1) then
                          !first the diagonals
@@ -761,8 +775,10 @@ SUBROUTINE off_diagonal_elem(aom_env,i,k,orb,itimes, atoms, &
                         aom_env%nacv(1:3,orb*(i-1)+m,(k-1)*atoms+1:k*atoms), &
                         aom_env%Btp, aom_env%atomlist, aom_env%connlist1, &
                         aom_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3), &
-                         aom_env%scoeffs, aom_env%neighbourlist(k,i,:,:), &
-                                  aom_env%neighbourlist(i,k,:,:), dR, &
+                         !aom_env%scoeffs, aom_env%neighbourlist(k,i,:,:), &
+                         !         aom_env%neighbourlist(i,k,:,:), dR, &
+                         aom_env%scoeffs, aom_env%aneighbour(:,:), &
+                                          aom_env%bneighbour(:,:), dR, &
                          do_random, aom_env)
                         !> note that calc_dRSab uses a radom number to randomize
                         !forwards derivative in the NACV (this improves energy
