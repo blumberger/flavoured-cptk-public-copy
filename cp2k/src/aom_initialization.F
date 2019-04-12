@@ -628,7 +628,7 @@ CONTAINS
 
      !CALCULATE THE HAMILTONIAN AND THE NACV
      do i=1,mol
-print *, "mol", i
+!print *, "mol", i
                !create the array of all its atomic coordinates at t
                !numerical factor converts from Angstroms into Bohr radii
                Atp(1,1:atoms) = dble(aom_env%elements((i-1)*atoms+1:i*atoms))

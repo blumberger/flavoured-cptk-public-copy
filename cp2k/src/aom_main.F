@@ -591,17 +591,21 @@ SUBROUTINE calc_Xmatrix_elements(aom_env, itimes, atoms, mol, dR, do_random, cba
                     end if
                     !neighbourlist(:,:,:,:) = aom_env%neighbourlist(:,:,:,:)
 
-                    !!recalculate neighbouring lists from scratch 
-                    do d=1,orb
-                         do m=1,orb
-                              call sab_screen_new(aom_env%Atp, aom_env%atomlist, &
-                               aom_env%connlist1, aom_env%pcoeffsrun(:,orb*(i-1)+d,3),&
-                              & aom_env%atomlist, aom_env%Btp, aom_env%atomlist, &
-                               aom_env%connlist1, aom_env%pcoeffsrun(:,orb*(k-1)+m,3),&
-                              & aom_env%aneighbour(:,1:atoms), aom_env%bneighbour(:,1:atoms), & 
-                                                                              minao)
-                         end do
-                    end do
+                    !!recalculate neighbouring lists from scratch
+                    !! you could even reduce the times we calculate neighbouring
+                    !list even further
+                    if (mod(itimes-1, aom_env%multiple_time_step) .eq. 0) then 
+                       do d=1,orb
+                            do m=1,orb
+                                 call sab_screen_new(aom_env%Atp, aom_env%atomlist, &
+                                  aom_env%connlist1, aom_env%pcoeffsrun(:,orb*(i-1)+d,3),&
+                                 & aom_env%atomlist, aom_env%Btp, aom_env%atomlist, &
+                                  aom_env%connlist1, aom_env%pcoeffsrun(:,orb*(k-1)+m,3),&
+                                 & aom_env%aneighbour(:,1:atoms), aom_env%bneighbour(:,1:atoms), & 
+                                                                                 minao)
+                            end do
+                       end do
+                     end if
 
                     !only call overlap if neighbours list says so
                     if (aom_env%NN(i,k) == 1) then
