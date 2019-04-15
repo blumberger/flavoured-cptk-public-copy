@@ -594,7 +594,8 @@ SUBROUTINE calc_Xmatrix_elements(aom_env, itimes, atoms, mol, dR, do_random, cba
                     !!recalculate neighbouring lists from scratch
                     !! you could even reduce the times we calculate neighbouring
                     !list even further
-                    if (mod(itimes-1, aom_env%multiple_time_step) .eq. 0) then 
+                    if (mod(itimes-1, aom_env%multiple_time_step) .eq. 0 & 
+                          .and. aom_env%multiple_time_step .ne. 1) then 
                        do d=1,orb
                             do m=1,orb
                                  call sab_screen_new(aom_env%Atp, aom_env%atomlist, &
@@ -771,7 +772,8 @@ SUBROUTINE off_diagonal_elem(aom_env,i,k,orb,itimes, atoms, &
                     !file) they are considered a
                     !constant and taken from the prevous time step.
                     !Calcul of the NACV
-                    if (mod(itimes-1, aom_env%multiple_time_step) .eq. 0) then 
+                    if (mod(itimes-1, aom_env%multiple_time_step) .eq. 0 &
+                          .and. aom_env%multiple_time_step .ne. 1) then 
                         call calc_dRSab(aom_env%Atp, aom_env%atomlist, &
                                       aom_env%connlist1, &
                         aom_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3), aom_env%scoeffs, &
@@ -788,8 +790,26 @@ SUBROUTINE off_diagonal_elem(aom_env,i,k,orb,itimes, atoms, &
                         !forwards derivative in the NACV (this improves energy
                         !conservation by one/two order of magnitude. To be
                         !consistent with random sequence, one should:
-                   !else
-                         !call random generator function
+                       !else
+                             !call random generator function
+
+                   else if (aom_env%multiple_time_step .eq. 1) then 
+                        call calc_dRSab(aom_env%Atp, aom_env%atomlist, &
+                                      aom_env%connlist1, &
+                        aom_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3), aom_env%scoeffs, &
+                        aom_env%nacv(1:3,orb*(k-1)+d,(i-1)*atoms+1:i*atoms), &
+                        aom_env%nacv(1:3,orb*(i-1)+m,(k-1)*atoms+1:k*atoms), &
+                        aom_env%Btp, aom_env%atomlist, aom_env%connlist1, &
+                        aom_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3), &
+                         aom_env%scoeffs, aom_env%neighbourlist(k,i,:,:), &
+                                  aom_env%neighbourlist(i,k,:,:), dR, &
+                         do_random, aom_env)
+                        !> note that calc_dRSab uses a radom number to randomize
+                        !forwards derivative in the NACV (this improves energy
+                        !conservation by one/two order of magnitude. To be
+                        !consistent with random sequence, one should:
+                       !else
+                             !call random generator function
           
                     end if
                end do

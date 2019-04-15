@@ -302,6 +302,7 @@ CONTAINS
              r_val=aom_env%cbar)
 
 
+
      !> INITIALIZE THE RANDOM GENERATOR
      CALL section_vals_val_get(adiab_section,"SEED",i_val=input_seed)
      initial_seed(:,:) = REAL(input_seed,KIND=dp)
@@ -507,6 +508,9 @@ CONTAINS
      CALL section_vals_val_get(coupling_section,"RANDOM_DERIVATIVE", l_val=do_random)
      CALL section_vals_val_get(coupling_section,"CENTER_OF_MASS", l_val=keyword_translate)
 
+     CALL section_vals_val_get(adiab_section,"MULTIPLE_TIME_STEP",&
+             i_val=aom_env%multiple_time_step)
+
      scaling = aom_env%scaling
      cbar = aom_env%cbar
      atoms = aom_env%atoms !Number of atoms per site
@@ -625,6 +629,16 @@ CONTAINS
           end do
      end do
 
+     ! Allocate neighbouring list just at the first step as Jacob suggested 
+     !only if aom_env%multiple_time_step .eq. 1 otherwise we use Multiple time
+     !step feature and to save memory we recalculate bneighbour and aneighbour
+     !every N steps. This is done also for the NACV giving a huge speed-up. NOTE
+     !that in general is not convenient to recauclate neighboring list at each
+     !step because is to expensive to do and not useful.
+     if (aom_env%multiple_time_step .eq. 1) then 
+       allocate(aom_env%neighbourlist(mol,mol,0:atoms,0:atoms))
+       aom_env%neighbourlist = 0
+     end if 
 
      !CALCULATE THE HAMILTONIAN AND THE NACV
      do i=1,mol
@@ -656,11 +670,14 @@ CONTAINS
                               & aom_env%aneighbour(:,1:atoms), aom_env%bneighbour(:,1:atoms), minao)
                          end do
                     end do
+                    !store neighbouring list when we do not use MTS feature
+                    if (aom_env%multiple_time_step .eq. 1) then
 !print *, "bneighbour", bneighbour(i,0)
-!                    aom_env%neighbourlist(i,k,:,1:atoms) = aom_env%bneighbour(:,1:atoms)
+                        aom_env%neighbourlist(i,k,:,1:atoms) = aom_env%bneighbour(:,1:atoms)
 !print *, "bneighbour", bneighbour(i,1:atoms)
-!                    aom_env%neighbourlist(k,i,:,1:atoms) = aom_env%aneighbour(:,1:atoms)
+                        aom_env%neighbourlist(k,i,:,1:atoms) = aom_env%aneighbour(:,1:atoms)
 !print *, "aneighbour", aneighbour(i,1:atoms)
+                    end if 
                     if (NN(i,k) == 1) then
                          !first the diagonals
                          if (i == k) then
