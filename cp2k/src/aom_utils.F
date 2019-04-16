@@ -1911,8 +1911,8 @@ SUBROUTINE calc_hop_nacv(aom_env, hop_nacv, ext_old_state, ext_new_state, symmet
         INTEGER                                      :: old_state, new_state
         REAL(KIND=dp)                                :: scaling, cbar, diff_energy
         REAL(KIND=dp)                                :: E_old_state, E_new_state
-        REAL(KIND=dp), dimension(:,:,:), allocatable :: Fin
-        REAL(KIND=dp), dimension(:,:,:), allocatable   :: nacv
+        !REAL(KIND=dp), dimension(:,:,:), allocatable :: Fin
+        !REAL(KIND=dp), dimension(:,:,:), allocatable   :: nacv
         REAL(KIND=dp), dimension(:,:,:,:), allocatable :: Wprime
         integer, dimension(:,:), allocatable :: NN
         integer :: i, j, k, mat, d, l, atoms
@@ -1950,13 +1950,13 @@ SUBROUTINE calc_hop_nacv(aom_env, hop_nacv, ext_old_state, ext_new_state, symmet
 
         !allocate(DH(mat,mat,natom,3))
         !allocate(my_DP(mat,mat,natom,3)) 
-        allocate(nacv(3,mat, mat*atoms)) 
+        !allocate(nacv(3,mat, mat*atoms)) 
         allocate(F_1(3,natom))
         allocate(F_11(3,natom))
         allocate(F_2(3,natom))
         allocate(F_22(3,natom))
         allocate(F_3(3,natom))
-        allocate(Fin(3,natom, mat))
+        !allocate(Fin(3,natom, mat))
         allocate(hop_nacv(3, natom)) 
 
         scaling = aom_env%scaling
@@ -1965,8 +1965,8 @@ SUBROUTINE calc_hop_nacv(aom_env, hop_nacv, ext_old_state, ext_new_state, symmet
         S = aom_env%Stptp
         C = aom_env%C_tp
         
-        nacv = aom_env%nacv
-        Fin = aom_env%F
+        !nacv = aom_env%nacv
+        !Fin = aom_env%F
         ext_pres = aom_env%ext_pres       
         IF (PRESENT(ext_old_state)) THEN
            old_state = ext_old_state
@@ -2013,7 +2013,7 @@ SUBROUTINE calc_hop_nacv(aom_env, hop_nacv, ext_old_state, ext_new_state, symmet
                        IF (ext_pres(j)) THEN
                           IF (i.ne.num_mol) THEN
                              !Wprime(k,l,j,d) = Wprime(k,l,j,d) + my_DP(i,num_mol,j,d) &
-                             Wprime(k,l,j,d) = Wprime(k,l,j,d) + nacv(d, i, num_j) &
+                             Wprime(k,l,j,d) = Wprime(k,l,j,d) + aom_env%nacv(d, i, num_j) &
                                                *( LL(num_mol,k)*LL(i,l)  + LL(num_mol,l) * LL(i, k))
                           ENDIF
                        ENDIF
@@ -2043,13 +2043,13 @@ SUBROUTINE calc_hop_nacv(aom_env, hop_nacv, ext_old_state, ext_new_state, symmet
                  ENDIF
                  do i=1,mat
                     !F_1(d,j) = F_1(d,j) + C(i,old_state)*DH(i,i,j,d)*C(i,new_state)*diff_energy
-                    F_1(d,j) = F_1(d,j) + C(i,old_state)*Fin(d,j,i)*C(i,new_state)*diff_energy
+                    F_1(d,j) = F_1(d,j) + C(i,old_state)*aom_env%F(d,j,i)*C(i,new_state)*diff_energy
                     IF (ext_pres(j)) THEN
                        !F_2(d, j) = F_2(d,j) + X(i, old_state) * nacv(d, i, num_mol, j) * X( num_mol, new_state) 
-                       F_2(d, j) = F_2(d,j) + X(i, old_state) * nacv(d, i, num_j) * X( num_mol, new_state) 
+                       F_2(d, j) = F_2(d,j) + X(i, old_state) * aom_env%nacv(d, i, num_j) * X( num_mol, new_state) 
                        IF (i.ne.num_mol) THEN
                           !F_11(d,j) = F_11(d,j) + diff_energy * DH(i,num_mol,j,d) * (              &
-                          F_11(d,j) = F_11(d,j) + diff_energy * convert_nacv*nacv(d, i, num_j) * (              &
+                          F_11(d,j) = F_11(d,j) + diff_energy * convert_nacv*aom_env%nacv(d, i, num_j) * (              &
                                                  C(num_mol, new_state) * C(i, old_state) +   &
                                                  C(num_mol, old_state) * C(i,new_state) )
                        ENDIF
@@ -2117,12 +2117,12 @@ SUBROUTINE calc_hop_nacv(aom_env, hop_nacv, ext_old_state, ext_new_state, symmet
                  do i=1,mat
                     !F_1(d,j) = F_1(d,j) + C(i,old_state)*DH(i,i,j,d)*C(i,new_state)*diff_energy
                     ! Diagonal term, it depends on the forces
-                    F_1(d,j) = F_1(d,j) + C(i,old_state)*Fin(d,j,i)*C(i,new_state)*diff_energy
+                    F_1(d,j) = F_1(d,j) + C(i,old_state)*aom_env%F(d,j,i)*C(i,new_state)*diff_energy
                     IF (ext_pres(j)) THEN
                        IF (i.ne.num_mol) THEN
                          ! Of diagonal term, only for active atom j present in
                          ! molecule num_mol
-                         F_11(d,j) = F_11(d,j) + diff_energy * convert_nacv*nacv(d, i, num_j) * (              &
+                         F_11(d,j) = F_11(d,j) + diff_energy * convert_nacv*aom_env%nacv(d, i, num_j) * (&
                                                  C(num_mol, new_state) * C(i, old_state) +   &
                                                  C(num_mol, old_state) * C(i,new_state) )
                        ENDIF
