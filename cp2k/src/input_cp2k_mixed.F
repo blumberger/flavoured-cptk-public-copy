@@ -525,7 +525,33 @@ CONTAINS
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
+    ! OZ: enable C-S and S-S lookup tables keywords
 
+    CALL keyword_create(keyword, name="PPI_C_S_FILE_NAME",&
+         description="Pi-pi C-S AOM lookup table",&
+         usage="PPI_C_S_FILE_NAME <FILENAME>",type_of_var=lchar_t)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="PSIGMA_C_S_FILE_NAME",&
+         description="Sigma-pi C-S lookup table",&
+         usage="PPI_C_S_FILE_NAME <FILENAME>",type_of_var=lchar_t)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="PPI_S_S_FILE_NAME",&
+         description="Pi-pi S-S AOM lookup table",&
+         usage="PPI_S_S_FILE_NAME <FILENAME>",type_of_var=lchar_t)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="PSIGMA_S_S_FILE_NAME",&
+         description="Sigma-pi S-S lookup table",&
+         usage="PPI_S_S_FILE_NAME <FILENAME>",type_of_var=lchar_t)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    !-----------------------------------------------------------------------
 
     CALL keyword_create(keyword, name="_DEFAULT_KEYWORD_",&
          description="The HOMO coefficient in the format:"//&
