@@ -67,7 +67,7 @@ IMPLICIT NONE
 CONTAINS
 
     SUBROUTINE  adiab_fssh_routines(particles_mix, virial_mix, results_mix,      &
-                global_forces, energies_tp, virials, results, nforce_eval,     &
+                 energies_tp, virials, results, nforce_eval,     &
                 map_index, mapping_section, adiab_section, mixed_env, my_itimes, &
                 method_keyword, final_energy, atomic_kinds,      &
                 local_particles)
@@ -75,7 +75,7 @@ CONTAINS
     TYPE(particle_list_type), POINTER        :: particles_mix
     TYPE(virial_type), POINTER               :: virial_mix
     TYPE(cp_result_type), POINTER            :: results_mix
-    TYPE(mixed_force_type), DIMENSION(:), POINTER  :: global_forces
+!    TYPE(mixed_force_type), DIMENSION(:), POINTER  :: global_forces
     REAL(KIND=dp), DIMENSION(:), POINTER     :: energies_tp
     TYPE(virial_p_type), DIMENSION(:), &
       POINTER                                :: virials
@@ -114,8 +114,9 @@ CONTAINS
     LOGICAL                                  :: my_test_keyword
 
 
-    natom = SIZE(global_forces(1)%forces,2)
-!print *, "natom_inside_non_adiab_method", natom
+    !natom = SIZE(global_forces(1)%forces,2)
+    !> WARNING: we assume all force evals have the same number of atoms
+    natom = SIZE(mixed_env%aom_env%F(1,:,1))
     ALLOCATE(positions_tp(3,natom))
     ALLOCATE(velocities_tp(3,natom))
     ALLOCATE(forces_adiab(3,natom))
@@ -160,17 +161,18 @@ CONTAINS
            CALL create_aom_env(nadiab, aom_atoms, norbitals, natom, &
                                positions_tp, coupling_section, adiab_section, & 
                                aom_env)
-print *, "aom_env%F222222222222", mixed_env%aom_env%F
            aom_env%atoms = aom_atoms
            aom_env%deltat = MDtimestep
-           aom_env%natom = SIZE(global_forces(1)%forces,2)
+           !aom_env%natom = SIZE(global_forces(1)%forces,2)
+           aom_env%natom = natom
+
            !> instead of passing mixed_env to propagate_aom_namd_first_step we
            !could probably use a pinter like the one below, to fill
            !aom_env%F array
            !aom_env%F => mixed_env%aom_env%F
            CALL propagate_aom_namd_first_step(nadiab, aom_atoms, norbitals,     &
                      positions_tp, velocities_tp, energies_tp, aom_env, itimes, &
-                     global_forces, coupling_section, adiab_section,& 
+                      coupling_section, adiab_section,& 
                      my_bo_keyword, atomic_kinds, &
                      local_particles, my_test_keyword, method_keyword, mixed_env)
         ELSE
@@ -192,7 +194,7 @@ print *, "aom_env%F222222222222", mixed_env%aom_env%F
 !print *, "itimes", itimes
               CALL construct_ham_X_SH(nadiab, aom_atoms, norbitals,         &
                             positions_tp, energies_tp, aom_env, itimes,     &
-                            global_forces, coupling_section, adiab_section, & 
+                             coupling_section, adiab_section, & 
                             my_bo_keyword, atomic_kinds,                    &
                             local_particles, my_test_keyword)
            ENDIF
@@ -213,7 +215,8 @@ print *, "aom_env%F222222222222", mixed_env%aom_env%F
       CASE("CLASSICAL_PATH")
           CALL section_vals_val_get(adiab_section,"FIRST_DIABAT",&
                i_val=init)
-          particles_mix%els(jparticle)%f(:)= global_forces(init)%forces(:,iparticle)
+          !particles_mix%els(jparticle)%f(:)= global_forces(init)%forces(:,iparticle)
+          particles_mix%els(jparticle)%f(:)= mixed_env%aom_env%F(:,iparticle,init)
           final_energy = energies_tp(init)
       CASE("FROZEN_HAMILTONIAN")
           particles_mix%els(jparticle)%f(:)= 0.0D0

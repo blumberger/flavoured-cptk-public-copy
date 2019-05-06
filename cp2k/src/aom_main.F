@@ -145,7 +145,7 @@ CONTAINS
                                   positions_tp,  &
                                   energies_tp,  &
                                   aom_env, itimes, &
-                                  global_forces, coupling_section, &
+                                   coupling_section, &
                                   adiab_section, my_bo_keyword,                 & 
                                   atomic_kinds, local_particles,                &
                                   my_test_keyword)
@@ -157,7 +157,7 @@ CONTAINS
      REAL(kind=dp), DIMENSION(:),  POINTER          :: energies_tp
      TYPE(aom_env_type), INTENT(INOUT)              :: aom_env
      INTEGER, POINTER                               :: itimes
-     TYPE(mixed_force_type), DIMENSION(:), POINTER  :: global_forces
+     !TYPE(mixed_force_type), DIMENSION(:), POINTER  :: global_forces
      TYPE(section_vals_type), POINTER               :: coupling_section
      LOGICAL, INTENT(IN)                            :: my_bo_keyword
      TYPE(section_vals_type), POINTER               :: adiab_section
@@ -179,7 +179,7 @@ CONTAINS
      INTEGER                                      :: ELsteps   
      REAL(KIND=dp)                                :: dR, times 
      REAL(KIND=dp)                                :: decohere_criterion
-     INTEGER                                      :: imol, iatom, natom
+     INTEGER                                      :: imol,  natom
      REAL(kind=dp), DIMENSION(:,:), ALLOCATABLE   :: exact_forces
      REAL(kind=dp), DIMENSION(:), ALLOCATABLE     :: site_energies, couplings
      LOGICAL                                      :: keyword_translate
@@ -379,21 +379,12 @@ CONTAINS
                                  sh_print_env, aom_env)
      ENDIF
 
-     !CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE RESULT OF THE SURFACE
-     !HOP ROUTINE IS. 
      !DO imol=1,mol
      !   DO iatom=1, natom
      !      !aom_env%F(:,iatom,imol) =  global_forces(imol)%forces(:,iatom)
      !      aom_env%F(:,iatom,imol) =  aom_env%diagonal_F(:,iatom,imol)
      !   ENDDO
      !ENDDO
-print *, "AOM_ENV_FORCES"
-DO imol=1,mol
-    DO iatom=1, natom
-      print *, aom_env%F(1,iatom,imol)
-    ENDDO
-ENDDO
-
      print*, "FOBSH| ACTIVE STATE = ", aom_env%active_state
 
 
@@ -414,6 +405,8 @@ ENDDO
 !print *, "nacvy", aom_env%nacv(2,:,:)
 !print *, "nacvz", aom_env%nacv(3,:,:)
 
+     !CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE RESULT OF THE SURFACE
+     !HOP ROUTINE IS. 
      call calcforces(state=aom_env%active_state,Hin=-AIMAG(aom_env%H_tp), C=aom_env%C_tp, nacv=aom_env%nacv, &
                            atoms=atoms, & 
                            scaling=scaling, cbar=cbar, Fin=aom_env%F, forces_adiab=aom_env%forces_adiab, &

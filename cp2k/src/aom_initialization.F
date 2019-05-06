@@ -437,7 +437,7 @@ CONTAINS
                                   velocities_tp,  &
                                   energies_tp,  &
                                   aom_env, itimes, &
-                                  global_forces, coupling_section, &
+                                  coupling_section, &
                                   adiab_section, my_bo_keyword,  &
                                   atomic_kinds, local_particles,                &
                                   my_test_keyword, method_keyword, mixed_env)
@@ -449,7 +449,7 @@ CONTAINS
      REAL(kind=dp), DIMENSION(:),  POINTER          :: energies_tp
      TYPE(aom_env_type), INTENT(INOUT)              :: aom_env
      INTEGER, POINTER                               :: itimes
-     TYPE(mixed_force_type), DIMENSION(:), POINTER  :: global_forces
+!     TYPE(mixed_force_type), DIMENSION(:), POINTER  :: global_forces
      TYPE(section_vals_type), POINTER               :: coupling_section
      LOGICAL, INTENT(IN)                            :: my_bo_keyword
      TYPE(section_vals_type), POINTER               :: adiab_section
