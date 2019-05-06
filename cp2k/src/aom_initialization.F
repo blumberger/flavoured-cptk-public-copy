@@ -763,7 +763,8 @@ CONTAINS
      !> HOP ROUTINE IS. 
      DO imol=1,mol
         DO iatom=1, natom
-           aom_env%F(:,iatom,imol) =  global_forces(imol)%forces(:,iatom)
+           !aom_env%F(:,iatom,imol) =  global_forces(imol)%forces(:,iatom)
+           aom_env%F(:,iatom,imol) =  aom_env%diagonal_F(:,iatom,imol)
         ENDDO
      ENDDO
 

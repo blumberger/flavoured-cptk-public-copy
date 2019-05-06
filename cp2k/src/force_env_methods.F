@@ -880,6 +880,7 @@ CONTAINS
     TYPE(section_vals_type), POINTER         :: energy_decomp_section
     INTEGER                                  :: act_atoms, output_unit
     INTEGER, DIMENSION(:), POINTER           :: my_mol_index !CHANGE SAM
+    REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: diagonal_F
 
 
     NULLIFY(atomic_kinds, local_particles, molecule_set, molecule_kind_set, local_molecules)
@@ -1232,7 +1233,7 @@ CONTAINS
                 CALL add_energies_forces_mem_saver( energies_1_mol_list, energies, intra_forces_global, &
                                                       my_mol_index, act_atoms, &
                                                       global_forces, my_energies, my_global_forces, &
-                                                      molecule_kind_set, local_molecules, molecule_set )
+                                                      molecule_kind_set, local_molecules, molecule_set, diagonal_F )
 !stop
            ELSE
                 CALL section_vals_val_get(adiab_section, "DO_SPEEDUP_LJ", l_val=do_speedup_lj)
@@ -1244,7 +1245,7 @@ CONTAINS
                 my_global_forces, my_energies, virials, results, nforce_eval,&
                 map_index, mapping_section,adiab_section,mixed_env,my_itimes, &
                 adiab_keyword, mixed_energy%pot,atomic_kinds, &
-                local_particles)
+                local_particles, diagonal_F)
            !IF (do_speedup_lj) THEN
               DO iforce_eval=1, SIZE(my_global_forces)
                  DEALLOCATE(my_global_forces(iforce_eval)%forces)
@@ -1297,7 +1298,7 @@ CONTAINS
  SUBROUTINE add_energies_forces_mem_saver( energies_1_mol_list, energies, intra_forces_global, &
                                               my_mol_index, act_atoms, &
                                               global_forces, my_energies, my_global_forces,& 
-                                            molecule_kind_set, local_molecules, molecule_set )
+                                            molecule_kind_set, local_molecules, molecule_set, diagonal_F )
 
  !  TYPE(mixed_environment_type), OPTIONAL, &
  !     POINTER                                :: mixed_env
@@ -1398,7 +1399,7 @@ CONTAINS
 
                        diagonal_F(:,aoi,i) = diagonal_F(:,aoi,i) + &
                                   intra_forces_global(2,:,count_idx) - intra_forces_global(1,:,count_idx)
-print *, my_global_forces(i)%forces(:, aoi), diagonal_F(:,aoi,i)
+print *, my_global_forces(i)%forces(1, aoi), diagonal_F(1,aoi,i)
                        
                     END DO
                     used_mols(count2) = my_mol

@@ -70,12 +70,13 @@ CONTAINS
                 global_forces, energies_tp, virials, results, nforce_eval,     &
                 map_index, mapping_section, adiab_section, mixed_env, my_itimes, &
                 method_keyword, final_energy, atomic_kinds,      &
-                local_particles)
+                local_particles, diagonal_F)
 
     TYPE(particle_list_type), POINTER        :: particles_mix
     TYPE(virial_type), POINTER               :: virial_mix
     TYPE(cp_result_type), POINTER            :: results_mix
     TYPE(mixed_force_type), DIMENSION(:), POINTER  :: global_forces
+    REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: diagonal_F
     REAL(KIND=dp), DIMENSION(:), POINTER     :: energies_tp
     TYPE(virial_p_type), DIMENSION(:), &
       POINTER                                :: virials
@@ -163,6 +164,8 @@ CONTAINS
            aom_env%atoms = aom_atoms
            aom_env%deltat = MDtimestep
            aom_env%natom = SIZE(global_forces(1)%forces,2)
+           !> create pointer to the diagonal forces that are expensive to store
+           aom_env%diagonal_F => diagonal_F
 !print *, "itimes", itimes
            CALL propagate_aom_namd_first_step(nadiab, aom_atoms, norbitals,     &
                      positions_tp, velocities_tp, energies_tp, aom_env, itimes, &
@@ -172,6 +175,10 @@ CONTAINS
         ELSE
            !> Get the information for the previous timesteps
            aom_env = mixed_env%aom_env
+            
+           !> create pointer to the diagonal forces that are expensive to store
+           aom_env%diagonal_F => diagonal_F
+          
            !> Velocities are taken directly from the integrator, note from
            !> velocities_tp
            !aom_env%velocities_t = velocities_tp
