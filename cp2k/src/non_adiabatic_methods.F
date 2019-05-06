@@ -70,13 +70,13 @@ CONTAINS
                 global_forces, energies_tp, virials, results, nforce_eval,     &
                 map_index, mapping_section, adiab_section, mixed_env, my_itimes, &
                 method_keyword, final_energy, atomic_kinds,      &
-                local_particles, diagonal_F)
+                local_particles)
 
     TYPE(particle_list_type), POINTER        :: particles_mix
     TYPE(virial_type), POINTER               :: virial_mix
     TYPE(cp_result_type), POINTER            :: results_mix
     TYPE(mixed_force_type), DIMENSION(:), POINTER  :: global_forces
-    REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: diagonal_F
+    !REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: diagonal_F
     REAL(KIND=dp), DIMENSION(:), POINTER     :: energies_tp
     TYPE(virial_p_type), DIMENSION(:), &
       POINTER                                :: virials
@@ -157,27 +157,31 @@ CONTAINS
                 velocities_tp(:, jparticle) = particles_mix%els(jparticle)%v(:)
            ENDIF
         END DO
+print *, "aom_env%diagonal_F", mixed_env%aom_env%diagonal_F
         IF (my_itimes.eq.0) THEN
            CALL create_aom_env(nadiab, aom_atoms, norbitals, natom, &
                                positions_tp, coupling_section, adiab_section, & 
                                aom_env)
+print *, "aom_env%diagonal_F222222222222", mixed_env%aom_env%diagonal_F
            aom_env%atoms = aom_atoms
            aom_env%deltat = MDtimestep
            aom_env%natom = SIZE(global_forces(1)%forces,2)
            !> create pointer to the diagonal forces that are expensive to store
-           aom_env%diagonal_F => diagonal_F
+           aom_env%diagonal_F => mixed_env%aom_env%diagonal_F
+print *, "NOOWWW", aom_env%diagonal_F
+stop
 !print *, "itimes", itimes
            CALL propagate_aom_namd_first_step(nadiab, aom_atoms, norbitals,     &
                      positions_tp, velocities_tp, energies_tp, aom_env, itimes, &
                      global_forces, coupling_section, adiab_section,& 
                      my_bo_keyword, atomic_kinds, &
-                     local_particles, my_test_keyword, method_keyword)
+                     local_particles, my_test_keyword, method_keyword, mixed_env)
         ELSE
            !> Get the information for the previous timesteps
            aom_env = mixed_env%aom_env
             
            !> create pointer to the diagonal forces that are expensive to store
-           aom_env%diagonal_F => diagonal_F
+           !aom_env%diagonal_F => diagonal_F
           
            !> Velocities are taken directly from the integrator, note from
            !> velocities_tp

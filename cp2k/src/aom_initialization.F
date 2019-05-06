@@ -121,6 +121,7 @@ MODULE aom_initialization
 
      USE cp_output_handling,              ONLY: cp_print_key_unit_nr, &
                                                 cp_print_key_should_output
+     USE mixed_environment_types,         ONLY: mixed_environment_type
 
 
 #include "./base/base_uses.f90"
@@ -439,7 +440,7 @@ CONTAINS
                                   global_forces, coupling_section, &
                                   adiab_section, my_bo_keyword,  &
                                   atomic_kinds, local_particles,                &
-                                  my_test_keyword, method_keyword)
+                                  my_test_keyword, method_keyword, mixed_env)
 
      INTEGER, INTENT(IN)                            :: nadiab,  norbitals 
      INTEGER, INTENT(IN)                            :: aom_atoms
@@ -457,6 +458,7 @@ CONTAINS
      LOGICAL, INTENT(IN)                            :: my_test_keyword
      CHARACTER(LEN=default_string_length)           :: method_keyword
      !TYPE(atomic_kind_type), DIMENSION(:), POINTER  :: atomic_kind_set
+     TYPE(mixed_environment_type), INTENT(INOUT)    :: mixed_env
 
      CHARACTER(len=*), PARAMETER :: routineN ='propagate_aom_namd_first_step', &
      routineP = moduleN//':'//routineN
@@ -764,7 +766,7 @@ CONTAINS
      DO imol=1,mol
         DO iatom=1, natom
            !aom_env%F(:,iatom,imol) =  global_forces(imol)%forces(:,iatom)
-           aom_env%F(:,iatom,imol) =  aom_env%diagonal_F(:,iatom,imol)
+           aom_env%F(:,iatom,imol) =  mixed_env%aom_env%diagonal_F(:,iatom,imol)
         ENDDO
      ENDDO
 

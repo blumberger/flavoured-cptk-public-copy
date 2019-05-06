@@ -880,7 +880,6 @@ CONTAINS
     TYPE(section_vals_type), POINTER         :: energy_decomp_section
     INTEGER                                  :: act_atoms, output_unit
     INTEGER, DIMENSION(:), POINTER           :: my_mol_index !CHANGE SAM
-    REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: diagonal_F
 
 
     NULLIFY(atomic_kinds, local_particles, molecule_set, molecule_kind_set, local_molecules)
@@ -1233,7 +1232,7 @@ CONTAINS
                 CALL add_energies_forces_mem_saver( energies_1_mol_list, energies, intra_forces_global, &
                                                       my_mol_index, act_atoms, &
                                                       global_forces, my_energies, my_global_forces, &
-                                                      molecule_kind_set, local_molecules, molecule_set, diagonal_F )
+                                                      molecule_kind_set, local_molecules, molecule_set, mixed_env )
 !stop
            ELSE
                 CALL section_vals_val_get(adiab_section, "DO_SPEEDUP_LJ", l_val=do_speedup_lj)
@@ -1245,7 +1244,7 @@ CONTAINS
                 my_global_forces, my_energies, virials, results, nforce_eval,&
                 map_index, mapping_section,adiab_section,mixed_env,my_itimes, &
                 adiab_keyword, mixed_energy%pot,atomic_kinds, &
-                local_particles, diagonal_F)
+                local_particles)
            !IF (do_speedup_lj) THEN
               DO iforce_eval=1, SIZE(my_global_forces)
                  DEALLOCATE(my_global_forces(iforce_eval)%forces)
@@ -1298,13 +1297,13 @@ CONTAINS
  SUBROUTINE add_energies_forces_mem_saver( energies_1_mol_list, energies, intra_forces_global, &
                                               my_mol_index, act_atoms, &
                                               global_forces, my_energies, my_global_forces,& 
-                                            molecule_kind_set, local_molecules, molecule_set, diagonal_F )
+                                            molecule_kind_set, local_molecules, molecule_set, mixed_env)
 
- !  TYPE(mixed_environment_type), OPTIONAL, &
- !     POINTER                                :: mixed_env
+   TYPE(mixed_environment_type), OPTIONAL, &
+      POINTER                                :: mixed_env
    TYPE(mixed_force_type), DIMENSION(:), &
      POINTER                                :: global_forces
-   REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: diagonal_F
+   !REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: diagonal_F
    REAL(KIND=dp), DIMENSION(:), POINTER     :: energies
    TYPE(mixed_force_type), DIMENSION(:), &
      POINTER                                :: my_global_forces
@@ -1355,7 +1354,7 @@ CONTAINS
   natom = SIZE(global_forces(1)%forces(:,:), 2)
 
   ALLOCATE(used_mols(SIZE(energies_1_mol_list(1,:))))
-  ALLOCATE(diagonal_F(3,natom, SIZE(energies_1_mol_list(1,:))))
+  ALLOCATE(mixed_env%aom_env%diagonal_F(3,natom, SIZE(energies_1_mol_list(1,:))))
   count2 = 1
   count3 = 0
   used_mols(:) = -1
@@ -1370,7 +1369,7 @@ CONTAINS
       ALLOCATE(my_global_forces(i)%forces( 3,natom))
       my_global_forces(i)%forces = global_forces(1)%forces
 
-      diagonal_F(:,:,i) = global_forces(1)%forces
+      mixed_env%aom_env%diagonal_F(:,:,i) = global_forces(1)%forces
 
       nkind = SIZE ( molecule_kind_set )
       count3 = 0
@@ -1397,9 +1396,9 @@ CONTAINS
                        my_global_forces(i)%forces(:, aoi) = my_global_forces(i)%forces(:, aoi) + &
                                   intra_forces_global(2,:,count_idx) - intra_forces_global(1,:,count_idx)
 
-                       diagonal_F(:,aoi,i) = diagonal_F(:,aoi,i) + &
+                       mixed_env%aom_env%diagonal_F(:,aoi,i) = mixed_env%aom_env%diagonal_F(:,aoi,i) + &
                                   intra_forces_global(2,:,count_idx) - intra_forces_global(1,:,count_idx)
-print *, my_global_forces(i)%forces(1, aoi), diagonal_F(1,aoi,i)
+print *, my_global_forces(i)%forces(1, aoi), mixed_env%aom_env%diagonal_F(1,aoi,i)
                        
                     END DO
                     used_mols(count2) = my_mol
