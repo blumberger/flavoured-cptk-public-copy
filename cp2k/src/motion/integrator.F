@@ -663,8 +663,8 @@ CONTAINS
              CALL total_momentum(tmp%vel, atomic_kind_set, nparticle_kind, local_particles)!, force_env)
            
              !deassociate diagonal forces pointer
-             IF (ASSOCIATED(force_env%mixed_env%aom_env%diagonal_F)) then
-                DEALLOCATE(force_env%mixed_env%aom_env%diagonal_F)
+             IF (ASSOCIATED(force_env%mixed_env%aom_env%F)) then
+                DEALLOCATE(force_env%mixed_env%aom_env%F)
 print *, "DEALLOCATE DIAGONALF"
              END IF
 

@@ -76,7 +76,6 @@ CONTAINS
     TYPE(virial_type), POINTER               :: virial_mix
     TYPE(cp_result_type), POINTER            :: results_mix
     TYPE(mixed_force_type), DIMENSION(:), POINTER  :: global_forces
-    !REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: diagonal_F
     REAL(KIND=dp), DIMENSION(:), POINTER     :: energies_tp
     TYPE(virial_p_type), DIMENSION(:), &
       POINTER                                :: virials
@@ -157,19 +156,18 @@ CONTAINS
                 velocities_tp(:, jparticle) = particles_mix%els(jparticle)%v(:)
            ENDIF
         END DO
-print *, "aom_env%diagonal_F", mixed_env%aom_env%diagonal_F
         IF (my_itimes.eq.0) THEN
            CALL create_aom_env(nadiab, aom_atoms, norbitals, natom, &
                                positions_tp, coupling_section, adiab_section, & 
                                aom_env)
-print *, "aom_env%diagonal_F222222222222", mixed_env%aom_env%diagonal_F
+print *, "aom_env%F222222222222", mixed_env%aom_env%F
            aom_env%atoms = aom_atoms
            aom_env%deltat = MDtimestep
            aom_env%natom = SIZE(global_forces(1)%forces,2)
            !> instead of passing mixed_env to propagate_aom_namd_first_step we
            !could probably use a pinter like the one below, to fill
-           !aom_env%diagonal_F array
-           !aom_env%diagonal_F => mixed_env%aom_env%diagonal_F
+           !aom_env%F array
+           !aom_env%F => mixed_env%aom_env%F
            CALL propagate_aom_namd_first_step(nadiab, aom_atoms, norbitals,     &
                      positions_tp, velocities_tp, energies_tp, aom_env, itimes, &
                      global_forces, coupling_section, adiab_section,& 
@@ -179,9 +177,6 @@ print *, "aom_env%diagonal_F222222222222", mixed_env%aom_env%diagonal_F
            !> Get the information for the previous timesteps
            aom_env = mixed_env%aom_env
             
-           !> create pointer to the diagonal forces that are expensive to store
-           !aom_env%diagonal_F => diagonal_F
-          
            !> Velocities are taken directly from the integrator, note from
            !> velocities_tp
            !aom_env%velocities_t = velocities_tp

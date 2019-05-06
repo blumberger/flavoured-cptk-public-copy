@@ -227,7 +227,7 @@ CONTAINS
      !each step
      ALLOCATE(aom_env%nacv(3,mat, mat*aom_atoms))
 !     ALLOCATE(aom_env%nacv_t(3,mat, mat*aom_atoms))
-     allocate(aom_env%F(3,natom,mol)) !array of diagonal atomic forces
+!     allocate(aom_env%F(3,natom,mol)) !array of diagonal atomic forces
      ALLOCATE(aom_env%forces_adiab(3,natom))
      ALLOCATE(aom_env%forces_adiab_new(3,natom))
      ALLOCATE(aom_env%diabatic_nace_tp(mat,mat))
@@ -242,7 +242,7 @@ CONTAINS
      aom_env%siteenergies = 0.0_dp
      aom_env%nacv = 0.0_dp
 !     aom_env%nacv_t = 0.0_dp
-     aom_env%F = 0.0_dp
+ !    aom_env%F = 0.0_dp
      aom_env%forces_adiab = 0.0_dp
      aom_env%forces_adiab_new = 0.0_dp
      aom_env%diabatic_nace_tp = 0.0_dp
@@ -481,7 +481,7 @@ CONTAINS
      INTEGER                                      :: new_state , ELsteps   
      REAL(KIND=dp)                                :: dR, times 
      REAL(KIND=dp)                                :: decohere_criterion
-     INTEGER                                      :: imol, iatom, natom
+     INTEGER                                      :: imol,  natom
      REAL(kind=dp), DIMENSION(:,:), ALLOCATABLE   :: exact_forces
      LOGICAL                                      :: keyword_translate
      TYPE(sh_print_env_type)                      :: sh_print_env
@@ -763,12 +763,12 @@ CONTAINS
      
      !> first part: CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE RESULT OF THE SURFACE
      !> HOP ROUTINE IS. 
-     DO imol=1,mol
-        DO iatom=1, natom
-           !aom_env%F(:,iatom,imol) =  global_forces(imol)%forces(:,iatom)
-           aom_env%F(:,iatom,imol) =  mixed_env%aom_env%diagonal_F(:,iatom,imol)
-        ENDDO
-     ENDDO
+     !DO imol=1,mol
+     !   DO iatom=1, natom
+     !      !aom_env%F(:,iatom,imol) =  global_forces(imol)%forces(:,iatom)
+     !      aom_env%F(:,iatom,imol) =  mixed_env%aom_env%diagonal_F(:,iatom,imol)
+     !   ENDDO
+     !ENDDO
 
      !> PRINT
      !> print site energies 
@@ -887,7 +887,7 @@ times = DBLE(itimes)
      !RESULT OF THE SURFACE HOP ROUTINE IS.
      print*, "FOBSH| ACTIVE STATE = ", active_state
      call calcforces(state=active_state,Hin=-AIMAG(aom_env%H_tp), C=aom_env%C_tp, nacv=aom_env%nacv, atoms=atoms, & 
-                     scaling=scaling, cbar=cbar, Fin=aom_env%F, forces_adiab=aom_env%forces_adiab, &
+                     scaling=scaling, cbar=cbar, Fin=mixed_env%aom_env%F, forces_adiab=aom_env%forces_adiab, &
                      ext_pres=aom_env%ext_pres)
 
      IF (analytics) THEN

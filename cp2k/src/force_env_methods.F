@@ -1303,7 +1303,6 @@ CONTAINS
       POINTER                                :: mixed_env
    TYPE(mixed_force_type), DIMENSION(:), &
      POINTER                                :: global_forces
-   !REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: diagonal_F
    REAL(KIND=dp), DIMENSION(:), POINTER     :: energies
    TYPE(mixed_force_type), DIMENSION(:), &
      POINTER                                :: my_global_forces
@@ -1354,7 +1353,7 @@ CONTAINS
   natom = SIZE(global_forces(1)%forces(:,:), 2)
 
   ALLOCATE(used_mols(SIZE(energies_1_mol_list(1,:))))
-  ALLOCATE(mixed_env%aom_env%diagonal_F(3,natom, SIZE(energies_1_mol_list(1,:))))
+  ALLOCATE(mixed_env%aom_env%F(3,natom, SIZE(energies_1_mol_list(1,:))))
   count2 = 1
   count3 = 0
   used_mols(:) = -1
@@ -1369,7 +1368,7 @@ CONTAINS
       ALLOCATE(my_global_forces(i)%forces( 3,natom))
       my_global_forces(i)%forces = global_forces(1)%forces
 
-      mixed_env%aom_env%diagonal_F(:,:,i) = global_forces(1)%forces
+      mixed_env%aom_env%F(:,:,i) = global_forces(1)%forces
 
       nkind = SIZE ( molecule_kind_set )
       count3 = 0
@@ -1396,9 +1395,9 @@ CONTAINS
                        my_global_forces(i)%forces(:, aoi) = my_global_forces(i)%forces(:, aoi) + &
                                   intra_forces_global(2,:,count_idx) - intra_forces_global(1,:,count_idx)
 
-                       mixed_env%aom_env%diagonal_F(:,aoi,i) = mixed_env%aom_env%diagonal_F(:,aoi,i) + &
+                       mixed_env%aom_env%F(:,aoi,i) = mixed_env%aom_env%F(:,aoi,i) + &
                                   intra_forces_global(2,:,count_idx) - intra_forces_global(1,:,count_idx)
-print *, my_global_forces(i)%forces(1, aoi), mixed_env%aom_env%diagonal_F(1,aoi,i)
+print *, my_global_forces(i)%forces(1, aoi), mixed_env%aom_env%F(1,aoi,i)
                        
                     END DO
                     used_mols(count2) = my_mol
