@@ -1303,6 +1303,7 @@ CONTAINS
  !     POINTER                                :: mixed_env
    TYPE(mixed_force_type), DIMENSION(:), &
      POINTER                                :: global_forces
+   REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: diagonal_F
    REAL(KIND=dp), DIMENSION(:), POINTER     :: energies
    TYPE(mixed_force_type), DIMENSION(:), &
      POINTER                                :: my_global_forces
@@ -1350,8 +1351,10 @@ CONTAINS
  
 !print *, "SIZE(mixed_env%energies_1_mol_list(1,:))", SIZE(energies_1_mol_list(1,:))
 !print *, "SIZE(global_forces(i)%forces(:,:), 2)", SIZE(global_forces(2)%forces(:,:), 2)
+  natom = SIZE(global_forces(1)%forces(:,:), 2)
 
   ALLOCATE(used_mols(SIZE(energies_1_mol_list(1,:))))
+  ALLOCATE(diagonal_F(3,natom, SIZE(energies_1_mol_list(1,:))))
   count2 = 1
   count3 = 0
   used_mols(:) = -1
@@ -1362,11 +1365,12 @@ CONTAINS
 !print *, "LOOP", i
 !print *, "INTRA+LJ", energies(1), "   ", energies(2)
       my_energies(i) = energies(1) + energies_1_mol_list(2,i) - energies_1_mol_list(1,i)
-      natom = SIZE(global_forces(1)%forces(:,:), 2)
 !print *, "natom", natom
       ALLOCATE(my_global_forces(i)%forces( 3,natom))
-      
       my_global_forces(i)%forces = global_forces(1)%forces
+
+      diagonal_F(:,:,i) = global_forces(1)%forces
+
       nkind = SIZE ( molecule_kind_set )
       count3 = 0
       MOL: DO ikind = 1, nkind !loop over molecules
@@ -1391,6 +1395,10 @@ CONTAINS
                        !print *, "force_already_there", global_forces(1)%forces(:,aoi)
                        my_global_forces(i)%forces(:, aoi) = my_global_forces(i)%forces(:, aoi) + &
                                   intra_forces_global(2,:,count_idx) - intra_forces_global(1,:,count_idx)
+
+                       diagonal_F(:,aoi,i) = diagonal_F(:,aoi,i) + &
+                                  intra_forces_global(2,:,count_idx) - intra_forces_global(1,:,count_idx)
+print *, my_global_forces(i)%forces(:, aoi), diagonal_F(:,aoi,i)
                        
                     END DO
                     used_mols(count2) = my_mol
@@ -1404,6 +1412,9 @@ CONTAINS
       END DO MOL
 
    END DO
+
+
+
 
  DEALLOCATE(used_mols)
 
