@@ -166,11 +166,10 @@ print *, "aom_env%diagonal_F222222222222", mixed_env%aom_env%diagonal_F
            aom_env%atoms = aom_atoms
            aom_env%deltat = MDtimestep
            aom_env%natom = SIZE(global_forces(1)%forces,2)
-           !> create pointer to the diagonal forces that are expensive to store
-           aom_env%diagonal_F => mixed_env%aom_env%diagonal_F
-print *, "NOOWWW", aom_env%diagonal_F
-stop
-!print *, "itimes", itimes
+           !> instead of passing mixed_env to propagate_aom_namd_first_step we
+           !could probably use a pinter like the one below, to fill
+           !aom_env%diagonal_F array
+           !aom_env%diagonal_F => mixed_env%aom_env%diagonal_F
            CALL propagate_aom_namd_first_step(nadiab, aom_atoms, norbitals,     &
                      positions_tp, velocities_tp, energies_tp, aom_env, itimes, &
                      global_forces, coupling_section, adiab_section,& 
