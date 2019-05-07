@@ -665,12 +665,12 @@ print *, "INIT_F", force_env%mixed_env%aom_env%F(1,:,1)
              force_env%mixed_env%aom_env%ctin_t = force_env%mixed_env%aom_env%ctin
              CALL total_momentum(tmp%vel, atomic_kind_set, nparticle_kind, local_particles)!, force_env)
 print *, "force_env%mixed_env%aom_env%F LAST_1", force_env%mixed_env%aom_env%F(1,:,1)      
-             !deassociate diagonal forces pointer
-             IF (ASSOCIATED(force_env%mixed_env%aom_env%F)) then
-                DEALLOCATE(force_env%mixed_env%aom_env%F)
-print *, "DEALLOCATE DIAGONALF"
-             END IF
-print *, "force_env%mixed_env%aom_env%F LAST_2", force_env%mixed_env%aom_env%F(1,:,1)           
+!             !deassociate diagonal forces pointer
+!             IF (ASSOCIATED(force_env%mixed_env%aom_env%F)) then
+!                DEALLOCATE(force_env%mixed_env%aom_env%F)
+!print *, "DEALLOCATE DIAGONALF"
+!             END IF
+!print *, "force_env%mixed_env%aom_env%F LAST_2", force_env%mixed_env%aom_env%F(1,:,1)           
        ELSE
 !> END CHANGE_AC
           ![NB] let nve work with force mixing which does not have consistent energies and forces

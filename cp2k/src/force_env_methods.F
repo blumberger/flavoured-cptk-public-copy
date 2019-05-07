@@ -1229,10 +1229,11 @@ CONTAINS
                !                   i_vals=my_mol_index)
                !print *, "my_mol_index", my_mol_index
 
+print *, "my_itimes", my_itimes
                 CALL add_energies_forces_mem_saver( energies_1_mol_list, energies, intra_forces_global, &
                                                       my_mol_index, act_atoms, &
                                                       global_forces, my_energies, &
-                                                      molecule_kind_set, local_molecules, molecule_set, mixed_env )
+                                                      molecule_kind_set, local_molecules, molecule_set, mixed_env, my_itimes)
            ELSE
                 CALL section_vals_val_get(adiab_section, "DO_SPEEDUP_LJ", l_val=do_speedup_lj)
                 CALL section_vals_val_get(adiab_section, "DO_SPEEDUP_INTRA", l_val=do_speedup_intra)
@@ -1288,7 +1289,7 @@ CONTAINS
  SUBROUTINE add_energies_forces_mem_saver( energies_1_mol_list, energies, intra_forces_global, &
                                               my_mol_index, act_atoms, &
                                               global_forces, my_energies, & 
-                                            molecule_kind_set, local_molecules, molecule_set, mixed_env)
+                                            molecule_kind_set, local_molecules, molecule_set, mixed_env, my_itimes)
 
    TYPE(mixed_environment_type), OPTIONAL, &
       POINTER                                :: mixed_env
@@ -1308,6 +1309,7 @@ CONTAINS
    INTEGER, ALLOCATABLE                     :: used_mols(:)
    INTEGER                                  :: act_atoms
    INTEGER, DIMENSION(:), POINTER           :: my_mol_index !CHANGE SAM
+   INTEGER, POINTER                         :: my_itimes !CHANGE_AC
 
    INTEGER :: i, natom, my_mol, count_idx, count2, count3, j
    INTEGER :: imol, nkind,  nmol_per_kind,  ikind, first_atom, &
@@ -1320,7 +1322,10 @@ CONTAINS
   natom = SIZE(global_forces(1)%forces(:,:), 2)
 
   ALLOCATE(used_mols(SIZE(energies_1_mol_list(1,:))))
-  ALLOCATE(mixed_env%aom_env%F(3,natom, SIZE(energies_1_mol_list(1,:))))
+  if(my_itimes .eq. 0) then
+     ALLOCATE(mixed_env%aom_env%F(3,natom, SIZE(energies_1_mol_list(1,:))))
+  end if
+
   count2 = 1
   count3 = 0
   used_mols(:) = -1
