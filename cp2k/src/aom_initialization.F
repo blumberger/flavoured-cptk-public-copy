@@ -227,7 +227,7 @@ CONTAINS
      !each step
      ALLOCATE(aom_env%nacv(3,mat, mat*aom_atoms))
 !     ALLOCATE(aom_env%nacv_t(3,mat, mat*aom_atoms))
-!     allocate(aom_env%F(3,natom,mol)) !array of diagonal atomic forces
+     allocate(aom_env%F(3,natom,mol)) !array of diagonal atomic forces
      ALLOCATE(aom_env%forces_adiab(3,natom))
      ALLOCATE(aom_env%forces_adiab_new(3,natom))
      ALLOCATE(aom_env%diabatic_nace_tp(mat,mat))

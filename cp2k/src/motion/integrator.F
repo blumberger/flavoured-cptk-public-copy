@@ -588,9 +588,6 @@ CONTAINS
                 force_env%mixed_env%aom_env%velocities_tp = tmp%vel
              ENDIF
 
-             IF (itimes.ge.1) THEN
-print *, "INIT_F", force_env%mixed_env%aom_env%F(1,:,1)
-             ENDIF
              ! 1. Calculate the forces, Hamiltonian, propagate the wf and try to
              !    hop. If we attempt to hop, we also calculate the forces in the
              !    new state.

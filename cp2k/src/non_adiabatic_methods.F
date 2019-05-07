@@ -169,7 +169,7 @@ print *, "mixed_env%aom_env%F_1", mixed_env%aom_env%F(1,:,1)
            !> instead of passing mixed_env to propagate_aom_namd_first_step we
            !could probably use a pinter like the one below, to fill
            !aom_env%F array
-           !aom_env%F => mixed_env%aom_env%F
+           aom_env%F = mixed_env%aom_env%F
            CALL propagate_aom_namd_first_step(nadiab, aom_atoms, norbitals,     &
                      positions_tp, velocities_tp, energies_tp, aom_env, itimes, &
                       coupling_section, adiab_section,& 
@@ -177,6 +177,9 @@ print *, "mixed_env%aom_env%F_1", mixed_env%aom_env%F(1,:,1)
                      local_particles, my_test_keyword, method_keyword, mixed_env)
         ELSE
            !> Get the information for the previous timesteps
+           !!!!!!!!!!!!!!!!!!!!!!TO BE MODIFIED!!!!!!!!!!!!!!!!!!!!!!!!!
+           !!! this is a very dangerous step one should use an interface
+           !subroutine to do that!!!!!!!!!!!
            aom_env = mixed_env%aom_env            
 print *, "aom_env%F_2", aom_env%F(1,:,1)
            !> Velocities are taken directly from the integrator, note from
