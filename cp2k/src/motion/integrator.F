@@ -661,7 +661,7 @@ CONTAINS
 
              force_env%mixed_env%aom_env%ctin_t = force_env%mixed_env%aom_env%ctin
              CALL total_momentum(tmp%vel, atomic_kind_set, nparticle_kind, local_particles)!, force_env)
-print *, "force_env%mixed_env%aom_env%F LAST_1", force_env%mixed_env%aom_env%F(1,:,1)      
+!print *, "force_env%mixed_env%aom_env%F LAST_1", force_env%mixed_env%aom_env%F(1,:,1)      
 !             !deassociate diagonal forces pointer
 !             IF (ASSOCIATED(force_env%mixed_env%aom_env%F)) then
 !                DEALLOCATE(force_env%mixed_env%aom_env%F)

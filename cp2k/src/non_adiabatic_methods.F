@@ -165,7 +165,7 @@ CONTAINS
            aom_env%deltat = MDtimestep
            !aom_env%natom = SIZE(global_forces(1)%forces,2)
            aom_env%natom = natom
-print *, "mixed_env%aom_env%F_1", mixed_env%aom_env%F(1,:,1)
+!print *, "mixed_env%aom_env%F_1", mixed_env%aom_env%F(1,:,1)
            !> instead of passing mixed_env to propagate_aom_namd_first_step we
            !could probably use a pinter like the one below, to fill
            !aom_env%F array
@@ -181,7 +181,7 @@ print *, "mixed_env%aom_env%F_1", mixed_env%aom_env%F(1,:,1)
            !!! this is a very dangerous step one should use an interface
            !subroutine to do that!!!!!!!!!!!
            aom_env = mixed_env%aom_env            
-print *, "aom_env%F_2", aom_env%F(1,:,1)
+!print *, "aom_env%F_2", aom_env%F(1,:,1)
            !> Velocities are taken directly from the integrator, note from
            !> velocities_tp
            !aom_env%velocities_t = velocities_tp
