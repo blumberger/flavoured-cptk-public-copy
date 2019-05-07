@@ -165,7 +165,7 @@ CONTAINS
            aom_env%deltat = MDtimestep
            !aom_env%natom = SIZE(global_forces(1)%forces,2)
            aom_env%natom = natom
-
+print *, "mixed_env%aom_env%F_1", mixed_env%aom_env%F(1,:,1)
            !> instead of passing mixed_env to propagate_aom_namd_first_step we
            !could probably use a pinter like the one below, to fill
            !aom_env%F array
@@ -177,8 +177,8 @@ CONTAINS
                      local_particles, my_test_keyword, method_keyword, mixed_env)
         ELSE
            !> Get the information for the previous timesteps
-           aom_env = mixed_env%aom_env
-            
+           aom_env = mixed_env%aom_env            
+print *, "aom_env%F_2", aom_env%F(1,:,1)
            !> Velocities are taken directly from the integrator, note from
            !> velocities_tp
            !aom_env%velocities_t = velocities_tp
