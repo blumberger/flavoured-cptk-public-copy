@@ -469,7 +469,7 @@ CONTAINS
      REAL(KIND=dp) :: S
      REAL(KIND=dp)    :: cbar, minao
 !     REAL(KIND=dp), dimension(:,:,:), allocatable :: nacv
-     REAL(KIND=dp), dimension(:,:,:), allocatable :: crds, pcoeffsrun
+     REAL(KIND=dp), dimension(:,:,:), POINTER :: crds, pcoeffsrun
      REAL(KIND=dp), dimension(:,:), allocatable :: Stptp
      REAL(KIND=dp), dimension(:,:), allocatable :: dist
      COMPLEX(KIND=dp), dimension(:), allocatable :: ctin

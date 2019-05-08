@@ -154,7 +154,7 @@ END TYPE adiab_nace_env_type
      REAL(KIND=dp), dimension(:,:,:), POINTER       :: crds
      REAL(KIND=dp), dimension(:,:), POINTER         :: dist
      INTEGER, DIMENSION(:,:), POINTER               :: NN
-     REAL(KIND=dp), dimension(:,:,:), allocatable   :: pcoeffsrun
+     REAL(KIND=dp), dimension(:,:,:), POINTER       :: pcoeffsrun
      REAL(KIND=dp), dimension(:,:), POINTER         :: At, Atm, Atp, Bt, Btm, & 
                                                        Btp, siteenergies
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: nacv!, nacv_t
