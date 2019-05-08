@@ -116,7 +116,7 @@ CONTAINS
 
     !natom = SIZE(global_forces(1)%forces,2)
     !> WARNING: we assume all force evals have the same number of atoms
-    natom = SIZE(mixed_env%aom_env%F(1,:,1))
+    natom = SIZE(mixed_env%F(1,:,1))
     ALLOCATE(positions_tp(3,natom))
     ALLOCATE(velocities_tp(3,natom))
     ALLOCATE(forces_adiab(3,natom))
@@ -165,23 +165,23 @@ CONTAINS
            aom_env%deltat = MDtimestep
            !aom_env%natom = SIZE(global_forces(1)%forces,2)
            aom_env%natom = natom
-!print *, "mixed_env%aom_env%F_1", mixed_env%aom_env%F(1,:,1)
+!print *, "mixed_env%F_1", mixed_env%F(1,:,1)
            !> instead of passing mixed_env to propagate_aom_namd_first_step we
            !could probably use a pinter like the one below, to fill
            !aom_env%F array
-           aom_env%F = mixed_env%aom_env%F
+           !aom_env%F = mixed_env%aom_env%F
            CALL propagate_aom_namd_first_step(nadiab, aom_atoms, norbitals,     &
                      positions_tp, velocities_tp, energies_tp, aom_env, itimes, &
                       coupling_section, adiab_section,& 
                      my_bo_keyword, atomic_kinds, &
-                     local_particles, my_test_keyword, method_keyword, mixed_env)
+                     local_particles, my_test_keyword, method_keyword, diagonal_F=mixed_env%F)
         ELSE
            !> Get the information for the previous timesteps
            !!!!!!!!!!!!!!!!!!!!!!TO BE MODIFIED!!!!!!!!!!!!!!!!!!!!!!!!!
            !!! this is a very dangerous step one should use an interface
            !subroutine to do that!!!!!!!!!!!
            aom_env = mixed_env%aom_env            
-!print *, "aom_env%F_2", aom_env%F(1,:,1)
+!print *, "mixed_env%F_2", mixed_env%F(1,:,1)
            !> Velocities are taken directly from the integrator, note from
            !> velocities_tp
            !aom_env%velocities_t = velocities_tp
@@ -199,7 +199,7 @@ CONTAINS
                             positions_tp, energies_tp, aom_env, itimes,     &
                              coupling_section, adiab_section, & 
                             my_bo_keyword, atomic_kinds,                    &
-                            local_particles, my_test_keyword)
+                            local_particles, my_test_keyword,diagonal_F=mixed_env%F)
            ENDIF
         ENDIF
         !> IMPORTANT: store all aom_env for the future timesteps
@@ -219,7 +219,7 @@ CONTAINS
           CALL section_vals_val_get(adiab_section,"FIRST_DIABAT",&
                i_val=init)
           !particles_mix%els(jparticle)%f(:)= global_forces(init)%forces(:,iparticle)
-          particles_mix%els(jparticle)%f(:)= mixed_env%aom_env%F(:,iparticle,init)
+          particles_mix%els(jparticle)%f(:)= mixed_env%F(:,iparticle,init)
           final_energy = energies_tp(init)
       CASE("FROZEN_HAMILTONIAN")
           particles_mix%els(jparticle)%f(:)= 0.0D0

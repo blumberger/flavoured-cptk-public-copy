@@ -261,13 +261,14 @@ SUBROUTINE calc_psi_after_correction(aom_env)
 
 END SUBROUTINE calc_psi_after_correction
 
-SUBROUTINE classically_forbidden_hops(active_state, aom_env, mat,  &
+SUBROUTINE classically_forbidden_hops(active_state, diagonal_F, aom_env, mat,  &
                   velocities_com_tp, local_particles, atomic_kinds, nparticle_kind, &
                           atomic_kind_set, class_forbidden_hop)
 
      INTEGER, INTENT(IN)                                :: active_state, mat
      TYPE(aom_env_type), INTENT(IN)                     :: aom_env
      REAL(kind=dp), DIMENSION(:,:), POINTER             :: velocities_com_tp
+     REAL(kind=dp), DIMENSION(:,:,:), INTENT(IN), POINTER   :: diagonal_F
      TYPE(distribution_1d_type), POINTER                :: local_particles
      TYPE(atomic_kind_list_type), POINTER, OPTIONAL     :: atomic_kinds
      INTEGER, INTENT(IN), OPTIONAL                      :: nparticle_kind
@@ -295,7 +296,7 @@ SUBROUTINE classically_forbidden_hops(active_state, aom_env, mat,  &
      do j=1, mat
            if ((j .gt. active_state) .and. (aom_env%E_tp(j) .le. E_cutoff)) then
                
-              CALL calc_hop_nacv(aom_env, hop_nacv, active_state, j, fast=.TRUE.)
+              CALL calc_hop_nacv(aom_env, diagonal_F, hop_nacv, active_state, j, fast=.TRUE.)
               CALL cal_delta_energy_nacv(atomic_kinds%n_els, velocities_com_tp, aom_env, atomic_kinds%els, &
                                 local_particles, hop_nacv, delta_energy, A, B, active_state, j)
               energy_conservation(j) = delta_energy
@@ -434,7 +435,7 @@ END SUBROUTINE classically_forbidden_hops
               local_particles, nparticle_kind = nparticle_kind, atomic_kind_set = atomic_kind_set)
    
         force_env%mixed_env%aom_env%ctin_before_deco = force_env%mixed_env%aom_env%ctin
-        CALL decohere_wf(adiab_section, force_env%mixed_env%aom_env, sh_print_env, itimes, &
+        CALL decohere_wf(adiab_section, force_env%mixed_env%aom_env, force_env%mixed_env%F, sh_print_env, itimes, &
                          velocities_com_tp, local_particles, nparticle_kind,atomic_kind_set)
         CALL section_vals_val_get(adiab_section,"SPURIOUS_TRANSFER_CORR", l_val=correct_transfer_keyword)
         
@@ -456,7 +457,7 @@ END SUBROUTINE classically_forbidden_hops
   END SUBROUTINE
 
  
-  SUBROUTINE decohere_wf(adiab_section, aom_env, sh_print_env, itimes, &
+  SUBROUTINE decohere_wf(adiab_section,aom_env, diagonal_F, sh_print_env, itimes, &
                          velocities_com_tp, local_particles, nparticle_kind, &
                          atomic_kind_set, atomic_kinds)
 
@@ -466,6 +467,7 @@ END SUBROUTINE classically_forbidden_hops
  !       TYPE(sh_env_type)                              :: sh_env
         INTEGER, POINTER                               :: itimes
         REAL(kind=dp), DIMENSION(:,:), POINTER             :: velocities_com_tp
+        REAL(kind=dp), DIMENSION(:,:,:), INTENT(IN), POINTER             :: diagonal_F
         TYPE(distribution_1d_type), POINTER                :: local_particles
         TYPE(atomic_kind_list_type), POINTER, OPTIONAL     :: atomic_kinds
         INTEGER, INTENT(IN), OPTIONAL                      :: nparticle_kind
@@ -495,7 +497,6 @@ END SUBROUTINE classically_forbidden_hops
         deltatMD = aom_env%deltat 
         !sh_print_env = aom_env%sh_print_env    
 
-
         SELECT CASE(wfprop_keyword)
         CASE("DIABATIC_BASIS")   
             SELECT CASE(deco_keyword)                                                          
@@ -506,14 +507,14 @@ END SUBROUTINE classically_forbidden_hops
             CASE("DAMPING")
               CALL calc_kinetic_tot(aom_env, velocities_com_tp, local_particles, atomic_kinds,&
                                     nparticle_kind, atomic_kind_set, K_tot, aom_env%ext_pres)
-              CALL eval_deco_tau(aom_env, tau, adiab_section, mol, K_tot, sh_print_env, &
+              CALL eval_deco_tau(aom_env,diagonal_F, tau, adiab_section, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds,nparticle_kind, atomic_kind_set) 
                    
               CALL  wf_damping(aom_env, tau, mol, deltatMD, sh_print_env)  
             CASE("COLLAPSE_WITHIN_DECOTIME")
               CALL calc_kinetic_tot(aom_env, velocities_com_tp, local_particles, atomic_kinds,&
                                     nparticle_kind, atomic_kind_set, K_tot, aom_env%ext_pres)
-              CALL eval_deco_tau(aom_env, tau, adiab_section, mol, K_tot, sh_print_env, &
+              CALL eval_deco_tau(aom_env,diagonal_F, tau, adiab_section, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds,nparticle_kind, atomic_kind_set) 
                    
               CALL  collapse_within_deco_time(tau, mol, deltatMD, aom_env)
@@ -531,7 +532,7 @@ END SUBROUTINE classically_forbidden_hops
             CASE("DAMPING")
               CALL calc_kinetic_tot(aom_env, velocities_com_tp, local_particles, atomic_kinds,&
                                     nparticle_kind, atomic_kind_set, K_tot, aom_env%ext_pres)
-              CALL eval_deco_tau(aom_env, tau, adiab_section, mol, K_tot, sh_print_env, &
+              CALL eval_deco_tau(aom_env,diagonal_F, tau, adiab_section, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds, nparticle_kind, atomic_kind_set) 
               CALL wf_damping_adiab_prop(aom_env, tau, mol, deltatMD, sh_print_env)                    
             CASE DEFAULT                                           
@@ -666,7 +667,7 @@ END SUBROUTINE classically_forbidden_hops
   END SUBROUTINE wf_damping_adiab_prop 
 
   
-  SUBROUTINE  eval_deco_tau(aom_env, tau, adiab_section, mol, K_tot, sh_print_env, &
+  SUBROUTINE  eval_deco_tau(aom_env, diagonal_F, tau, adiab_section, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds,nparticle_kind, atomic_kind_set)                    
 !    LOGICAL, INTENT(IN)                        :: edc_deco_time
 !    TYPE(sh_env_type)                          :: sh_env
@@ -682,6 +683,7 @@ END SUBROUTINE classically_forbidden_hops
     INTEGER, INTENT(IN), OPTIONAL                      :: nparticle_kind
     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE, INTENT(OUT) :: tau
     TYPE(section_vals_type), POINTER               :: adiab_section
+    REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: diagonal_F
 
 
 
@@ -776,7 +778,7 @@ END SUBROUTINE classically_forbidden_hops
                          !if there is mixing then we use force otherwise we use !pure dephasing
                          call calcforces(i ,-AIMAG(aom_env%H_tp), aom_env%C_tp, aom_env%nacv, &
                               aom_env%atoms, &
-                              aom_env%scaling, aom_env%cbar, aom_env%F, my_forces_adiab, &
+                              aom_env%scaling, aom_env%cbar, diagonal_F, my_forces_adiab, &
                              aom_env%ext_pres)
                          tau(i) = 0.0D0
                          DO iparticle_kind= 1, my_nparticle_kind
@@ -825,7 +827,7 @@ END SUBROUTINE classically_forbidden_hops
                          !if there is mixing then we use force otherwise we use !pure dephasing
                          call calcforces(i ,-AIMAG(aom_env%H_tp), aom_env%C_tp, aom_env%nacv, &
                               aom_env%atoms, &
-                              aom_env%scaling, aom_env%cbar, aom_env%F, my_forces_adiab, &
+                              aom_env%scaling, aom_env%cbar, diagonal_F, my_forces_adiab, &
                               aom_env%ext_pres)
                          tau(i) = 0.0D0
                          tau_forces(i) =  0.0D0

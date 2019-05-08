@@ -1229,16 +1229,15 @@ CONTAINS
                !                   i_vals=my_mol_index)
                !print *, "my_mol_index", my_mol_index
 
-print *, "my_itimes", my_itimes
                 CALL add_energies_forces_mem_saver( energies_1_mol_list, energies, intra_forces_global, &
                                                       my_mol_index, act_atoms, &
                                                       global_forces, my_energies, &
-                                                      molecule_kind_set, local_molecules, molecule_set, mixed_env, my_itimes)
+                                            molecule_kind_set, local_molecules, molecule_set, mixed_env, my_itimes)
            ELSE
                 CALL section_vals_val_get(adiab_section, "DO_SPEEDUP_LJ", l_val=do_speedup_lj)
                 CALL section_vals_val_get(adiab_section, "DO_SPEEDUP_INTRA", l_val=do_speedup_intra)
                 CALL add_energies_forces(energies, global_forces, my_energies, do_speedup_lj, &
-                                                                                     do_speedup_intra, mixed_env)
+                                                              do_speedup_intra, mixed_env, my_itimes)
            END IF
            !print*, "AC_energies", my_energies 
            CALL adiab_fssh_routines(particles_mix, virial_mix, results_mix,   &
@@ -1323,7 +1322,7 @@ print *, "my_itimes", my_itimes
 
   ALLOCATE(used_mols(SIZE(energies_1_mol_list(1,:))))
   if(my_itimes .eq. 0) then
-     ALLOCATE(mixed_env%aom_env%F(3,natom, SIZE(energies_1_mol_list(1,:))))
+     ALLOCATE(mixed_env%F(3,natom, SIZE(energies_1_mol_list(1,:))))
   end if
 
   count2 = 1
@@ -1342,7 +1341,7 @@ print *, "my_itimes", my_itimes
       !> we allocate diagonal forces array. All the atoms for a give state i
       !assume the value of the neutral force_field that contains: intra +
       !nonbonded interactions
-      mixed_env%aom_env%F(:,:,i) = global_forces(1)%forces
+      mixed_env%F(:,:,i) = global_forces(1)%forces
       nkind = SIZE ( molecule_kind_set )
       count3 = 0
       
@@ -1364,7 +1363,7 @@ print *, "my_itimes", my_itimes
                        !print *, "force_already_there", global_forces(1)%forces(:,aoi)
                        !my_global_forces(i)%forces(:, aoi) = my_global_forces(i)%forces(:, aoi) + &
                        !           intra_forces_global(2,:,count_idx) - intra_forces_global(1,:,count_idx)
-                       mixed_env%aom_env%F(:,aoi,i) = mixed_env%aom_env%F(:,aoi,i) + &
+                       mixed_env%F(:,aoi,i) = mixed_env%F(:,aoi,i) + &
                                   intra_forces_global(2,:,count_idx) - intra_forces_global(1,:,count_idx)
                     END DO
                     used_mols(count2) = my_mol
@@ -1375,12 +1374,13 @@ print *, "my_itimes", my_itimes
           END DO
       END DO MOL
    END DO
-!print *, "mixed_env%aom_env%F_0", mixed_env%aom_env%F(1,:,1)
+print *, "mixed_env%F_0", mixed_env%F(1,:,1)
  DEALLOCATE(used_mols)
 
   END SUBROUTINE add_energies_forces_mem_saver
 
-  SUBROUTINE add_energies_forces(energies, global_forces, my_energies,  do_speedup_lj, do_speedup_intra, mixed_env)
+  SUBROUTINE add_energies_forces(energies, global_forces, my_energies,  do_speedup_lj, do_speedup_intra, &
+                                                            mixed_env, my_itimes)
 
 !TYPE(force_env_type), POINTER                :: force_env
 
@@ -1392,6 +1392,7 @@ print *, "my_itimes", my_itimes
 !    TYPE(mixed_force_type), DIMENSION(:), &
 !      POINTER                                :: my_global_forces
     REAL(KIND=dp), DIMENSION(:), POINTER     :: my_energies
+    INTEGER, POINTER                         :: my_itimes 
 
 !    TYPE(force_env_type), POINTER            :: sub_force_envs
 !    TYPE(fist_env_type), POINTER             :: charge_fist_env, &
@@ -1416,13 +1417,15 @@ print *, "my_itimes", my_itimes
        !ALLOCATE(my_global_forces(SIZE(energies)-1))
       !> WARNING: here we assume that all force evals have the same number of atoms
        natom = SIZE(global_forces(1)%forces(:,:), 2)
-       ALLOCATE(mixed_env%aom_env%F(3,natom, SIZE(energies)-1))
+       if(my_itimes .eq. 0) then
+           ALLOCATE(mixed_env%F(3,natom, SIZE(energies)-1))
+       end if
        ALLOCATE(my_energies(SIZE(energies)-1))
        DO i = 2, SIZE(energies)
           my_energies(i-1) = energies(i) + energies(1)
           natom = SIZE(global_forces(i)%forces(:,:), 2)
           !ALLOCATE(my_global_forces(i-1)%forces( 3,natom))
-          mixed_env%aom_env%F(:,:,i-1) = global_forces(i)%forces + global_forces(1)%forces
+          mixed_env%F(:,:,i-1) = global_forces(i)%forces + global_forces(1)%forces
 !          my_global_forces(i-1)%forces = global_forces(i)%forces + global_forces(1)%forces
        ENDDO
 
@@ -1431,13 +1434,15 @@ print *, "my_itimes", my_itimes
        !ALLOCATE(my_global_forces( number_state ))
       !> WARNING: here we assume that all force evals have the same number of atoms
        natom = SIZE(global_forces(1)%forces(:,:), 2)
-       ALLOCATE(mixed_env%aom_env%F(3,natom, number_state))
+       if(my_itimes .eq. 0) then
+           ALLOCATE(mixed_env%F(3,natom, number_state))
+       end if
        ALLOCATE(my_energies(  number_state ))
        DO i = 1, number_state
           my_energies(i) =  energies(1) + energies(2*i) - energies(2*i + 1)
           natom = SIZE(global_forces(i)%forces(:,:), 2)
 !          ALLOCATE(my_global_forces(i)%forces( 3,natom))
-           mixed_env%aom_env%F(:,:,i) = global_forces(1)%forces + global_forces(2*i)%forces - global_forces(2*i + 1)%forces
+           mixed_env%F(:,:,i) = global_forces(1)%forces + global_forces(2*i)%forces - global_forces(2*i + 1)%forces
 !          my_global_forces(i)%forces =  global_forces(1)%forces + global_forces(2*i)%forces - global_forces(2*i + 1)%forces
        ENDDO
 
@@ -1445,13 +1450,15 @@ print *, "my_itimes", my_itimes
        !ALLOCATE(my_global_forces(SIZE(energies)))
       !> WARNING: here we assume that all force evals have the same number of atoms
        natom = SIZE(global_forces(1)%forces(:,:), 2)
-       ALLOCATE(mixed_env%aom_env%F(3,natom, SIZE(energies)))
+       if(my_itimes .eq. 0) then
+           ALLOCATE(mixed_env%F(3,natom, SIZE(energies)))
+       end if
        ALLOCATE(my_energies(SIZE(energies)))
        DO i = 1, SIZE(energies)
           my_energies(i) = energies(i)
           natom = SIZE(global_forces(i)%forces(:,:), 2)
 !          ALLOCATE(my_global_forces(i)%forces( 3,natom))
-          mixed_env%aom_env%F(:,:,i) = global_forces(i)%forces
+          mixed_env%F(:,:,i) = global_forces(i)%forces
 !          my_global_forces(i)%forces = global_forces(i)%forces
         ENDDO
     ELSE

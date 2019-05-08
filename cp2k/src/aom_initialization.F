@@ -108,8 +108,8 @@ MODULE aom_initialization
      USE non_adiabatic_utils,            ONLY: decohere_wf,  &
                                                propagate_wf, &
                                                propagate_adiab_wf, &
-                                                  prop_wf_HS_corr, & 
-                                               classically_forbidden_hops
+                                                  prop_wf_HS_corr!, & 
+                                               !classically_forbidden_hops
 
 
      USE parallel_rng_types,           ONLY: UNIFORM,&
@@ -227,7 +227,7 @@ CONTAINS
      !each step
      ALLOCATE(aom_env%nacv(3,mat, mat*aom_atoms))
 !     ALLOCATE(aom_env%nacv_t(3,mat, mat*aom_atoms))
-     allocate(aom_env%F(3,natom,mol)) !array of diagonal atomic forces
+!     allocate(aom_env%F(3,natom,mol)) !array of diagonal atomic forces
      ALLOCATE(aom_env%forces_adiab(3,natom))
      ALLOCATE(aom_env%forces_adiab_new(3,natom))
      ALLOCATE(aom_env%diabatic_nace_tp(mat,mat))
@@ -440,7 +440,7 @@ CONTAINS
                                   coupling_section, &
                                   adiab_section, my_bo_keyword,  &
                                   atomic_kinds, local_particles,                &
-                                  my_test_keyword, method_keyword, mixed_env)
+                                  my_test_keyword, method_keyword, diagonal_F)
 
      INTEGER, INTENT(IN)                            :: nadiab,  norbitals 
      INTEGER, INTENT(IN)                            :: aom_atoms
@@ -458,7 +458,6 @@ CONTAINS
      LOGICAL, INTENT(IN)                            :: my_test_keyword
      CHARACTER(LEN=default_string_length)           :: method_keyword
      !TYPE(atomic_kind_type), DIMENSION(:), POINTER  :: atomic_kind_set
-     TYPE(mixed_environment_type), INTENT(INOUT)    :: mixed_env
 
      CHARACTER(len=*), PARAMETER :: routineN ='propagate_aom_namd_first_step', &
      routineP = moduleN//':'//routineN
@@ -498,6 +497,7 @@ CONTAINS
      INTEGER                                    :: unit_nr
      !INTEGER                                    :: nparticle_kind
      !INTEGER, dimension(:), allocatable          :: class_forbidden_hop_tp
+     REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: diagonal_F
 
      NULLIFY(positions_com_tp, velocities_com_tp)
      NULLIFY(logger)
@@ -823,7 +823,7 @@ times = DBLE(itimes)
                  ctin(first_diabat) = CMPLX(1.0D0, 0.0D0,dp)  
              CASE("ADIABATIC_BASIS")
              !> CALCULATE NACV FOR ADIAB PROPAGATION AT t=0
-             CALL nacv_first_ts(aom_env, natom, mat, velocities_com_tp) 
+             CALL nacv_first_ts(aom_env,diagonal_F, natom, mat, velocities_com_tp) 
 !ONLY FOR THE TEST
                  ctin(:) = aom_env%C_tp(first_diabat,:)
              CASE DEFAULT
@@ -837,7 +837,7 @@ times = DBLE(itimes)
                  ctin(:) = aom_env%C_tp(:, active_state)
              CASE("ADIABATIC_BASIS")
                  !> CALCULATE NACV FOR ADIAB PROPAGATION AT t=0
-                 CALL nacv_first_ts(aom_env, natom, mat, velocities_com_tp) 
+                 CALL nacv_first_ts(aom_env, diagonal_F, natom, mat, velocities_com_tp) 
                  ctin(:) = CMPLX(0.0D0, 0.0D0,dp)
                  !> WARNING: THIS LINE HAS TO BE MODIFIED TO INCLUDE MORE ORBITAL PER MOLECULE
                  ctin(active_state) = CMPLX(1.0D0, 0.0D0,dp)
@@ -887,7 +887,7 @@ times = DBLE(itimes)
      !RESULT OF THE SURFACE HOP ROUTINE IS.
      print*, "FOBSH| ACTIVE STATE = ", active_state
      call calcforces(state=active_state,Hin=-AIMAG(aom_env%H_tp), C=aom_env%C_tp, nacv=aom_env%nacv, atoms=atoms, & 
-                     scaling=scaling, cbar=cbar, Fin=mixed_env%aom_env%F, forces_adiab=aom_env%forces_adiab, &
+                     scaling=scaling, cbar=cbar, Fin=diagonal_F, forces_adiab=aom_env%forces_adiab, &
                      ext_pres=aom_env%ext_pres)
 
      IF (analytics) THEN
@@ -967,12 +967,13 @@ times = DBLE(itimes)
   END SUBROUTINE propagate_aom_namd_first_step
 
   !Seems to change the nace not the nacv 
-  SUBROUTINE nacv_first_ts(aom_env, natom, mat, velocities_com_tp)
+  SUBROUTINE nacv_first_ts(aom_env, diagonal_F, natom, mat, velocities_com_tp)
 
      TYPE(aom_env_type), INTENT(INOUT)              :: aom_env
      INTEGER, intent(in)                            :: natom
      integer, intent(in)                            :: mat
      REAL(kind=dp), DIMENSION(:,:), INTENT(IN)      :: velocities_com_tp
+     REAL(kind=dp), DIMENSION(:,:,:), POINTER, INTENT(IN)      :: diagonal_F
 
      CHARACTER(len=*), PARAMETER :: routineN ='nacv_first_ts', &
      routineP = moduleN//':'//routineN
@@ -984,7 +985,7 @@ times = DBLE(itimes)
      do i =1, mat
          do j = 1, mat
               if (j .ge. i) then
-                  CALL calc_hop_nacv(aom_env, hop_nacv, i, j, fast=.TRUE.)
+                  CALL calc_hop_nacv(aom_env, diagonal_F, hop_nacv, i, j, fast=.TRUE.)
                   do iparticle=1,natom
                        do coord = 1,3
                             aom_env%adiab_nace_tp(i,j) = aom_env%adiab_nace_tp(i,j) + &

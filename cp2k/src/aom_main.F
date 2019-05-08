@@ -148,7 +148,7 @@ CONTAINS
                                    coupling_section, &
                                   adiab_section, my_bo_keyword,                 & 
                                   atomic_kinds, local_particles,                &
-                                  my_test_keyword)
+                                  my_test_keyword, diagonal_F)
 
 
      INTEGER, INTENT(IN)                            :: nadiab,  norbitals 
@@ -166,6 +166,7 @@ CONTAINS
      LOGICAL, INTENT(IN)                            :: my_test_keyword
      INTEGER                                    :: nparticle_kind
      TYPE(atomic_kind_type), DIMENSION(:), POINTER                       :: atomic_kind_set
+     REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: diagonal_F
 
      CHARACTER(len=*), PARAMETER :: routineN ='construct_ham_X_SH', &
      routineP = moduleN//':'//routineN
@@ -342,7 +343,7 @@ CONTAINS
            !consistent with the hopping probability, which is evaluated at tp.
            !These transition will be set to zero in the hamiltonian evolution
            !between t and tp.
-           CALL classically_forbidden_hops(aom_env%active_state, aom_env, mat,  &
+           CALL classically_forbidden_hops(aom_env%active_state,diagonal_F,  aom_env, mat,  &
                   velocities_com_tp, local_particles, atomic_kinds, nparticle_kind, &
                           atomic_kind_set, class_forbidden_hop_tp)
            CALL prop_wf_HS_corr(aom_env%ctin, aom_env, nadiab,  norbitals, ELsteps, &
@@ -409,12 +410,12 @@ CONTAINS
      !HOP ROUTINE IS. 
      call calcforces(state=aom_env%active_state,Hin=-AIMAG(aom_env%H_tp), C=aom_env%C_tp, nacv=aom_env%nacv, &
                            atoms=atoms, & 
-                           scaling=scaling, cbar=cbar, Fin=aom_env%F, forces_adiab=aom_env%forces_adiab, &
+                           scaling=scaling, cbar=cbar, Fin=diagonal_F, forces_adiab=aom_env%forces_adiab, &
                            ext_pres=aom_env%ext_pres)
      IF (aom_env%attempt_hop) THEN
          call calcforces(state=aom_env%new_state,Hin=-AIMAG(aom_env%H_tp), C=aom_env%C_tp, nacv=aom_env%nacv, &
                               atoms=atoms, & 
-                              scaling=scaling, cbar=cbar, Fin=aom_env%F, forces_adiab=aom_env%forces_adiab_new, &
+                              scaling=scaling, cbar=cbar, Fin=diagonal_F, forces_adiab=aom_env%forces_adiab_new, &
                               ext_pres=aom_env%ext_pres)
      ENDIF
 

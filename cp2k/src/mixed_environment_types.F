@@ -90,6 +90,7 @@ MODULE mixed_environment_types
 !> Add a new object into the mixed_environment_type
 !> Require for Non Adiabatic Molecular Dynamics
      TYPE (aom_env_type)                           :: aom_env
+     REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: F
 !> End CHANGE_AC
 
 
@@ -220,6 +221,7 @@ CONTAINS
     NULLIFY (mixed_env%sub_para_env)
     NULLIFY (mixed_env%sub_logger)
     NULLIFY (mixed_env%energies)
+    NULLIFY (mixed_env%F)
 !    NULLIFY (mixed_env%energies_1_mol_list)
     NULLIFY (mixed_env%par)
     NULLIFY (mixed_env%val)
