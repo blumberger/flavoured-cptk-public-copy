@@ -1321,6 +1321,11 @@ CONTAINS
   natom = SIZE(global_forces(1)%forces(:,:), 2)
 
   ALLOCATE(used_mols(SIZE(energies_1_mol_list(1,:))))
+ !> we do F allocation just at the first step and never again just to NOT
+ !allocate and deallocate this big array at every step. NOTE that this array is
+ !now never deallocated and just deallocated by the compiler at the very end.
+ !One should probably write a subroutine that deallocate all allocatable just
+ !this at the very end of cp2k
   if(my_itimes .eq. 0) then
      ALLOCATE(mixed_env%F(3,natom, SIZE(energies_1_mol_list(1,:))))
   end if
@@ -1363,6 +1368,9 @@ CONTAINS
                        !print *, "force_already_there", global_forces(1)%forces(:,aoi)
                        !my_global_forces(i)%forces(:, aoi) = my_global_forces(i)%forces(:, aoi) + &
                        !           intra_forces_global(2,:,count_idx) - intra_forces_global(1,:,count_idx)
+                       !> Additiona and subtruction scheme to use just two
+                       !Force_eval section instead of N and save a huge amount
+                       !of memory
                        mixed_env%F(:,aoi,i) = mixed_env%F(:,aoi,i) + &
                                   intra_forces_global(2,:,count_idx) - intra_forces_global(1,:,count_idx)
                     END DO
@@ -1405,12 +1413,6 @@ CONTAINS
     INTEGER :: i, natom, number_state
 
     
-!CALL force_env_get(force_env, sub_force_env=sub_force_envs)
-!CALL force_env_get(force_env=sub_force_envs(0), fist_env=neutral_fist_env)
-!CALL force_env_get(force_env=sub_force_envs(1), fist_env=charged_fist_env)
-!CALL fist_env_get(fist_env=neutral_fist_env, thermo=neutral_thermo)
-
-!pot_list_netural = neutral_thermo%pot_list
     NULLIFY( my_energies)
     if ((do_speedup_lj).AND.(.NOT.(do_speedup_intra))) then
        !ALLOCATE(my_global_forces(SIZE(energies)-1))

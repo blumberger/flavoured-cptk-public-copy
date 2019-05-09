@@ -668,7 +668,6 @@ print *, "ALLOCATION OF S MATRICES"
 
      !CALCULATE THE HAMILTONIAN AND THE NACV
      do i=1,mol
-!print *, "mol", i
                !create the array of all its atomic coordinates at t
                !numerical factor converts from Angstroms into Bohr radii
                Atp(1,1:atoms) = dble(aom_env%elements((i-1)*atoms+1:i*atoms))
@@ -698,11 +697,8 @@ print *, "ALLOCATION OF S MATRICES"
                     end do
                     !store neighbouring list when we do not use MTS feature
                     if (aom_env%multiple_time_step .eq. 1) then
-!print *, "bneighbour", bneighbour(i,0)
                         aom_env%neighbourlist(i,k,:,1:atoms) = aom_env%bneighbour(:,1:atoms)
-!print *, "bneighbour", bneighbour(i,1:atoms)
                         aom_env%neighbourlist(k,i,:,1:atoms) = aom_env%aneighbour(:,1:atoms)
-!print *, "aneighbour", aneighbour(i,1:atoms)
                     end if 
                     if (NN(i,k) == 1) then
                          !first the diagonals

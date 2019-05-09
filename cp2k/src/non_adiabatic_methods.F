@@ -165,7 +165,6 @@ CONTAINS
            aom_env%deltat = MDtimestep
            !aom_env%natom = SIZE(global_forces(1)%forces,2)
            aom_env%natom = natom
-!print *, "mixed_env%F_1", mixed_env%F(1,:,1)
            !> instead of passing mixed_env to propagate_aom_namd_first_step we
            !could probably use a pinter like the one below, to fill
            !aom_env%F array
@@ -181,7 +180,6 @@ CONTAINS
            !!! this is a very dangerous step one should use an interface
            !subroutine to do that!!!!!!!!!!!
            aom_env = mixed_env%aom_env            
-!print *, "mixed_env%F_2", mixed_env%F(1,:,1)
            !> Velocities are taken directly from the integrator, note from
            !> velocities_tp
            !aom_env%velocities_t = velocities_tp
@@ -194,7 +192,6 @@ CONTAINS
               !aom_env%old_state = -1
            ELSE
               !> Main CALL: calculate the Hamiltonian, propagate the electronic dynamics
-!print *, "itimes", itimes
               CALL construct_ham_X_SH(nadiab, aom_atoms, norbitals,         &
                             positions_tp, energies_tp, aom_env, itimes,     &
                              coupling_section, adiab_section, & 
@@ -202,7 +199,17 @@ CONTAINS
                             local_particles, my_test_keyword,diagonal_F=mixed_env%F)
            ENDIF
         ENDIF
-        !> IMPORTANT: store all aom_env for the future timesteps
+        !> IMPORTANT: store all aom_env for the future timesteps.
+        !> NOTE: this is also a tricky step, as the memory for
+        !mixed_env%aom_env object is allocated here. One should improve this
+        !interface subroutine. aom_env is a local structure not a pointer, in
+        !this case equal sign is copying the local structure aom_env (with all
+        !varibales inside it) to another local structure mixed_env%aom_env. In general
+        !for allocated variables inside aom_type.F (aom enviroment) this would
+        !take twice as much of the memory for each varibale. However since most
+        !of the variables inside aom_env are defined as pointers this operation
+        !takes for each variable just as much as the memory it takes to allocate
+        !the variable only once.
         mixed_env%aom_env=aom_env
     CASE DEFAULT
         CPABORT("There is no method to calculate the coupling")
