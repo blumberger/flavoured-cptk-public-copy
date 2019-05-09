@@ -175,7 +175,8 @@ CONTAINS
      INTEGER    :: input_seed
      TYPE(rng_stream_type), POINTER           :: rng_stream
      LOGICAL                                  :: continue_while
-     CHARACTER(LEN=default_string_length)     :: file_name_s_psigma, file_name_s_ppi, deco_keyword
+     CHARACTER(LEN=default_string_length)     :: file_name_s_psigma, file_name_s_ppi, deco_keyword,&
+                                                   prop_wf_keyword
      ! OZ: extra strings for C-S and S-S SAB calc
      CHARACTER(LEN=default_string_length)     :: file_name_s_psigma_C_S,file_name_s_ppi_C_S
      CHARACTER(LEN=default_string_length)     :: file_name_s_psigma_S_S,file_name_s_ppi_S_S
@@ -193,7 +194,7 @@ CONTAINS
      CALL section_vals_val_get(coupling_section,"CUT_OFF_CONNECTIVITY",&
              r_val=cutoff_connect)
      CALL section_vals_val_get(coupling_section,"RANDOM_DERIVATIVE", l_val=do_random)
-   
+     CALL section_vals_val_get(adiab_section,"RK_PROPAGATION", c_val=prop_wf_keyword) 
 
      mat = norbitals*nadiab !> Size of the vectorial space where the wavefunctions are projected
      c = nadiab*aom_atoms !> Numbers of active atoms
@@ -258,11 +259,20 @@ CONTAINS
      ALLOCATE(aom_env%H_tp(mat,mat))
      ALLOCATE(aom_env%Stt(mat,mat))
      ALLOCATE(aom_env%Stptp(mat,mat))
-     ALLOCATE(aom_env%Sttp(mat,mat))
-     ALLOCATE(aom_env%Stpt(mat,mat))
-     ALLOCATE(aom_env%Stmt(mat,mat))
-     ALLOCATE(aom_env%Sttm(mat,mat))
-     ALLOCATE(aom_env%Stmtm(mat,mat))
+     if (prop_wf_keyword .ne. "DIABATIC_RK_FAST") then
+     ! in case DIABATIC_RK_FAST diabatic nace are never calculated, neither in
+     ! the
+     ! propagate_wf nor in the adiabatic nace calculation for the hopping
+     ! probability
+     ! so that all the Sttp and co matrices are also not used, no point in
+     ! allocate them
+print *, "ALLOCATION OF S MATRICES"
+        ALLOCATE(aom_env%Sttp(mat,mat))
+        ALLOCATE(aom_env%Stpt(mat,mat))
+        ALLOCATE(aom_env%Stmt(mat,mat))
+        ALLOCATE(aom_env%Sttm(mat,mat))
+        ALLOCATE(aom_env%Stmtm(mat,mat))
+     end if
      ALLOCATE(aom_env%ctin(mat))
      ALLOCATE(aom_env%ctin_t(mat))
 
@@ -905,11 +915,6 @@ times = DBLE(itimes)
      ! so that all the Sttp and co matrices are also not used and so the memory
      ! allocate for thme can be deallocated 
          aom_env%no_diab_nace = .True.
-         DEALLOCATE(aom_env%Sttp)
-         DEALLOCATE(aom_env%Stpt)
-         DEALLOCATE(aom_env%Stmt)
-         DEALLOCATE(aom_env%Sttm)
-         DEALLOCATE(aom_env%Stmtm)
      CASE("DIABATIC_RK_DLI")
      CASE("ADIABATIC_RK")
      CASE("HS_CORRECTED_RK")  

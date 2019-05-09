@@ -1374,7 +1374,6 @@ CONTAINS
           END DO
       END DO MOL
    END DO
-print *, "mixed_env%F_0", mixed_env%F(1,:,1)
  DEALLOCATE(used_mols)
 
   END SUBROUTINE add_energies_forces_mem_saver
