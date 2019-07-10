@@ -1142,7 +1142,7 @@ END SUBROUTINE classically_forbidden_hops
      integer                                         :: mat 
 
 
-     CHARACTER(len=*), PARAMETER                     :: routineN ='propagate_wf', &
+     CHARACTER(len=*), PARAMETER                     :: routineN ='propagate_wf_nace_interpol', &
      routineP = moduleN//':'//routineN
 
      COMPLEX(KIND=dp), dimension(:), allocatable     :: ctout, ctotal
@@ -1273,47 +1273,52 @@ END SUBROUTINE classically_forbidden_hops
 !                                                 X2, deltatMD, NACE)
                     X2 = H_2 - D_2
      
-                    K2 = cmplx(0.0D0, 0.0D0,dp)
-                    K3 = cmplx(0.0D0, 0.0D0,dp)
-                    K4 = cmplx(0.0D0, 0.0D0,dp)
+                    !K2 = cmplx(0.0D0, 0.0D0,dp)
+                    !K3 = cmplx(0.0D0, 0.0D0,dp)
+                    !K4 = cmplx(0.0D0, 0.0D0,dp)
           
-                    !now that X has been found, use 4th order Runge-Kutta numerical integration method
-                    !aiming to find operator such that c(t+1) = (1 + operator)*c
+                    !!now that X has been found, use 4th order Runge-Kutta numerical integration method
+                    !!aiming to find operator such that c(t+1) = (1 + operator)*c
           
-                    !there are four terms in X: each is an increasing multiple. so first term is proportional to X(t),
-                    !second term is as X(t+deltat/2)*X(t), third term is as X(t+deltat/2)*X(t+deltat/2)*X(t),
-                    !fourth term is as X(t+deltat)*X(t+deltat/2)*X(t+deltat/2)*X(t)
-                    !this means each term is some X matrix times the previous term,
-                    !so only three more calls to ZGEMM are needed
-                    !the K matrices are the second, third and fourth Runge-Kutta terms
+                    !!there are four terms in X: each is an increasing multiple. so first term is proportional to X(t),
+                    !!second term is as X(t+deltat/2)*X(t), third term is as X(t+deltat/2)*X(t+deltat/2)*X(t),
+                    !!fourth term is as X(t+deltat)*X(t+deltat/2)*X(t+deltat/2)*X(t)
+                    !!this means each term is some X matrix times the previous term,
+                    !!so only three more calls to ZGEMM are needed
+                    !!the K matrices are the second, third and fourth Runge-Kutta terms
      
-                    alpha = cmplx(deltatE/2.0D0, 0.0D0,dp)
-                    beta = cmplx(0.0D0, 0.0D0,dp)
+                    !alpha = cmplx(deltatE/2.0D0, 0.0D0,dp)
+                    !beta = cmplx(0.0D0, 0.0D0,dp)
      
-                    !second term
-                    call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X12, mat, X1, &
-                    &mat, beta, K2, mat)
-                    K2 = K2 + X12
-                    
-                    !third term
-                    call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X12, mat, K2, &
-                    &mat, beta, K3, mat)
-                    K3 = K3 + X12
+                    !!second term
+                    !call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X12, mat, X1, &
+                    !&mat, beta, K2, mat)
+                    !K2 = K2 + X12
+                    !
+                    !!third term
+                    !call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X12, mat, K2, &
+                    !&mat, beta, K3, mat)
+                    !K3 = K3 + X12
      
-                    !fourth term
-                    alpha = cmplx(deltatE, 0.0D0,dp)
-                    call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X2, mat, K3, &
-                    &mat, beta, K4, mat)
-                    K4 = K4 + X2
+                    !!fourth term
+                    !alpha = cmplx(deltatE, 0.0D0,dp)
+                    !call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X2, mat, K3, &
+                    !&mat, beta, K4, mat)
+                    !K4 = K4 + X2
  
-                    !put everything together
-                    Ktot = Imat + (deltatE/6.0D0)*(X1 + 2*K2 + 2*K3 + K4)
+                    !!put everything together
+                    !Ktot = Imat + (deltatE/6.0D0)*(X1 + 2*K2 + 2*K3 + K4)
      
-                    !timestep electron propagation and print out
-                    !alpha = dcmplx(1.0D0, 0.0D0)
-                    alpha = cmplx(1.0D0, 0.0D0,dp)
-                    inc = 1
-                    call ZGEMV(zgemm_type, mat, mat, alpha, Ktot, mat, ctin, inc, beta, ctout, inc)
+                    !!timestep electron propagation and print out
+                    !!alpha = dcmplx(1.0D0, 0.0D0)
+                    !alpha = cmplx(1.0D0, 0.0D0,dp)
+                    !inc = 1
+                    !call ZGEMV(zgemm_type, mat, mat, alpha, Ktot, mat, ctin, inc, beta, ctout, inc)
+
+                    ! Call new (vector) RK4 method
+                    CALL RK4(ctin, X1, X12, X2, deltatE, mat)
+                    ctout = ctin(:)
+
                     ctmag = 0.0D0
                     ctcomp = cmplx(0.0D0, 0.0D0,dp)
                     do i=1,mat
@@ -1362,11 +1367,11 @@ END SUBROUTINE classically_forbidden_hops
 
 !DEALLOCATE
 !       DEALLOCATE(NACE)
-       deallocate(H_0, Hdiff, H_1, H_2, X1, X2, X12, Ktot, K2, K3, K4)
+       deallocate(H_0, Hdiff, H_1, H_2, X1, X2, X12)!, Ktot, K2, K3, K4)
        deallocate(D_0, Ddiff, D_1, D_2)
 !       deallocate(Sttdiff, Stptpdiff, Stmtmdiff, Sttpdiff, Sttmdiff)
 !       deallocate(Stt_int, Sttp_int, Stptp_int, Sttm_int, Stmtm_int)
-       deallocate(Imat)
+       !deallocate(Imat)
 !END DEALLOCATE
 
   END SUBROUTINE propagate_wf_diab_nace_interpol 
@@ -1439,7 +1444,7 @@ END SUBROUTINE classically_forbidden_hops
   !         the coupling for situations in which SH is sensible to use (i.e.
   !         outside of the hopping regime) so this subroutine is applicable to
   !         the majority of sims.
-  ! \author Sam, Matt
+  ! \author Sam (Matt editted RK4)
   ! \date   23/05/19
   !**********************************************************************************
   SUBROUTINE propagate_wf_fast(ctin, aom_env, nadiab,  norbitals, ELsteps, &
@@ -1570,8 +1575,6 @@ END SUBROUTINE classically_forbidden_hops
      COMPLEX(KIND=dp), dimension(:,:), allocatable   :: my_H_t, my_H_tp
      REAL(KIND=dp), dimension(:,:), allocatable      :: NACE
      COMPLEX(KIND=dp), dimension(:,:), allocatable   :: H_1, Hdiff, H_0, H_2, X1, X2, X12
-     COMPLEX(KIND=dp), dimension(:,:), allocatable   :: Ktot, K2, K3, K4
-     REAL(KIND=dp), dimension(:,:), allocatable      :: Imat 
      REAL(KIND=dp), dimension(:,:), allocatable       :: Stt_int, Sttp_int, Stptp_int, &
                                                           Sttm_int, Stmtm_int
 
@@ -1585,13 +1588,6 @@ END SUBROUTINE classically_forbidden_hops
 
      !Various Allocation
 
-
-     !Imat is an identity matrix of the dimensions of the other square matrices
-     allocate(Imat(mat,mat))
-     !define once, then use whenever
-     Imat = 0.0D0
-     FORALL(j = 1:mat) Imat(j,j) = 1     
-     
      !need to allocate these square matrices
      !first the real, S-related ones
      allocate(Stptpdiff(mat,mat))
@@ -1624,15 +1620,6 @@ END SUBROUTINE classically_forbidden_hops
      allocate(X2(mat,mat))
      allocate(X12(mat,mat))
      
-    
-     !finally the K matrices, which are the terms in the Runge-Kutta integration
-     !note K1 missing, because it's just a constant times X
-     !Ktot is the final constant by which c(t) is multiplied
-     allocate(Ktot(mat,mat))
-     allocate(K2(mat,mat))
-     allocate(K3(mat,mat))
-     allocate(K4(mat,mat))
-
      !used to give correct commands to ZGEMX subroutines later
      zgemm_type = 'N'
 
@@ -1701,47 +1688,52 @@ END SUBROUTINE classically_forbidden_hops
                     call makeX(mat, H_2, Stt_int, Sttp_int, Sttm_int, Stptp_int, Stmtm_int, &
                                                  X2, deltatMD, NACE)
      
-                    K2 = cmplx(0.0D0, 0.0D0,dp)
-                    K3 = cmplx(0.0D0, 0.0D0,dp)
-                    K4 = cmplx(0.0D0, 0.0D0,dp)
+                    !K2 = cmplx(0.0D0, 0.0D0,dp)
+                    !K3 = cmplx(0.0D0, 0.0D0,dp)
+                    !K4 = cmplx(0.0D0, 0.0D0,dp)
           
-                    !now that X has been found, use 4th order Runge-Kutta numerical integration method
-                    !aiming to find operator such that c(t+1) = (1 + operator)*c
+                    !!now that X has been found, use 4th order Runge-Kutta numerical integration method
+                    !!aiming to find operator such that c(t+1) = (1 + operator)*c
           
-                    !there are four terms in X: each is an increasing multiple. so first term is proportional to X(t),
-                    !second term is as X(t+deltat/2)*X(t), third term is as X(t+deltat/2)*X(t+deltat/2)*X(t),
-                    !fourth term is as X(t+deltat)*X(t+deltat/2)*X(t+deltat/2)*X(t)
-                    !this means each term is some X matrix times the previous term,
-                    !so only three more calls to ZGEMM are needed
-                    !the K matrices are the second, third and fourth Runge-Kutta terms
+                    !!there are four terms in X: each is an increasing multiple. so first term is proportional to X(t),
+                    !!second term is as X(t+deltat/2)*X(t), third term is as X(t+deltat/2)*X(t+deltat/2)*X(t),
+                    !!fourth term is as X(t+deltat)*X(t+deltat/2)*X(t+deltat/2)*X(t)
+                    !!this means each term is some X matrix times the previous term,
+                    !!so only three more calls to ZGEMM are needed
+                    !!the K matrices are the second, third and fourth Runge-Kutta terms
      
-                    alpha = cmplx(deltatE/2.0D0, 0.0D0,dp)
-                    beta = cmplx(0.0D0, 0.0D0,dp)
+                    !alpha = cmplx(deltatE/2.0D0, 0.0D0,dp)
+                    !beta = cmplx(0.0D0, 0.0D0,dp)
      
-                    !second term
-                    call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X12, mat, X1, &
-                    &mat, beta, K2, mat)
-                    K2 = K2 + X12
-                    
-                    !third term
-                    call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X12, mat, K2, &
-                    &mat, beta, K3, mat)
-                    K3 = K3 + X12
+                    !!second term
+                    !call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X12, mat, X1, &
+                    !&mat, beta, K2, mat)
+                    !K2 = K2 + X12
+                    !
+                    !!third term
+                    !call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X12, mat, K2, &
+                    !&mat, beta, K3, mat)
+                    !K3 = K3 + X12
      
-                    !fourth term
-                    alpha = cmplx(deltatE, 0.0D0,dp)
-                    call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X2, mat, K3, &
-                    &mat, beta, K4, mat)
-                    K4 = K4 + X2
+                    !!fourth term
+                    !alpha = cmplx(deltatE, 0.0D0,dp)
+                    !call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X2, mat, K3, &
+                    !&mat, beta, K4, mat)
+                    !K4 = K4 + X2
  
-                    !put everything together
-                    Ktot = Imat + (deltatE/6.0D0)*(X1 + 2*K2 + 2*K3 + K4)
+                    !!put everything together
+                    !Ktot = Imat + (deltatE/6.0D0)*(X1 + 2*K2 + 2*K3 + K4)
      
                     !timestep electron propagation and print out
                     !alpha = dcmplx(1.0D0, 0.0D0)
-                    alpha = cmplx(1.0D0, 0.0D0,dp)
-                    inc = 1
-                    call ZGEMV(zgemm_type, mat, mat, alpha, Ktot, mat, ctin, inc, beta, ctout, inc)
+                    !alpha = cmplx(1.0D0, 0.0D0,dp)
+                    !inc = 1
+                    !call ZGEMV(zgemm_type, mat, mat, alpha, Ktot, mat, ctin, inc, beta, ctout, inc)
+
+                    ! Call new (vector) RK4 method
+                    CALL RK4(ctin, X1, X12, X2, deltatE, mat)
+                    ctout = ctin(:)
+
                     ctmag = 0.0D0
                     ctcomp = cmplx(0.0D0, 0.0D0,dp)
                     do i=1,mat
@@ -1788,10 +1780,9 @@ END SUBROUTINE classically_forbidden_hops
 
 !DEALLOCATE
        DEALLOCATE(NACE)
-       deallocate(H_0, Hdiff, H_1, H_2, X1, X2, X12, Ktot, K2, K3, K4)
+       deallocate(H_0, Hdiff, H_1, H_2, X1, X2, X12)
        deallocate(Sttdiff, Stptpdiff, Stmtmdiff, Sttpdiff, Sttmdiff)
        deallocate(Stt_int, Sttp_int, Stptp_int, Sttm_int, Stmtm_int)
-       deallocate(Imat)
 !END DEALLOCATE
 
   END SUBROUTINE propagate_wf    
@@ -1808,7 +1799,7 @@ END SUBROUTINE classically_forbidden_hops
      INTEGER, dimension(:), INTENT(IN)               :: class_forbidden_hop
      integer, INTENT(IN)                             :: active_state, mat 
 
-     CHARACTER(len=*), PARAMETER                     :: routineN ='propagate_wf', &
+     CHARACTER(len=*), PARAMETER                     :: routineN ='prop_wf_HS_corr', &
      routineP = moduleN//':'//routineN
 
      COMPLEX(KIND=dp), dimension(:), allocatable     :: ctout, ctotal
@@ -1817,8 +1808,8 @@ END SUBROUTINE classically_forbidden_hops
 !     REAL(KIND=dp), dimension(:,:), allocatable      :: NACE1
       COMPLEX(KIND=dp), dimension(:,:), allocatable   :: my_H_t, my_H_tp
      COMPLEX(KIND=dp), dimension(:,:), allocatable   :: H_1, Hdiff, H_0, H_2, X1, X2, X12!, Ytot
-     COMPLEX(KIND=dp), dimension(:,:), allocatable   :: Ktot, K2, K3, K4
-     REAL(KIND=dp), dimension(:,:), allocatable      :: Imat 
+     !COMPLEX(KIND=dp), dimension(:,:), allocatable   :: Ktot, K2, K3, K4
+     !REAL(KIND=dp), dimension(:,:), allocatable      :: Imat 
      REAL(KIND=dp), dimension(:,:), allocatable       :: Stt_int, Sttp_int, Stptp_int, &
                                                           Sttm_int, Stmtm_int
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE       :: U_t, U_t1, U_t2, U_tp, U_t0 
@@ -1850,11 +1841,11 @@ END SUBROUTINE classically_forbidden_hops
      !Various Allocation
 
 
-     !Imat is an identity matrix of the dimensions of the other square matrices
-     allocate(Imat(mat,mat))
-     !define once, then use whenever
-     Imat = 0.0D0
-     FORALL(j = 1:mat) Imat(j,j) = 1     
+     !!Imat is an identity matrix of the dimensions of the other square matrices
+     !allocate(Imat(mat,mat))
+     !!define once, then use whenever
+     !Imat = 0.0D0
+     !FORALL(j = 1:mat) Imat(j,j) = 1     
      
      !need to allocate these square matrices
      !first the real, S-related ones
@@ -1902,13 +1893,13 @@ END SUBROUTINE classically_forbidden_hops
      allocate(Sterm2(mat,mat)) 
 !END TEST
     
-     !finally the K matrices, which are the terms in the Runge-Kutta integration
-     !note K1 missing, because it's just a constant times X
-     !Ktot is the final constant by which c(t) is multiplied
-     allocate(Ktot(mat,mat))
-     allocate(K2(mat,mat))
-     allocate(K3(mat,mat))
-     allocate(K4(mat,mat))
+     !!finally the K matrices, which are the terms in the Runge-Kutta integration
+     !!note K1 missing, because it's just a constant times X
+     !!Ktot is the final constant by which c(t) is multiplied
+     !allocate(Ktot(mat,mat))
+     !allocate(K2(mat,mat))
+     !allocate(K3(mat,mat))
+     !allocate(K4(mat,mat))
 
      !used to give correct commands to ZGEMX subroutines later
      zgemm_type = 'N'
@@ -2061,47 +2052,52 @@ END SUBROUTINE classically_forbidden_hops
 
                     CALL hs_corrected_makeX(interm_hamil, modified_diab_nace, t2, dim_, X2)
 
-                    K2 = cmplx(0.0D0, 0.0D0,dp)
-                    K3 = cmplx(0.0D0, 0.0D0,dp)
-                    K4 = cmplx(0.0D0, 0.0D0,dp)
+                    !K2 = cmplx(0.0D0, 0.0D0,dp)
+                    !K3 = cmplx(0.0D0, 0.0D0,dp)
+                    !K4 = cmplx(0.0D0, 0.0D0,dp)
           
-                    !now that X has been found, use 4th order Runge-Kutta numerical integration method
-                    !aiming to find operator such that c(t+1) = (1 + operator)*c
+                    !!now that X has been found, use 4th order Runge-Kutta numerical integration method
+                    !!aiming to find operator such that c(t+1) = (1 + operator)*c
           
-                    !there are four terms in X: each is an increasing multiple. so first term is proportional to X(t),
-                    !second term is as X(t+deltat/2)*X(t), third term is as X(t+deltat/2)*X(t+deltat/2)*X(t),
-                    !fourth term is as X(t+deltat)*X(t+deltat/2)*X(t+deltat/2)*X(t)
-                    !this means each term is some X matrix times the previous term,
-                    !so only three more calls to ZGEMM are needed
-                    !the K matrices are the second, third and fourth Runge-Kutta terms
+                    !!there are four terms in X: each is an increasing multiple. so first term is proportional to X(t),
+                    !!second term is as X(t+deltat/2)*X(t), third term is as X(t+deltat/2)*X(t+deltat/2)*X(t),
+                    !!fourth term is as X(t+deltat)*X(t+deltat/2)*X(t+deltat/2)*X(t)
+                    !!this means each term is some X matrix times the previous term,
+                    !!so only three more calls to ZGEMM are needed
+                    !!the K matrices are the second, third and fourth Runge-Kutta terms
      
-                    alpha = cmplx(deltatE/2.0D0, 0.0D0,dp)
-                    beta = cmplx(0.0D0, 0.0D0,dp)
+                    !alpha = cmplx(deltatE/2.0D0, 0.0D0,dp)
+                    !beta = cmplx(0.0D0, 0.0D0,dp)
      
-                    !second term
-                    call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X12, mat, X1, &
-                    &mat, beta, K2, mat)
-                    K2 = K2 + X12
-                    
-                    !third term
-                    call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X12, mat, K2, &
-                    &mat, beta, K3, mat)
-                    K3 = K3 + X12
+                    !!second term
+                    !call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X12, mat, X1, &
+                    !&mat, beta, K2, mat)
+                    !K2 = K2 + X12
+                    !
+                    !!third term
+                    !call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X12, mat, K2, &
+                    !&mat, beta, K3, mat)
+                    !K3 = K3 + X12
      
-                    !fourth term
-                    alpha = cmplx(deltatE, 0.0D0,dp)
-                    call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X2, mat, K3, &
-                    &mat, beta, K4, mat)
-                    K4 = K4 + X2
+                    !!fourth term
+                    !alpha = cmplx(deltatE, 0.0D0,dp)
+                    !call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X2, mat, K3, &
+                    !&mat, beta, K4, mat)
+                    !K4 = K4 + X2
  
-                    !put everything together
-                    Ktot = Imat + (deltatE/6.0D0)*(X1 + 2*K2 + 2*K3 + K4)
+                    !!put everything together
+                    !Ktot = Imat + (deltatE/6.0D0)*(X1 + 2*K2 + 2*K3 + K4)
      
-                    !timestep electron propagation and print out
-                    !alpha = dcmplx(1.0D0, 0.0D0)
-                    alpha = cmplx(1.0D0, 0.0D0,dp)
-                    inc = 1
-                    call ZGEMV(zgemm_type, mat, mat, alpha, Ktot, mat, ctin, inc, beta, ctout, inc)
+                    !!timestep electron propagation and print out
+                    !!alpha = dcmplx(1.0D0, 0.0D0)
+                    !alpha = cmplx(1.0D0, 0.0D0,dp)
+                    !inc = 1
+                    !call ZGEMV(zgemm_type, mat, mat, alpha, Ktot, mat, ctin, inc, beta, ctout, inc)
+
+                    ! Call new (vector) RK4 method
+                    CALL RK4(ctin, X1, X12, X2, deltatE, mat)
+                    ctout = ctin(:)
+
                     ctmag = 0.0D0
                     ctcomp = cmplx(0.0D0, 0.0D0,dp)
                     do i=1,mat
@@ -2198,10 +2194,10 @@ END SUBROUTINE classically_forbidden_hops
 
        DEALLOCATE(NACE)
        deallocate(interm_hamil,interm_umatrix, udot_matrices)
-       deallocate(H_0, Hdiff, H_1, H_2, X1, X2, X12, Ktot, K2, K3, K4)
+       deallocate(H_0, Hdiff, H_1, H_2, X1, X2, X12)!, Ktot, K2, K3, K4)
        deallocate(Sttdiff, Stptpdiff, Stmtmdiff, Sttpdiff, Sttmdiff)
        deallocate(Stt_int, Sttp_int, Stptp_int, Sttm_int, Stmtm_int)
-       deallocate(Imat)
+       !deallocate(Imat)
 !END DEALLOCATE
 
   END SUBROUTINE prop_wf_HS_corr                                                                
@@ -2342,8 +2338,8 @@ END SUBROUTINE classically_forbidden_hops
      COMPLEX(KIND=dp), dimension(:,:), allocatable   :: X1, X2, X12
      REAL(KIND=dp), DIMENSION(:), allocatable        :: E_1, Ediff, E_0, E_2
  
-     COMPLEX(KIND=dp), dimension(:,:), allocatable   :: Ktot, K2, K3, K4
-     REAL(KIND=dp), dimension(:,:), allocatable      :: Imat 
+     !COMPLEX(KIND=dp), dimension(:,:), allocatable   :: Ktot, K2, K3, K4
+     !REAL(KIND=dp), dimension(:,:), allocatable      :: Imat 
  
  
      INTEGER                                         :: ELsteps   
@@ -2361,11 +2357,11 @@ END SUBROUTINE classically_forbidden_hops
      !Various Allocation
  
  
-     !Imat is an identity matrix of the dimensions of the other square matrices
-     allocate(Imat(mat,mat))
-     !define once, then use whenever
-     Imat = 0.0D0
-     FORALL(j = 1:mat) Imat(j,j) = 1     
+     !!Imat is an identity matrix of the dimensions of the other square matrices
+     !allocate(Imat(mat,mat))
+     !!define once, then use whenever
+     !Imat = 0.0D0
+     !FORALL(j = 1:mat) Imat(j,j) = 1     
      
      allocate(NACEdiff(mat,mat))
      allocate(NACEint(mat,mat)) 
@@ -2388,13 +2384,13 @@ END SUBROUTINE classically_forbidden_hops
      allocate(X12(mat,mat))
      
     
-     !finally the K matrices, which are the terms in the Runge-Kutta integration
-     !note K1 missing, because it's just a constant times X
-     !Ktot is the final constant by which c(t) is multiplied
-     allocate(Ktot(mat,mat))
-     allocate(K2(mat,mat))
-     allocate(K3(mat,mat))
-     allocate(K4(mat,mat))
+     !!finally the K matrices, which are the terms in the Runge-Kutta integration
+     !!note K1 missing, because it's just a constant times X
+     !!Ktot is the final constant by which c(t) is multiplied
+     !allocate(Ktot(mat,mat))
+     !allocate(K2(mat,mat))
+     !allocate(K3(mat,mat))
+     !allocate(K4(mat,mat))
  
      !used to give correct commands to ZGEMX subroutines later
      zgemm_type = 'N'
@@ -2426,9 +2422,9 @@ END SUBROUTINE classically_forbidden_hops
 
                     call make_adiabX(mat, E_2, NACEint, X2)
      
-                    K2 = cmplx(0.0D0, 0.0D0,dp)
-                    K3 = cmplx(0.0D0, 0.0D0,dp)
-                    K4 = cmplx(0.0D0, 0.0D0,dp)
+                    !K2 = cmplx(0.0D0, 0.0D0,dp)
+                    !K3 = cmplx(0.0D0, 0.0D0,dp)
+                    !K4 = cmplx(0.0D0, 0.0D0,dp)
           
                     !now that X has been found, use 4th order Runge-Kutta numerical integration method
                     !aiming to find operator such that c(t+1) = (1 + operator)*c
@@ -2440,33 +2436,38 @@ END SUBROUTINE classically_forbidden_hops
                     !so only three more calls to ZGEMM are needed
                     !the K matrices are the second, third and fourth Runge-Kutta terms
      
-                    alpha = cmplx(deltatE/2.0D0, 0.0D0,dp)
-                    beta = cmplx(0.0D0, 0.0D0,dp)
+                    !alpha = cmplx(deltatE/2.0D0, 0.0D0,dp)
+                    !beta = cmplx(0.0D0, 0.0D0,dp)
      
-                    !second term
-                    call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X12, mat, X1, &
-                    &mat, beta, K2, mat)
-                    K2 = K2 + X12
-                    
-                    !third term
-                    call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X12, mat, K2, &
-                    &mat, beta, K3, mat)
-                    K3 = K3 + X12
+                    !!second term
+                    !call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X12, mat, X1, &
+                    !&mat, beta, K2, mat)
+                    !K2 = K2 + X12
+                    !
+                    !!third term
+                    !call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X12, mat, K2, &
+                    !&mat, beta, K3, mat)
+                    !K3 = K3 + X12
      
-                    !fourth term
-                    alpha = cmplx(deltatE, 0.0D0,dp)
-                    call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X2, mat, K3, &
-                    &mat, beta, K4, mat)
-                    K4 = K4 + X2
+                    !!fourth term
+                    !alpha = cmplx(deltatE, 0.0D0,dp)
+                    !call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X2, mat, K3, &
+                    !&mat, beta, K4, mat)
+                    !K4 = K4 + X2
  
-                    !put everything together
-                    Ktot = Imat + (deltatE/6.0D0)*(X1 + 2*K2 + 2*K3 + K4)
+                    !!put everything together
+                    !Ktot = Imat + (deltatE/6.0D0)*(X1 + 2*K2 + 2*K3 + K4)
      
-                    !timestep electron propagation and print out
-                    !alpha = dcmplx(1.0D0, 0.0D0)
-                    alpha = cmplx(1.0D0, 0.0D0,dp)
-                    inc = 1
-                    call ZGEMV(zgemm_type, mat, mat, alpha, Ktot, mat, ctin, inc, beta, ctout, inc)
+                    !!timestep electron propagation and print out
+                    !!alpha = dcmplx(1.0D0, 0.0D0)
+                    !alpha = cmplx(1.0D0, 0.0D0,dp)
+                    !inc = 1
+                    !call ZGEMV(zgemm_type, mat, mat, alpha, Ktot, mat, ctin, inc, beta, ctout, inc)
+
+                    ! Call new (vector) RK4 method
+                    CALL RK4(ctin, X1, X12, X2, deltatE, mat)
+                    ctout = ctin(:)
+
                     ctmag = 0.0D0
                     ctcomp = cmplx(0.0D0, 0.0D0,dp)
                     do i=1,mat
@@ -2504,8 +2505,8 @@ END SUBROUTINE classically_forbidden_hops
  
  !DEALLOCATE
        !DEALLOCATE(NACE)
-       deallocate(E_0, Ediff, E_1, E_2, X1, X2, X12, Ktot, K2, K3, K4)
-       deallocate(Imat)
+       deallocate(E_0, Ediff, E_1, E_2, X1, X2, X12)!, Ktot, K2, K3, K4)
+       !deallocate(Imat)
  !END DEALLOCATE
  
   END SUBROUTINE propagate_adiab_wf                                                                
