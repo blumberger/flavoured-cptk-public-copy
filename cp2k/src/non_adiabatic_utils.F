@@ -1146,36 +1146,17 @@ END SUBROUTINE classically_forbidden_hops
      routineP = moduleN//':'//routineN
 
      COMPLEX(KIND=dp), dimension(:), allocatable     :: ctotal
-!     REAL(KIND=dp), dimension(:,:), allocatable      :: Sttdiff, Sttmdiff, Sttpdiff, Stmtmdiff, Stptpdiff
      COMPLEX(KIND=dp), dimension(:,:), allocatable   :: my_H_t, my_H_tp
-!     REAL(KIND=dp), dimension(:,:), allocatable      :: NACE
-     COMPLEX(KIND=dp), dimension(:,:), allocatable   :: H_1, Hdiff, H_0, H_2, X1, X2, X12
-     COMPLEX(KIND=dp), dimension(:,:), allocatable   :: Ktot, K2, K3, K4
-     REAL(KIND=dp), dimension(:,:), allocatable      :: Imat 
+     COMPLEX(KIND=dp), dimension(:,:), allocatable   :: H_1, Hdiff, H_2, X1, X2, X12
      REAL(KIND=dp), dimension(:,:), allocatable       :: Ddiff, D_0, D_1, D_2
-!     REAL(KIND=dp), dimension(:,:), allocatable       :: Stt_int, Sttp_int, Stptp_int, &
-!                                                          Sttm_int, Stmtm_int
 
      LOGICAL                                         :: renorm, offset
      REAL(KIND=dp)                                   :: ctmag
-     !COMPLEX(KIND=dp)                                :: alpha, beta, ctcomp
      COMPLEX(KIND=dp)                                ::  ctcomp
-     integer                                         :: t2
-     !integer                                         :: i,j, inc 
-     integer                                         :: i, j 
-     character(len=1)                                :: zgemm_type
+     integer                                         :: t2,i
 
 
      !Various Allocation
-
-
-     !Imat is an identity matrix of the dimensions of the other square matrices
-     allocate(Imat(mat,mat))
-     !define once, then use whenever
-     Imat = 0.0D0
-     FORALL(j = 1:mat) Imat(j,j) = 1     
-     
-     !allocate(ctout(mat))
      allocate(ctotal(mat))
 
      !then the complex ones i.e. H matrices; combinations of H and S
@@ -1183,36 +1164,25 @@ END SUBROUTINE classically_forbidden_hops
      !For ease of calculation therefore, in this program,
      !H_t etc are always -i*H.
      !This is why they're complex variables
-!     allocate(NACE(mat,mat))
      allocate(Ddiff(mat,mat))
      allocate(D_0(mat,mat))
      allocate(D_1(mat,mat))
      allocate(D_2(mat,mat))
      allocate(Hdiff(mat,mat))
-     allocate(H_0(mat,mat))
      allocate(H_1(mat,mat))
      allocate(H_2(mat,mat))
      allocate(X1(mat,mat))
      allocate(X2(mat,mat))
      allocate(X12(mat,mat))
-     
-    
-     !finally the K matrices, which are the terms in the Runge-Kutta integration
-     !note K1 missing, because it's just a constant times X
-     !Ktot is the final constant by which c(t) is multiplied
-     allocate(Ktot(mat,mat))
-     allocate(K2(mat,mat))
-     allocate(K3(mat,mat))
-     allocate(K4(mat,mat))
-
-     !used to give correct commands to ZGEMX subroutines later
-     zgemm_type = 'N'
-
      allocate(my_H_t(mat, mat))
      allocate(my_H_tp(mat, mat))
 
+      ! Control the offset of hamiltonian and renormalisation of wf
+      ! See Hammes-Schiffer, Tully 1994 (Proton transfer in solution) for offset
+      offset = .TRUE.
+      renorm = .TRUE.
+     
     
-     offset = .TRUE.
      my_H_t = aom_env%H_t
      my_H_tp = aom_env%H_tp
      if (offset) then
@@ -1227,96 +1197,22 @@ END SUBROUTINE classically_forbidden_hops
             
              Hdiff = (deltatE/deltatMD)*(my_H_tp - my_H_t)
              Ddiff = (deltatE/deltatMD)*(aom_env%diabatic_nace_tp -aom_env%diabatic_nace_t)
-!             Sttdiff = (deltatE/deltatMD)*(aom_env%Stptp - aom_env%Stt)
-!             Sttpdiff = (deltatE/deltatMD)*(aom_env%Sttp - aom_env%Stmt)
-!             Sttmdiff = (deltatE/deltatMD)*(aom_env%Stpt - aom_env%Sttm)
-!             Stptpdiff = Sttdiff
-!             Stmtmdiff = (deltatE/deltatMD)*(aom_env%Stt - aom_env%Stmtm)
-             H_0  = my_H_t
              D_0  = aom_env%diabatic_nace_t
 
-!Assignment internal variabls used in the RK
-             
-!             Stt_int = aom_env%Stt 
-!             Sttp_int = aom_env%Sttp
-!             Stptp_int = aom_env%Stptp
-!             Sttm_int = aom_env%Sttm
-!             Stmtm_int = aom_env%Stmtm
-
-!             call makeX(mat, H_0, Stt_int, Sttp_int, Sttm_int, Stptp_int, &
-!                                             Stmtm_int, X1, deltatMD)
-             X1 = H_0 - D_0
-!write(*,*) "H_0", H_0
-!print *, "D0"
-!CALL print_matrix_standard_out(D_0)
+             X1 = my_H_t - D_0
 
              do t2=1,int(deltatMD/deltatE)
                     !create timestepped equivalents
-                    H_1 = H_0 + 0.5D0*Hdiff
+                    !> interpolate hamiltonian and diabatic NACE (that are in
+                    !any case very smallcompare to H)
+                    H_1 = my_H_t + 0.5D0*Hdiff
                     D_1 = D_0 + 0.5D0*Ddiff
-!                    Stt_int = Stt_int + 0.5D0*Sttdiff
-!                    Sttp_int = Sttp_int + 0.5D0*Sttpdiff
-!                    Sttm_int = Sttm_int + 0.5D0*Sttmdiff
-!                    Stptp_int = Stptp_int + 0.5D0*Stptpdiff
-!                    Stmtm_int = Stmtm_int + 0.5D0*Stmtmdiff
-!                    call makeX(mat, H_1, Stt_int, Sttp_int, Sttm_int, Stptp_int, & 
-!                                                       Stmtm_int, X12, deltatMD)
                     X12 = H_1 - D_1
      
-
                     H_2 = H_1 + 0.5D0*Hdiff
                     D_2 = D_1 + 0.5D0*Ddiff
-!                    Stt_int = Stt_int + 0.5D0*Sttdiff
-!                    Sttp_int = Sttp_int + 0.5D0*Sttpdiff
-!                    Sttm_int = Sttm_int + 0.5D0*Sttmdiff
-!                    Stptp_int = Stptp_int + 0.5D0*Stptpdiff
-!                    Stmtm_int = Stmtm_int + 0.5D0*Stmtmdiff
-!                    call makeX(mat, H_2, Stt_int, Sttp_int, Sttm_int, Stptp_int, Stmtm_int, &
-!                                                 X2, deltatMD, NACE)
                     X2 = H_2 - D_2
      
-                    !K2 = cmplx(0.0D0, 0.0D0,dp)
-                    !K3 = cmplx(0.0D0, 0.0D0,dp)
-                    !K4 = cmplx(0.0D0, 0.0D0,dp)
-          
-                    !!now that X has been found, use 4th order Runge-Kutta numerical integration method
-                    !!aiming to find operator such that c(t+1) = (1 + operator)*c
-          
-                    !!there are four terms in X: each is an increasing multiple. so first term is proportional to X(t),
-                    !!second term is as X(t+deltat/2)*X(t), third term is as X(t+deltat/2)*X(t+deltat/2)*X(t),
-                    !!fourth term is as X(t+deltat)*X(t+deltat/2)*X(t+deltat/2)*X(t)
-                    !!this means each term is some X matrix times the previous term,
-                    !!so only three more calls to ZGEMM are needed
-                    !!the K matrices are the second, third and fourth Runge-Kutta terms
-     
-                    !alpha = cmplx(deltatE/2.0D0, 0.0D0,dp)
-                    !beta = cmplx(0.0D0, 0.0D0,dp)
-     
-                    !!second term
-                    !call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X12, mat, X1, &
-                    !&mat, beta, K2, mat)
-                    !K2 = K2 + X12
-                    !
-                    !!third term
-                    !call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X12, mat, K2, &
-                    !&mat, beta, K3, mat)
-                    !K3 = K3 + X12
-     
-                    !!fourth term
-                    !alpha = cmplx(deltatE, 0.0D0,dp)
-                    !call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X2, mat, K3, &
-                    !&mat, beta, K4, mat)
-                    !K4 = K4 + X2
- 
-                    !!put everything together
-                    !Ktot = Imat + (deltatE/6.0D0)*(X1 + 2*K2 + 2*K3 + K4)
-     
-                    !!timestep electron propagation and print out
-                    !!alpha = dcmplx(1.0D0, 0.0D0)
-                    !alpha = cmplx(1.0D0, 0.0D0,dp)
-                    !inc = 1
-                    !call ZGEMV(zgemm_type, mat, mat, alpha, Ktot, mat, ctin, inc, beta, ctout, inc)
-
                     ! Call new (vector) RK4 method
                     CALL RK4(ctin, X1, X12, X2, deltatE, mat)
                     !ctout = ctin(:)
@@ -1332,7 +1228,8 @@ END SUBROUTINE classically_forbidden_hops
                        print*, "FOBSH| *** WARNING: Norm is", ctmag
                        CPABORT("Problem in the electronic propagation, norm is not conserved.")
                     ENDIF
-                    renorm = .TRUE.
+  
+                    ! Check WF for norm conservation
                     if (renorm) then
                        !rescale to conserve norm = 1
                        do i=1,mat
@@ -1343,20 +1240,12 @@ END SUBROUTINE classically_forbidden_hops
                          ctotal(i) = conjg(ctin(i))*ctin(i)
                     end do
 
-!print *, "D2"
-!CALL print_matrix_standard_out(D_2)
                     !update
-                     H_0 = H_2
+                     my_H_t = H_2
                      D_0 = D_2
                      X1  = X2
-
-                    !ctin = ctout
-!COMMENT: WHY CTOUT?
-                    !ctout = cmplx(0.0D0, 0.0D0,dp)
-
              end do
-             !times = DBLE(itimes) + (t2-1)*1/DBLE(ELsteps)
-             !times = DBLE(itimes) 
+
              CALL adiab_print_nace(adiab_section, D_2, nadiab, norbitals, itimes, deltatMD, times)
              CALL adiab_print_coeff(adiab_section, ctin,nadiab, norbitals,itimes, deltatMD, &
                                     times)
@@ -1367,14 +1256,9 @@ END SUBROUTINE classically_forbidden_hops
        
 !END PROPAGATE THE ELECTRON FOR ONE MOLECULAR TIMESTEP
 
-!DEALLOCATE
-!       DEALLOCATE(NACE)
-       deallocate(H_0, Hdiff, H_1, H_2, X1, X2, X12)!, Ktot, K2, K3, K4)
+       deallocate( Hdiff, H_1, H_2, X1, X2, X12)
+       deallocate( my_H_t, my_H_tp, ctotal)
        deallocate(D_0, Ddiff, D_1, D_2)
-!       deallocate(Sttdiff, Stptpdiff, Stmtmdiff, Sttpdiff, Sttmdiff)
-!       deallocate(Stt_int, Sttp_int, Stptp_int, Sttm_int, Stmtm_int)
-       !deallocate(Imat)
-!END DEALLOCATE
 
   END SUBROUTINE propagate_wf_diab_nace_interpol 
 
@@ -1563,6 +1447,15 @@ END SUBROUTINE classically_forbidden_hops
    END SUBROUTINE propagate_wf_fast   
  
 
+  !**********************************************************************************
+  !> \brief This subroutine propagates the WF interpolating the overlap matrices
+  !         S at each electronic steps and the Hamiltonian at each nuclear
+  !         timestep. The diabatic NACE are reconstructed from Overlap matrices
+  !         S at each electronic step, making this unusefully accurate and by
+  !         far too expensive in term of computer time.
+  ! \author Jacob (Sam editted)
+  ! \date   23/05/19
+  !**********************************************************************************
    SUBROUTINE propagate_wf(ctin, aom_env, nadiab,  norbitals, ELsteps, &
                            itimes, adiab_section, deltatMD, deltatE , times,      &
                             mat)
@@ -1591,10 +1484,8 @@ END SUBROUTINE classically_forbidden_hops
 
      LOGICAL                                         :: renorm, offset
      REAL(KIND=dp)                                   :: ctmag
-     !COMPLEX(KIND=dp)                                :: alpha, beta, ctcomp
      COMPLEX(KIND=dp)                                :: ctcomp
      integer                                         :: t2, i
-     !integer                                         :: i,j, inc 
      character(len=1)                                :: zgemm_type
 
 
@@ -1631,12 +1522,11 @@ END SUBROUTINE classically_forbidden_hops
      allocate(X1(mat,mat))
      allocate(X2(mat,mat))
      allocate(X12(mat,mat))
+     allocate(my_H_t(mat, mat))
+     allocate(my_H_tp(mat, mat))
      
      !used to give correct commands to ZGEMX subroutines later
      zgemm_type = 'N'
-
-     allocate(my_H_t(mat, mat))
-     allocate(my_H_tp(mat, mat))
 
     
      offset = .TRUE.
@@ -1658,22 +1548,12 @@ END SUBROUTINE classically_forbidden_hops
              Stptpdiff = Sttdiff
              Stmtmdiff = (deltatE/deltatMD)*(aom_env%Stt - aom_env%Stmtm)
              H_0  = my_H_t
-             !H_2 =  my_H_tp
 
-!write(*,*) "Stmtm", aom_env%Stmtm
-!write(*,*) "aom_env%Sttm", aom_env%Sttm
-!write(*,*) "aom_env%Stmt", aom_env%Stmt
-!write(*,*) "aom_env%Stt", aom_env%Stt
-!write(*,*) "aom_env%Stptp", aom_env%Stptp
-!write(*,*) "aom_env%Stpt", aom_env%Stpt
-!write(*,*) "aom_env%Sttp", aom_env%Sttp
-!Assignment internal variabls used in the RK
+             !Assignment internal variabls used in the RK
              
              Stt_int = aom_env%Stt 
              Sttp_int = aom_env%Sttp
              Stptp_int = aom_env%Stptp
-             !Stpt_int = Stpt!
-             !Stmt_int = Stmt!
              Sttm_int = aom_env%Sttm
              Stmtm_int = aom_env%Stmtm
 
@@ -1772,14 +1652,7 @@ END SUBROUTINE classically_forbidden_hops
                      H_0 = H_2
                      X1  = X2
 
-                    !ctin = ctout
-!COMMENT: WHY CTOUT?
-                    !ctout = cmplx(0.0D0, 0.0D0,dp)
-
-
              end do
-             !times = DBLE(itimes) + (t2-1)*1/DBLE(ELsteps)
-             !times = DBLE(itimes) 
              CALL adiab_print_nace(adiab_section, NACE, nadiab, norbitals, itimes, deltatMD, times)
              CALL adiab_print_coeff(adiab_section, ctin,nadiab, norbitals,itimes, deltatMD, &
                                     times)
@@ -1793,6 +1666,7 @@ END SUBROUTINE classically_forbidden_hops
 !DEALLOCATE
        DEALLOCATE(NACE)
        deallocate(H_0, Hdiff, H_1, H_2, X1, X2, X12)
+       deallocate(my_H_t, my_H_tp, ctotal)
        deallocate(Sttdiff, Stptpdiff, Stmtmdiff, Sttpdiff, Sttmdiff)
        deallocate(Stt_int, Sttp_int, Stptp_int, Sttm_int, Stmtm_int)
 !END DEALLOCATE
@@ -1800,12 +1674,16 @@ END SUBROUTINE classically_forbidden_hops
   END SUBROUTINE propagate_wf    
 
 
+  !**********************************************************************************
+  !> \brief This subroutine propagates the WF using Elimination of forbidden hop
+  !         equations see manuscript A.Carof. 
+  ! \author Sam
+  ! \date   23/05/19
+  !**********************************************************************************
   SUBROUTINE prop_wf_HS_corr(ctin, aom_env, nadiab,  norbitals, ELsteps, &
                            itimes, adiab_section, deltatMD, deltatE , times,      &
                             mat, class_forbidden_hop, active_state)
 
-     !COMPLEX(KIND=dp), dimension(:,:), INTENT(IN)    :: H_t, H_tp
-     !REAL(KIND=dp), dimension(:,:), INTENT(IN)       :: Stt, Sttp, Stptp, Stpt, Stmt, Sttm, Stmtm
      COMPLEX(KIND=dp), dimension(:), INTENT(INOUT)   :: ctin
      INTEGER, INTENT(IN)                             :: nadiab,  norbitals 
      INTEGER, dimension(:), INTENT(IN)               :: class_forbidden_hop
@@ -1817,11 +1695,8 @@ END SUBROUTINE classically_forbidden_hops
      COMPLEX(KIND=dp), dimension(:), allocatable     ::  ctotal
      REAL(KIND=dp), dimension(:,:), allocatable      :: Sttdiff, Sttmdiff, Sttpdiff, Stmtmdiff, Stptpdiff
      REAL(KIND=dp), dimension(:,:), allocatable      :: NACE , modified_diab_nace
-!     REAL(KIND=dp), dimension(:,:), allocatable      :: NACE1
       COMPLEX(KIND=dp), dimension(:,:), allocatable   :: my_H_t, my_H_tp
      COMPLEX(KIND=dp), dimension(:,:), allocatable   :: H_1, Hdiff, H_0, H_2, X1, X2, X12!, Ytot
-     !COMPLEX(KIND=dp), dimension(:,:), allocatable   :: Ktot, K2, K3, K4
-     !REAL(KIND=dp), dimension(:,:), allocatable      :: Imat 
      REAL(KIND=dp), dimension(:,:), allocatable       :: Stt_int, Sttp_int, Stptp_int, &
                                                           Sttm_int, Stmtm_int
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE       :: U_t, U_t1, U_t2, U_tp, U_t0 
@@ -1830,7 +1705,6 @@ END SUBROUTINE classically_forbidden_hops
      REAL(KIND=dp), DIMENSION(:), ALLOCATABLE         :: Eig_val_t, Eig_val_t1, Eig_val_t2, Eig_val_t0,& 
                                                           Eig_val_tp
      LOGICAL                                         :: renorm, offset
-
 
      INTEGER                                         :: ELsteps   
      INTEGER, POINTER                                :: itimes
@@ -1845,10 +1719,10 @@ END SUBROUTINE classically_forbidden_hops
      !integer                                         :: i,j, inc 
      character(len=1)                                :: zgemm_type
 
-!TEST
-     COMPLEX(KIND=dp), dimension(:), allocatable     :: pop
-     COMPLEX(KIND=dp), dimension(:), allocatable     :: ctin_adiab
-     REAL(KIND=dp), dimension(:,:), allocatable      :: Sterm1, UU, UDU, Sterm2, UDU_old_nace
+!TEST (KEEP FOR PRINTING PURPOSES)
+!     COMPLEX(KIND=dp), dimension(:), allocatable     :: pop
+!     COMPLEX(KIND=dp), dimension(:), allocatable     :: ctin_adiab
+!     REAL(KIND=dp), dimension(:,:), allocatable      :: Sterm1, UU, UDU, Sterm2, UDU_old_nace
 !     integer :: k
 !END TEST
      !Various Allocation
@@ -1896,24 +1770,16 @@ END SUBROUTINE classically_forbidden_hops
      allocate(X12(mat,mat))
 
 !TEST
-     allocate(ctin_adiab(mat))
-     allocate(pop(mat))
-    ! allocate(Ytot(mat,mat))
-     allocate(Sterm1(mat,mat)) 
-     allocate(UU(mat,mat)) 
-     allocate(UDU(mat,mat)) 
-     allocate(UDU_old_nace(mat,mat)) 
-     allocate(Sterm2(mat,mat)) 
+!     allocate(ctin_adiab(mat))
+!     allocate(pop(mat))
+!    ! allocate(Ytot(mat,mat))
+!     allocate(Sterm1(mat,mat)) 
+!     allocate(UU(mat,mat)) 
+!     allocate(UDU(mat,mat)) 
+!     allocate(UDU_old_nace(mat,mat)) 
+!     allocate(Sterm2(mat,mat)) 
 !END TEST
     
-     !!finally the K matrices, which are the terms in the Runge-Kutta integration
-     !!note K1 missing, because it's just a constant times X
-     !!Ktot is the final constant by which c(t) is multiplied
-     !allocate(Ktot(mat,mat))
-     !allocate(K2(mat,mat))
-     !allocate(K3(mat,mat))
-     !allocate(K4(mat,mat))
-
      !used to give correct commands to ZGEMX subroutines later
      zgemm_type = 'N'
 
@@ -2065,48 +1931,6 @@ END SUBROUTINE classically_forbidden_hops
 
                     CALL hs_corrected_makeX(interm_hamil, modified_diab_nace, t2, dim_, X2)
 
-                    !K2 = cmplx(0.0D0, 0.0D0,dp)
-                    !K3 = cmplx(0.0D0, 0.0D0,dp)
-                    !K4 = cmplx(0.0D0, 0.0D0,dp)
-          
-                    !!now that X has been found, use 4th order Runge-Kutta numerical integration method
-                    !!aiming to find operator such that c(t+1) = (1 + operator)*c
-          
-                    !!there are four terms in X: each is an increasing multiple. so first term is proportional to X(t),
-                    !!second term is as X(t+deltat/2)*X(t), third term is as X(t+deltat/2)*X(t+deltat/2)*X(t),
-                    !!fourth term is as X(t+deltat)*X(t+deltat/2)*X(t+deltat/2)*X(t)
-                    !!this means each term is some X matrix times the previous term,
-                    !!so only three more calls to ZGEMM are needed
-                    !!the K matrices are the second, third and fourth Runge-Kutta terms
-     
-                    !alpha = cmplx(deltatE/2.0D0, 0.0D0,dp)
-                    !beta = cmplx(0.0D0, 0.0D0,dp)
-     
-                    !!second term
-                    !call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X12, mat, X1, &
-                    !&mat, beta, K2, mat)
-                    !K2 = K2 + X12
-                    !
-                    !!third term
-                    !call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X12, mat, K2, &
-                    !&mat, beta, K3, mat)
-                    !K3 = K3 + X12
-     
-                    !!fourth term
-                    !alpha = cmplx(deltatE, 0.0D0,dp)
-                    !call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X2, mat, K3, &
-                    !&mat, beta, K4, mat)
-                    !K4 = K4 + X2
- 
-                    !!put everything together
-                    !Ktot = Imat + (deltatE/6.0D0)*(X1 + 2*K2 + 2*K3 + K4)
-     
-                    !!timestep electron propagation and print out
-                    !!alpha = dcmplx(1.0D0, 0.0D0)
-                    !alpha = cmplx(1.0D0, 0.0D0,dp)
-                    !inc = 1
-                    !call ZGEMV(zgemm_type, mat, mat, alpha, Ktot, mat, ctin, inc, beta, ctout, inc)
-
                     ! Call new (vector) RK4 method
                     CALL RK4(ctin, X1, X12, X2, deltatE, mat)
                     !ctout = ctin(:)
@@ -2199,7 +2023,6 @@ END SUBROUTINE classically_forbidden_hops
                                   times)
              CALL adiab_print_matrix_density(adiab_section, ctin, nadiab,norbitals,itimes,deltatMD, &
                                                     times)
-!stop
 
 !END PROPAGATE THE ELECTRON FOR ONE MOLECULAR TIMESTEP
 
@@ -2208,6 +2031,7 @@ END SUBROUTINE classically_forbidden_hops
        DEALLOCATE(NACE)
        deallocate(interm_hamil,interm_umatrix, udot_matrices)
        deallocate(H_0, Hdiff, H_1, H_2, X1, X2, X12)!, Ktot, K2, K3, K4)
+       deallocate( my_H_t, my_H_tp, ctotal)
        deallocate(Sttdiff, Stptpdiff, Stmtmdiff, Sttpdiff, Sttmdiff)
        deallocate(Stt_int, Sttp_int, Stptp_int, Sttm_int, Stmtm_int)
        !deallocate(Imat)
@@ -2332,6 +2156,8 @@ END SUBROUTINE classically_forbidden_hops
 
   END SUBROUTINE calc_modified_diab_nace
 
+
+! WARNING:::::THIS SUBROUTINE HAS NEVER BEEN USED AND MAY NOT WORK!!!
   SUBROUTINE propagate_adiab_wf(E_t, E_tp, ctin, aom_env, nadiab,  norbitals, ELsteps, &
                            itimes, adiab_section, deltatMD, deltatE , times,      &
                             mat)
