@@ -1145,7 +1145,7 @@ END SUBROUTINE classically_forbidden_hops
      CHARACTER(len=*), PARAMETER                     :: routineN ='propagate_wf_nace_interpol', &
      routineP = moduleN//':'//routineN
 
-     COMPLEX(KIND=dp), dimension(:), allocatable     :: ctout, ctotal
+     COMPLEX(KIND=dp), dimension(:), allocatable     :: ctotal
 !     REAL(KIND=dp), dimension(:,:), allocatable      :: Sttdiff, Sttmdiff, Sttpdiff, Stmtmdiff, Stptpdiff
      COMPLEX(KIND=dp), dimension(:,:), allocatable   :: my_H_t, my_H_tp
 !     REAL(KIND=dp), dimension(:,:), allocatable      :: NACE
@@ -1158,9 +1158,11 @@ END SUBROUTINE classically_forbidden_hops
 
      LOGICAL                                         :: renorm, offset
      REAL(KIND=dp)                                   :: ctmag
-     COMPLEX(KIND=dp)                                :: alpha, beta, ctcomp
+     !COMPLEX(KIND=dp)                                :: alpha, beta, ctcomp
+     COMPLEX(KIND=dp)                                ::  ctcomp
      integer                                         :: t2
-     integer                                         :: i,j, inc 
+     !integer                                         :: i,j, inc 
+     integer                                         :: i, j 
      character(len=1)                                :: zgemm_type
 
 
@@ -1173,7 +1175,7 @@ END SUBROUTINE classically_forbidden_hops
      Imat = 0.0D0
      FORALL(j = 1:mat) Imat(j,j) = 1     
      
-     allocate(ctout(mat))
+     !allocate(ctout(mat))
      allocate(ctotal(mat))
 
      !then the complex ones i.e. H matrices; combinations of H and S
@@ -1317,12 +1319,12 @@ END SUBROUTINE classically_forbidden_hops
 
                     ! Call new (vector) RK4 method
                     CALL RK4(ctin, X1, X12, X2, deltatE, mat)
-                    ctout = ctin(:)
+                    !ctout = ctin(:)
 
                     ctmag = 0.0D0
                     ctcomp = cmplx(0.0D0, 0.0D0,dp)
                     do i=1,mat
-                         ctotal(i) = conjg(ctout(i))*ctout(i)
+                         ctotal(i) = conjg(ctin(i))*ctin(i)
                          ctcomp = ctcomp + ctotal(i)
                     end do
                     ctmag = abs(ctcomp)
@@ -1334,11 +1336,11 @@ END SUBROUTINE classically_forbidden_hops
                     if (renorm) then
                        !rescale to conserve norm = 1
                        do i=1,mat
-                            ctout(i) = cmplx((1.0D0/sqrt(ctmag))*REAL(ctout(i)), (1.0D0/sqrt(ctmag))*AIMAG(ctout(i)),dp)
+                            ctin(i) = cmplx((1.0D0/sqrt(ctmag))*REAL(ctin(i)), (1.0D0/sqrt(ctmag))*AIMAG(ctin(i)),dp)
                        end do
                     endif
                     do i=1,mat
-                         ctotal(i) = conjg(ctout(i))*ctout(i)
+                         ctotal(i) = conjg(ctin(i))*ctin(i)
                     end do
 
 !print *, "D2"
@@ -1348,9 +1350,9 @@ END SUBROUTINE classically_forbidden_hops
                      D_0 = D_2
                      X1  = X2
 
-                    ctin = ctout
+                    !ctin = ctout
 !COMMENT: WHY CTOUT?
-                    ctout = cmplx(0.0D0, 0.0D0,dp)
+                    !ctout = cmplx(0.0D0, 0.0D0,dp)
 
              end do
              !times = DBLE(itimes) + (t2-1)*1/DBLE(ELsteps)
@@ -1471,6 +1473,8 @@ END SUBROUTINE classically_forbidden_hops
  
       LOGICAL                                         :: renorm, offset
       REAL(KIND=dp)                                   :: ctmag
+      !COMPLEX(KIND=dp)                                :: alpha, beta, ctcomp
+      COMPLEX(KIND=dp)                                :: ctcomp
       integer                                         :: t2
       integer                                         :: i
  
@@ -1516,17 +1520,19 @@ END SUBROUTINE classically_forbidden_hops
           CALL RK4(ctin, X1, X12, X2, deltaTe, mat) 
           
           ! Normalisation stuff
-          ctmag = CMPLX(0.0D0, 0.0D0,dp)
+          ctmag = 0.0D0
+          ctcomp = CMPLX(0.0D0, 0.0D0,dp)
           do i=1,mat
                ctotal(i) = CONJG(ctin(i))*ctin(i)
-               ctmag = ctmag + ctotal(i)
+               ctcomp = ctcomp + ctotal(i)
           end do
- 
+   
+          ctmag = abs(ctcomp) 
           IF ( ABS( ctmag - 1).GE.1E-5 ) THEN
              PRINT *, "FOBSH| *** WARNING: Norm is", ctmag
              CPABORT("Problem in the electronic propagation, norm is not conserved.")
           ENDIF
-          
+           
           ! Check WF for norm conservation
           if (renorm) then
              !rescale to conserve norm = 1
@@ -1534,6 +1540,11 @@ END SUBROUTINE classically_forbidden_hops
                   ctin(i) = CMPLX((1.0D0/SQRT(ctmag))*REAL(ctin(i)), (1.0D0/SQRT(ctmag))*AIMAG(ctin(i)),dp)
              end do
           endif
+
+          do i=1,mat
+               ctotal(i) = conjg(ctin(i))*ctin(i)
+          end do
+
  
           !update
           X1  = X2
@@ -1570,7 +1581,7 @@ END SUBROUTINE classically_forbidden_hops
      CHARACTER(len=*), PARAMETER                     :: routineN ='propagate_wf', &
      routineP = moduleN//':'//routineN
 
-     COMPLEX(KIND=dp), dimension(:), allocatable     :: ctout, ctotal
+     COMPLEX(KIND=dp), dimension(:), allocatable     :: ctotal
      REAL(KIND=dp), dimension(:,:), allocatable      :: Sttdiff, Sttmdiff, Sttpdiff, Stmtmdiff, Stptpdiff
      COMPLEX(KIND=dp), dimension(:,:), allocatable   :: my_H_t, my_H_tp
      REAL(KIND=dp), dimension(:,:), allocatable      :: NACE
@@ -1580,9 +1591,10 @@ END SUBROUTINE classically_forbidden_hops
 
      LOGICAL                                         :: renorm, offset
      REAL(KIND=dp)                                   :: ctmag
-     COMPLEX(KIND=dp)                                :: alpha, beta, ctcomp
-     integer                                         :: t2
-     integer                                         :: i,j, inc 
+     !COMPLEX(KIND=dp)                                :: alpha, beta, ctcomp
+     COMPLEX(KIND=dp)                                :: ctcomp
+     integer                                         :: t2, i
+     !integer                                         :: i,j, inc 
      character(len=1)                                :: zgemm_type
 
 
@@ -1603,7 +1615,7 @@ END SUBROUTINE classically_forbidden_hops
      allocate(Sttm_int(mat,mat))
      allocate(Stmtm_int(mat,mat))
 
-     allocate(ctout(mat))
+     !allocate(ctout(mat))
      allocate(ctotal(mat))
 
      !then the complex ones i.e. H matrices; combinations of H and S
@@ -1732,12 +1744,12 @@ END SUBROUTINE classically_forbidden_hops
 
                     ! Call new (vector) RK4 method
                     CALL RK4(ctin, X1, X12, X2, deltatE, mat)
-                    ctout = ctin(:)
+                    !ctout = ctin(:)
 
                     ctmag = 0.0D0
                     ctcomp = cmplx(0.0D0, 0.0D0,dp)
                     do i=1,mat
-                         ctotal(i) = conjg(ctout(i))*ctout(i)
+                         ctotal(i) = conjg(ctin(i))*ctin(i)
                          ctcomp = ctcomp + ctotal(i)
                     end do
                     ctmag = abs(ctcomp)
@@ -1749,20 +1761,20 @@ END SUBROUTINE classically_forbidden_hops
                     if (renorm) then
                        !rescale to conserve norm = 1
                        do i=1,mat
-                            ctout(i) = cmplx((1.0D0/sqrt(ctmag))*REAL(ctout(i)), (1.0D0/sqrt(ctmag))*AIMAG(ctout(i)),dp)
+                            ctin(i) = cmplx((1.0D0/sqrt(ctmag))*REAL(ctin(i)), (1.0D0/sqrt(ctmag))*AIMAG(ctin(i)),dp)
                        end do
                     endif
                     do i=1,mat
-                         ctotal(i) = conjg(ctout(i))*ctout(i)
+                         ctotal(i) = conjg(ctin(i))*ctin(i)
                     end do
 
                     !update
                      H_0 = H_2
                      X1  = X2
 
-                    ctin = ctout
+                    !ctin = ctout
 !COMMENT: WHY CTOUT?
-                    ctout = cmplx(0.0D0, 0.0D0,dp)
+                    !ctout = cmplx(0.0D0, 0.0D0,dp)
 
 
              end do
@@ -1802,7 +1814,7 @@ END SUBROUTINE classically_forbidden_hops
      CHARACTER(len=*), PARAMETER                     :: routineN ='prop_wf_HS_corr', &
      routineP = moduleN//':'//routineN
 
-     COMPLEX(KIND=dp), dimension(:), allocatable     :: ctout, ctotal
+     COMPLEX(KIND=dp), dimension(:), allocatable     ::  ctotal
      REAL(KIND=dp), dimension(:,:), allocatable      :: Sttdiff, Sttmdiff, Sttpdiff, Stmtmdiff, Stptpdiff
      REAL(KIND=dp), dimension(:,:), allocatable      :: NACE , modified_diab_nace
 !     REAL(KIND=dp), dimension(:,:), allocatable      :: NACE1
@@ -1827,9 +1839,10 @@ END SUBROUTINE classically_forbidden_hops
      REAL(KIND=dp)                                   :: deltatMD, deltatE
      REAL(KIND=dp)                                   :: ctmag
      REAL(KIND=dp)                                   :: times 
-     COMPLEX(KIND=dp)                                :: alpha, beta, ctcomp
-     integer                                         :: t2, dim_
-     integer                                         :: i,j, inc 
+     !COMPLEX(KIND=dp)                                :: alpha, beta, ctcomp
+     COMPLEX(KIND=dp)                                :: ctcomp
+     integer                                         :: t2,i, dim_
+     !integer                                         :: i,j, inc 
      character(len=1)                                :: zgemm_type
 
 !TEST
@@ -1865,7 +1878,7 @@ END SUBROUTINE classically_forbidden_hops
      allocate(Sttm_int(mat,mat))
      allocate(Stmtm_int(mat,mat))
 
-     allocate(ctout(mat))
+     !allocate(ctout(mat))
      allocate(ctotal(mat))
 
      !then the complex ones i.e. H matrices; combinations of H and S
@@ -2096,12 +2109,12 @@ END SUBROUTINE classically_forbidden_hops
 
                     ! Call new (vector) RK4 method
                     CALL RK4(ctin, X1, X12, X2, deltatE, mat)
-                    ctout = ctin(:)
+                    !ctout = ctin(:)
 
                     ctmag = 0.0D0
                     ctcomp = cmplx(0.0D0, 0.0D0,dp)
                     do i=1,mat
-                         ctotal(i) = conjg(ctout(i))*ctout(i)
+                         ctotal(i) = conjg(ctin(i))*ctin(i)
                          ctcomp = ctcomp + ctotal(i)
                     end do
                     ctmag = abs(ctcomp)
@@ -2114,19 +2127,19 @@ END SUBROUTINE classically_forbidden_hops
                     if (renorm) then
                        !rescale to conserve norm = 1
                        do i=1,mat
-                            ctout(i) = cmplx((1.0D0/sqrt(ctmag))*REAL(ctout(i)), (1.0D0/sqrt(ctmag))*AIMAG(ctout(i)),dp)
+                            ctin(i) = cmplx((1.0D0/sqrt(ctmag))*REAL(ctin(i)), (1.0D0/sqrt(ctmag))*AIMAG(ctin(i)),dp)
                        end do
                     end if
                     do i=1,mat
-                         ctotal(i) = conjg(ctout(i))*ctout(i)
+                         ctotal(i) = conjg(ctin(i))*ctin(i)
                     end do
 
                     !update
                     H_0 = H_2
 
-                    ctin = ctout
+                    !ctin = ctout
 
-                    ctout = cmplx(0.0D0, 0.0D0,dp)
+                    !ctout = cmplx(0.0D0, 0.0D0,dp)
 
                     !times = DBLE(itimes) + (t2-1)*1/DBLE(ELsteps)
 
@@ -2348,9 +2361,11 @@ END SUBROUTINE classically_forbidden_hops
      REAL(KIND=dp)                                   :: deltatMD, deltatE
      REAL(KIND=dp)                                   :: ctmag
      REAL(KIND=dp)                                   :: times 
-     COMPLEX(KIND=dp)                                :: alpha, beta, ctcomp
-     integer                                         :: t2
-     integer                                         :: i,j, inc, mat 
+     !COMPLEX(KIND=dp)                                :: alpha, beta, ctcomp
+     COMPLEX(KIND=dp)                                :: ctcomp
+     integer                                         :: t2,i 
+     !integer                                         :: i,j, inc, mat 
+     integer                                         :: mat 
      character(len=1)                                :: zgemm_type
  
  
