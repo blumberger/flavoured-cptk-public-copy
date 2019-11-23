@@ -838,6 +838,8 @@ times = DBLE(itimes)
          CASE("ADIABATIC")
              CALL section_vals_val_get(adiab_section,"FIRST_ADIABAT",&
                                        i_val=active_state)
+             sh_print_env%first_adiabat = active_state
+             CALL adiab_print_sh_info(sh_print_env, keyword = 'START')
              SELECT CASE(keyword_basis_repr)
              CASE("DIABATIC_BASIS")
                  ctin(:) = aom_env%C_tp(:, active_state)

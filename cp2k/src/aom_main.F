@@ -388,6 +388,10 @@ CONTAINS
      !ENDDO
      print*, "FOBSH| ACTIVE STATE = ", aom_env%active_state
 
+     IF (my_bo_keyword) THEN
+          sh_print_env%first_adiabat = aom_env%active_state
+          CALL adiab_print_sh_info(sh_print_env, keyword = 'BOMD')
+     END IF 
 
 !TEST PRINTING DIAGONAL GRADIENTS 
 !do d=1,3 

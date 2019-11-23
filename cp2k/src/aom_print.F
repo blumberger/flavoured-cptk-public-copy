@@ -973,6 +973,20 @@ CONTAINS
                !DEALLOCATE(pop_init)
  
            end if
+       CASE("BOMD")
+! this part is just TO PRINT FINAL STATE IN CASE OF BOMD 
+               !ALLOCATE(pop_init(nadiab))
+         unit_conv_fs = cp_unit_from_cp2k(1.0_dp,"fs")
+         time = times*deltatMD*unit_conv_fs 
+         WRITE ( unit_nr, '(A,I0,A,F20.3,A,F0.10)' )   "   i = ",INT(times),", time = ",time, " (fs)"
+          
+         first_adiabat= sh_print_env%first_adiabat    
+
+         !WRITE( unit_nr, "(A,I8)" ) "First Adiabatic State = ", first_adiabat
+         WRITE( unit_nr, "(A,I8)" ) "Final state   = ", first_adiabat
+         WRITE( unit_nr, "(A)") "  "
+         !DEALLOCATE(pop_init)
+
        CASE("TULLY_TEST")
            ALLOCATE(proba(nadiab))
            sumg         = sh_print_env%sumprob
