@@ -524,18 +524,19 @@ print *, "ALLOCATION OF S MATRICES"
      !minao is an atomic overlap cutoff
      CALL section_vals_val_get(coupling_section,"ATOMIC_OVERLAP_CUTOFF",&
              r_val=minao)
-     CALL section_vals_val_get(coupling_section,"ELECTRONIC_PARTIAL_STEP",&
-             i_val=ELsteps)
      CALL section_vals_val_get(coupling_section,"DECOHERENCE_CRITERION",&
              r_val=decohere_criterion)
      CALL section_vals_val_get(coupling_section,"NACV_INCREMENT",&
              r_val=dR)
      CALL section_vals_val_get(coupling_section,"ANALYTICS", l_val=analytics)
      CALL section_vals_val_get(coupling_section,"RANDOM_DERIVATIVE", l_val=do_random)
-     CALL section_vals_val_get(coupling_section,"CENTER_OF_MASS", l_val=keyword_translate)
+
+     CALL section_vals_val_get(adiab_section,"CENTER_OF_MASS", l_val=keyword_translate)
 
      CALL section_vals_val_get(adiab_section,"MULTIPLE_TIME_STEP",&
              i_val=aom_env%multiple_time_step)
+     CALL section_vals_val_get(adiab_section,"ELECTRONIC_PARTIAL_STEP",&
+             i_val=ELsteps)
 
      scaling = aom_env%scaling
      cbar = aom_env%cbar

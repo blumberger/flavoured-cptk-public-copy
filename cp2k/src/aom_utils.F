@@ -2526,9 +2526,9 @@ print *, "CTIN", ctin
         IF (PRESENT(rescale_keyword)) THEN
            my_rescale_keyword = rescale_keyword
         ELSE
-           CALL section_vals_val_get(coupling_section,"METHOD_RESCALING",c_val=my_rescale_keyword)
+           CALL section_vals_val_get(adiab_section,"METHOD_RESCALING",c_val=my_rescale_keyword)
         ENDIF
-        CALL section_vals_val_get(coupling_section,"CENTER_OF_MASS",l_val=translate_keyword)
+        CALL section_vals_val_get(adiab_section,"CENTER_OF_MASS",l_val=translate_keyword)
         sh_print_env = force_env%mixed_env%aom_env%sh_print_env
 
         ALLOCATE(velocities_com(SIZE(velocities, 1), SIZE(velocities, 2)))
@@ -2588,7 +2588,7 @@ print *, "CTIN", ctin
 
 
         CASE("NACV")
-           CALL section_vals_val_get(coupling_section,"METHOD_ADIABATIC_NACV",c_val=nacv_keyword)
+           CALL section_vals_val_get(adiab_section,"METHOD_ADIABATIC_NACV",c_val=nacv_keyword)
            CALL cal_delta_ene_QSYS(nparticle_kind, velocities_com, force_env, atomic_kind_set, &
                                  local_particles, delta_energy, kinetic_energy_prime)
            sh_print_env%kinetic_energy   = kinetic_energy_prime
@@ -2675,7 +2675,7 @@ ENDIF
 !ENDIF
               If (delta_energy.lt.0) THEN
                   force_env%mixed_env%aom_env%successful_hop = .FALSE.
-                  CALL section_vals_val_get(coupling_section,"METHOD_REVERSAL",c_val=reversal_keyword)
+                  CALL section_vals_val_get(adiab_section,"METHOD_REVERSAL",c_val=reversal_keyword)
                   CALL hop_nacv_vel_reversing(nparticle_kind, velocities,  & 
                                               force_env%mixed_env%aom_env%forces_adiab, &
                                               force_env%mixed_env%aom_env%forces_adiab_new, &

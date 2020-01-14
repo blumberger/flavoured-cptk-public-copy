@@ -582,6 +582,7 @@ CONTAINS
           IF (mixing_type.eq.mix_adiab) do_fssh = .TRUE.
        ENDIF
        IF (do_fssh) THEN
+print *, "STARTING_POINT"
              !We save the velocities for the first timestep, to estimate the
              !position at t--1
              IF (itimes.ge.1) THEN

@@ -427,7 +427,7 @@ END SUBROUTINE classically_forbidden_hops
         adiab_section => section_vals_get_subs_vals(mixed_section, "ADIABATIC")
         coupling_section => section_vals_get_subs_vals(adiab_section, "AOM")
 
-        CALL section_vals_val_get(coupling_section,"CENTER_OF_MASS",l_val=translate_keyword)
+        CALL section_vals_val_get(adiab_section,"CENTER_OF_MASS",l_val=translate_keyword)
         sh_print_env = force_env%mixed_env%aom_env%sh_print_env
  
         ALLOCATE(velocities_com_tp(SIZE(velocities, 1), SIZE(velocities, 2)))
