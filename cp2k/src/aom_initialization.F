@@ -636,9 +636,15 @@ CONTAINS
              END SELECT
          CASE("ADIABATIC")
              CALL section_vals_val_get(adiab_section,"FIRST_ADIABAT",&
-                                       i_val=active_state)
-             sh_print_env%first_adiabat = active_state
+                                      i_val=active_state)
+             !> print init
+             sh_print_env%first_adiabat    = active_state
+             ALLOCATE(sh_print_env%pop_init(SIZE(aom_env%C_tp(:,active_state))))
+             sh_print_env%pop_init(:)      = 0.0D0
+             sh_print_env%pop_init(active_state)  = 1.0D0
              CALL adiab_print_sh_info(sh_print_env, keyword = 'START')
+             DEALLOCATE(sh_print_env%pop_init)
+
              SELECT CASE(keyword_basis_repr)
              CASE("DIABATIC_BASIS")
                  ctin(:) = aom_env%C_tp(:, active_state)

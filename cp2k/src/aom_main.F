@@ -347,7 +347,7 @@ CONTAINS
            CALL prop_wf_HS_corr(aom_env%ctin, aom_env, nadiab,  norbitals, ELsteps, &
                            itimes, adiab_section, deltatMD, deltatE , times, &
                             mat, class_forbidden_hop_tp, aom_env%active_state)
-           CALL section_vals_val_get(coupling_section,"METHOD_REVERSAL",c_val=reversal_keyword)
+           CALL section_vals_val_get(adiab_section,"METHOD_REVERSAL",c_val=reversal_keyword)
            if (reversal_keyword .eq. "ALWAYS") then
                 aom_env%HS_propagation = .FALSE.
            else 
