@@ -64,7 +64,8 @@ MODULE aom_main
                                              calc_hop_nacv, &
                                              cal_delta_energy_nacv, &
                                              diab_to_adiab, & 
-                                             print_matrix_standard_out
+                                             print_matrix_standard_out,& 
+                                             calc_coms_and_nlist_aom
 
      USE aom_types,                    ONLY: aom_env_type, &
                                                 sh_print_env_type
@@ -270,7 +271,7 @@ CONTAINS
 !print *, "NACV from prev step", aom_env%nacv_t(1,:,:) 
 
      !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
-     CALL calc_coms_and_nlist(aom_env, atoms, mol, cutoff_sites, orb)
+     CALL calc_coms_and_nlist_aom(aom_env, atoms, mol, cutoff_sites, orb)
 
      !> CALCULATE THE HAMILTONIAN, THE STTP MATRIX AND THE NACV
      CALL calc_Xmatrix_elements(aom_env, itimes, atoms, mol, dR, do_random, cbar, &
@@ -469,54 +470,55 @@ CONTAINS
      DEALLOCATE(velocities_com_tp)
      deallocate(exact_forces)
      deallocate(site_energies, couplings, adiab_c, adiab_pop)
+     DEALLOCATE(PC_allrvecs)
     END SUBROUTINE construct_ham_X_SH
 
 
-SUBROUTINE calc_coms_and_nlist(aom_env, atoms, mol, cutoff_sites, orb)
-     TYPE(aom_env_type), INTENT(INOUT)     :: aom_env
-     INTEGER, INTENT(IN)                   :: mol, atoms, orb
-     REAL(KIND=dp), intent (IN)            :: cutoff_sites
-
-     CHARACTER(len=*), PARAMETER                     :: routineN ='calc_coms_and_nlist', &
-     routineP = moduleN//':'//routineN
-
-     integer                               :: i, j, m, d
-    
-     !> CALCULATE THE CENTER OF MASS
-     !calculate CoMs at first timestep
-     !coms(1 to 3,i) are the x, y and z coordinates of CoM of i
-     aom_env%coms = 0
-     do i=1,mol
-          do m=1,atoms
-               do d=1,3
-                    aom_env%coms(d,i) = aom_env%coms(d,i) + (aom_env%crds(d,(i-1)*atoms + m,3))/atoms
-               end do
-          end do
-     end do
-
-     !> CONSTRUCT NEIGHBOURS LIST
-     do i=1,mol
-          do j=1,mol
-               aom_env%dist(i,j) = ((aom_env%coms(1,i) - aom_env%coms(1,j))*(aom_env%coms(1,i) - &
-                                 aom_env%coms(1,j)) + (aom_env%coms(2,i) - aom_env%coms(2,j))*&
-                      (aom_env%coms(2,i) - aom_env%coms(2,j)) + (aom_env%coms(3,i) - &
-                          aom_env%coms(3,j))*(aom_env%coms(3,i) - aom_env%coms(3,j)))
-               if (aom_env%dist(i,j) < cutoff_sites*cutoff_sites) then
-                    do d=1,orb
-                         do m=1,orb
-                              aom_env%NN(orb*(i-1)+d,orb*(j-1)+m) = 1
-                         end do
-                    end do
-               else
-                    do d=1,orb
-                         do m=1,orb
-                              aom_env%NN(orb*(i-1)+d,orb*(j-1)+m) = 0
-                         end do
-                    end do
-               end if                    
-          end do
-     end do
-END SUBROUTINE calc_coms_and_nlist
+!SUBROUTINE calc_coms_and_nlist(aom_env, atoms, mol, cutoff_sites, orb)
+!     TYPE(aom_env_type), INTENT(INOUT)     :: aom_env
+!     INTEGER, INTENT(IN)                   :: mol, atoms, orb
+!     REAL(KIND=dp), intent (IN)            :: cutoff_sites
+!
+!     CHARACTER(len=*), PARAMETER                     :: routineN ='calc_coms_and_nlist', &
+!     routineP = moduleN//':'//routineN
+!
+!     integer                               :: i, j, m, d
+!    
+!     !> CALCULATE THE CENTER OF MASS
+!     !calculate CoMs at first timestep
+!     !coms(1 to 3,i) are the x, y and z coordinates of CoM of i
+!     aom_env%coms = 0
+!     do i=1,mol
+!          do m=1,atoms
+!               do d=1,3
+!                    aom_env%coms(d,i) = aom_env%coms(d,i) + (aom_env%crds(d,(i-1)*atoms + m,3))/atoms
+!               end do
+!          end do
+!     end do
+!
+!     !> CONSTRUCT NEIGHBOURS LIST
+!     do i=1,mol
+!          do j=1,mol
+!               aom_env%dist(i,j) = ((aom_env%coms(1,i) - aom_env%coms(1,j))*(aom_env%coms(1,i) - &
+!                                 aom_env%coms(1,j)) + (aom_env%coms(2,i) - aom_env%coms(2,j))*&
+!                      (aom_env%coms(2,i) - aom_env%coms(2,j)) + (aom_env%coms(3,i) - &
+!                          aom_env%coms(3,j))*(aom_env%coms(3,i) - aom_env%coms(3,j)))
+!               if (aom_env%dist(i,j) < cutoff_sites*cutoff_sites) then
+!                    do d=1,orb
+!                         do m=1,orb
+!                              aom_env%NN(orb*(i-1)+d,orb*(j-1)+m) = 1
+!                         end do
+!                    end do
+!               else
+!                    do d=1,orb
+!                         do m=1,orb
+!                              aom_env%NN(orb*(i-1)+d,orb*(j-1)+m) = 0
+!                         end do
+!                    end do
+!               end if                    
+!          end do
+!     end do
+!END SUBROUTINE calc_coms_and_nlist
 
 
 SUBROUTINE calc_Xmatrix_elements(aom_env, itimes, atoms, mol, dR, do_random, cbar, &
@@ -657,6 +659,7 @@ SUBROUTINE calc_Xmatrix_elements(aom_env, itimes, atoms, mol, dR, do_random, cba
                   PC_allrvecs (3:5,((i-1)*atoms)+o) = PC_rvecs(:,o)
                end do
      end do !loop over i
+    DEALLOCATE(PC_rvecs) 
 END SUBROUTINE calc_Xmatrix_elements
 
 SUBROUTINE diagonal_elem(i,k,orb,itimes,aom_env)

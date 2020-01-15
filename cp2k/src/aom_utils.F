@@ -122,6 +122,7 @@ IMPLICIT NONE
    CHARACTER(len=*), PARAMETER, PRIVATE :: moduleN = 'aom_utils'
 
    PUBLIC :: makeX,            &
+             calc_coms_and_nlist_aom, &
              make_adiabX,      &
              adiabaticity,     &
              calcforces,           &
@@ -145,6 +146,53 @@ IMPLICIT NONE
 CONTAINS
 
 
+SUBROUTINE calc_coms_and_nlist_aom(aom_env, atoms, mol, cutoff_sites, orb)
+
+     TYPE(aom_env_type), INTENT(INOUT)     :: aom_env
+     INTEGER, INTENT(IN)                   :: mol, atoms, orb
+     REAL(KIND=dp), intent (IN)            :: cutoff_sites
+
+     CHARACTER(len=*), PARAMETER                     :: routineN='calc_coms_and_nlist_aom', &
+     routineP = moduleN//':'//routineN
+
+     integer                               :: i, j, m, d
+  
+
+     !CALCULATE THE CENTER OF MASS
+     !calculate CoMs at first timestep
+     !coms(1 to 3,i) are the x, y and z coordinates of CoM of i
+     aom_env%coms = 0
+     do i=1,mol
+          do m=1,atoms
+               do d=1,3
+                    aom_env%coms(d,i) = aom_env%coms(d,i) + (aom_env%crds(d,(i-1)*atoms + m,3))/atoms
+               end do
+          end do
+     end do
+
+     !CONSTRUCT NEIGHBOURS LIST
+     do i=1,mol
+          do j=1,mol
+               aom_env%dist(i,j) = ((aom_env%coms(1,i) - aom_env%coms(1,j))*(aom_env%coms(1,i) &
+                - aom_env%coms(1,j)) + (aom_env%coms(2,i) - aom_env%coms(2,j))*&
+               &(aom_env%coms(2,i) - aom_env%coms(2,j)) + (aom_env%coms(3,i) & 
+                - aom_env%coms(3,j))*(aom_env%coms(3,i) - aom_env%coms(3,j)))
+               if (aom_env%dist(i,j) < cutoff_sites*cutoff_sites) then
+                    do d=1,orb
+                         do m=1,orb
+                              aom_env%NN(orb*(i-1)+d,orb*(j-1)+m) = 1
+                         end do
+                    end do
+               else
+                    do d=1,orb
+                         do m=1,orb
+                              aom_env%NN(orb*(i-1)+d,orb*(j-1)+m) = 0
+                         end do
+                    end do
+               end if                    
+          end do
+     end do
+END SUBROUTINE calc_coms_and_nlist_aom
 
   
 subroutine makeX(mol, H, Stt, Sttp, Sttm, Stptp, Stmtm, X, deltat, NACE)
@@ -1403,7 +1451,7 @@ subroutine calc_adiab_nace_old(aom_env, adiab_section)
         !this subroutine calculates the adiabatic nace used in the calculation
         !of the hopping probability and also in the RK adiabatic propagation 
 !WARNING: THIS SUBROUTINE HAS TIME INCONSISTENCIES IN THE TIME DERIVATIVES THAT
-!HAVE BEEN CORRECTED IN THE IT'S CHOPPED VERSION ABOVE
+!HAVE BEEN CORRECTED IN THE CHOPPED VERSION ABOVE
         TYPE(aom_env_type)                         :: aom_env
         TYPE(section_vals_type), POINTER           :: adiab_section
 

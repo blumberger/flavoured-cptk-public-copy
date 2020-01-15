@@ -62,7 +62,8 @@ MODULE aom_initialization
                                               calc_hop_nacv, &
                                               cal_delta_energy_nacv, &
                                               diab_to_adiab, &
-                                              print_matrix_standard_out
+                                              print_matrix_standard_out,&
+                                             calc_coms_and_nlist_aom
 
      USE aom_types,                    ONLY: aom_env_type, &
                                                 sh_print_env_type
@@ -222,7 +223,7 @@ CONTAINS
      allocate(aom_env%Bt(4,atoms))
      allocate(aom_env%Btp(4,atoms))
      allocate(aom_env%Btm(4,atoms))
-     allocate(aom_env%siteenergies(3,mat))
+     allocate(aom_env%siteenergies(3,mat))  !QE_SG: why the dim is 3,mat and not mat
      !> nacv are memory consuming to store however here we are storing them at time
      !t and tp for the multiple time step feature avoing their calculations at
      !each step
@@ -472,19 +473,17 @@ print *, "ALLOCATION OF S MATRICES"
      CHARACTER(len=*), PARAMETER :: routineN ='propagate_aom_namd_first_step', &
      routineP = moduleN//':'//routineN
 
-     integer :: coord 
-     integer :: mol, i, j, k, l, m, d, atoms, c,  first_diabat, active_state, mat, orb
-     integer, dimension(:,:), allocatable :: NN!,  aneighbour, bneighbour  
+     integer :: coord, mol, atoms, c, first_diabat, active_state, mat, orb 
+!     integer :: mol, i, j, k, l, m, d, atoms, c,o,first_diabat, active_state, mat, orb
+!     integer, dimension(:,:), allocatable :: NN!,  aneighbour, bneighbour  
      REAL(KIND=dp) :: cutoff_sites, cutoff_connect, scaling, deltatMD, deltatE
-     REAL(KIND=dp) :: S
+ !    REAL(KIND=dp) :: S
      REAL(KIND=dp)    :: cbar, minao
 !     REAL(KIND=dp), dimension(:,:,:), allocatable :: nacv
-     REAL(KIND=dp), dimension(:,:,:), POINTER :: crds, pcoeffsrun
-     REAL(KIND=dp), dimension(:,:), allocatable :: Stptp
-     REAL(KIND=dp), dimension(:,:), allocatable :: dist
+!     REAL(KIND=dp), dimension(:,:), allocatable :: Stptp
+!     REAL(KIND=dp), dimension(:,:), allocatable :: dist
      COMPLEX(KIND=dp), dimension(:), allocatable :: ctin
-     REAL(KIND=dp), dimension(:,:), allocatable ::  Atp, Btp, coms, siteenergies
-     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE ::  scoefftot
+!     REAL(KIND=dp), dimension(:,:), allocatable ::  Atp, Btp, coms
 !     REAL(KIND=dp), DIMENSION(:,:,:), ALLOCATABLE :: F
      LOGICAL                                      :: decohere, analytics
      INTEGER                                      :: new_state , ELsteps   
@@ -498,7 +497,7 @@ print *, "ALLOCATION OF S MATRICES"
      CHARACTER(LEN=default_string_length)         :: keyword_init, keyword_basis_repr, &
                                                      prop_wf_keyword
      real(kind=dp), DIMENSION(:,:), allocatable :: PC_allrvecs
-     real(kind=dp), allocatable :: PC_rvecs(:,:)
+!     real(kind=dp), allocatable :: PC_rvecs(:,:)
      LOGICAL    :: do_random
      REAL(kind=dp), DIMENSION(:), ALLOCATABLE     :: site_energies, couplings
      REAL(KIND=dp), dimension(:), allocatable     :: adiab_pop
@@ -516,11 +515,11 @@ print *, "ALLOCATION OF S MATRICES"
 
 
      !> cutoff to define the neighborough list
-     CALL section_vals_val_get(coupling_section,"CUT_OFF_BETWEEN_SITES",&
-             r_val=cutoff_sites)
-     !> cutoff to define the neighborough list
      CALL section_vals_val_get(coupling_section,"CUT_OFF_CONNECTIVITY",&
              r_val=cutoff_connect)
+     !> cutoff to define the neighborough list
+     CALL section_vals_val_get(coupling_section,"CUT_OFF_BETWEEN_SITES",&
+             r_val=cutoff_sites)
      !minao is an atomic overlap cutoff
      CALL section_vals_val_get(coupling_section,"ATOMIC_OVERLAP_CUTOFF",&
              r_val=minao)
@@ -564,12 +563,10 @@ print *, "ALLOCATION OF S MATRICES"
      ALLOCATE(velocities_com_tp(3, natom))
      allocate(exact_forces(3,natom))
      allocate(ctin(mat))      !ctin goes into the subroutine ZGEMV
-     ALLOCATE(PC_allrvecs(5,mol*atoms))
-     ALLOCATE(PC_rvecs(3,atoms))
      !need to allocate these square matrices
      !first the real, S-related ones
-     allocate(Stptp(mat,mat))
-     allocate(crds(3,c,3))
+!     allocate(Stptp(mat,mat))
+     !allocate(crds(3,c,3))
      !allocate(NACE_ad_tp(mat,mat))
      !then the complex ones i.e. H matrices; combinations of H and S
      !Note that in the solution to the Schroedinger equation, the H term is -i*H
@@ -581,17 +578,17 @@ print *, "ALLOCATION OF S MATRICES"
 ! one could use already aom_env%nacv here
 !     allocate(nacv(3,mat,mat*atoms))      !non-adiabatic coupling vectors
 !     nacv = 0.0D0
-     allocate(siteenergies(3,mat))      !diagonals of the Hamiltonian
-     allocate(pcoeffsrun(atoms,mat,3)) !pcoeffsrun exists because the p-coefficients need to be renormalised for each structure
-     allocate(scoefftot(c))
-     allocate(coms(3,mol))
-     allocate(NN(mat,mat))
-     allocate(dist(mol,mol))
+!     allocate(siteenergies(3,mat))      !diagonals of the Hamiltonian
+!     allocate(pcoeffsrun(atoms,mat,3)) !pcoeffsrun exists because the p-coefficients need to be renormalised for each structure
+!     allocate(scoefftot(c))
+!     allocate(coms(3,mol))
+!     allocate(NN(mat,mat))
+!     allocate(dist(mol,mol))
      !allocate the arrays that will contain atomic coordinates for the overlap routine
      !first column is now atomic number of atom (e.g. 6 for carbon)
      !Naming convention: At = A(t), Atp = A(t+1), Atm = A(t-1), etc
-     allocate(Atp(4,atoms))
-     allocate(Btp(4,atoms))
+!     allocate(Atp(4,atoms))
+!     allocate(Btp(4,atoms))
 !     allocate(F(3,natom,mol)) !array of diagonal atomic forces
      !these arrays are data for the non-adiabatic coupling calculation
      !they help efficiency by telling the program which atoms are connected
@@ -612,49 +609,20 @@ print *, "ALLOCATION OF S MATRICES"
      ENDIF
      CALL translate_com(positions_tp, keyword_translate, positions_com_tp, local_particles, atomic_kinds = atomic_kinds)  
      do coord=1,3
-        crds(coord,:,1) = PACK(positions_com_tp(coord,:), aom_env%ext_pres)
+        aom_env%crds(coord,:,1) = PACK(positions_com_tp(coord,:), aom_env%ext_pres)
         !At time 0, we must guess the positions at time -1 with the inital velocities
-        crds(coord,:,2) = PACK(positions_com_tp(coord,:), aom_env%ext_pres) -  &
+        aom_env%crds(coord,:,2) = PACK(positions_com_tp(coord,:), aom_env%ext_pres) -  &
                           PACK(velocities_com_tp(coord,:), aom_env%ext_pres)*deltatMD
-        crds(coord,:,3) = PACK(positions_com_tp(coord,:), aom_env%ext_pres)
-        siteenergies(2,:) = 0.0D0 ! CHANGE_AC
-        siteenergies(3,:) = energies_tp(:) ! CHANGE_AC
+        aom_env%crds(coord,:,3) = PACK(positions_com_tp(coord,:), aom_env%ext_pres)
+        aom_env%siteenergies(2,:) = 0.0D0 ! CHANGE_AC
+        aom_env%siteenergies(3,:) = energies_tp(:) ! CHANGE_AC
      enddo
+    
+     
+     !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
+     CALL calc_coms_and_nlist_aom(aom_env, atoms, mol, cutoff_sites, orb)
 
 
-     !CALCULATE THE CENTER OF MASS
-     !calculate CoMs at first timestep
-     !coms(1 to 3,i) are the x, y and z coordinates of CoM of i
-     coms = 0
-     do i=1,mol
-          do m=1,atoms
-               do d=1,3
-                    coms(d,i) = coms(d,i) + (crds(d,(i-1)*atoms + m,3))/atoms
-               end do
-          end do
-     end do
-
-
-     !CONSTRUCT NEIGHBOURS LIST
-     do i=1,mol
-          do j=1,mol
-               dist(i,j) = ((coms(1,i) - coms(1,j))*(coms(1,i) - coms(1,j)) + (coms(2,i) - coms(2,j))*&
-               &(coms(2,i) - coms(2,j)) + (coms(3,i) - coms(3,j))*(coms(3,i) - coms(3,j)))
-               if (dist(i,j) < cutoff_sites*cutoff_sites) then
-                    do d=1,orb
-                         do m=1,orb
-                              NN(orb*(i-1)+d,orb*(j-1)+m) = 1
-                         end do
-                    end do
-               else
-                    do d=1,orb
-                         do m=1,orb
-                              NN(orb*(i-1)+d,orb*(j-1)+m) = 0
-                         end do
-                    end do
-               end if                    
-          end do
-     end do
 
      ! Allocate neighbouring list just at the first step as Jacob suggested 
      !only if aom_env%multiple_time_step .eq. 1 otherwise we use Multiple time
@@ -667,95 +635,9 @@ print *, "ALLOCATION OF S MATRICES"
        aom_env%neighbourlist = 0
      end if 
 
-     !CALCULATE THE HAMILTONIAN AND THE NACV
-     do i=1,mol
-               !create the array of all its atomic coordinates at t
-               !numerical factor converts from Angstroms into Bohr radii
-               Atp(1,1:atoms) = dble(aom_env%elements((i-1)*atoms+1:i*atoms))
-               do j=1,atoms
-                    Atp(2:4,j) = crds(1:3,(i-1)*atoms+j,3)
-               end do
-
-               !then for each other molecule
-               do k=1,mol
-                    !create the array of its atomic coordinates at both t and t+dt
-                    Btp(1,1:atoms) = dble(aom_env%elements((k-1)*atoms+1:k*atoms))
-                    do l=1,atoms
-                        Btp(2:4,l) = crds(1:3,(k-1)*atoms+l,3)
-                    end do
-                    if (i == 1) then
-                         do d=1,orb
-                              pcoeffsrun(1:atoms,orb*(k-1)+d,3) = aom_env%pcoeffs(1:atoms,d)
-                              call calc_sab(Btp, aom_env%connlist2, pcoeffsrun(:,orb*(k-1)+d,3))
-                         end do
-                    end if  ! (i == 1)
-                    do d=1,orb
-                         do m=1,orb
-                              call sab_screen_new(Atp, aom_env%atomlist, aom_env%connlist1, pcoeffsrun(:,orb*(i-1)+d,3),&
-                              & aom_env%atomlist, Btp, aom_env%atomlist, aom_env%connlist1, pcoeffsrun(:,orb*(k-1)+m,3),&
-                              & aom_env%aneighbour(:,1:atoms), aom_env%bneighbour(:,1:atoms), minao)
-                         end do
-                    end do
-                    !store neighbouring list when we do not use MTS feature
-                    if (aom_env%multiple_time_step .eq. 1) then
-                        aom_env%neighbourlist(i,k,:,1:atoms) = aom_env%bneighbour(:,1:atoms)
-                        aom_env%neighbourlist(k,i,:,1:atoms) = aom_env%aneighbour(:,1:atoms)
-                    end if 
-                    if (NN(i,k) == 1) then
-                         !first the diagonals
-                         if (i == k) then
-                              do d=1,orb
-                                   do m=1,orb
-                                        !These diagonals are 1 by definition
-                                        Stptp(orb*(i-1)+d,orb*(k-1)+m) = 1.0D0
-                                        aom_env%H_tp(orb*(i-1)+d,orb*(k-1)+d) = cmplx(0.0D0, (-siteenergies(3,k)),dp)
-                                   end do
-                              end do
-
-                         !now the off-diagonals                         
-                         else ! ( i == k)
-                              !symmetric matrices
-                              !no sense calling calc_sab twice as often as you need to
-                              if (k < i) then
-                                   do m=1,orb
-                                        do d=1,orb
-                                             aom_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = aom_env%H_tp(orb*(k-1)+m,orb*(i-1)+d)
-                                             Stptp(orb*(i-1)+d,orb*(k-1)+m) = Stptp(orb*(k-1)+m,orb*(i-1)+d)
-                                        end do
-                                   end do
-                              else
-                                   do d=1,orb
-                                        do m=1,orb
-                                             call calc_sab(Atp, aom_env%connlist2, pcoeffsrun(1:atoms,orb*(i-1)+d,3),&
-                                              S, Btp, aom_env%connlist2, pcoeffsrun(1:atoms,orb*(k-1)+m,3))
-                                             Stptp(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
-                                             aom_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0, -scaling*S,dp)
-
-                                             call calc_dRSab(Atp, aom_env%atomlist, aom_env%connlist1, &
-                                             pcoeffsrun(1:atoms,orb*(i-1)+d,3), aom_env%scoeffs, &
-                                             !nacv(1:3,orb*(k-1)+d,orb*(i-1)+m,(i-1)*atoms+1:i*atoms), &
-                                             !nacv(1:3,orb*(i-1)+m,orb*(k-1)+d,(k-1)*atoms+1:k*atoms), &
-                                             aom_env%nacv(1:3,orb*(k-1)+d,(i-1)*atoms+1:i*atoms), &
-                                             aom_env%nacv(1:3,orb*(i-1)+m,(k-1)*atoms+1:k*atoms), &
-                                             Btp, aom_env%atomlist, aom_env%connlist1, pcoeffsrun(1:atoms,orb*(k-1)+m,3),&
-                                             !aom_env%scoeffs, aom_env%neighbourlist(k,i,:,:), aom_env%neighbourlist(i,k,:,:), dR, &
-                                             aom_env%scoeffs, aom_env%aneighbour(:,:), aom_env%bneighbour(:,:), dR, &
-                                             do_random, aom_env)
-                                        end do
-                                   end do
-                              endif 
-                         end if !(i==k)
-                    else !(NN(i,k) == 1
-                         do d=1,orb
-                              do m=1,orb
-                                   !fill in elements of non-overlapping pairs with 0
-                                   aom_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0, 0.0D0,dp)
-                                   Stptp(orb*(i-1)+d,orb*(k-1)+m) = 0.0D0
-                              end do
-                         end do
-                    end if !(NN(i,k) == 1
-               end do !loop over k 
-     enddo !loop-over i
+     !> CALCULATE THE HAMILTONIAN, THE STTP MATRIX AND THE NACV
+     CALL calc_Xmatrix_elements_first_step(aom_env, atoms, mol, dR, do_random,cbar, &
+                      scaling, PC_allrvecs, orb, minao)
 
 
      !> CONVERT NACV AND CALCULATE EIGENPROPERTIES 
@@ -788,7 +670,7 @@ print *, "ALLOCATION OF S MATRICES"
          end if
      end do
    
-times = DBLE(itimes)
+     times = DBLE(itimes)
 
 
      !> print info in the output only if we do not restart the file
@@ -940,33 +822,34 @@ times = DBLE(itimes)
      aom_env%new_state = new_state
      aom_env%active_state = active_state
      !> IMPORTANT FOR THE FIRST TIME STEP
-     aom_env%Stt = Stptp
+     aom_env%Stt = aom_env%Stptp
      aom_env%old_state = aom_env%active_state
      !aom_env%active_state = -1
      aom_env%new_state = -1
      aom_env%successful_hop = .FALSE.
      !aom_env%Stptp = Stptp
-     aom_env%NN = NN
+     !aom_env%NN = NN
 
 
     !> DEALLOCATE
-    deallocate(scoefftot)
-    deallocate(pcoeffsrun)
+!    deallocate(scoefftot)
+!    deallocate(pcoeffsrun)
     deallocate(ctin)
-    deallocate(siteenergies)
-    deallocate(crds)
-    deallocate(coms)
-    deallocate(NN)
-    deallocate(Atp)
-    deallocate(Btp)
-    deallocate(Stptp)
+!    deallocate(siteenergies)
+!    deallocate(crds)
+!    deallocate(coms)
+!    deallocate(NN)
+!    deallocate(Atp)
+!    deallocate(Btp)
+!    deallocate(Stptp)
 !    deallocate(nacv)
-    deallocate(dist)
+!    deallocate(dist)
     deallocate(exact_forces)
 !    deallocate(F)
     deallocate(site_energies, couplings, adiab_c, adiab_pop)
     DEALLOCATE(positions_com_tp)
     DEALLOCATE(velocities_com_tp)
+    DEALLOCATE(PC_allrvecs)    
 
   END SUBROUTINE propagate_aom_namd_first_step
 
@@ -1004,5 +887,135 @@ times = DBLE(itimes)
      end do
      aom_env%adiab_nace_tp = -aom_env%adiab_nace_tp 
   END SUBROUTINE nacv_first_ts
+
+SUBROUTINE calc_Xmatrix_elements_first_step(aom_env, atoms, mol, dR, do_random,cbar, &
+                      scaling, PC_allrvecs, orb, minao)
+
+     TYPE(aom_env_type)                      :: aom_env
+     integer, intent(IN)                     :: atoms
+     integer, intent(in)                     :: mol, orb
+     REAL(KIND=dp), intent(in)                   :: dR
+     LOGICAL, intent(in)                         :: do_random
+     REAL(KIND=dp), intent(in)                   :: cbar
+     REAL(KIND=dp), intent(in)                   :: minao
+     REAL(KIND=dp), intent(in) :: scaling
+     real(kind=dp), DIMENSION(:,:), allocatable, intent(out) :: PC_allrvecs
+
+     CHARACTER(len=*), PARAMETER                     :: routineN='calc_Xmatrix_elements_first_step', &
+     routineP = moduleN//':'//routineN
+
+     REAL(KIND=dp)                   :: S
+     integer :: i, j, k, l, m, d, o
+     real(kind=dp), allocatable :: PC_rvecs(:,:)
+
+
+     ALLOCATE(PC_allrvecs(5,mol*atoms))
+     ALLOCATE(PC_rvecs(3,atoms))
+
+     !CALCULATE THE HAMILTONIAN AND THE NACV
+     do i=1,mol
+               !create the array of all its atomic coordinates at t
+               !numerical factor converts from Angstroms into Bohr radii
+               aom_env%Atp(1,1:atoms) = dble(aom_env%elements((i-1)*atoms+1:i*atoms))
+               do j=1,atoms
+                    aom_env%Atp(2:4,j) = aom_env%crds(1:3,(i-1)*atoms+j,3)
+               end do
+
+               !then for each other molecule
+               do k=1,mol
+                    !create the array of its atomic coordinates at both t and t+dt
+                    aom_env%Btp(1,1:atoms) = dble(aom_env%elements((k-1)*atoms+1:k*atoms))
+                    do l=1,atoms
+                        aom_env%Btp(2:4,l) = aom_env%crds(1:3,(k-1)*atoms+l,3)
+                    end do
+                    if (i == 1) then
+                         do d=1,orb
+                              aom_env%pcoeffsrun(1:atoms,orb*(k-1)+d,3) = aom_env%pcoeffs(1:atoms,d)
+                              call calc_sab(aom_env%Btp, aom_env%connlist2, aom_env%pcoeffsrun(:,orb*(k-1)+d,3))
+                         end do
+                    end if  ! (i == 1)
+                    do d=1,orb
+                         do m=1,orb
+                              call sab_screen_new(aom_env%Atp, aom_env%atomlist, aom_env%connlist1, &
+                                                                      aom_env%pcoeffsrun(:,orb*(i-1)+d,3),&
+                              & aom_env%atomlist, aom_env%Btp, aom_env%atomlist, aom_env%connlist1, &
+                                                                     aom_env%pcoeffsrun(:,orb*(k-1)+m,3),&
+                              & aom_env%aneighbour(:,1:atoms), aom_env%bneighbour(:,1:atoms), minao)
+                         end do
+                    end do
+                    !store neighbouring list when we do not use MTS feature
+                    if (aom_env%multiple_time_step .eq. 1) then
+                        aom_env%neighbourlist(i,k,:,1:atoms) = aom_env%bneighbour(:,1:atoms)
+                        aom_env%neighbourlist(k,i,:,1:atoms) = aom_env%aneighbour(:,1:atoms)
+                    end if 
+                    if (aom_env%NN(i,k) == 1) then
+                         !first the diagonals
+                         if (i == k) then
+                              do d=1,orb
+                                   do m=1,orb
+                                        !These diagonals are 1 by definition
+                                        aom_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = 1.0D0
+                                        aom_env%H_tp(orb*(i-1)+d,orb*(k-1)+d) = cmplx(0.0D0, (-aom_env%siteenergies(3,k)),dp)
+                                   end do
+                              end do
+
+                         !now the off-diagonals                         
+                         else ! ( i == k)
+                              !symmetric matrices
+                              !no sense calling calc_sab twice as often as you need to
+                              if (k < i) then
+                                   do m=1,orb
+                                        do d=1,orb
+                                             aom_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = aom_env%H_tp(orb*(k-1)+m,orb*(i-1)+d)
+                                             aom_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = aom_env%Stptp(orb*(k-1)+m,orb*(i-1)+d)
+                                        end do
+                                   end do
+                              else
+                                   do d=1,orb
+                                        do m=1,orb
+                                             call calc_sab(aom_env%Atp, aom_env%connlist2, &
+                                                          aom_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3),&
+                                                          S, aom_env%Btp, aom_env%connlist2, & 
+                                                          aom_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3))
+                                             aom_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
+                                             aom_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0, -scaling*S,dp)
+
+                                             call calc_dRSab(aom_env%Atp, aom_env%atomlist, aom_env%connlist1, &
+                                             aom_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3), aom_env%scoeffs, &
+                                             !nacv(1:3,orb*(k-1)+d,orb*(i-1)+m,(i-1)*atoms+1:i*atoms), &
+                                             !nacv(1:3,orb*(i-1)+m,orb*(k-1)+d,(k-1)*atoms+1:k*atoms), &
+                                             aom_env%nacv(1:3,orb*(k-1)+d,(i-1)*atoms+1:i*atoms), &
+                                             aom_env%nacv(1:3,orb*(i-1)+m,(k-1)*atoms+1:k*atoms), &
+                                             aom_env%Btp, aom_env%atomlist, aom_env%connlist1, & 
+                                                                   aom_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3),&
+                                             !aom_env%scoeffs, aom_env%neighbourlist(k,i,:,:), aom_env%neighbourlist(i,k,:,:), dR, &
+                                             aom_env%scoeffs, aom_env%aneighbour(:,:), aom_env%bneighbour(:,:), dR, &
+                                             do_random, aom_env)
+                                        end do
+                                   end do
+                              endif 
+                         end if !(i==k)
+                    else !(NN(i,k) == 1
+                         do d=1,orb
+                              do m=1,orb
+                                   !fill in elements of non-overlapping pairs with 0
+                                   aom_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0, 0.0D0,dp)
+                                   aom_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = 0.0D0
+                              end do
+                         end do
+                    end if !(NN(i,k) == 1
+               end do !loop over k 
+
+               call calc_sab_pete(aom_env%Atp, aom_env%connlist2, PC_rvecs)
+               do o=1, size(PC_rvecs,2)
+                  PC_allrvecs(1,((i-1)*atoms)+o) = i
+                  PC_allrvecs(2,((i-1)*atoms)+o) = o
+                  PC_allrvecs (3:5,((i-1)*atoms)+o) = PC_rvecs(:,o)
+               end do
+
+     enddo !loop-over i
+     DEALLOCATE(PC_rvecs)
+
+END SUBROUTINE calc_Xmatrix_elements_first_step
 
 END MODULE aom_initialization
