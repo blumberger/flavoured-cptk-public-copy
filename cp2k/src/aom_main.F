@@ -108,7 +108,7 @@ MODULE aom_main
 
      USE distribution_1d_types,        ONLY: distribution_1d_type
 
-     USE non_adiabatic_utils,            ONLY: decohere_wf,  &
+     USE non_adiabatic_utils,          ONLY: decohere_wf,  &
                                                propagate_wf, &
                                                propagate_wf_fast, &
                                                propagate_adiab_wf, &
@@ -118,15 +118,15 @@ MODULE aom_main
                                                define_active_region, &
                                                calc_psi_after_correction
 
-     USE parallel_rng_types,              ONLY: UNIFORM,&
-                                             create_rng_stream,&
-                                             delete_rng_stream
+     USE parallel_rng_types,           ONLY: UNIFORM,&
+                                          create_rng_stream,&
+                                          delete_rng_stream
 
-     USE cp_log_handling,                 ONLY: cp_get_default_logger, &
-                                                cp_logger_type
+     USE cp_log_handling,              ONLY: cp_get_default_logger, &
+                                             cp_logger_type
 
-     USE cp_output_handling,              ONLY: cp_print_key_unit_nr, &
-                                                cp_print_key_should_output
+     USE cp_output_handling,           ONLY: cp_print_key_unit_nr, &
+                                             cp_print_key_should_output
 
 
 #include "./base/base_uses.f90"
@@ -158,45 +158,46 @@ CONTAINS
      REAL(kind=dp), DIMENSION(:),  POINTER          :: energies_tp
      TYPE(aom_env_type), INTENT(INOUT)              :: aom_env
      INTEGER, POINTER                               :: itimes
-     !TYPE(mixed_force_type), DIMENSION(:), POINTER  :: global_forces
      TYPE(section_vals_type), POINTER               :: coupling_section
      LOGICAL, INTENT(IN)                            :: my_bo_keyword
      TYPE(section_vals_type), POINTER               :: adiab_section
      TYPE(atomic_kind_list_type), POINTER           :: atomic_kinds
      TYPE(distribution_1d_type), POINTER            :: local_particles
      LOGICAL, INTENT(IN)                            :: my_test_keyword
-     INTEGER                                    :: nparticle_kind
-     TYPE(atomic_kind_type), DIMENSION(:), POINTER                       :: atomic_kind_set
+     INTEGER                                        :: nparticle_kind
+     TYPE(atomic_kind_type), DIMENSION(:), POINTER  :: atomic_kind_set
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: diagonal_F
 
      CHARACTER(len=*), PARAMETER :: routineN ='construct_ham_X_SH', &
      routineP = moduleN//':'//routineN
 
-     integer :: coord
-     integer :: mol, atoms, c,  mat, orb
-     REAL(KIND=dp) :: cutoff_sites, cutoff_connect, scaling, deltatMD, deltatE
-     REAL(KIND=dp)    :: cbar, minao
-     INTEGER, dimension(:), allocatable          :: class_forbidden_hop_tp
-     LOGICAL                                      :: analytics, do_nace_speedup
-     INTEGER                                      :: ELsteps   
-     REAL(KIND=dp)                                :: dR, times 
-     REAL(KIND=dp)                                :: decohere_criterion
-     INTEGER                                      :: imol,  natom
-     REAL(kind=dp), DIMENSION(:,:), ALLOCATABLE   :: exact_forces
-     REAL(kind=dp), DIMENSION(:), ALLOCATABLE     :: site_energies, couplings
-     LOGICAL                                      :: keyword_translate
-     TYPE(sh_print_env_type)                      :: sh_print_env
-     REAL(kind=dp), DIMENSION(:,:),POINTER        :: positions_com_tp, velocities_com_tp
-     CHARACTER(LEN=default_string_length)         :: prop_wf_keyword 
-     CHARACTER(LEN=default_string_length)         :: reversal_keyword
-     real(kind=dp), DIMENSION(:,:), allocatable   :: PC_allrvecs
-     LOGICAL                                      :: do_random 
-     REAL(KIND=dp), dimension(:), allocatable     :: adiab_pop
-     COMPLEX(KIND=dp), dimension(:), allocatable               :: adiab_c
-     TYPE(cp_logger_type), POINTER                :: logger
-     INTEGER                                    :: unit_nr
+     integer                                        :: coord
+     integer                                        :: mol, atoms, c,  mat, orb
+     REAL(KIND=dp)                                  :: cutoff_sites, cutoff_connect, &
+                                                       scaling, deltatMD, deltatE
+     REAL(KIND=dp)                                  :: cbar, minao
+     INTEGER, dimension(:), allocatable             :: class_forbidden_hop_tp
+     LOGICAL                                        :: analytics, do_nace_speedup
+     INTEGER                                        :: ELsteps   
+     REAL(KIND=dp)                                  :: dR, times 
+     REAL(KIND=dp)                                  :: decohere_criterion
+     INTEGER                                        :: imol,  natom
+     REAL(kind=dp), DIMENSION(:,:), ALLOCATABLE     :: exact_forces
+     REAL(kind=dp), DIMENSION(:), ALLOCATABLE       :: site_energies, couplings
+     LOGICAL                                        :: keyword_translate
+     TYPE(sh_print_env_type)                        :: sh_print_env
+     REAL(kind=dp), DIMENSION(:,:),POINTER          :: positions_com_tp, velocities_com_tp
+     CHARACTER(LEN=default_string_length)           :: prop_wf_keyword 
+     CHARACTER(LEN=default_string_length)           :: reversal_keyword
+     real(kind=dp), DIMENSION(:,:), allocatable     :: PC_allrvecs
+     LOGICAL                                        :: do_random 
+     REAL(KIND=dp), dimension(:), allocatable       :: adiab_pop
+     COMPLEX(KIND=dp), dimension(:), allocatable    :: adiab_c
+     TYPE(cp_logger_type), POINTER                  :: logger
+     INTEGER                                        :: unit_nr
 !TEST
 !     INTEGER                                    :: d, i,j
+
 
      NULLIFY(logger)
      logger => cp_get_default_logger()
@@ -207,25 +208,34 @@ CONTAINS
      !> cutoff to define the neighborough list
      CALL section_vals_val_get(coupling_section,"CUT_OFF_CONNECTIVITY",&
              r_val=cutoff_connect)
-     !minao is an atomic overlap cutoff
+     !> minao is an atomic overlap cutoff
      CALL section_vals_val_get(coupling_section,"ATOMIC_OVERLAP_CUTOFF",&
              r_val=minao)
-     CALL section_vals_val_get(coupling_section,"DECOHERENCE_CRITERION",&
-             r_val=decohere_criterion)
+     !> dR is the increment for the gradient finite difference calculation 
      CALL section_vals_val_get(coupling_section,"NACV_INCREMENT",&
              r_val=dR)
+     !> analytics would probably calculates analytic forces for a 2 state sytems (Spencer 2016)
      CALL section_vals_val_get(coupling_section,"ANALYTICS", l_val=analytics)
+     !> This remove bias coming from the finite difference calculation of the
+     !> gradients of the Hamiltonian from AOM
      CALL section_vals_val_get(coupling_section,"RANDOM_DERIVATIVE", l_val=do_random)
-     CALL section_vals_val_get(adiab_section,"CENTER_OF_MASS", l_val=keyword_translate)
-     CALL section_vals_val_get(adiab_section, "DO_SPEEDUP_NACE", l_val=do_nace_speedup)
-     CALL section_vals_val_get(adiab_section,"MULTIPLE_TIME_STEP",&
-             i_val=aom_env%multiple_time_step)
-     CALL section_vals_val_get(adiab_section,"ELECTRONIC_PARTIAL_STEP",&
-             i_val=ELsteps)
+     !> Multiple time step calculation of aom gradient
+     CALL section_vals_val_get(coupling_section,"MULTIPLE_TIME_STEP",&
+                               i_val=aom_env%multiple_time_step)
 
-!TO READ FROM EXTERNAL FILE
-!     aom_env%multiple_time_step = 10 
-!print *, "MULTIPLE TIME STEP", aom_env%multiple_time_step
+     
+     CALL section_vals_val_get(adiab_section,"CENTER_OF_MASS", l_val=keyword_translate)
+     !COMMENT SG: the following keyword could be removed since new nace are
+     !better
+     !> uses chunked nace (improved) subroutines as default 
+     CALL section_vals_val_get(adiab_section, "DO_SPEEDUP_NACE", l_val=do_nace_speedup)
+     CALL section_vals_val_get(adiab_section,"ELECTRONIC_PARTIAL_STEP",&
+                               i_val=ELsteps)
+     !> Instantaneous decoherence related threshold criteria 
+     CALL section_vals_val_get(adiab_section,"DECOHERENCE_CRITERION",&
+             r_val=decohere_criterion)
+
+     !> Scaling factor Hab = scaling*Sab_bar
      scaling = aom_env%scaling
      cbar = aom_env%cbar
      atoms = aom_env%atoms !Number of atoms per site
@@ -262,13 +272,8 @@ CONTAINS
         aom_env%siteenergies(3,:) = energies_tp(:) ! CHANGE_AC
      enddo
 
-
-     !ctin(:) = aom_env%ctin(:)
-     !> store adiabatic nace and diabatic non-orthogonal nacv (aom_env%nacv) from the previous
-     !step
+     !> store adiabatic nace and diabatic from the previous step
      aom_env%adiab_nace_t = aom_env%adiab_nace_tp
-!     aom_env%nacv_t = aom_env%nacv
-!print *, "NACV from prev step", aom_env%nacv_t(1,:,:) 
 
      !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
      CALL calc_coms_and_nlist_aom(aom_env, atoms, mol, cutoff_sites, orb)
@@ -277,24 +282,18 @@ CONTAINS
      CALL calc_Xmatrix_elements(aom_env, itimes, atoms, mol, dR, do_random, cbar, &
                       scaling, PC_allrvecs, orb, minao)
 
-!print *, "Stptp"
-!CALL print_matrix_standard_out(aom_env%Stptp)
-!print *, "Stt"
-!CALL print_matrix_standard_out(aom_env%Stt)
-
      !> CONVERT THE diabatic NACV WITH THE GOOD UNITS
-!print *, "NACV from inside", aom_env%nacv(1,:,:)
     if (mod(itimes-1, aom_env%multiple_time_step) .eq. 0) then
         print *, "FOBSH| *** OFF-DIAGONAL GRADIENT CALCULATION"
         aom_env%nacv = cbar*aom_env%nacv
     end if
-!TEST NACV ABSENCE:
-!aom_env%nacv = 0.0D0
-!print *, "NACV tp", aom_env%nacv(1,:,:)
+    !TEST NACV ABSENCE:
+    !aom_env%nacv = 0.0D0
+    !print *, "NACV tp", aom_env%nacv(1,:,:)
 
 
- !THIS KEYWORD helps treating initial itimes correctly in case of restart file
- !usage 
+     !> THIS KEYWORD helps treating initial itimes correctly in case of restart file
+     !usage 
      aom_env%restart_key = .False.
 
      !> HAMILTONIAN DIAGONALIZATION
@@ -311,16 +310,14 @@ CONTAINS
         CALL calc_adiab_nace_old(aom_env, adiab_section)
      END IF
 
-
-!>this if statement is usefull at t=1 becuase aom_env%diabatic_nace_tp
-!> is not present and we would need it in the interpolation scheme during the
-!> wavefunction propagation, so no we approximate that aom_env%diabatic_nace_t =0
-!> and aom_env%diabatic_nace_tp = aom_env%diabatic_nace_t
+     !>this if statement is usefull at t=1 becuase aom_env%diabatic_nace_tp
+     !> is not present and we would need it in the interpolation scheme during the
+     !> wavefunction propagation, so no we approximate that aom_env%diabatic_nace_t =0
+     !> and aom_env%diabatic_nace_tp = aom_env%diabatic_nace_t
      if (itimes.eq.1 .or. aom_env%restart_key)  then
        aom_env%diabatic_nace_tp = aom_env%diabatic_nace_t
      end if
      
-
      !> PROPAGATE THE ELECTRON FOR ONE MOLECULAR TIMESTEP
      !>the CHARGE CARRIER WF is called aom_env%ctin
      aom_env%HS_propagation = .FALSE.
@@ -381,12 +378,6 @@ CONTAINS
                                  sh_print_env, aom_env)
      ENDIF
 
-     !DO imol=1,mol
-     !   DO iatom=1, natom
-     !      !aom_env%F(:,iatom,imol) =  global_forces(imol)%forces(:,iatom)
-     !      aom_env%F(:,iatom,imol) =  aom_env%diagonal_F(:,iatom,imol)
-     !   ENDDO
-     !ENDDO
      print*, "FOBSH| ACTIVE STATE = ", aom_env%active_state
 
      IF (my_bo_keyword) THEN
@@ -394,22 +385,6 @@ CONTAINS
           CALL adiab_print_sh_info(sh_print_env, keyword = 'BOMD')
      END IF 
 
-!TEST PRINTING DIAGONAL GRADIENTS 
-!do d=1,3 
-!   do j=1,natom
-!     do i=1,mat
-!print *, "DIAGONAL FORCE", aom_env%F(d,j,i)
-!     end do
-!   end do
-!end do
-!print *, "Fdiag", aom_env%F(1,:,:)
-
-!print *, "TOTAL_NUM_ATOMS", natom
-!print *, "aom_atoms", aom_atoms
-!print *, "mat", mat
-!print *, "nacvx", aom_env%nacv(1,:,:)
-!print *, "nacvy", aom_env%nacv(2,:,:)
-!print *, "nacvz", aom_env%nacv(3,:,:)
 
      !CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE RESULT OF THE SURFACE
      !HOP ROUTINE IS. 
@@ -423,7 +398,6 @@ CONTAINS
                               scaling=scaling, cbar=cbar, Fin=diagonal_F, forces_adiab=aom_env%forces_adiab_new, &
                               ext_pres=aom_env%ext_pres)
      ENDIF
-
 
      !> PRINT
      CALL adiab_print_hamiltonian(adiab_section, -AIMAG(aom_env%H_tp), nadiab,norbitals,itimes, deltatMD)
@@ -474,53 +448,6 @@ CONTAINS
     END SUBROUTINE construct_ham_X_SH
 
 
-!SUBROUTINE calc_coms_and_nlist(aom_env, atoms, mol, cutoff_sites, orb)
-!     TYPE(aom_env_type), INTENT(INOUT)     :: aom_env
-!     INTEGER, INTENT(IN)                   :: mol, atoms, orb
-!     REAL(KIND=dp), intent (IN)            :: cutoff_sites
-!
-!     CHARACTER(len=*), PARAMETER                     :: routineN ='calc_coms_and_nlist', &
-!     routineP = moduleN//':'//routineN
-!
-!     integer                               :: i, j, m, d
-!    
-!     !> CALCULATE THE CENTER OF MASS
-!     !calculate CoMs at first timestep
-!     !coms(1 to 3,i) are the x, y and z coordinates of CoM of i
-!     aom_env%coms = 0
-!     do i=1,mol
-!          do m=1,atoms
-!               do d=1,3
-!                    aom_env%coms(d,i) = aom_env%coms(d,i) + (aom_env%crds(d,(i-1)*atoms + m,3))/atoms
-!               end do
-!          end do
-!     end do
-!
-!     !> CONSTRUCT NEIGHBOURS LIST
-!     do i=1,mol
-!          do j=1,mol
-!               aom_env%dist(i,j) = ((aom_env%coms(1,i) - aom_env%coms(1,j))*(aom_env%coms(1,i) - &
-!                                 aom_env%coms(1,j)) + (aom_env%coms(2,i) - aom_env%coms(2,j))*&
-!                      (aom_env%coms(2,i) - aom_env%coms(2,j)) + (aom_env%coms(3,i) - &
-!                          aom_env%coms(3,j))*(aom_env%coms(3,i) - aom_env%coms(3,j)))
-!               if (aom_env%dist(i,j) < cutoff_sites*cutoff_sites) then
-!                    do d=1,orb
-!                         do m=1,orb
-!                              aom_env%NN(orb*(i-1)+d,orb*(j-1)+m) = 1
-!                         end do
-!                    end do
-!               else
-!                    do d=1,orb
-!                         do m=1,orb
-!                              aom_env%NN(orb*(i-1)+d,orb*(j-1)+m) = 0
-!                         end do
-!                    end do
-!               end if                    
-!          end do
-!     end do
-!END SUBROUTINE calc_coms_and_nlist
-
-
 SUBROUTINE calc_Xmatrix_elements(aom_env, itimes, atoms, mol, dR, do_random, cbar, &
                       scaling, PC_allrvecs, orb, minao)
 
@@ -544,12 +471,10 @@ SUBROUTINE calc_Xmatrix_elements(aom_env, itimes, atoms, mol, dR, do_random, cba
       
      ALLOCATE(PC_allrvecs(5,mol*atoms))
      ALLOCATE(PC_rvecs(3,atoms))
-!COMMENT: I guess Atm and Btm are only need for the first timestep (itimes = 1)
-!one could duplicate this subroutine and create one only for the first timestep
+     !COMMENT: I guess Atm and Btm are only need for the first timestep (itimes = 1)
+     !one could duplicate this subroutine and create one only for the first timestep
      !for each molecule i
-!print *, "aom_env%NN", aom_env%NN
      do i=1,mol
-!print *, "iiiii", i
                !create the array of all its atomic coordinates at t
                !numerical factor converts from Angstroms into Bohr radii
                do j=1,atoms
@@ -566,7 +491,6 @@ SUBROUTINE calc_Xmatrix_elements(aom_env, itimes, atoms, mol, dR, do_random, cba
 
                !then for each other molecule
                do k=1,mol
-!print *, "k", k
                     !create the array of its atomic coordinates at both t and t+dt
                     do l=1,atoms
                          aom_env%Bt(1,l)  = dble(aom_env%elements(l))
@@ -581,19 +505,15 @@ SUBROUTINE calc_Xmatrix_elements(aom_env, itimes, atoms, mol, dR, do_random, cba
                     end do
                     if (i == 1) then
                          do d=1,orb
-!print *, "d", d
                               aom_env%pcoeffsrun(:,orb*(k-1)+d,1) = aom_env%pcoeffs(:,d)
-!print *, "call calc_sab 1"
                               call calc_sab(aom_env%Btm, aom_env%connlist2, &
                                                  aom_env%pcoeffsrun(:,orb*(k-1)+d,1))
 
                               aom_env%pcoeffsrun(:,orb*(k-1)+d,2) = aom_env%pcoeffs(:,d)
-!print *, "call calc_sab 2"
                               call calc_sab(aom_env%Bt, aom_env%connlist2, &
                                                  aom_env%pcoeffsrun(:,orb*(k-1)+d,2))
 
                               aom_env%pcoeffsrun(:,orb*(k-1)+d,3) = aom_env%pcoeffs(:,d)
-!print *, "call calc_sab 3"
                               call calc_sab(aom_env%Btp, aom_env%connlist2, & 
                                                aom_env%pcoeffsrun(:,orb*(k-1)+d,3))
                          end do
@@ -634,12 +554,12 @@ SUBROUTINE calc_Xmatrix_elements(aom_env, itimes, atoms, mol, dR, do_random, cba
                                    aom_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0, 0.0D0,dp)
                                    aom_env%Stt(orb*(i-1)+d,orb*(k-1)+m)   = 0.0D0
                                    aom_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = 0.0D0
-     ! in case no_diab_nace is true nace in the diabatic basis are not used
-     ! neither to
-     ! propagate_wf nor in the adiabatic nace calculation for the hopping
-     ! probability
-     ! so that all the Sttp and co matrices are also not used and not calculated
-     ! NB probably the same could be done for aom_env%Stt
+     !> in case no_diab_nace is true nace in the diabatic basis are not used
+     !> neither to
+     !> propagate_wf nor in the adiabatic nace calculation for the hopping
+     !> probability
+     !> so that all the Sttp and co matrices are also not used and not calculated
+     !> NB probably the same could be done for aom_env%Stt
                                    if (.NOT. aom_env%no_diab_nace) then
                                        aom_env%Sttp(orb*(i-1)+d,orb*(k-1)+m)  = 0.0D0
                                        aom_env%Stpt(orb*(i-1)+d,orb*(k-1)+m) = 0.0D0
@@ -679,12 +599,12 @@ SUBROUTINE diagonal_elem(i,k,orb,itimes,aom_env)
                !A bit of math to be convinced for Sttp,
                !Stpt: dSii/dt = 0
                aom_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = 1.0D0
-     ! in case no_diab_nace is true nace in the diabatic basis are not used
-     ! neither to
-     ! propagate_wf nor in the adiabatic nace calculation for the hopping
-     ! probability
-     ! so that all the Sttp and co matrices are also not used and not calculated
-     ! NB probably the same could be done for aom_env%Stt
+     !> in case no_diab_nace is true nace in the diabatic basis are not used
+     !> neither to
+     !> propagate_wf nor in the adiabatic nace calculation for the hopping
+     !> probability
+     !> so that all the Sttp and co matrices are also not used and not calculated
+     !> NB probably the same could be done for aom_env%Stt
                if (.NOT. aom_env%no_diab_nace) then
                   aom_env%Sttp(orb*(i-1)+d,orb*(k-1)+m)  = 1.0D0
                   aom_env%Stpt(orb*(i-1)+d,orb*(k-1)+m)  = 1.0D0
@@ -736,12 +656,12 @@ SUBROUTINE off_diagonal_elem(aom_env,i,k,orb,itimes, atoms, &
                                              aom_env%Stt(orb*(k-1)+m,orb*(i-1)+d)
                     aom_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = &
                                             aom_env%Stptp(orb*(k-1)+m,orb*(i-1)+d)
-     ! in case no_diab_nace is true nace in the diabatic basis are not used
-     ! neither to
-     ! propagate_wf nor in the adiabatic nace calculation for the hopping
-     ! probability
-     ! so that all the Sttp and co matrices are also not used and not calculated
-     ! NB probably the same could be done for aom_env%Stt
+     !>in case no_diab_nace is true nace in the diabatic basis are not used
+     !>neither to
+     !>propagate_wf nor in the adiabatic nace calculation for the hopping
+     !>probability
+     !>so that all the Sttp and co matrices are also not used and not calculated
+     !>NB probably the same could be done for aom_env%Stt
                     if (.NOT. aom_env%no_diab_nace) then
                        aom_env%Stmtm(orb*(i-1)+d,orb*(k-1)+m) = &
                                                 aom_env%Stmtm(orb*(k-1)+m,orb*(i-1)+d)
@@ -764,7 +684,6 @@ SUBROUTINE off_diagonal_elem(aom_env,i,k,orb,itimes, atoms, &
           do d=1,orb
                do m=1,orb
                !PC added print_rvecs =yes so p vectors and coords would be printed 
-!print *, "call calc_sab 4"
                     call calc_sab(aom_env%Atp, aom_env%connlist2, &
                         aom_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3),&
                      S, aom_env%Btp, aom_env%connlist2, &
@@ -773,8 +692,6 @@ SUBROUTINE off_diagonal_elem(aom_env,i,k,orb,itimes, atoms, &
                     aom_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
                     aom_env%H_tp(orb*(i-1)+d,orb*(k-1)+m) = cmplx(0.0D0, -scaling*S,dp)
 
-!print *, "call calc_dRsab 1"
-!print *, "REST", mod(itimes-1, aom_env%multiple_time_step)
                     !> In the following diabatic non-orthog. nace are
                     !calculated, since calculating them is very time consuming
                     !and expensive we opted for a multiple time step scheme.
@@ -833,14 +750,12 @@ SUBROUTINE off_diagonal_elem(aom_env,i,k,orb,itimes, atoms, &
          if (.NOT. aom_env%no_diab_nace) then
              do d=1,orb
                   do m=1,orb
-!    print *, "call calc_sab 5"
                        call calc_sab(aom_env%At, aom_env%connlist2, &
                         aom_env%pcoeffsrun(1:atoms,orb*(i-1)+d,2), S, &
                         aom_env%Btp,&
                        & aom_env%connlist2, aom_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3))
                        aom_env%Sttp(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
     
-!    print *, "call calc_sab 6"
                        call calc_sab(aom_env%Atp, aom_env%connlist2, &
                             aom_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3), S,& 
                         aom_env%Bt,&
@@ -851,7 +766,6 @@ SUBROUTINE off_diagonal_elem(aom_env,i,k,orb,itimes, atoms, &
              if (itimes.eq.1 .or. aom_env%restart_key)  then
                   do d=1,orb
                        do m=1,orb
-!    print *, "call calc_sab 7"
                             call calc_sab(aom_env%Atm, aom_env%connlist2, &
                             &aom_env%pcoeffsrun(1:atoms,orb*(i-1)+d,1), S, &
                                 aom_env%Btm, aom_env%connlist2,&
@@ -859,14 +773,12 @@ SUBROUTINE off_diagonal_elem(aom_env,i,k,orb,itimes, atoms, &
                             aom_env%Stmtm(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
     
     
-!    print *, "call calc_sab 8"
                             call calc_sab(aom_env%At, aom_env%connlist2, &
                             &aom_env%pcoeffsrun(1:atoms,orb*(i-1)+d,2), S, &
                                        aom_env%Btm, aom_env%connlist2,&
                             &aom_env%pcoeffsrun(1:atoms,orb*(k-1)+m,1))
                             aom_env%Sttm(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
     
-!    print *, "call calc_sab 9"
                             call calc_sab(aom_env%Atm, aom_env%connlist2, &
                             &aom_env%pcoeffsrun(1:atoms,orb*(i-1)+d,1), S, &
                               aom_env%Bt, aom_env%connlist2, &

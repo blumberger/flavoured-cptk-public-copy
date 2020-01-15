@@ -96,8 +96,6 @@ MODULE aom_initialization
                                              adiab_print_nacv, &
                                              adiab_print_pvecs
 
-
-
      USE atomic_kind_list_types,       ONLY: atomic_kind_list_type
 
      USE atomic_kind_types,            ONLY: atomic_kind_type,&
@@ -106,23 +104,22 @@ MODULE aom_initialization
 
      USE distribution_1d_types,        ONLY: distribution_1d_type
 
-     USE non_adiabatic_utils,            ONLY: decohere_wf,  &
-                                               propagate_wf, &
-                                               propagate_adiab_wf, &
-                                                  prop_wf_HS_corr!, & 
-                                               !classically_forbidden_hops
-
+     USE non_adiabatic_utils,          ONLY: decohere_wf,  &
+                                             propagate_wf, &
+                                             propagate_adiab_wf, &
+                                             prop_wf_HS_corr!, & 
+                                             !classically_forbidden_hops
 
      USE parallel_rng_types,           ONLY: UNIFORM,&
                                              create_rng_stream,&
                                              rng_stream_type
  
-     USE cp_log_handling,                 ONLY: cp_get_default_logger, &
-                                                cp_logger_type
+     USE cp_log_handling,              ONLY: cp_get_default_logger, &
+                                             cp_logger_type
 
-     USE cp_output_handling,              ONLY: cp_print_key_unit_nr, &
-                                                cp_print_key_should_output
-     USE mixed_environment_types,         ONLY: mixed_environment_type
+     USE cp_output_handling,           ONLY: cp_print_key_unit_nr, &
+                                             cp_print_key_should_output
+     USE mixed_environment_types,      ONLY: mixed_environment_type
 
 
 #include "./base/base_uses.f90"
@@ -155,38 +152,28 @@ CONTAINS
      CHARACTER(len=*), PARAMETER :: routineN ='create_aom_env', &
      routineP = moduleN//':'//routineN
 
-     integer :: i, j, mat, c, coord, mol, atoms, start
-     REAL(KIND=dp) :: cutoff_connect
-     REAL(KIND=dp), dimension(:,:), allocatable :: crds
-     REAL(KIND=dp), dimension(:,:), allocatable :: Atp
-     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE :: pcoefftot, scoefftot
-     LOGICAL, DIMENSION(:), ALLOCATABLE :: atomlist_mask, submask
-     integer, dimension(:), ALLOCATABLE           :: ext_elements
-     TYPE(cp_sll_val_type), POINTER               :: listcoeff
-     TYPE(cp_sll_val_type), POINTER               :: listdiabcoeff
-!     TYPE(section_vals_type), POINTER             :: input_key
-!     TYPE(cp_logger_type), POINTER                :: logger
-
-!     INTEGER                              :: should_output
- !    LOGICAL                              :: my_do_restart = .FALSE.
-
-     LOGICAL    :: do_random
-!  test_key
-     REAL(KIND=dp), DIMENSION(3, 2)           :: initial_seed
-     INTEGER    :: input_seed
-     TYPE(rng_stream_type), POINTER           :: rng_stream
-     LOGICAL                                  :: continue_while
-     CHARACTER(LEN=default_string_length)     :: file_name_s_psigma, file_name_s_ppi, deco_keyword,&
-                                                   prop_wf_keyword
+     integer                                        :: i, j, mat, c, coord, mol, atoms, start
+     REAL(KIND=dp)                                  :: cutoff_connect
+     REAL(KIND=dp), dimension(:,:), allocatable     :: crds
+     REAL(KIND=dp), dimension(:,:), allocatable     :: Atp
+     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE       :: pcoefftot, scoefftot
+     LOGICAL, DIMENSION(:), ALLOCATABLE             :: atomlist_mask, submask
+     integer, dimension(:), ALLOCATABLE             :: ext_elements
+     TYPE(cp_sll_val_type), POINTER                 :: listcoeff
+     TYPE(cp_sll_val_type), POINTER                 :: listdiabcoeff
+     LOGICAL                                        :: do_random
+     REAL(KIND=dp), DIMENSION(3, 2)                 :: initial_seed
+     INTEGER                                        :: input_seed
+     TYPE(rng_stream_type), POINTER                 :: rng_stream
+     LOGICAL                                        :: continue_while
+     CHARACTER(LEN=default_string_length)           :: file_name_s_psigma, file_name_s_ppi, deco_keyword,&
+                                                       prop_wf_keyword
      ! OZ: extra strings for C-S and S-S SAB calc
-     CHARACTER(LEN=default_string_length)     :: file_name_s_psigma_C_S,file_name_s_ppi_C_S
-     CHARACTER(LEN=default_string_length)     :: file_name_s_psigma_S_S,file_name_s_ppi_S_S
+     CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_C_S,file_name_s_ppi_C_S
+     CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_S_S,file_name_s_ppi_S_S
 
      NULLIFY(rng_stream)
      NULLIFY(listcoeff)
-!     NULLIFY(logger)
-!     logger => cp_get_default_logger()
-
 
      mol = nadiab ! CHANGE_AC
      atoms = aom_atoms ! CHANGE_AC
@@ -201,9 +188,7 @@ CONTAINS
      c = nadiab*aom_atoms !> Numbers of active atoms
 
      ALLOCATE(aom_env%elements(c))
-!     ALLOCATE(aom_env%neighbourlist(nadiab, nadiab,0:aom_atoms,0:aom_atoms))
      ALLOCATE(aom_env%connlist1(4,aom_atoms))
-!     ALLOCATE(aom_env%bneighbour(3,0:aom_atoms))
      allocate(aom_env%aneighbour(0:atoms,0:atoms))
      allocate(aom_env%bneighbour(0:atoms,0:atoms))
      ALLOCATE(aom_env%pcoeffs(aom_atoms,norbitals))
@@ -228,8 +213,6 @@ CONTAINS
      !t and tp for the multiple time step feature avoing their calculations at
      !each step
      ALLOCATE(aom_env%nacv(3,mat, mat*aom_atoms))
-!     ALLOCATE(aom_env%nacv_t(3,mat, mat*aom_atoms))
-!     allocate(aom_env%F(3,natom,mol)) !array of diagonal atomic forces
      ALLOCATE(aom_env%forces_adiab(3,natom))
      ALLOCATE(aom_env%forces_adiab_new(3,natom))
      ALLOCATE(aom_env%diabatic_nace_tp(mat,mat))
@@ -243,11 +226,14 @@ CONTAINS
      aom_env%Btm = 0.0_dp
      aom_env%siteenergies = 0.0_dp
      aom_env%nacv = 0.0_dp
-!     aom_env%nacv_t = 0.0_dp
- !    aom_env%F = 0.0_dp
      aom_env%forces_adiab = 0.0_dp
      aom_env%forces_adiab_new = 0.0_dp
      aom_env%diabatic_nace_tp = 0.0_dp
+     !> these arrays are data for the non-adiabatic coupling calculation
+     !> they help efficiency by telling the program which atoms are connected
+     !> and thus which pairs to carry out the calculation for
+     aom_env%aneighbour = 0
+     aom_env%bneighbour = 0
  
      ALLOCATE(aom_env%rm_t(3, natom))
      ALLOCATE(aom_env%rm_tm(3, natom))
@@ -260,23 +246,25 @@ CONTAINS
      ALLOCATE(aom_env%H_tp(mat,mat))
      ALLOCATE(aom_env%Stt(mat,mat))
      ALLOCATE(aom_env%Stptp(mat,mat))
+
      if (prop_wf_keyword .ne. "DIABATIC_RK_FAST") then
-     ! in case DIABATIC_RK_FAST diabatic nace are never calculated, neither in
-     ! the
-     ! propagate_wf nor in the adiabatic nace calculation for the hopping
-     ! probability
-     ! so that all the Sttp and co matrices are also not used, no point in
-     ! allocate them
-print *, "ALLOCATION OF S MATRICES"
+     !> in case DIABATIC_RK_FAST diabatic nace are never calculated, neither in
+     !> the
+     !> propagate_wf nor in the adiabatic nace calculation for the hopping
+     !> probability
+     !> so that all the Sttp and co matrices are also not used, no point in
+     !> allocate them
+        print *, "FOB-SH: ALLOCATION OF S MATRICES"
         ALLOCATE(aom_env%Sttp(mat,mat))
         ALLOCATE(aom_env%Stpt(mat,mat))
         ALLOCATE(aom_env%Stmt(mat,mat))
         ALLOCATE(aom_env%Sttm(mat,mat))
         ALLOCATE(aom_env%Stmtm(mat,mat))
      end if
+     !> wavefunction in the diabatic basis
      ALLOCATE(aom_env%ctin(mat))
      ALLOCATE(aom_env%ctin_t(mat))
-
+     !> wavefunction associated with decoherence
      ALLOCATE(aom_env%ctin_before_deco(mat))
      ALLOCATE(aom_env%ctin_after_deco(mat))
      ALLOCATE(aom_env%ctin_after_tranf_correction(mat))
@@ -286,16 +274,16 @@ print *, "ALLOCATION OF S MATRICES"
 
      aom_env%futur_decohere = .FALSE.
      aom_env%decohere       = .FALSE.
-     aom_env%no_diab_nace       = .FALSE.
+     aom_env%no_diab_nace   = .FALSE.
 
-     aom_env%new_state   = -1
-     aom_env%old_state   = -1
+     aom_env%new_state      = -1
+     aom_env%old_state      = -1
      aom_env%active_state   = -1
-     ALLOCATE(aom_env%adiab_overlap(mat, mat))
-     aom_env%attempt_hop = .FALSE.
+     aom_env%attempt_hop    = .FALSE.
      aom_env%successful_hop = .FALSE.
-     
      aom_env%HS_propagation = .FALSE.
+
+     ALLOCATE(aom_env%adiab_overlap(mat, mat))
      ALLOCATE(aom_env%class_forbidden_hop_t(mat))
      allocate(aom_env%adiab_nace_t(mat,mat))
      allocate(aom_env%adiab_nace_tp(mat,mat))
@@ -319,15 +307,12 @@ print *, "ALLOCATION OF S MATRICES"
                          file_name_s_psigma_C_S, file_name_s_ppi_C_S,&
                          file_name_s_psigma_S_S, file_name_s_ppi_S_S)
      
-
      !> Scaling factor Hab = scaling*Sab_bar
      CALL section_vals_val_get(coupling_section,"SCALING_FACTOR",&
              r_val=aom_env%scaling)
      !> cbar factor : Sab = cbar*Sab_bar
      CALL section_vals_val_get(coupling_section,"CBAR",&
              r_val=aom_env%cbar)
-
-
 
      !> INITIALIZE THE RANDOM GENERATOR
      CALL section_vals_val_get(adiab_section,"SEED",i_val=input_seed)
@@ -337,26 +322,11 @@ print *, "ALLOCATION OF S MATRICES"
                              name="aom fssh",&
                              distribution_type=UNIFORM, &
                              seed=initial_seed)
-     !stop
      ALLOCATE(aom_env%rng_stream)
      aom_env%rng_stream = rng_stream
 
-  
-!     input_key => section_vals_get_subs_vals(adiab_section,&
-!                                       "WAVEFUNCTION_RESTART")
-
-!     should_output = cp_print_key_should_output(&
-!                     iteration_info=logger%iter_info,&
-!                     basis_section=input_key)
-
-     
-!     IF (should_output .ne. 0) THEN
-!        my_do_restart = .TRUE.
-!     END IF
-!print *, "my_do_restart", my_do_restart
-
      !> Get wavefunction diabatic coefficients from the input file
-     !this section should be optional somehow---STILL TO DO USING e.g.
+     !COMMENT_SG: this section should be optional somehow---STILL TO DO USING e.g.
      !STEP_START_EVAL keyword in the input 
      wf_restart_section => section_vals_get_subs_vals(adiab_section,"WAVEFUNCTION_RESTART")
      CALL section_vals_val_get(wf_restart_section,"RESTART_KEY", l_val=aom_env%restart_key)
@@ -396,7 +366,6 @@ print *, "ALLOCATION OF S MATRICES"
           end do
           aom_env%scoeffs(i) = scoefftot(start - 1 + i)
      end do
-
 
      !> CONSTRUCT THE CONNLIST
      !we fill out the connlist arrays before calculating the nacv
@@ -460,7 +429,6 @@ print *, "ALLOCATION OF S MATRICES"
      REAL(kind=dp), DIMENSION(:),  POINTER          :: energies_tp
      TYPE(aom_env_type), INTENT(INOUT)              :: aom_env
      INTEGER, POINTER                               :: itimes
-!     TYPE(mixed_force_type), DIMENSION(:), POINTER  :: global_forces
      TYPE(section_vals_type), POINTER               :: coupling_section
      LOGICAL, INTENT(IN)                            :: my_bo_keyword
      TYPE(section_vals_type), POINTER               :: adiab_section
@@ -468,44 +436,34 @@ print *, "ALLOCATION OF S MATRICES"
      TYPE(distribution_1d_type), POINTER            :: local_particles
      LOGICAL, INTENT(IN)                            :: my_test_keyword
      CHARACTER(LEN=default_string_length)           :: method_keyword
-     !TYPE(atomic_kind_type), DIMENSION(:), POINTER  :: atomic_kind_set
 
      CHARACTER(len=*), PARAMETER :: routineN ='propagate_aom_namd_first_step', &
      routineP = moduleN//':'//routineN
 
-     integer :: coord, mol, atoms, c, first_diabat, active_state, mat, orb 
-!     integer :: mol, i, j, k, l, m, d, atoms, c,o,first_diabat, active_state, mat, orb
-!     integer, dimension(:,:), allocatable :: NN!,  aneighbour, bneighbour  
-     REAL(KIND=dp) :: cutoff_sites, cutoff_connect, scaling, deltatMD, deltatE
- !    REAL(KIND=dp) :: S
-     REAL(KIND=dp)    :: cbar, minao
-!     REAL(KIND=dp), dimension(:,:,:), allocatable :: nacv
-!     REAL(KIND=dp), dimension(:,:), allocatable :: Stptp
-!     REAL(KIND=dp), dimension(:,:), allocatable :: dist
-     COMPLEX(KIND=dp), dimension(:), allocatable :: ctin
-!     REAL(KIND=dp), dimension(:,:), allocatable ::  Atp, Btp, coms
-!     REAL(KIND=dp), DIMENSION(:,:,:), ALLOCATABLE :: F
-     LOGICAL                                      :: decohere, analytics
-     INTEGER                                      :: new_state , ELsteps   
-     REAL(KIND=dp)                                :: dR, times 
-     REAL(KIND=dp)                                :: decohere_criterion
-     INTEGER                                      :: imol,  natom
-     REAL(kind=dp), DIMENSION(:,:), ALLOCATABLE   :: exact_forces
-     LOGICAL                                      :: keyword_translate
-     TYPE(sh_print_env_type)                      :: sh_print_env
-     REAL(kind=dp), DIMENSION(:,:),POINTER        :: positions_com_tp, velocities_com_tp
-     CHARACTER(LEN=default_string_length)         :: keyword_init, keyword_basis_repr, &
-                                                     prop_wf_keyword
-     real(kind=dp), DIMENSION(:,:), allocatable :: PC_allrvecs
-!     real(kind=dp), allocatable :: PC_rvecs(:,:)
-     LOGICAL    :: do_random
-     REAL(kind=dp), DIMENSION(:), ALLOCATABLE     :: site_energies, couplings
-     REAL(KIND=dp), dimension(:), allocatable     :: adiab_pop
-     COMPLEX(KIND=dp), dimension(:), allocatable               :: adiab_c
-     TYPE(cp_logger_type), POINTER                :: logger
-     INTEGER                                    :: unit_nr
-     !INTEGER                                    :: nparticle_kind
-     !INTEGER, dimension(:), allocatable          :: class_forbidden_hop_tp
+     integer                                        :: coord, mol, atoms, c, & 
+                                                       first_diabat, active_state, mat, orb 
+     REAL(KIND=dp)                                  :: cutoff_sites, cutoff_connect, & 
+                                                       scaling, deltatMD, deltatE
+     REAL(KIND=dp)                                  :: cbar, minao
+     COMPLEX(KIND=dp), dimension(:), allocatable    :: ctin
+     LOGICAL                                        :: decohere, analytics
+     INTEGER                                        :: new_state , ELsteps   
+     REAL(KIND=dp)                                  :: dR, times 
+     REAL(KIND=dp)                                  :: decohere_criterion
+     INTEGER                                        :: imol,  natom
+     REAL(kind=dp), DIMENSION(:,:), ALLOCATABLE     :: exact_forces
+     LOGICAL                                        :: keyword_translate
+     TYPE(sh_print_env_type)                        :: sh_print_env
+     REAL(kind=dp), DIMENSION(:,:),POINTER          :: positions_com_tp, velocities_com_tp
+     CHARACTER(LEN=default_string_length)           :: keyword_init, keyword_basis_repr, &
+                                                        prop_wf_keyword
+     real(kind=dp), DIMENSION(:,:), allocatable     :: PC_allrvecs
+     LOGICAL                                        :: do_random
+     REAL(kind=dp), DIMENSION(:), ALLOCATABLE       :: site_energies, couplings
+     REAL(KIND=dp), dimension(:), allocatable       :: adiab_pop
+     COMPLEX(KIND=dp), dimension(:), allocatable    :: adiab_c
+     TYPE(cp_logger_type), POINTER                  :: logger
+     INTEGER                                        :: unit_nr
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: diagonal_F
 
      NULLIFY(positions_com_tp, velocities_com_tp)
@@ -520,23 +478,30 @@ print *, "ALLOCATION OF S MATRICES"
      !> cutoff to define the neighborough list
      CALL section_vals_val_get(coupling_section,"CUT_OFF_BETWEEN_SITES",&
              r_val=cutoff_sites)
-     !minao is an atomic overlap cutoff
+     !> minao is an atomic overlap cutoff
      CALL section_vals_val_get(coupling_section,"ATOMIC_OVERLAP_CUTOFF",&
              r_val=minao)
-     CALL section_vals_val_get(coupling_section,"DECOHERENCE_CRITERION",&
-             r_val=decohere_criterion)
+     !> dR is the increment for the gradient finite difference calculation
      CALL section_vals_val_get(coupling_section,"NACV_INCREMENT",&
              r_val=dR)
+     !> analytics would probably calculates analytic forces for a 2 state sytems
+     !(Spencer 2016)
      CALL section_vals_val_get(coupling_section,"ANALYTICS", l_val=analytics)
+     !> This remove bias coming from the finite difference calculation of the
+      !> gradients of the Hamiltonian from AOM
      CALL section_vals_val_get(coupling_section,"RANDOM_DERIVATIVE", l_val=do_random)
+     !> Multiple time step calculation of aom gradient
+     CALL section_vals_val_get(coupling_section,"MULTIPLE_TIME_STEP",&
+             i_val=aom_env%multiple_time_step)
 
      CALL section_vals_val_get(adiab_section,"CENTER_OF_MASS", l_val=keyword_translate)
-
-     CALL section_vals_val_get(adiab_section,"MULTIPLE_TIME_STEP",&
-             i_val=aom_env%multiple_time_step)
      CALL section_vals_val_get(adiab_section,"ELECTRONIC_PARTIAL_STEP",&
              i_val=ELsteps)
+     !> Instantaneous decoherence related threshold criteria
+     CALL section_vals_val_get(adiab_section,"DECOHERENCE_CRITERION",&
+             r_val=decohere_criterion)
 
+     !> Scaling factor Hab = scaling*Sab_bar
      scaling = aom_env%scaling
      cbar = aom_env%cbar
      atoms = aom_env%atoms !Number of atoms per site
@@ -558,48 +523,12 @@ print *, "ALLOCATION OF S MATRICES"
      sh_print_env%nadiab = mat
      sh_print_env%norbitals = orb
      sh_print_env%deltatMD = deltatMD
+
      ALLOCATE(sh_print_env%adiab_energies_t(mat))
      ALLOCATE(positions_com_tp(3, natom))
      ALLOCATE(velocities_com_tp(3, natom))
      allocate(exact_forces(3,natom))
      allocate(ctin(mat))      !ctin goes into the subroutine ZGEMV
-     !need to allocate these square matrices
-     !first the real, S-related ones
-!     allocate(Stptp(mat,mat))
-     !allocate(crds(3,c,3))
-     !allocate(NACE_ad_tp(mat,mat))
-     !then the complex ones i.e. H matrices; combinations of H and S
-     !Note that in the solution to the Schroedinger equation, the H term is -i*H
-     !For ease of calculation therefore, in this program,
-     !H_t etc are always -i*H.
-     !This is why they're complex variables
-     !allocate(nacv(3,mat,mat,mat*atoms))      !non-adiabatic coupling vectors
-! COMMENT: to save memory there is no point of allocating nacv as internal array
-! one could use already aom_env%nacv here
-!     allocate(nacv(3,mat,mat*atoms))      !non-adiabatic coupling vectors
-!     nacv = 0.0D0
-!     allocate(siteenergies(3,mat))      !diagonals of the Hamiltonian
-!     allocate(pcoeffsrun(atoms,mat,3)) !pcoeffsrun exists because the p-coefficients need to be renormalised for each structure
-!     allocate(scoefftot(c))
-!     allocate(coms(3,mol))
-!     allocate(NN(mat,mat))
-!     allocate(dist(mol,mol))
-     !allocate the arrays that will contain atomic coordinates for the overlap routine
-     !first column is now atomic number of atom (e.g. 6 for carbon)
-     !Naming convention: At = A(t), Atp = A(t+1), Atm = A(t-1), etc
-!     allocate(Atp(4,atoms))
-!     allocate(Btp(4,atoms))
-!     allocate(F(3,natom,mol)) !array of diagonal atomic forces
-     !these arrays are data for the non-adiabatic coupling calculation
-     !they help efficiency by telling the program which atoms are connected
-     !and thus which pairs to carry out the calculation for
-!     allocate(aneighbour(0:atoms,0:atoms))
-!     allocate(bneighbour(0:atoms,0:atoms))
-     aom_env%aneighbour = 0
-     aom_env%bneighbour = 0
-     !allocate(neighbourlist(mol,mol,0:atoms,0:atoms))
-!     aom_env%neighbourlist = 0
-
 
      !READ THE COORDINATES, ENERGIES AND STATE
      IF (method_keyword.eq."FROZEN_HAMILTONIAN") THEN
@@ -609,20 +538,17 @@ print *, "ALLOCATION OF S MATRICES"
      ENDIF
      CALL translate_com(positions_tp, keyword_translate, positions_com_tp, local_particles, atomic_kinds = atomic_kinds)  
      do coord=1,3
-        aom_env%crds(coord,:,1) = PACK(positions_com_tp(coord,:), aom_env%ext_pres)
+        aom_env%crds(coord,:,1)   = PACK(positions_com_tp(coord,:), aom_env%ext_pres)
         !At time 0, we must guess the positions at time -1 with the inital velocities
-        aom_env%crds(coord,:,2) = PACK(positions_com_tp(coord,:), aom_env%ext_pres) -  &
+        aom_env%crds(coord,:,2)   = PACK(positions_com_tp(coord,:), aom_env%ext_pres) -  &
                           PACK(velocities_com_tp(coord,:), aom_env%ext_pres)*deltatMD
-        aom_env%crds(coord,:,3) = PACK(positions_com_tp(coord,:), aom_env%ext_pres)
+        aom_env%crds(coord,:,3)   = PACK(positions_com_tp(coord,:), aom_env%ext_pres)
         aom_env%siteenergies(2,:) = 0.0D0 ! CHANGE_AC
         aom_env%siteenergies(3,:) = energies_tp(:) ! CHANGE_AC
      enddo
     
-     
      !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
      CALL calc_coms_and_nlist_aom(aom_env, atoms, mol, cutoff_sites, orb)
-
-
 
      ! Allocate neighbouring list just at the first step as Jacob suggested 
      !only if aom_env%multiple_time_step .eq. 1 otherwise we use Multiple time
@@ -639,26 +565,17 @@ print *, "ALLOCATION OF S MATRICES"
      CALL calc_Xmatrix_elements_first_step(aom_env, atoms, mol, dR, do_random,cbar, &
                       scaling, PC_allrvecs, orb, minao)
 
-
      !> CONVERT NACV AND CALCULATE EIGENPROPERTIES 
      !> THESE ASSOCIATIONS ARE NEEDED FOR THE NACV CALC
      aom_env%nacv = cbar*aom_env%nacv
-!TEST NO NACV 
-!nacv = 0.0D0
-!print *, "NACV T1", nacv(1,:,:)
 
+     !> HAMILTONIAN DIAGONALIZATION
+     !The adiabaticity subroutine diagonalises the diabatic Hamiltonian H_tp
+     !It gives us back the eigenvalues E_tp and eigenvectors C_tp
+     !initialize Adiabatic energies that will be used for trivial hopping and
+     !decoherence corrections
      CALL adiabaticity(-AIMAG(aom_env%H_tp), aom_env%C_tp, aom_env%E_tp)
      
-     
-     !> first part: CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE RESULT OF THE SURFACE
-     !> HOP ROUTINE IS. 
-     !DO imol=1,mol
-     !   DO iatom=1, natom
-     !      !aom_env%F(:,iatom,imol) =  global_forces(imol)%forces(:,iatom)
-     !      aom_env%F(:,iatom,imol) =  mixed_env%aom_env%diagonal_F(:,iatom,imol)
-     !   ENDDO
-     !ENDDO
-
      !> PRINT
      !> print site energies 
      allocate(site_energies(mat))
@@ -671,7 +588,6 @@ print *, "ALLOCATION OF S MATRICES"
      end do
    
      times = DBLE(itimes)
-
 
      !> print info in the output only if we do not restart the file
      sh_print_env%times = times
@@ -686,7 +602,7 @@ print *, "ALLOCATION OF S MATRICES"
         CALL adiab_print_nacv(adiab_section, aom_env%nacv, nadiab, norbitals, aom_atoms,itimes, deltatMD)
      end if
 
-     !> INITIALIZE  
+     !> INITIALIZE THE WAVEFUNCTION (WE DO NOT PROPAGATE IT AT THE FIRST STEP) 
      IF  (.NOT. my_test_keyword) THEN
          decohere = .FALSE.
          aom_env%decohere = .FALSE.
@@ -697,6 +613,7 @@ print *, "ALLOCATION OF S MATRICES"
          else
              CALL section_vals_val_get(adiab_section, "INITIALIZATION", c_val=keyword_init)
          end if
+
          CALL section_vals_val_get(adiab_section, "REPRESENTATION", c_val=keyword_basis_repr)
          SELECT CASE(keyword_init)
          CASE("DIABATIC")
@@ -711,9 +628,8 @@ print *, "ALLOCATION OF S MATRICES"
                  !> WARNING: THIS LINE HAS TO BE MODIFIED TO INCLUDE MORE ORBITAL PER MOLECULE
                  ctin(first_diabat) = CMPLX(1.0D0, 0.0D0,dp)  
              CASE("ADIABATIC_BASIS")
-             !> CALCULATE NACV FOR ADIAB PROPAGATION AT t=0
-             CALL nacv_first_ts(aom_env,diagonal_F, natom, mat, velocities_com_tp) 
-!ONLY FOR THE TEST
+                 !> CALCULATE NACV FOR ADIAB PROPAGATION AT t=0
+                 CALL nacv_first_ts(aom_env,diagonal_F, natom, mat, velocities_com_tp) 
                  ctin(:) = aom_env%C_tp(first_diabat,:)
              CASE DEFAULT
                  CPABORT("Choose REPRESENTATION, only: DIABATIC_BASIS or ADIABATIC_BASIS")
@@ -744,7 +660,6 @@ print *, "ALLOCATION OF S MATRICES"
          CASE DEFAULT
              CPABORT("INITIALIZATION implemented: DIABATIC, ADIABATIC")
          END SELECT
-!         times = 0.0
 
          allocate(adiab_c(mat)) 
          allocate(adiab_pop(mat))
@@ -786,6 +701,7 @@ print *, "ALLOCATION OF S MATRICES"
         CALL adiab_print_exact_forces(adiab_section, exact_forces, natom, deltatMD, times)
      ENDIF
 
+     !> COMMENT_SG: to adjust this part
      CALL section_vals_val_get(adiab_section,"RK_PROPAGATION", c_val=prop_wf_keyword)
      SELECT CASE(prop_wf_keyword)                                 
      CASE("DIABATIC_RK")
@@ -818,34 +734,18 @@ print *, "ALLOCATION OF S MATRICES"
      aom_env%diabatic_nace_t = aom_env%diabatic_nace_tp
      aom_env%E_t = aom_env%E_tp
      aom_env%C_t = aom_env%C_tp
-!     aom_env%nacv        = nacv
      aom_env%new_state = new_state
      aom_env%active_state = active_state
      !> IMPORTANT FOR THE FIRST TIME STEP
      aom_env%Stt = aom_env%Stptp
      aom_env%old_state = aom_env%active_state
-     !aom_env%active_state = -1
      aom_env%new_state = -1
      aom_env%successful_hop = .FALSE.
-     !aom_env%Stptp = Stptp
-     !aom_env%NN = NN
 
 
     !> DEALLOCATE
-!    deallocate(scoefftot)
-!    deallocate(pcoeffsrun)
     deallocate(ctin)
-!    deallocate(siteenergies)
-!    deallocate(crds)
-!    deallocate(coms)
-!    deallocate(NN)
-!    deallocate(Atp)
-!    deallocate(Btp)
-!    deallocate(Stptp)
-!    deallocate(nacv)
-!    deallocate(dist)
     deallocate(exact_forces)
-!    deallocate(F)
     deallocate(site_energies, couplings, adiab_c, adiab_pop)
     DEALLOCATE(positions_com_tp)
     DEALLOCATE(velocities_com_tp)
@@ -860,12 +760,13 @@ print *, "ALLOCATION OF S MATRICES"
      INTEGER, intent(in)                            :: natom
      integer, intent(in)                            :: mat
      REAL(kind=dp), DIMENSION(:,:), INTENT(IN)      :: velocities_com_tp
-     REAL(kind=dp), DIMENSION(:,:,:), POINTER, INTENT(IN)      :: diagonal_F
+     REAL(kind=dp), DIMENSION(:,:,:), POINTER, & 
+                                    INTENT(IN)      :: diagonal_F
 
-     CHARACTER(len=*), PARAMETER :: routineN ='nacv_first_ts', &
+     CHARACTER(len=*), PARAMETER                    :: routineN ='nacv_first_ts', &
      routineP = moduleN//':'//routineN
      
-     integer             :: i,j, iparticle, coord
+     integer                                        :: i,j, iparticle, coord
      REAL(kind=dp), DIMENSION(:,:), allocatable     :: hop_nacv
 
      aom_env%adiab_nace_tp = 0.0D0
@@ -891,21 +792,21 @@ print *, "ALLOCATION OF S MATRICES"
 SUBROUTINE calc_Xmatrix_elements_first_step(aom_env, atoms, mol, dR, do_random,cbar, &
                       scaling, PC_allrvecs, orb, minao)
 
-     TYPE(aom_env_type)                      :: aom_env
-     integer, intent(IN)                     :: atoms
-     integer, intent(in)                     :: mol, orb
+     TYPE(aom_env_type)                          :: aom_env
+     integer, intent(IN)                         :: atoms
+     integer, intent(in)                         :: mol, orb
      REAL(KIND=dp), intent(in)                   :: dR
      LOGICAL, intent(in)                         :: do_random
      REAL(KIND=dp), intent(in)                   :: cbar
      REAL(KIND=dp), intent(in)                   :: minao
-     REAL(KIND=dp), intent(in) :: scaling
+     REAL(KIND=dp), intent(in)                   :: scaling
      real(kind=dp), DIMENSION(:,:), allocatable, intent(out) :: PC_allrvecs
 
-     CHARACTER(len=*), PARAMETER                     :: routineN='calc_Xmatrix_elements_first_step', &
+     CHARACTER(len=*), PARAMETER                 :: routineN='calc_Xmatrix_elements_first_step', &
      routineP = moduleN//':'//routineN
 
-     REAL(KIND=dp)                   :: S
-     integer :: i, j, k, l, m, d, o
+     REAL(KIND=dp)                               :: S
+     integer                                     :: i, j, k, l, m, d, o
      real(kind=dp), allocatable :: PC_rvecs(:,:)
 
 

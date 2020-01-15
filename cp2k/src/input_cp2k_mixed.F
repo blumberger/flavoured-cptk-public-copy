@@ -344,12 +344,12 @@ CONTAINS
     CALL keyword_release(keyword)
 
 
-    CALL keyword_create(keyword, name="MULTIPLE_TIME_STEP",&
-         description="starting molecule number",&
-         usage="1", type_of_var=integer_t)
+
+    CALL keyword_create(keyword, name="DECOHERENCE_CRITERION",&
+         description="Criterion to decohere",&
+         usage="1.0E-05", type_of_var=real_t)
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
-
 
     CALL keyword_create(keyword, name="CENTER_OF_MASS",&
          description="Decide if do all electronic propagation and velocities "//&
@@ -452,11 +452,6 @@ CONTAINS
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
-    CALL keyword_create(keyword, name="DECOHERENCE_CRITERION",&
-         description="Criterion to decohere",&
-         usage="1.0E-05", type_of_var=real_t)
-    CALL section_add_keyword(sub2section,keyword)
-    CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="CBAR",&
          description="Sab constant factor",&
@@ -509,35 +504,12 @@ CONTAINS
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
-!   CALL keyword_create(keyword, name="CENTER_OF_MASS",&
-!        description="Decide if do all electronic propagation and velocities "//&
-!                    "rescaling into the center-of-mass frame.",&
-!        usage="True", &
-!        default_l_val=.TRUE., &
-!        lone_keyword_l_val=.TRUE.)
-!   CALL section_add_keyword(sub2section,keyword)
-!   CALL keyword_release(keyword)
+    CALL keyword_create(keyword, name="MULTIPLE_TIME_STEP",&
+         description="starting molecule number",&
+         usage="1", type_of_var=integer_t)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
 
-!   CALL keyword_create(keyword, name="METHOD_RESCALING",&
-!        description="Defines the methods to rescale the velocities if required.",&
-!        usage="METHOD_RESCALING: BASIC EXACT", type_of_var=char_t,&
-!        n_var=-1)
-!   CALL section_add_keyword(sub2section,keyword)
-!   CALL keyword_release(keyword)
-
-!   CALL keyword_create(keyword, name="METHOD_ADIABATIC_NACV",&
-!        description="Defines the methods to compute the adiabatic NACV for the rescaling.",&
-!        usage="METHOD_RESCALING: BASIC EXACT", type_of_var=char_t,&
-!        n_var=-1)
-!   CALL section_add_keyword(sub2section,keyword)
-!   CALL keyword_release(keyword)
-!
-!   CALL keyword_create(keyword, name="METHOD_REVERSAL",&
-!        description="Defines the methods to reverse the velocities after a frustrated hop if required.",&
-!        usage="METHOD_RESCALING: BASIC EXACT", type_of_var=char_t,&
-!        n_var=-1)
-!   CALL section_add_keyword(sub2section,keyword)
-!   CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="NACV_INCREMENT",&
          description="Spatial Increment to calculate the NACV with Finite Difference.",&

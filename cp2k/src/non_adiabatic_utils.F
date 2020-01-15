@@ -1330,7 +1330,7 @@ END SUBROUTINE classically_forbidden_hops
   !         the coupling for situations in which SH is sensible to use (i.e.
   !         outside of the hopping regime) so this subroutine is applicable to
   !         the majority of sims.
-  ! \author Sam (Matt editted RK4)
+  ! \author Sam (Matt edited RK4)
   ! \date   23/05/19
   !**********************************************************************************
   SUBROUTINE propagate_wf_fast(ctin, aom_env, nadiab,  norbitals, ELsteps, &
