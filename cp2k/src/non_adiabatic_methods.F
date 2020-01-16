@@ -115,6 +115,7 @@ CONTAINS
 
 
     !natom = SIZE(global_forces(1)%forces,2)
+    !COMMENT_SG: TO CHANGE FOR MULTIPHASE
     !> WARNING: we assume all force evals have the same number of atoms
     natom = SIZE(mixed_env%F(1,:,1))
     ALLOCATE(positions_tp(3,natom))

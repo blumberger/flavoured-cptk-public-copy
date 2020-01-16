@@ -52,19 +52,10 @@ MODULE aom_main
 
      USE aom_utils,                    ONLY: makeX,    &
                                              make_adiabX,      &
-                                             adiabaticity,   &
-                                             surf_hop_type,     &
                                              calcforces,     &
                                              read_listcoeff, &
-                                             choose_firstadiabat, &
-                                             simple_vel_rescaling, &
-                                             translate_com, &
                                              calc_adiab_nace, &
                                              calc_adiab_nace_old, &
-                                             calc_hop_nacv, &
-                                             cal_delta_energy_nacv, &
-                                             diab_to_adiab, & 
-                                             print_matrix_standard_out,& 
                                              calc_coms_and_nlist_aom
 
      USE aom_types,                    ONLY: aom_env_type, &
@@ -108,15 +99,22 @@ MODULE aom_main
 
      USE distribution_1d_types,        ONLY: distribution_1d_type
 
-     USE non_adiabatic_utils,          ONLY: decohere_wf,  &
-                                               propagate_wf, &
-                                               propagate_wf_fast, &
-                                               propagate_adiab_wf, &
-                                               propagate_wf_diab_nace_interpol, &
-                                               prop_wf_HS_corr, & 
-                                               classically_forbidden_hops, &
-                                               define_active_region, &
-                                               calc_psi_after_correction
+     USE non_adiabatic_utils,          ONLY: decohere_wf,       &
+                                             diab_to_adiab,     & 
+                                             calc_hop_nacv,     &
+                                             surf_hop_type,     &
+                                             choose_firstadiabat, &
+                                             print_matrix_standard_out,& 
+                                             translate_com, &
+                                             adiabaticity,   &
+                                             propagate_wf, &
+                                             propagate_wf_fast, &
+                                             propagate_adiab_wf, &
+                                             propagate_wf_diab_nace_interpol, &
+                                             prop_wf_HS_corr, & 
+                                             classically_forbidden_hops, &
+                                             define_active_region, &
+                                             calc_psi_after_correction
 
      USE parallel_rng_types,           ONLY: UNIFORM,&
                                           create_rng_stream,&

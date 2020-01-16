@@ -117,12 +117,13 @@ MODULE integrator
 !> CHANGE_AC
   USE md_ener_types,                   ONLY: md_ener_type,&
                                              zero_md_ener
-  USE aom_utils,                       ONLY: check_hop_attempt, &
-                                             total_momentum
+!  USE aom_utils,                       ONLY: check_hop_attempt, &
  
   USE aom_types,                       ONLY: aom_env_type
 
-  USE non_adiabatic_utils,             ONLY: apply_decoherence
+  USE non_adiabatic_utils,             ONLY: apply_decoherence, &
+                                             check_hop_attempt, &
+                                             total_momentum
                                              !ida_collapse, &
                                              !apply_decoherence
                                              !adiab_overalp_check

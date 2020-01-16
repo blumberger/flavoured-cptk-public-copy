@@ -51,18 +51,10 @@ MODULE aom_initialization
 
      USE aom_utils,                    ONLY: makeX,    &
                                              make_adiabX,      &
-                                             adiabaticity,   &
                                              !surfacehop,     &
                                              calcforces,     &
                                              read_listcoeff, &
                                              read_listdiabcoeff, &
-                                             choose_firstadiabat, &
-                                             simple_vel_rescaling, &
-                                             translate_com, &
-                                              calc_hop_nacv, &
-                                              cal_delta_energy_nacv, &
-                                              diab_to_adiab, &
-                                              print_matrix_standard_out,&
                                              calc_coms_and_nlist_aom
 
      USE aom_types,                    ONLY: aom_env_type, &
@@ -104,8 +96,14 @@ MODULE aom_initialization
 
      USE distribution_1d_types,        ONLY: distribution_1d_type
 
-     USE non_adiabatic_utils,          ONLY: decohere_wf,  &
-                                             propagate_wf, &
+     USE non_adiabatic_utils,          ONLY: decohere_wf,        &
+                                             calc_hop_nacv,      &
+                                             choose_firstadiabat, &
+                                             print_matrix_standard_out,&
+                                             diab_to_adiab,      &
+                                             translate_com,      &
+                                             adiabaticity,       &
+                                             propagate_wf,       &
                                              propagate_adiab_wf, &
                                              prop_wf_HS_corr!, & 
                                              !classically_forbidden_hops
@@ -628,6 +626,7 @@ CONTAINS
                  !> WARNING: THIS LINE HAS TO BE MODIFIED TO INCLUDE MORE ORBITAL PER MOLECULE
                  ctin(first_diabat) = CMPLX(1.0D0, 0.0D0,dp)  
              CASE("ADIABATIC_BASIS")
+                 !!!!! THIS SECTION IS DEPRECATED !!!!!!
                  !> CALCULATE NACV FOR ADIAB PROPAGATION AT t=0
                  CALL nacv_first_ts(aom_env,diagonal_F, natom, mat, velocities_com_tp) 
                  ctin(:) = aom_env%C_tp(first_diabat,:)
@@ -649,6 +648,7 @@ CONTAINS
              CASE("DIABATIC_BASIS")
                  ctin(:) = aom_env%C_tp(:, active_state)
              CASE("ADIABATIC_BASIS")
+                 !!!!! THIS SECTION IS DEPRECATED !!!!!!
                  !> CALCULATE NACV FOR ADIAB PROPAGATION AT t=0
                  CALL nacv_first_ts(aom_env, diagonal_F, natom, mat, velocities_com_tp) 
                  ctin(:) = CMPLX(0.0D0, 0.0D0,dp)

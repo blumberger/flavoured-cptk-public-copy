@@ -25,26 +25,21 @@ MODULE non_adiabatic_utils
                                              adiab_print_exact_forces,       &
                                              adiab_print_active_state,       &
                                              adiab_print_sh_info,            &
-                                             adiab_print_hamiltonian, &
-                                             adiab_print_nace,        &
-                                             adiab_print_nacv    
-     USE parallel_rng_types,              ONLY: next_random_number    
+                                             adiab_print_hamiltonian,        &
+                                             adiab_print_nace,               &
+                                             adiab_print_nacv,               &
+                                             adiab_print_hop_nacv
+
+     USE parallel_rng_types,           ONLY: next_random_number    
+
      USE aom_types,                    ONLY: aom_env_type, &      
                                                 sh_print_env_type 
 
-     USE aom_utils,                    ONLY: makeX,    &
-                                             make_adiabX,      &
-                                             adiabaticity,   &
-                                             calcforces,     &
-                                             read_listcoeff, &
-                                             choose_firstadiabat, &
-                                             simple_vel_rescaling, &
-                                             translate_com, &
-                                             calc_hop_nacv, &
-                                             cal_delta_energy_nacv, &
+     USE aom_utils,                    ONLY: makeX,              & 
+                                             make_adiabX,        &
+                                             calcforces,         &
                                              calc_diabatic_nace, & 
-                                             print_matrix_standard_out
-
+                                             matinvsqrt
 
 !     USE non_adiabatic_types,           ONLY: sh_env_type
 
@@ -69,108 +64,1457 @@ MODULE non_adiabatic_utils
                                                                                                        
         CHARACTER(len=*), PARAMETER, PRIVATE :: moduleN ='non_adiabatic_utils'
                                                                                                        
-        PUBLIC :: decohere_wf,      &  
-                  propagate_wf,    &
-                  propagate_wf_fast,    &
-                  propagate_adiab_wf, &
-                  prop_wf_HS_corr, &
-                  calc_kinetic_tot, &
-                 classically_forbidden_hops, &
-                 ida_collapse, &
-                 define_active_region, &
-                 calc_psi_after_correction, &
-                 apply_decoherence, & 
-                 propagate_wf_diab_nace_interpol
+        PUBLIC :: decohere_wf,                     &
+                  calc_hop_nacv,                   &
+                  surf_hop_type,                   &
+                  check_hop_attempt,               &
+                  choose_firstadiabat,             &
+                  print_matrix_standard_out,       &
+                  diab_to_adiab,                   &
+                  cal_delta_energy_nacv,           &
+                  translate_com,                   &  
+                  simple_vel_rescaling,            &
+                  adiabaticity,                    &
+                  total_momentum,                  &
+                  propagate_wf,                    &
+                  propagate_wf_fast,               &
+                  propagate_adiab_wf,              &
+                  prop_wf_HS_corr,                 &
+                  calc_kinetic_tot,                &
+                  classically_forbidden_hops,      &
+                  ida_collapse,                    &
+                  define_active_region,            &
+                  calc_psi_after_correction,       &
+                  apply_decoherence,               & 
+                  propagate_wf_diab_nace_interpol
                   
 
 CONTAINS
 
-! Could be removed
-SUBROUTINE adiab_overalp_calc(active_state, aom_env, C_tp, mol, itimes, & 
-                                   attempt_hop, enforced_active_state)
+!**********************************************************************************
+!> \brief TOADD
+!**********************************************************************************
+subroutine surf_hop_type(adiab_section, C1, C2, deltat, &
+           new_state, attempt_hop, decohere_criterion, sh_print_env, aom_env)
+!Choose whether doing surface hopping with trivial hopping correction or without
+!it following the old code 
+        
+       TYPE(section_vals_type), POINTER               :: adiab_section
+       REAL(KIND=dp), dimension(:,:), intent(in) :: C1, C2
+       REAL(KIND=dp), intent(in) :: deltat
+       INTEGER, INTENT(INOUT)        :: new_state
+       LOGICAL, INTENT(OUT)        :: attempt_hop
+       REAL(KIND=dp), INTENT(IN) :: decohere_criterion
+       TYPE(sh_print_env_type)     :: sh_print_env
+       TYPE(aom_env_type)          :: aom_env
+       
+       CHARACTER(len=*), PARAMETER :: routineN ='surf_hop_type', &
+                               routineP = moduleN//':'//routineN
 
-     INTEGER, intent(INOUT)                         :: active_state, mol, itimes
-     INTEGER, intent(OUT)                         :: enforced_active_state 
-     LOGICAL, INTENT(INOUT)                           :: attempt_hop
-     REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE, INTENT(INOUT)   :: C_tp
-     TYPE(aom_env_type), INTENT(IN)              :: aom_env
+       CHARACTER(LEN=default_string_length)           :: surfhop_keyword
+       LOGICAL                                        :: overlap_key, do_trivial_corr
 
-     CHARACTER(len=*), PARAMETER :: routineN = 'adiab_overalp_calc', &
-              routineP = moduleN//':'//routineN
-     REAL(KIND=dp), dimension(:), allocatable    :: overlaps
-     REAL(KIND=dp)                                :: sum1!, sum
-     INTEGER                                     :: i, loc(1) 
+       overlap_key = .True.
 
-     allocate(overlaps(4))
+       CALL section_vals_val_get(adiab_section,"SURF_HOP_CHOICE", c_val=surfhop_keyword)
+       sh_print_env%additional_prints = .FALSE.
 
-     overlaps = 0.0D0
+       SELECT CASE(surfhop_keyword)
+       CASE("TRIVIAL_CORR_WITH_OVERLAP")
+            sh_print_env%additional_prints = .TRUE.
+            do_trivial_corr = .TRUE.
+            CALL modified_surfacehop(C1, C2, deltat, &
+              new_state, attempt_hop, decohere_criterion, &
+              sh_print_env, aom_env, adiab_section, do_trivial_corr)
+       CASE("TRIVIAL_HOP_CORRECT")
+            sh_print_env%additional_prints = .TRUE.
+            do_trivial_corr = .TRUE.
+            CALL modified_surfacehop(C1, C2, deltat, &
+              new_state, attempt_hop, decohere_criterion, &
+              sh_print_env, aom_env, adiab_section, do_trivial_corr)
+       CASE("UNMODIFIED_SURF_HOP")
+            do_trivial_corr = .FALSE.
+            !CALL  surfacehop(deltat, old_state, C2, &
+            !  new_state, attempt_hop, decohere_criterion, sh_print_env, &
+            !                                  aom_env, adiab_section)
+            CALL modified_surfacehop(C1, C2, deltat, &
+              new_state, attempt_hop, decohere_criterion, &
+              sh_print_env, aom_env, adiab_section, do_trivial_corr) 
+       CASE DEFAULT
+            CPABORT("There is no method to add trivial crossing correction")
+       END SELECT
+END SUBROUTINE surf_hop_type
 
-!     sum = 0.0D0
-     sum1 = 0.0D0
-     
-     do i=1, mol
-!         sum = sum + (abs(aom_env%C_t(i, active_state)) *abs(C_tp(i, active_state)))
-         sum1 = sum1 + aom_env%C_t(i, active_state)*C_tp(i, active_state)
-     end do
-     
-     
-!     print *, "OVERLAP_TRIVIAL", sum
-     print *, "PHASE_OVERALAP", abs(sum1)
-     
-     if (abs(sum1) .lt. 0.7 .and. .not. attempt_hop) then
-        print *, "POSSIBLE_TRIVIAL_CROSSING"
-        do i =1,mol
-            if (active_state .gt. 2) then
-                overlaps(1) = overlaps(1) + aom_env%C_t(i, active_state) *C_tp(i,active_state+2)
-                overlaps(2) = overlaps(2) + aom_env%C_t(i, active_state) *C_tp(i,active_state+1)
-                overlaps(3) = overlaps(3) + aom_env%C_t(i, active_state) *C_tp(i,active_state-1)
-                overlaps(4) = overlaps(4) + aom_env%C_t(i, active_state) *C_tp(i,active_state-2)
-            else if (active_state .gt. 1) then
-                overlaps(1) = overlaps(1) + aom_env%C_t(i, active_state)*C_tp(i,active_state+2)
-                overlaps(2) = overlaps(2) + aom_env%C_t(i, active_state)*C_tp(i,active_state+1)
-                overlaps(3) = overlaps(3) + aom_env%C_t(i, active_state)*C_tp(i,active_state-1)
-            else 
-                overlaps(1) = overlaps(1) + aom_env%C_t(i,active_state)*C_tp(i,active_state+2)
-                overlaps(2) = overlaps(2) + aom_env%C_t(i,active_state)*C_tp(i,active_state+1)
-            end if
-     
+
+!**********************************************************************************
+!> \brief TOADD
+!**********************************************************************************
+subroutine modified_surfacehop(C1, C2, deltat, &
+              new_state, attempt_hop, decohere_criterion, &
+              sh_print_env, aom_env, adiab_section,       & 
+              do_trivial_corr) 
+        !using the method outlined in John Tully's Electronic Transitions paper
+        !calculate the probability of the molecular dynamics switching to evolve on a different potential surface
+        REAL(KIND=dp), dimension(:,:), intent(in) :: C1, C2
+        REAL(KIND=dp), intent(in) :: deltat
+        INTEGER, INTENT(INOUT)        :: new_state
+        LOGICAL, INTENT(OUT)        :: attempt_hop
+        REAL(KIND=dp), INTENT(IN) :: decohere_criterion
+        TYPE(sh_print_env_type) :: sh_print_env
+        TYPE(aom_env_type), INTENT(INOUT)             :: aom_env
+        TYPE(section_vals_type), POINTER              :: adiab_section
+        LOGICAL, INTENT(IN)                           :: do_trivial_corr
+
+        CHARACTER(len=*), PARAMETER :: routineN ='modified_surfacehop', &
+        routineP = moduleN//':'//routineN
+
+        CHARACTER(LEN=default_string_length)         :: wfpropag_keyword
+        integer :: i, j, mol!, k, l
+        REAL(KIND=dp) :: hop, sumg, ex_prob, min, g_exa, err
+        REAL(KIND=dp), dimension(:), allocatable :: b, g
+        !REAL(KIND=dp), dimension(:), allocatable :: g_before, g_after, g_renorm
+        COMPLEX(KIND=dp), dimension(:), allocatable :: ct, cttm_ad
+        COMPLEX(KIND=dp), dimension(:), allocatable :: ak, akttm
+        INTEGER        :: state_min 
+        REAL(KIND=dp), dimension(:), ALLOCATABLE :: enerdiff
+ 
+        mol = size(aom_env%Stt,1)
+
+        ! Based on paper [Spencer16]: Spencer et al., J. Chem. Phys. 145, 064102 (2016)
+        ! and paper [Wang14] :
+
+        !many allocations
+        allocate(ak(mol))
+        allocate(b(mol))
+        allocate(g(mol))
+        allocate(akttm(mol))        
+        allocate(enerdiff(mol))
+        allocate(ct(mol))
+        allocate(cttm_ad(mol)) 
+        ALLOCATE(sh_print_env%proba(mol))
+
+        ! Find the state closest in energy according to [Wang14]
+        IF (do_trivial_corr) THEN 
+             do i=1,mol
+                     if (i .ne. aom_env%active_state) then 
+                             enerdiff(i) = abs(aom_env%E_tp(i) - aom_env%E_tp(aom_env%active_state)) 
+                     else if (i .eq. aom_env%active_state) then 
+                             enerdiff(aom_env%active_state) = 0.0D0
+                     end if
+             end do
+             if (enerdiff(1) == enerdiff(aom_env%active_state)) then
+                     min = enerdiff(2)
+                     do i= 3,mol
+                            if (enerdiff(i) < min .and. i .ne. aom_env%active_state) then
+                                    min = enerdiff(i)
+                                     state_min = i
+                             end if          
+                     end do
+             else 
+                     min = enerdiff(1)
+                     do i= 2,mol
+                            if (enerdiff(i) < min .and. i .ne. aom_env%active_state) then
+                                    min = enerdiff(i)
+                                    state_min = i
+                             end if          
+                     end do
+             end if
+             do i =1,mol
+                     if (enerdiff(i) == min) then
+                            state_min = i
+                     end if
+             end do
+             sh_print_env%enermin = min
+        ENDIF
+
+        !if the propagation occurs in the diabatic basis, transfor diabatic coefficients
+        !into adiabatic coefficients
+        CALL section_vals_val_get(adiab_section,"REPRESENTATION", c_val=wfpropag_keyword)
+        SELECT CASE(wfpropag_keyword)
+        CASE("DIABATIC_BASIS")
+               !CALL diab_to_adiab(aom_env, C2, old_state, mol, cstate, ct, &
+               !                                    C1, cttm_ad, cstate_tm)
+               !     CALL diab_to_adiab(aom_env, C2, old_state, mol, cstate, ct)
+               !end if
+               CALL diab_to_adiab(C2, aom_env%ctin, ct) 
+               CALL diab_to_adiab(C1, aom_env%ctin_t, cttm_ad) 
+        CASE("ADIABATIC_BASIS")
+               CPABORT("Not Ready")
+               !ct(:) = aom_env%ctt(:)
+               !cttm_ad(:) = aom_env%cttm(:)
+               !cstate = aom_env%ctt(old_state)
+               !cstate_tm = aom_env%cttm(old_state)
+        CASE DEFAULT
+               CPABORT("There is no method to propagate the wavefunction.")
+        END SELECT
+
+
+        do i=1,mol
+               !construct state density for t present and t-deltat from the active state to
+               !other state
+                ak(i) = ct(i)*conjg(ct(aom_env%active_state))
+                akttm(i) = cttm_ad(i)*conjg(cttm_ad(aom_env%old_state))
+                !>assign 0.0 to b(i) if the hop is forbidden
+                if (aom_env%HS_propagation .and. &
+                              (i .eq. aom_env%class_forbidden_hop_t(i))) then
+                   b(i) = 0.0D0 
+                else 
+                   b(i) = -2.0D0*REAL(conjg(ak(i))*aom_env%adiab_nace_tp(i,aom_env%active_state))
+                end if
+        end do
+
+        !calc exact total surface hopping probability (also termed g_tot) 
+        !according to Prezhdo and Wang 2014
+        !>in this case we need to use the new enforced state to avoid discontinuity
+        !in the time derivative
+        ex_prob = (abs(akttm(aom_env%old_state))- abs(ak(aom_env%active_state)))/abs(akttm(aom_env%old_state))
+        sh_print_env%exprob = ex_prob 
+
+        ! Use Eq. (4) of [Spencer16]
+        ! calculate sumg that can also be negative because each individual probability
+        ! (flux) could be negative 
+        !calculate g and sum(g)
+        sumg = 0.0D0
+        do i=1,mol
+                !g(i) is the probability to hop from the current state (old_state) to any other
+                !state (i) 
+                g(i) = (deltat*b(i))/abs(ak(aom_env%active_state))
+                if (i .ne. aom_env%active_state) then
+                        sumg = sumg + g(i)
+                end if
+        end do
+        sh_print_env%sumflux   = sumg
+        err = abs(sumg - ex_prob)
+        IF (err.gt.0.1) THEN
+           print*, "FOBSH| *** WARNING: difference between exact flux and sum of Tully's proba is", err, "***"
+        ENDIF
+
+        !EFFECTIVE TRIVIAL CROSSINGS CORRECTION
+        ! Use Eq. () of [Wang14]
+        g_exa = 0
+        if (do_trivial_corr) THEN
+           g_exa = ex_prob - sumg + g(state_min)
+           g(state_min) = g_exa
+        endif 
+
+       !CORRECTION FOR NEGATIVE NUMBER
+       do i =1,mol
+                if (g(i) < 0.0D0) then
+                        g(i) = 0.0D0
+                end if
        end do
-       print *, "OVERALPS", abs(overlaps(:))
-       print *, "MAX_OVERLAP", itimes, abs(sum1), maxval(abs(overlaps(:)))
-print *, "MORE_INFO", itimes, sum1, overlaps(1), overlaps(2), overlaps(3), overlaps(4)
-!       print *, "MAXLOC", maxloc(abs(overlaps(:)))
-       loc = maxloc(abs(overlaps(:)))
-       if (maxval(abs(overlaps(:))) .lt. sum1) then 
-           print *, "WARNING: MORE THAN TWO STATES CROSS"
-           enforced_active_state = active_state
-       else     
-           if (loc(1) == 1) then
-               enforced_active_state = active_state+2
-           else if (loc(1) == 2) then
-               enforced_active_state = active_state+1
-           else if (loc(1) == 3) then
-               enforced_active_state = active_state-1
-           else if (loc(1) == 4) then
-               enforced_active_state = active_state-2
-           end if
-       print *, "enforced_active_state", enforced_active_state 
-print *, "STATE_TO_GO", active_state, enforced_active_state 
-print *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, active_state)*aom_env%C_t(:, active_state))), &
-        maxloc(abs(C_tp(:,enforced_active_state)*C_tp(:,enforced_active_state)))
+
+       !NORMALIZATION
+       !due to finite timestep, sometimes the probabilities may sum to greater than 1
+       !if this happens, rescale them down to sum = 1
+       sumg = 0.0D0
+       do i=1,mol
+               if (i .ne. aom_env%active_state) then
+                       sumg = sumg + g(i)
+               end if
+       end do
+       if (sumg > 1.0D0) then
+               print*, "FOBSH| *** WARNING: We have to normalize the probability, the sum was:", sumg, "***"
+               do i=1,mol
+                       g(i) = g(i)/sumg
+                       g(aom_env%active_state) = 0.0D0
+               end do
+               sh_print_env%renorm = .TRUE.
+               sh_print_env%sumprob   = sumg
+       else
+               sh_print_env%renorm = .FALSE.
+               sh_print_env%sumprob   = sumg
+               g(aom_env%active_state) = 1.0D0 - sumg
        end if
-      !enforced_active_state = 0
-         
-     end if
+       sh_print_env%proba     = g
+
+        !do i=1, mol
+        !   print *, "AC_TRIVIAL", g_before(i), g_after(i), g_renorm(i)
+        !enddo
+
+
+        hop = next_random_number(aom_env%rng_stream)
+        !print *, "RANDOM_NUMBER_HOPPING_PROBA", hop
+        sh_print_env%hop       = hop
+        sh_print_env%old_state = aom_env%active_state
+        !and see if this random number causes a surface hop
+        sumg = 0.0D0
+        do i=1,mol
+                sumg = sumg + g(i)
+                if (hop <= sumg) then
+                        if (i .ne. aom_env%active_state) then
+                                new_state = i
+                                !write(24,*) i                        
+                                !decohere = .FALSE.
+                                aom_env%decohere = .FALSE.
+                                attempt_hop = .TRUE.
+                                print *, "FOBSH| ATTEMPTED_HOP"
+                                sh_print_env%attempt_hop    = attempt_hop
+                                sh_print_env%new_state = new_state
+                                EXIT
+                        elseif (i == aom_env%active_state) then
+                                new_state = aom_env%active_state 
+                                attempt_hop = .FALSE.
+                                sh_print_env%attempt_hop    = attempt_hop
+                                sh_print_env%new_state = new_state
+!                                write(24,*) state
+                                
+                                !if there has not been any surfacehop, we need to consider the possibility of the decoherence correction
+                                !if the non-adiabatic coupling dphi to all other states is below a certain threshold
+                                !then a wavefunction collapse will be enforced
+                                aom_env%decohere = .TRUE.
+                                do j=1,mol
+                                        if (abs(aom_env%adiab_nace_tp(aom_env%active_state,j)) & 
+                                                     > decohere_criterion .and. aom_env%active_state .ne. j) then
+                                               ! decohere = .FALSE.
+                                                aom_env%decohere = .FALSE.
+                                                EXIT
+                                        end if
+                                end do
+                               ! decohere = .TRUE.
+                                EXIT
+                        end if
+                end if
+        end do
+
+        CALL adiab_print_sh_info(sh_print_env, keyword = 'TULLY_TEST') 
+
+        DEALLOCATE(sh_print_env%proba)
+        DEALLOCATE(enerdiff)
+        deallocate(ak)
+        deallocate(b)
+        deallocate(G)
+        deallocate(akttm)
+end subroutine modified_surfacehop
+
+!**********************************************************************************
+!> \brief TOADD
+!**********************************************************************************
+   SUBROUTINE check_hop_attempt(velocities, atomic_kind_set, nparticle_kind, local_particles, &
+ force_env, rescale_keyword)
+        REAL(kind=dp), DIMENSION(:,:),POINTER    :: velocities
+        TYPE(atomic_kind_type), DIMENSION(:), &
+             POINTER                                :: atomic_kind_set
+        INTEGER, INTENT(IN)                      :: nparticle_kind
+        TYPE(distribution_1d_type), POINTER      :: local_particles
+        TYPE(force_env_type), POINTER            :: force_env
+        CHARACTER(LEN=default_string_length), OPTIONAL  :: rescale_keyword
+
+        CHARACTER(len=*), PARAMETER :: routineN = 'check_hop_attempt', &
+        routineP = moduleN//':'//routineN
+
+        REAL(kind=dp)                            :: delta_energy, rescale_factor
+        REAL(kind=dp)                            :: kinetic_energy_prime, kinetic_energy_qsys, A, B
+        REAL(kind=dp), DIMENSION(:,:), ALLOCATABLE  :: hop_nacv, hop_nacv_oldold, hop_nacv_newnew
+        REAL(kind=dp), DIMENSION(:,:), ALLOCATABLE  :: hop_nacv_oldnew, hop_nacv_newold
+        REAL(kind=dp), DIMENSION(:,:), ALLOCATABLE  :: F_11, F_1, F_2, F_3
+        CHARACTER(LEN=default_string_length)     :: my_rescale_keyword
+        CHARACTER(LEN=default_string_length)     :: nacv_keyword, reversal_keyword
+        TYPE(section_vals_type), POINTER         :: mixed_section, adiab_section, coupling_section
+        TYPE(section_vals_type), POINTER         :: force_env_section
+        INTEGER                                  :: old_state, new_state
+        TYPE(sh_print_env_type)                  :: sh_print_env
+        LOGICAL                                  :: translate_keyword
+        REAL(kind=dp), DIMENSION(:,:),POINTER    :: velocities_com
+
+
+        CALL force_env_get(force_env=force_env,&
+                       force_env_section=force_env_section)
+        mixed_section => section_vals_get_subs_vals(force_env_section,"MIXED")
+        adiab_section => section_vals_get_subs_vals(mixed_section, "ADIABATIC")
+        coupling_section => section_vals_get_subs_vals(adiab_section, "AOM")
+        IF (PRESENT(rescale_keyword)) THEN
+           my_rescale_keyword = rescale_keyword
+        ELSE
+           CALL section_vals_val_get(adiab_section,"METHOD_RESCALING",c_val=my_rescale_keyword)
+        ENDIF
+        CALL section_vals_val_get(adiab_section,"CENTER_OF_MASS",l_val=translate_keyword)
+        sh_print_env = force_env%mixed_env%aom_env%sh_print_env
+
+        ALLOCATE(velocities_com(SIZE(velocities, 1), SIZE(velocities, 2)))
+        CALL translate_com(velocities, translate_keyword, velocities_com, &
+                           local_particles, nparticle_kind = nparticle_kind, atomic_kind_set = atomic_kind_set)
+        SELECT CASE(my_rescale_keyword)
+        CASE("SIMPLE")
+           CALL cal_delta_energy(nparticle_kind, velocities_com, force_env, atomic_kind_set, &
+                                 local_particles, delta_energy, kinetic_energy_prime)
+           sh_print_env%old_state        = force_env%mixed_env%aom_env%active_state
+           sh_print_env%new_state        = force_env%mixed_env%aom_env%new_state
+           IF (delta_energy.lt.0) THEN
+              force_env%mixed_env%aom_env%successful_hop = .FALSE.
+           ELSE 
+               !> Factor to rescale the velocities (Eq. 49 of PAPER_1)
+              !rescale_factor = SQRT(  delta_energy /kinetic_energy_prime )
+              !velocities = rescale_factor*velocities
+              force_env%mixed_env%aom_env%successful_hop = .TRUE.
+              force_env%mixed_env%aom_env%active_state   = force_env%mixed_env%aom_env%new_state
+              CALL simple_vel_rescaling(velocities, delta_energy, kinetic_energy_prime, rescale_factor)
+           ENDIF
+
+           sh_print_env%adiab_energies_t = force_env%mixed_env%aom_env%E_tp
+           sh_print_env%delta_energy     = delta_energy
+           sh_print_env%successful_hop   = force_env%mixed_env%aom_env%successful_hop
+           sh_print_env%kinetic_energy   = kinetic_energy_prime
+           IF (sh_print_env%successful_hop) sh_print_env%rescale_factor = rescale_factor
+           CALL adiab_print_sh_info(sh_print_env, keyword = 'SIMPLE_RESCALING')
+
+
+        CASE("SIMPLE_QSYS")
+           CALL cal_delta_ene_QSYS(nparticle_kind, velocities_com, force_env, atomic_kind_set, &
+                         local_particles, delta_energy, kinetic_energy_qsys)
+           sh_print_env%old_state        = force_env%mixed_env%aom_env%active_state
+           sh_print_env%new_state        = force_env%mixed_env%aom_env%new_state
+           IF (delta_energy.lt.0) THEN
+              force_env%mixed_env%aom_env%successful_hop = .FALSE.
+           ELSE 
+               !> Factor to rescale the velocities (Eq. 49 of PAPER_1)
+              !rescale_factor = SQRT(  delta_energy /kinetic_energy_prime )
+              !velocities = rescale_factor*velocities
+              force_env%mixed_env%aom_env%successful_hop = .TRUE.
+              !force_env%mixed_env%aom_env%old_state      = force_env%mixed_env%aom_env%active_state
+              force_env%mixed_env%aom_env%active_state   = force_env%mixed_env%aom_env%new_state
+              CALL simple_vel_resc_qsys(atomic_kind_set, local_particles,  &
+                       force_env, nparticle_kind, velocities, delta_energy, kinetic_energy_qsys, &
+                         rescale_factor)
+
+           ENDIF
+
+           sh_print_env%adiab_energies_t = force_env%mixed_env%aom_env%E_tp
+           sh_print_env%delta_energy     = delta_energy
+           sh_print_env%successful_hop   = force_env%mixed_env%aom_env%successful_hop
+           sh_print_env%kinetic_energy   = kinetic_energy_qsys
+           IF (sh_print_env%successful_hop) sh_print_env%rescale_factor = rescale_factor
+           CALL adiab_print_sh_info(sh_print_env, keyword = 'SIMPLE_RESCALING')
+
+
+        CASE("NACV")
+           CALL section_vals_val_get(adiab_section,"METHOD_ADIABATIC_NACV",c_val=nacv_keyword)
+           CALL cal_delta_ene_QSYS(nparticle_kind, velocities_com, force_env, atomic_kind_set, &
+                                 local_particles, delta_energy, kinetic_energy_prime)
+           sh_print_env%kinetic_energy   = kinetic_energy_prime
+           sh_print_env%old_state        = force_env%mixed_env%aom_env%active_state
+           sh_print_env%new_state        = force_env%mixed_env%aom_env%new_state
+           IF ((delta_energy.lt.0).AND.(nacv_keyword.ne."TEST")) THEN
+              force_env%mixed_env%aom_env%successful_hop = .FALSE.
+
+              sh_print_env%adiab_energies_t = force_env%mixed_env%aom_env%E_tp
+              sh_print_env%delta_energy     = delta_energy
+              sh_print_env%successful_hop   = force_env%mixed_env%aom_env%successful_hop
+              sh_print_env%old_state        = force_env%mixed_env%aom_env%active_state
+              sh_print_env%new_state        = force_env%mixed_env%aom_env%new_state
+              IF (sh_print_env%successful_hop) sh_print_env%rescale_factor = rescale_factor
+              CALL adiab_print_sh_info(sh_print_env, keyword = 'SIMPLE_RESCALING')
+           ELSE 
+              SELECT CASE(nacv_keyword)
+              CASE("TEST")
+                 old_state = force_env%mixed_env%aom_env%active_state
+                 new_state = force_env%mixed_env%aom_env%new_state
+                 !aom_env=force_env%mixed_env%aom_env
+                 CALL calc_hop_nacv( force_env%mixed_env%aom_env,force_env%mixed_env%F,&
+                                                                   hop_nacv_oldold, old_state, old_state, "OLDOLD")
+                 CALL calc_hop_nacv( force_env%mixed_env%aom_env, force_env%mixed_env%F,& 
+                                                                  hop_nacv_newnew, new_state, new_state, "NEWNEW")
+                 CALL calc_hop_nacv( force_env%mixed_env%aom_env, force_env%mixed_env%F,& 
+                                                                    hop_nacv_newold, new_state, old_state, "NEWOLD")
+                 CALL calc_hop_nacv( force_env%mixed_env%aom_env, force_env%mixed_env%F,& 
+                                                                   hop_nacv_oldnew, old_state, new_state, "OLDNEW")
+                 CALL adiab_print_hop_nacv(sh_print_env, hop_nacv_oldold, &
+                                  hop_nacv_newnew, hop_nacv_newold, hop_nacv_oldnew) 
+                 print*, "ERRORASYM = ", SUM( (hop_nacv_oldnew + hop_nacv_newold ) **2 )
+                 hop_nacv = hop_nacv_oldnew
+                 print*, "totalnacv =" , SUM(hop_nacv(1,:)),  SUM(hop_nacv(2,:)), SUM(hop_nacv(3,:))
+                 print*, "totalnacvasym =" , SUM(hop_nacv_oldnew(1,:) - hop_nacv_newold(1,:)) / 2,  & 
+                                             SUM(hop_nacv_oldnew(2,:) - hop_nacv_newold(2,:)) / 2,  &
+                                             SUM(hop_nacv_oldnew(3,:) - hop_nacv_newold(3,:)) / 2
+              CASE("CONTRIBUTION")
+                 CALL calc_hop_nacv( force_env%mixed_env%aom_env, force_env%mixed_env%F,& 
+                                                         hop_nacv, exF_11 = F_11, exF_1 = F_1, exF_2 = F_2, exF_3 =F_3)
+                 print*, "totalnacv =" , SUM(hop_nacv(1,:)),  SUM(hop_nacv(2,:)), SUM(hop_nacv(3,:))
+                 print*, "totalnacvF1 =" , SUM(F_1(1,:)),  SUM(F_1(2,:)), SUM(F_1(3,:))
+                 print*, "totalnacvFF1 =" , SUM(F_1(1,:) + F_11(1,:)), &
+                                            SUM(F_1(2,:) + F_11(2,:)), &
+                                            SUM(F_1(3,:) + F_11(3,:))
+                 CALL adiab_print_hop_nacv(sh_print_env, hop_nacv, F_11, F_1, F_2, F_3) 
+                 CALL cal_delta_energy_nacv(nparticle_kind, velocities_com, force_env%mixed_env%aom_env, &
+                                              atomic_kind_set, &
+                                            local_particles, F_1 + F_11, delta_energy, A, B) 
+print*, "DELTAFF1 = ", delta_energy
+IF ((delta_energy).lt.0) THEN
+     print*, "LOGFF1 = ", 0
+ELSE
+     print*, "LOGFF1 = ", 1
+ENDIF
      
-     deallocate(overlaps)
+                 CALL cal_delta_energy_nacv(nparticle_kind, velocities_com, force_env%mixed_env%aom_env, &
+                                            atomic_kind_set, &
+                                            local_particles, F_1, delta_energy, A, B) 
+print*, "DELTAF1 = ", delta_energy
+IF ((delta_energy).lt.0) THEN
+     print*, "LOGF1 = ", 0
+ELSE
+     print*, "LOGF1 = ", 1
+ENDIF
+     
+              CASE("TOTAL")
+                 CALL calc_hop_nacv(force_env%mixed_env%aom_env, force_env%mixed_env%F, hop_nacv)
+                 CALL adiab_print_hop_nacv(sh_print_env, hop_nacv) 
+              CASE("FAST")
+                 CALL calc_hop_nacv( force_env%mixed_env%aom_env, force_env%mixed_env%F, hop_nacv, fast=.TRUE.)
+
+                 CALL adiab_print_hop_nacv(sh_print_env, hop_nacv) 
+              CASE DEFAULT
+                CPABORT("There is no method to calculate the NACV.")
+              END SELECT 
+              CALL cal_delta_energy_nacv(nparticle_kind, velocities_com, force_env%mixed_env%aom_env, &
+                                          atomic_kind_set, &
+                                          local_particles, hop_nacv, delta_energy, A, B) 
+!IF ((delta_energy).lt.0) THEN
+!     print*, "LOGNACV = ", 0
+!ELSE
+!     print*, "LOGNACV = ", 1
+!ENDIF
+              If (delta_energy.lt.0) THEN
+                  force_env%mixed_env%aom_env%successful_hop = .FALSE.
+                  CALL section_vals_val_get(adiab_section,"METHOD_REVERSAL",c_val=reversal_keyword)
+                  CALL hop_nacv_vel_reversing(nparticle_kind, velocities,  & 
+                                              force_env%mixed_env%aom_env%forces_adiab, &
+                                              force_env%mixed_env%aom_env%forces_adiab_new, &
+                                              hop_nacv, atomic_kind_set, local_particles, reversal_keyword, &
+                                              sh_print_env,A,B)
+              ELSE 
+                  force_env%mixed_env%aom_env%successful_hop = .TRUE.
+                  force_env%mixed_env%aom_env%active_state   = force_env%mixed_env%aom_env%new_state
+                  CALL hop_nacv_vel_rescaling(nparticle_kind, velocities, delta_energy, A, B, hop_nacv, &
+                                              atomic_kind_set, local_particles, rescale_factor)
+              ENDIF
+
+              sh_print_env%A = A
+              sh_print_env%B = B
+              sh_print_env%adiab_energies_t = force_env%mixed_env%aom_env%E_tp
+              sh_print_env%delta_energy     = delta_energy
+              sh_print_env%successful_hop   = force_env%mixed_env%aom_env%successful_hop
+              IF (sh_print_env%successful_hop) THEN
+                 sh_print_env%rescale_factor = rescale_factor
+                 sh_print_env%momentum_shift(:) = rescale_factor *        & 
+                          (/ SUM(hop_nacv(1,:)), SUM(hop_nacv(2,:)), SUM(hop_nacv(3,:)) /)
+              ENDIF
+              CALL adiab_print_sh_info(sh_print_env, keyword = 'NACV_RESCALING')
+              !IF (.NOT.(sh_print_env%successful_hop)) THEN
+              !   CALL adiab_print_sh_info(sh_print_env, keyword = 'NACV_REVERSING')
+              !ENDIF 
+           ENDIF 
+        CASE DEFAULT
+                CPABORT("There is no method to do the rescaling of the velocities.")
+        END SELECT
+
+        DEALLOCATE(velocities_com)
+   END SUBROUTINE check_hop_attempt
+
+!**********************************************************************************
+!> \brief TOADD
+!**********************************************************************************
+SUBROUTINE calc_hop_nacv(aom_env, diagonal_F, hop_nacv, ext_old_state, ext_new_state, symmetry, fast, &
+                         exF_11, exF_1, exF_2, exF_3)
+        TYPE(aom_env_type)                                       :: aom_env
+        REAL(kind=dp), DIMENSION(:,:), INTENT(OUT), ALLOCATABLE  :: hop_nacv
+        INTEGER, OPTIONAL                                        :: ext_old_state, ext_new_state
+        CHARACTER(len=*), OPTIONAL                               :: symmetry
+        LOGICAL, OPTIONAL                                        :: fast
+        REAL(kind=dp), DIMENSION(:,:), INTENT(OUT), ALLOCATABLE, OPTIONAL  :: exF_11, exF_1, exF_2, exF_3
+        REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: diagonal_F
 
 
-END SUBROUTINE adiab_overalp_calc
+        CHARACTER(len=*), PARAMETER :: routineN = 'calc_hop_nacv', &
+        routineP = moduleN//':'//routineN
+
+        INTEGER                                      :: num_mol, nadiab, num_j, natom
+        INTEGER                                      :: old_state, new_state
+        REAL(KIND=dp)                                :: scaling, cbar, diff_energy
+        REAL(KIND=dp)                                :: E_old_state, E_new_state
+        !REAL(KIND=dp), dimension(:,:,:), allocatable :: Fin
+        !REAL(KIND=dp), dimension(:,:,:), allocatable   :: nacv
+        REAL(KIND=dp), dimension(:,:,:,:), allocatable :: Wprime
+        integer, dimension(:,:), allocatable :: NN
+        integer :: i, j, k, mat, d, l, atoms
+        !REAL(KIND=dp), dimension(:,:,:,:), allocatable :: DH, my_DP
+        REAL(KIND=dp), dimension(:,:), allocatable :: F_1, F_11, F_2, F_22, F_3
+        REAL(KIND=dp), dimension(:), allocatable ::   Sdiag
+        REAL(KIND=dp), dimension(:,:), allocatable :: S, C, T, X, LL, Y
+        LOGICAL, dimension(:), allocatable         :: ext_pres
+        LOGICAL                                    :: my_fast
+        REAL(KIND=dp) :: total_norm, error
+        REAL(KIND=dp)                           :: convert_nacv 
+
+        ! Based on paper Carof, Giannini, Blumberger, J. Chem. Phys. 147,
+        ! 214113 (2017), [Carof17]
 
 
+        mat    = SIZE(aom_env%Stptp, 1)
+        natom  = SIZE(diagonal_F, 2)
+        nadiab = SIZE(diagonal_F, 3)
+        atoms  = SIZE(aom_env%connlist1, 2)
+
+        my_fast = .FALSE.
+        IF (PRESENT(fast)) my_fast = fast
+
+        allocate(T(mat,mat))
+        allocate(NN(mat,mat))
+        allocate(S(mat,mat))
+        allocate(C(mat,mat))
+        allocate(X(mat,mat))
+        allocate(Y(mat,mat))
+        allocate(LL(mat,mat))
+
+        allocate(Sdiag(mat))
+        allocate(ext_pres(natom))
+
+        !allocate(DH(mat,mat,natom,3))
+        !allocate(my_DP(mat,mat,natom,3)) 
+        !allocate(nacv(3,mat, mat*atoms)) 
+        allocate(F_1(3,natom))
+        allocate(F_11(3,natom))
+        allocate(F_2(3,natom))
+        allocate(F_22(3,natom))
+        allocate(F_3(3,natom))
+        !allocate(Fin(3,natom, mat))
+        allocate(hop_nacv(3, natom)) 
+
+        scaling = aom_env%scaling
+        cbar = aom_env%cbar
+        NN = aom_env%NN
+        S = aom_env%Stptp
+        C = aom_env%C_tp
+        
+        !nacv = aom_env%nacv
+        !Fin = aom_env%F
+        ext_pres = aom_env%ext_pres       
+        IF (PRESENT(ext_old_state)) THEN
+           old_state = ext_old_state
+        ELSE
+           old_state = aom_env%active_state
+        ENDIF
+        IF (PRESENT(ext_new_state)) THEN
+           new_state = ext_new_state 
+        ELSE
+           new_state = aom_env%new_state
+        ENDIF
+        E_old_state = aom_env%E_tp(old_state)
+        E_new_state = aom_env%E_tp(new_state)
+        IF (E_old_state.EQ.E_new_state) THEN
+           diff_energy = 0.0D0
+        ELSE
+           diff_energy = 1 / (E_new_state - E_old_state)
+        ENDIF  
+
+     IF (.NOT.my_fast) THEN
+           ! Use the full Eq. (14) of [Carof17]
+
+        T = S
+        CALL matinvsqrt(mat, .FALSE., T)
+        X = matmul(T, C)                   ! X is T*U
+        !CALL adiabaticity(T, LL, Sdiag)     
+        CALL adiabaticity(S, LL, Sdiag)    ! LL is L, the matrix that
+        ! diagonalizes S and T. Sdiag is the eigenvalues of S.
+        Y = matmul( transpose(LL), C)     ! Y is L^{dagger}C
+
+        !CALCULATE W' with Eq. (21) if [Carof17]
+        allocate(Wprime(mat,mat,natom,3)) 
+        do d=1,3
+           num_j = -1
+           do j=1,natom
+              IF (ext_pres(j)) THEN
+                  num_j   = num_j + 1
+                  num_mol = int(num_j/atoms) + 1
+              ENDIF
+              do k=1, mat
+                 do l=1, mat
+                    Wprime(k,l,j,d) = 0.0d0
+                    do i=1,mat 
+                       IF (ext_pres(j)) THEN
+                          IF (i.ne.num_mol) THEN
+                             !Wprime(k,l,j,d) = Wprime(k,l,j,d) + my_DP(i,num_mol,j,d) &
+                             Wprime(k,l,j,d) = Wprime(k,l,j,d) + aom_env%nacv(d, i, num_j) &
+                                               *( LL(num_mol,k)*LL(i,l)  + LL(num_mol,l) * LL(i, k))
+                          ENDIF
+                       ENDIF
+                    ENDDO
+                    Wprime(k, l, j, d) = - Wprime( k, l, j, d) / ( SQRT(Sdiag(k))*SQRT(Sdiag(l)) + Sdiag(l) )
+                 ENDDO
+              ENDDO
+           ENDDO
+        ENDDO          
+     ENDIF
+
+
+
+       convert_nacv = - scaling / cbar
+       IF (.NOT.my_fast) THEN
+           num_mol = 0
+           do d=1,3
+              num_j = -1
+              do j=1,natom
+                 F_1(d,j) = 0.0D0
+                 F_11(d,j) = 0.0D0
+                 F_2(d,j) = 0.0D0
+                 F_3(d,j) = 0.0D0
+                 IF (ext_pres(j)) THEN
+                    num_j   = num_j + 1
+                    num_mol = int(num_j/atoms) + 1 
+                 ENDIF
+                 do i=1,mat
+                    !F_1(d,j) = F_1(d,j) + C(i,old_state)*DH(i,i,j,d)*C(i,new_state)*diff_energy
+                    F_1(d,j) = F_1(d,j) + C(i,old_state)*diagonal_F(d,j,i)*C(i,new_state)*diff_energy
+                    IF (ext_pres(j)) THEN
+                       !F_2(d, j) = F_2(d,j) + X(i, old_state) * nacv(d, i, num_mol, j) * X( num_mol, new_state) 
+                       F_2(d, j) = F_2(d,j) + X(i, old_state) * aom_env%nacv(d, i, num_j) * X( num_mol, new_state) 
+                       IF (i.ne.num_mol) THEN
+                          !F_11(d,j) = F_11(d,j) + diff_energy * DH(i,num_mol,j,d) * (              &
+                          F_11(d,j) = F_11(d,j) + diff_energy * convert_nacv*aom_env%nacv(d, i, num_j) * (              &
+                                                 C(num_mol, new_state) * C(i, old_state) +   &
+                                                 C(num_mol, old_state) * C(i,new_state) )
+                       ENDIF
+                       DO k = 1, mat
+                          F_3(d,j) = F_3(d,j) + Y(i, old_state) * Wprime(i, k, j, d) * Y(k, new_state)
+                       ENDDO
+                    ENDIF
+                 ENDDO
+              ENDDO
+           ENDDO 
+
+           ! Carefull with the sign! 
+           hop_nacv = -(F_1 + F_11) + F_2 + F_3
+           IF (PRESENT(symmetry)) THEN
+              DO j=1, natom
+                 DO d=1, 3
+                    print*, "NACV", symmetry, hop_nacv(d,j) 
+                 ENDDO
+              ENDDO
+           ENDIF
+           IF (PRESENT(exF_1))  exF_1  = F_1
+           IF (PRESENT(exF_11)) exF_11 = F_11
+           IF (PRESENT(exF_2))  exF_2  = F_2
+           IF (PRESENT(exF_3))  exF_3  = F_3
+           IF (PRESENT(exF_1)) THEN
+              F_22 = F_2 + F_3
+              total_norm = 0.0D0
+              error = 0.0D0
+              DO j=1, 12
+                 !DO d=1,3
+                 DO d=1, 3
+                       error = error + ( hop_nacv(d,j) - (F_1(d,j) + F_11(d,j)))**2 
+                       total_norm = total_norm +  (hop_nacv(d,j))**2
+                       print*, "hop_nacv", hop_nacv(d,j)
+                       print*, "d_1_term", F_1(d,j) + F_11(d,j)
+                       print*, "total_norm = ", total_norm
+                       print*, "error = ", error
+                 ENDDO
+                 IF (( mod(j,3).eq.1 ).AND. (j < 12)) THEN
+                       print*, "NACVTOTCARBON = ", j, NORM2(hop_nacv(:,j))
+                       print*, "NACVFF1CARBON   = ", j, NORM2(F_1(:,j) + F_11(:,j))
+                 ELSE 
+                       print*, "NACVTOTHYDROGEN = ", j, NORM2(hop_nacv(:,j))
+                       print*, "NACVFF1HYDROGEN   = ", j, NORM2(F_1(:,j) + F_11(:,j))
+                 ENDIF 
+              ENDDO
+              print*, "TOTALNORM = ", sqrt(total_norm)
+              print*, "ERROR =  ", sqrt(error/total_norm)
+           ENDIF
+        ELSE
+           ! Only calculation of term a_{I, ij} in Eq. (14) of [Carof17], i.e.
+           ! Eq. (15)
+           num_mol = 0   ! Molecular index 
+           do d=1,3      ! Cartesian coordinates
+              num_j = 0  ! Active atom index
+              do j=1,natom ! Sum over all the atoms
+                 F_1(d,j) = 0.0D0
+                 F_11(d,j) = 0.0D0
+                 IF (ext_pres(j)) THEN
+                    num_j   = num_j + 1                  ! Update the active atom index
+                    num_mol = int((num_j-1)/atoms) + 1   ! Update the molecular index
+                    ! WARNING: we suppose that all molecules have the same
+                    ! number of atoms
+                 ENDIF
+                 do i=1,mat
+                    !F_1(d,j) = F_1(d,j) + C(i,old_state)*DH(i,i,j,d)*C(i,new_state)*diff_energy
+                    ! Diagonal term, it depends on the forces
+                    F_1(d,j) = F_1(d,j) + C(i,old_state)*diagonal_F(d,j,i)*C(i,new_state)*diff_energy
+                    IF (ext_pres(j)) THEN
+                       IF (i.ne.num_mol) THEN
+                         ! Of diagonal term, only for active atom j present in
+                         ! molecule num_mol
+                         F_11(d,j) = F_11(d,j) + diff_energy * convert_nacv*aom_env%nacv(d, i, num_j) * (&
+                                                 C(num_mol, new_state) * C(i, old_state) +   &
+                                                 C(num_mol, old_state) * C(i,new_state) )
+                       ENDIF
+                    ENDIF
+                 ENDDO
+              ENDDO
+           ENDDO 
+
+           ! minus sign to take the same convention of the paper.
+           hop_nacv = -(F_1 + F_11) 
+        ENDIF
+ 
+        deallocate(T)
+        !deallocate(DH)
+        !deallocate(my_DP)
+        deallocate(F_1)
+        deallocate(F_11)
+        deallocate(F_2)
+        deallocate(F_22)
+        deallocate(F_3)
+END SUBROUTINE calc_hop_nacv
+
+
+FUNCTION NORM2(array) RESULT(norm)
+         REAL(kind=dp), dimension(:), INTENT(IN) :: array
+        
+         INTEGER       :: i
+         REAL(KIND=dp) :: norm
+ 
+         norm = 0
+         DO i=1, SIZE(array)
+            norm = norm + array(i)*array(i)
+         ENDDO
+         norm = SQRT(norm)
+END FUNCTION NORM2
+
+!**********************************************************************************
+!> \brief TOADD
+!**********************************************************************************
+   SUBROUTINE hop_nacv_vel_reversing(nparticle_kind, velocities, forces_old, forces_new, hop_nacv, atomic_kind_set, &
+                                     local_particles, reversal_keyword, sh_print_env, A, B)
+        INTEGER, INTENT(IN)                      :: nparticle_kind
+        REAL(kind=dp), DIMENSION(:,:),POINTER    :: velocities
+        REAL(kind=dp), DIMENSION(:,:), INTENT(IN)   :: forces_old, forces_new
+        REAL(kind=dp), DIMENSION(:,:), INTENT(IN)   :: hop_nacv
+        TYPE(distribution_1d_type), POINTER      :: local_particles
+        TYPE(atomic_kind_type), DIMENSION(:), &
+             POINTER                             :: atomic_kind_set
+        CHARACTER(LEN=default_string_length)     :: reversal_keyword
+        TYPE(sh_print_env_type)                  :: sh_print_env
+        REAL(kind=dp), INTENT(IN)                :: A, B
+
+        CHARACTER(len=*), PARAMETER :: routineN = 'hop_nacv_vel_rescaling', &
+        routineP = moduleN//':'//routineN
+
+        REAL(kind=dp)                            :: product_pd, product_dfo, product_dfn
+        REAL(kind=dp)                            :: mass
+        INTEGER                                  :: iparticle_kind
+        INTEGER                                  :: nparticle_local
+        INTEGER                                  :: iparticle_local, iparticle
+        TYPE(atomic_kind_type), POINTER          :: atomic_kind
+        LOGICAL                                  :: reverse
+        REAL(KIND=dp)                            :: reversal_factor
+
+        NULLIFY(atomic_kind)
+!> TO EXPLAIN  
+        IF ((reversal_keyword.ne."ALWAYS").OR.(reversal_keyword.ne."NEVER")) THEN
+           product_pd = 0.0D0
+           product_dfo = 0.0D0
+           product_dfn = 0.0D0
+           DO iparticle_kind=1,nparticle_kind
+              atomic_kind => atomic_kind_set(iparticle_kind)
+              CALL get_atomic_kind(atomic_kind=atomic_kind,mass=mass)
+              nparticle_local = local_particles%n_el(iparticle_kind)
+              DO iparticle_local=1,nparticle_local
+                 iparticle = local_particles%list(iparticle_kind)%array(iparticle_local)
+                 product_pd = product_pd + mass * (                                   &
+                                velocities(1, iparticle) * hop_nacv(1, iparticle) +   &            
+                                velocities(2, iparticle) * hop_nacv(2, iparticle) +   &            
+                                velocities(3, iparticle) * hop_nacv(3, iparticle) )               
+                 product_dfo = product_dfo +  ( &
+                                hop_nacv(1, iparticle) * forces_old(1, iparticle) +    &           
+                                hop_nacv(2, iparticle) * forces_old(2, iparticle) +    &           
+                                hop_nacv(3, iparticle) * forces_old(3, iparticle) )               
+                 product_dfn = product_dfn +  ( &
+                                hop_nacv(1, iparticle) * forces_new(1, iparticle) +    &           
+                                hop_nacv(2, iparticle) * forces_new(2, iparticle) +    &           
+                                hop_nacv(3, iparticle) * forces_new(3, iparticle) )               
+              ENDDO
+           END DO
+        ENDIF
+
+        reverse = .FALSE.
+        SELECT CASE(reversal_keyword)
+        CASE("NEVER")
+           reverse = .FALSE.
+        CASE("ALWAYS")
+           reverse = .TRUE.
+        CASE("TRUHLAR")
+           IF ((product_pd*product_dfn).lt.0) reverse = .TRUE.
+        CASE("SUBOTNIK")
+           IF (((product_pd*product_dfn).lt.0) .AND. ((product_dfn*product_dfo).lt.0)) reverse = .TRUE.
+        CASE DEFAULT
+           CPABORT("There is not method to reverse the velocities after a frustrated hop") 
+        END SELECT
+
+        IF (reverse) THEN
+           reversal_factor = -B/A
+           DO iparticle_kind=1,nparticle_kind
+              atomic_kind => atomic_kind_set(iparticle_kind)
+              CALL get_atomic_kind(atomic_kind=atomic_kind,mass=mass)
+              nparticle_local = local_particles%n_el(iparticle_kind)
+              DO iparticle_local=1,nparticle_local
+                 iparticle = local_particles%list(iparticle_kind)%array(iparticle_local)
+                 IF ((velocities(1, iparticle)**2 + velocities(2, iparticle)**2 + &
+                      velocities(3, iparticle)**2 ).NE.0.0d0) THEN
+                    velocities(:, iparticle ) = velocities(:, iparticle) + (reversal_factor/mass) * hop_nacv(:, iparticle)
+                 ENDIF
+              ENDDO
+           END DO
+        ENDIF
+        
+        sh_print_env%reversal_keyword = reversal_keyword
+        sh_print_env%reverse = reverse
+        sh_print_env%product_pd = product_pd
+        sh_print_env%product_dfn = product_dfn
+        sh_print_env%product_dfo = product_dfo
+
+        IF (ASSOCIATED(atomic_kind)) NULLIFY(atomic_kind)
+   END SUBROUTINE hop_nacv_vel_reversing
+
+
+!**********************************************************************************
+!> \brief TOADD
+!**********************************************************************************
+   SUBROUTINE hop_nacv_vel_rescaling(nparticle_kind, velocities, delta_energy, A, B, hop_nacv, atomic_kind_set, &
+                                     local_particles, rescale_factor)
+        INTEGER, INTENT(IN)                      :: nparticle_kind
+        REAL(kind=dp), DIMENSION(:,:),POINTER    :: velocities
+        REAL(kind=dp), INTENT(IN)                :: delta_energy, A, B
+        REAL(kind=dp), DIMENSION(:,:), INTENT(IN)   :: hop_nacv
+        TYPE(distribution_1d_type), POINTER      :: local_particles
+        TYPE(atomic_kind_type), DIMENSION(:), &
+             POINTER                             :: atomic_kind_set
+        REAL(kind=dp), INTENT(OUT)                :: rescale_factor
+
+        CHARACTER(len=*), PARAMETER :: routineN = 'hop_nacv_vel_rescaling', &
+        routineP = moduleN//':'//routineN
+
+        REAL(kind=dp)                            :: mass
+        INTEGER                                  :: iparticle_kind
+        INTEGER                                  :: nparticle_local 
+        INTEGER                                  :: iparticle_local, iparticle
+        TYPE(atomic_kind_type), POINTER          :: atomic_kind
+
+        NULLIFY(atomic_kind)
+!> From Fabiano E, Keal TW, Thiel W. Implementation of surface hopping molecular dynamics using semiempirical methods. 
+!>     Chem Phys 2008, 349:334–347.
+!>  B = -B, compare to the paper
+
+        IF (A == 0) THEN
+           rescale_factor = 0
+        ELSE
+           IF (B < 0) THEN
+              rescale_factor = (- B - SQRT(delta_energy))/(2 * A)
+           ELSE
+              rescale_factor = (- B + SQRT(delta_energy))/(2 * A)
+           ENDIF
+        ENDIF
+        DO iparticle_kind=1,nparticle_kind
+           atomic_kind => atomic_kind_set(iparticle_kind)
+           CALL get_atomic_kind(atomic_kind=atomic_kind,mass=mass)
+           nparticle_local = local_particles%n_el(iparticle_kind)
+           DO iparticle_local=1,nparticle_local
+              iparticle = local_particles%list(iparticle_kind)%array(iparticle_local)
+              IF ((velocities(1, iparticle)**2 + velocities(2, iparticle)**2 + &
+                   velocities(3, iparticle)**2 ).NE.0.0d0) THEN
+                 velocities(:, iparticle ) = velocities(:, iparticle) + (rescale_factor/mass) * hop_nacv(:, iparticle)
+              ENDIF
+           ENDDO
+        END DO
+        IF (ASSOCIATED(atomic_kind)) NULLIFY(atomic_kind)
+   END SUBROUTINE hop_nacv_vel_rescaling
+
+!**********************************************************************************
+!> \brief TOADD
+!**********************************************************************************
+   SUBROUTINE simple_vel_resc_qsys(atomic_kind_set,local_particles, force_env, nparticle_kind, & 
+                                   velocities, delta_energy, kinetic_energy_qsys, rescale_factor)
+        
+        INTEGER, INTENT(IN)                      :: nparticle_kind 
+        REAL(kind=dp), DIMENSION(:,:),POINTER    :: velocities
+        TYPE(force_env_type), POINTER            :: force_env
+        TYPE(distribution_1d_type), POINTER      :: local_particles
+        TYPE(atomic_kind_type), DIMENSION(:), &
+             POINTER                                :: atomic_kind_set
+        TYPE(atomic_kind_type), POINTER          :: atomic_kind
+        REAL(kind=dp), INTENT(IN)                :: delta_energy
+        REAL(kind=dp), INTENT(IN)                :: kinetic_energy_qsys
+        REAL(kind=dp), INTENT(OUT)               :: rescale_factor
+
+        CHARACTER(len=*), PARAMETER :: routineN = 'simple_vel_resc_qys', &
+        routineP = moduleN//':'//routineN
+
+        REAL(kind=dp)                            :: mass
+        INTEGER                                  :: iparticle_kind
+        INTEGER                                  :: iparticle_local, iparticle
+        INTEGER                                  :: nparticle_local
+
+!> Factor to rescale the velocities (Eq. 49 of PAPER_1)
+        rescale_factor = SQRT(  delta_energy /kinetic_energy_qsys)
+
+           DO iparticle_kind=1,nparticle_kind
+              atomic_kind => atomic_kind_set(iparticle_kind)
+              CALL get_atomic_kind(atomic_kind=atomic_kind,mass=mass)
+              nparticle_local = local_particles%n_el(iparticle_kind)
+              DO iparticle_local=1,nparticle_local
+                 iparticle = local_particles%list(iparticle_kind)%array(iparticle_local)
+                 if (force_env%mixed_env%aom_env%ext_pres(iparticle)) then 
+                         velocities(:, iparticle) =rescale_factor*velocities(:, iparticle)
+                 end if
+              END DO
+           END DO
+   END SUBROUTINE simple_vel_resc_qsys
+
+!**********************************************************************************
+!> \brief TOADD
+!**********************************************************************************
+   SUBROUTINE cal_delta_ene_QSYS(nparticle_kind, velocities, force_env, atomic_kind_set, &
+                               local_particles, delta_energy, kinetic_energy_qsys) 
+        INTEGER, INTENT(IN)                      :: nparticle_kind
+        REAL(kind=dp), DIMENSION(:,:),POINTER    :: velocities
+        TYPE(force_env_type), POINTER            :: force_env
+        TYPE(distribution_1d_type), POINTER      :: local_particles
+        TYPE(atomic_kind_type), DIMENSION(:), &
+             POINTER                                :: atomic_kind_set
+        REAL(kind=dp), INTENT(OUT)               :: delta_energy
+        REAL(kind=dp), INTENT(OUT)               :: kinetic_energy_qsys
+
+        CHARACTER(len=*), PARAMETER :: routineN = 'cal_delta_ene_QSYS', &
+        routineP = moduleN//':'//routineN
+
+        REAL(kind=dp)                            :: mass
+        INTEGER                                  :: iparticle_kind, new_state, old_state
+        INTEGER                                  :: nparticle_local
+        INTEGER                                  :: iparticle_local, iparticle
+        TYPE(atomic_kind_type), POINTER          :: atomic_kind
+
+        NULLIFY(atomic_kind)
+           kinetic_energy_qsys = 0.0D0
+           DO iparticle_kind=1,nparticle_kind
+              atomic_kind => atomic_kind_set(iparticle_kind)
+              CALL get_atomic_kind(atomic_kind=atomic_kind,mass=mass)
+              nparticle_local = local_particles%n_el(iparticle_kind)
+              DO iparticle_local=1,nparticle_local
+                 iparticle = local_particles%list(iparticle_kind)%array(iparticle_local)
+                 if (force_env%mixed_env%aom_env%ext_pres(iparticle)) then 
+                      kinetic_energy_qsys = kinetic_energy_qsys +   &
+                         mass*( &
+                         velocities(1, iparticle)**2 + &
+                         velocities(2, iparticle)**2 + &
+                         velocities(3, iparticle)**2  )
+                 end if
+              END DO
+           END DO
+          kinetic_energy_qsys = 0.5*kinetic_energy_qsys
+
+!print *, "kinetic_energy_qsys", kinetic_energy_qsys
+           new_state = force_env%mixed_env%aom_env%new_state
+           old_state = force_env%mixed_env%aom_env%active_state
+           delta_energy = kinetic_energy_qsys-( &
+                     force_env%mixed_env%aom_env%E_tp(new_state) - &
+                     force_env%mixed_env%aom_env%E_tp(old_state))
+        IF (ASSOCIATED(atomic_kind)) NULLIFY(atomic_kind)
+   END SUBROUTINE cal_delta_ene_QSYS
+
+!**********************************************************************************
+!> \brief TOADD
+!**********************************************************************************
+SUBROUTINE cal_delta_energy(nparticle_kind, velocities, force_env, atomic_kind_set, &
+                            local_particles, delta_energy, kinetic_energy_prime) 
+     INTEGER, INTENT(IN)                      :: nparticle_kind
+     REAL(kind=dp), DIMENSION(:,:),POINTER    :: velocities
+     TYPE(force_env_type), POINTER            :: force_env
+     TYPE(distribution_1d_type), POINTER      :: local_particles
+     TYPE(atomic_kind_type), DIMENSION(:), &
+          POINTER                                :: atomic_kind_set
+     REAL(kind=dp), INTENT(OUT)               :: delta_energy
+     REAL(kind=dp), INTENT(OUT)               :: kinetic_energy_prime
+
+     CHARACTER(len=*), PARAMETER :: routineN = 'cal_delta_energy', &
+     routineP = moduleN//':'//routineN
+
+     REAL(kind=dp)                            :: mass
+     INTEGER                                  :: iparticle_kind, new_state, old_state
+     INTEGER                                  :: nparticle_local
+     INTEGER                                  :: iparticle_local, iparticle
+     TYPE(atomic_kind_type), POINTER          :: atomic_kind
+
+     NULLIFY(atomic_kind)
+        kinetic_energy_prime = 0.0D0
+        DO iparticle_kind=1,nparticle_kind
+           atomic_kind => atomic_kind_set(iparticle_kind)
+           CALL get_atomic_kind(atomic_kind=atomic_kind,mass=mass)
+           nparticle_local = local_particles%n_el(iparticle_kind)
+           DO iparticle_local=1,nparticle_local
+              iparticle = local_particles%list(iparticle_kind)%array(iparticle_local)
+              kinetic_energy_prime = kinetic_energy_prime +   &
+                 mass*( &
+                 velocities(1, iparticle)**2 + &
+                 velocities(2, iparticle)**2 + &
+                 velocities(3, iparticle)**2  )
+           END DO
+        END DO
+        kinetic_energy_prime = 0.5*kinetic_energy_prime
+
+        new_state = force_env%mixed_env%aom_env%new_state
+        old_state = force_env%mixed_env%aom_env%active_state
+        !print *, "OLD_STATE_ISOTROP", old_state
+        delta_energy = kinetic_energy_prime-( &
+                  force_env%mixed_env%aom_env%E_tp(new_state) - &
+                  force_env%mixed_env%aom_env%E_tp(old_state))
+     IF (ASSOCIATED(atomic_kind)) NULLIFY(atomic_kind)
+END SUBROUTINE cal_delta_energy
+
+!**********************************************************************************
+!> \brief Get first adiabatic state when initialization is DIABATIC
+!**********************************************************************************
+   SUBROUTINE choose_firstadiabat(C, init, sh_print_env, first_adiabat, aom_env)
+
+        REAL(KIND=dp), dimension(:,:), intent(in) :: C
+        INTEGER, INTENT(IN)                       :: init
+        TYPE(sh_print_env_type), INTENT(INOUT)    :: sh_print_env
+        INTEGER, INTENT(OUT)                      :: first_adiabat
+        TYPE(aom_env_type)                        :: aom_env
+
+        CHARACTER(len=*), PARAMETER :: routineN = 'choose_firstadiabat', &
+        routineP = moduleN//':'//routineN
+        
+        INTEGER                                   :: i
+        REAL( KIND =dp)                           :: random, sumc
+
+        ALLOCATE(sh_print_env%pop_init(SIZE(C(init,:))))
+
+        random = next_random_number(aom_env%rng_stream)
+        sh_print_env%initrandom = random
+        sumc = 0.0D0
+        DO i=1, SIZE(C(init,:))
+           sh_print_env%pop_init(i) = C(init,i)*C(init,i)
+        ENDDO
+        DO i=1, SIZE(C(init,:))
+           sumc = sumc + C(init,i)*C(init,i)
+           IF (random.le.sumc) THEN
+              first_adiabat = i
+              sh_print_env%first_adiabat = i
+              EXIT
+           ENDIF
+        ENDDO
+        CALL adiab_print_sh_info(sh_print_env, keyword = 'START')
+        DEALLOCATE(sh_print_env%pop_init)
+
+   END SUBROUTINE choose_firstadiabat
+
+!**********************************************************************************
+!> \brief Diabatic to adiabatic transformation
+!**********************************************************************************
+subroutine print_matrix_standard_out(matrix)
+     
+      INTEGER                                    :: mol,i,j
+      REAL(KIND=dp),  DIMENSION(:,:), INTENT(IN) :: matrix
+
+      mol = SIZE(matrix, 1)
+
+PRINT *, "----------------------------------------------------------"
+DO i=1, mol
+   DO j=1, mol
+      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", matrix(i,j), "  "
+   END DO
+   PRINT *, " "
+END DO
+PRINT *, "----------------------------------------------------------"
+
+end subroutine print_matrix_standard_out
+
+!**********************************************************************************
+!> \brief Diabatic to adiabatic transformation
+!**********************************************************************************
+SUBROUTINE diab_to_adiab( C, diab_c, adiab_c, pop)
+        REAL(KIND=dp), dimension(:,:), intent(in) :: C
+        COMPLEX(KIND=dp), dimension(:), intent(in) :: diab_c
+        COMPLEX(KIND=dp), dimension(:), intent(out) :: adiab_c
+        REAL(KIND=dp), dimension(:), intent(out), optional    :: pop        
+
+        CHARACTER(len=*), PARAMETER :: routineN ='diab_to_adiab', &
+                               routineP = moduleN//':'//routineN
+
+        integer :: i, j!, mol!, k, l
+
+        do i=1, SIZE(diab_c)
+           adiab_c(i) = cmplx(0.0, 0.0, dp)
+           do j=1, SIZE(diab_c)
+              adiab_c(i) = adiab_c(i) + cmplx(C(j,i), 0.0D0,dp)*diab_c(j)
+           enddo
+           if(PRESENT(pop)) then
+              pop(i) = abs(adiab_c(i)*conjg(adiab_c(i)))
+           end if
+        enddo
+END SUBROUTINE
+
+!**********************************************************************************
+!> \brief This does energy conservation test according to Fabiano 2008 to check
+!> whether the energy conservation criteria for a hop to be successful is met.
+!**********************************************************************************
+   SUBROUTINE cal_delta_energy_nacv(nparticle_kind, velocities, aom_env, atomic_kind_set, &
+                                    local_particles, hop_nacv, delta_energy, A, B, i, j) 
+        INTEGER                                 :: nparticle_kind
+        INTEGER, OPTIONAL, INTENT(IN)            :: i, j
+        REAL(kind=dp), DIMENSION(:,:),POINTER    :: velocities
+        TYPE(aom_env_type)                       :: aom_env
+        TYPE(distribution_1d_type), POINTER      :: local_particles
+        TYPE(atomic_kind_type), DIMENSION(:), &
+             POINTER                                :: atomic_kind_set
+        REAL(kind=dp), DIMENSION(:,:), INTENT(IN)   :: hop_nacv
+        REAL(kind=dp), INTENT(OUT)                  :: delta_energy
+        REAL(kind=dp), INTENT(OUT)                  :: A, B
+
+        CHARACTER(len=*), PARAMETER :: routineN = 'cal_delta_energy_nacv', &
+        routineP = moduleN//':'//routineN
+
+        REAL(kind=dp)                            :: mass
+        INTEGER                                  :: iparticle_kind, new_state, old_state
+        INTEGER                                  :: nparticle_local, coord
+        INTEGER                                  :: iparticle_local, iparticle
+        TYPE(atomic_kind_type), POINTER          :: atomic_kind
+
+
+        NULLIFY(atomic_kind)
+!From Fabiano E, Keal TW, Thiel W. Implementation of surface hopping molecular dynamics using semiempirical methods. 
+!     Chem Phys 2008, 349:334–347.
+           A = 0
+           B = 0
+           DO iparticle_kind=1,nparticle_kind
+              atomic_kind => atomic_kind_set(iparticle_kind)
+              CALL get_atomic_kind(atomic_kind=atomic_kind,mass=mass)
+              nparticle_local = local_particles%n_el(iparticle_kind)
+!stop
+              DO iparticle_local=1,nparticle_local
+                 iparticle = local_particles%list(iparticle_kind)%array(iparticle_local)
+!stop
+                 DO coord = 1, 3
+                    IF ((velocities(1, iparticle)**2 + velocities(2, iparticle)**2 + &
+                       velocities(3, iparticle)**2 ).NE.0.0d0) THEN
+                       A = A + hop_nacv(coord, iparticle)**2 / mass
+                    ELSE IF ( SUM(velocities).EQ.0) THEN
+                       A = A + hop_nacv(coord, iparticle)**2 / mass
+                    ENDIF
+                    B = B + velocities(coord, iparticle) * hop_nacv(coord, iparticle)
+                 ENDDO
+              END DO
+           END DO
+           A = 0.5*A
+
+           IF (PRESENT(j)) THEN
+              new_state = j
+           ELSE    
+              new_state = aom_env%new_state
+           ENDIF
+           IF (PRESENT(i)) THEN
+              old_state = i
+           ELSE
+              old_state = aom_env%active_state
+!print *, "DELTAE_OLDSTATE", old_state
+           ENDIF
+           delta_energy = B**2 - 4 * A * (  &
+                     aom_env%E_tp(new_state) - &
+                     aom_env%E_tp(old_state))
+        IF (ASSOCIATED(atomic_kind)) NULLIFY(atomic_kind)
+   END SUBROUTINE cal_delta_energy_nacv
+
+!**********************************************************************************
+!> \brief TOADD
+!**********************************************************************************
+   SUBROUTINE translate_com(array, keyword_translate, translate_array, &
+                            local_particles, atomic_kinds, nparticle_kind, atomic_kind_set)
+        REAL(kind=dp), DIMENSION(:,:),POINTER                     :: array
+        LOGICAL                                                   :: keyword_translate
+        REAL(KIND=dp), DIMENSION(:,:), POINTER                    :: translate_array
+        TYPE(distribution_1d_type), POINTER                       :: local_particles
+        TYPE(atomic_kind_list_type), POINTER, OPTIONAL            :: atomic_kinds
+        INTEGER, INTENT(IN), OPTIONAL                             :: nparticle_kind
+        TYPE(atomic_kind_type), DIMENSION(:), &
+             POINTER, OPTIONAL                                    :: atomic_kind_set
+
+        CHARACTER(len=*), PARAMETER :: routineN = 'translate_com', &
+        routineP = moduleN//':'//routineN
+
+        TYPE(atomic_kind_type), TARGET, ALLOCATABLE, DIMENSION(:) :: my_atomic_kind_set
+        INTEGER                                                   :: my_nparticle_kind
+        REAL(kind=dp)                                             :: mass
+        INTEGER                                                   :: iparticle_kind
+        INTEGER                                                   :: nparticle_local
+        INTEGER                                                   :: iparticle_local, iparticle
+        TYPE(atomic_kind_type), POINTER                           :: atomic_kind
+        REAL(kind=dp), DIMENSION(3)                               :: sum_array
+        REAL(KIND=dp)                                             :: sum_mass
+
+        NULLIFY(atomic_kind)
+        IF (keyword_translate) THEN
+           IF (PRESENT(atomic_kinds)) THEN
+              my_nparticle_kind = atomic_kinds%n_els
+              ALLOCATE(my_atomic_kind_set(SIZE(atomic_kinds%els)))
+              my_atomic_kind_set = atomic_kinds%els
+           ELSE
+              IF ((PRESENT(nparticle_kind)).AND.(PRESENT(atomic_kind_set))) THEN
+                 my_nparticle_kind = nparticle_kind
+                 ALLOCATE(my_atomic_kind_set(SIZE(atomic_kind_set)))
+                 my_atomic_kind_set = atomic_kind_set
+              ENDIF
+           ENDIF
+           sum_array = 0.0D0
+           sum_mass  = 0.0D0
+           DO iparticle_kind=1, my_nparticle_kind
+              atomic_kind => my_atomic_kind_set(iparticle_kind)
+              CALL get_atomic_kind(atomic_kind=atomic_kind,mass=mass)
+              nparticle_local = local_particles%n_el(iparticle_kind)
+              DO iparticle_local=1,nparticle_local
+                 iparticle = local_particles%list(iparticle_kind)%array(iparticle_local)
+                 sum_array(:) = sum_array(:) +   &
+                    mass*array(:, iparticle)
+                 sum_mass = sum_mass + mass
+              END DO
+           END DO
+           sum_array = sum_array / sum_mass
+
+           DO iparticle_kind=1, my_nparticle_kind
+              atomic_kind => my_atomic_kind_set(iparticle_kind)
+              CALL get_atomic_kind(atomic_kind=atomic_kind,mass=mass)
+              nparticle_local = local_particles%n_el(iparticle_kind)
+              DO iparticle_local=1,nparticle_local
+                 iparticle = local_particles%list(iparticle_kind)%array(iparticle_local)
+                 translate_array(:, iparticle) = array(:, iparticle) - sum_array(:)
+              END DO   
+           END DO   
+        ELSE
+           translate_array = array
+        ENDIF 
+      
+        IF (ASSOCIATED(atomic_kind)) NULLIFY(atomic_kind)
+   END SUBROUTINE translate_com
+
+! COMMENT_SG: I think this subroutines is just to print final momentum for
+! checking purposes
+!**********************************************************************************
+!> \brief TOADD
+!**********************************************************************************
+   SUBROUTINE total_momentum(velocities, atomic_kind_set, nparticle_kind, &
+                               local_particles)!, force_env) 
+        REAL(kind=dp), DIMENSION(:,:),POINTER    :: velocities
+        TYPE(atomic_kind_type), DIMENSION(:), &
+             POINTER                             :: atomic_kind_set
+        INTEGER, INTENT(IN)                      :: nparticle_kind
+        TYPE(distribution_1d_type), POINTER      :: local_particles
+        !TYPE(force_env_type), POINTER            :: force_env
+ 
+        CHARACTER(len=*), PARAMETER :: routineN = 'total_momentum', &
+        routineP = moduleN//':'//routineN
+ 
+        REAL(kind=dp)                            :: mass
+        INTEGER                                  :: iparticle_kind
+        INTEGER                                  :: nparticle_local
+        INTEGER                                  :: iparticle_local, iparticle
+        TYPE(atomic_kind_type), POINTER          :: atomic_kind
+        REAL(kind=dp), DIMENSION(3)              :: momentum
+
+        NULLIFY(atomic_kind)
+           momentum = 0.0D0 
+           DO iparticle_kind=1,nparticle_kind
+              atomic_kind => atomic_kind_set(iparticle_kind)
+              CALL get_atomic_kind(atomic_kind=atomic_kind,mass=mass)
+              nparticle_local = local_particles%n_el(iparticle_kind)
+              DO iparticle_local=1,nparticle_local
+                 iparticle = local_particles%list(iparticle_kind)%array(iparticle_local)
+                 momentum(:) = momentum(:) +   &
+                    mass*velocities(:, iparticle)
+              END DO
+           END DO
+           !print*, "MOMENTUM = ", MOMENTUM
+        IF (ASSOCIATED(atomic_kind)) NULLIFY(atomic_kind)
+   END SUBROUTINE total_momentum
+
+!**********************************************************************************
+!> \brief Rescale the velocity isotropically for the full system (this means
+!>        this rescaling is size estensive it depends on the num. of atoms
+!**********************************************************************************
+   SUBROUTINE simple_vel_rescaling(velocities, delta_energy, kinetic_energy_prime, rescale_factor)
+        REAL(kind=dp), DIMENSION(:,:),POINTER    :: velocities
+        REAL(kind=dp), INTENT(IN)                :: delta_energy
+        REAL(kind=dp), INTENT(IN)                :: kinetic_energy_prime
+        REAL(kind=dp), INTENT(OUT)               :: rescale_factor
+
+        CHARACTER(len=*), PARAMETER :: routineN = 'simple_vel_rescaling', &
+        routineP = moduleN//':'//routineN
+
+        !> Factor to rescale the velocities (Eq. 49 of PAPER_1)
+        rescale_factor = SQRT(  delta_energy /kinetic_energy_prime )
+        velocities = rescale_factor*velocities
+   END SUBROUTINE simple_vel_rescaling
+
+!**********************************************************************************
+!> \brief Diagonalize the Hamiltonian and calculate eigevlaues and eigenvectors
+!**********************************************************************************
+subroutine adiabaticity(H, C, E)
+        !this subroutine will allow calculation of surface hopping probabilities
+        !between N adiabatic surfaces
+
+        REAL(KIND=dp), dimension(:,:), intent(in) :: H
+        REAL(KIND=dp), dimension(:,:), intent(out), allocatable :: C
+        REAL(KIND=dp), dimension(:), intent(out), allocatable :: E
+        !logical, intent(in) :: store_C
+        !TYPE(aom_env_type), INTENT(INOUT), OPTIONAL               ::    aom_env
+
+        CHARACTER(len=*), PARAMETER :: routineN ='adiabaticity', &
+                               routineP = moduleN//':'//routineN
+
+        integer :: mol
+        integer :: stat, LWORK
+        character(len=1) :: job, up
+        REAL(KIND=dp), dimension(:), allocatable :: DGETRI_WORK
+
+        mol = SIZE(H, 1)
+ 
+        allocate(C(mol,mol))
+        allocate(E(mol))
+        allocate(DGETRI_WORK(3*size(C)-1))
+ 
+        C = H
+
+        job = 'V'
+        up = 'U'
+        !DSYEV is from the BLAS. Returns vector of eigenvalues D and overwrites S with matrix of eigenvectors
+        !Original call establishes optimum size for speed purposes
+        LWORK = -1
+        call DSYEV(job, up, mol, C, mol, E, DGETRI_WORK, LWORK, stat)
+        if (stat /= 0) then
+                CPABORT("Error with subroutine DSYEV: error status")
+        end if
+        LWORK = max(3*size(C)-1, int(DGETRI_WORK(1)))
+
+        deallocate(DGETRI_WORK)
+        allocate(DGETRI_WORK(LWORK))
+
+        call DSYEV(job, up, mol, C, mol, E, DGETRI_WORK, LWORK, stat)
+        if (stat /= 0) then
+                CPABORT("Error with subroutine DSYEV: error status")
+        end if
+        
+        !if (AND.PRESENT(aom_env)) then 
+        !allocate(aom_env%C_tp(mol,mol))
+        !        aom_env%C_tp=C
+        !end if 
+        
+         
+        deallocate(DGETRI_WORK)
+end subroutine adiabaticity
+
+!**********************************************************************************
+!> \brief Define the active region when the spurious charge transfer correction
+!>        is used
+!**********************************************************************************
 SUBROUTINE define_active_region(aom_env)
      
-     TYPE(aom_env_type)                      :: aom_env   
+     TYPE(aom_env_type)                       :: aom_env   
    
      CHARACTER(len=*), PARAMETER :: routineN = 'define_active_region', &
         routineP = moduleN//':'//routineN
@@ -178,7 +1522,7 @@ SUBROUTINE define_active_region(aom_env)
      REAL(KIND=dp), dimension(:), allocatable :: pop
      REAL(KIND=dp)                            :: sum
      INTEGER                                  :: i 
-     INTEGER                                     :: mat
+     INTEGER                                  :: mat
 
      
      mat = size(aom_env%H_tp,1) 
@@ -205,14 +1549,11 @@ SUBROUTINE define_active_region(aom_env)
         end if
      end do
 
-!do i =1, mat
-!    write (*,'(I12,A, F12.10)') aom_env%active_region(i),  "  pop = ", pop(i)
-!end do
-
+    !do i =1, mat
+    !    write (*,'(I12,A, F12.10)') aom_env%active_region(i),  "  pop = ", pop(i)
+    !end do
 
      DEALLOCATE(pop)
-     !DEALLOCATE(active_region)
-
 END SUBROUTINE define_active_region
 
 SUBROUTINE calc_psi_after_correction(aom_env)
@@ -276,8 +1617,6 @@ SUBROUTINE classically_forbidden_hops(active_state, diagonal_F, aom_env, mat,  &
                    POINTER, OPTIONAL                        :: atomic_kind_set
      INTEGER, dimension(:), allocatable, INTENT(OUT)          :: class_forbidden_hop
 
-     !INTEGER                                  :: my_nparticle_kind
-     !TYPE(atomic_kind_type), ALLOCATABLE, TARGET, DIMENSION(:)     :: my_atomic_kind_set 
      INTEGER :: j
      REAL(kind=dp), DIMENSION(:,:), allocatable     :: hop_nacv
      REAL(kind=dp)                               :: delta_energy
@@ -2352,7 +3691,91 @@ END SUBROUTINE classically_forbidden_hops
  
   END SUBROUTINE propagate_adiab_wf                                                                
 
+!!!!!!!!!!!!!! DEPRECATED SUBROUTINES !!!!!!!!!!!!!!!!!!!!!!!!!!
 
+
+!!!!!!! DEPRECATED !!!!!
+! Could be removed
+SUBROUTINE adiab_overalp_calc(active_state, aom_env, C_tp, mol, itimes, & 
+                                   attempt_hop, enforced_active_state)
+
+     INTEGER, intent(INOUT)                         :: active_state, mol, itimes
+     INTEGER, intent(OUT)                         :: enforced_active_state 
+     LOGICAL, INTENT(INOUT)                           :: attempt_hop
+     REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE, INTENT(INOUT)   :: C_tp
+     TYPE(aom_env_type), INTENT(IN)              :: aom_env
+
+     CHARACTER(len=*), PARAMETER :: routineN = 'adiab_overalp_calc', &
+              routineP = moduleN//':'//routineN
+     REAL(KIND=dp), dimension(:), allocatable    :: overlaps
+     REAL(KIND=dp)                                :: sum1!, sum
+     INTEGER                                     :: i, loc(1) 
+
+     allocate(overlaps(4))
+
+     overlaps = 0.0D0
+
+!     sum = 0.0D0
+     sum1 = 0.0D0
+     
+     do i=1, mol
+!         sum = sum + (abs(aom_env%C_t(i, active_state)) *abs(C_tp(i, active_state)))
+         sum1 = sum1 + aom_env%C_t(i, active_state)*C_tp(i, active_state)
+     end do
+     
+     
+!     print *, "OVERLAP_TRIVIAL", sum
+     print *, "PHASE_OVERALAP", abs(sum1)
+     
+     if (abs(sum1) .lt. 0.7 .and. .not. attempt_hop) then
+        print *, "POSSIBLE_TRIVIAL_CROSSING"
+        do i =1,mol
+            if (active_state .gt. 2) then
+                overlaps(1) = overlaps(1) + aom_env%C_t(i, active_state) *C_tp(i,active_state+2)
+                overlaps(2) = overlaps(2) + aom_env%C_t(i, active_state) *C_tp(i,active_state+1)
+                overlaps(3) = overlaps(3) + aom_env%C_t(i, active_state) *C_tp(i,active_state-1)
+                overlaps(4) = overlaps(4) + aom_env%C_t(i, active_state) *C_tp(i,active_state-2)
+            else if (active_state .gt. 1) then
+                overlaps(1) = overlaps(1) + aom_env%C_t(i, active_state)*C_tp(i,active_state+2)
+                overlaps(2) = overlaps(2) + aom_env%C_t(i, active_state)*C_tp(i,active_state+1)
+                overlaps(3) = overlaps(3) + aom_env%C_t(i, active_state)*C_tp(i,active_state-1)
+            else 
+                overlaps(1) = overlaps(1) + aom_env%C_t(i,active_state)*C_tp(i,active_state+2)
+                overlaps(2) = overlaps(2) + aom_env%C_t(i,active_state)*C_tp(i,active_state+1)
+            end if
+     
+       end do
+       print *, "OVERALPS", abs(overlaps(:))
+       print *, "MAX_OVERLAP", itimes, abs(sum1), maxval(abs(overlaps(:)))
+print *, "MORE_INFO", itimes, sum1, overlaps(1), overlaps(2), overlaps(3), overlaps(4)
+!       print *, "MAXLOC", maxloc(abs(overlaps(:)))
+       loc = maxloc(abs(overlaps(:)))
+       if (maxval(abs(overlaps(:))) .lt. sum1) then 
+           print *, "WARNING: MORE THAN TWO STATES CROSS"
+           enforced_active_state = active_state
+       else     
+           if (loc(1) == 1) then
+               enforced_active_state = active_state+2
+           else if (loc(1) == 2) then
+               enforced_active_state = active_state+1
+           else if (loc(1) == 3) then
+               enforced_active_state = active_state-1
+           else if (loc(1) == 4) then
+               enforced_active_state = active_state-2
+           end if
+       print *, "enforced_active_state", enforced_active_state 
+print *, "STATE_TO_GO", active_state, enforced_active_state 
+print *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, active_state)*aom_env%C_t(:, active_state))), &
+        maxloc(abs(C_tp(:,enforced_active_state)*C_tp(:,enforced_active_state)))
+       end if
+      !enforced_active_state = 0
+         
+     end if
+     
+     deallocate(overlaps)
+
+
+END SUBROUTINE adiab_overalp_calc
 
 END MODULE non_adiabatic_utils 
                        
