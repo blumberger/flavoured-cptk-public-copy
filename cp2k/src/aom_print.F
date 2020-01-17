@@ -56,7 +56,7 @@ MODULE aom_print
        cp_sll_val_next, cp_sll_val_p_type, cp_sll_val_rm_el_at, &
        cp_sll_val_set_el_at, cp_sll_val_type
 
-  USE aom_types,                     ONLY: aom_env_type, &
+  USE sh_types,                     ONLY: sh_env_type, &
                                              sh_print_env_type
   USE cp_units,                        ONLY: cp_unit_from_cp2k
 

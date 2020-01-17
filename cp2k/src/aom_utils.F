@@ -46,8 +46,8 @@ MODULE aom_utils
    USE kinds,                          ONLY: default_string_length,&
                                                dp
    USE machine,                        ONLY: m_getpid
-   USE aom_types,                      ONLY: sh_print_env_type, &
-                                             aom_env_type
+   USE sh_types,                      ONLY: sh_print_env_type, &
+                                             sh_env_type
    USE aom_print,                      ONLY: adiab_print_sh_info
 
   USE cp_parser_methods,               ONLY: read_float_object
@@ -105,7 +105,7 @@ MODULE aom_utils
 
   USE parallel_rng_types,              ONLY: next_random_number 
 
-  USE aom_types,                       ONLY: aom_env_type
+  USE sh_types,                       ONLY: sh_env_type
 
 !  USE non_adiabatic_utils,             ONLY: simple_vel_rescaling, &
 !                                             translate_com,        &
@@ -141,9 +141,9 @@ CONTAINS
 !**********************************************************************************
 !> \brief 
 !**********************************************************************************
-SUBROUTINE calc_coms_and_nlist_aom(aom_env, atoms, mol, cutoff_sites, orb)
+SUBROUTINE calc_coms_and_nlist_aom(sh_env, atoms, mol, cutoff_sites, orb)
 
-     TYPE(aom_env_type), INTENT(INOUT)     :: aom_env
+     TYPE(sh_env_type), INTENT(INOUT)     :: sh_env
      INTEGER, INTENT(IN)                   :: mol, atoms, orb
      REAL(KIND=dp), intent (IN)            :: cutoff_sites
 
@@ -156,11 +156,11 @@ SUBROUTINE calc_coms_and_nlist_aom(aom_env, atoms, mol, cutoff_sites, orb)
      !CALCULATE THE CENTER OF MASS
      !calculate CoMs at first timestep
      !coms(1 to 3,i) are the x, y and z coordinates of CoM of i
-     aom_env%coms = 0
+     sh_env%coms = 0
      do i=1,mol
           do m=1,atoms
                do d=1,3
-                    aom_env%coms(d,i) = aom_env%coms(d,i) + (aom_env%crds(d,(i-1)*atoms + m,3))/atoms
+                    sh_env%coms(d,i) = sh_env%coms(d,i) + (sh_env%crds(d,(i-1)*atoms + m,3))/atoms
                end do
           end do
      end do
@@ -168,20 +168,20 @@ SUBROUTINE calc_coms_and_nlist_aom(aom_env, atoms, mol, cutoff_sites, orb)
      !CONSTRUCT NEIGHBOURS LIST
      do i=1,mol
           do j=1,mol
-               aom_env%dist(i,j) = ((aom_env%coms(1,i) - aom_env%coms(1,j))*(aom_env%coms(1,i) &
-                - aom_env%coms(1,j)) + (aom_env%coms(2,i) - aom_env%coms(2,j))*&
-               &(aom_env%coms(2,i) - aom_env%coms(2,j)) + (aom_env%coms(3,i) & 
-                - aom_env%coms(3,j))*(aom_env%coms(3,i) - aom_env%coms(3,j)))
-               if (aom_env%dist(i,j) < cutoff_sites*cutoff_sites) then
+               sh_env%dist(i,j) = ((sh_env%coms(1,i) - sh_env%coms(1,j))*(sh_env%coms(1,i) &
+                - sh_env%coms(1,j)) + (sh_env%coms(2,i) - sh_env%coms(2,j))*&
+               &(sh_env%coms(2,i) - sh_env%coms(2,j)) + (sh_env%coms(3,i) & 
+                - sh_env%coms(3,j))*(sh_env%coms(3,i) - sh_env%coms(3,j)))
+               if (sh_env%dist(i,j) < cutoff_sites*cutoff_sites) then
                     do d=1,orb
                          do m=1,orb
-                              aom_env%NN(orb*(i-1)+d,orb*(j-1)+m) = 1
+                              sh_env%NN(orb*(i-1)+d,orb*(j-1)+m) = 1
                          end do
                     end do
                else
                     do d=1,orb
                          do m=1,orb
-                              aom_env%NN(orb*(i-1)+d,orb*(j-1)+m) = 0
+                              sh_env%NN(orb*(i-1)+d,orb*(j-1)+m) = 0
                          end do
                     end do
                end if                    
@@ -195,7 +195,7 @@ END SUBROUTINE calc_coms_and_nlist_aom
 !**********************************************************************************
 subroutine makeX(mol, H, Stt, Sttp, Sttm, Stptp, Stmtm, X, deltat, NACE)
         !X is the name I give to the matrix in the solution to the Schroedinger equation:
-        !dc/dt = X*aom_env%ctin
+        !dc/dt = X*sh_env%ctin
         !makeX constructs an X matrix from inputs of S and H
         ! the X matrix is = H - d^{diab}, note that elements of H are pure
         ! imaginary = -iH_{kl} due to the construction of S matrix
@@ -296,7 +296,7 @@ end subroutine makeX
 !**********************************************************************************
 subroutine calc_diabatic_nace(mol, H, Stt, Sttp, Sttm, Stptp, Stmtm, deltat, NACE, X)
        !X is the name I give to the matrix in the solution to the Schroedinger equation:
-       !dc/dt = X*aom_env%ctin
+       !dc/dt = X*sh_env%ctin
        !makeX constructs an X matrix from inputs of S and H
 
        integer, intent(in) :: mol
@@ -371,7 +371,7 @@ end subroutine calc_diabatic_nace
 !!! WARNING::::Adiabatic propgation is DEPRECATED so this may not work!!!
 subroutine make_adiabX(mol, E_t, NACE_ad_t, X) !deltat, NACE)
         !X is the name I give to the matrix in the solution to the Schroedinger equation:
-        !dc/dt = X*aom_env%ctin
+        !dc/dt = X*sh_env%ctin
         !makeX constructs an X matrix from inputs of S and H
 
         integer, intent(in) :: mol
@@ -409,10 +409,10 @@ end subroutine make_adiabX
 !**********************************************************************************
 !> \brief 
 !**********************************************************************************
-subroutine old_diab_to_adiab( aom_env, C2, old_state, mol, cstate, ct, C1, cttm_ad, cstate_tm)
+subroutine old_diab_to_adiab( sh_env, C2, old_state, mol, cstate, ct, C1, cttm_ad, cstate_tm)
         REAL(KIND=dp), dimension(:,:), intent(in) :: C2
         integer, intent(in) :: old_state
-        TYPE(aom_env_type) :: aom_env
+        TYPE(sh_env_type) :: sh_env
         integer, intent(in) :: mol
         COMPLEX(KIND=dp), intent(out) :: cstate
         COMPLEX(KIND=dp), dimension(:), intent(out) :: ct
@@ -428,9 +428,9 @@ subroutine old_diab_to_adiab( aom_env, C2, old_state, mol, cstate, ct, C1, cttm_
         cstate = cmplx(0.0D0, 0.0D0, dp)
         IF (PRESENT(cstate_tm)) cstate_tm = cmplx(0.0D0, 0.0D0, dp)
         do i=1,mol
-                cstate = cstate + cmplx(C2(i,old_state), 0.0D0,dp)*aom_env%ctin(i)
+                cstate = cstate + cmplx(C2(i,old_state), 0.0D0,dp)*sh_env%ctin(i)
                 IF (PRESENT(C1)) THEN
-                     cstate_tm = cstate_tm + cmplx(C1(i,old_state),0.0D0,dp)*aom_env%ctin(i)
+                     cstate_tm = cstate_tm + cmplx(C1(i,old_state),0.0D0,dp)*sh_env%ctin(i)
                 END IF
         end do
         do i=1,mol
@@ -438,9 +438,9 @@ subroutine old_diab_to_adiab( aom_env, C2, old_state, mol, cstate, ct, C1, cttm_
                 ct(i) = cmplx(0.0D0, 0.0D0,dp)
                 IF (PRESENT(cttm_ad)) cttm_ad(i) = cmplx(0.0D0, 0.0D0,dp)
                 do j=1,mol
-                        ct(i) = ct(i) + cmplx(C2(j,i), 0.0D0,dp)*aom_env%ctin(j)
+                        ct(i) = ct(i) + cmplx(C2(j,i), 0.0D0,dp)*sh_env%ctin(j)
                         IF (PRESENT(C1)) THEN
-                              cttm_ad(i) = cttm_ad(i) + cmplx(C1(j,i),0.0D0,dp)*aom_env%ctin(j)
+                              cttm_ad(i) = cttm_ad(i) + cmplx(C1(j,i),0.0D0,dp)*sh_env%ctin(j)
                         END IF
                 end do
         end do
@@ -451,9 +451,9 @@ end subroutine old_diab_to_adiab
 !**********************************************************************************
 !> \brief Calculate the diabatic NACE first
 !**********************************************************************************
-subroutine nace1(aom_env, mol, deltat)
+subroutine nace1(sh_env, mol, deltat)
 
-    TYPE(aom_env_type)                         :: aom_env
+    TYPE(sh_env_type)                         :: sh_env
     INTEGER                                    :: mol, i, j, sub, add
     REAL(KIND=dp)                              :: deltat
 
@@ -465,21 +465,21 @@ subroutine nace1(aom_env, mol, deltat)
     !> 1. Calculate the term  D  (first term in Eq. 19)
     !many allocations
     !use the matinvsqrt subroutine to find T = S^(-1/2)
-    aom_env%adiab_nace_env%T1 = aom_env%Stmtm
-    aom_env%adiab_nace_env%T2 = aom_env%Stptp
-    call matinvsqrt(mol, .TRUE., aom_env%adiab_nace_env%T1)
-    call matinvsqrt(mol, .TRUE., aom_env%adiab_nace_env%T2)
+    sh_env%adiab_nace_env%T1 = sh_env%Stmtm
+    sh_env%adiab_nace_env%T2 = sh_env%Stptp
+    call matinvsqrt(mol, .TRUE., sh_env%adiab_nace_env%T1)
+    call matinvsqrt(mol, .TRUE., sh_env%adiab_nace_env%T2)
     !and do some straightforward first-order numerical derivatives
     !Time deriv of overlap
-    aom_env%adiab_nace_env%DT = (0.5D0/deltat)*(aom_env%adiab_nace_env%T2 - aom_env%adiab_nace_env%T1)
+    sh_env%adiab_nace_env%DT = (0.5D0/deltat)*(sh_env%adiab_nace_env%T2 - sh_env%adiab_nace_env%T1)
     !Time deriv of Lowdin Mat
-    aom_env%adiab_nace_env%DS = (0.5D0/deltat)*(aom_env%Sttp - aom_env%Sttm)
+    sh_env%adiab_nace_env%DS = (0.5D0/deltat)*(sh_env%Sttp - sh_env%Sttm)
 
 !   THE FOLLOWING CODE IS USEFUL FOR PRINTING NxN MATRICIES       
 !PRINT *, "TST Bef:"
 !DO i=1, mol
 !   DO j=1, mol
-!      WRITE(6, "(A2, e12.4, A2)", advance='no') "| ", aom_env%adiab_nace_env%TST(i,j), " "
+!      WRITE(6, "(A2, e12.4, A2)", advance='no') "| ", sh_env%adiab_nace_env%TST(i,j), " "
 !   END DO
 !   PRINT *, " "
 !END DO
@@ -490,58 +490,58 @@ subroutine nace1(aom_env, mol, deltat)
     !Note that T2 is overwritten in the following DGEMM operation 
     !1. T2 = Stt*DT
     CALL DGEMM('N', 'N', mol, mol, mol, 1.0D0, &
-                aom_env%Stt,               mol, &
-                aom_env%adiab_nace_env%DT, mol, &
-                0.0_DP, aom_env%adiab_nace_env%T2, mol)
+                sh_env%Stt,               mol, &
+                sh_env%adiab_nace_env%DT, mol, &
+                0.0_DP, sh_env%adiab_nace_env%T2, mol)
 
     !2. TST = T1^{dagg}*T2
     CALL DGEMM('T', 'N', mol, mol, mol, 1.0_DP, &
-                aom_env%adiab_nace_env%T1,  mol, &
-                aom_env%adiab_nace_env%T2, mol, &       ! at this point diab_D = TST
-                0.0_DP, aom_env%adiab_nace_env%diab_D, mol)
+                sh_env%adiab_nace_env%T1,  mol, &
+                sh_env%adiab_nace_env%T2, mol, &       ! at this point diab_D = TST
+                0.0_DP, sh_env%adiab_nace_env%diab_D, mol)
 
     ! This part takes advantage of the sparse nature of the DS matrix
     !IS ONLY VALID FOR CHAINS WITH ONLY OFF DIAGONALS ELEMENTS
     ! Again the mat-mat mult is done in 2 steps:
     !1. T2 = DS*T1
    DO j=1, mol
-     aom_env%adiab_nace_env%T2(1,j) = &
-      aom_env%adiab_nace_env%DS(1,2)*aom_env%adiab_nace_env%T1(2,j)
+     sh_env%adiab_nace_env%T2(1,j) = &
+      sh_env%adiab_nace_env%DS(1,2)*sh_env%adiab_nace_env%T1(2,j)
    END DO
 
    DO i=2, mol-1
       DO j=1, mol
         sub = i-1
         add = i+1
-        aom_env%adiab_nace_env%T2(i,j) = &
-          aom_env%adiab_nace_env%DS(i,sub)*aom_env%adiab_nace_env%T1(sub,j) &
-        + aom_env%adiab_nace_env%DS(i,add)*aom_env%adiab_nace_env%T1(add,j)
+        sh_env%adiab_nace_env%T2(i,j) = &
+          sh_env%adiab_nace_env%DS(i,sub)*sh_env%adiab_nace_env%T1(sub,j) &
+        + sh_env%adiab_nace_env%DS(i,add)*sh_env%adiab_nace_env%T1(add,j)
       END DO
    END DO
    sub = mol-1
    DO j=1, mol
-     aom_env%adiab_nace_env%T2(mol,j) = &
-      aom_env%adiab_nace_env%DS(mol,sub)*aom_env%adiab_nace_env%T1(sub,j)
+     sh_env%adiab_nace_env%T2(mol,j) = &
+      sh_env%adiab_nace_env%DS(mol,sub)*sh_env%adiab_nace_env%T1(sub,j)
    END DO
 
 
 !   ! If the loop above doesn't work then try using this.
 !    !1. T2 = DS*T1
 !    CALL DGEMM('N', 'N', mol, mol, mol, 1.0_DP, &
-!               aom_env%adiab_nace_env%DS, mol, &
-!               aom_env%adiab_nace_env%T1, mol, &
-!               0.0_DP, aom_env%adiab_nace_env%T2, mol)
+!               sh_env%adiab_nace_env%DS, mol, &
+!               sh_env%adiab_nace_env%T1, mol, &
+!               0.0_DP, sh_env%adiab_nace_env%T2, mol)
 
     !2. TDT = T1^{dagg}*T2 + TST
     CALL DGEMM('T', 'N', mol, mol, mol, 1.0_DP, &
-                aom_env%adiab_nace_env%T1,  mol, &
-                aom_env%adiab_nace_env%T2, mol, &       ! Now diab_D becomes = TDT + TST
-                1.0_DP, aom_env%adiab_nace_env%diab_D, mol)
+                sh_env%adiab_nace_env%T1,  mol, &
+                sh_env%adiab_nace_env%T2, mol, &       ! Now diab_D becomes = TDT + TST
+                1.0_DP, sh_env%adiab_nace_env%diab_D, mol)
 !   THE FOLLOWING CODE IS USEFUL FOR PRINTING NxN MATRICIES       
 PRINT *, "D Bef:"
 DO i=1, mol
    DO j=1, mol
-      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", aom_env%adiab_nace_env%diab_D(i,j), "  "
+      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", sh_env%adiab_nace_env%diab_D(i,j), "  "
    END DO
    PRINT *, " "
 END DO
@@ -554,9 +554,9 @@ end subroutine nace1
 !> practice it does exactly the same job as makeX subroutine with the exception
 !> that does not calculate the term H_kl - d_kl
 !**********************************************************************************
-subroutine nace1_modified(aom_env, mol, deltat)
+subroutine nace1_modified(sh_env, mol, deltat)
 
-    TYPE(aom_env_type)                         :: aom_env
+    TYPE(sh_env_type)                         :: sh_env
     INTEGER                                    :: mol!, i, j!, sub, add
     REAL(KIND=dp)                              :: deltat
 
@@ -570,27 +570,27 @@ subroutine nace1_modified(aom_env, mol, deltat)
     !> 1. Calculate the term  D  (first term in Eq. 19)
     !many allocations
     !use the matinvsqrt subroutine to find T = S^(-1/2)
-    aom_env%adiab_nace_env%T1 = aom_env%Stmtm
-    aom_env%adiab_nace_env%T2 = aom_env%Stptp
-    call matinvsqrt(mol, .TRUE., aom_env%adiab_nace_env%T1)
-    call matinvsqrt(mol, .TRUE., aom_env%adiab_nace_env%T2)
+    sh_env%adiab_nace_env%T1 = sh_env%Stmtm
+    sh_env%adiab_nace_env%T2 = sh_env%Stptp
+    call matinvsqrt(mol, .TRUE., sh_env%adiab_nace_env%T1)
+    call matinvsqrt(mol, .TRUE., sh_env%adiab_nace_env%T2)
     !and do some straightforward first-order numerical derivatives
 
-    aom_env%adiab_nace_env%Ttt = aom_env%Stt
-    call matinvsqrt(mol, .TRUE., aom_env%adiab_nace_env%Ttt)
-    aom_env%adiab_nace_env%Sttsqrt_var = aom_env%Stt
-    call matinvsqrt(mol, .FALSE., aom_env%adiab_nace_env%Sttsqrt_var)
+    sh_env%adiab_nace_env%Ttt = sh_env%Stt
+    call matinvsqrt(mol, .TRUE., sh_env%adiab_nace_env%Ttt)
+    sh_env%adiab_nace_env%Sttsqrt_var = sh_env%Stt
+    call matinvsqrt(mol, .FALSE., sh_env%adiab_nace_env%Sttsqrt_var)
 
     !Time deriv of overlap Tdot
-    aom_env%adiab_nace_env%DT = (0.5D0/deltat)*(aom_env%adiab_nace_env%T2 - aom_env%adiab_nace_env%T1)
+    sh_env%adiab_nace_env%DT = (0.5D0/deltat)*(sh_env%adiab_nace_env%T2 - sh_env%adiab_nace_env%T1)
     !Time deriv of Lowdin Mat Dprime
-    aom_env%adiab_nace_env%DS = (0.5D0/deltat)*(aom_env%Sttp - aom_env%Sttm)
+    sh_env%adiab_nace_env%DS = (0.5D0/deltat)*(sh_env%Sttp - sh_env%Sttm)
 
 !   THE FOLLOWING CODE IS USEFUL FOR PRINTING NxN MATRICIES       
 !PRINT *, "TST Bef:"
 !DO i=1, mol
 !   DO j=1, mol
-!      WRITE(6, "(A2, e12.4, A2)", advance='no') "| ", aom_env%adiab_nace_env%TST(i,j), " "
+!      WRITE(6, "(A2, e12.4, A2)", advance='no') "| ", sh_env%adiab_nace_env%TST(i,j), " "
 !   END DO
 !   PRINT *, " "
 !END DO
@@ -601,75 +601,75 @@ subroutine nace1_modified(aom_env, mol, deltat)
 !   !Note that T2 is now overwritten in the following DGEMM operation 
 !   !1. T2 = Stt*DT
 !   CALL DGEMM('N', 'N', mol, mol, mol, 1.0D0, &
-!               aom_env%Stt,               mol, &
-!               aom_env%adiab_nace_env%DT, mol, &
-!               0.0_DP, aom_env%adiab_nace_env%T2, mol)
+!               sh_env%Stt,               mol, &
+!               sh_env%adiab_nace_env%DT, mol, &
+!               0.0_DP, sh_env%adiab_nace_env%T2, mol)
 !
 !   !2. TST = T1^{dagg}*T2
 !   CALL DGEMM('T', 'N', mol, mol, mol, 1.0_DP, &
-!               aom_env%adiab_nace_env%Ttt,  mol, &
-!               aom_env%adiab_nace_env%T2, mol, &       ! at this point diab_D = TST
-!               0.0_DP, aom_env%adiab_nace_env%diab_D, mol)
+!               sh_env%adiab_nace_env%Ttt,  mol, &
+!               sh_env%adiab_nace_env%T2, mol, &       ! at this point diab_D = TST
+!               0.0_DP, sh_env%adiab_nace_env%diab_D, mol)
 
     !alternative to the double step above
     !2. TST = S^(1/2)*DT
     CALL DGEMM('N', 'N', mol, mol, mol, 1.0D0, &
-                aom_env%adiab_nace_env%Sttsqrt_var, mol, &
-                aom_env%adiab_nace_env%DT, mol, &
-                0.0_DP, aom_env%adiab_nace_env%diab_D, mol)
+                sh_env%adiab_nace_env%Sttsqrt_var, mol, &
+                sh_env%adiab_nace_env%DT, mol, &
+                0.0_DP, sh_env%adiab_nace_env%diab_D, mol)
 
     ! This part takes advantage of the sparse nature of the DS matrix
     ! THIS PART WORKS JUST FOR CHAINS AND IT'S NOT GENERAL
     ! Again the mat-mat mult is done in 2 steps:
     !1. T2 = DS*T1
 !   DO j=1, mol
-!     aom_env%adiab_nace_env%T2(1,j) = &
-!      aom_env%adiab_nace_env%DS(1,2)*aom_env%adiab_nace_env%T1(2,j)
+!     sh_env%adiab_nace_env%T2(1,j) = &
+!      sh_env%adiab_nace_env%DS(1,2)*sh_env%adiab_nace_env%T1(2,j)
 !   END DO
 !   DO i=2, mol-1
 !      DO j=1, mol
 !        sub = i-1
 !        add = i+1
-!        aom_env%adiab_nace_env%T2(i,j) = &
-!          aom_env%adiab_nace_env%DS(i,sub)*aom_env%adiab_nace_env%T1(sub,j) &
-!        + aom_env%adiab_nace_env%DS(i,add)*aom_env%adiab_nace_env%T1(add,j)
+!        sh_env%adiab_nace_env%T2(i,j) = &
+!          sh_env%adiab_nace_env%DS(i,sub)*sh_env%adiab_nace_env%T1(sub,j) &
+!        + sh_env%adiab_nace_env%DS(i,add)*sh_env%adiab_nace_env%T1(add,j)
 !      END DO
 !   END DO
 !   sub = mol-1
 !   DO j=1, mol
-!     aom_env%adiab_nace_env%T2(mol,j) = &
-!      aom_env%adiab_nace_env%DS(mol,sub)*aom_env%adiab_nace_env%T1(sub,j)
+!     sh_env%adiab_nace_env%T2(mol,j) = &
+!      sh_env%adiab_nace_env%DS(mol,sub)*sh_env%adiab_nace_env%T1(sub,j)
 !   END DO
 
 
    ! If the loop above doesn't work then try using this.
     !1. T2 = DS*T1
     CALL DGEMM('N', 'N', mol, mol, mol, 1.0_DP, &
-               aom_env%adiab_nace_env%DS, mol, &
-               aom_env%adiab_nace_env%Ttt, mol, &
-               0.0_DP, aom_env%adiab_nace_env%T2, mol)
+               sh_env%adiab_nace_env%DS, mol, &
+               sh_env%adiab_nace_env%Ttt, mol, &
+               0.0_DP, sh_env%adiab_nace_env%T2, mol)
 
 
     !2. TDT = T1^{dagg}*T2 + TST
     CALL DGEMM('T', 'N', mol, mol, mol, 1.0_DP, &
-                aom_env%adiab_nace_env%Ttt,  mol, &
-                aom_env%adiab_nace_env%T2, mol, &       ! Now diab_D becomes = TDT + TST
-                1.0_DP, aom_env%adiab_nace_env%diab_D, mol)
+                sh_env%adiab_nace_env%Ttt,  mol, &
+                sh_env%adiab_nace_env%T2, mol, &       ! Now diab_D becomes = TDT + TST
+                1.0_DP, sh_env%adiab_nace_env%diab_D, mol)
 !!   THE FOLLOWING CODE IS USEFUL FOR PRINTING NxN MATRICIES       
 !PRINT *, "D Bef:"
 !DO i=1, mol
 !   DO j=1, mol
-!      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", aom_env%adiab_nace_env%diab_D(i,j), "  "
+!      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", sh_env%adiab_nace_env%diab_D(i,j), "  "
 !   END DO
 !   PRINT *, " "
 !END DO
 
 !NB: becuase of the way finite differences are defined actually here
-!aom_env%diabatic_nace_t refers at time T (namely t-dt) not Tp
-   aom_env%diabatic_nace_t = (aom_env%adiab_nace_env%diab_D - & 
-                              TRANSPOSE(aom_env%adiab_nace_env%diab_D)) / 2
+!sh_env%diabatic_nace_t refers at time T (namely t-dt) not Tp
+   sh_env%diabatic_nace_t = (sh_env%adiab_nace_env%diab_D - & 
+                              TRANSPOSE(sh_env%adiab_nace_env%diab_D)) / 2
 
-!aom_env%adiab_nace_env%diab_D = aom_env%diabatic_nace !this would
+!sh_env%adiab_nace_env%diab_D = sh_env%diabatic_nace !this would
 !antisimmetrize NACE even in the calculation of adiab nace, 
 !We have shown that it makes no difference at all!
 
@@ -680,9 +680,9 @@ end subroutine nace1_modified
 !> \brief I've divided the calc_adiab_nace subroutine into discrete chunks in
 !         order to profiling it with a finer resolution. This is chunk 2.
 !**********************************************************************************
-subroutine nace2(aom_env, mol, print_here)
+subroutine nace2(sh_env, mol, print_here)
 
-        TYPE(aom_env_type)                         :: aom_env
+        TYPE(sh_env_type)                         :: sh_env
         INTEGER                                    :: mol
         LOGICAL                                    :: print_here
 
@@ -694,96 +694,96 @@ subroutine nace2(aom_env, mol, print_here)
         LOGICAL                                    :: go_on
 
         !> 2. Check reordering of eigenvectors between the different timestep.
-        aom_env%adiab_nace_env%map_new2old = 0
-        aom_env%adiab_nace_env%map_old2new = 0
-        aom_env%adiab_nace_env%not_associated = 0
-        aom_env%adiab_nace_env%zeros = 0
-        aom_env%adiab_nace_env%basic = (/( i, i=1, mol )/)
+        sh_env%adiab_nace_env%map_new2old = 0
+        sh_env%adiab_nace_env%map_old2new = 0
+        sh_env%adiab_nace_env%not_associated = 0
+        sh_env%adiab_nace_env%zeros = 0
+        sh_env%adiab_nace_env%basic = (/( i, i=1, mol )/)
         threshold = 0.1
         !> First, we associate the new state i with the old state k if overlap is above
         !> (1 - threshold)
         do i=1, mol !loop over new index
            max_val = 0.0
            do j= 1, mol !loop over old index
-              aom_env%adiab_overlap(i,j) = 0.0
+              sh_env%adiab_overlap(i,j) = 0.0
               do k = 1, mol
-                 aom_env%adiab_overlap(i,j) = aom_env%adiab_overlap(i,j) + aom_env%C_tp(k,i)*aom_Env%C_t(k,j)
+                 sh_env%adiab_overlap(i,j) = sh_env%adiab_overlap(i,j) + sh_env%C_tp(k,i)*sh_env%C_t(k,j)
               enddo
-              if (abs(aom_env%adiab_overlap(i,j)).GE.abs(max_val)) THEN
-                 max_val = aom_env%adiab_overlap(i,j)
+              if (abs(sh_env%adiab_overlap(i,j)).GE.abs(max_val)) THEN
+                 max_val = sh_env%adiab_overlap(i,j)
                  new_index = j
               endif
            enddo
            if ( abs( max_val**2 - 1 ).LT.threshold) then
-              aom_env%adiab_nace_env%map_new2old(i) = new_index
-              aom_env%adiab_nace_env%map_old2new( aom_env%adiab_nace_env%map_new2old(i) ) = i
+              sh_env%adiab_nace_env%map_new2old(i) = new_index
+              sh_env%adiab_nace_env%map_old2new( sh_env%adiab_nace_env%map_new2old(i) ) = i
            endif
            !print_here = .TRUE.
            if (print_here) then
               if (i.NE.new_index) then
                  if ( abs( max_val**2 - 1 ).LT.threshold) then
                     print*, "FOBSH| Reordering: for state", i, "old index was", new_index, &
-                            "with overlap", max_val, "and former", aom_env%adiab_overlap(i,i)
+                            "with overlap", max_val, "and former", sh_env%adiab_overlap(i,i)
                  else
                     print*, "FOBSH! Reorgering: for state", i, " we stay in with overlap", &
-                            aom_env%adiab_overlap(i,i), " instead of goind to ", new_index, "with overlap", max_val
+                            sh_env%adiab_overlap(i,i), " instead of goind to ", new_index, "with overlap", max_val
                  endif
               endif
            endif
         enddo
-        IF (ANY(aom_env%adiab_nace_env%map_new2old.NE.aom_env%adiab_nace_env%basic) .and. print_here) THEN
-            print*, "FOBSH| New map: ", aom_env%adiab_nace_env%map_new2old
+        IF (ANY(sh_env%adiab_nace_env%map_new2old.NE.sh_env%adiab_nace_env%basic) .and. print_here) THEN
+            print*, "FOBSH| New map: ", sh_env%adiab_nace_env%map_new2old
         END IF
 
         !> If we've associated state i with state j, we try to associate j with if if the
         !> overlap is above 0.5
-        IF (ANY(aom_env%adiab_nace_env%map_new2old.EQ.aom_env%adiab_nace_env%zeros)) THEN
+        IF (ANY(sh_env%adiab_nace_env%map_new2old.EQ.sh_env%adiab_nace_env%zeros)) THEN
          do i=1,mol
-            IF ((aom_env%adiab_nace_env%map_new2old(i).EQ.0).AND.(aom_env%adiab_nace_env%map_old2new(i).NE.0)) THEN
-               IF ( abs( (aom_env%adiab_overlap(i, aom_env%adiab_nace_env%map_old2new(i)))**2 - 1 ).LT.0.5 ) THEN
-                  aom_env%adiab_nace_env%map_new2old(i) = aom_env%adiab_nace_env%map_old2new(i)
-                  aom_env%adiab_nace_env%map_old2new( aom_env%adiab_nace_env%map_new2old(i) ) = i
+            IF ((sh_env%adiab_nace_env%map_new2old(i).EQ.0).AND.(sh_env%adiab_nace_env%map_old2new(i).NE.0)) THEN
+               IF ( abs( (sh_env%adiab_overlap(i, sh_env%adiab_nace_env%map_old2new(i)))**2 - 1 ).LT.0.5 ) THEN
+                  sh_env%adiab_nace_env%map_new2old(i) = sh_env%adiab_nace_env%map_old2new(i)
+                  sh_env%adiab_nace_env%map_old2new( sh_env%adiab_nace_env%map_new2old(i) ) = i
                ENDIF
             ENDIF
          enddo
-        IF (ANY(aom_env%adiab_nace_env%map_new2old.NE.aom_env%adiab_nace_env%basic) .and. print_here) THEN
-            print*, "FOBSH! New map again:", aom_env%adiab_nace_env%map_new2old
+        IF (ANY(sh_env%adiab_nace_env%map_new2old.NE.sh_env%adiab_nace_env%basic) .and. print_here) THEN
+            print*, "FOBSH! New map again:", sh_env%adiab_nace_env%map_new2old
         END IF
        ENDIF
 
         !> Finally, we associate the not associate j with the remaining j state by order
         !> of energy
-        IF (ANY(aom_env%adiab_nace_env%map_new2old.EQ.aom_env%adiab_nace_env%zeros)) THEN
+        IF (ANY(sh_env%adiab_nace_env%map_new2old.EQ.sh_env%adiab_nace_env%zeros)) THEN
          k = 1
          do i=1, mol
                j = 1
                go_on = .TRUE.
                do while ((go_on).AND.(j.LE.mol))
-                  if (i.eq.aom_env%adiab_nace_env%map_new2old(j)) then
+                  if (i.eq.sh_env%adiab_nace_env%map_new2old(j)) then
                      go_on = .FALSE.
                   else
                      j = j + 1
                   endif
                enddo
                if (go_on) then
-                  aom_env%adiab_nace_env%not_associated(k) = i
+                  sh_env%adiab_nace_env%not_associated(k) = i
                   k = k +1
                endif
          enddo
         j = 1
         do i=1, mol
-           if (aom_env%adiab_nace_env%map_new2old(i).EQ.0) then
-              aom_env%adiab_nace_env%map_new2old(i) = aom_env%adiab_nace_env%not_associated(j)
-              aom_env%adiab_nace_env%map_old2new( aom_env%adiab_nace_env%map_new2old(i) ) = i
+           if (sh_env%adiab_nace_env%map_new2old(i).EQ.0) then
+              sh_env%adiab_nace_env%map_new2old(i) = sh_env%adiab_nace_env%not_associated(j)
+              sh_env%adiab_nace_env%map_old2new( sh_env%adiab_nace_env%map_new2old(i) ) = i
               j = j+1
            endif
         enddo
-        IF (ANY(aom_env%adiab_nace_env%map_new2old.NE.aom_env%adiab_nace_env%basic) .and. print_here) THEN
-           print*, "FOBSH| New map final:", aom_env%adiab_nace_env%map_new2old
-           print*, "FOBSH| New map final, from old to new:", aom_env%adiab_nace_env%map_old2new
+        IF (ANY(sh_env%adiab_nace_env%map_new2old.NE.sh_env%adiab_nace_env%basic) .and. print_here) THEN
+           print*, "FOBSH| New map final:", sh_env%adiab_nace_env%map_new2old
+           print*, "FOBSH| New map final, from old to new:", sh_env%adiab_nace_env%map_old2new
         ENDIF
        ENDIF
-       IF (SUM(aom_env%adiab_nace_env%map_new2old).NE.( mol*(mol+1)/2 )) THEN
+       IF (SUM(sh_env%adiab_nace_env%map_new2old).NE.( mol*(mol+1)/2 )) THEN
            CPABORT("Problem in the mapping between old and new states.")
        ENDIF
 !> End of 2.
@@ -794,17 +794,17 @@ end subroutine nace2
 !> \brief I've divided the calc_adiab_nace subroutine into discrete chunks in
 !         order to profiling it with a finer resolution. This is chunk 3.
 !**********************************************************************************
-subroutine nace3(aom_env)
+subroutine nace3(sh_env)
 
-        TYPE(aom_env_type)                         :: aom_env
+        TYPE(sh_env_type)                         :: sh_env
 
         CHARACTER(len=*), PARAMETER :: routineN ='nace3', &
                     routineP = moduleN//':'//routineN
 
         ! 3. Decide map
-        IF (.NOT.(aom_env%do_reorder)) THEN
-           aom_env%adiab_nace_env%map_new2old = aom_env%adiab_nace_env%basic
-           aom_env%adiab_nace_env%map_old2new = aom_env%adiab_nace_env%basic
+        IF (.NOT.(sh_env%do_reorder)) THEN
+           sh_env%adiab_nace_env%map_new2old = sh_env%adiab_nace_env%basic
+           sh_env%adiab_nace_env%map_old2new = sh_env%adiab_nace_env%basic
         ENDIF
         ! End of 3        
 
@@ -815,9 +815,9 @@ end subroutine nace3
 !         order to profiling it with a finer resolution. This is chunk 4. This
 !         does correct the phase as it would be arbitrary otherwise.
 !**********************************************************************************
-subroutine nace4(aom_env, mol)
+subroutine nace4(sh_env, mol)
 
-        TYPE(aom_env_type)                         :: aom_env
+        TYPE(sh_env_type)                         :: sh_env
         INTEGER                                    :: mol
         REAL(KIND=dp)                              :: sum_
 
@@ -831,18 +831,18 @@ subroutine nace4(aom_env, mol)
         do_sign_change = .True.
         IF (do_sign_change) THEN
            DO i=1, mol
-              !PRINT*, aom_env%adiab_overlap(i, aom_env%adiab_nace_env%map_new2old(i))
-              if (aom_env%adiab_overlap(i, aom_env%adiab_nace_env%map_new2old(i)).lt.0) then
-                 aom_env%C_tp(:,i) = - aom_env%C_tp(:, i)
-                 aom_env%adiab_overlap(i,:) = - aom_env%adiab_overlap(i,:)
+              !PRINT*, sh_env%adiab_overlap(i, sh_env%adiab_nace_env%map_new2old(i))
+              if (sh_env%adiab_overlap(i, sh_env%adiab_nace_env%map_new2old(i)).lt.0) then
+                 sh_env%C_tp(:,i) = - sh_env%C_tp(:, i)
+                 sh_env%adiab_overlap(i,:) = - sh_env%adiab_overlap(i,:)
               endif
               sum_ = 0  
               do j=1, mol
-                 sum_ = sum_ + aom_env%C_tp(j, i) * aom_env%C_t(j, i)
+                 sum_ = sum_ + sh_env%C_tp(j, i) * sh_env%C_t(j, i)
               enddo
               !print*, "AC_PHASE", i, sum_
-              !print*, "aom_env%adiab_overlap", aom_env%adiab_overlap(i, :)
-              !if (i.eq.aom_env%active_state) print*, "AC_STATE_WARNING"          
+              !print*, "sh_env%adiab_overlap", sh_env%adiab_overlap(i, :)
+              !if (i.eq.sh_env%active_state) print*, "AC_STATE_WARNING"          
            ENDDO
         ENDIF
         ! End of 4
@@ -853,16 +853,16 @@ end subroutine nace4
 !> \brief I've divided the calc_adiab_nace subroutine into discrete chunks in
 !         order to profiling it with a finer resolution. This is chunk 5.
 !**********************************************************************************
-subroutine nace5(aom_env)
+subroutine nace5(sh_env)
    
-        TYPE(aom_env_type)                         :: aom_env
+        TYPE(sh_env_type)                         :: sh_env
 
         CHARACTER(len=*), PARAMETER :: routineN ='nace5', &
                     routineP = moduleN//':'//routineN
 
         !> 5. Reassociate state active_state
-        aom_env%active_state = aom_env%adiab_nace_env%map_old2new(aom_env%old_state)
-        print*, "FOBSH| Put former active state", aom_env%old_state, "in new active state", aom_env%active_state 
+        sh_env%active_state = sh_env%adiab_nace_env%map_old2new(sh_env%old_state)
+        print*, "FOBSH| Put former active state", sh_env%old_state, "in new active state", sh_env%active_state 
         ! End of 5
 
 end subroutine nace5
@@ -873,9 +873,9 @@ end subroutine nace5
 !time Tp instead (this incosistency needs to be investigated further even though
 !it will probably not afftect the results as UDU is a nagligible term)
 !**********************************************************************************
-subroutine nace6(aom_env, mol, deltat)
+subroutine nace6(sh_env, mol, deltat)
 
-    TYPE(aom_env_type)                         :: aom_env
+    TYPE(sh_env_type)                         :: sh_env
     INTEGER                                    :: mol
     REAL(KIND=dp)                              :: deltat, inv_deltat
  
@@ -888,31 +888,31 @@ subroutine nace6(aom_env, mol, deltat)
     ! 6. Calculate the full NACE, Eq. (19) in paper 1.
     DO i=1, mol
        DO j=1, mol
-          aom_env%adiab_nace_tp(i,j) = - aom_env%adiab_overlap(i, aom_env%adiab_nace_env%map_new2old(j))
+          sh_env%adiab_nace_tp(i,j) = - sh_env%adiab_overlap(i, sh_env%adiab_nace_env%map_new2old(j))
           IF (i ==j) THEN 
-             aom_env%adiab_nace_tp(i,j) = aom_env%adiab_nace_tp(i,j) + 1
+             sh_env%adiab_nace_tp(i,j) = sh_env%adiab_nace_tp(i,j) + 1
           ENDIF
        ENDDO
     ENDDO
     ! End of 6
 
-   if (aom_env%no_diab_nace) then 
+   if (sh_env%no_diab_nace) then 
      ! the adiabatic nace are just d = U^{dagger}Udot
-     aom_env%adiab_nace_tp(:,:) = inv_deltat*aom_env%adiab_nace_tp(:,:)
+     sh_env%adiab_nace_tp(:,:) = inv_deltat*sh_env%adiab_nace_tp(:,:)
    else
      !NB read description about time inconsistency
      !1. T1 <= D*U
      CALL DGEMM('N', 'N', mol, mol, mol, 1.0_DP, &
-          aom_env%adiab_nace_env%diab_D, mol, &    
-          aom_env%C_tp,                  mol, &     ! C_tp = U
-          0.0_DP, aom_env%adiab_nace_env%T1, mol) 
+          sh_env%adiab_nace_env%diab_D, mol, &    
+          sh_env%C_tp,                  mol, &     ! C_tp = U
+          0.0_DP, sh_env%adiab_nace_env%T1, mol) 
 
       !U^{dagger}U^dot = (1/dt)*adiab_nace_tp
       !2. adiab_nace_tp <= U^{dagg}*T1 + (1/dt)*adiab_nace_tp
       CALL DGEMM('T', 'N', mol, mol, mol, 1.0_DP, &
-          aom_env%C_tp,                  mol, &     ! C_tp = U
-          aom_env%adiab_nace_env%T1,   mol, &    
-          inv_deltat, aom_env%adiab_nace_tp, mol) 
+          sh_env%C_tp,                  mol, &     ! C_tp = U
+          sh_env%adiab_nace_env%T1,   mol, &    
+          inv_deltat, sh_env%adiab_nace_tp, mol) 
    end if 
      
 end subroutine nace6
@@ -921,9 +921,9 @@ end subroutine nace6
 !> \brief I've divided the calc_adiab_nace subroutine into discrete chunks in
 !         order to profiling it with a finer resolution. This is chunk 7.
 !**********************************************************************************
-subroutine nace7(aom_env, mol) 
+subroutine nace7(sh_env, mol) 
    
-        TYPE(aom_env_type)                         :: aom_env
+        TYPE(sh_env_type)                         :: sh_env
         INTEGER                                    :: mol
 
         CHARACTER(len=*), PARAMETER :: routineN ='nace7', &
@@ -932,21 +932,21 @@ subroutine nace7(aom_env, mol)
         INTEGER                                    :: i,j
 
         ! 7. If reordering, we use the anti-symmetry of the NACE
-        IF (aom_env%do_reorder) THEN 
+        IF (sh_env%do_reorder) THEN 
            Do i=1, mol
               Do j=1, mol  
-                 !print*, i,j, aom_env%adiab_nace_tp(i,j), aom_env%adiab_nace_tp(j,i)
-                 !print*, i,j, ( aom_env%adiab_nace_tp(i,j) + aom_env%adiab_nace_tp(j,i) )
+                 !print*, i,j, sh_env%adiab_nace_tp(i,j), sh_env%adiab_nace_tp(j,i)
+                 !print*, i,j, ( sh_env%adiab_nace_tp(i,j) + sh_env%adiab_nace_tp(j,i) )
                  IF (j.lt.i) THEN 
-                     aom_env%adiab_nace_tp(i,j) = - aom_env%adiab_nace_tp(j,i)
+                     sh_env%adiab_nace_tp(i,j) = - sh_env%adiab_nace_tp(j,i)
                  ELSE
-                     aom_env%adiab_nace_tp(i,j) = ( aom_env%adiab_nace_tp(i,j) - aom_env%adiab_nace_tp(j,i) ) / 2
+                     sh_env%adiab_nace_tp(i,j) = ( sh_env%adiab_nace_tp(i,j) - sh_env%adiab_nace_tp(j,i) ) / 2
                  ENDIF
               Enddo
            Enddo
            !Do i=1, mol
            !   Do j=1, mol 
-           !      print*, i,j, aom_env%adiab_nace_tp(i,j), aom_env%adiab_nace_tp(j,i)
+           !      print*, i,j, sh_env%adiab_nace_tp(i,j), sh_env%adiab_nace_tp(j,i)
            !   Enddo
            !Enddo
         ENDIF
@@ -957,10 +957,10 @@ end subroutine nace7
 !**********************************************************************************
 !> \brief 
 !**********************************************************************************
-subroutine calc_adiab_nace(aom_env, adiab_section)
+subroutine calc_adiab_nace(sh_env, adiab_section)
         !this subroutine calculates the adiabatic nace used in the calculation
         !of the hopping probability and also in the RK adiabatic propagation 
-        TYPE(aom_env_type)                         :: aom_env
+        TYPE(sh_env_type)                         :: sh_env
         TYPE(section_vals_type), POINTER           :: adiab_section
 
         CHARACTER(len=*), PARAMETER :: routineN ='calc_adiab_nace', &
@@ -969,21 +969,21 @@ subroutine calc_adiab_nace(aom_env, adiab_section)
         INTEGER                                    :: mol
         LOGICAL                                    :: print_here
 
-        mol = size(aom_env%Stt,1)
+        mol = size(sh_env%Stt,1)
 
         CALL section_vals_val_get(adiab_section,"PRINT_MORE", &
                                                    l_val=print_here)
 
-        if (.NOT.aom_env%no_diab_nace) then
-            CALL nace1_modified(aom_env, mol, aom_env%deltat)
+        if (.NOT.sh_env%no_diab_nace) then
+            CALL nace1_modified(sh_env, mol, sh_env%deltat)
         end if
-        !CALL nace1(aom_env, mol, aom_env%deltat)
-        CALL nace2(aom_env, mol, print_here)
-        CALL nace3(aom_env)
-        CALL nace4(aom_env, mol)
-        CALL nace5(aom_env)
-        CALL nace6(aom_env, mol, aom_env%deltat)
-        CALL nace7(aom_env, mol)
+        !CALL nace1(sh_env, mol, sh_env%deltat)
+        CALL nace2(sh_env, mol, print_here)
+        CALL nace3(sh_env)
+        CALL nace4(sh_env, mol)
+        CALL nace5(sh_env)
+        CALL nace6(sh_env, mol, sh_env%deltat)
+        CALL nace7(sh_env, mol)
  
 end subroutine calc_adiab_nace
 
@@ -1335,12 +1335,12 @@ print *, "CTIN", ctin
 !!!!!!!!!!!!!!   DEPRECATED SUB. BELOW  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !******************************************************************************
 
-subroutine calc_adiab_nace_old(aom_env, adiab_section)
+subroutine calc_adiab_nace_old(sh_env, adiab_section)
         !this subroutine calculates the adiabatic nace used in the calculation
         !of the hopping probability and also in the RK adiabatic propagation 
 !WARNING: THIS SUBROUTINE HAS TIME INCONSISTENCIES IN THE TIME DERIVATIVES THAT
 !HAVE BEEN CORRECTED IN THE CHOPPED VERSION ABOVE
-        TYPE(aom_env_type)                         :: aom_env
+        TYPE(sh_env_type)                         :: sh_env
         TYPE(section_vals_type), POINTER           :: adiab_section
 
        CHARACTER(len=*), PARAMETER :: routineN ='calc_adiab_nace_old', &
@@ -1354,8 +1354,8 @@ subroutine calc_adiab_nace_old(aom_env, adiab_section)
         LOGICAL                                    :: go_on, print_here, do_sign_change
         REAL(kind=dp)  :: sum_
 
-        mol = size(aom_env%Stt,1)
-        deltat = aom_env%deltat
+        mol = size(sh_env%Stt,1)
+        deltat = sh_env%deltat
 
         CALL section_vals_val_get(adiab_section,"PRINT_MORE", &
                                                    l_val=print_here)
@@ -1371,13 +1371,13 @@ subroutine calc_adiab_nace_old(aom_env, adiab_section)
         allocate(TDT(mol,mol))
         allocate(DS(mol,mol))
         !use the matinvsqrt subroutine to find T = S^(-1/2)
-        T1 = aom_env%Stmtm
-        T2 = aom_env%Stptp
+        T1 = sh_env%Stmtm
+        T2 = sh_env%Stptp
         call matinvsqrt(mol, .TRUE., T1)
         call matinvsqrt(mol, .TRUE., T2)
         !and do some straightforward first-order numerical derivatives
         DT = (0.5D0/deltat)*(T2 - T1)
-        DS = (0.5D0/deltat)*(aom_env%Sttp - aom_env%Sttm)
+        DS = (0.5D0/deltat)*(sh_env%Sttp - sh_env%Sttm)
         !with these two loops, calculate the nacv in the time domain between adiabatic wavefunctions
         !by transforming from the diabatic overlaps
         do i=1,mol
@@ -1386,7 +1386,7 @@ subroutine calc_adiab_nace_old(aom_env, adiab_section)
                         TDT(i,j) = 0.0D0
                         do k=1,mol
                                 do l=1,mol
-                                        TST(i,j) = TST(i,j) + T1(k,i)*aom_env%Stt(k,l)*DT(l,j)
+                                        TST(i,j) = TST(i,j) + T1(k,i)*sh_env%Stt(k,l)*DT(l,j)
                                         TDT(i,j) = TDT(i,j) + T1(k,i)*DS(k,l)*T1(l,j)
                                 end do
                         end do
@@ -1412,12 +1412,12 @@ subroutine calc_adiab_nace_old(aom_env, adiab_section)
         do i=1, mol !loop over new index
            max_val = 0.0
            do j= 1, mol !loop over old index
-              aom_env%adiab_overlap(i,j) = 0.0
+              sh_env%adiab_overlap(i,j) = 0.0
               do k = 1, mol
-                 aom_env%adiab_overlap(i,j) = aom_env%adiab_overlap(i,j) + aom_env%C_tp(k,i)*aom_Env%C_t(k,j)
+                 sh_env%adiab_overlap(i,j) = sh_env%adiab_overlap(i,j) + sh_env%C_tp(k,i)*sh_env%C_t(k,j)
               enddo
-              if (abs(aom_env%adiab_overlap(i,j)).GE.abs(max_val)) THEN
-                 max_val = aom_env%adiab_overlap(i,j)
+              if (abs(sh_env%adiab_overlap(i,j)).GE.abs(max_val)) THEN
+                 max_val = sh_env%adiab_overlap(i,j)
                  new_index = j
               endif
            enddo
@@ -1430,10 +1430,10 @@ subroutine calc_adiab_nace_old(aom_env, adiab_section)
               if (i.NE.new_index) then
                  if ( abs( max_val**2 - 1 ).LT.threshold) then
                     print*, "FOBSH| Reordering: for state", i, "old index was", new_index, &
-                            "with overlap", max_val, "and former", aom_env%adiab_overlap(i,i)
+                            "with overlap", max_val, "and former", sh_env%adiab_overlap(i,i)
                  else 
                     print*, "FOBSH! Reorgering: for state", i, " we stay in with overlap", &
-                            aom_env%adiab_overlap(i,i), " instead of goind to ", new_index, "with overlap", max_val
+                            sh_env%adiab_overlap(i,i), " instead of goind to ", new_index, "with overlap", max_val
                  endif
               endif
            endif
@@ -1445,7 +1445,7 @@ subroutine calc_adiab_nace_old(aom_env, adiab_section)
         IF (ANY(map_new2old.EQ.zeros)) THEN
          do i=1,mol
             IF ((map_new2old(i).EQ.0).AND.(map_old2new(i).NE.0)) THEN
-               IF ( abs( (aom_env%adiab_overlap(i, map_old2new(i)))**2 - 1 ).LT.0.5 ) THEN
+               IF ( abs( (sh_env%adiab_overlap(i, map_old2new(i)))**2 - 1 ).LT.0.5 ) THEN
                   map_new2old(i) = map_old2new(i)
                   map_old2new( map_new2old(i) ) = i
                ENDIF
@@ -1493,7 +1493,7 @@ subroutine calc_adiab_nace_old(aom_env, adiab_section)
 
 
 ! 3. Decide map
-       IF (.NOT.(aom_env%do_reorder)) THEN
+       IF (.NOT.(sh_env%do_reorder)) THEN
           map_new2old = basic
           map_old2new = basic
        ENDIF
@@ -1503,40 +1503,40 @@ subroutine calc_adiab_nace_old(aom_env, adiab_section)
        do_sign_change = .True.
        IF (do_sign_change) THEN
           DO i=1, mol
-             !PRINT*, aom_env%adiab_overlap(i, map_new2old(i))
-             if (aom_env%adiab_overlap(i, map_new2old(i)).lt.0) then
-                aom_env%C_tp(:,i) = - aom_env%C_tp(:, i)
-                aom_env%adiab_overlap(i,:) = - aom_env%adiab_overlap(i,:)
+             !PRINT*, sh_env%adiab_overlap(i, map_new2old(i))
+             if (sh_env%adiab_overlap(i, map_new2old(i)).lt.0) then
+                sh_env%C_tp(:,i) = - sh_env%C_tp(:, i)
+                sh_env%adiab_overlap(i,:) = - sh_env%adiab_overlap(i,:)
              endif
              sum_ = 0 
              do j=1, mol
-                sum_ = sum_ + aom_env%C_tp(j, i) * aom_env%C_t(j, i)
+                sum_ = sum_ + sh_env%C_tp(j, i) * sh_env%C_t(j, i)
              enddo
              !print*, "AC_PHASE", i, sum_
-             !print*, "aom_env%adiab_overlap", aom_env%adiab_overlap(i, :)
-             !if (i.eq.aom_env%active_state) print*, "AC_STATE_WARNING"          
+             !print*, "sh_env%adiab_overlap", sh_env%adiab_overlap(i, :)
+             !if (i.eq.sh_env%active_state) print*, "AC_STATE_WARNING"          
           ENDDO
        ENDIF
 ! End of 4
 
 
 !> 5. Reassociate state active_state
-        aom_env%active_state = map_old2new(aom_env%old_state)
-        print*, "FOBSH| Put former active state", aom_env%old_state, "in new active state", aom_env%active_state 
+        sh_env%active_state = map_old2new(sh_env%old_state)
+        print*, "FOBSH| Put former active state", sh_env%old_state, "in new active state", sh_env%active_state 
 ! End of 5
 
 ! 6. Calculate the full NACE, Eq. (19) in paper 1.
         DO i=1, mol
            DO j=1, mol
-              aom_env%adiab_nace_tp(i,j) = - aom_env%adiab_overlap(i, map_new2old(j))
+              sh_env%adiab_nace_tp(i,j) = - sh_env%adiab_overlap(i, map_new2old(j))
               IF (i ==j) THEN
-                 aom_env%adiab_nace_tp(i,j) = aom_env%adiab_nace_tp(i,j) + 1
+                 sh_env%adiab_nace_tp(i,j) = sh_env%adiab_nace_tp(i,j) + 1
               ENDIF
-              aom_env%adiab_nace_tp(i,j) = aom_env%adiab_nace_tp(i,j) / deltat
+              sh_env%adiab_nace_tp(i,j) = sh_env%adiab_nace_tp(i,j) / deltat
               DO k=1, mol
                  DO l=1, mol
-                    aom_env%adiab_nace_tp(i,j) = & 
-                                    aom_env%adiab_nace_tp(i,j) + aom_env%C_tp(k,i)*aom_env%C_tp(l,j)*(TST(k,l) + TDT(k,l))
+                    sh_env%adiab_nace_tp(i,j) = & 
+                                    sh_env%adiab_nace_tp(i,j) + sh_env%C_tp(k,i)*sh_env%C_tp(l,j)*(TST(k,l) + TDT(k,l))
                  ENDDO
               ENDDO  
            ENDDO
@@ -1544,21 +1544,21 @@ subroutine calc_adiab_nace_old(aom_env, adiab_section)
 ! End of 6
 
 ! 7. If reordering, we use the anti-symmetry of the NACE
-        IF (aom_env%do_reorder) THEN
+        IF (sh_env%do_reorder) THEN
            Do i=1, mol
               Do j=1, mol 
-                 !print*, i,j, aom_env%adiab_nace_tp(i,j), aom_env%adiab_nace_tp(j,i)
-                 !print*, i,j, ( aom_env%adiab_nace_tp(i,j) + aom_env%adiab_nace_tp(j,i) )
+                 !print*, i,j, sh_env%adiab_nace_tp(i,j), sh_env%adiab_nace_tp(j,i)
+                 !print*, i,j, ( sh_env%adiab_nace_tp(i,j) + sh_env%adiab_nace_tp(j,i) )
                  IF (j.lt.i) THEN
-                     aom_env%adiab_nace_tp(i,j) = - aom_env%adiab_nace_tp(j,i)
+                     sh_env%adiab_nace_tp(i,j) = - sh_env%adiab_nace_tp(j,i)
                  ELSE
-                     aom_env%adiab_nace_tp(i,j) = ( aom_env%adiab_nace_tp(i,j) - aom_env%adiab_nace_tp(j,i) ) / 2
+                     sh_env%adiab_nace_tp(i,j) = ( sh_env%adiab_nace_tp(i,j) - sh_env%adiab_nace_tp(j,i) ) / 2
                  ENDIF
               Enddo
            Enddo
            !Do i=1, mol
            !   Do j=1, mol 
-           !      print*, i,j, aom_env%adiab_nace_tp(i,j), aom_env%adiab_nace_tp(j,i)
+           !      print*, i,j, sh_env%adiab_nace_tp(i,j), sh_env%adiab_nace_tp(j,i)
            !   Enddo
            !Enddo
         ENDIF
@@ -1575,7 +1575,7 @@ end subroutine calc_adiab_nace_old
 
 subroutine surfacehop(deltat, old_state, C2, &
               new_state, attempt_hop, decohere_criterion, sh_print_env, &
-                                                     aom_env, adiab_section)
+                                                     sh_env, adiab_section)
 
         !using the method outlined in John Tully's Electronic Transitions paper
         !calculate the probability of the molecular dynamics switching to evolve on a different potential surface
@@ -1586,7 +1586,7 @@ subroutine surfacehop(deltat, old_state, C2, &
         LOGICAL, INTENT(OUT)        :: attempt_hop
         REAL(KIND=dp), INTENT(IN) :: decohere_criterion
         TYPE(sh_print_env_type), INTENT(OUT) :: sh_print_env
-        TYPE(aom_env_type)                   :: aom_env
+        TYPE(sh_env_type)                   :: sh_env
         TYPE(section_vals_type), POINTER               :: adiab_section
 
         CHARACTER(len=*), PARAMETER :: routineN ='surfacehop', &
@@ -1600,7 +1600,7 @@ subroutine surfacehop(deltat, old_state, C2, &
         COMPLEX(KIND=dp), dimension(:), allocatable :: ak
         COMPLEX(KIND=dp) :: cstate
         
-        mol = size(aom_env%Stt,1)
+        mol = size(sh_env%Stt,1)
 
         !many allocations
         allocate(ak(mol))
@@ -1614,10 +1614,10 @@ subroutine surfacehop(deltat, old_state, C2, &
 
         SELECT CASE(wfpropag_keyword)
         CASE("DIABATIC_BASIS")
-            CALL old_diab_to_adiab(aom_env, C2, old_state, mol, cstate, ct)
+            CALL old_diab_to_adiab(sh_env, C2, old_state, mol, cstate, ct)
         CASE("ADIABATIC_BASIS")
-            ct(:) = aom_env%ctin(:)
-            cstate = aom_env%ctin_t(old_state)
+            ct(:) = sh_env%ctin(:)
+            cstate = sh_env%ctin_t(old_state)
         CASE DEFAULT
            CPABORT("There is no method to propagate the wavefunction.")
         END SELECT
@@ -1626,11 +1626,11 @@ subroutine surfacehop(deltat, old_state, C2, &
 
         do i=1,mol
                 ak(i) = ct(i)*conjg(cstate)
-                if (aom_env%HS_propagation .and. &
-                              (i .eq. aom_env%class_forbidden_hop_t(i))) then
+                if (sh_env%HS_propagation .and. &
+                              (i .eq. sh_env%class_forbidden_hop_t(i))) then
                    b(i) = 0.0D0 
                 else 
-                b(i) = -2.0D0*REAL(conjg(ak(i))*aom_env%adiab_nace_tp(i,old_state))
+                b(i) = -2.0D0*REAL(conjg(ak(i))*sh_env%adiab_nace_tp(i,old_state))
                 end if
         end do
 
@@ -1668,7 +1668,7 @@ subroutine surfacehop(deltat, old_state, C2, &
 !> CHANGE_AC
         sh_print_env%proba     = g
 
-        hop = next_random_number(aom_env%rng_stream)
+        hop = next_random_number(sh_env%rng_stream)
 
         sh_print_env%hop       = hop
         sh_print_env%old_state = old_state
@@ -1680,7 +1680,7 @@ subroutine surfacehop(deltat, old_state, C2, &
                         if (i .ne. old_state) then
                                 new_state = i
                                ! decohere = .FALSE.
-                                aom_env%decohere = .FALSE.
+                                sh_env%decohere = .FALSE.
                                 attempt_hop = .TRUE.
                                 sh_print_env%attempt_hop    = attempt_hop
                                 sh_print_env%new_state = new_state
@@ -1695,12 +1695,12 @@ subroutine surfacehop(deltat, old_state, C2, &
                                 !if there has not been any surfacehop, we need to consider the possibility of the decoherence correction
                                 !if the non-adiabatic coupling dphi to all other states is below a certain threshold
                                 !then a wavefunction collapse will be enforced
-                                aom_env%decohere = .TRUE.
+                                sh_env%decohere = .TRUE.
                                 do j=1,mol
-                                        if (abs(aom_env%adiab_nace_tp(old_state,j)) & 
+                                        if (abs(sh_env%adiab_nace_tp(old_state,j)) & 
                                                  > decohere_criterion .and. old_state .ne. j) then
                                                ! decohere = .FALSE.
-                                                aom_env%decohere = .FALSE.
+                                                sh_env%decohere = .FALSE.
                                                 EXIT
                                         end if
                                 end do
@@ -1746,8 +1746,8 @@ SUBROUTINE rotation_diab_to_adiab(C_tp, ctin, mat, adiab_ctin, pop)
 
 END SUBROUTINE rotation_diab_to_adiab
 
-SUBROUTINE old_adiab_overlap_check(aom_env, changed_state, itimes)
-    TYPE(aom_env_type)                         :: aom_env
+SUBROUTINE old_adiab_overlap_check(sh_env, changed_state, itimes)
+    TYPE(sh_env_type)                         :: sh_env
     INTEGER, OPTIONAL, intent(in)               :: changed_state, itimes  
 
     CHARACTER(len=*), PARAMETER :: routineN = 'old_adiab_overlap_check', &
@@ -1760,7 +1760,7 @@ SUBROUTINE old_adiab_overlap_check(aom_env, changed_state, itimes)
     LOGICAL :: overlap_over_thresh
 !!ADD OPTIONAL
 
-    mat    = SIZE(aom_env%Stptp, 1)
+    mat    = SIZE(sh_env%Stptp, 1)
 
     allocate(overlaps(2*mat))
 
@@ -1771,20 +1771,20 @@ SUBROUTINE old_adiab_overlap_check(aom_env, changed_state, itimes)
         past_state = changed_state
 !print *, "OLD_STATE", changed_state
     else
-        past_state = aom_env%active_state
+        past_state = sh_env%active_state
 !print *, "STATE_CHANGED", past_state
-!print *, "NEW_STATE_here", aom_env%active_state    
+!print *, "NEW_STATE_here", sh_env%active_state    
     end if
 
-!print *, "NEW_STATE", aom_env%active_state    
+!print *, "NEW_STATE", sh_env%active_state    
 
      do i=1, mat
-         overlaps(1) = overlaps(1) + aom_env%C_t(i, past_state)*aom_env%C_tp(i, aom_env%active_state)
+         overlaps(1) = overlaps(1) + sh_env%C_t(i, past_state)*sh_env%C_tp(i, sh_env%active_state)
      end do
 !print *, "OVERLAP_NOTSQUARED", overlaps(1)
 
      overlaps(1) = abs(overlaps(1))*abs(overlaps(1))
-print *, "OVERALP_SQUARED", past_state, aom_env%active_state, overlaps(1)
+print *, "OVERALP_SQUARED", past_state, sh_env%active_state, overlaps(1)
 
      overlap_over_thresh = .False.
   
@@ -1797,15 +1797,15 @@ print *, "OVERALP_SQUARED", past_state, aom_env%active_state, overlaps(1)
      !   max_val = maxval(overlaps(:))
         do j =2, 2*mat  !I want to be sure to count all the states
            res_mod = ((-1)**(modulo(j ,2)))*(j/2)   !this is +1,-1,+2,-2
-           state = aom_env%active_state+res_mod
+           state = sh_env%active_state+res_mod
            !two conditions in case state is negative or is larger than mat
            if (state .le. 0 .or. state .gt. mat) then
 !              print *, "skipped", j, state
               cycle
            else  
               do i = 1, mat
-                 overlaps(j) = overlaps(j) + aom_env%C_t(i, past_state)*&
-                                             aom_env%C_tp(i, state)
+                 overlaps(j) = overlaps(j) + sh_env%C_t(i, past_state)*&
+                                             sh_env%C_tp(i, state)
               end do
               overlaps(j) = abs(overlaps(j))*abs(overlaps(j))
 !              print *, j, state
@@ -1837,16 +1837,16 @@ print *, "MAX_OVERLAP_HOPPING", overlaps(1), maxval(overlaps(:))
 end if
 
 if ( overlaps(1) .gt. 0.5) then
-print *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, past_state)*&
-                            aom_env%C_t(:, past_state))), &
-      maxloc(abs(aom_env%C_tp(:,aom_env%active_state)*aom_env%C_tp(:,aom_env%active_state)))
-print *, "STATE_TOGOTO", past_state, aom_env%active_state
+print *, "LOCALIZATION", maxloc(abs(sh_env%C_t(:, past_state)*&
+                            sh_env%C_t(:, past_state))), &
+      maxloc(abs(sh_env%C_tp(:,sh_env%active_state)*sh_env%C_tp(:,sh_env%active_state)))
+print *, "STATE_TOGOTO", past_state, sh_env%active_state
 else
-print *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, past_state)*&
-                            aom_env%C_t(:, past_state)))
-!            maxloc(abs(aom_env%C_tp(:,aom_env%enforced_active_state)*&
-!                            aom_env%C_tp(:,aom_env%enforced_active_state)))
-!print *, "STATE_TOGOTO", past_state, aom_env%enforced_active_state
+print *, "LOCALIZATION", maxloc(abs(sh_env%C_t(:, past_state)*&
+                            sh_env%C_t(:, past_state)))
+!            maxloc(abs(sh_env%C_tp(:,sh_env%enforced_active_state)*&
+!                            sh_env%C_tp(:,sh_env%enforced_active_state)))
+!print *, "STATE_TOGOTO", past_state, sh_env%enforced_active_state
 end if
 
     deallocate(overlaps)

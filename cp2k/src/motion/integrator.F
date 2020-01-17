@@ -119,7 +119,7 @@ MODULE integrator
                                              zero_md_ener
 !  USE aom_utils,                       ONLY: check_hop_attempt, &
  
-  USE aom_types,                       ONLY: aom_env_type
+  USE sh_types,                       ONLY: sh_env_type
 
   USE non_adiabatic_utils,             ONLY: apply_decoherence, &
                                              check_hop_attempt, &
@@ -587,7 +587,7 @@ print *, "STARTING_POINT"
              !We save the velocities for the first timestep, to estimate the
              !position at t--1
              IF (itimes.ge.1) THEN
-                force_env%mixed_env%aom_env%velocities_tp = tmp%vel
+                force_env%mixed_env%sh_env%velocities_tp = tmp%vel
              ENDIF
 
              ! 1. Calculate the forces, Hamiltonian, propagate the wf and try to
@@ -608,68 +608,68 @@ print *, "STARTING_POINT"
               CALL vv_second(tmp, atomic_kind_set, local_particles, particle_set, &
                              core_particle_set, shell_particle_set, nparticle_kind, shell_adiabatic, dt)
              
-!mol = size(force_env%mixed_env%aom_env%Stt,1)
-!print*, "a before =", force_env%mixed_env%aom_env%state_tmdt
-!print*, "a' after enforcement =",  force_env%mixed_env%aom_env%active_state
-!print*, "f final state =", force_env%mixed_env%aom_env%new_state
+!mol = size(force_env%mixed_env%sh_env%Stt,1)
+!print*, "a before =", force_env%mixed_env%sh_env%state_tmdt
+!print*, "a' after enforcement =",  force_env%mixed_env%sh_env%active_state
+!print*, "f final state =", force_env%mixed_env%sh_env%new_state
 !do i =1, mol
 !write (*,'(A,F12.10,A, F12.10,A , F12.10,A , F12.10)') &
-!     "Ct(a)=", force_env%mixed_env%aom_env%C_t(i, force_env%mixed_env%aom_env%state_tmdt), &
-!    " Ctp(a)= ", force_env%mixed_env%aom_env%C_tp(i, force_env%mixed_env%aom_env%state_tmdt), &
-!    " Ctp(a')= ", force_env%mixed_env%aom_env%C_tp(i, force_env%mixed_env%aom_env%active_state), &
-!    " Ctp(f)= ", force_env%mixed_env%aom_env%C_tp(i, force_env%mixed_env%aom_env%new_state)
+!     "Ct(a)=", force_env%mixed_env%sh_env%C_t(i, force_env%mixed_env%sh_env%state_tmdt), &
+!    " Ctp(a)= ", force_env%mixed_env%sh_env%C_tp(i, force_env%mixed_env%sh_env%state_tmdt), &
+!    " Ctp(a')= ", force_env%mixed_env%sh_env%C_tp(i, force_env%mixed_env%sh_env%active_state), &
+!    " Ctp(f)= ", force_env%mixed_env%sh_env%C_tp(i, force_env%mixed_env%sh_env%new_state)
 !end do
              ! 3. Check if an attempted hop is successuful or not
-             IF (force_env%mixed_env%aom_env%attempt_hop) THEN
-                print*, "FOBSH| Active state before the attempt to hop:", force_env%mixed_env%aom_env%active_state
+             IF (force_env%mixed_env%sh_env%attempt_hop) THEN
+                print*, "FOBSH| Active state before the attempt to hop:", force_env%mixed_env%sh_env%active_state
                 CALL check_hop_attempt(tmp%vel, atomic_kind_set, nparticle_kind, local_particles, force_env)
-                IF (force_env%mixed_env%aom_env%successful_hop) THEN
+                IF (force_env%mixed_env%sh_env%successful_hop) THEN
                    ! If successful, we call again this subroutine to update the
                    ! forces. It is necessary to proceed like that to apply the
                    ! constraint. 
                    CALL force_env_calc_energy_force(force_env,require_consistent_energy_force=.FALSE., &
                                                     itimes = itimes)
                 ENDIF
-                print*, "FOBSH| Active state after the attempt to hop:", force_env%mixed_env%aom_env%active_state
+                print*, "FOBSH| Active state after the attempt to hop:", force_env%mixed_env%sh_env%active_state
              ENDIF
 
              ! 4.Apply the decoherence           
-             IF (force_env%mixed_env%aom_env%do_deco) THEN
+             IF (force_env%mixed_env%sh_env%do_deco) THEN
                 !> here we decohere the WF onto the active state  , that could be a new one in case of successful hop 
                 CALL apply_decoherence(itimes, tmp%vel, force_env, local_particles, nparticle_kind, atomic_kind_set)
              ENDIF          
 
              ! 5. Check if it's trivial crossing (only for printing purpose)
              !    Probably I would need to check the overalp here
-             CALL adiab_overlap_check(force_env%mixed_env%aom_env)
+             CALL adiab_overlap_check(force_env%mixed_env%sh_env)
 
              ! 6. Update all variables for the next time step.
-             force_env%mixed_env%aom_env%C_t = force_env%mixed_env%aom_env%C_tp
-             force_env%mixed_env%aom_env%H_t = force_env%mixed_env%aom_env%H_tp
-             force_env%mixed_env%aom_env%diabatic_nace_t = force_env%mixed_env%aom_env%diabatic_nace_tp
-             force_env%mixed_env%aom_env%E_t = force_env%mixed_env%aom_env%E_tp
-             force_env%mixed_env%aom_env%old_state = force_env%mixed_env%aom_env%active_state
-             force_env%mixed_env%aom_env%active_state = -1
-             force_env%mixed_env%aom_env%new_state = -1
-             force_env%mixed_env%aom_env%successful_hop = .FALSE.
-             force_env%mixed_env%aom_env%attempt_hop = .FALSE.
+             force_env%mixed_env%sh_env%C_t = force_env%mixed_env%sh_env%C_tp
+             force_env%mixed_env%sh_env%H_t = force_env%mixed_env%sh_env%H_tp
+             force_env%mixed_env%sh_env%diabatic_nace_t = force_env%mixed_env%sh_env%diabatic_nace_tp
+             force_env%mixed_env%sh_env%E_t = force_env%mixed_env%sh_env%E_tp
+             force_env%mixed_env%sh_env%old_state = force_env%mixed_env%sh_env%active_state
+             force_env%mixed_env%sh_env%active_state = -1
+             force_env%mixed_env%sh_env%new_state = -1
+             force_env%mixed_env%sh_env%successful_hop = .FALSE.
+             force_env%mixed_env%sh_env%attempt_hop = .FALSE.
 
-             if (.NOT. force_env%mixed_env%aom_env%no_diab_nace) then
-                force_env%mixed_env%aom_env%Stmtm = force_env%mixed_env%aom_env%Stt
-                force_env%mixed_env%aom_env%Sttm  = force_env%mixed_env%aom_env%Stpt
-                force_env%mixed_env%aom_env%Stmt  = force_env%mixed_env%aom_env%Sttp
+             if (.NOT. force_env%mixed_env%sh_env%no_diab_nace) then
+                force_env%mixed_env%sh_env%Stmtm = force_env%mixed_env%sh_env%Stt
+                force_env%mixed_env%sh_env%Sttm  = force_env%mixed_env%sh_env%Stpt
+                force_env%mixed_env%sh_env%Stmt  = force_env%mixed_env%sh_env%Sttp
              end if
-             force_env%mixed_env%aom_env%Stt   = force_env%mixed_env%aom_env%Stptp
+             force_env%mixed_env%sh_env%Stt   = force_env%mixed_env%sh_env%Stptp
 
-             force_env%mixed_env%aom_env%ctin_t = force_env%mixed_env%aom_env%ctin
+             force_env%mixed_env%sh_env%ctin_t = force_env%mixed_env%sh_env%ctin
              CALL total_momentum(tmp%vel, atomic_kind_set, nparticle_kind, local_particles)!, force_env)
-!print *, "force_env%mixed_env%aom_env%F LAST_1", force_env%mixed_env%aom_env%F(1,:,1)      
+!print *, "force_env%mixed_env%sh_env%F LAST_1", force_env%mixed_env%sh_env%F(1,:,1)      
 !             !deassociate diagonal forces pointer
-!             IF (ASSOCIATED(force_env%mixed_env%aom_env%F)) then
-!                DEALLOCATE(force_env%mixed_env%aom_env%F)
+!             IF (ASSOCIATED(force_env%mixed_env%sh_env%F)) then
+!                DEALLOCATE(force_env%mixed_env%sh_env%F)
 !print *, "DEALLOCATE DIAGONALF"
 !             END IF
-!print *, "force_env%mixed_env%aom_env%F LAST_2", force_env%mixed_env%aom_env%F(1,:,1)           
+!print *, "force_env%mixed_env%sh_env%F LAST_2", force_env%mixed_env%sh_env%F(1,:,1)           
        ELSE
 !> END CHANGE_AC
           ![NB] let nve work with force mixing which does not have consistent energies and forces
@@ -731,8 +731,8 @@ print *, "STARTING_POINT"
 
 
 
-  SUBROUTINE adiab_overlap_check(aom_env)
-    TYPE(aom_env_type)                         :: aom_env
+  SUBROUTINE adiab_overlap_check(sh_env)
+    TYPE(sh_env_type)                         :: sh_env
 
     CHARACTER(len=*), PARAMETER :: routineN = 'adiab_overlap_check', &
               routineP = moduleN//':'//routineN
@@ -744,15 +744,15 @@ print *, "STARTING_POINT"
     LOGICAL                                     :: overlap_over_thresh, debug
     REAL(KIND=dp)                               :: max1, max2
 
-     mat    = SIZE(aom_env%Stptp, 1)
+     mat    = SIZE(sh_env%Stptp, 1)
 
      allocate(overlaps(2*mat))
      ALLOCATE(abs_array(mat))
      overlaps = 0.0D0
 
-     past_state = aom_env%old_state
+     past_state = sh_env%old_state
 
-     overlaps(1) = abs(aom_env%adiab_overlap(aom_env%active_state, past_state))**2
+     overlaps(1) = abs(sh_env%adiab_overlap(sh_env%active_state, past_state))**2
 
      overlap_over_thresh = .False.
 
@@ -763,12 +763,12 @@ print *, "STARTING_POINT"
         sum_ov = overlaps(1)
         do j =2, 2*mat  !I want to be sure to count all the states
            res_mod = ((-1)**(modulo(j ,2)))*(j/2)   !this is +1,-1,+2,-2
-           state = aom_env%active_state+res_mod
+           state = sh_env%active_state+res_mod
            !two conditions in case state is negative or is larger than mat
            if (state .le. 0 .or. state .gt. mat) then
               cycle
            else
-              overlaps(j) = abs(aom_env%adiab_overlap(past_state, state))**2
+              overlaps(j) = abs(sh_env%adiab_overlap(past_state, state))**2
            end if
            max_val = maxval(overlaps(:))
            sum_ov = sum_ov +  overlaps(j)
@@ -786,44 +786,44 @@ print *, "STARTING_POINT"
 
 
       debug = .TRUE.
-      if (.not. aom_env%attempt_hop) then
+      if (.not. sh_env%attempt_hop) then
           if (overlap_over_thresh) then
              print*, "FOBSH| CASE1: no hop and no trivial crossing"
           else
              print*, "FOBSH| CASE2: no hop and maybe a crossing, final overlap is :", overlaps(1)
-             print*, "FOBSH| We were localized on molecule", maxloc(abs(aom_env%C_t(:,past_state)))
-             print*, "FOBSH| And now on molecule", maxloc(abs(aom_env%C_tp(:, aom_env%active_state)))
+             print*, "FOBSH| We were localized on molecule", maxloc(abs(sh_env%C_t(:,past_state)))
+             print*, "FOBSH| And now on molecule", maxloc(abs(sh_env%C_tp(:, sh_env%active_state)))
              IF (debug) THEN
-                abs_array = maxloc(abs(aom_env%C_t(:,past_state)))
+                abs_array = maxloc(abs(sh_env%C_t(:,past_state)))
                 max1 = abs_array(1)
-                abs_array = maxloc(abs(aom_env%C_tp(:,aom_env%active_state)))
+                abs_array = maxloc(abs(sh_env%C_tp(:,sh_env%active_state)))
                 max2 = abs_array(1)
                 IF ( ABS(max1 - max2).GT.1 ) THEN
                    print*, "Before,    After"
-                   print*, past_state, aom_env%active_state
+                   print*, past_state, sh_env%active_state
                    !> print active state before and after reordering
                    !do j=1, mat
-                   !   print*, aom_env%C_t(j,past_state), aom_env%C_tp(j, aom_env%active_state)
+                   !   print*, sh_env%C_t(j,past_state), sh_env%C_tp(j, sh_env%active_state)
                    !enddo
                 ENDIF
              ENDIF
           end if
       else 
-          if(.not. aom_env%successful_hop) then
+          if(.not. sh_env%successful_hop) then
             if (.not. overlap_over_thresh) then
                 print*, "FOBSH| CASE3: rejected hop and maybe a crossing, final overlap is :", overlaps(1)
-                print*, "FOBSH| We were localized on molecule", maxloc(abs(aom_env%C_t(:,past_state)))
-                print*, "FOBSH| And now on molecule", maxloc(abs(aom_env%C_tp(:, aom_env%active_state)))
+                print*, "FOBSH| We were localized on molecule", maxloc(abs(sh_env%C_t(:,past_state)))
+                print*, "FOBSH| And now on molecule", maxloc(abs(sh_env%C_tp(:, sh_env%active_state)))
                 IF (debug) THEN
-                   abs_array = maxloc(abs(aom_env%C_t(:,past_state)))
+                   abs_array = maxloc(abs(sh_env%C_t(:,past_state)))
                    max1 = abs_array(1)
-                   abs_array = maxloc(abs(aom_env%C_tp(:,aom_env%active_state)))
+                   abs_array = maxloc(abs(sh_env%C_tp(:,sh_env%active_state)))
                    max2 = abs_array(1)
                    IF ( ABS(max1 - max2).GT.1 ) THEN
                       print*, "Before,    After"
-                      print*, past_state, aom_env%active_state
+                      print*, past_state, sh_env%active_state
                       !do j=1, mat
-                      !   print*, aom_env%C_t(j,past_state), aom_env%C_tp(j, aom_env%active_state)
+                      !   print*, sh_env%C_t(j,past_state), sh_env%C_tp(j, sh_env%active_state)
                       !enddo
                    ENDIF
                 ENDIF
@@ -833,18 +833,18 @@ print *, "STARTING_POINT"
          else
            if (.not. overlap_over_thresh) then
                 print*, "FOBSH| CASE5: successful hop and maybe a crossing, final overlap is :", overlaps(1)
-                print*, "FOBSH| We were localized on molecule", maxloc(abs(aom_env%C_t(:,past_state)))
-                print*, "FOBSH| And now on molecule", maxloc(abs(aom_env%C_tp(:, aom_env%active_state)))
+                print*, "FOBSH| We were localized on molecule", maxloc(abs(sh_env%C_t(:,past_state)))
+                print*, "FOBSH| And now on molecule", maxloc(abs(sh_env%C_tp(:, sh_env%active_state)))
                 IF (debug) THEN
-                   abs_array = maxloc(abs(aom_env%C_t(:,past_state)))
+                   abs_array = maxloc(abs(sh_env%C_t(:,past_state)))
                    max1 = abs_array(1)
-                   abs_array = maxloc(abs(aom_env%C_tp(:,aom_env%active_state)))
+                   abs_array = maxloc(abs(sh_env%C_tp(:,sh_env%active_state)))
                    max2 = abs_array(1)
                    IF ( ABS(max1 - max2).GT.1 ) THEN
                       print*, "Before,    After"
-                      print*, past_state, aom_env%active_state
+                      print*, past_state, sh_env%active_state
                       !do j=1, mat
-                      !   print*, aom_env%C_t(j,past_state), aom_env%C_tp(j, aom_env%active_state)
+                      !   print*, sh_env%C_t(j,past_state), sh_env%C_tp(j, sh_env%active_state)
                       !enddo
                    ENDIF
                 ENDIF

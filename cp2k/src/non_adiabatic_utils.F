@@ -32,7 +32,7 @@ MODULE non_adiabatic_utils
 
      USE parallel_rng_types,           ONLY: next_random_number    
 
-     USE aom_types,                    ONLY: aom_env_type, &      
+     USE sh_types,                    ONLY: sh_env_type, &      
                                                 sh_print_env_type 
 
      USE aom_utils,                    ONLY: makeX,              & 
@@ -95,7 +95,7 @@ CONTAINS
 !> \brief TOADD
 !**********************************************************************************
 subroutine surf_hop_type(adiab_section, C1, C2, deltat, &
-           new_state, attempt_hop, decohere_criterion, sh_print_env, aom_env)
+           new_state, attempt_hop, decohere_criterion, sh_print_env, sh_env)
 !Choose whether doing surface hopping with trivial hopping correction or without
 !it following the old code 
         
@@ -106,7 +106,7 @@ subroutine surf_hop_type(adiab_section, C1, C2, deltat, &
        LOGICAL, INTENT(OUT)        :: attempt_hop
        REAL(KIND=dp), INTENT(IN) :: decohere_criterion
        TYPE(sh_print_env_type)     :: sh_print_env
-       TYPE(aom_env_type)          :: aom_env
+       TYPE(sh_env_type)          :: sh_env
        
        CHARACTER(len=*), PARAMETER :: routineN ='surf_hop_type', &
                                routineP = moduleN//':'//routineN
@@ -125,21 +125,21 @@ subroutine surf_hop_type(adiab_section, C1, C2, deltat, &
             do_trivial_corr = .TRUE.
             CALL modified_surfacehop(C1, C2, deltat, &
               new_state, attempt_hop, decohere_criterion, &
-              sh_print_env, aom_env, adiab_section, do_trivial_corr)
+              sh_print_env, sh_env, adiab_section, do_trivial_corr)
        CASE("TRIVIAL_HOP_CORRECT")
             sh_print_env%additional_prints = .TRUE.
             do_trivial_corr = .TRUE.
             CALL modified_surfacehop(C1, C2, deltat, &
               new_state, attempt_hop, decohere_criterion, &
-              sh_print_env, aom_env, adiab_section, do_trivial_corr)
+              sh_print_env, sh_env, adiab_section, do_trivial_corr)
        CASE("UNMODIFIED_SURF_HOP")
             do_trivial_corr = .FALSE.
             !CALL  surfacehop(deltat, old_state, C2, &
             !  new_state, attempt_hop, decohere_criterion, sh_print_env, &
-            !                                  aom_env, adiab_section)
+            !                                  sh_env, adiab_section)
             CALL modified_surfacehop(C1, C2, deltat, &
               new_state, attempt_hop, decohere_criterion, &
-              sh_print_env, aom_env, adiab_section, do_trivial_corr) 
+              sh_print_env, sh_env, adiab_section, do_trivial_corr) 
        CASE DEFAULT
             CPABORT("There is no method to add trivial crossing correction")
        END SELECT
@@ -151,7 +151,7 @@ END SUBROUTINE surf_hop_type
 !**********************************************************************************
 subroutine modified_surfacehop(C1, C2, deltat, &
               new_state, attempt_hop, decohere_criterion, &
-              sh_print_env, aom_env, adiab_section,       & 
+              sh_print_env, sh_env, adiab_section,       & 
               do_trivial_corr) 
         !using the method outlined in John Tully's Electronic Transitions paper
         !calculate the probability of the molecular dynamics switching to evolve on a different potential surface
@@ -161,7 +161,7 @@ subroutine modified_surfacehop(C1, C2, deltat, &
         LOGICAL, INTENT(OUT)        :: attempt_hop
         REAL(KIND=dp), INTENT(IN) :: decohere_criterion
         TYPE(sh_print_env_type) :: sh_print_env
-        TYPE(aom_env_type), INTENT(INOUT)             :: aom_env
+        TYPE(sh_env_type), INTENT(INOUT)             :: sh_env
         TYPE(section_vals_type), POINTER              :: adiab_section
         LOGICAL, INTENT(IN)                           :: do_trivial_corr
 
@@ -178,7 +178,7 @@ subroutine modified_surfacehop(C1, C2, deltat, &
         INTEGER        :: state_min 
         REAL(KIND=dp), dimension(:), ALLOCATABLE :: enerdiff
  
-        mol = size(aom_env%Stt,1)
+        mol = size(sh_env%Stt,1)
 
         ! Based on paper [Spencer16]: Spencer et al., J. Chem. Phys. 145, 064102 (2016)
         ! and paper [Wang14] :
@@ -196,16 +196,16 @@ subroutine modified_surfacehop(C1, C2, deltat, &
         ! Find the state closest in energy according to [Wang14]
         IF (do_trivial_corr) THEN 
              do i=1,mol
-                     if (i .ne. aom_env%active_state) then 
-                             enerdiff(i) = abs(aom_env%E_tp(i) - aom_env%E_tp(aom_env%active_state)) 
-                     else if (i .eq. aom_env%active_state) then 
-                             enerdiff(aom_env%active_state) = 0.0D0
+                     if (i .ne. sh_env%active_state) then 
+                             enerdiff(i) = abs(sh_env%E_tp(i) - sh_env%E_tp(sh_env%active_state)) 
+                     else if (i .eq. sh_env%active_state) then 
+                             enerdiff(sh_env%active_state) = 0.0D0
                      end if
              end do
-             if (enerdiff(1) == enerdiff(aom_env%active_state)) then
+             if (enerdiff(1) == enerdiff(sh_env%active_state)) then
                      min = enerdiff(2)
                      do i= 3,mol
-                            if (enerdiff(i) < min .and. i .ne. aom_env%active_state) then
+                            if (enerdiff(i) < min .and. i .ne. sh_env%active_state) then
                                     min = enerdiff(i)
                                      state_min = i
                              end if          
@@ -213,7 +213,7 @@ subroutine modified_surfacehop(C1, C2, deltat, &
              else 
                      min = enerdiff(1)
                      do i= 2,mol
-                            if (enerdiff(i) < min .and. i .ne. aom_env%active_state) then
+                            if (enerdiff(i) < min .and. i .ne. sh_env%active_state) then
                                     min = enerdiff(i)
                                     state_min = i
                              end if          
@@ -232,18 +232,18 @@ subroutine modified_surfacehop(C1, C2, deltat, &
         CALL section_vals_val_get(adiab_section,"REPRESENTATION", c_val=wfpropag_keyword)
         SELECT CASE(wfpropag_keyword)
         CASE("DIABATIC_BASIS")
-               !CALL diab_to_adiab(aom_env, C2, old_state, mol, cstate, ct, &
+               !CALL diab_to_adiab(sh_env, C2, old_state, mol, cstate, ct, &
                !                                    C1, cttm_ad, cstate_tm)
-               !     CALL diab_to_adiab(aom_env, C2, old_state, mol, cstate, ct)
+               !     CALL diab_to_adiab(sh_env, C2, old_state, mol, cstate, ct)
                !end if
-               CALL diab_to_adiab(C2, aom_env%ctin, ct) 
-               CALL diab_to_adiab(C1, aom_env%ctin_t, cttm_ad) 
+               CALL diab_to_adiab(C2, sh_env%ctin, ct) 
+               CALL diab_to_adiab(C1, sh_env%ctin_t, cttm_ad) 
         CASE("ADIABATIC_BASIS")
                CPABORT("Not Ready")
-               !ct(:) = aom_env%ctt(:)
-               !cttm_ad(:) = aom_env%cttm(:)
-               !cstate = aom_env%ctt(old_state)
-               !cstate_tm = aom_env%cttm(old_state)
+               !ct(:) = sh_env%ctt(:)
+               !cttm_ad(:) = sh_env%cttm(:)
+               !cstate = sh_env%ctt(old_state)
+               !cstate_tm = sh_env%cttm(old_state)
         CASE DEFAULT
                CPABORT("There is no method to propagate the wavefunction.")
         END SELECT
@@ -252,14 +252,14 @@ subroutine modified_surfacehop(C1, C2, deltat, &
         do i=1,mol
                !construct state density for t present and t-deltat from the active state to
                !other state
-                ak(i) = ct(i)*conjg(ct(aom_env%active_state))
-                akttm(i) = cttm_ad(i)*conjg(cttm_ad(aom_env%old_state))
+                ak(i) = ct(i)*conjg(ct(sh_env%active_state))
+                akttm(i) = cttm_ad(i)*conjg(cttm_ad(sh_env%old_state))
                 !>assign 0.0 to b(i) if the hop is forbidden
-                if (aom_env%HS_propagation .and. &
-                              (i .eq. aom_env%class_forbidden_hop_t(i))) then
+                if (sh_env%HS_propagation .and. &
+                              (i .eq. sh_env%class_forbidden_hop_t(i))) then
                    b(i) = 0.0D0 
                 else 
-                   b(i) = -2.0D0*REAL(conjg(ak(i))*aom_env%adiab_nace_tp(i,aom_env%active_state))
+                   b(i) = -2.0D0*REAL(conjg(ak(i))*sh_env%adiab_nace_tp(i,sh_env%active_state))
                 end if
         end do
 
@@ -267,7 +267,7 @@ subroutine modified_surfacehop(C1, C2, deltat, &
         !according to Prezhdo and Wang 2014
         !>in this case we need to use the new enforced state to avoid discontinuity
         !in the time derivative
-        ex_prob = (abs(akttm(aom_env%old_state))- abs(ak(aom_env%active_state)))/abs(akttm(aom_env%old_state))
+        ex_prob = (abs(akttm(sh_env%old_state))- abs(ak(sh_env%active_state)))/abs(akttm(sh_env%old_state))
         sh_print_env%exprob = ex_prob 
 
         ! Use Eq. (4) of [Spencer16]
@@ -278,8 +278,8 @@ subroutine modified_surfacehop(C1, C2, deltat, &
         do i=1,mol
                 !g(i) is the probability to hop from the current state (old_state) to any other
                 !state (i) 
-                g(i) = (deltat*b(i))/abs(ak(aom_env%active_state))
-                if (i .ne. aom_env%active_state) then
+                g(i) = (deltat*b(i))/abs(ak(sh_env%active_state))
+                if (i .ne. sh_env%active_state) then
                         sumg = sumg + g(i)
                 end if
         end do
@@ -309,7 +309,7 @@ subroutine modified_surfacehop(C1, C2, deltat, &
        !if this happens, rescale them down to sum = 1
        sumg = 0.0D0
        do i=1,mol
-               if (i .ne. aom_env%active_state) then
+               if (i .ne. sh_env%active_state) then
                        sumg = sumg + g(i)
                end if
        end do
@@ -317,14 +317,14 @@ subroutine modified_surfacehop(C1, C2, deltat, &
                print*, "FOBSH| *** WARNING: We have to normalize the probability, the sum was:", sumg, "***"
                do i=1,mol
                        g(i) = g(i)/sumg
-                       g(aom_env%active_state) = 0.0D0
+                       g(sh_env%active_state) = 0.0D0
                end do
                sh_print_env%renorm = .TRUE.
                sh_print_env%sumprob   = sumg
        else
                sh_print_env%renorm = .FALSE.
                sh_print_env%sumprob   = sumg
-               g(aom_env%active_state) = 1.0D0 - sumg
+               g(sh_env%active_state) = 1.0D0 - sumg
        end if
        sh_print_env%proba     = g
 
@@ -333,27 +333,27 @@ subroutine modified_surfacehop(C1, C2, deltat, &
         !enddo
 
 
-        hop = next_random_number(aom_env%rng_stream)
+        hop = next_random_number(sh_env%rng_stream)
         !print *, "RANDOM_NUMBER_HOPPING_PROBA", hop
         sh_print_env%hop       = hop
-        sh_print_env%old_state = aom_env%active_state
+        sh_print_env%old_state = sh_env%active_state
         !and see if this random number causes a surface hop
         sumg = 0.0D0
         do i=1,mol
                 sumg = sumg + g(i)
                 if (hop <= sumg) then
-                        if (i .ne. aom_env%active_state) then
+                        if (i .ne. sh_env%active_state) then
                                 new_state = i
                                 !write(24,*) i                        
                                 !decohere = .FALSE.
-                                aom_env%decohere = .FALSE.
+                                sh_env%decohere = .FALSE.
                                 attempt_hop = .TRUE.
                                 print *, "FOBSH| ATTEMPTED_HOP"
                                 sh_print_env%attempt_hop    = attempt_hop
                                 sh_print_env%new_state = new_state
                                 EXIT
-                        elseif (i == aom_env%active_state) then
-                                new_state = aom_env%active_state 
+                        elseif (i == sh_env%active_state) then
+                                new_state = sh_env%active_state 
                                 attempt_hop = .FALSE.
                                 sh_print_env%attempt_hop    = attempt_hop
                                 sh_print_env%new_state = new_state
@@ -362,12 +362,12 @@ subroutine modified_surfacehop(C1, C2, deltat, &
                                 !if there has not been any surfacehop, we need to consider the possibility of the decoherence correction
                                 !if the non-adiabatic coupling dphi to all other states is below a certain threshold
                                 !then a wavefunction collapse will be enforced
-                                aom_env%decohere = .TRUE.
+                                sh_env%decohere = .TRUE.
                                 do j=1,mol
-                                        if (abs(aom_env%adiab_nace_tp(aom_env%active_state,j)) & 
-                                                     > decohere_criterion .and. aom_env%active_state .ne. j) then
+                                        if (abs(sh_env%adiab_nace_tp(sh_env%active_state,j)) & 
+                                                     > decohere_criterion .and. sh_env%active_state .ne. j) then
                                                ! decohere = .FALSE.
-                                                aom_env%decohere = .FALSE.
+                                                sh_env%decohere = .FALSE.
                                                 EXIT
                                         end if
                                 end do
@@ -429,7 +429,7 @@ end subroutine modified_surfacehop
            CALL section_vals_val_get(adiab_section,"METHOD_RESCALING",c_val=my_rescale_keyword)
         ENDIF
         CALL section_vals_val_get(adiab_section,"CENTER_OF_MASS",l_val=translate_keyword)
-        sh_print_env = force_env%mixed_env%aom_env%sh_print_env
+        sh_print_env = force_env%mixed_env%sh_env%sh_print_env
 
         ALLOCATE(velocities_com(SIZE(velocities, 1), SIZE(velocities, 2)))
         CALL translate_com(velocities, translate_keyword, velocities_com, &
@@ -438,22 +438,22 @@ end subroutine modified_surfacehop
         CASE("SIMPLE")
            CALL cal_delta_energy(nparticle_kind, velocities_com, force_env, atomic_kind_set, &
                                  local_particles, delta_energy, kinetic_energy_prime)
-           sh_print_env%old_state        = force_env%mixed_env%aom_env%active_state
-           sh_print_env%new_state        = force_env%mixed_env%aom_env%new_state
+           sh_print_env%old_state        = force_env%mixed_env%sh_env%active_state
+           sh_print_env%new_state        = force_env%mixed_env%sh_env%new_state
            IF (delta_energy.lt.0) THEN
-              force_env%mixed_env%aom_env%successful_hop = .FALSE.
+              force_env%mixed_env%sh_env%successful_hop = .FALSE.
            ELSE 
                !> Factor to rescale the velocities (Eq. 49 of PAPER_1)
               !rescale_factor = SQRT(  delta_energy /kinetic_energy_prime )
               !velocities = rescale_factor*velocities
-              force_env%mixed_env%aom_env%successful_hop = .TRUE.
-              force_env%mixed_env%aom_env%active_state   = force_env%mixed_env%aom_env%new_state
+              force_env%mixed_env%sh_env%successful_hop = .TRUE.
+              force_env%mixed_env%sh_env%active_state   = force_env%mixed_env%sh_env%new_state
               CALL simple_vel_rescaling(velocities, delta_energy, kinetic_energy_prime, rescale_factor)
            ENDIF
 
-           sh_print_env%adiab_energies_t = force_env%mixed_env%aom_env%E_tp
+           sh_print_env%adiab_energies_t = force_env%mixed_env%sh_env%E_tp
            sh_print_env%delta_energy     = delta_energy
-           sh_print_env%successful_hop   = force_env%mixed_env%aom_env%successful_hop
+           sh_print_env%successful_hop   = force_env%mixed_env%sh_env%successful_hop
            sh_print_env%kinetic_energy   = kinetic_energy_prime
            IF (sh_print_env%successful_hop) sh_print_env%rescale_factor = rescale_factor
            CALL adiab_print_sh_info(sh_print_env, keyword = 'SIMPLE_RESCALING')
@@ -462,26 +462,26 @@ end subroutine modified_surfacehop
         CASE("SIMPLE_QSYS")
            CALL cal_delta_ene_QSYS(nparticle_kind, velocities_com, force_env, atomic_kind_set, &
                          local_particles, delta_energy, kinetic_energy_qsys)
-           sh_print_env%old_state        = force_env%mixed_env%aom_env%active_state
-           sh_print_env%new_state        = force_env%mixed_env%aom_env%new_state
+           sh_print_env%old_state        = force_env%mixed_env%sh_env%active_state
+           sh_print_env%new_state        = force_env%mixed_env%sh_env%new_state
            IF (delta_energy.lt.0) THEN
-              force_env%mixed_env%aom_env%successful_hop = .FALSE.
+              force_env%mixed_env%sh_env%successful_hop = .FALSE.
            ELSE 
                !> Factor to rescale the velocities (Eq. 49 of PAPER_1)
               !rescale_factor = SQRT(  delta_energy /kinetic_energy_prime )
               !velocities = rescale_factor*velocities
-              force_env%mixed_env%aom_env%successful_hop = .TRUE.
-              !force_env%mixed_env%aom_env%old_state      = force_env%mixed_env%aom_env%active_state
-              force_env%mixed_env%aom_env%active_state   = force_env%mixed_env%aom_env%new_state
+              force_env%mixed_env%sh_env%successful_hop = .TRUE.
+              !force_env%mixed_env%sh_env%old_state      = force_env%mixed_env%sh_env%active_state
+              force_env%mixed_env%sh_env%active_state   = force_env%mixed_env%sh_env%new_state
               CALL simple_vel_resc_qsys(atomic_kind_set, local_particles,  &
                        force_env, nparticle_kind, velocities, delta_energy, kinetic_energy_qsys, &
                          rescale_factor)
 
            ENDIF
 
-           sh_print_env%adiab_energies_t = force_env%mixed_env%aom_env%E_tp
+           sh_print_env%adiab_energies_t = force_env%mixed_env%sh_env%E_tp
            sh_print_env%delta_energy     = delta_energy
-           sh_print_env%successful_hop   = force_env%mixed_env%aom_env%successful_hop
+           sh_print_env%successful_hop   = force_env%mixed_env%sh_env%successful_hop
            sh_print_env%kinetic_energy   = kinetic_energy_qsys
            IF (sh_print_env%successful_hop) sh_print_env%rescale_factor = rescale_factor
            CALL adiab_print_sh_info(sh_print_env, keyword = 'SIMPLE_RESCALING')
@@ -492,31 +492,31 @@ end subroutine modified_surfacehop
            CALL cal_delta_ene_QSYS(nparticle_kind, velocities_com, force_env, atomic_kind_set, &
                                  local_particles, delta_energy, kinetic_energy_prime)
            sh_print_env%kinetic_energy   = kinetic_energy_prime
-           sh_print_env%old_state        = force_env%mixed_env%aom_env%active_state
-           sh_print_env%new_state        = force_env%mixed_env%aom_env%new_state
+           sh_print_env%old_state        = force_env%mixed_env%sh_env%active_state
+           sh_print_env%new_state        = force_env%mixed_env%sh_env%new_state
            IF ((delta_energy.lt.0).AND.(nacv_keyword.ne."TEST")) THEN
-              force_env%mixed_env%aom_env%successful_hop = .FALSE.
+              force_env%mixed_env%sh_env%successful_hop = .FALSE.
 
-              sh_print_env%adiab_energies_t = force_env%mixed_env%aom_env%E_tp
+              sh_print_env%adiab_energies_t = force_env%mixed_env%sh_env%E_tp
               sh_print_env%delta_energy     = delta_energy
-              sh_print_env%successful_hop   = force_env%mixed_env%aom_env%successful_hop
-              sh_print_env%old_state        = force_env%mixed_env%aom_env%active_state
-              sh_print_env%new_state        = force_env%mixed_env%aom_env%new_state
+              sh_print_env%successful_hop   = force_env%mixed_env%sh_env%successful_hop
+              sh_print_env%old_state        = force_env%mixed_env%sh_env%active_state
+              sh_print_env%new_state        = force_env%mixed_env%sh_env%new_state
               IF (sh_print_env%successful_hop) sh_print_env%rescale_factor = rescale_factor
               CALL adiab_print_sh_info(sh_print_env, keyword = 'SIMPLE_RESCALING')
            ELSE 
               SELECT CASE(nacv_keyword)
               CASE("TEST")
-                 old_state = force_env%mixed_env%aom_env%active_state
-                 new_state = force_env%mixed_env%aom_env%new_state
-                 !aom_env=force_env%mixed_env%aom_env
-                 CALL calc_hop_nacv_aom( force_env%mixed_env%aom_env,force_env%mixed_env%F,&
+                 old_state = force_env%mixed_env%sh_env%active_state
+                 new_state = force_env%mixed_env%sh_env%new_state
+                 !sh_env=force_env%mixed_env%sh_env
+                 CALL calc_hop_nacv_aom( force_env%mixed_env%sh_env,force_env%mixed_env%F,&
                                                                    hop_nacv_oldold, old_state, old_state, "OLDOLD")
-                 CALL calc_hop_nacv_aom( force_env%mixed_env%aom_env, force_env%mixed_env%F,& 
+                 CALL calc_hop_nacv_aom( force_env%mixed_env%sh_env, force_env%mixed_env%F,& 
                                                                   hop_nacv_newnew, new_state, new_state, "NEWNEW")
-                 CALL calc_hop_nacv_aom( force_env%mixed_env%aom_env, force_env%mixed_env%F,& 
+                 CALL calc_hop_nacv_aom( force_env%mixed_env%sh_env, force_env%mixed_env%F,& 
                                                                     hop_nacv_newold, new_state, old_state, "NEWOLD")
-                 CALL calc_hop_nacv_aom( force_env%mixed_env%aom_env, force_env%mixed_env%F,& 
+                 CALL calc_hop_nacv_aom( force_env%mixed_env%sh_env, force_env%mixed_env%F,& 
                                                                    hop_nacv_oldnew, old_state, new_state, "OLDNEW")
                  CALL adiab_print_hop_nacv(sh_print_env, hop_nacv_oldold, &
                                   hop_nacv_newnew, hop_nacv_newold, hop_nacv_oldnew) 
@@ -527,7 +527,7 @@ end subroutine modified_surfacehop
                                              SUM(hop_nacv_oldnew(2,:) - hop_nacv_newold(2,:)) / 2,  &
                                              SUM(hop_nacv_oldnew(3,:) - hop_nacv_newold(3,:)) / 2
               CASE("CONTRIBUTION")
-                 CALL calc_hop_nacv_aom( force_env%mixed_env%aom_env, force_env%mixed_env%F,& 
+                 CALL calc_hop_nacv_aom( force_env%mixed_env%sh_env, force_env%mixed_env%F,& 
                                                          hop_nacv, exF_11 = F_11, exF_1 = F_1, exF_2 = F_2, exF_3 =F_3)
                  print*, "totalnacv =" , SUM(hop_nacv(1,:)),  SUM(hop_nacv(2,:)), SUM(hop_nacv(3,:))
                  print*, "totalnacvF1 =" , SUM(F_1(1,:)),  SUM(F_1(2,:)), SUM(F_1(3,:))
@@ -535,7 +535,7 @@ end subroutine modified_surfacehop
                                             SUM(F_1(2,:) + F_11(2,:)), &
                                             SUM(F_1(3,:) + F_11(3,:))
                  CALL adiab_print_hop_nacv(sh_print_env, hop_nacv, F_11, F_1, F_2, F_3) 
-                 CALL cal_delta_energy_nacv(nparticle_kind, velocities_com, force_env%mixed_env%aom_env, &
+                 CALL cal_delta_energy_nacv(nparticle_kind, velocities_com, force_env%mixed_env%sh_env, &
                                               atomic_kind_set, &
                                             local_particles, F_1 + F_11, delta_energy, A, B) 
 print*, "DELTAFF1 = ", delta_energy
@@ -545,7 +545,7 @@ ELSE
      print*, "LOGFF1 = ", 1
 ENDIF
      
-                 CALL cal_delta_energy_nacv(nparticle_kind, velocities_com, force_env%mixed_env%aom_env, &
+                 CALL cal_delta_energy_nacv(nparticle_kind, velocities_com, force_env%mixed_env%sh_env, &
                                             atomic_kind_set, &
                                             local_particles, F_1, delta_energy, A, B) 
 print*, "DELTAF1 = ", delta_energy
@@ -556,16 +556,16 @@ ELSE
 ENDIF
      
               CASE("TOTAL")
-                 CALL calc_hop_nacv_aom(force_env%mixed_env%aom_env, force_env%mixed_env%F, hop_nacv)
+                 CALL calc_hop_nacv_aom(force_env%mixed_env%sh_env, force_env%mixed_env%F, hop_nacv)
                  CALL adiab_print_hop_nacv(sh_print_env, hop_nacv) 
               CASE("FAST")
-                 CALL calc_hop_nacv_aom( force_env%mixed_env%aom_env, force_env%mixed_env%F, hop_nacv, fast=.TRUE.)
+                 CALL calc_hop_nacv_aom( force_env%mixed_env%sh_env, force_env%mixed_env%F, hop_nacv, fast=.TRUE.)
 
                  CALL adiab_print_hop_nacv(sh_print_env, hop_nacv) 
               CASE DEFAULT
                 CPABORT("There is no method to calculate the NACV.")
               END SELECT 
-              CALL cal_delta_energy_nacv(nparticle_kind, velocities_com, force_env%mixed_env%aom_env, &
+              CALL cal_delta_energy_nacv(nparticle_kind, velocities_com, force_env%mixed_env%sh_env, &
                                           atomic_kind_set, &
                                           local_particles, hop_nacv, delta_energy, A, B) 
 !IF ((delta_energy).lt.0) THEN
@@ -574,25 +574,25 @@ ENDIF
 !     print*, "LOGNACV = ", 1
 !ENDIF
               If (delta_energy.lt.0) THEN
-                  force_env%mixed_env%aom_env%successful_hop = .FALSE.
+                  force_env%mixed_env%sh_env%successful_hop = .FALSE.
                   CALL section_vals_val_get(adiab_section,"METHOD_REVERSAL",c_val=reversal_keyword)
                   CALL hop_nacv_vel_reversing(nparticle_kind, velocities,  & 
-                                              force_env%mixed_env%aom_env%forces_adiab, &
-                                              force_env%mixed_env%aom_env%forces_adiab_new, &
+                                              force_env%mixed_env%sh_env%forces_adiab, &
+                                              force_env%mixed_env%sh_env%forces_adiab_new, &
                                               hop_nacv, atomic_kind_set, local_particles, reversal_keyword, &
                                               sh_print_env,A,B)
               ELSE 
-                  force_env%mixed_env%aom_env%successful_hop = .TRUE.
-                  force_env%mixed_env%aom_env%active_state   = force_env%mixed_env%aom_env%new_state
+                  force_env%mixed_env%sh_env%successful_hop = .TRUE.
+                  force_env%mixed_env%sh_env%active_state   = force_env%mixed_env%sh_env%new_state
                   CALL hop_nacv_vel_rescaling(nparticle_kind, velocities, delta_energy, A, B, hop_nacv, &
                                               atomic_kind_set, local_particles, rescale_factor)
               ENDIF
 
               sh_print_env%A = A
               sh_print_env%B = B
-              sh_print_env%adiab_energies_t = force_env%mixed_env%aom_env%E_tp
+              sh_print_env%adiab_energies_t = force_env%mixed_env%sh_env%E_tp
               sh_print_env%delta_energy     = delta_energy
-              sh_print_env%successful_hop   = force_env%mixed_env%aom_env%successful_hop
+              sh_print_env%successful_hop   = force_env%mixed_env%sh_env%successful_hop
               IF (sh_print_env%successful_hop) THEN
                  sh_print_env%rescale_factor = rescale_factor
                  sh_print_env%momentum_shift(:) = rescale_factor *        & 
@@ -613,9 +613,9 @@ ENDIF
 !**********************************************************************************
 !> \brief TOADD
 !**********************************************************************************
-SUBROUTINE calc_hop_nacv_aom(aom_env, diagonal_F, hop_nacv, ext_old_state, ext_new_state, symmetry, fast, &
+SUBROUTINE calc_hop_nacv_aom(sh_env, diagonal_F, hop_nacv, ext_old_state, ext_new_state, symmetry, fast, &
                          exF_11, exF_1, exF_2, exF_3)
-        TYPE(aom_env_type)                                       :: aom_env
+        TYPE(sh_env_type)                                       :: sh_env
         REAL(kind=dp), DIMENSION(:,:), INTENT(OUT), ALLOCATABLE  :: hop_nacv
         INTEGER, OPTIONAL                                        :: ext_old_state, ext_new_state
         CHARACTER(len=*), OPTIONAL                               :: symmetry
@@ -649,10 +649,10 @@ SUBROUTINE calc_hop_nacv_aom(aom_env, diagonal_F, hop_nacv, ext_old_state, ext_n
         ! 214113 (2017), [Carof17]
 
 
-        mat    = SIZE(aom_env%Stptp, 1)
+        mat    = SIZE(sh_env%Stptp, 1)
         natom  = SIZE(diagonal_F, 2)
         nadiab = SIZE(diagonal_F, 3)
-        atoms  = SIZE(aom_env%connlist1, 2)
+        atoms  = SIZE(sh_env%connlist1, 2)
 
         my_fast = .FALSE.
         IF (PRESENT(fast)) my_fast = fast
@@ -679,27 +679,27 @@ SUBROUTINE calc_hop_nacv_aom(aom_env, diagonal_F, hop_nacv, ext_old_state, ext_n
         !allocate(Fin(3,natom, mat))
         allocate(hop_nacv(3, natom)) 
 
-        scaling = aom_env%scaling
-        cbar = aom_env%cbar
-        NN = aom_env%NN
-        S = aom_env%Stptp
-        C = aom_env%C_tp
+        scaling = sh_env%scaling
+        cbar = sh_env%cbar
+        NN = sh_env%NN
+        S = sh_env%Stptp
+        C = sh_env%C_tp
         
-        !nacv = aom_env%nacv
-        !Fin = aom_env%F
-        ext_pres = aom_env%ext_pres       
+        !nacv = sh_env%nacv
+        !Fin = sh_env%F
+        ext_pres = sh_env%ext_pres       
         IF (PRESENT(ext_old_state)) THEN
            old_state = ext_old_state
         ELSE
-           old_state = aom_env%active_state
+           old_state = sh_env%active_state
         ENDIF
         IF (PRESENT(ext_new_state)) THEN
            new_state = ext_new_state 
         ELSE
-           new_state = aom_env%new_state
+           new_state = sh_env%new_state
         ENDIF
-        E_old_state = aom_env%E_tp(old_state)
-        E_new_state = aom_env%E_tp(new_state)
+        E_old_state = sh_env%E_tp(old_state)
+        E_new_state = sh_env%E_tp(new_state)
         IF (E_old_state.EQ.E_new_state) THEN
            diff_energy = 0.0D0
         ELSE
@@ -733,7 +733,7 @@ SUBROUTINE calc_hop_nacv_aom(aom_env, diagonal_F, hop_nacv, ext_old_state, ext_n
                        IF (ext_pres(j)) THEN
                           IF (i.ne.num_mol) THEN
                              !Wprime(k,l,j,d) = Wprime(k,l,j,d) + my_DP(i,num_mol,j,d) &
-                             Wprime(k,l,j,d) = Wprime(k,l,j,d) + aom_env%nacv(d, i, num_j) &
+                             Wprime(k,l,j,d) = Wprime(k,l,j,d) + sh_env%nacv(d, i, num_j) &
                                                *( LL(num_mol,k)*LL(i,l)  + LL(num_mol,l) * LL(i, k))
                           ENDIF
                        ENDIF
@@ -766,10 +766,10 @@ SUBROUTINE calc_hop_nacv_aom(aom_env, diagonal_F, hop_nacv, ext_old_state, ext_n
                     F_1(d,j) = F_1(d,j) + C(i,old_state)*diagonal_F(d,j,i)*C(i,new_state)*diff_energy
                     IF (ext_pres(j)) THEN
                        !F_2(d, j) = F_2(d,j) + X(i, old_state) * nacv(d, i, num_mol, j) * X( num_mol, new_state) 
-                       F_2(d, j) = F_2(d,j) + X(i, old_state) * aom_env%nacv(d, i, num_j) * X( num_mol, new_state) 
+                       F_2(d, j) = F_2(d,j) + X(i, old_state) * sh_env%nacv(d, i, num_j) * X( num_mol, new_state) 
                        IF (i.ne.num_mol) THEN
                           !F_11(d,j) = F_11(d,j) + diff_energy * DH(i,num_mol,j,d) * (              &
-                          F_11(d,j) = F_11(d,j) + diff_energy * convert_nacv*aom_env%nacv(d, i, num_j) * (              &
+                          F_11(d,j) = F_11(d,j) + diff_energy * convert_nacv*sh_env%nacv(d, i, num_j) * (              &
                                                  C(num_mol, new_state) * C(i, old_state) +   &
                                                  C(num_mol, old_state) * C(i,new_state) )
                        ENDIF
@@ -842,7 +842,7 @@ SUBROUTINE calc_hop_nacv_aom(aom_env, diagonal_F, hop_nacv, ext_old_state, ext_n
                        IF (i.ne.num_mol) THEN
                          ! Of diagonal term, only for active atom j present in
                          ! molecule num_mol
-                         F_11(d,j) = F_11(d,j) + diff_energy * convert_nacv*aom_env%nacv(d, i, num_j) * (&
+                         F_11(d,j) = F_11(d,j) + diff_energy * convert_nacv*sh_env%nacv(d, i, num_j) * (&
                                                  C(num_mol, new_state) * C(i, old_state) +   &
                                                  C(num_mol, old_state) * C(i,new_state) )
                        ENDIF
@@ -1061,7 +1061,7 @@ END FUNCTION NORM2
               nparticle_local = local_particles%n_el(iparticle_kind)
               DO iparticle_local=1,nparticle_local
                  iparticle = local_particles%list(iparticle_kind)%array(iparticle_local)
-                 if (force_env%mixed_env%aom_env%ext_pres(iparticle)) then 
+                 if (force_env%mixed_env%sh_env%ext_pres(iparticle)) then 
                          velocities(:, iparticle) =rescale_factor*velocities(:, iparticle)
                  end if
               END DO
@@ -1099,7 +1099,7 @@ END FUNCTION NORM2
               nparticle_local = local_particles%n_el(iparticle_kind)
               DO iparticle_local=1,nparticle_local
                  iparticle = local_particles%list(iparticle_kind)%array(iparticle_local)
-                 if (force_env%mixed_env%aom_env%ext_pres(iparticle)) then 
+                 if (force_env%mixed_env%sh_env%ext_pres(iparticle)) then 
                       kinetic_energy_qsys = kinetic_energy_qsys +   &
                          mass*( &
                          velocities(1, iparticle)**2 + &
@@ -1111,11 +1111,11 @@ END FUNCTION NORM2
           kinetic_energy_qsys = 0.5*kinetic_energy_qsys
 
 !print *, "kinetic_energy_qsys", kinetic_energy_qsys
-           new_state = force_env%mixed_env%aom_env%new_state
-           old_state = force_env%mixed_env%aom_env%active_state
+           new_state = force_env%mixed_env%sh_env%new_state
+           old_state = force_env%mixed_env%sh_env%active_state
            delta_energy = kinetic_energy_qsys-( &
-                     force_env%mixed_env%aom_env%E_tp(new_state) - &
-                     force_env%mixed_env%aom_env%E_tp(old_state))
+                     force_env%mixed_env%sh_env%E_tp(new_state) - &
+                     force_env%mixed_env%sh_env%E_tp(old_state))
         IF (ASSOCIATED(atomic_kind)) NULLIFY(atomic_kind)
    END SUBROUTINE cal_delta_ene_QSYS
 
@@ -1159,25 +1159,25 @@ SUBROUTINE cal_delta_energy(nparticle_kind, velocities, force_env, atomic_kind_s
         END DO
         kinetic_energy_prime = 0.5*kinetic_energy_prime
 
-        new_state = force_env%mixed_env%aom_env%new_state
-        old_state = force_env%mixed_env%aom_env%active_state
+        new_state = force_env%mixed_env%sh_env%new_state
+        old_state = force_env%mixed_env%sh_env%active_state
         !print *, "OLD_STATE_ISOTROP", old_state
         delta_energy = kinetic_energy_prime-( &
-                  force_env%mixed_env%aom_env%E_tp(new_state) - &
-                  force_env%mixed_env%aom_env%E_tp(old_state))
+                  force_env%mixed_env%sh_env%E_tp(new_state) - &
+                  force_env%mixed_env%sh_env%E_tp(old_state))
      IF (ASSOCIATED(atomic_kind)) NULLIFY(atomic_kind)
 END SUBROUTINE cal_delta_energy
 
 !**********************************************************************************
 !> \brief Get first adiabatic state when initialization is DIABATIC
 !**********************************************************************************
-   SUBROUTINE choose_firstadiabat(C, init, sh_print_env, first_adiabat, aom_env)
+   SUBROUTINE choose_firstadiabat(C, init, sh_print_env, first_adiabat, sh_env)
 
         REAL(KIND=dp), dimension(:,:), intent(in) :: C
         INTEGER, INTENT(IN)                       :: init
         TYPE(sh_print_env_type), INTENT(INOUT)    :: sh_print_env
         INTEGER, INTENT(OUT)                      :: first_adiabat
-        TYPE(aom_env_type)                        :: aom_env
+        TYPE(sh_env_type)                        :: sh_env
 
         CHARACTER(len=*), PARAMETER :: routineN = 'choose_firstadiabat', &
         routineP = moduleN//':'//routineN
@@ -1187,7 +1187,7 @@ END SUBROUTINE cal_delta_energy
 
         ALLOCATE(sh_print_env%pop_init(SIZE(C(init,:))))
 
-        random = next_random_number(aom_env%rng_stream)
+        random = next_random_number(sh_env%rng_stream)
         sh_print_env%initrandom = random
         sumc = 0.0D0
         DO i=1, SIZE(C(init,:))
@@ -1256,12 +1256,12 @@ END SUBROUTINE
 !> \brief This does energy conservation test according to Fabiano 2008 to check
 !> whether the energy conservation criteria for a hop to be successful is met.
 !**********************************************************************************
-   SUBROUTINE cal_delta_energy_nacv(nparticle_kind, velocities, aom_env, atomic_kind_set, &
+   SUBROUTINE cal_delta_energy_nacv(nparticle_kind, velocities, sh_env, atomic_kind_set, &
                                     local_particles, hop_nacv, delta_energy, A, B, i, j) 
         INTEGER                                 :: nparticle_kind
         INTEGER, OPTIONAL, INTENT(IN)            :: i, j
         REAL(kind=dp), DIMENSION(:,:),POINTER    :: velocities
-        TYPE(aom_env_type)                       :: aom_env
+        TYPE(sh_env_type)                       :: sh_env
         TYPE(distribution_1d_type), POINTER      :: local_particles
         TYPE(atomic_kind_type), DIMENSION(:), &
              POINTER                                :: atomic_kind_set
@@ -1308,17 +1308,17 @@ END SUBROUTINE
            IF (PRESENT(j)) THEN
               new_state = j
            ELSE    
-              new_state = aom_env%new_state
+              new_state = sh_env%new_state
            ENDIF
            IF (PRESENT(i)) THEN
               old_state = i
            ELSE
-              old_state = aom_env%active_state
+              old_state = sh_env%active_state
 !print *, "DELTAE_OLDSTATE", old_state
            ENDIF
            delta_energy = B**2 - 4 * A * (  &
-                     aom_env%E_tp(new_state) - &
-                     aom_env%E_tp(old_state))
+                     sh_env%E_tp(new_state) - &
+                     sh_env%E_tp(old_state))
         IF (ASSOCIATED(atomic_kind)) NULLIFY(atomic_kind)
    END SUBROUTINE cal_delta_energy_nacv
 
@@ -1462,7 +1462,7 @@ subroutine adiabaticity(H, C, E)
         REAL(KIND=dp), dimension(:,:), intent(out), allocatable :: C
         REAL(KIND=dp), dimension(:), intent(out), allocatable :: E
         !logical, intent(in) :: store_C
-        !TYPE(aom_env_type), INTENT(INOUT), OPTIONAL               ::    aom_env
+        !TYPE(sh_env_type), INTENT(INOUT), OPTIONAL               ::    sh_env
 
         CHARACTER(len=*), PARAMETER :: routineN ='adiabaticity', &
                                routineP = moduleN//':'//routineN
@@ -1499,9 +1499,9 @@ subroutine adiabaticity(H, C, E)
                 CPABORT("Error with subroutine DSYEV: error status")
         end if
         
-        !if (AND.PRESENT(aom_env)) then 
-        !allocate(aom_env%C_tp(mol,mol))
-        !        aom_env%C_tp=C
+        !if (AND.PRESENT(sh_env)) then 
+        !allocate(sh_env%C_tp(mol,mol))
+        !        sh_env%C_tp=C
         !end if 
         
          
@@ -1512,9 +1512,9 @@ end subroutine adiabaticity
 !> \brief Define the active region when the spurious charge transfer correction
 !>        is used
 !**********************************************************************************
-SUBROUTINE define_active_region(aom_env)
+SUBROUTINE define_active_region(sh_env)
      
-     TYPE(aom_env_type)                       :: aom_env   
+     TYPE(sh_env_type)                       :: sh_env   
    
      CHARACTER(len=*), PARAMETER :: routineN = 'define_active_region', &
         routineP = moduleN//':'//routineN
@@ -1525,14 +1525,14 @@ SUBROUTINE define_active_region(aom_env)
      INTEGER                                  :: mat
 
      
-     mat = size(aom_env%H_tp,1) 
+     mat = size(sh_env%H_tp,1) 
 
      ALLOCATE(pop(mat))
 
      ! do i=1, mol
-     pop(:)  = real(aom_env%ctin_before_deco(:)*conjg(aom_env%ctin_before_deco(:)))
+     pop(:)  = real(sh_env%ctin_before_deco(:)*conjg(sh_env%ctin_before_deco(:)))
      ! end do
-     aom_env%active_region(:) = 0
+     sh_env%active_region(:) = 0
      sum = 0.0
      do i =1, mat
          sum = sum + maxval(pop)
@@ -1545,12 +1545,12 @@ SUBROUTINE define_active_region(aom_env)
 
      do i =1,mat
         if (pop(i) == -1) then
-            aom_env%active_region(i) = 1
+            sh_env%active_region(i) = 1
         end if
      end do
 
     !do i =1, mat
-    !    write (*,'(I12,A, F12.10)') aom_env%active_region(i),  "  pop = ", pop(i)
+    !    write (*,'(I12,A, F12.10)') sh_env%active_region(i),  "  pop = ", pop(i)
     !end do
 
      DEALLOCATE(pop)
@@ -1559,9 +1559,9 @@ END SUBROUTINE define_active_region
 !**********************************************************************************
 !> \brief TOADD
 !**********************************************************************************
-SUBROUTINE calc_psi_after_correction(aom_env)
+SUBROUTINE calc_psi_after_correction(sh_env)
  
-     TYPE(aom_env_type)                      :: aom_env
+     TYPE(sh_env_type)                      :: sh_env
      !COMPLEX(KIND=dp), dimension(:), INTENT(IN) :: ctin, ctin_after_deco
      !COMPLEX(KIND=dp), dimension(:), allocatable, INTENT(out) :: ctin_after_tranf_correction
      !INTEGER, dimension(:), INTENT(in)          :: active_region
@@ -1573,18 +1573,18 @@ SUBROUTINE calc_psi_after_correction(aom_env)
      INTEGER                  :: i
      INTEGER                        :: mat
 
-     mat = size(aom_env%H_tp,1) 
+     mat = size(sh_env%H_tp,1) 
    
      !allocate(ctin_after_tranf_correction(mat))
      sum_ctin = 0.0D0
      sum_ctin_after_deco = 0.0D0
      do i =1, mat
-         if (aom_env%active_region(i) == 0) then 
-             sum_ctin = sum_ctin + abs(aom_env%ctin_before_deco(i)*&
-                                        conjg(aom_env%ctin_before_deco(i)))
+         if (sh_env%active_region(i) == 0) then 
+             sum_ctin = sum_ctin + abs(sh_env%ctin_before_deco(i)*&
+                                        conjg(sh_env%ctin_before_deco(i)))
          else
              sum_ctin_after_deco = sum_ctin_after_deco + &
-                      abs(aom_env%ctin_after_deco(i)*conjg(aom_env%ctin_after_deco(i)))
+                      abs(sh_env%ctin_after_deco(i)*conjg(sh_env%ctin_after_deco(i)))
          end if
      end do
 
@@ -1596,10 +1596,10 @@ SUBROUTINE calc_psi_after_correction(aom_env)
     IF (ABS(lambda_scaling-1).GT.1E-03) THEN
        PRINT*, "FOBSH| *** WARNING: Projection to avoid spurious transfer get lambda = ", lambda_scaling, "***"
     ENDIF
-    aom_env%ctin_after_tranf_correction(:) = aom_env%ctin_before_deco(:)
+    sh_env%ctin_after_tranf_correction(:) = sh_env%ctin_before_deco(:)
     do i =1, mat
-       if (aom_env%active_region(i) == 1) then
-           aom_env%ctin_after_tranf_correction(i) = aom_env%ctin_after_deco(i)*lambda_scaling
+       if (sh_env%active_region(i) == 1) then
+           sh_env%ctin_after_tranf_correction(i) = sh_env%ctin_after_deco(i)*lambda_scaling
        end if
     end do
 
@@ -1608,12 +1608,12 @@ END SUBROUTINE calc_psi_after_correction
 !**********************************************************************************
 !> \brief TOADD
 !**********************************************************************************
-SUBROUTINE classically_forbidden_hops(active_state, diagonal_F, aom_env, mat,  &
+SUBROUTINE classically_forbidden_hops(active_state, diagonal_F, sh_env, mat,  &
                   velocities_com_tp, local_particles, atomic_kinds, nparticle_kind, &
                           atomic_kind_set, class_forbidden_hop)
 
      INTEGER, INTENT(IN)                                :: active_state, mat
-     TYPE(aom_env_type), INTENT(IN)                     :: aom_env
+     TYPE(sh_env_type), INTENT(IN)                     :: sh_env
      REAL(kind=dp), DIMENSION(:,:), POINTER             :: velocities_com_tp
      REAL(kind=dp), DIMENSION(:,:,:), INTENT(IN), POINTER   :: diagonal_F
      TYPE(distribution_1d_type), POINTER                :: local_particles
@@ -1633,16 +1633,16 @@ SUBROUTINE classically_forbidden_hops(active_state, diagonal_F, aom_env, mat,  &
      ALLOCATE(energy_conservation(mat)) 
      ALLOCATE(class_forbidden_hop(mat))
 
-     CALL calc_kinetic_tot(aom_env, velocities_com_tp, local_particles, atomic_kinds, &
+     CALL calc_kinetic_tot(sh_env, velocities_com_tp, local_particles, atomic_kinds, &
                   nparticle_kind, atomic_kind_set, K_tot)
      E_cutoff = 0.0D0
-     E_cutoff = aom_env%E_tp(active_state) + K_tot  !THIS CUTOFF IS TO LARGE ALL THE
+     E_cutoff = sh_env%E_tp(active_state) + K_tot  !THIS CUTOFF IS TO LARGE ALL THE
                                             !STATE ARE BELOW IT
      do j=1, mat
-           if ((j .gt. active_state) .and. (aom_env%E_tp(j) .le. E_cutoff)) then
+           if ((j .gt. active_state) .and. (sh_env%E_tp(j) .le. E_cutoff)) then
                
-              CALL calc_hop_nacv_aom(aom_env, diagonal_F, hop_nacv, active_state, j, fast=.TRUE.)
-              CALL cal_delta_energy_nacv(atomic_kinds%n_els, velocities_com_tp, aom_env, atomic_kinds%els, &
+              CALL calc_hop_nacv_aom(sh_env, diagonal_F, hop_nacv, active_state, j, fast=.TRUE.)
+              CALL cal_delta_energy_nacv(atomic_kinds%n_els, velocities_com_tp, sh_env, atomic_kinds%els, &
                                 local_particles, hop_nacv, delta_energy, A, B, active_state, j)
               energy_conservation(j) = delta_energy
               if (energy_conservation(j) .lt. 0.0D0) then 
@@ -1650,7 +1650,7 @@ SUBROUTINE classically_forbidden_hops(active_state, diagonal_F, aom_env, mat,  &
               else 
                    class_forbidden_hop(j) = -1
               end if
-           else if ((j .gt. active_state) .and. (aom_env%E_tp(j) .gt. E_cutoff)) then
+           else if ((j .gt. active_state) .and. (sh_env%E_tp(j) .gt. E_cutoff)) then
               class_forbidden_hop(j) = j
               energy_conservation(j) = -2  
            else if (j .le. active_state) then
@@ -1692,28 +1692,28 @@ END SUBROUTINE classically_forbidden_hops
         coupling_section => section_vals_get_subs_vals(adiab_section, "AOM")
 
         CALL section_vals_val_get(adiab_section,"CENTER_OF_MASS",l_val=translate_keyword)
-        sh_print_env = force_env%mixed_env%aom_env%sh_print_env
+        sh_print_env = force_env%mixed_env%sh_env%sh_print_env
  
         ALLOCATE(velocities_com_tp(SIZE(velocities, 1), SIZE(velocities, 2)))
         CALL translate_com(velocities, translate_keyword, velocities_com_tp, &
               local_particles, nparticle_kind = nparticle_kind, atomic_kind_set = atomic_kind_set)
    
-        force_env%mixed_env%aom_env%ctin_before_deco = force_env%mixed_env%aom_env%ctin
-        CALL decohere_wf(adiab_section, force_env%mixed_env%aom_env, force_env%mixed_env%F, sh_print_env, itimes, &
+        force_env%mixed_env%sh_env%ctin_before_deco = force_env%mixed_env%sh_env%ctin
+        CALL decohere_wf(adiab_section, force_env%mixed_env%sh_env, force_env%mixed_env%F, sh_print_env, itimes, &
                          velocities_com_tp, local_particles, nparticle_kind,atomic_kind_set)
         CALL section_vals_val_get(adiab_section,"SPURIOUS_TRANSFER_CORR", l_val=correct_transfer_keyword)
         
         if (correct_transfer_keyword) then
               !> this subroutine define the active regione for local decoherence, it
-              !takes aom_env%ctin_before_deco  as argument
-              CALL define_active_region(force_env%mixed_env%aom_env)
-              !> the new aom_env%ctin after deco is given to aom_env%ctin_after_deco
-              force_env%mixed_env%aom_env%ctin_after_deco=force_env%mixed_env%aom_env%ctin
-              CALL calc_psi_after_correction(force_env%mixed_env%aom_env)
+              !takes sh_env%ctin_before_deco  as argument
+              CALL define_active_region(force_env%mixed_env%sh_env)
+              !> the new sh_env%ctin after deco is given to sh_env%ctin_after_deco
+              force_env%mixed_env%sh_env%ctin_after_deco=force_env%mixed_env%sh_env%ctin
+              CALL calc_psi_after_correction(force_env%mixed_env%sh_env)
 
-              !> the value of aom_env%ctin is updated again using the spurious charge
+              !> the value of sh_env%ctin is updated again using the spurious charge
               !transfer correction
-              force_env%mixed_env%aom_env%ctin = force_env%mixed_env%aom_env%ctin_after_tranf_correction                        
+              force_env%mixed_env%sh_env%ctin = force_env%mixed_env%sh_env%ctin_after_tranf_correction                        
         end if
 
         DEALLOCATE(velocities_com_tp)
@@ -1724,13 +1724,13 @@ END SUBROUTINE classically_forbidden_hops
 !**********************************************************************************
 !> \brief TOADD
 !**********************************************************************************
-  SUBROUTINE decohere_wf(adiab_section,aom_env, diagonal_F, sh_print_env, itimes, &
+  SUBROUTINE decohere_wf(adiab_section,sh_env, diagonal_F, sh_print_env, itimes, &
                          velocities_com_tp, local_particles, nparticle_kind, &
                          atomic_kind_set, atomic_kinds)
 
         TYPE(section_vals_type), POINTER               :: adiab_section 
         TYPE(sh_print_env_type)                        :: sh_print_env
-        TYPE(aom_env_type)                             :: aom_env
+        TYPE(sh_env_type)                             :: sh_env
  !       TYPE(sh_env_type)                              :: sh_env
         INTEGER, POINTER                               :: itimes
         REAL(kind=dp), DIMENSION(:,:), POINTER             :: velocities_com_tp
@@ -1760,48 +1760,48 @@ END SUBROUTINE classically_forbidden_hops
         CALL section_vals_val_get(adiab_section,"DECOHERENCE_CORRECTIONS",c_val=deco_keyword)
         
        
-        mol = SIZE(aom_env%H_tp, 1) 
-        deltatMD = aom_env%deltat 
-        !sh_print_env = aom_env%sh_print_env    
+        mol = SIZE(sh_env%H_tp, 1) 
+        deltatMD = sh_env%deltat 
+        !sh_print_env = sh_env%sh_print_env    
 
         SELECT CASE(wfprop_keyword)
         CASE("DIABATIC_BASIS")   
             SELECT CASE(deco_keyword)                                                          
             CASE("INSTANT_COLLAPSE")
-              CALL wf_collapse(aom_env, sh_print_env, itimes)
+              CALL wf_collapse(sh_env, sh_print_env, itimes)
             CASE("TRESH_ONLY_COLLAPSE")  
-              CALL  wf_tresh_collaps(aom_env, sh_print_env, itimes)
+              CALL  wf_tresh_collaps(sh_env, sh_print_env, itimes)
             CASE("DAMPING")
-              CALL calc_kinetic_tot(aom_env, velocities_com_tp, local_particles, atomic_kinds,&
-                                    nparticle_kind, atomic_kind_set, K_tot, aom_env%ext_pres)
-              CALL eval_deco_tau(aom_env,diagonal_F, tau, adiab_section, mol, K_tot, sh_print_env, &
+              CALL calc_kinetic_tot(sh_env, velocities_com_tp, local_particles, atomic_kinds,&
+                                    nparticle_kind, atomic_kind_set, K_tot, sh_env%ext_pres)
+              CALL eval_deco_tau(sh_env,diagonal_F, tau, adiab_section, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds,nparticle_kind, atomic_kind_set) 
                    
-              CALL  wf_damping(aom_env, tau, mol, deltatMD, sh_print_env)  
+              CALL  wf_damping(sh_env, tau, mol, deltatMD, sh_print_env)  
             CASE("COLLAPSE_WITHIN_DECOTIME")
-              CALL calc_kinetic_tot(aom_env, velocities_com_tp, local_particles, atomic_kinds,&
-                                    nparticle_kind, atomic_kind_set, K_tot, aom_env%ext_pres)
-              CALL eval_deco_tau(aom_env,diagonal_F, tau, adiab_section, mol, K_tot, sh_print_env, &
+              CALL calc_kinetic_tot(sh_env, velocities_com_tp, local_particles, atomic_kinds,&
+                                    nparticle_kind, atomic_kind_set, K_tot, sh_env%ext_pres)
+              CALL eval_deco_tau(sh_env,diagonal_F, tau, adiab_section, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds,nparticle_kind, atomic_kind_set) 
                    
-              CALL  collapse_within_deco_time(tau, mol, deltatMD, aom_env)
+              CALL  collapse_within_deco_time(tau, mol, deltatMD, sh_env)
             CASE("IDA")
-               CALL ida_collapse(aom_env)
+               CALL ida_collapse(sh_env)
             CASE DEFAULT                                           
               CPABORT("There is no method to add the decoherence.") 
             END SELECT
         CASE("ADIABATIC_BASIS")
             SELECT CASE(deco_keyword)                                                          
             CASE("INSTANT_COLLAPSE")
-              CALL wf_collapse_adiab_prop(aom_env,sh_print_env, itimes)
+              CALL wf_collapse_adiab_prop(sh_env,sh_print_env, itimes)
             CASE("TRESH_ONLY_COLLAPSE")  
               CPABORT("NOT IMPLEMENTED")
             CASE("DAMPING")
-              CALL calc_kinetic_tot(aom_env, velocities_com_tp, local_particles, atomic_kinds,&
-                                    nparticle_kind, atomic_kind_set, K_tot, aom_env%ext_pres)
-              CALL eval_deco_tau(aom_env,diagonal_F, tau, adiab_section, mol, K_tot, sh_print_env, &
+              CALL calc_kinetic_tot(sh_env, velocities_com_tp, local_particles, atomic_kinds,&
+                                    nparticle_kind, atomic_kind_set, K_tot, sh_env%ext_pres)
+              CALL eval_deco_tau(sh_env,diagonal_F, tau, adiab_section, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds, nparticle_kind, atomic_kind_set) 
-              CALL wf_damping_adiab_prop(aom_env, tau, mol, deltatMD, sh_print_env)                    
+              CALL wf_damping_adiab_prop(sh_env, tau, mol, deltatMD, sh_print_env)                    
             CASE DEFAULT                                           
               CPABORT("There is no method to add the decoherence.") 
             END SELECT
@@ -1814,8 +1814,8 @@ END SUBROUTINE classically_forbidden_hops
 !**********************************************************************************
 !> \brief TOADD
 !**********************************************************************************
-  SUBROUTINE wf_collapse_adiab_prop(aom_env,sh_print_env, itimes)
-    TYPE(aom_env_type)                             :: aom_env
+  SUBROUTINE wf_collapse_adiab_prop(sh_env,sh_print_env, itimes)
+    TYPE(sh_env_type)                             :: sh_env
     TYPE(sh_print_env_type)                        :: sh_print_env
     INTEGER, POINTER                               :: itimes
 
@@ -1825,13 +1825,13 @@ END SUBROUTINE classically_forbidden_hops
  sh_print_env%decohere = .FALSE.                                      
       IF (itimes.ge.1) THEN                                                
          !Finally, collapse the wavefunction if called for                 
-         if (aom_env%futur_decohere .and. aom_env%decohere) then                                  
+         if (sh_env%futur_decohere .and. sh_env%decohere) then                                  
 !> Check if the surface_hop subroutine asks us to do the decoherence       
                   sh_print_env%decohere = .TRUE.
 !The wafunction is collapsed in a pure state
-                     aom_env%ctin(:) =  CMPLX(0.0D0, 0.0D0,dp)
-                     aom_env%ctin(aom_env%active_state) = CMPLX(1.0D0, 0.0D0,dp)
-                  aom_env%futur_decohere = .FALSE.                         
+                     sh_env%ctin(:) =  CMPLX(0.0D0, 0.0D0,dp)
+                     sh_env%ctin(sh_env%active_state) = CMPLX(1.0D0, 0.0D0,dp)
+                  sh_env%futur_decohere = .FALSE.                         
          end if                                                            
          CALL adiab_print_sh_info(sh_print_env, keyword = 'DECOHERENCE')   
       ENDIF
@@ -1841,9 +1841,9 @@ END SUBROUTINE classically_forbidden_hops
 !**********************************************************************************
 !> \brief TOADD
 !**********************************************************************************
-  SUBROUTINE wf_collapse(aom_env,sh_print_env, itimes)
+  SUBROUTINE wf_collapse(sh_env,sh_print_env, itimes)
     TYPE(sh_print_env_type)                        :: sh_print_env
-    TYPE(aom_env_type)                             :: aom_env
+    TYPE(sh_env_type)                             :: sh_env
     INTEGER, POINTER                               :: itimes
 
     CHARACTER(len=*), PARAMETER :: routineN ='wf_collapse', &         
@@ -1853,11 +1853,11 @@ END SUBROUTINE classically_forbidden_hops
  sh_print_env%decohere = .FALSE.                                      
       IF (itimes.ge.1) THEN                                                
          !Finally, collapse the wavefunction if called for                 
-         if (aom_env%futur_decohere .and. aom_env%decohere) then                                  
+         if (sh_env%futur_decohere .and. sh_env%decohere) then                                  
 !> Check if the surface_hop subroutine asks us to do the decoherence       
                   sh_print_env%decohere = .TRUE.
-                     aom_env%ctin(:) = aom_env%C_tp(:, aom_env%active_state)
-                  aom_env%futur_decohere = .FALSE.                         
+                     sh_env%ctin(:) = sh_env%C_tp(:, sh_env%active_state)
+                  sh_env%futur_decohere = .FALSE.                         
          end if                                                            
          CALL adiab_print_sh_info(sh_print_env, keyword = 'DECOHERENCE')   
       ENDIF
@@ -1867,13 +1867,13 @@ END SUBROUTINE classically_forbidden_hops
 !**********************************************************************************
 !> \brief TOADD
 !**********************************************************************************
-  SUBROUTINE ida_collapse(aom_env)
-    TYPE(aom_env_type)                             :: aom_env
+  SUBROUTINE ida_collapse(sh_env)
+    TYPE(sh_env_type)                             :: sh_env
     CHARACTER(len=*), PARAMETER :: routineN ='ida_collapse', &         
     routineP = moduleN//':'//routineN                                                                 
         
-       if (aom_env%attempt_hop) then
-              aom_env%ctin(:) = aom_env%C_tp(:, aom_env%active_state)
+       if (sh_env%attempt_hop) then
+              sh_env%ctin(:) = sh_env%C_tp(:, sh_env%active_state)
       end if      
   END SUBROUTINE ida_collapse
 
@@ -1881,8 +1881,8 @@ END SUBROUTINE classically_forbidden_hops
 !**********************************************************************************
 !> \brief TOADD
 !**********************************************************************************
-  SUBROUTINE wf_tresh_collaps(aom_env, sh_print_env, itimes)
-    TYPE(aom_env_type)                             :: aom_env
+  SUBROUTINE wf_tresh_collaps(sh_env, sh_print_env, itimes)
+    TYPE(sh_env_type)                             :: sh_env
     TYPE(sh_print_env_type)                        :: sh_print_env
     INTEGER, POINTER                               :: itimes
 
@@ -1892,10 +1892,10 @@ END SUBROUTINE classically_forbidden_hops
  sh_print_env%decohere = .FALSE.                                      
       IF (itimes.ge.1) THEN                                                
          !Finally, collapse the wavefunction if called for                 
-         if (aom_env%decohere) then                                  
+         if (sh_env%decohere) then                                  
 !> Check if the surface_hop subroutine asks us to do the decoherence       
                   sh_print_env%decohere = .TRUE.
-                     aom_env%ctin(:) = aom_env%C_tp(:, aom_env%active_state)
+                     sh_env%ctin(:) = sh_env%C_tp(:, sh_env%active_state)
          end if                                                            
          CALL adiab_print_sh_info(sh_print_env, keyword = 'DECOHERENCE')   
       ENDIF
@@ -1905,9 +1905,9 @@ END SUBROUTINE classically_forbidden_hops
 !**********************************************************************************
 !> \brief TOADD
 !**********************************************************************************
-  SUBROUTINE  wf_damping_adiab_prop(aom_env, tau, mol, deltatMD, sh_print_env)                    
+  SUBROUTINE  wf_damping_adiab_prop(sh_env, tau, mol, deltatMD, sh_print_env)                    
     REAL(KIND=dp), DIMENSION(:), INTENT(in)    :: tau!, tau_forces
-    TYPE(aom_env_type)                          :: aom_env
+    TYPE(sh_env_type)                          :: sh_env
     INTEGER, INTENT(IN)                        :: mol
     REAL(KIND=dp), INTENT(IN)                  :: deltatMD
     TYPE(sh_print_env_type)                    :: sh_print_env
@@ -1926,25 +1926,25 @@ END SUBROUTINE classically_forbidden_hops
 
     !>transfor the diabatic into the adiabatic coefficients and calculate tau
     do i=1,mol 
-           if (i .ne. aom_env%active_state) then
+           if (i .ne. sh_env%active_state) then
 !               tau(i)= (1/abs(sh_env%E_tp(i) - sh_env%E_tp(sh_env%active_state)))* &
 !                                        (C_param +(E_0_param/K_tot))
 
     !>Damp the coefficients of the states different from the active state    
-                aom_env%ctin(i) = aom_env%ctin(i)*exp(-(deltatMD/tau(i)))
-                sum = sum + abs(aom_env%ctin(i))*abs(aom_env%ctin(i))
+                sh_env%ctin(i) = sh_env%ctin(i)*exp(-(deltatMD/tau(i)))
+                sum = sum + abs(sh_env%ctin(i))*abs(sh_env%ctin(i))
            end if
     end do
 
     !>transfer population to the active state for keeping the detailed balance   
-    if (aom_env%ctin(aom_env%active_state)== 0) then
-           aom_env%ctin(aom_env%active_state) = sqrt(1-sum)
+    if (sh_env%ctin(sh_env%active_state)== 0) then
+           sh_env%ctin(sh_env%active_state) = sqrt(1-sum)
     else 
-           aom_env%ctin(aom_env%active_state)= aom_env%ctin(aom_env%active_state)* &
-              sqrt((1-sum)/(abs(aom_env%ctin(aom_env%active_state))*abs(aom_env%ctin(aom_env%active_state))))
+           sh_env%ctin(sh_env%active_state)= sh_env%ctin(sh_env%active_state)* &
+              sqrt((1-sum)/(abs(sh_env%ctin(sh_env%active_state))*abs(sh_env%ctin(sh_env%active_state))))
     end if
     
-    pop(aom_env%active_state) = aom_env%ctin(aom_env%active_state)*conjg(aom_env%ctin(aom_env%active_state))
+    pop(sh_env%active_state) = sh_env%ctin(sh_env%active_state)*conjg(sh_env%ctin(sh_env%active_state))
     deallocate(pop)
   END SUBROUTINE wf_damping_adiab_prop 
 
@@ -1952,12 +1952,12 @@ END SUBROUTINE classically_forbidden_hops
 !**********************************************************************************
 !> \brief TOADD
 !**********************************************************************************
-  SUBROUTINE  eval_deco_tau(aom_env, diagonal_F, tau, adiab_section, mol, K_tot, sh_print_env, &
+  SUBROUTINE  eval_deco_tau(sh_env, diagonal_F, tau, adiab_section, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds,nparticle_kind, atomic_kind_set)                    
 !    LOGICAL, INTENT(IN)                        :: edc_deco_time
 !    TYPE(sh_env_type)                          :: sh_env
     INTEGER, INTENT(IN)                        :: mol
-    TYPE(aom_env_type)                         :: aom_env
+    TYPE(sh_env_type)                         :: sh_env
 !    REAL(KIND=dp), INTENT(IN)                  :: deltatMD
     REAL(kind=dp)                              :: K_tot
     TYPE(sh_print_env_type)                    :: sh_print_env
@@ -1993,8 +1993,8 @@ END SUBROUTINE classically_forbidden_hops
     REAL(kind=dp), DIMENSION(:,:),POINTER          :: my_forces_adiab
     LOGICAL                                  :: tau_schwartz
 
-    !ALLOCATE(active_state_adforces(3, aom_env%natom))
-    ALLOCATE(my_forces_adiab(3,aom_env%natom))
+    !ALLOCATE(active_state_adforces(3, sh_env%natom))
+    ALLOCATE(my_forces_adiab(3,sh_env%natom))
     allocate(tau(mol)) ! decoherence time (EDC method)
     allocate(tau_forces(mol)) ! decoherence time (EDC method)
     allocate(tau_pure_deph(mol)) ! decoherence time (EDC method)
@@ -2002,9 +2002,9 @@ END SUBROUTINE classically_forbidden_hops
     allocate(adiab_nace_vector(mol))
 !    allocate(sh_print_env%pure_deph(mol))
 
-    adiab_nace_vector(:) = aom_env%adiab_nace_tp(aom_env%active_state,:)
+    adiab_nace_vector(:) = sh_env%adiab_nace_tp(sh_env%active_state,:)
     !>number of degrees of freedom intensive EDC
-    deg_of_freedom = (mol*aom_env%atoms*3-6)
+    deg_of_freedom = (mol*sh_env%atoms*3-6)
 
 
     IF (PRESENT(atomic_kinds)) THEN
@@ -2032,7 +2032,7 @@ END SUBROUTINE classically_forbidden_hops
    
    CALL section_vals_val_get(adiab_section,"DECO_TIME",c_val=tau_param)
     do i=1,mol 
-           if (i .ne. aom_env%active_state) then
+           if (i .ne. sh_env%active_state) then
               SELECT CASE(tau_param)
               CASE("EDC")
                     CALL section_vals_val_get(adiab_section,"EDC_C",r_val=C_param)
@@ -2042,12 +2042,12 @@ END SUBROUTINE classically_forbidden_hops
                     if (E_0_param == 0.0D0) then  
                          K_tot = 1.0D0
                     end if
-                    tau(i)= (1/abs(aom_env%E_tp(i) - aom_env%E_tp(aom_env%active_state)))* &
+                    tau(i)= (1/abs(sh_env%E_tp(i) - sh_env%E_tp(sh_env%active_state)))* &
                                         (C_param+((E_0_param/K_tot)*deg_of_freedom))
 
               CASE("FORCES_BASED")
                     !Boltzmann factor to use in alpha parameter
-                     KbT = (2*K_tot)/(3*mol*aom_env%atoms)
+                     KbT = (2*K_tot)/(3*mol*sh_env%atoms)
                     !instead of using the exact boltzmann factor, at the moment the code uses Temp =
                     !298 K, maybe this point should be modified in future
                     
@@ -2058,13 +2058,13 @@ END SUBROUTINE classically_forbidden_hops
                     Temp = 3.1693191275167785e-06*T_inp !conver in KbT
                       !Temp = 0.0009444571  !KbT at 298 K
                       ! mixing_threshold = 2.0D0
-                    if ((abs(adiab_nace_vector(i))/(abs(aom_env%E_tp(i)-aom_env%E_tp(aom_env%active_state)))) & 
+                    if ((abs(adiab_nace_vector(i))/(abs(sh_env%E_tp(i)-sh_env%E_tp(sh_env%active_state)))) & 
                                          .ge. mixing_threshold) then
                          !if there is mixing then we use force otherwise we use !pure dephasing
-                         call calcforces(i ,-AIMAG(aom_env%H_tp), aom_env%C_tp, aom_env%nacv, &
-                              aom_env%atoms, &
-                              aom_env%scaling, aom_env%cbar, diagonal_F, my_forces_adiab, &
-                             aom_env%ext_pres)
+                         call calcforces(i ,-AIMAG(sh_env%H_tp), sh_env%C_tp, sh_env%nacv, &
+                              sh_env%atoms, &
+                              sh_env%scaling, sh_env%cbar, diagonal_F, my_forces_adiab, &
+                             sh_env%ext_pres)
                          tau(i) = 0.0D0
                          DO iparticle_kind= 1, my_nparticle_kind
                                 atomic_kind => my_atomic_kind_set(iparticle_kind)
@@ -2075,12 +2075,12 @@ END SUBROUTINE classically_forbidden_hops
                                    alpha = 6*mass*Temp                  
                                    if (tau_schwartz) then    
                                         tau(i) = tau(i) + &
-                                        (dot_product((my_forces_adiab(:,iparticle)-aom_env%forces_adiab(:,iparticle)),&
-                                        (my_forces_adiab(:,iparticle)-aom_env%forces_adiab(:,iparticle))))/(4*alpha)
+                                        (dot_product((my_forces_adiab(:,iparticle)-sh_env%forces_adiab(:,iparticle)),&
+                                        (my_forces_adiab(:,iparticle)-sh_env%forces_adiab(:,iparticle))))/(4*alpha)
                                    else
                                         tau(i) = tau(i) + &
-                                        (sqrt(dot_product((my_forces_adiab(:,iparticle)-aom_env%forces_adiab(:,iparticle)),&
-                                        (my_forces_adiab(:,iparticle)-aom_env%forces_adiab(:,iparticle)))))/(2*sqrt(alpha))
+                                        (sqrt(dot_product((my_forces_adiab(:,iparticle)-sh_env%forces_adiab(:,iparticle)),&
+                                        (my_forces_adiab(:,iparticle)-sh_env%forces_adiab(:,iparticle)))))/(2*sqrt(alpha))
                                    end if
                                 END DO
                          END DO
@@ -2091,12 +2091,12 @@ END SUBROUTINE classically_forbidden_hops
                          end if
                     else
 !                         sh_print_env%pure_deph(i) = .TRUE.
-                         tau(i)= (1/abs(aom_env%E_tp(i) - aom_env%E_tp(aom_env%active_state)))
+                         tau(i)= (1/abs(sh_env%E_tp(i) - sh_env%E_tp(sh_env%active_state)))
                     end if
 
               CASE("HYBRID_TAU")
                     !Boltzmann factor to use in alpha parameter
-                     KbT = (2*K_tot)/(3*mol*aom_env%atoms)
+                     KbT = (2*K_tot)/(3*mol*sh_env%atoms)
                     !instead of using the exact boltzmann factor, at the moment the code uses Temp =
                     !298 K, maybe this point should be modified in future
                     
@@ -2107,13 +2107,13 @@ END SUBROUTINE classically_forbidden_hops
                     Temp = 3.1693191275167785e-06*T_inp !conver in KbT
                       !Temp = 0.0009444571  !KbT at 298 K
                       ! mixing_threshold = 2.0D0
-                    if ((abs(adiab_nace_vector(i))/(abs(aom_env%E_tp(i)-aom_env%E_tp(aom_env%active_state)))) & 
+                    if ((abs(adiab_nace_vector(i))/(abs(sh_env%E_tp(i)-sh_env%E_tp(sh_env%active_state)))) & 
                                          .ge. mixing_threshold) then
                          !if there is mixing then we use force otherwise we use !pure dephasing
-                         call calcforces(i ,-AIMAG(aom_env%H_tp), aom_env%C_tp, aom_env%nacv, &
-                              aom_env%atoms, &
-                              aom_env%scaling, aom_env%cbar, diagonal_F, my_forces_adiab, &
-                              aom_env%ext_pres)
+                         call calcforces(i ,-AIMAG(sh_env%H_tp), sh_env%C_tp, sh_env%nacv, &
+                              sh_env%atoms, &
+                              sh_env%scaling, sh_env%cbar, diagonal_F, my_forces_adiab, &
+                              sh_env%ext_pres)
                          tau(i) = 0.0D0
                          tau_forces(i) =  0.0D0
                           tau_pure_deph(i) = 0.0D0
@@ -2126,12 +2126,12 @@ END SUBROUTINE classically_forbidden_hops
                                    alpha = 6*mass*Temp                  
                                    if (tau_schwartz) then    
                                         tau(i) = tau(i) + &
-                                        (dot_product((my_forces_adiab(:,iparticle)-aom_env%forces_adiab(:,iparticle)),&
-                                        (my_forces_adiab(:,iparticle)-aom_env%forces_adiab(:,iparticle))))/(4*alpha)
+                                        (dot_product((my_forces_adiab(:,iparticle)-sh_env%forces_adiab(:,iparticle)),&
+                                        (my_forces_adiab(:,iparticle)-sh_env%forces_adiab(:,iparticle))))/(4*alpha)
                                    else
                                         tau(i) = tau(i) + &
-                                        (sqrt(dot_product((my_forces_adiab(:,iparticle)-aom_env%forces_adiab(:,iparticle)),&
-                                        (my_forces_adiab(:,iparticle)-aom_env%forces_adiab(:,iparticle)))))/(2*sqrt(alpha))
+                                        (sqrt(dot_product((my_forces_adiab(:,iparticle)-sh_env%forces_adiab(:,iparticle)),&
+                                        (my_forces_adiab(:,iparticle)-sh_env%forces_adiab(:,iparticle)))))/(2*sqrt(alpha))
                                    end if
                                 END DO
                          END DO
@@ -2139,7 +2139,7 @@ END SUBROUTINE classically_forbidden_hops
                              tau(i) = sqrt(1/tau(i))
                          else
                              tau_forces(i) = 1/tau(i)
-                             tau_pure_deph(i) =  1/abs(aom_env%E_tp(i)-aom_env%E_tp(aom_env%active_state))
+                             tau_pure_deph(i) =  1/abs(sh_env%E_tp(i)-sh_env%E_tp(sh_env%active_state))
                             if(tau_forces(i) .ge. tau_pure_deph(i)) then
                                  tau(i) = tau_forces(i)
                             else
@@ -2148,7 +2148,7 @@ END SUBROUTINE classically_forbidden_hops
                          end if
                     else
 !                         sh_print_env%pure_deph(i) = .TRUE.
-                         tau(i)= (1/abs(aom_env%E_tp(i) - aom_env%E_tp(aom_env%active_state)))
+                         tau(i)= (1/abs(sh_env%E_tp(i) - sh_env%E_tp(sh_env%active_state)))
                     end if
               
               CASE DEFAULT
@@ -2176,11 +2176,11 @@ END SUBROUTINE classically_forbidden_hops
 !**********************************************************************************
 !> \brief TOADD
 !**********************************************************************************
-  SUBROUTINE collapse_within_deco_time(tau, mol, deltatMD, aom_env)
+  SUBROUTINE collapse_within_deco_time(tau, mol, deltatMD, sh_env)
 
     INTEGER, INTENT(IN)                        :: mol
     REAL(KIND=dp), INTENT(IN)                  :: deltatMD
-    TYPE(aom_env_type)                         :: aom_env
+    TYPE(sh_env_type)                         :: sh_env
     REAL(KIND=dp), DIMENSION(:), INTENT(in)    :: tau!, tau_forces
 
     CHARACTER(len=*), PARAMETER :: routineN ='collapse_within_deco_time', &
@@ -2198,19 +2198,19 @@ END SUBROUTINE classically_forbidden_hops
 
     sum = 0.0D0
     do i=1,mol
-         if (i .ne. aom_env%active_state) then
+         if (i .ne. sh_env%active_state) then
              pop(i) = cmplx(0.0D0, 0.0D0,dp) !TEST
              ct(i) = cmplx(0.0D0, 0.0D0,dp) 
              !> Tranform coefficients in the adiabatic basis 
              do j=1,mol
-                    ct(i) = ct(i) + cmplx(aom_env%C_tp(j,i), 0.0D0,dp)*aom_env%ctin(j)
+                    ct(i) = ct(i) + cmplx(sh_env%C_tp(j,i), 0.0D0,dp)*sh_env%ctin(j)
              end do
              pop(i) = ct(i)*conjg(ct(i))
              !print *, "POPU_BEFORE", pop(i)
         
              !>evaluate which states will be collpased
              collapse_probability = deltatMD/tau(i)
-             random_num = next_random_number(aom_env%rng_stream)
+             random_num = next_random_number(sh_env%rng_stream)
              if (random_num .gt. collapse_probability) then 
                     ct(i) = ct(i)  !nothing happens
              else
@@ -2221,34 +2221,34 @@ END SUBROUTINE classically_forbidden_hops
     end do
  
     !>transfor the active diabatic state into the active adiabatic state
-    pop(aom_env%active_state)= cmplx(0.0D0, 0.0D0, dp)
-    ct(aom_env%active_state) = cmplx(0.0D0, 0.0D0, dp)
+    pop(sh_env%active_state)= cmplx(0.0D0, 0.0D0, dp)
+    ct(sh_env%active_state) = cmplx(0.0D0, 0.0D0, dp)
     do i=1,mol                                                       
-           ct(aom_env%active_state) = ct(aom_env%active_state) + &
-             cmplx(aom_env%C_tp(i,aom_env%active_state), 0.0D0,dp)*aom_env%ctin(i)
+           ct(sh_env%active_state) = ct(sh_env%active_state) + &
+             cmplx(sh_env%C_tp(i,sh_env%active_state), 0.0D0,dp)*sh_env%ctin(i)
     end do  
     
-    pop(aom_env%active_state) = ct(aom_env%active_state)*conjg(ct(aom_env%active_state))
+    pop(sh_env%active_state) = ct(sh_env%active_state)*conjg(ct(sh_env%active_state))
     
     !>transfer population to the active state for keeping the detailed balance   
-    if (ct(aom_env%active_state)== 0) then
-           ct(aom_env%active_state) = sqrt(1-sum)
+    if (ct(sh_env%active_state)== 0) then
+           ct(sh_env%active_state) = sqrt(1-sum)
     else 
-           ct(aom_env%active_state)= ct(aom_env%active_state)* &
-              sqrt((1-sum)/(abs(ct(aom_env%active_state))*abs(ct(aom_env%active_state))))
+           ct(sh_env%active_state)= ct(sh_env%active_state)* &
+              sqrt((1-sum)/(abs(ct(sh_env%active_state))*abs(ct(sh_env%active_state))))
     end if
 
-    pop(aom_env%active_state) = ct(aom_env%active_state)*conjg(ct(aom_env%active_state))
+    pop(sh_env%active_state) = ct(sh_env%active_state)*conjg(ct(sh_env%active_state))
 
     !>transfor back the adiabatic into the diabatic which, then, follow the
       !electronic prpagation    
     do j=1,mol
-          aom_env%ctin(j) = cmplx(0.0D0, 0.0D0,dp)                           
+          sh_env%ctin(j) = cmplx(0.0D0, 0.0D0,dp)                           
           pop(j) = cmplx(0.0D0, 0.0D0,dp) !TEST
           do i=1,mol 
-              aom_env%ctin(j) = aom_env%ctin(j) + cmplx(aom_env%C_tp(j,i), 0.0D0,dp)*ct(i)
+              sh_env%ctin(j) = sh_env%ctin(j) + cmplx(sh_env%C_tp(j,i), 0.0D0,dp)*ct(i)
           end do
-         pop(j)=aom_env%ctin(j)*conjg(aom_env%ctin(j))
+         pop(j)=sh_env%ctin(j)*conjg(sh_env%ctin(j))
     end do
 
     deallocate(pop) !TEST
@@ -2260,9 +2260,9 @@ END SUBROUTINE classically_forbidden_hops
 !**********************************************************************************
 !> \brief TOADD
 !**********************************************************************************
-  SUBROUTINE  wf_damping(aom_env, tau, mol, deltatMD, sh_print_env)                    
+  SUBROUTINE  wf_damping(sh_env, tau, mol, deltatMD, sh_print_env)                    
     REAL(KIND=dp), DIMENSION(:), INTENT(in)    :: tau!, tau_forces
-    TYPE(aom_env_type)                          :: aom_env
+    TYPE(sh_env_type)                          :: sh_env
     INTEGER, INTENT(IN)                        :: mol
     REAL(KIND=dp), INTENT(IN)                  :: deltatMD
     TYPE(sh_print_env_type)                    :: sh_print_env
@@ -2280,14 +2280,14 @@ END SUBROUTINE classically_forbidden_hops
 
     sum = 0.0D0
     do i=1,mol 
-           if (i .ne. aom_env%active_state) then
+           if (i .ne. sh_env%active_state) then
                pop(i) = cmplx(0.0D0, 0.0D0,dp) !TEST
                ct(i) = cmplx(0.0D0, 0.0D0,dp) 
                !> if statement to choose the decoherence time
 
                !> Tranform coefficients in the adiabatic basis 
                 do j=1,mol
-                        ct(i) = ct(i) + cmplx(aom_env%C_tp(j,i), 0.0D0,dp)*aom_env%ctin(j)
+                        ct(i) = ct(i) + cmplx(sh_env%C_tp(j,i), 0.0D0,dp)*sh_env%ctin(j)
                 end do
                 !>damp the coefficients of the states different from the active state    
                 pop(i) = ct(i)*conjg(ct(i))
@@ -2299,34 +2299,34 @@ END SUBROUTINE classically_forbidden_hops
     end do
 
     !>transfor the active diabatic state into the active adiabatic state
-    pop(aom_env%active_state)= cmplx(0.0D0, 0.0D0, dp)
-    ct(aom_env%active_state) = cmplx(0.0D0, 0.0D0, dp)
+    pop(sh_env%active_state)= cmplx(0.0D0, 0.0D0, dp)
+    ct(sh_env%active_state) = cmplx(0.0D0, 0.0D0, dp)
     do i=1,mol                                                       
-           ct(aom_env%active_state) = ct(aom_env%active_state) + &
-             cmplx(aom_env%C_tp(i,aom_env%active_state), 0.0D0,dp)*aom_env%ctin(i)
+           ct(sh_env%active_state) = ct(sh_env%active_state) + &
+             cmplx(sh_env%C_tp(i,sh_env%active_state), 0.0D0,dp)*sh_env%ctin(i)
     end do  
     
-    pop(aom_env%active_state) = ct(aom_env%active_state)*conjg(ct(aom_env%active_state))
+    pop(sh_env%active_state) = ct(sh_env%active_state)*conjg(ct(sh_env%active_state))
     
     !>transfer population to the active state for keeping the detailed balance   
-    if (ct(aom_env%active_state)== 0) then
-           ct(aom_env%active_state) = sqrt(1-sum)
+    if (ct(sh_env%active_state)== 0) then
+           ct(sh_env%active_state) = sqrt(1-sum)
     else 
-           ct(aom_env%active_state)= ct(aom_env%active_state)* &
-              sqrt((1-sum)/(abs(ct(aom_env%active_state))*abs(ct(aom_env%active_state))))
+           ct(sh_env%active_state)= ct(sh_env%active_state)* &
+              sqrt((1-sum)/(abs(ct(sh_env%active_state))*abs(ct(sh_env%active_state))))
     end if
     
-    pop(aom_env%active_state) = ct(aom_env%active_state)*conjg(ct(aom_env%active_state))
+    pop(sh_env%active_state) = ct(sh_env%active_state)*conjg(ct(sh_env%active_state))
 
     !>transfor back the adiabatic into the diabatic which, then, follow the
       !electronic prpagation    
     do j=1,mol
-          aom_env%ctin(j) = cmplx(0.0D0, 0.0D0,dp)                           
+          sh_env%ctin(j) = cmplx(0.0D0, 0.0D0,dp)                           
           pop(j) = cmplx(0.0D0, 0.0D0,dp) !TEST
           do i=1,mol 
-              aom_env%ctin(j) = aom_env%ctin(j) + cmplx(aom_env%C_tp(j,i), 0.0D0,dp)*ct(i)
+              sh_env%ctin(j) = sh_env%ctin(j) + cmplx(sh_env%C_tp(j,i), 0.0D0,dp)*ct(i)
           end do
-         pop(j)= aom_env%ctin(j)*conjg(aom_env%ctin(j))
+         pop(j)= sh_env%ctin(j)*conjg(sh_env%ctin(j))
     end do
     
 !   CALL adiab_print_sh_info(sh_print_env, keyword = 'DAMPING')   
@@ -2339,10 +2339,10 @@ END SUBROUTINE classically_forbidden_hops
 !**********************************************************************************
 !> \brief TOADD
 !**********************************************************************************
-  SUBROUTINE calc_kinetic_tot(aom_env, array, local_particles, atomic_kinds, &
+  SUBROUTINE calc_kinetic_tot(sh_env, array, local_particles, atomic_kinds, &
                                               nparticle_kind, atomic_kind_set, K_tot, ext_pres)
       
-        TYPE(aom_env_type)                                 :: aom_env
+        TYPE(sh_env_type)                                 :: sh_env
         REAL(kind=dp), DIMENSION(:,:), POINTER             :: array
         TYPE(distribution_1d_type), POINTER                :: local_particles
         TYPE(atomic_kind_list_type), POINTER, OPTIONAL     :: atomic_kinds
@@ -2378,7 +2378,7 @@ END SUBROUTINE classically_forbidden_hops
 
            qsys_only = .FALSE.
            if (PRESENT(ext_pres)) then
-               !ext_pres =  aom_env%ext_pres 
+               !ext_pres =  sh_env%ext_pres 
                qsys_only = .TRUE.
            else 
                qsys_only = .FALSE.
@@ -2421,12 +2421,12 @@ END SUBROUTINE classically_forbidden_hops
 !matrix. However it interpolates diabatic nace between nuclear time steps in the
 !same way as for the H
 !**********************************************************************************
-   SUBROUTINE propagate_wf_diab_nace_interpol(ctin, aom_env, nadiab,  norbitals, ELsteps, &
+   SUBROUTINE propagate_wf_diab_nace_interpol(ctin, sh_env, nadiab,  norbitals, ELsteps, &
                            itimes, adiab_section, deltatMD, deltatE , times,      &
                             mat)
 
      COMPLEX(KIND=dp), dimension(:), INTENT(INOUT)   :: ctin
-     TYPE(aom_env_type)                              :: aom_env
+     TYPE(sh_env_type)                              :: sh_env
      INTEGER, INTENT(IN)                             :: nadiab,  norbitals 
      INTEGER                                         :: ELsteps   
      INTEGER, POINTER                                :: itimes
@@ -2477,12 +2477,12 @@ END SUBROUTINE classically_forbidden_hops
       renorm = .TRUE.
      
     
-     my_H_t = aom_env%H_t
-     my_H_tp = aom_env%H_tp
+     my_H_t = sh_env%H_t
+     my_H_tp = sh_env%H_tp
      if (offset) then
         do i = 1, mat
-           my_H_t(i,i) = my_H_t(i,i) - aom_env%H_t(1,1)
-           my_H_tp(i,i) = my_H_tp(i,i) - aom_env%H_tp(1,1)
+           my_H_t(i,i) = my_H_t(i,i) - sh_env%H_t(1,1)
+           my_H_tp(i,i) = my_H_tp(i,i) - sh_env%H_tp(1,1)
         enddo
      endif
       
@@ -2490,8 +2490,8 @@ END SUBROUTINE classically_forbidden_hops
 !COMMENT: INDENTATION
             
              Hdiff = (deltatE/deltatMD)*(my_H_tp - my_H_t)
-             Ddiff = (deltatE/deltatMD)*(aom_env%diabatic_nace_tp -aom_env%diabatic_nace_t)
-             D_0  = aom_env%diabatic_nace_t
+             Ddiff = (deltatE/deltatMD)*(sh_env%diabatic_nace_tp -sh_env%diabatic_nace_t)
+             D_0  = sh_env%diabatic_nace_t
 
              X1 = my_H_t - D_0
 
@@ -2627,12 +2627,12 @@ END SUBROUTINE classically_forbidden_hops
   ! \author Sam (Matt edited RK4)
   ! \date   23/05/19
   !**********************************************************************************
-  SUBROUTINE propagate_wf_fast(ctin, aom_env, nadiab,  norbitals, ELsteps, &
+  SUBROUTINE propagate_wf_fast(ctin, sh_env, nadiab,  norbitals, ELsteps, &
                           itimes, adiab_section, deltatMD, deltatE , times,      &
                            mat)
  
       COMPLEX(KIND=dp), dimension(:), INTENT(INOUT)   :: ctin
-      TYPE(aom_env_type)                              :: aom_env
+      TYPE(sh_env_type)                              :: sh_env
       INTEGER, INTENT(IN)                             :: nadiab,  norbitals 
       INTEGER                                         :: ELsteps   
       INTEGER, POINTER                                :: itimes
@@ -2668,12 +2668,12 @@ END SUBROUTINE classically_forbidden_hops
  
       ! Offset the Hamiltonian (I've left some unnecessary arrays here for
       !                         clarity)
-      my_H_t = aom_env%H_t
-      my_H_tp = aom_env%H_tp
+      my_H_t = sh_env%H_t
+      my_H_tp = sh_env%H_tp
       if (offset) then
          do i = 1, mat
-            my_H_t(i,i) = my_H_t(i,i) - aom_env%H_t(1,1)
-            my_H_tp(i,i) = my_H_tp(i,i) - aom_env%H_tp(1,1)
+            my_H_t(i,i) = my_H_t(i,i) - sh_env%H_t(1,1)
+            my_H_tp(i,i) = my_H_tp(i,i) - sh_env%H_tp(1,1)
          enddo
       endif
  
@@ -2750,12 +2750,12 @@ END SUBROUTINE classically_forbidden_hops
   ! \author Jacob (Sam editted)
   ! \date   23/05/19
   !**********************************************************************************
-   SUBROUTINE propagate_wf(ctin, aom_env, nadiab,  norbitals, ELsteps, &
+   SUBROUTINE propagate_wf(ctin, sh_env, nadiab,  norbitals, ELsteps, &
                            itimes, adiab_section, deltatMD, deltatE , times,      &
                             mat)
 
      COMPLEX(KIND=dp), dimension(:), INTENT(INOUT)   :: ctin
-     TYPE(aom_env_type)                              :: aom_env
+     TYPE(sh_env_type)                              :: sh_env
      INTEGER, INTENT(IN)                             :: nadiab,  norbitals 
      INTEGER                                         :: ELsteps   
      INTEGER, POINTER                                :: itimes
@@ -2824,32 +2824,32 @@ END SUBROUTINE classically_forbidden_hops
 
     
      offset = .TRUE.
-     my_H_t = aom_env%H_t
-     my_H_tp = aom_env%H_tp
+     my_H_t = sh_env%H_t
+     my_H_tp = sh_env%H_tp
      if (offset) then
         do i = 1, mat
-           my_H_t(i,i) = my_H_t(i,i) - aom_env%H_t(1,1)
-           my_H_tp(i,i) = my_H_tp(i,i) - aom_env%H_tp(1,1)
+           my_H_t(i,i) = my_H_t(i,i) - sh_env%H_t(1,1)
+           my_H_tp(i,i) = my_H_tp(i,i) - sh_env%H_tp(1,1)
         enddo
      endif
       
 
 !COMMENT: INDENTATION
              Hdiff = (deltatE/deltatMD)*(my_H_tp - my_H_t)
-             Sttdiff = (deltatE/deltatMD)*(aom_env%Stptp - aom_env%Stt)
-             Sttpdiff = (deltatE/deltatMD)*(aom_env%Sttp - aom_env%Stmt)
-             Sttmdiff = (deltatE/deltatMD)*(aom_env%Stpt - aom_env%Sttm)
+             Sttdiff = (deltatE/deltatMD)*(sh_env%Stptp - sh_env%Stt)
+             Sttpdiff = (deltatE/deltatMD)*(sh_env%Sttp - sh_env%Stmt)
+             Sttmdiff = (deltatE/deltatMD)*(sh_env%Stpt - sh_env%Sttm)
              Stptpdiff = Sttdiff
-             Stmtmdiff = (deltatE/deltatMD)*(aom_env%Stt - aom_env%Stmtm)
+             Stmtmdiff = (deltatE/deltatMD)*(sh_env%Stt - sh_env%Stmtm)
              H_0  = my_H_t
 
              !Assignment internal variabls used in the RK
              
-             Stt_int = aom_env%Stt 
-             Sttp_int = aom_env%Sttp
-             Stptp_int = aom_env%Stptp
-             Sttm_int = aom_env%Sttm
-             Stmtm_int = aom_env%Stmtm
+             Stt_int = sh_env%Stt 
+             Sttp_int = sh_env%Sttp
+             Stptp_int = sh_env%Stptp
+             Sttm_int = sh_env%Sttm
+             Stmtm_int = sh_env%Stmtm
 
              call makeX(mat, H_0, Stt_int, Sttp_int, Sttm_int, Stptp_int, &
                                              Stmtm_int, X1, deltatMD, NACE)
@@ -2974,7 +2974,7 @@ END SUBROUTINE classically_forbidden_hops
   ! \author Sam
   ! \date   23/05/19
   !**********************************************************************************
-  SUBROUTINE prop_wf_HS_corr(ctin, aom_env, nadiab,  norbitals, ELsteps, &
+  SUBROUTINE prop_wf_HS_corr(ctin, sh_env, nadiab,  norbitals, ELsteps, &
                            itimes, adiab_section, deltatMD, deltatE , times,      &
                             mat, class_forbidden_hop, active_state)
 
@@ -3003,7 +3003,7 @@ END SUBROUTINE classically_forbidden_hops
      INTEGER                                         :: ELsteps   
      INTEGER, POINTER                                :: itimes
      TYPE(section_vals_type), POINTER                :: adiab_section
-     TYPE(aom_env_type)                              :: aom_env
+     TYPE(sh_env_type)                              :: sh_env
      REAL(KIND=dp)                                   :: deltatMD, deltatE
      REAL(KIND=dp)                                   :: ctmag
      REAL(KIND=dp)                                   :: times 
@@ -3081,28 +3081,28 @@ END SUBROUTINE classically_forbidden_hops
      allocate(my_H_tp(mat, mat))
 
      offset = .TRUE.
-     my_H_t = aom_env%H_t
-     my_H_tp = aom_env%H_tp
+     my_H_t = sh_env%H_t
+     my_H_tp = sh_env%H_tp
      if (offset) then
         do i = 1, mat
-           my_H_t(i,i) = my_H_t(i,i) - aom_env%H_t(1,1)
-           my_H_tp(i,i) = my_H_tp(i,i) - aom_env%H_tp(1,1)
+           my_H_t(i,i) = my_H_t(i,i) - sh_env%H_t(1,1)
+           my_H_tp(i,i) = my_H_tp(i,i) - sh_env%H_tp(1,1)
         enddo
      endif
 
     
       
 !COMMENT: INDENTATION
-             !Hdiff = (deltatE/deltatMD)*(aom_env%H_tp - aom_env%H_t)
+             !Hdiff = (deltatE/deltatMD)*(sh_env%H_tp - sh_env%H_t)
              Hdiff = (deltatE/deltatMD)*(my_H_tp - my_H_t)
-             Sttdiff = (deltatE/deltatMD)*(aom_env%Stptp - aom_env%Stt)
-             Sttpdiff = (deltatE/deltatMD)*(aom_env%Sttp - aom_env%Stmt)
-             Sttmdiff = (deltatE/deltatMD)*(aom_env%Stpt - aom_env%Sttm)
+             Sttdiff = (deltatE/deltatMD)*(sh_env%Stptp - sh_env%Stt)
+             Sttpdiff = (deltatE/deltatMD)*(sh_env%Sttp - sh_env%Stmt)
+             Sttmdiff = (deltatE/deltatMD)*(sh_env%Stpt - sh_env%Sttm)
              Stptpdiff = Sttdiff
-             Stmtmdiff = (deltatE/deltatMD)*(aom_env%Stt - aom_env%Stmtm)
-             !H_0  = aom_env%H_t
+             Stmtmdiff = (deltatE/deltatMD)*(sh_env%Stt - sh_env%Stmtm)
+             !H_0  = sh_env%H_t
              H_0  = my_H_t
-             !H_2 = aom_env%H_tp
+             !H_2 = sh_env%H_tp
              H_2 = my_H_tp
 
 
@@ -3162,26 +3162,26 @@ END SUBROUTINE classically_forbidden_hops
 
 
 
-             !H_0  = aom_env%H_t
-             !H_2 = aom_env%H_tp
+             !H_0  = sh_env%H_t
+             !H_2 = sh_env%H_tp
 
 !Assignment internal variabls used in the RK
              
-             Stt_int = aom_env%Stt 
-             Sttp_int = aom_env%Sttp
-             Stptp_int = aom_env%Stptp
+             Stt_int = sh_env%Stt 
+             Sttp_int = sh_env%Sttp
+             Stptp_int = sh_env%Stptp
              !Stpt_int = Stpt!
              !Stmt_int = Stmt!
-             Sttm_int = aom_env%Sttm
-             Stmtm_int = aom_env%Stmtm
+             Sttm_int = sh_env%Sttm
+             Stmtm_int = sh_env%Stmtm
 
              do t2=1,int(deltatMD/deltatE)
                  
                     dim_ = 1
-                    !CALL adiabaticity(-AIMAG(aom_env%H_t), mat, U_t, Eig_val_t, .false.)
+                    !CALL adiabaticity(-AIMAG(sh_env%H_t), mat, U_t, Eig_val_t, .false.)
                     CALL calc_diabatic_nace(mat, interm_hamil(dim_,t2,:,:), Stt_int, Sttp_int, Sttm_int, &
                                                         Stptp_int, Stmtm_int, deltatMD, NACE)
-                    !CALL calc_diabatic_nace(mat, aom_env%H_t, Stt_int, Sttp_int, Sttm_int, &
+                    !CALL calc_diabatic_nace(mat, sh_env%H_t, Stt_int, Sttp_int, Sttm_int, &
                      !                                   Stptp_int, Stmtm_int, X1, deltatMD, NACE)
                     CALL calc_modified_diab_nace(class_forbidden_hop, NACE, & 
                           udot_matrices, interm_umatrix, modified_diab_nace, mat, active_state, t2, dim_)
@@ -3189,7 +3189,7 @@ END SUBROUTINE classically_forbidden_hops
                     CALL hs_corrected_makeX(interm_hamil, modified_diab_nace, t2, dim_, X1)
 
 
-!                    call makeX(mat, aom_env%H_t, Stt_int, Sttp_int, Sttm_int, Stptp_int, &
+!                    call makeX(mat, sh_env%H_t, Stt_int, Sttp_int, Sttm_int, Stptp_int, &
 !                                             Stmtm_int, X1, deltatMD, NACE)
      
                     !create timestepped equivalents
@@ -3452,14 +3452,14 @@ END SUBROUTINE classically_forbidden_hops
 
 
 ! WARNING:::::THIS SUBROUTINE HAS NEVER BEEN USED AND MAY NOT WORK!!!
-  SUBROUTINE propagate_adiab_wf(E_t, E_tp, ctin, aom_env, nadiab,  norbitals, ELsteps, &
+  SUBROUTINE propagate_adiab_wf(E_t, E_tp, ctin, sh_env, nadiab,  norbitals, ELsteps, &
                            itimes, adiab_section, deltatMD, deltatE , times,      &
                             mat)
      
      REAL(KIND=dp), DIMENSION(:), INTENT(IN)         :: E_t, E_tp 
      COMPLEX(KIND=dp), dimension(:), INTENT(INOUT)   :: ctin
      INTEGER, INTENT(IN)                             :: nadiab,  norbitals 
-     TYPE(aom_env_type), intent(in)                  :: aom_env
+     TYPE(sh_env_type), intent(in)                  :: sh_env
  
  
      CHARACTER(len=*), PARAMETER                     :: routineN ='propagate_adiab_wf', &
@@ -3532,14 +3532,14 @@ END SUBROUTINE classically_forbidden_hops
  
  
              Ediff = (deltatE/deltatMD)*(E_tp - E_t)
-             NACEdiff = (deltatE/deltatMD)*(aom_env%adiab_nace_tp - &
-                                             aom_env%adiab_nace_t)
+             NACEdiff = (deltatE/deltatMD)*(sh_env%adiab_nace_tp - &
+                                             sh_env%adiab_nace_t)
              
  
              E_0  = E_t
              E_2 = E_tp
 
-             NACEint = aom_env%adiab_nace_t
+             NACEint = sh_env%adiab_nace_t
  
              do t2=1,int(deltatMD/deltatE)
                     call make_adiabX(mat, E_0, NACEint, X1)
@@ -3610,14 +3610,14 @@ END SUBROUTINE classically_forbidden_hops
 
 !!!!!!! DEPRECATED !!!!!
 ! Could be removed
-SUBROUTINE adiab_overalp_calc(active_state, aom_env, C_tp, mol, itimes, & 
+SUBROUTINE adiab_overalp_calc(active_state, sh_env, C_tp, mol, itimes, & 
                                    attempt_hop, enforced_active_state)
 
      INTEGER, intent(INOUT)                         :: active_state, mol, itimes
      INTEGER, intent(OUT)                         :: enforced_active_state 
      LOGICAL, INTENT(INOUT)                           :: attempt_hop
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE, INTENT(INOUT)   :: C_tp
-     TYPE(aom_env_type), INTENT(IN)              :: aom_env
+     TYPE(sh_env_type), INTENT(IN)              :: sh_env
 
      CHARACTER(len=*), PARAMETER :: routineN = 'adiab_overalp_calc', &
               routineP = moduleN//':'//routineN
@@ -3633,8 +3633,8 @@ SUBROUTINE adiab_overalp_calc(active_state, aom_env, C_tp, mol, itimes, &
      sum1 = 0.0D0
      
      do i=1, mol
-!         sum = sum + (abs(aom_env%C_t(i, active_state)) *abs(C_tp(i, active_state)))
-         sum1 = sum1 + aom_env%C_t(i, active_state)*C_tp(i, active_state)
+!         sum = sum + (abs(sh_env%C_t(i, active_state)) *abs(C_tp(i, active_state)))
+         sum1 = sum1 + sh_env%C_t(i, active_state)*C_tp(i, active_state)
      end do
      
      
@@ -3645,17 +3645,17 @@ SUBROUTINE adiab_overalp_calc(active_state, aom_env, C_tp, mol, itimes, &
         print *, "POSSIBLE_TRIVIAL_CROSSING"
         do i =1,mol
             if (active_state .gt. 2) then
-                overlaps(1) = overlaps(1) + aom_env%C_t(i, active_state) *C_tp(i,active_state+2)
-                overlaps(2) = overlaps(2) + aom_env%C_t(i, active_state) *C_tp(i,active_state+1)
-                overlaps(3) = overlaps(3) + aom_env%C_t(i, active_state) *C_tp(i,active_state-1)
-                overlaps(4) = overlaps(4) + aom_env%C_t(i, active_state) *C_tp(i,active_state-2)
+                overlaps(1) = overlaps(1) + sh_env%C_t(i, active_state) *C_tp(i,active_state+2)
+                overlaps(2) = overlaps(2) + sh_env%C_t(i, active_state) *C_tp(i,active_state+1)
+                overlaps(3) = overlaps(3) + sh_env%C_t(i, active_state) *C_tp(i,active_state-1)
+                overlaps(4) = overlaps(4) + sh_env%C_t(i, active_state) *C_tp(i,active_state-2)
             else if (active_state .gt. 1) then
-                overlaps(1) = overlaps(1) + aom_env%C_t(i, active_state)*C_tp(i,active_state+2)
-                overlaps(2) = overlaps(2) + aom_env%C_t(i, active_state)*C_tp(i,active_state+1)
-                overlaps(3) = overlaps(3) + aom_env%C_t(i, active_state)*C_tp(i,active_state-1)
+                overlaps(1) = overlaps(1) + sh_env%C_t(i, active_state)*C_tp(i,active_state+2)
+                overlaps(2) = overlaps(2) + sh_env%C_t(i, active_state)*C_tp(i,active_state+1)
+                overlaps(3) = overlaps(3) + sh_env%C_t(i, active_state)*C_tp(i,active_state-1)
             else 
-                overlaps(1) = overlaps(1) + aom_env%C_t(i,active_state)*C_tp(i,active_state+2)
-                overlaps(2) = overlaps(2) + aom_env%C_t(i,active_state)*C_tp(i,active_state+1)
+                overlaps(1) = overlaps(1) + sh_env%C_t(i,active_state)*C_tp(i,active_state+2)
+                overlaps(2) = overlaps(2) + sh_env%C_t(i,active_state)*C_tp(i,active_state+1)
             end if
      
        end do
@@ -3679,7 +3679,7 @@ print *, "MORE_INFO", itimes, sum1, overlaps(1), overlaps(2), overlaps(3), overl
            end if
        print *, "enforced_active_state", enforced_active_state 
 print *, "STATE_TO_GO", active_state, enforced_active_state 
-print *, "LOCALIZATION", maxloc(abs(aom_env%C_t(:, active_state)*aom_env%C_t(:, active_state))), &
+print *, "LOCALIZATION", maxloc(abs(sh_env%C_t(:, active_state)*sh_env%C_t(:, active_state))), &
         maxloc(abs(C_tp(:,enforced_active_state)*C_tp(:,enforced_active_state)))
        end if
       !enforced_active_state = 0

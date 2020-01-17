@@ -18,7 +18,7 @@ module aom_overlapfinal
   USE kinds,                           ONLY: default_string_length,&
                                              dp
   USE parallel_rng_types,              ONLY: next_random_number
-  USE aom_types,                       ONLY: aom_env_type
+  USE sh_types,                       ONLY: sh_env_type
   USE cp_parser_methods,               ONLY: parser_get_next_line
   USE cp_parser_types,                 ONLY: cp_parser_type,&
                                              parser_create,&
@@ -1405,7 +1405,7 @@ deallocate(prervecsa)
 
   subroutine calc_dRSab(xyza, atomlista, connlistal, coeffap, coeffas, &
                        nacva, nacvb, xyzb, atomlistb, connlistbl, coeffbp, coeffbs, &
-                       aneighbour, bneighbour, dR, do_random, aom_env)
+                       aneighbour, bneighbour, dR, do_random, sh_env)
 
 !     The aim of this subroutine is to calculate the non adiabatic coupling vector 
 !     using a 2 point scheme of numerical derivation (f(R+dR)-f(R))/dR. 3-point scheme
@@ -1438,7 +1438,7 @@ deallocate(prervecsa)
       !CHANGE_AC 170504
       REAL(KIND=dp) :: random, signed
       LOGICAL, INTENT(IN)          :: do_random
-      TYPE(aom_env_type)                 :: aom_env
+      TYPE(sh_env_type)                 :: sh_env
 
 
       natoma=size(xyza,2)
@@ -1499,7 +1499,7 @@ deallocate(prervecsa)
                  !call init_random_seed()
                  !call random_number(random)
                  !CALL create_rng_stream(rng_stream, "nacva")
-                 random = next_random_number(aom_env%rng_stream)
+                 random = next_random_number(sh_env%rng_stream)
                  !CALL delete_rng_stream(rng_stream)
                  if (random < 0.5) then
                     signed = -1
@@ -1571,7 +1571,7 @@ deallocate(prervecsa)
                  !call init_random_seed()
                  !call random_number(random)
                  !CALL create_rng_stream(rng_stream, "nacvb")
-                 random = next_random_number(aom_env%rng_stream)
+                 random = next_random_number(sh_env%rng_stream)
                  !CALL delete_rng_stream(rng_stream)
                  if (random < 0.5) then
                     signed = -1

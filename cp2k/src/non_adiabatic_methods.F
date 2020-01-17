@@ -39,7 +39,7 @@ MODULE non_adiabatic_methods
                                              s2s,&
                                              str2id
 
-  USE aom_types,                       ONLY: aom_env_type 
+  USE sh_types,                       ONLY: sh_env_type 
 
   USE aom_main,                        ONLY: construct_ham_X_SH
 
@@ -51,7 +51,7 @@ MODULE non_adiabatic_methods
   USE atomic_kind_types,               ONLY: atomic_kind_type,&
                                              get_atomic_kind,&
                                              get_atomic_kind_set
-  USE aom_initialization,              ONLY: create_aom_env,   &
+  USE aom_initialization,              ONLY: create_sh_env,   &
                                              propagate_aom_namd_first_step
 
 #include "./base/base_uses.f90"
@@ -107,7 +107,7 @@ CONTAINS
     REAL(kind=dp)                            :: factor
     TYPE(section_vals_type), POINTER         :: coupling_section
     CHARACTER(LEN=default_string_length)     :: coupling_keyword
-    TYPE(aom_env_type)                       :: aom_env
+    TYPE(sh_env_type)                       :: sh_env
     INTEGER, POINTER                         :: itimes
     REAL(KIND=dp)                            :: energy_adiabat
     LOGICAL                                  :: my_bo_keyword
@@ -159,19 +159,19 @@ CONTAINS
            ENDIF
         END DO
         IF (my_itimes.eq.0) THEN
-           CALL create_aom_env(nadiab, aom_atoms, norbitals, natom, &
+           CALL create_sh_env(nadiab, aom_atoms, norbitals, natom, &
                                positions_tp, coupling_section, adiab_section, & 
-                               aom_env)
-           aom_env%atoms = aom_atoms
-           aom_env%deltat = MDtimestep
-           !aom_env%natom = SIZE(global_forces(1)%forces,2)
-           aom_env%natom = natom
+                               sh_env)
+           sh_env%atoms = aom_atoms
+           sh_env%deltat = MDtimestep
+           !sh_env%natom = SIZE(global_forces(1)%forces,2)
+           sh_env%natom = natom
            !> instead of passing mixed_env to propagate_aom_namd_first_step we
            !could probably use a pinter like the one below, to fill
-           !aom_env%F array
-           !aom_env%F = mixed_env%aom_env%F
+           !sh_env%F array
+           !sh_env%F = mixed_env%sh_env%F
            CALL propagate_aom_namd_first_step(nadiab, aom_atoms, norbitals,     &
-                     positions_tp, velocities_tp, energies_tp, aom_env, itimes, &
+                     positions_tp, velocities_tp, energies_tp, sh_env, itimes, &
                       coupling_section, adiab_section,& 
                      my_bo_keyword, atomic_kinds, &
                      local_particles, my_test_keyword, method_keyword, diagonal_F=mixed_env%F)
@@ -180,46 +180,46 @@ CONTAINS
            !!!!!!!!!!!!!!!!!!!!!!TO BE MODIFIED!!!!!!!!!!!!!!!!!!!!!!!!!
            !!! this is a very dangerous step one should use an interface
            !subroutine to do that!!!!!!!!!!!
-           aom_env = mixed_env%aom_env            
+           sh_env = mixed_env%sh_env            
            !> Velocities are taken directly from the integrator, note from
            !> velocities_tp
-           !aom_env%velocities_t = velocities_tp
-           IF (aom_env%successful_hop) THEN
-              aom_env%forces_adiab = aom_env%forces_adiab_new
-              aom_env%futur_decohere = .TRUE.
-              !aom_env%successful_hop = .FALSE.
-              aom_env%forces_adiab_new = 0.0D0
-              !aom_env%new_state = -1
-              !aom_env%old_state = -1
+           !sh_env%velocities_t = velocities_tp
+           IF (sh_env%successful_hop) THEN
+              sh_env%forces_adiab = sh_env%forces_adiab_new
+              sh_env%futur_decohere = .TRUE.
+              !sh_env%successful_hop = .FALSE.
+              sh_env%forces_adiab_new = 0.0D0
+              !sh_env%new_state = -1
+              !sh_env%old_state = -1
            ELSE
               !> Main CALL: calculate the Hamiltonian, propagate the electronic dynamics
               CALL construct_ham_X_SH(nadiab, aom_atoms, norbitals,         &
-                            positions_tp, energies_tp, aom_env, itimes,     &
+                            positions_tp, energies_tp, sh_env, itimes,     &
                              coupling_section, adiab_section, & 
                             my_bo_keyword, atomic_kinds,                    &
                             local_particles, my_test_keyword,diagonal_F=mixed_env%F)
            ENDIF
         ENDIF
-        !> IMPORTANT: store all aom_env for the future timesteps.
+        !> IMPORTANT: store all sh_env for the future timesteps.
         !> NOTE: this is also a tricky step, as the memory for
-        !mixed_env%aom_env object is allocated here. One should improve this
-        !interface subroutine. aom_env is a local structure not a pointer, in
-        !this case equal sign is copying the local structure aom_env (with all
-        !varibales inside it) to another local structure mixed_env%aom_env. In general
+        !mixed_env%sh_env object is allocated here. One should improve this
+        !interface subroutine. sh_env is a local structure not a pointer, in
+        !this case equal sign is copying the local structure sh_env (with all
+        !varibales inside it) to another local structure mixed_env%sh_env. In general
         !for allocated variables inside aom_type.F (aom enviroment) this would
         !take twice as much of the memory for each varibale. However since most
-        !of the variables inside aom_env are defined as pointers this operation
+        !of the variables inside sh_env are defined as pointers this operation
         !takes for each variable just as much as the memory it takes to allocate
         !the variable only once.
-        mixed_env%aom_env=aom_env
+        mixed_env%sh_env=sh_env
     CASE DEFAULT
         CPABORT("There is no method to calculate the coupling")
     END SELECT
 
 
     !> IMPORTANT : GIVE BACK THE FORCES TO FIST
-    energy_adiabat = aom_env%E_tp(aom_env%active_state)
-    forces_adiab = aom_env%forces_adiab
+    energy_adiabat = sh_env%E_tp(sh_env%active_state)
+    forces_adiab = sh_env%forces_adiab
     DO iparticle = 1, natom
       jparticle = map_index(iparticle)
       SELECT CASE(method_keyword)
