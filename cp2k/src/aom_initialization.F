@@ -42,19 +42,20 @@ MODULE aom_initialization
      USE kinds,                        ONLY: default_string_length,&
                                              dp
      USE aom_overlapfinal,             ONLY:  connect_list2, &
-                                              calc_sab, &
-                                              sab_screen_new, &
-                                              calc_dRSab, &
-                                              calc_rvecs, &
-                                              calc_sab_pete, &
+                                              !calc_sab, &
+                                              !sab_screen_new, &
+                                              !calc_dRSab, &
+                                              !calc_rvecs, &
+                                              !calc_sab_pete, &
                                               build_s_tables
 
-     USE aom_utils,                    ONLY: makeX,    &
-                                             make_adiabX,      &
+     USE aom_utils,                    ONLY: makeX,                                &
+                                             calc_aom_Xmatrix_elements_first_step, & 
+                                             make_adiabX,                          &
                                              !surfacehop,     &
-                                             calcforces,     &
-                                             read_listcoeff, &
-                                             read_listdiabcoeff, &
+                                             calcforces,                           &
+                                             read_listcoeff,                       &
+                                             read_listdiabcoeff,                   &
                                              calc_coms_and_nlist_aom
 
      USE sh_types,                    ONLY: sh_env_type, &
@@ -560,7 +561,7 @@ CONTAINS
      end if 
 
      !> CALCULATE THE HAMILTONIAN, THE STTP MATRIX AND THE NACV
-     CALL calc_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_random,cbar, &
+     CALL calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_random,cbar, &
                       scaling, PC_allrvecs, orb, minao)
 
      !> CONVERT NACV AND CALCULATE EIGENPROPERTIES 
@@ -795,134 +796,5 @@ CONTAINS
      sh_env%adiab_nace_tp = -sh_env%adiab_nace_tp 
   END SUBROUTINE nacv_first_ts
 
-SUBROUTINE calc_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_random,cbar, &
-                      scaling, PC_allrvecs, orb, minao)
-
-     TYPE(sh_env_type)                          :: sh_env
-     integer, intent(IN)                         :: atoms
-     integer, intent(in)                         :: mol, orb
-     REAL(KIND=dp), intent(in)                   :: dR
-     LOGICAL, intent(in)                         :: do_random
-     REAL(KIND=dp), intent(in)                   :: cbar
-     REAL(KIND=dp), intent(in)                   :: minao
-     REAL(KIND=dp), intent(in)                   :: scaling
-     real(kind=dp), DIMENSION(:,:), allocatable, intent(out) :: PC_allrvecs
-
-     CHARACTER(len=*), PARAMETER                 :: routineN='calc_Xmatrix_elements_first_step', &
-     routineP = moduleN//':'//routineN
-
-     REAL(KIND=dp)                               :: S
-     integer                                     :: i, j, k, l, m, d, o
-     real(kind=dp), allocatable :: PC_rvecs(:,:)
-
-
-     ALLOCATE(PC_allrvecs(5,mol*atoms))
-     ALLOCATE(PC_rvecs(3,atoms))
-
-     !CALCULATE THE HAMILTONIAN AND THE NACV
-     do i=1,mol
-               !create the array of all its atomic coordinates at t
-               !numerical factor converts from Angstroms into Bohr radii
-               sh_env%Atp(1,1:atoms) = dble(sh_env%elements((i-1)*atoms+1:i*atoms))
-               do j=1,atoms
-                    sh_env%Atp(2:4,j) = sh_env%crds(1:3,(i-1)*atoms+j,3)
-               end do
-
-               !then for each other molecule
-               do k=1,mol
-                    !create the array of its atomic coordinates at both t and t+dt
-                    sh_env%Btp(1,1:atoms) = dble(sh_env%elements((k-1)*atoms+1:k*atoms))
-                    do l=1,atoms
-                        sh_env%Btp(2:4,l) = sh_env%crds(1:3,(k-1)*atoms+l,3)
-                    end do
-                    if (i == 1) then
-                         do d=1,orb
-                              sh_env%pcoeffsrun(1:atoms,orb*(k-1)+d,3) = sh_env%pcoeffs(1:atoms,d)
-                              call calc_sab(sh_env%Btp, sh_env%connlist2, sh_env%pcoeffsrun(:,orb*(k-1)+d,3))
-                         end do
-                    end if  ! (i == 1)
-                    do d=1,orb
-                         do m=1,orb
-                              call sab_screen_new(sh_env%Atp, sh_env%atomlist, sh_env%connlist1, &
-                                                                      sh_env%pcoeffsrun(:,orb*(i-1)+d,3),&
-                              & sh_env%atomlist, sh_env%Btp, sh_env%atomlist, sh_env%connlist1, &
-                                                                     sh_env%pcoeffsrun(:,orb*(k-1)+m,3),&
-                              & sh_env%aneighbour(:,1:atoms), sh_env%bneighbour(:,1:atoms), minao)
-                         end do
-                    end do
-                    !store neighbouring list when we do not use MTS feature
-                    if (sh_env%multiple_time_step .eq. 1) then
-                        sh_env%neighbourlist(i,k,:,1:atoms) = sh_env%bneighbour(:,1:atoms)
-                        sh_env%neighbourlist(k,i,:,1:atoms) = sh_env%aneighbour(:,1:atoms)
-                    end if 
-                    if (sh_env%NN(i,k) == 1) then
-                         !first the diagonals
-                         if (i == k) then
-                              do d=1,orb
-                                   do m=1,orb
-                                        !These diagonals are 1 by definition
-                                        sh_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = 1.0D0
-                                        sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+d) = cmplx(0.0D0, (-sh_env%siteenergies(3,k)),dp)
-                                   end do
-                              end do
-
-                         !now the off-diagonals                         
-                         else ! ( i == k)
-                              !symmetric matrices
-                              !no sense calling calc_sab twice as often as you need to
-                              if (k < i) then
-                                   do m=1,orb
-                                        do d=1,orb
-                                             sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = sh_env%H_tp(orb*(k-1)+m,orb*(i-1)+d)
-                                             sh_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = sh_env%Stptp(orb*(k-1)+m,orb*(i-1)+d)
-                                        end do
-                                   end do
-                              else
-                                   do d=1,orb
-                                        do m=1,orb
-                                             call calc_sab(sh_env%Atp, sh_env%connlist2, &
-                                                          sh_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3),&
-                                                          S, sh_env%Btp, sh_env%connlist2, & 
-                                                          sh_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3))
-                                             sh_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
-                                             sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0, -scaling*S,dp)
-
-                                             call calc_dRSab(sh_env%Atp, sh_env%atomlist, sh_env%connlist1, &
-                                             sh_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3), sh_env%scoeffs, &
-                                             !nacv(1:3,orb*(k-1)+d,orb*(i-1)+m,(i-1)*atoms+1:i*atoms), &
-                                             !nacv(1:3,orb*(i-1)+m,orb*(k-1)+d,(k-1)*atoms+1:k*atoms), &
-                                             sh_env%nacv(1:3,orb*(k-1)+d,(i-1)*atoms+1:i*atoms), &
-                                             sh_env%nacv(1:3,orb*(i-1)+m,(k-1)*atoms+1:k*atoms), &
-                                             sh_env%Btp, sh_env%atomlist, sh_env%connlist1, & 
-                                                                   sh_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3),&
-                                             !sh_env%scoeffs, sh_env%neighbourlist(k,i,:,:), sh_env%neighbourlist(i,k,:,:), dR, &
-                                             sh_env%scoeffs, sh_env%aneighbour(:,:), sh_env%bneighbour(:,:), dR, &
-                                             do_random, sh_env)
-                                        end do
-                                   end do
-                              endif 
-                         end if !(i==k)
-                    else !(NN(i,k) == 1
-                         do d=1,orb
-                              do m=1,orb
-                                   !fill in elements of non-overlapping pairs with 0
-                                   sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0, 0.0D0,dp)
-                                   sh_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = 0.0D0
-                              end do
-                         end do
-                    end if !(NN(i,k) == 1
-               end do !loop over k 
-
-               call calc_sab_pete(sh_env%Atp, sh_env%connlist2, PC_rvecs)
-               do o=1, size(PC_rvecs,2)
-                  PC_allrvecs(1,((i-1)*atoms)+o) = i
-                  PC_allrvecs(2,((i-1)*atoms)+o) = o
-                  PC_allrvecs (3:5,((i-1)*atoms)+o) = PC_rvecs(:,o)
-               end do
-
-     enddo !loop-over i
-     DEALLOCATE(PC_rvecs)
-
-END SUBROUTINE calc_Xmatrix_elements_first_step
 
 END MODULE aom_initialization

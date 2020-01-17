@@ -107,6 +107,12 @@ MODULE aom_utils
 
   USE sh_types,                       ONLY: sh_env_type
 
+  USE aom_overlapfinal,               ONLY:  connect_list2, &
+                                              calc_sab, &
+                                              sab_screen_new, &
+                                              calc_dRSab, &
+                                              calc_rvecs, &
+                                              calc_sab_pete
 !  USE non_adiabatic_utils,             ONLY: simple_vel_rescaling, &
 !                                             translate_com,        &
 !                                             cal_delta_energy_nacv,&
@@ -123,20 +129,501 @@ IMPLICIT NONE
 
    CHARACTER(len=*), PARAMETER, PRIVATE :: moduleN = 'aom_utils'
 
-   PUBLIC :: makeX,            &
-             calc_coms_and_nlist_aom, &
-             make_adiabX,      &
-             calcforces,           &
-             read_listcoeff,       & 
-             calc_adiab_nace, &
-             calc_diabatic_nace, &
-             read_listdiabcoeff, & 
-             calc_adiab_nace_old, &
+   PUBLIC :: makeX,                                &
+             calc_aom_Xmatrix_elements,            & 
+             calc_aom_Xmatrix_elements_first_step, & 
+             calc_coms_and_nlist_aom,              &
+             make_adiabX,                          &
+             calcforces,                           &
+             read_listcoeff,                       & 
+             calc_adiab_nace,                      &
+             calc_diabatic_nace,                   &
+             read_listdiabcoeff,                   & 
+             calc_adiab_nace_old,                  &
              matinvsqrt
  
 
 CONTAINS
 
+!**********************************************************************************
+!> \brief 
+!**********************************************************************************
+SUBROUTINE calc_aom_Xmatrix_elements(sh_env, itimes, atoms, mol, dR, do_random, cbar, &
+                      scaling, PC_allrvecs, orb, minao)
+
+     TYPE(sh_env_type)                      :: sh_env
+     INTEGER, POINTER                        :: itimes
+     integer, intent(IN)                     :: atoms
+     integer, intent(in)                     :: mol, orb
+     REAL(KIND=dp), intent(in)                   :: dR  
+     LOGICAL, intent(in)                         :: do_random
+     REAL(KIND=dp), intent(in)                   :: cbar
+     REAL(KIND=dp), intent(in)                   :: minao
+     REAL(KIND=dp), intent(in) :: scaling
+     real(kind=dp), DIMENSION(:,:), allocatable, intent(out) :: PC_allrvecs
+
+     CHARACTER(len=*), PARAMETER                     :: routineN ='calc_aom_Xmatrix_elements', &
+     routineP = moduleN//':'//routineN
+
+     REAL(KIND=dp)                   :: S
+     integer :: i, j, k, l, m, d, o
+     real(kind=dp), allocatable :: PC_rvecs(:,:)
+      
+     ALLOCATE(PC_allrvecs(5,mol*atoms))
+     ALLOCATE(PC_rvecs(3,atoms))
+     !COMMENT: I guess Atm and Btm are only need for the first timestep (itimes = 1)
+     !one could duplicate this subroutine and create one only for the first timestep
+     !for each molecule i
+     do i=1,mol
+               !create the array of all its atomic coordinates at t
+               !numerical factor converts from Angstroms into Bohr radii
+               do j=1,atoms
+                    sh_env%At(1,j)  = dble(sh_env%elements(j))
+                    sh_env%Atp(1,j) = dble(sh_env%elements(j))
+                    sh_env%Atm(1,j) = dble(sh_env%elements(j))
+                    do d=2,4
+                         !> CHANGE_AC : already coordonates in atomic units
+                         sh_env%Atm(d,j) = sh_env%crds(d-1,(i-1)*atoms+j,1)
+                         sh_env%At(d,j)  = sh_env%crds(d-1,(i-1)*atoms+j,2)
+                         sh_env%Atp(d,j) = sh_env%crds(d-1,(i-1)*atoms+j,3)
+                    end do
+               end do
+
+               !then for each other molecule
+               do k=1,mol
+                    !create the array of its atomic coordinates at both t and t+dt
+                    do l=1,atoms
+                         sh_env%Bt(1,l)  = dble(sh_env%elements(l))
+                         sh_env%Btp(1,l) = dble(sh_env%elements(l))
+                         sh_env%Btm(1,l) = dble(sh_env%elements(l))
+                         do d=2,4
+                              !> CHANGE_AC : already coordonates in atomic units
+                              sh_env%Btm(d,l) = sh_env%crds(d-1,(k-1)*atoms+l,1)
+                              sh_env%Bt(d,l)  = sh_env%crds(d-1,(k-1)*atoms+l,2)
+                              sh_env%Btp(d,l) = sh_env%crds(d-1,(k-1)*atoms+l,3)
+                         end do
+                    end do
+                    if (i == 1) then
+                         do d=1,orb
+                              sh_env%pcoeffsrun(:,orb*(k-1)+d,1) = sh_env%pcoeffs(:,d)
+                              call calc_sab(sh_env%Btm, sh_env%connlist2, &
+                                                 sh_env%pcoeffsrun(:,orb*(k-1)+d,1))
+
+                              sh_env%pcoeffsrun(:,orb*(k-1)+d,2) = sh_env%pcoeffs(:,d)
+                              call calc_sab(sh_env%Bt, sh_env%connlist2, &
+                                                 sh_env%pcoeffsrun(:,orb*(k-1)+d,2))
+
+                              sh_env%pcoeffsrun(:,orb*(k-1)+d,3) = sh_env%pcoeffs(:,d)
+                              call calc_sab(sh_env%Btp, sh_env%connlist2, & 
+                                               sh_env%pcoeffsrun(:,orb*(k-1)+d,3))
+                         end do
+                    end if
+                    !neighbourlist(:,:,:,:) = sh_env%neighbourlist(:,:,:,:)
+
+                    !!recalculate neighbouring lists from scratch
+                    !! you could even reduce the times we calculate neighbouring
+                    !list even further
+                    if (mod(itimes-1, sh_env%multiple_time_step) .eq. 0 & 
+                          .and. sh_env%multiple_time_step .ne. 1) then 
+                       do d=1,orb
+                            do m=1,orb
+                                 call sab_screen_new(sh_env%Atp, sh_env%atomlist, &
+                                  sh_env%connlist1, sh_env%pcoeffsrun(:,orb*(i-1)+d,3),&
+                                 & sh_env%atomlist, sh_env%Btp, sh_env%atomlist, &
+                                  sh_env%connlist1, sh_env%pcoeffsrun(:,orb*(k-1)+m,3),&
+                                 & sh_env%aneighbour(:,1:atoms), sh_env%bneighbour(:,1:atoms), & 
+                                                                                 minao)
+                            end do
+                       end do
+                     end if
+
+                    !only call overlap if neighbours list says so
+                    if (sh_env%NN(i,k) == 1) then
+                         !first the diagonals
+                         if (i == k) then
+                              CALL diagonal_aom_elem(i,k,orb,itimes,sh_env)
+                         !now the off-diagonals                         
+                         else ! ( i == k)
+                              CALL off_diagonal_aom_elem(sh_env,i,k,orb,itimes, atoms, &
+                                   dR, S, do_random, cbar, scaling)
+                         end if !(i==k)
+                    else !(NN(i,k) == 1
+                         do d=1,orb
+                              do m=1,orb
+                                   !fill in elements of non-overlapping pairs with 0
+                                   sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0, 0.0D0,dp)
+                                   sh_env%Stt(orb*(i-1)+d,orb*(k-1)+m)   = 0.0D0
+                                   sh_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = 0.0D0
+     !> in case no_diab_nace is true nace in the diabatic basis are not used
+     !> neither to
+     !> propagate_wf nor in the adiabatic nace calculation for the hopping
+     !> probability
+     !> so that all the Sttp and co matrices are also not used and not calculated
+     !> NB probably the same could be done for sh_env%Stt
+                                   if (.NOT. sh_env%no_diab_nace) then
+                                       sh_env%Sttp(orb*(i-1)+d,orb*(k-1)+m)  = 0.0D0
+                                       sh_env%Stpt(orb*(i-1)+d,orb*(k-1)+m) = 0.0D0
+                                       sh_env%Sttm(orb*(i-1)+d,orb*(k-1)+m) = 0.0D0
+                                       sh_env%Stmtm(orb*(i-1)+d,orb*(k-1)+m) = 0.0D0
+                                       sh_env%Stmt(orb*(i-1)+d,orb*(k-1)+m) = 0.0D0
+                                   end if
+                              end do
+                         end do
+                    end if !(NN(i,k) == 1
+
+               end do !loop over k
+               call calc_sab_pete(sh_env%Atp, sh_env%connlist2, PC_rvecs)
+               do o=1, size(PC_rvecs,2)
+                  PC_allrvecs(1,((i-1)*atoms)+o) = i
+                  PC_allrvecs(2,((i-1)*atoms)+o) = o
+                  PC_allrvecs (3:5,((i-1)*atoms)+o) = PC_rvecs(:,o)
+               end do
+     end do !loop over i
+    DEALLOCATE(PC_rvecs) 
+END SUBROUTINE calc_aom_Xmatrix_elements
+
+SUBROUTINE diagonal_aom_elem(i,k,orb,itimes,sh_env)
+
+     integer, intent(IN) :: i, k,orb
+     INTEGER, POINTER                               :: itimes
+     TYPE(sh_env_type)              :: sh_env
+
+     CHARACTER(len=*), PARAMETER :: routineN ='diagonal_aom_elem', &
+     routineP = moduleN//':'//routineN
+
+     integer ::  m, d
+
+     do d=1,orb
+          do m=1,orb
+               !These diagonals are 1 by definition
+               !A bit of math to be convinced for Sttp,
+               !Stpt: dSii/dt = 0
+               sh_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = 1.0D0
+     !> in case no_diab_nace is true nace in the diabatic basis are not used
+     !> neither to
+     !> propagate_wf nor in the adiabatic nace calculation for the hopping
+     !> probability
+     !> so that all the Sttp and co matrices are also not used and not calculated
+     !> NB probably the same could be done for sh_env%Stt
+               if (.NOT. sh_env%no_diab_nace) then
+                  sh_env%Sttp(orb*(i-1)+d,orb*(k-1)+m)  = 1.0D0
+                  sh_env%Stpt(orb*(i-1)+d,orb*(k-1)+m)  = 1.0D0
+               end if
+               sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+d) = cmplx(0.0D0, &
+                                         (-sh_env%siteenergies(3,k)),dp)
+          end do
+     end do
+     if (itimes.eq.1 .or. sh_env%restart_key)  then
+          do d=1,orb
+               do m=1,orb
+               !These diagonals are 1 by definition
+               !A bit of math to be convinced for Sttp,
+               !Stpt: dSii/dt = 0
+                    sh_env%Stt(orb*(i-1)+d,orb*(k-1)+m)   = 1.0D0
+                    if (.NOT. sh_env%no_diab_nace) then
+                      sh_env%Stmt(orb*(i-1)+d,orb*(k-1)+m)  = 1.0D0
+                      sh_env%Sttm(orb*(i-1)+d,orb*(k-1)+m)  = 1.0D0
+                      sh_env%Stmtm(orb*(i-1)+d,orb*(k-1)+m) = 1.0D0
+                    end if
+               end do
+          end do     
+     end if ! (.not.inrun)
+END SUBROUTINE diagonal_aom_elem
+
+SUBROUTINE off_diagonal_aom_elem(sh_env,i,k,orb,itimes, atoms, &
+                                   dR, S, do_random, cbar, scaling)
+
+     TYPE(sh_env_type)                           :: sh_env
+     integer, intent(IN) :: i, k,orb, atoms
+     INTEGER, POINTER                               :: itimes
+     REAL(KIND=dp), intent(in)                   :: dR  
+     REAL(KIND=dp), intent(out)                  :: S
+     LOGICAL, intent(in)                         :: do_random
+     REAL(KIND=dp), intent(in)                   :: cbar
+     REAL(KIND=dp), intent(in) :: scaling
+
+     CHARACTER(len=*), PARAMETER :: routineN ='off_diagonal_aom_elem', &
+     routineP = moduleN//':'//routineN
+
+     integer ::  m, d
+     !symmetric matrices
+     !no sense calling calc_sab twice as often as you need to
+     if (k < i) then
+          do m=1,orb
+               do d=1,orb
+                    sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = sh_env%H_tp(orb*(k-1)+m,orb*(i-1)+d)
+                    sh_env%Stt(orb*(i-1)+d,orb*(k-1)+m)   = &
+                                             sh_env%Stt(orb*(k-1)+m,orb*(i-1)+d)
+                    sh_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = &
+                                            sh_env%Stptp(orb*(k-1)+m,orb*(i-1)+d)
+     !>in case no_diab_nace is true nace in the diabatic basis are not used
+     !>neither to
+     !>propagate_wf nor in the adiabatic nace calculation for the hopping
+     !>probability
+     !>so that all the Sttp and co matrices are also not used and not calculated
+     !>NB probably the same could be done for sh_env%Stt
+                    if (.NOT. sh_env%no_diab_nace) then
+                       sh_env%Stmtm(orb*(i-1)+d,orb*(k-1)+m) = &
+                                                sh_env%Stmtm(orb*(k-1)+m,orb*(i-1)+d)
+                       !A cross symmetry for Sttp, Stpt,
+                       !Sttm, Stmt
+                       sh_env%Sttp(orb*(i-1)+d,orb*(k-1)+m)  = &
+                                                sh_env%Stpt(orb*(k-1)+m,orb*(i-1)+d)
+                       sh_env%Stpt(orb*(i-1)+d,orb*(k-1)+m)  = & 
+                                                 sh_env%Sttp(orb*(k-1)+m,orb*(i-1)+d)
+                       if (itimes.eq.1 .or. sh_env%restart_key)  then
+                          sh_env%Sttm(orb*(i-1)+d,orb*(k-1)+m)  = &
+                                                 sh_env%Stmt(orb*(k-1)+m,orb*(i-1)+d)
+                          sh_env%Stmt(orb*(i-1)+d,orb*(k-1)+m)  = &
+                                                 sh_env%Sttm(orb*(k-1)+m,orb*(i-1)+d)
+                       ENDIF
+                    end if
+               end do
+          end do
+     else
+          do d=1,orb
+               do m=1,orb
+               !PC added print_rvecs =yes so p vectors and coords would be printed 
+                    call calc_sab(sh_env%Atp, sh_env%connlist2, &
+                        sh_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3),&
+                     S, sh_env%Btp, sh_env%connlist2, &
+                               sh_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3),& 
+                     print_rvecs='yes', molA_index=i, molB_index=k)
+                    sh_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
+                    sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m) = cmplx(0.0D0, -scaling*S,dp)
+
+                    !> In the following diabatic non-orthog. nace are
+                    !calculated, since calculating them is very time consuming
+                    !and expensive we opted for a multiple time step scheme.
+                    !while the nacv are within the counter(chosen in the input 
+                    !file) they are considered a
+                    !constant and taken from the prevous time step.
+                    !Calcul of the NACV
+                    if (mod(itimes-1, sh_env%multiple_time_step) .eq. 0 &
+                          .and. sh_env%multiple_time_step .ne. 1) then 
+                        call calc_dRSab(sh_env%Atp, sh_env%atomlist, &
+                                      sh_env%connlist1, &
+                        sh_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3), sh_env%scoeffs, &
+                        sh_env%nacv(1:3,orb*(k-1)+d,(i-1)*atoms+1:i*atoms), &
+                        sh_env%nacv(1:3,orb*(i-1)+m,(k-1)*atoms+1:k*atoms), &
+                        sh_env%Btp, sh_env%atomlist, sh_env%connlist1, &
+                        sh_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3), &
+                         !sh_env%scoeffs, sh_env%neighbourlist(k,i,:,:), &
+                         !         sh_env%neighbourlist(i,k,:,:), dR, &
+                         sh_env%scoeffs, sh_env%aneighbour(:,:), &
+                                          sh_env%bneighbour(:,:), dR, &
+                         do_random, sh_env)
+                        !> note that calc_dRSab uses a radom number to randomize
+                        !forwards derivative in the NACV (this improves energy
+                        !conservation by one/two order of magnitude. To be
+                        !consistent with random sequence, one should:
+                       !else
+                             !call random generator function
+
+                   else if (sh_env%multiple_time_step .eq. 1) then 
+                        call calc_dRSab(sh_env%Atp, sh_env%atomlist, &
+                                      sh_env%connlist1, &
+                        sh_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3), sh_env%scoeffs, &
+                        sh_env%nacv(1:3,orb*(k-1)+d,(i-1)*atoms+1:i*atoms), &
+                        sh_env%nacv(1:3,orb*(i-1)+m,(k-1)*atoms+1:k*atoms), &
+                        sh_env%Btp, sh_env%atomlist, sh_env%connlist1, &
+                        sh_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3), &
+                         sh_env%scoeffs, sh_env%neighbourlist(k,i,:,:), &
+                                  sh_env%neighbourlist(i,k,:,:), dR, &
+                         do_random, sh_env)
+                        !> note that calc_dRSab uses a radom number to randomize
+                        !forwards derivative in the NACV (this improves energy
+                        !conservation by one/two order of magnitude. To be
+                        !consistent with random sequence, one should:
+                       !else
+                             !call random generator function
+          
+                    end if
+               end do
+          end do
+     ! in case no_diab_nace is true nace in the diabatic basis are not used
+     ! neither to
+     ! propagate_wf nor in the adiabatic nace calculation for the hopping
+     ! probability
+     ! so that all the Sttp and co matrices are also not used and not calculated
+     ! NB probably the same could be done for sh_env%Stt and sh_env%Stptp
+         if (.NOT. sh_env%no_diab_nace) then
+             do d=1,orb
+                  do m=1,orb
+                       call calc_sab(sh_env%At, sh_env%connlist2, &
+                        sh_env%pcoeffsrun(1:atoms,orb*(i-1)+d,2), S, &
+                        sh_env%Btp,&
+                       & sh_env%connlist2, sh_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3))
+                       sh_env%Sttp(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
+    
+                       call calc_sab(sh_env%Atp, sh_env%connlist2, &
+                            sh_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3), S,& 
+                        sh_env%Bt,&
+                       & sh_env%connlist2, sh_env%pcoeffsrun(1:atoms,orb*(k-1)+m,2))
+                       sh_env%Stpt(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
+                  end do
+             end do
+             if (itimes.eq.1 .or. sh_env%restart_key)  then
+                  do d=1,orb
+                       do m=1,orb
+                            call calc_sab(sh_env%Atm, sh_env%connlist2, &
+                            &sh_env%pcoeffsrun(1:atoms,orb*(i-1)+d,1), S, &
+                                sh_env%Btm, sh_env%connlist2,&
+                            &sh_env%pcoeffsrun(1:atoms,orb*(k-1)+m,1))
+                            sh_env%Stmtm(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
+    
+    
+                            call calc_sab(sh_env%At, sh_env%connlist2, &
+                            &sh_env%pcoeffsrun(1:atoms,orb*(i-1)+d,2), S, &
+                                       sh_env%Btm, sh_env%connlist2,&
+                            &sh_env%pcoeffsrun(1:atoms,orb*(k-1)+m,1))
+                            sh_env%Sttm(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
+    
+                            call calc_sab(sh_env%Atm, sh_env%connlist2, &
+                            &sh_env%pcoeffsrun(1:atoms,orb*(i-1)+d,1), S, &
+                              sh_env%Bt, sh_env%connlist2, &
+                            &sh_env%pcoeffsrun(1:atoms,orb*(k-1)+m,2))
+                            sh_env%Stmt(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
+                       end do
+                  end do
+    
+             end if ! (.not.inrun)
+         end if 
+     end if ! ( k < i)
+END SUBROUTINE off_diagonal_aom_elem
+
+!**********************************************************************************
+!> \brief 
+!**********************************************************************************
+SUBROUTINE calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_random,cbar, &
+                      scaling, PC_allrvecs, orb, minao)
+
+     TYPE(sh_env_type)                          :: sh_env
+     integer, intent(IN)                         :: atoms
+     integer, intent(in)                         :: mol, orb
+     REAL(KIND=dp), intent(in)                   :: dR
+     LOGICAL, intent(in)                         :: do_random
+     REAL(KIND=dp), intent(in)                   :: cbar
+     REAL(KIND=dp), intent(in)                   :: minao
+     REAL(KIND=dp), intent(in)                   :: scaling
+     real(kind=dp), DIMENSION(:,:), allocatable, intent(out) :: PC_allrvecs
+
+     CHARACTER(len=*), PARAMETER                 :: routineN='calc_aom_Xmatrix_elements_first_step', &
+     routineP = moduleN//':'//routineN
+
+     REAL(KIND=dp)                               :: S
+     integer                                     :: i, j, k, l, m, d, o
+     real(kind=dp), allocatable :: PC_rvecs(:,:)
+
+
+     ALLOCATE(PC_allrvecs(5,mol*atoms))
+     ALLOCATE(PC_rvecs(3,atoms))
+
+     !CALCULATE THE HAMILTONIAN AND THE NACV
+     do i=1,mol
+               !create the array of all its atomic coordinates at t
+               !numerical factor converts from Angstroms into Bohr radii
+               sh_env%Atp(1,1:atoms) = dble(sh_env%elements((i-1)*atoms+1:i*atoms))
+               do j=1,atoms
+                    sh_env%Atp(2:4,j) = sh_env%crds(1:3,(i-1)*atoms+j,3)
+               end do
+
+               !then for each other molecule
+               do k=1,mol
+                    !create the array of its atomic coordinates at both t and t+dt
+                    sh_env%Btp(1,1:atoms) = dble(sh_env%elements((k-1)*atoms+1:k*atoms))
+                    do l=1,atoms
+                        sh_env%Btp(2:4,l) = sh_env%crds(1:3,(k-1)*atoms+l,3)
+                    end do
+                    if (i == 1) then
+                         do d=1,orb
+                              sh_env%pcoeffsrun(1:atoms,orb*(k-1)+d,3) = sh_env%pcoeffs(1:atoms,d)
+                              call calc_sab(sh_env%Btp, sh_env%connlist2, sh_env%pcoeffsrun(:,orb*(k-1)+d,3))
+                         end do
+                    end if  ! (i == 1)
+                    do d=1,orb
+                         do m=1,orb
+                              call sab_screen_new(sh_env%Atp, sh_env%atomlist, sh_env%connlist1, &
+                                                                      sh_env%pcoeffsrun(:,orb*(i-1)+d,3),&
+                              & sh_env%atomlist, sh_env%Btp, sh_env%atomlist, sh_env%connlist1, &
+                                                                     sh_env%pcoeffsrun(:,orb*(k-1)+m,3),&
+                              & sh_env%aneighbour(:,1:atoms), sh_env%bneighbour(:,1:atoms), minao)
+                         end do
+                    end do
+                    !store neighbouring list when we do not use MTS feature
+                    if (sh_env%multiple_time_step .eq. 1) then
+                        sh_env%neighbourlist(i,k,:,1:atoms) = sh_env%bneighbour(:,1:atoms)
+                        sh_env%neighbourlist(k,i,:,1:atoms) = sh_env%aneighbour(:,1:atoms)
+                    end if 
+                    if (sh_env%NN(i,k) == 1) then
+                         !first the diagonals
+                         if (i == k) then
+                              do d=1,orb
+                                   do m=1,orb
+                                        !These diagonals are 1 by definition
+                                        sh_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = 1.0D0
+                                        sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+d) = cmplx(0.0D0, (-sh_env%siteenergies(3,k)),dp)
+                                   end do
+                              end do
+
+                         !now the off-diagonals                         
+                         else ! ( i == k)
+                              !symmetric matrices
+                              !no sense calling calc_sab twice as often as you need to
+                              if (k < i) then
+                                   do m=1,orb
+                                        do d=1,orb
+                                             sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = sh_env%H_tp(orb*(k-1)+m,orb*(i-1)+d)
+                                             sh_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = sh_env%Stptp(orb*(k-1)+m,orb*(i-1)+d)
+                                        end do
+                                   end do
+                              else
+                                   do d=1,orb
+                                        do m=1,orb
+                                             call calc_sab(sh_env%Atp, sh_env%connlist2, &
+                                                          sh_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3),&
+                                                          S, sh_env%Btp, sh_env%connlist2, & 
+                                                          sh_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3))
+                                             sh_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
+                                             sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0, -scaling*S,dp)
+
+                                             call calc_dRSab(sh_env%Atp, sh_env%atomlist, sh_env%connlist1, &
+                                             sh_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3), sh_env%scoeffs, &
+                                             !nacv(1:3,orb*(k-1)+d,orb*(i-1)+m,(i-1)*atoms+1:i*atoms), &
+                                             !nacv(1:3,orb*(i-1)+m,orb*(k-1)+d,(k-1)*atoms+1:k*atoms), &
+                                             sh_env%nacv(1:3,orb*(k-1)+d,(i-1)*atoms+1:i*atoms), &
+                                             sh_env%nacv(1:3,orb*(i-1)+m,(k-1)*atoms+1:k*atoms), &
+                                             sh_env%Btp, sh_env%atomlist, sh_env%connlist1, & 
+                                                                   sh_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3),&
+                                             !sh_env%scoeffs, sh_env%neighbourlist(k,i,:,:), sh_env%neighbourlist(i,k,:,:), dR, &
+                                             sh_env%scoeffs, sh_env%aneighbour(:,:), sh_env%bneighbour(:,:), dR, &
+                                             do_random, sh_env)
+                                        end do
+                                   end do
+                              endif 
+                         end if !(i==k)
+                    else !(NN(i,k) == 1
+                         do d=1,orb
+                              do m=1,orb
+                                   !fill in elements of non-overlapping pairs with 0
+                                   sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0, 0.0D0,dp)
+                                   sh_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = 0.0D0
+                              end do
+                         end do
+                    end if !(NN(i,k) == 1
+               end do !loop over k 
+
+               call calc_sab_pete(sh_env%Atp, sh_env%connlist2, PC_rvecs)
+               do o=1, size(PC_rvecs,2)
+                  PC_allrvecs(1,((i-1)*atoms)+o) = i
+                  PC_allrvecs(2,((i-1)*atoms)+o) = o
+                  PC_allrvecs (3:5,((i-1)*atoms)+o) = PC_rvecs(:,o)
+               end do
+
+     enddo !loop-over i
+     DEALLOCATE(PC_rvecs)
+
+END SUBROUTINE calc_aom_Xmatrix_elements_first_step
 
 !**********************************************************************************
 !> \brief 
