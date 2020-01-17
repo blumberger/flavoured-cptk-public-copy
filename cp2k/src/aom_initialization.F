@@ -97,7 +97,7 @@ MODULE aom_initialization
      USE distribution_1d_types,        ONLY: distribution_1d_type
 
      USE non_adiabatic_utils,          ONLY: decohere_wf,        &
-                                             calc_hop_nacv,      &
+                                             calc_hop_nacv_aom,      &
                                              choose_firstadiabat, &
                                              print_matrix_standard_out,&
                                              diab_to_adiab,      &
@@ -779,7 +779,7 @@ CONTAINS
      do i =1, mat
          do j = 1, mat
               if (j .ge. i) then
-                  CALL calc_hop_nacv(aom_env, diagonal_F, hop_nacv, i, j, fast=.TRUE.)
+                  CALL calc_hop_nacv_aom(aom_env, diagonal_F, hop_nacv, i, j, fast=.TRUE.)
                   do iparticle=1,natom
                        do coord = 1,3
                             aom_env%adiab_nace_tp(i,j) = aom_env%adiab_nace_tp(i,j) + &

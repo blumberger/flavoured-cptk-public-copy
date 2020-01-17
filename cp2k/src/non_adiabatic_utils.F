@@ -65,7 +65,7 @@ MODULE non_adiabatic_utils
         CHARACTER(len=*), PARAMETER, PRIVATE :: moduleN ='non_adiabatic_utils'
                                                                                                        
         PUBLIC :: decohere_wf,                     &
-                  calc_hop_nacv,                   &
+                  calc_hop_nacv_aom,                   &
                   surf_hop_type,                   &
                   check_hop_attempt,               &
                   choose_firstadiabat,             &
@@ -510,13 +510,13 @@ end subroutine modified_surfacehop
                  old_state = force_env%mixed_env%aom_env%active_state
                  new_state = force_env%mixed_env%aom_env%new_state
                  !aom_env=force_env%mixed_env%aom_env
-                 CALL calc_hop_nacv( force_env%mixed_env%aom_env,force_env%mixed_env%F,&
+                 CALL calc_hop_nacv_aom( force_env%mixed_env%aom_env,force_env%mixed_env%F,&
                                                                    hop_nacv_oldold, old_state, old_state, "OLDOLD")
-                 CALL calc_hop_nacv( force_env%mixed_env%aom_env, force_env%mixed_env%F,& 
+                 CALL calc_hop_nacv_aom( force_env%mixed_env%aom_env, force_env%mixed_env%F,& 
                                                                   hop_nacv_newnew, new_state, new_state, "NEWNEW")
-                 CALL calc_hop_nacv( force_env%mixed_env%aom_env, force_env%mixed_env%F,& 
+                 CALL calc_hop_nacv_aom( force_env%mixed_env%aom_env, force_env%mixed_env%F,& 
                                                                     hop_nacv_newold, new_state, old_state, "NEWOLD")
-                 CALL calc_hop_nacv( force_env%mixed_env%aom_env, force_env%mixed_env%F,& 
+                 CALL calc_hop_nacv_aom( force_env%mixed_env%aom_env, force_env%mixed_env%F,& 
                                                                    hop_nacv_oldnew, old_state, new_state, "OLDNEW")
                  CALL adiab_print_hop_nacv(sh_print_env, hop_nacv_oldold, &
                                   hop_nacv_newnew, hop_nacv_newold, hop_nacv_oldnew) 
@@ -527,7 +527,7 @@ end subroutine modified_surfacehop
                                              SUM(hop_nacv_oldnew(2,:) - hop_nacv_newold(2,:)) / 2,  &
                                              SUM(hop_nacv_oldnew(3,:) - hop_nacv_newold(3,:)) / 2
               CASE("CONTRIBUTION")
-                 CALL calc_hop_nacv( force_env%mixed_env%aom_env, force_env%mixed_env%F,& 
+                 CALL calc_hop_nacv_aom( force_env%mixed_env%aom_env, force_env%mixed_env%F,& 
                                                          hop_nacv, exF_11 = F_11, exF_1 = F_1, exF_2 = F_2, exF_3 =F_3)
                  print*, "totalnacv =" , SUM(hop_nacv(1,:)),  SUM(hop_nacv(2,:)), SUM(hop_nacv(3,:))
                  print*, "totalnacvF1 =" , SUM(F_1(1,:)),  SUM(F_1(2,:)), SUM(F_1(3,:))
@@ -556,10 +556,10 @@ ELSE
 ENDIF
      
               CASE("TOTAL")
-                 CALL calc_hop_nacv(force_env%mixed_env%aom_env, force_env%mixed_env%F, hop_nacv)
+                 CALL calc_hop_nacv_aom(force_env%mixed_env%aom_env, force_env%mixed_env%F, hop_nacv)
                  CALL adiab_print_hop_nacv(sh_print_env, hop_nacv) 
               CASE("FAST")
-                 CALL calc_hop_nacv( force_env%mixed_env%aom_env, force_env%mixed_env%F, hop_nacv, fast=.TRUE.)
+                 CALL calc_hop_nacv_aom( force_env%mixed_env%aom_env, force_env%mixed_env%F, hop_nacv, fast=.TRUE.)
 
                  CALL adiab_print_hop_nacv(sh_print_env, hop_nacv) 
               CASE DEFAULT
@@ -613,7 +613,7 @@ ENDIF
 !**********************************************************************************
 !> \brief TOADD
 !**********************************************************************************
-SUBROUTINE calc_hop_nacv(aom_env, diagonal_F, hop_nacv, ext_old_state, ext_new_state, symmetry, fast, &
+SUBROUTINE calc_hop_nacv_aom(aom_env, diagonal_F, hop_nacv, ext_old_state, ext_new_state, symmetry, fast, &
                          exF_11, exF_1, exF_2, exF_3)
         TYPE(aom_env_type)                                       :: aom_env
         REAL(kind=dp), DIMENSION(:,:), INTENT(OUT), ALLOCATABLE  :: hop_nacv
@@ -624,7 +624,7 @@ SUBROUTINE calc_hop_nacv(aom_env, diagonal_F, hop_nacv, ext_old_state, ext_new_s
         REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: diagonal_F
 
 
-        CHARACTER(len=*), PARAMETER :: routineN = 'calc_hop_nacv', &
+        CHARACTER(len=*), PARAMETER :: routineN = 'calc_hop_nacv_aom', &
         routineP = moduleN//':'//routineN
 
         INTEGER                                      :: num_mol, nadiab, num_j, natom
@@ -863,7 +863,7 @@ SUBROUTINE calc_hop_nacv(aom_env, diagonal_F, hop_nacv, ext_old_state, ext_new_s
         deallocate(F_2)
         deallocate(F_22)
         deallocate(F_3)
-END SUBROUTINE calc_hop_nacv
+END SUBROUTINE calc_hop_nacv_aom
 
 
 FUNCTION NORM2(array) RESULT(norm)
@@ -1556,6 +1556,9 @@ SUBROUTINE define_active_region(aom_env)
      DEALLOCATE(pop)
 END SUBROUTINE define_active_region
 
+!**********************************************************************************
+!> \brief TOADD
+!**********************************************************************************
 SUBROUTINE calc_psi_after_correction(aom_env)
  
      TYPE(aom_env_type)                      :: aom_env
@@ -1602,6 +1605,9 @@ SUBROUTINE calc_psi_after_correction(aom_env)
 
 END SUBROUTINE calc_psi_after_correction
 
+!**********************************************************************************
+!> \brief TOADD
+!**********************************************************************************
 SUBROUTINE classically_forbidden_hops(active_state, diagonal_F, aom_env, mat,  &
                   velocities_com_tp, local_particles, atomic_kinds, nparticle_kind, &
                           atomic_kind_set, class_forbidden_hop)
@@ -1635,7 +1641,7 @@ SUBROUTINE classically_forbidden_hops(active_state, diagonal_F, aom_env, mat,  &
      do j=1, mat
            if ((j .gt. active_state) .and. (aom_env%E_tp(j) .le. E_cutoff)) then
                
-              CALL calc_hop_nacv(aom_env, diagonal_F, hop_nacv, active_state, j, fast=.TRUE.)
+              CALL calc_hop_nacv_aom(aom_env, diagonal_F, hop_nacv, active_state, j, fast=.TRUE.)
               CALL cal_delta_energy_nacv(atomic_kinds%n_els, velocities_com_tp, aom_env, atomic_kinds%els, &
                                 local_particles, hop_nacv, delta_energy, A, B, active_state, j)
               energy_conservation(j) = delta_energy
@@ -1656,90 +1662,9 @@ SUBROUTINE classically_forbidden_hops(active_state, diagonal_F, aom_env, mat,  &
 END SUBROUTINE classically_forbidden_hops
 
 
-!COMMENT: IS THIS SUBROUTINE REDUNDANT WITH cal_delta_energy IN aom_utils.F?
-!  SUBROUTINE evaluate_delta_energy_nacv(velocities, local_particles, atomic_kinds, &
-!                                    nparticle_kind, atomic_kind_set, &
-!                                   aom_env,E_tp, hop_nacv, delta_energy, A, B, &
-!                                              i, j) 
-!
-!       REAL(kind=dp), DIMENSION(:,:), POINTER             :: velocities
-!       TYPE(distribution_1d_type), POINTER                :: local_particles
-!       TYPE(atomic_kind_list_type), POINTER, OPTIONAL     :: atomic_kinds
-!       INTEGER, INTENT(IN), OPTIONAL                      :: nparticle_kind
-!       TYPE(atomic_kind_type), DIMENSION(:), &
-!            POINTER, OPTIONAL                             :: atomic_kind_set
-!       TYPE(aom_env_type)                                 :: aom_env
-!       INTEGER, OPTIONAL, INTENT(IN)                      :: i, j
-!       REAL(kind=dp), DIMENSION(:,:), INTENT(IN)          :: hop_nacv
-!       REAL(kind=dp), INTENT(OUT)                         :: delta_energy
-!       REAL(kind=dp), INTENT(OUT)                         :: A, B
-!       REAL(KIND=dp), DIMENSION(:), INTENT(IN)            ::  E_tp
-!
-!
-!       CHARACTER(len=*), PARAMETER :: routineN = 'evaluate_delta_energy_nacv', &
-!       routineP = moduleN//':'//routineN
-!
-!       TYPE(atomic_kind_type), ALLOCATABLE, TARGET, DIMENSION(:)     :: my_atomic_kind_set
-!       INTEGER                                  :: my_nparticle_kind
-!       REAL(kind=dp)                            :: mass
-!       INTEGER                                  :: iparticle_kind, new_state, old_state
-!       INTEGER                                  :: nparticle_local, coord
-!       INTEGER                                  :: iparticle_local, iparticle
-!       TYPE(atomic_kind_type), POINTER          :: atomic_kind
-!
-!
-!From Fabiano E, Keal TW, Thiel W. Implementation of surface hopping molecular dynamics using semiempirical methods. 
-!     Chem Phys 2008, 349:334–347.
-!
-!
-!       IF (PRESENT(atomic_kinds)) THEN
-!          my_nparticle_kind = atomic_kinds%n_els
-!          ALLOCATE(my_atomic_kind_set(SIZE(atomic_kinds%els)))
-!          my_atomic_kind_set = atomic_kinds%els
-!       ELSE
-!          IF ((PRESENT(nparticle_kind)).AND.(PRESENT(atomic_kind_set))) THEN
-!             my_nparticle_kind = nparticle_kind
-!             ALLOCATE(my_atomic_kind_set(SIZE(atomic_kind_set)))
-!             my_atomic_kind_set = atomic_kind_set
-!          END IF
-!       END IF
-!
-!          A = 0
-!          B = 0
-!          DO iparticle_kind=1, my_nparticle_kind
-!             atomic_kind => my_atomic_kind_set(iparticle_kind)
-!             CALL get_atomic_kind(atomic_kind=atomic_kind,mass=mass)
-!             nparticle_local = local_particles%n_el(iparticle_kind)
-!             DO iparticle_local=1,nparticle_local
-!                iparticle = local_particles%list(iparticle_kind)%array(iparticle_local)
-!                DO coord = 1, 3
-!                   IF ((velocities(1, iparticle)**2 + velocities(2, iparticle)**2 + &
-!                      velocities(3, iparticle)**2 ).NE.0.0d0) THEN
-!                      A = A + hop_nacv(coord, iparticle)**2 / mass
-!                   ELSE IF ( SUM(velocities).EQ.0) THEN
-!                      A = A + hop_nacv(coord, iparticle)**2 / mass
-!                   ENDIF
-!                   B = B + velocities(coord, iparticle) * hop_nacv(coord, iparticle)
-!                ENDDO
-!             END DO
-!          END DO
-!          A = 0.5*A
-!
-!          IF (PRESENT(j)) THEN
-!             new_state = j
-!          ELSE    
-!             new_state = aom_env%new_state
-!          ENDIF
-!          IF (PRESENT(i)) THEN
-!             old_state = i
-!          ELSE
-!             old_state = aom_env%active_state
-!          ENDIF
-!          delta_energy = B**2 - 4 * A * (  &
-!                    E_tp(new_state) - E_tp(old_state))
-!  END SUBROUTINE evaluate_delta_energy_nacv
-
-
+!**********************************************************************************
+!> \brief TOADD
+!**********************************************************************************
   SUBROUTINE apply_decoherence(itimes, velocities, force_env, local_particles, nparticle_kind, atomic_kind_set)
 
        REAL(kind=dp), DIMENSION(:,:),POINTER    :: velocities
@@ -1796,6 +1721,9 @@ END SUBROUTINE classically_forbidden_hops
   END SUBROUTINE
 
  
+!**********************************************************************************
+!> \brief TOADD
+!**********************************************************************************
   SUBROUTINE decohere_wf(adiab_section,aom_env, diagonal_F, sh_print_env, itimes, &
                          velocities_com_tp, local_particles, nparticle_kind, &
                          atomic_kind_set, atomic_kinds)
@@ -1883,6 +1811,9 @@ END SUBROUTINE classically_forbidden_hops
   END SUBROUTINE decohere_wf
 
 
+!**********************************************************************************
+!> \brief TOADD
+!**********************************************************************************
   SUBROUTINE wf_collapse_adiab_prop(aom_env,sh_print_env, itimes)
     TYPE(aom_env_type)                             :: aom_env
     TYPE(sh_print_env_type)                        :: sh_print_env
@@ -1907,6 +1838,9 @@ END SUBROUTINE classically_forbidden_hops
   END SUBROUTINE wf_collapse_adiab_prop
 
 
+!**********************************************************************************
+!> \brief TOADD
+!**********************************************************************************
   SUBROUTINE wf_collapse(aom_env,sh_print_env, itimes)
     TYPE(sh_print_env_type)                        :: sh_print_env
     TYPE(aom_env_type)                             :: aom_env
@@ -1930,6 +1864,9 @@ END SUBROUTINE classically_forbidden_hops
   END SUBROUTINE wf_collapse 
 
 
+!**********************************************************************************
+!> \brief TOADD
+!**********************************************************************************
   SUBROUTINE ida_collapse(aom_env)
     TYPE(aom_env_type)                             :: aom_env
     CHARACTER(len=*), PARAMETER :: routineN ='ida_collapse', &         
@@ -1941,6 +1878,9 @@ END SUBROUTINE classically_forbidden_hops
   END SUBROUTINE ida_collapse
 
  
+!**********************************************************************************
+!> \brief TOADD
+!**********************************************************************************
   SUBROUTINE wf_tresh_collaps(aom_env, sh_print_env, itimes)
     TYPE(aom_env_type)                             :: aom_env
     TYPE(sh_print_env_type)                        :: sh_print_env
@@ -1962,6 +1902,9 @@ END SUBROUTINE classically_forbidden_hops
   END SUBROUTINE wf_tresh_collaps
 
 
+!**********************************************************************************
+!> \brief TOADD
+!**********************************************************************************
   SUBROUTINE  wf_damping_adiab_prop(aom_env, tau, mol, deltatMD, sh_print_env)                    
     REAL(KIND=dp), DIMENSION(:), INTENT(in)    :: tau!, tau_forces
     TYPE(aom_env_type)                          :: aom_env
@@ -1981,19 +1924,19 @@ END SUBROUTINE classically_forbidden_hops
     sum = 0.0D0
 
 
-!transfor the diabatic into the adiabatic coefficients and calculate tau
+    !>transfor the diabatic into the adiabatic coefficients and calculate tau
     do i=1,mol 
            if (i .ne. aom_env%active_state) then
 !               tau(i)= (1/abs(sh_env%E_tp(i) - sh_env%E_tp(sh_env%active_state)))* &
 !                                        (C_param +(E_0_param/K_tot))
 
-!Damp the coefficients of the states different from the active state    
+    !>Damp the coefficients of the states different from the active state    
                 aom_env%ctin(i) = aom_env%ctin(i)*exp(-(deltatMD/tau(i)))
                 sum = sum + abs(aom_env%ctin(i))*abs(aom_env%ctin(i))
            end if
     end do
 
-!transfer population to the active state for keeping the detailed balance   
+    !>transfer population to the active state for keeping the detailed balance   
     if (aom_env%ctin(aom_env%active_state)== 0) then
            aom_env%ctin(aom_env%active_state) = sqrt(1-sum)
     else 
@@ -2006,6 +1949,9 @@ END SUBROUTINE classically_forbidden_hops
   END SUBROUTINE wf_damping_adiab_prop 
 
   
+!**********************************************************************************
+!> \brief TOADD
+!**********************************************************************************
   SUBROUTINE  eval_deco_tau(aom_env, diagonal_F, tau, adiab_section, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds,nparticle_kind, atomic_kind_set)                    
 !    LOGICAL, INTENT(IN)                        :: edc_deco_time
@@ -2227,6 +2173,9 @@ END SUBROUTINE classically_forbidden_hops
   END SUBROUTINE eval_deco_tau
 
 
+!**********************************************************************************
+!> \brief TOADD
+!**********************************************************************************
   SUBROUTINE collapse_within_deco_time(tau, mol, deltatMD, aom_env)
 
     INTEGER, INTENT(IN)                        :: mol
@@ -2308,6 +2257,9 @@ END SUBROUTINE classically_forbidden_hops
   END SUBROUTINE collapse_within_deco_time
 
 
+!**********************************************************************************
+!> \brief TOADD
+!**********************************************************************************
   SUBROUTINE  wf_damping(aom_env, tau, mol, deltatMD, sh_print_env)                    
     REAL(KIND=dp), DIMENSION(:), INTENT(in)    :: tau!, tau_forces
     TYPE(aom_env_type)                          :: aom_env
@@ -2384,6 +2336,9 @@ END SUBROUTINE classically_forbidden_hops
   END SUBROUTINE wf_damping 
  
 
+!**********************************************************************************
+!> \brief TOADD
+!**********************************************************************************
   SUBROUTINE calc_kinetic_tot(aom_env, array, local_particles, atomic_kinds, &
                                               nparticle_kind, atomic_kind_set, K_tot, ext_pres)
       
@@ -3602,47 +3557,6 @@ END SUBROUTINE classically_forbidden_hops
 
                     call make_adiabX(mat, E_2, NACEint, X2)
      
-                    !K2 = cmplx(0.0D0, 0.0D0,dp)
-                    !K3 = cmplx(0.0D0, 0.0D0,dp)
-                    !K4 = cmplx(0.0D0, 0.0D0,dp)
-          
-                    !now that X has been found, use 4th order Runge-Kutta numerical integration method
-                    !aiming to find operator such that c(t+1) = (1 + operator)*c
-          
-                    !there are four terms in X: each is an increasing multiple. so first term is proportional to X(t),
-                    !second term is as X(t+deltat/2)*X(t), third term is as X(t+deltat/2)*X(t+deltat/2)*X(t),
-                    !fourth term is as X(t+deltat)*X(t+deltat/2)*X(t+deltat/2)*X(t)
-                    !this means each term is some X matrix times the previous term,
-                    !so only three more calls to ZGEMM are needed
-                    !the K matrices are the second, third and fourth Runge-Kutta terms
-     
-                    !alpha = cmplx(deltatE/2.0D0, 0.0D0,dp)
-                    !beta = cmplx(0.0D0, 0.0D0,dp)
-     
-                    !!second term
-                    !call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X12, mat, X1, &
-                    !&mat, beta, K2, mat)
-                    !K2 = K2 + X12
-                    !
-                    !!third term
-                    !call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X12, mat, K2, &
-                    !&mat, beta, K3, mat)
-                    !K3 = K3 + X12
-     
-                    !!fourth term
-                    !alpha = cmplx(deltatE, 0.0D0,dp)
-                    !call ZGEMM(zgemm_type, zgemm_type, mat, mat, mat, alpha, X2, mat, K3, &
-                    !&mat, beta, K4, mat)
-                    !K4 = K4 + X2
- 
-                    !!put everything together
-                    !Ktot = Imat + (deltatE/6.0D0)*(X1 + 2*K2 + 2*K3 + K4)
-     
-                    !!timestep electron propagation and print out
-                    !!alpha = dcmplx(1.0D0, 0.0D0)
-                    !alpha = cmplx(1.0D0, 0.0D0,dp)
-                    !inc = 1
-                    !call ZGEMV(zgemm_type, mat, mat, alpha, Ktot, mat, ctin, inc, beta, ctout, inc)
 
                     ! Call new (vector) RK4 method
                     CALL RK4(ctin, X1, X12, X2, deltatE, mat)

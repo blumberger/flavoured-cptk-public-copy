@@ -138,6 +138,9 @@ IMPLICIT NONE
 CONTAINS
 
 
+!**********************************************************************************
+!> \brief 
+!**********************************************************************************
 SUBROUTINE calc_coms_and_nlist_aom(aom_env, atoms, mol, cutoff_sites, orb)
 
      TYPE(aom_env_type), INTENT(INOUT)     :: aom_env
@@ -187,6 +190,9 @@ SUBROUTINE calc_coms_and_nlist_aom(aom_env, atoms, mol, cutoff_sites, orb)
 END SUBROUTINE calc_coms_and_nlist_aom
 
   
+!**********************************************************************************
+!> \brief 
+!**********************************************************************************
 subroutine makeX(mol, H, Stt, Sttp, Sttm, Stptp, Stmtm, X, deltat, NACE)
         !X is the name I give to the matrix in the solution to the Schroedinger equation:
         !dc/dt = X*aom_env%ctin
@@ -285,6 +291,9 @@ subroutine makeX(mol, H, Stt, Sttp, Sttm, Stptp, Stmtm, X, deltat, NACE)
 end subroutine makeX
 
 
+!**********************************************************************************
+!> \brief 
+!**********************************************************************************
 subroutine calc_diabatic_nace(mol, H, Stt, Sttp, Sttm, Stptp, Stmtm, deltat, NACE, X)
        !X is the name I give to the matrix in the solution to the Schroedinger equation:
        !dc/dt = X*aom_env%ctin
@@ -359,7 +368,7 @@ subroutine calc_diabatic_nace(mol, H, Stt, Sttp, Sttm, Stptp, Stmtm, deltat, NAC
 
 end subroutine calc_diabatic_nace
 
-!!! Adiabatic propgation is DEPRECATED !!!
+!!! WARNING::::Adiabatic propgation is DEPRECATED so this may not work!!!
 subroutine make_adiabX(mol, E_t, NACE_ad_t, X) !deltat, NACE)
         !X is the name I give to the matrix in the solution to the Schroedinger equation:
         !dc/dt = X*aom_env%ctin
@@ -397,10 +406,9 @@ subroutine make_adiabX(mol, E_t, NACE_ad_t, X) !deltat, NACE)
 end subroutine make_adiabX
 
 
-
-
-
-
+!**********************************************************************************
+!> \brief 
+!**********************************************************************************
 subroutine old_diab_to_adiab( aom_env, C2, old_state, mol, cstate, ct, C1, cttm_ad, cstate_tm)
         REAL(KIND=dp), dimension(:,:), intent(in) :: C2
         integer, intent(in) :: old_state
@@ -946,6 +954,9 @@ subroutine nace7(aom_env, mol)
 
 end subroutine nace7
 
+!**********************************************************************************
+!> \brief 
+!**********************************************************************************
 subroutine calc_adiab_nace(aom_env, adiab_section)
         !this subroutine calculates the adiabatic nace used in the calculation
         !of the hopping probability and also in the RK adiabatic propagation 
@@ -976,9 +987,9 @@ subroutine calc_adiab_nace(aom_env, adiab_section)
  
 end subroutine calc_adiab_nace
 
-
-
-
+!**********************************************************************************
+!> \brief 
+!**********************************************************************************
 subroutine matinvsqrt(mol, invert, S)
 
         !calculates either the square root or the inverse of the square root of a square matrix S
@@ -1033,10 +1044,6 @@ subroutine matinvsqrt(mol, invert, S)
 
         deallocate(D, P, Pinv, DGETRI_WORK)
 end subroutine matinvsqrt
-
-
-
-
 
 
 ! COMMENT_SG: this subroutine is still a bit tight up to AOM and should be

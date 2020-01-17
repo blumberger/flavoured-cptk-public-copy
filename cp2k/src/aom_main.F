@@ -101,7 +101,6 @@ MODULE aom_main
 
      USE non_adiabatic_utils,          ONLY: decohere_wf,       &
                                              diab_to_adiab,     & 
-                                             calc_hop_nacv,     &
                                              surf_hop_type,     &
                                              choose_firstadiabat, &
                                              print_matrix_standard_out,& 
