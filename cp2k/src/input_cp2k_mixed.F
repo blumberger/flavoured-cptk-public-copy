@@ -314,6 +314,40 @@ CONTAINS
     !-----------------------------------------------------------------------
     !-----------------------------------------------------------------------
 
+    !-----------------------------------------------------------------------
+    !> start new sub2section ENERGY_CONSERVATION, part of ADIABATIC subsection
+   NULLIFY(sub2section)
+   CALL section_create(sub2section,name="ENERGY_CONSERVATION",&
+        description="Defines the velocity adj,"//&
+                     "and related parameters to use",&
+        n_keywords=1, n_subsections=0, repeats=.FALSE.)
+   CALL section_add_subsection(subsection,sub2section)
+
+   CALL keyword_create(keyword, name="METHOD_RESCALING",&
+        description="Defines the methods to rescale the velocities if required.",&
+        usage="METHOD_RESCALING: BASIC EXACT", type_of_var=char_t,&
+        n_var=-1)
+   CALL section_add_keyword(sub2section,keyword)
+   CALL keyword_release(keyword)
+
+   CALL keyword_create(keyword, name="METHOD_ADIABATIC_NACV",&
+        description="Defines the methods to compute the adiabatic NACV for the rescaling.",&
+        usage="METHOD_RESCALING: BASIC EXACT", type_of_var=char_t,&
+        n_var=-1)
+   CALL section_add_keyword(sub2section,keyword)
+   CALL keyword_release(keyword)
+
+   CALL keyword_create(keyword, name="METHOD_REVERSAL",&
+        description="Defines the methods to reverse the velocities after a frustrated hop if required.",&
+        usage="METHOD_RESCALING: BASIC EXACT", type_of_var=char_t,&
+        n_var=-1)
+   CALL section_add_keyword(sub2section,keyword)
+   CALL keyword_release(keyword)
+
+   !> releasing ENERGY_CONSERVATION subsection
+   CALL section_release(sub2section)
+    !-----------------------------------------------------------------------
+
     CALL keyword_create(keyword, name="METHOD_PROPAGATION",&
          description="Defines the methods to obtain the adiabatic forces.",&
          usage="METHOD_PROPAGATION : CLASSICAL_PATH, FSSH",  type_of_var=char_t,&
@@ -353,26 +387,6 @@ CONTAINS
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
 
-    CALL keyword_create(keyword, name="METHOD_RESCALING",&
-         description="Defines the methods to rescale the velocities if required.",&
-         usage="METHOD_RESCALING: BASIC EXACT", type_of_var=char_t,&
-         n_var=-1)
-    CALL section_add_keyword(subsection,keyword)
-    CALL keyword_release(keyword)
-
-    CALL keyword_create(keyword, name="METHOD_ADIABATIC_NACV",&
-         description="Defines the methods to compute the adiabatic NACV for the rescaling.",&
-         usage="METHOD_RESCALING: BASIC EXACT", type_of_var=char_t,&
-         n_var=-1)
-    CALL section_add_keyword(subsection,keyword)
-    CALL keyword_release(keyword)
-
-    CALL keyword_create(keyword, name="METHOD_REVERSAL",&
-         description="Defines the methods to reverse the velocities after a frustrated hop if required.",&
-         usage="METHOD_RESCALING: BASIC EXACT", type_of_var=char_t,&
-         n_var=-1)
-    CALL section_add_keyword(subsection,keyword)
-    CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="ELECTRONIC_PARTIAL_STEP",&
          description="Number of electronic steps by atomic step",&

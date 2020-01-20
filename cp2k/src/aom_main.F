@@ -170,6 +170,7 @@ CONTAINS
      routineP = moduleN//':'//routineN
 
      TYPE(section_vals_type), POINTER               :: decoherence_section, optimization_section
+     TYPE(section_vals_type), POINTER               :: e_conservation_section
      integer                                        :: coord
      integer                                        :: mol, atoms, c,  mat, orb
      REAL(KIND=dp)                                  :: cutoff_sites, cutoff_connect, &
@@ -194,13 +195,14 @@ CONTAINS
      COMPLEX(KIND=dp), dimension(:), allocatable    :: adiab_c
      TYPE(cp_logger_type), POINTER                  :: logger
      INTEGER                                        :: unit_nr
+     
 !TEST
 !     INTEGER                                    :: d, i,j
-
 
      NULLIFY(logger)
      NULLIFY(optimization_section)
      NULLIFY(decoherence_section)
+     NULLIFY(e_conservation_section)
 
      logger => cp_get_default_logger()
 
@@ -227,6 +229,7 @@ CONTAINS
 
      optimization_section => section_vals_get_subs_vals(adiab_section,"OPTIMIZATION")
      decoherence_section => section_vals_get_subs_vals(adiab_section,"DECOHERENCE")
+     e_conservation_section => section_vals_get_subs_vals(adiab_section,"ENERGY_CONSERVATION")
      
      CALL section_vals_val_get(adiab_section,"CENTER_OF_MASS", l_val=keyword_translate)
 
@@ -353,7 +356,7 @@ CONTAINS
            CALL prop_wf_HS_corr(sh_env%ctin, sh_env, nadiab,  norbitals, ELsteps, &
                            itimes, adiab_section, deltatMD, deltatE , times, &
                             mat, class_forbidden_hop_tp, sh_env%active_state)
-           CALL section_vals_val_get(adiab_section,"METHOD_REVERSAL",c_val=reversal_keyword)
+           CALL section_vals_val_get(e_conservation_section,"METHOD_REVERSAL",c_val=reversal_keyword)
            if (reversal_keyword .eq. "ALWAYS") then
                 sh_env%HS_propagation = .FALSE.
            else 

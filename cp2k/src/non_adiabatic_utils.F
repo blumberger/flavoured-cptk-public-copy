@@ -415,22 +415,29 @@ end subroutine modified_surfacehop
         CHARACTER(LEN=default_string_length)     :: my_rescale_keyword
         CHARACTER(LEN=default_string_length)     :: nacv_keyword, reversal_keyword
         TYPE(section_vals_type), POINTER         :: mixed_section, adiab_section, coupling_section
-        TYPE(section_vals_type), POINTER         :: force_env_section
+        TYPE(section_vals_type), POINTER         :: force_env_section, e_conservation_section
         INTEGER                                  :: old_state, new_state
         TYPE(sh_print_env_type)                  :: sh_print_env
         LOGICAL                                  :: translate_keyword
         REAL(kind=dp), DIMENSION(:,:),POINTER    :: velocities_com
 
 
+        NULLIFY(mixed_section)
+        NULLIFY(adiab_section)
+        NULLIFY(coupling_section)
+        NULLIFY(e_conservation_section)
+
         CALL force_env_get(force_env=force_env,&
                        force_env_section=force_env_section)
         mixed_section => section_vals_get_subs_vals(force_env_section,"MIXED")
         adiab_section => section_vals_get_subs_vals(mixed_section, "ADIABATIC")
         coupling_section => section_vals_get_subs_vals(adiab_section, "AOM")
+        e_conservation_section => section_vals_get_subs_vals(adiab_section, "ENERGY_CONSERVATION")
+
         IF (PRESENT(rescale_keyword)) THEN
            my_rescale_keyword = rescale_keyword
         ELSE
-           CALL section_vals_val_get(adiab_section,"METHOD_RESCALING",c_val=my_rescale_keyword)
+           CALL section_vals_val_get(e_conservation_section,"METHOD_RESCALING",c_val=my_rescale_keyword)
         ENDIF
         CALL section_vals_val_get(adiab_section,"CENTER_OF_MASS",l_val=translate_keyword)
         sh_print_env = force_env%mixed_env%sh_env%sh_print_env
@@ -492,7 +499,7 @@ end subroutine modified_surfacehop
 
 
         CASE("NACV")
-           CALL section_vals_val_get(adiab_section,"METHOD_ADIABATIC_NACV",c_val=nacv_keyword)
+           CALL section_vals_val_get(e_conservation_section,"METHOD_ADIABATIC_NACV",c_val=nacv_keyword)
            CALL cal_delta_ene_QSYS(nparticle_kind, velocities_com, force_env, atomic_kind_set, &
                                  local_particles, delta_energy, kinetic_energy_prime)
            sh_print_env%kinetic_energy   = kinetic_energy_prime
@@ -579,7 +586,7 @@ ENDIF
 !ENDIF
               If (delta_energy.lt.0) THEN
                   force_env%mixed_env%sh_env%successful_hop = .FALSE.
-                  CALL section_vals_val_get(adiab_section,"METHOD_REVERSAL",c_val=reversal_keyword)
+                  CALL section_vals_val_get(e_conservation_section,"METHOD_REVERSAL",c_val=reversal_keyword)
                   CALL hop_nacv_vel_reversing(nparticle_kind, velocities,  & 
                                               force_env%mixed_env%sh_env%forces_adiab, &
                                               force_env%mixed_env%sh_env%forces_adiab_new, &
