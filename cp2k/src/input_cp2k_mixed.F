@@ -175,26 +175,36 @@ CONTAINS
 !> 15-12-11
 !> Create the input part for the Non Adiabatic Molecular Dynamics
 
+    !> main ADIABATIC section part of the general MIXED section
     CALL section_create(subsection,name="ADIABATIC",&
          description="Defines the methods to obtain the adiabatic forces.",&
          n_keywords=1, n_subsections=0, repeats=.FALSE.)
 
-    CALL keyword_create(keyword, name="DO_MEMORY_SAVE",&
-         description="Temporary keyword to activate energy decomposition alorithm",&
-         usage="True", default_l_val=.False., &
-         lone_keyword_l_val=.True.) 
-        ! type_of_var=char_t,&
-        ! n_var=-1)
-    CALL section_add_keyword(subsection,keyword)
-    CALL keyword_release(keyword)
+    !-----------------------------------------------------------------------
+    !> start new sub2section OPTIMIZATION, part of ADIABATIC subsection
+    NULLIFY(sub2section)
+    CALL section_create(sub2section,name="OPTIMIZATION",&
+         description="Defines the optimization methods to calculate site,"//&
+                      "energies from FIST global energies and forces",&
+         n_keywords=1, n_subsections=0, repeats=.FALSE.)
+    CALL section_add_subsection(subsection,sub2section)
+
+!   CALL keyword_create(keyword, name="DO_MEMORY_SAVE",&
+!        description="Temporary keyword to activate energy decomposition alorithm",&
+!        usage="True", default_l_val=.True., &
+!        lone_keyword_l_val=.True.) 
+!       ! type_of_var=char_t,&
+!       ! n_var=-1)
+!   CALL section_add_keyword(sub2section,keyword)
+!   CALL keyword_release(keyword)
     
     CALL keyword_create(keyword, name="DO_SPEEDUP_LJ",&
          description="If DO_SPEEDUP_LJ is TRUE, the first force_eval section will only calculate LJ interactions",&
-         usage="True", default_l_val=.False., &
+         usage="True", default_l_val=.True., &
          lone_keyword_l_val=.True.) 
         ! type_of_var=char_t,&
         ! n_var=-1)
-    CALL section_add_keyword(subsection,keyword)
+    CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="DO_SPEEDUP_INTRA",&
@@ -202,13 +212,12 @@ CONTAINS
                       "the pair force eval section will calculate intramolecular"//&
                       "interaction for one charged molecule only and the impair for one neutral"//&
                       "molecule only. WARNING: DO_SPEEDUP_LJ should be put to TRUE.",&
-         usage="True", default_l_val=.False., &
+         usage="True", default_l_val=.True., &
          lone_keyword_l_val=.True.) 
         ! type_of_var=char_t,&
         ! n_var=-1)
-    CALL section_add_keyword(subsection,keyword)
+    CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
-
 
     CALL keyword_create(keyword, name="DO_SPEEDUP_NACE",&
          description="If set to TRUE will apply nace optimisations.",&
@@ -216,46 +225,46 @@ CONTAINS
          lone_keyword_l_val=.True.) 
         ! type_of_var=char_t,&
         ! n_var=-1)
-    CALL section_add_keyword(subsection,keyword)
-    CALL keyword_release(keyword)
-
-
-    CALL keyword_create(keyword, name="METHOD_PROPAGATION",&
-         description="Defines the methods to obtain the adiabatic forces.",&
-         usage="METHOD_PROPAGATION : CLASSICAL_PATH, FSSH",  type_of_var=char_t,&
-         n_var=-1)
-    CALL section_add_keyword(subsection,keyword)
-    CALL keyword_release(keyword)
-
-
-    CALL keyword_create(keyword, name="ELECTR_PROPAGATION",&
-         description="Defines basis and methods to propagate the wf.",&
-         usage="DIABATIC_PROP ",  type_of_var=char_t,&
-         n_var=-1)
-    CALL section_add_keyword(subsection,keyword)
-    CALL keyword_release(keyword)
-
-!> 15-12-11
-    CALL keyword_create(keyword, name="METHOD_COUPLING",&
-         description="Defines the methods to obtain the adiabatic forces.",&
-         usage="METHOD_COUPLING : AOM",  type_of_var=char_t,&
-         n_var=-1)
-    CALL section_add_keyword(subsection,keyword)
+    CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="SURF_HOP_CHOICE",&
          description="Decide whether to use or not the trivial hopping correction",&
          usage="SURF_HOP_CHOICE: BASIC EXACT", type_of_var=char_t,&
          n_var=-1)
-    CALL section_add_keyword(subsection,keyword)
+    CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
-    !CALL keyword_create(keyword, name="THRESHOLD_TRIVIAL_CROSS",&
-     !    description="parameter used as a threshold to activate trivial correction", &
-      !    usage="1e-03", type_of_var=real_t)
-    !CALL section_add_keyword(subsection,keyword)
-    !CALL keyword_release(keyword)
-  
+    CALL keyword_create(keyword, name="RK_PROPAGATION",&
+         description="Decide which RK scheme is used and the approximation level",&
+         usage="DIABATIC or ADIABATIC or HS", & 
+         type_of_var=char_t)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="REORDERING_STATES_USING_OVERLAP",&
+         description="Choose if you want to activate REORDERING_STATES_USING_OVERLAP",&
+         usage="REORDERING_STATES_USING_OVERLAP: False", default_l_val=.False., &
+         lone_keyword_l_val=.True.) 
+        ! type_of_var=char_t,&
+        ! n_var=-1)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    !> releasing OPTIMIZATION subsection
+    CALL section_release(sub2section)
+    !-----------------------------------------------------------------------
+    !-----------------------------------------------------------------------
+
+    !-----------------------------------------------------------------------
+    !> start new sub2section DECOHERENCE, part of ADIABATIC subsection
+!   NULLIFY(sub2section)
+!   CALL section_create(sub2section,name="DECOHERENCE",&
+!        description="Defines the decoherence methods,"//&
+!                     "and related parameters to use",&
+!        n_keywords=1, n_subsections=0, repeats=.FALSE.)
+!   CALL section_add_subsection(subsection,sub2section)
+
     CALL keyword_create(keyword, name="DECOHERENCE_CORRECTIONS",&
          description="Defines the methods to decohere the wavefunction if required.",&
          usage="DECOHERENCE_CORRECTIONS: BASIC EXACT", type_of_var=char_t,&
@@ -267,24 +276,6 @@ CONTAINS
          description="Defines the decoherence time used by the damping",&
          usage="DECO_TIME: BASIC EXACT", type_of_var=char_t,&
          n_var=-1)
-    CALL section_add_keyword(subsection,keyword)
-    CALL keyword_release(keyword)
-    
-    CALL keyword_create(keyword, name="REORDERING_STATES_USING_OVERLAP",&
-         description="Choose if you want to activate REORDERING_STATES_USING_OVERLAP",&
-         usage="REORDERING_STATES_USING_OVERLAP: False", default_l_val=.False., &
-         lone_keyword_l_val=.True.) 
-        ! type_of_var=char_t,&
-        ! n_var=-1)
-    CALL section_add_keyword(subsection,keyword)
-    CALL keyword_release(keyword)
-  
-    CALL keyword_create(keyword, name="PRINT_MORE",&
-         description="Choose if you want to print more stuff",&
-         usage="PRINT_MORE: True", default_l_val=.True., &
-         lone_keyword_l_val=.TRUE.) 
-        ! type_of_var=char_t,&
-        ! n_var=-1)
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
 
@@ -321,17 +312,36 @@ CONTAINS
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
 
-    CALL keyword_create(keyword, name="INITIALIZATION",&
-         description="Decide how to initiate the system for wavefunction and surface.",&
-         usage="DIABATIC or ADIABATIC", & 
-         type_of_var=char_t)
+    CALL keyword_create(keyword, name="DECOHERENCE_CRITERION",&
+         description="Criterion to decohere",&
+         usage="1.0E-05", type_of_var=real_t)
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
 
+    !> releasing DECOHERENCE subsection
+!    CALL section_release(sub2section)
+    !-----------------------------------------------------------------------
+    !-----------------------------------------------------------------------
 
-    CALL keyword_create(keyword, name="RK_PROPAGATION",&
-         description="Decide which RK scheme is used: Diab  or Adiab or HS",&
-         usage="DIABATIC or ADIABATIC or HS", & 
+    CALL keyword_create(keyword, name="METHOD_PROPAGATION",&
+         description="Defines the methods to obtain the adiabatic forces.",&
+         usage="METHOD_PROPAGATION : CLASSICAL_PATH, FSSH",  type_of_var=char_t,&
+         n_var=-1)
+    CALL section_add_keyword(subsection,keyword)
+    CALL keyword_release(keyword)
+ 
+    CALL keyword_create(keyword, name="PRINT_MORE",&
+         description="Choose if you want to print more stuff",&
+         usage="PRINT_MORE: True", default_l_val=.True., &
+         lone_keyword_l_val=.TRUE.) 
+        ! type_of_var=char_t,&
+        ! n_var=-1)
+    CALL section_add_keyword(subsection,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="INITIALIZATION",&
+         description="Decide how to initiate the system for wavefunction and surface.",&
+         usage="DIABATIC or ADIABATIC", & 
          type_of_var=char_t)
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
@@ -340,14 +350,6 @@ CONTAINS
          description="Decide which representation is used: Diab  or Adiab",&
          usage="DIABATIC_BASIS or ADIABATIC_BASIS", & 
          type_of_var=char_t)
-    CALL section_add_keyword(subsection,keyword)
-    CALL keyword_release(keyword)
-
-
-
-    CALL keyword_create(keyword, name="DECOHERENCE_CRITERION",&
-         description="Criterion to decohere",&
-         usage="1.0E-05", type_of_var=real_t)
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
 
@@ -407,10 +409,23 @@ CONTAINS
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
 
+!********************************************************************************
+!> 15-12-11 use this as new section 
+    CALL keyword_create(keyword, name="METHOD_COUPLING",&
+         description="Defines the methods to obtain the adiabatic forces.",&
+         usage="METHOD_COUPLING : AOM",  type_of_var=char_t,&
+         n_var=-1)
+    CALL section_add_keyword(subsection,keyword)
+    CALL keyword_release(keyword)
+!********************************************************************************
+
+    !-----------------------------------------------------------------------
+    !> start new sub3section AOM part of COUPLING sub2section
     NULLIFY(sub2section)
     CALL section_create(sub2section,name="AOM",&
          description="Defines the methods to obtain the adiabatic forces.",&
          n_keywords=1, n_subsections=0, repeats=.FALSE.)
+    CALL section_add_subsection(subsection,sub2section)
 
     CALL keyword_create(keyword, name="NUMBER_DIABATIC_STATES",&
          description="Number of diabatic states to consider",&
@@ -558,8 +573,6 @@ CONTAINS
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
-    !-----------------------------------------------------------------------
-
     CALL keyword_create(keyword, name="_DEFAULT_KEYWORD_",&
          description="The HOMO coefficient in the format:"//&
          "<p><tt>ATOMIC_KIND  LIST NO HOMOS HOMOP</tt></p>",&
@@ -568,9 +581,11 @@ CONTAINS
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
-    CALL section_add_subsection(subsection,sub2section)
+    !> releasing AOM subsection
     CALL section_release(sub2section)
+    !-----------------------------------------------------------------------
 
+    !> WAVEFUNCTION_RESTART subsection part of ADIABATIC section
     NULLIFY(sub2section)
     CALL section_create(sub2section,name="WAVEFUNCTION_RESTART",&
          description="WF restart",&
@@ -605,8 +620,6 @@ CONTAINS
 !    CALL section_release(sub3section)
 !    CALL section_add_subsection(subsection,sub2section)
 !    CALL section_release(sub2section)
-
-
 
     CALL section_create(sub2section,name="PRINT",&
          description="Section of possible print options in ADIABATIC env.",&

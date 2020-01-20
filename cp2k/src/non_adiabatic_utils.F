@@ -112,11 +112,13 @@ subroutine surf_hop_type(adiab_section, C1, C2, deltat, &
                                routineP = moduleN//':'//routineN
 
        CHARACTER(LEN=default_string_length)           :: surfhop_keyword
+       TYPE(section_vals_type), POINTER               :: optimization_section
        LOGICAL                                        :: overlap_key, do_trivial_corr
 
        overlap_key = .True.
-
-       CALL section_vals_val_get(adiab_section,"SURF_HOP_CHOICE", c_val=surfhop_keyword)
+   
+       optimization_section => section_vals_get_subs_vals(adiab_section,"OPTIMIZATION")
+       CALL section_vals_val_get(optimization_section,"SURF_HOP_CHOICE", c_val=surfhop_keyword)
        sh_print_env%additional_prints = .FALSE.
 
        SELECT CASE(surfhop_keyword)

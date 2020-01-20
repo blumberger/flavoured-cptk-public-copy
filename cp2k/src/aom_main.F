@@ -158,7 +158,7 @@ CONTAINS
      INTEGER, POINTER                               :: itimes
      TYPE(section_vals_type), POINTER               :: coupling_section
      LOGICAL, INTENT(IN)                            :: my_bo_keyword
-     TYPE(section_vals_type), POINTER               :: adiab_section
+     TYPE(section_vals_type), POINTER               :: adiab_section, optimization_section
      TYPE(atomic_kind_list_type), POINTER           :: atomic_kinds
      TYPE(distribution_1d_type), POINTER            :: local_particles
      LOGICAL, INTENT(IN)                            :: my_test_keyword
@@ -221,12 +221,15 @@ CONTAINS
      CALL section_vals_val_get(coupling_section,"MULTIPLE_TIME_STEP",&
                                i_val=sh_env%multiple_time_step)
 
+     optimization_section => section_vals_get_subs_vals(adiab_section,"OPTIMIZATION")
      
      CALL section_vals_val_get(adiab_section,"CENTER_OF_MASS", l_val=keyword_translate)
+
      !COMMENT SG: the following keyword could be removed since new nace are
      !better
      !> uses chunked nace (improved) subroutines as default 
-     CALL section_vals_val_get(adiab_section, "DO_SPEEDUP_NACE", l_val=do_nace_speedup)
+     CALL section_vals_val_get(optimization_section, "DO_SPEEDUP_NACE", l_val=do_nace_speedup)
+
      CALL section_vals_val_get(adiab_section,"ELECTRONIC_PARTIAL_STEP",&
                                i_val=ELsteps)
      !> Instantaneous decoherence related threshold criteria 
@@ -319,7 +322,7 @@ CONTAINS
      !> PROPAGATE THE ELECTRON FOR ONE MOLECULAR TIMESTEP
      !>the CHARGE CARRIER WF is called sh_env%ctin
      sh_env%HS_propagation = .FALSE.
-     CALL section_vals_val_get(adiab_section,"RK_PROPAGATION", c_val=prop_wf_keyword)
+     CALL section_vals_val_get(optimization_section,"RK_PROPAGATION", c_val=prop_wf_keyword)
      SELECT CASE(prop_wf_keyword)                                 
      CASE("DIABATIC_RK")
            CALL propagate_wf(sh_env%ctin, sh_env, nadiab,  norbitals, ELsteps, &

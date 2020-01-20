@@ -856,7 +856,7 @@ CONTAINS
 !> 15-12-11
 !> To create a new way to combine the force
 !> To get the adiabatic force 
-    TYPE(section_vals_type), POINTER         :: adiab_section
+    TYPE(section_vals_type), POINTER         :: adiab_section, optimization_section
     CHARACTER(LEN=default_string_length)     :: adiab_keyword
     TYPE(mixed_environment_type), POINTER    :: mixed_env
     TYPE(atomic_kind_list_type), POINTER     :: atomic_kinds
@@ -1198,6 +1198,8 @@ CONTAINS
     CASE(mix_adiab)
         adiab_section => section_vals_get_subs_vals(mixed_section, "ADIABATIC")
         CALL section_vals_val_get(adiab_section,"METHOD_PROPAGATION",c_val=adiab_keyword)
+        optimization_section => section_vals_get_subs_vals(adiab_section,"OPTIMIZATION")
+
         mixed_env => force_env%mixed_env
         IF (ALLOCATED(thermo%pot_list)) THEN
 !print *, "force_env%mixed_env%energies_1_mol_list INSIDE", mixed_env%energies_1_mol_list
@@ -1234,8 +1236,9 @@ CONTAINS
                                                       global_forces, my_energies, &
                                             molecule_kind_set, local_molecules, molecule_set, mixed_env, my_itimes)
            ELSE
-                CALL section_vals_val_get(adiab_section, "DO_SPEEDUP_LJ", l_val=do_speedup_lj)
-                CALL section_vals_val_get(adiab_section, "DO_SPEEDUP_INTRA", l_val=do_speedup_intra)
+                
+                CALL section_vals_val_get(optimization_section, "DO_SPEEDUP_LJ", l_val=do_speedup_lj)
+                CALL section_vals_val_get(optimization_section, "DO_SPEEDUP_INTRA", l_val=do_speedup_intra)
                 CALL add_energies_forces(energies, global_forces, my_energies, do_speedup_lj, &
                                                               do_speedup_intra, mixed_env, my_itimes)
            END IF

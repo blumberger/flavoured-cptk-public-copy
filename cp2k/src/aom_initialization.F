@@ -144,7 +144,7 @@ CONTAINS
      INTEGER, INTENT(IN)                            :: nadiab,  aom_atoms, norbitals, natom
      REAL(kind=dp), DIMENSION(:,:),POINTER          :: positions_tp
      TYPE(section_vals_type), POINTER               :: coupling_section
-     TYPE(section_vals_type), POINTER               :: adiab_section
+     TYPE(section_vals_type), POINTER               :: adiab_section, optimization_section
      TYPE(section_vals_type), POINTER               :: wf_restart_section
      TYPE(sh_env_type), INTENT(INOUT)              :: sh_env
 
@@ -160,7 +160,7 @@ CONTAINS
      integer, dimension(:), ALLOCATABLE             :: ext_elements
      TYPE(cp_sll_val_type), POINTER                 :: listcoeff
      TYPE(cp_sll_val_type), POINTER                 :: listdiabcoeff
-     LOGICAL                                        :: do_random
+!     LOGICAL                                        :: do_random
      REAL(KIND=dp), DIMENSION(3, 2)                 :: initial_seed
      INTEGER                                        :: input_seed
      TYPE(rng_stream_type), POINTER                 :: rng_stream
@@ -180,8 +180,9 @@ CONTAINS
      !> cutoff to define the neighborough list
      CALL section_vals_val_get(coupling_section,"CUT_OFF_CONNECTIVITY",&
              r_val=cutoff_connect)
-     CALL section_vals_val_get(coupling_section,"RANDOM_DERIVATIVE", l_val=do_random)
-     CALL section_vals_val_get(adiab_section,"RK_PROPAGATION", c_val=prop_wf_keyword) 
+!     CALL section_vals_val_get(coupling_section,"RANDOM_DERIVATIVE", l_val=do_random)
+     optimization_section => section_vals_get_subs_vals(adiab_section,"OPTIMIZATION")
+     CALL section_vals_val_get(optimization_section,"RK_PROPAGATION", c_val=prop_wf_keyword) 
 
      mat = norbitals*nadiab !> Size of the vectorial space where the wavefunctions are projected
      c = nadiab*aom_atoms !> Numbers of active atoms
@@ -207,7 +208,7 @@ CONTAINS
      allocate(sh_env%Bt(4,atoms))
      allocate(sh_env%Btp(4,atoms))
      allocate(sh_env%Btm(4,atoms))
-     allocate(sh_env%siteenergies(3,mat))  !QE_SG: why the dim is 3,mat and not mat
+     allocate(sh_env%siteenergies(3,mat))  !COMMENT_SG: why the dim is 3,mat and not mat
      !> nacv are memory consuming to store however here we are storing them at time
      !t and tp for the multiple time step feature avoing their calculations at
      !each step
@@ -383,7 +384,9 @@ CONTAINS
      IF (.NOT.(deco_keyword.EQ."NO_DECO_CORR"))  sh_env%do_deco = .TRUE.
 
      sh_env%do_reorder = .FALSE.
-     CALL section_vals_val_get(adiab_section,"REORDERING_STATES_USING_OVERLAP",l_val=sh_env%do_reorder)
+     optimization_section => section_vals_get_subs_vals(adiab_section,"OPTIMIZATION")
+     CALL section_vals_val_get(optimization_section,"REORDERING_STATES_USING_OVERLAP",&
+                                                      l_val=sh_env%do_reorder)
 
      DEALLOCATE(rng_stream)
   END SUBROUTINE create_sh_env
@@ -430,7 +433,7 @@ CONTAINS
      INTEGER, POINTER                               :: itimes
      TYPE(section_vals_type), POINTER               :: coupling_section
      LOGICAL, INTENT(IN)                            :: my_bo_keyword
-     TYPE(section_vals_type), POINTER               :: adiab_section
+     TYPE(section_vals_type), POINTER               :: adiab_section,optimization_section
      TYPE(atomic_kind_list_type), POINTER           :: atomic_kinds
      TYPE(distribution_1d_type), POINTER            :: local_particles
      LOGICAL, INTENT(IN)                            :: my_test_keyword
@@ -708,8 +711,9 @@ CONTAINS
         CALL adiab_print_exact_forces(adiab_section, exact_forces, natom, deltatMD, times)
      ENDIF
 
-     !> COMMENT_SG: to adjust this part
-     CALL section_vals_val_get(adiab_section,"RK_PROPAGATION", c_val=prop_wf_keyword)
+     !> COMMENT_SG: remove this select CASE
+     optimization_section => section_vals_get_subs_vals(adiab_section,"OPTIMIZATION")
+     CALL section_vals_val_get(optimization_section,"RK_PROPAGATION", c_val=prop_wf_keyword)
      SELECT CASE(prop_wf_keyword)                                 
      CASE("DIABATIC_RK")
      CASE("DIABATIC_RK_FAST")
