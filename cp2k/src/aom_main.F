@@ -158,7 +158,7 @@ CONTAINS
      INTEGER, POINTER                               :: itimes
      TYPE(section_vals_type), POINTER               :: coupling_section
      LOGICAL, INTENT(IN)                            :: my_bo_keyword
-     TYPE(section_vals_type), POINTER               :: adiab_section, optimization_section
+     TYPE(section_vals_type), POINTER               :: adiab_section
      TYPE(atomic_kind_list_type), POINTER           :: atomic_kinds
      TYPE(distribution_1d_type), POINTER            :: local_particles
      LOGICAL, INTENT(IN)                            :: my_test_keyword
@@ -169,6 +169,7 @@ CONTAINS
      CHARACTER(len=*), PARAMETER :: routineN ='construct_ham_X_SH', &
      routineP = moduleN//':'//routineN
 
+     TYPE(section_vals_type), POINTER               :: decoherence_section, optimization_section
      integer                                        :: coord
      integer                                        :: mol, atoms, c,  mat, orb
      REAL(KIND=dp)                                  :: cutoff_sites, cutoff_connect, &
@@ -198,6 +199,9 @@ CONTAINS
 
 
      NULLIFY(logger)
+     NULLIFY(optimization_section)
+     NULLIFY(decoherence_section)
+
      logger => cp_get_default_logger()
 
      !> cutoff to define the neighborough list
@@ -222,6 +226,7 @@ CONTAINS
                                i_val=sh_env%multiple_time_step)
 
      optimization_section => section_vals_get_subs_vals(adiab_section,"OPTIMIZATION")
+     decoherence_section => section_vals_get_subs_vals(adiab_section,"DECOHERENCE")
      
      CALL section_vals_val_get(adiab_section,"CENTER_OF_MASS", l_val=keyword_translate)
 
@@ -233,7 +238,7 @@ CONTAINS
      CALL section_vals_val_get(adiab_section,"ELECTRONIC_PARTIAL_STEP",&
                                i_val=ELsteps)
      !> Instantaneous decoherence related threshold criteria 
-     CALL section_vals_val_get(adiab_section,"DECOHERENCE_CRITERION",&
+     CALL section_vals_val_get(decoherence_section,"DECOHERENCE_CRITERION",&
              r_val=decohere_criterion)
 
      !> Scaling factor Hab = scaling*Sab_bar

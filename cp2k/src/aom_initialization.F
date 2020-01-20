@@ -145,7 +145,7 @@ CONTAINS
      REAL(kind=dp), DIMENSION(:,:),POINTER          :: positions_tp
      TYPE(section_vals_type), POINTER               :: coupling_section
      TYPE(section_vals_type), POINTER               :: adiab_section, optimization_section
-     TYPE(section_vals_type), POINTER               :: wf_restart_section
+     TYPE(section_vals_type), POINTER               :: wf_restart_section, decoherence_section
      TYPE(sh_env_type), INTENT(INOUT)              :: sh_env
 
      CHARACTER(len=*), PARAMETER :: routineN ='create_sh_env', &
@@ -173,6 +173,10 @@ CONTAINS
 
      NULLIFY(rng_stream)
      NULLIFY(listcoeff)
+     NULLIFY(decoherence_section)
+     NULLIFY(wf_restart_section)
+     NULLIFY(optimization_section)
+
 
      mol = nadiab ! CHANGE_AC
      atoms = aom_atoms ! CHANGE_AC
@@ -380,7 +384,8 @@ CONTAINS
 
      
      sh_env%do_deco = .FALSE.
-     CALL section_vals_val_get(adiab_section,"DECOHERENCE_CORRECTIONS",c_val=deco_keyword)
+     decoherence_section => section_vals_get_subs_vals(adiab_section,"DECOHERENCE")
+     CALL section_vals_val_get(decoherence_section,"DECOHERENCE_CORRECTIONS",c_val=deco_keyword)
      IF (.NOT.(deco_keyword.EQ."NO_DECO_CORR"))  sh_env%do_deco = .TRUE.
 
      sh_env%do_reorder = .FALSE.
@@ -451,7 +456,6 @@ CONTAINS
      LOGICAL                                        :: decohere, analytics
      INTEGER                                        :: new_state , ELsteps   
      REAL(KIND=dp)                                  :: dR, times 
-     REAL(KIND=dp)                                  :: decohere_criterion
      INTEGER                                        :: imol,  natom
      REAL(kind=dp), DIMENSION(:,:), ALLOCATABLE     :: exact_forces
      LOGICAL                                        :: keyword_translate
@@ -470,6 +474,7 @@ CONTAINS
 
      NULLIFY(positions_com_tp, velocities_com_tp)
      NULLIFY(logger)
+     NULLIFY(optimization_section)
 
      logger => cp_get_default_logger()
 
@@ -499,9 +504,6 @@ CONTAINS
      CALL section_vals_val_get(adiab_section,"CENTER_OF_MASS", l_val=keyword_translate)
      CALL section_vals_val_get(adiab_section,"ELECTRONIC_PARTIAL_STEP",&
              i_val=ELsteps)
-     !> Instantaneous decoherence related threshold criteria
-     CALL section_vals_val_get(adiab_section,"DECOHERENCE_CRITERION",&
-             r_val=decohere_criterion)
 
      !> Scaling factor Hab = scaling*Sab_bar
      scaling = sh_env%scaling

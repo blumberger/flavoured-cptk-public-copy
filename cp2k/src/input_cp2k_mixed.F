@@ -189,15 +189,6 @@ CONTAINS
          n_keywords=1, n_subsections=0, repeats=.FALSE.)
     CALL section_add_subsection(subsection,sub2section)
 
-!   CALL keyword_create(keyword, name="DO_MEMORY_SAVE",&
-!        description="Temporary keyword to activate energy decomposition alorithm",&
-!        usage="True", default_l_val=.True., &
-!        lone_keyword_l_val=.True.) 
-!       ! type_of_var=char_t,&
-!       ! n_var=-1)
-!   CALL section_add_keyword(sub2section,keyword)
-!   CALL keyword_release(keyword)
-    
     CALL keyword_create(keyword, name="DO_SPEEDUP_LJ",&
          description="If DO_SPEEDUP_LJ is TRUE, the first force_eval section will only calculate LJ interactions",&
          usage="True", default_l_val=.True., &
@@ -258,25 +249,25 @@ CONTAINS
 
     !-----------------------------------------------------------------------
     !> start new sub2section DECOHERENCE, part of ADIABATIC subsection
-!   NULLIFY(sub2section)
-!   CALL section_create(sub2section,name="DECOHERENCE",&
-!        description="Defines the decoherence methods,"//&
-!                     "and related parameters to use",&
-!        n_keywords=1, n_subsections=0, repeats=.FALSE.)
-!   CALL section_add_subsection(subsection,sub2section)
+   NULLIFY(sub2section)
+   CALL section_create(sub2section,name="DECOHERENCE",&
+        description="Defines the decoherence methods,"//&
+                     "and related parameters to use",&
+        n_keywords=1, n_subsections=0, repeats=.FALSE.)
+   CALL section_add_subsection(subsection,sub2section)
 
     CALL keyword_create(keyword, name="DECOHERENCE_CORRECTIONS",&
          description="Defines the methods to decohere the wavefunction if required.",&
          usage="DECOHERENCE_CORRECTIONS: BASIC EXACT", type_of_var=char_t,&
          n_var=-1)
-    CALL section_add_keyword(subsection,keyword)
+    CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
     
     CALL keyword_create(keyword, name="DECO_TIME",&
          description="Defines the decoherence time used by the damping",&
          usage="DECO_TIME: BASIC EXACT", type_of_var=char_t,&
          n_var=-1)
-    CALL section_add_keyword(subsection,keyword)
+    CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="SPURIOUS_TRANSFER_CORR",&
@@ -285,41 +276,41 @@ CONTAINS
          lone_keyword_l_val=.TRUE.) 
         ! type_of_var=char_t,&
         ! n_var=-1)
-    CALL section_add_keyword(subsection,keyword)
+    CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="EDC_C",&
          description="C parameter in the Energy-based deco. correction formula",&
          usage="1.0D0", type_of_var=real_t)
-    CALL section_add_keyword(subsection,keyword)
+    CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="EDC_E0",&
          description="E0 parameter in the Energy-based deco. correction formula",&
          usage="0.1D0", type_of_var=real_t)
-    CALL section_add_keyword(subsection,keyword)
+    CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="THRESHOLD_TAU_FORCES",&
          description="threshold used in the forces based calculation",&
          usage="0.1D0", type_of_var=real_t)
-    CALL section_add_keyword(subsection,keyword)
+    CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="TEMPERATURE_FG_WIDTH",&
          description="Temperature to define FG width, currectly 298 K",&
          usage="0.0009444571", type_of_var=real_t)
-    CALL section_add_keyword(subsection,keyword)
+    CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="DECOHERENCE_CRITERION",&
          description="Criterion to decohere",&
          usage="1.0E-05", type_of_var=real_t)
-    CALL section_add_keyword(subsection,keyword)
+    CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
     !> releasing DECOHERENCE subsection
-!    CALL section_release(sub2section)
+    CALL section_release(sub2section)
     !-----------------------------------------------------------------------
     !-----------------------------------------------------------------------
 

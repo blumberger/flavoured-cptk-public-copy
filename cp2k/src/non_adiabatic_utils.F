@@ -115,6 +115,8 @@ subroutine surf_hop_type(adiab_section, C1, C2, deltat, &
        TYPE(section_vals_type), POINTER               :: optimization_section
        LOGICAL                                        :: overlap_key, do_trivial_corr
 
+       NULLIFY(optimization_section)
+
        overlap_key = .True.
    
        optimization_section => section_vals_get_subs_vals(adiab_section,"OPTIMIZATION")
@@ -1669,29 +1671,34 @@ END SUBROUTINE classically_forbidden_hops
 !**********************************************************************************
   SUBROUTINE apply_decoherence(itimes, velocities, force_env, local_particles, nparticle_kind, atomic_kind_set)
 
-       REAL(kind=dp), DIMENSION(:,:),POINTER    :: velocities
+       REAL(kind=dp), DIMENSION(:,:),POINTER     :: velocities
        TYPE(atomic_kind_type), DIMENSION(:), &
           POINTER                                :: atomic_kind_set
-       INTEGER, INTENT(IN)                      :: nparticle_kind
-       TYPE(distribution_1d_type), POINTER      :: local_particles
-       TYPE(force_env_type), POINTER            :: force_env
+       INTEGER, INTENT(IN)                       :: nparticle_kind
+       TYPE(distribution_1d_type), POINTER       :: local_particles
+       TYPE(force_env_type), POINTER             :: force_env
        INTEGER, POINTER                          :: itimes 
-!       TYPE(atomic_kind_list_type), POINTER     :: atomic_kinds
        
        CHARACTER(len=*), PARAMETER :: routineN = 'apply_decoherence', &
             routineP = moduleN//':'//routineN 
 
-       REAL(kind=dp), DIMENSION(:,:),POINTER    :: velocities_com_tp
-       LOGICAL                                  :: translate_keyword, correct_transfer_keyword 
-       TYPE(section_vals_type), POINTER         :: mixed_section, adiab_section, coupling_section
-       TYPE(section_vals_type), POINTER         :: force_env_section
-       TYPE(sh_print_env_type)                  :: sh_print_env
+       REAL(kind=dp), DIMENSION(:,:),POINTER     :: velocities_com_tp
+       LOGICAL                                   :: translate_keyword, correct_transfer_keyword 
+       TYPE(section_vals_type), POINTER          :: mixed_section, adiab_section, coupling_section
+       TYPE(section_vals_type), POINTER          :: force_env_section, decoherence_section
+       TYPE(sh_print_env_type)                   :: sh_print_env
+
+       NULLIFY(mixed_section)      
+       NULLIFY(adiab_section)      
+       NULLIFY(coupling_section)      
+       NULLIFY(decoherence_section)      
 
        CALL force_env_get(force_env=force_env,&
                        force_env_section=force_env_section)
         mixed_section => section_vals_get_subs_vals(force_env_section,"MIXED")
         adiab_section => section_vals_get_subs_vals(mixed_section, "ADIABATIC")
         coupling_section => section_vals_get_subs_vals(adiab_section, "AOM")
+        decoherence_section => section_vals_get_subs_vals(adiab_section,"DECOHERENCE") 
 
         CALL section_vals_val_get(adiab_section,"CENTER_OF_MASS",l_val=translate_keyword)
         sh_print_env = force_env%mixed_env%sh_env%sh_print_env
@@ -1703,7 +1710,7 @@ END SUBROUTINE classically_forbidden_hops
         force_env%mixed_env%sh_env%ctin_before_deco = force_env%mixed_env%sh_env%ctin
         CALL decohere_wf(adiab_section, force_env%mixed_env%sh_env, force_env%mixed_env%F, sh_print_env, itimes, &
                          velocities_com_tp, local_particles, nparticle_kind,atomic_kind_set)
-        CALL section_vals_val_get(adiab_section,"SPURIOUS_TRANSFER_CORR", l_val=correct_transfer_keyword)
+        CALL section_vals_val_get(decoherence_section,"SPURIOUS_TRANSFER_CORR", l_val=correct_transfer_keyword)
         
         if (correct_transfer_keyword) then
               !> this subroutine define the active regione for local decoherence, it
@@ -1730,7 +1737,7 @@ END SUBROUTINE classically_forbidden_hops
                          velocities_com_tp, local_particles, nparticle_kind, &
                          atomic_kind_set, atomic_kinds)
 
-        TYPE(section_vals_type), POINTER               :: adiab_section 
+        TYPE(section_vals_type), POINTER               :: adiab_section
         TYPE(sh_print_env_type)                        :: sh_print_env
         TYPE(sh_env_type)                             :: sh_env
  !       TYPE(sh_env_type)                              :: sh_env
@@ -1748,6 +1755,7 @@ END SUBROUTINE classically_forbidden_hops
         CHARACTER(len=*), PARAMETER :: routineN ='decohere_wf', &         
                                        routineP = moduleN//':'//routineN
 
+        TYPE(section_vals_type), POINTER               :: decoherence_section
 !       logical                                            :: edc_deco_time
         REAL(KIND=dp), DIMENSION(:), ALLOCATABLE       :: tau!, tau_forces
         CHARACTER(LEN=default_string_length)           :: wfprop_keyword
@@ -1756,10 +1764,14 @@ END SUBROUTINE classically_forbidden_hops
         INTEGER                                        :: mol
         REAL(KIND=dp)                                 :: deltatMD
 !        REAL(KIND=dp)                                  :: C_param, E_0_param
+  
+
+        NULLIFY(decoherence_section)
 
         CALL section_vals_val_get(adiab_section,"REPRESENTATION", &
                                                      c_val=wfprop_keyword)
-        CALL section_vals_val_get(adiab_section,"DECOHERENCE_CORRECTIONS",c_val=deco_keyword)
+        decoherence_section => section_vals_get_subs_vals(adiab_section,"DECOHERENCE")
+        CALL section_vals_val_get(decoherence_section,"DECOHERENCE_CORRECTIONS",c_val=deco_keyword)
         
        
         mol = SIZE(sh_env%H_tp, 1) 
@@ -1956,21 +1968,19 @@ END SUBROUTINE classically_forbidden_hops
 !**********************************************************************************
   SUBROUTINE  eval_deco_tau(sh_env, diagonal_F, tau, adiab_section, mol, K_tot, sh_print_env, &
                           local_particles, atomic_kinds,nparticle_kind, atomic_kind_set)                    
-!    LOGICAL, INTENT(IN)                        :: edc_deco_time
-!    TYPE(sh_env_type)                          :: sh_env
-    INTEGER, INTENT(IN)                        :: mol
-    TYPE(sh_env_type)                         :: sh_env
-!    REAL(KIND=dp), INTENT(IN)                  :: deltatMD
-    REAL(kind=dp)                              :: K_tot
-    TYPE(sh_print_env_type)                    :: sh_print_env
+
+    INTEGER, INTENT(IN)                                :: mol
+    TYPE(sh_env_type)                                  :: sh_env
+    REAL(kind=dp)                                      :: K_tot
+    TYPE(sh_print_env_type)                            :: sh_print_env
     TYPE(distribution_1d_type), POINTER                :: local_particles
     TYPE(atomic_kind_list_type), POINTER, OPTIONAL     :: atomic_kinds
     TYPE(atomic_kind_type), DIMENSION(:), &
-                POINTER, OPTIONAL                             :: atomic_kind_set
+                POINTER, OPTIONAL                      :: atomic_kind_set
     INTEGER, INTENT(IN), OPTIONAL                      :: nparticle_kind
     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE, INTENT(OUT) :: tau
-    TYPE(section_vals_type), POINTER               :: adiab_section
-    REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: diagonal_F
+    TYPE(section_vals_type), POINTER                   :: adiab_section
+    REAL(KIND=dp), DIMENSION(:,:,:), POINTER           :: diagonal_F
 
 
 
@@ -1978,23 +1988,26 @@ END SUBROUTINE classically_forbidden_hops
     routineP = moduleN//':'//routineN   
 
     CHARACTER(LEN=default_string_length)           :: tau_param
-    REAL(KIND=dp), DIMENSION(:), ALLOCATABLE :: tau_forces, tau_pure_deph
-    REAL(KIND=dp)                           :: C_param, E_0_param
+    REAL(KIND=dp), DIMENSION(:), ALLOCATABLE       :: tau_forces, tau_pure_deph
+    REAL(KIND=dp)                                  :: C_param, E_0_param
     TYPE(atomic_kind_type), ALLOCATABLE, TARGET, DIMENSION(:)     :: my_atomic_kind_set
-    INTEGER                                  :: my_nparticle_kind
-    REAL(kind=dp)                            :: mass
-    INTEGER                                  :: iparticle_kind
-    INTEGER                                  :: nparticle_local
-    REAL(kind=dp)                            :: mixing_threshold
-    INTEGER                                  :: iparticle_local, iparticle
-    TYPE(atomic_kind_type), POINTER          :: atomic_kind
+    INTEGER                                        :: my_nparticle_kind
+    REAL(kind=dp)                                  :: mass
+    INTEGER                                        :: iparticle_kind
+    INTEGER                                        :: nparticle_local
+    REAL(kind=dp)                                  :: mixing_threshold
+    INTEGER                                        :: iparticle_local, iparticle
+    TYPE(atomic_kind_type), POINTER                :: atomic_kind
     INTEGER  :: i, deg_of_freedom
-    REAL(KIND=dp), DIMENSION(:), ALLOCATABLE :: adiab_nace_vector
-    REAL(KIND=dp)      :: KbT, Temp, alpha, T_inp 
+    REAL(KIND=dp), DIMENSION(:), ALLOCATABLE       :: adiab_nace_vector
+    REAL(KIND=dp)                                  :: KbT, Temp, alpha, T_inp 
     !REAL(kind=dp), DIMENSION(:,:),POINTER          :: active_state_adforces
     REAL(kind=dp), DIMENSION(:,:),POINTER          :: my_forces_adiab
-    LOGICAL                                  :: tau_schwartz
+    LOGICAL                                        :: tau_schwartz
+    TYPE(section_vals_type), POINTER               :: decoherence_section
 
+    NULLIFY(decoherence_section)
+ 
     !ALLOCATE(active_state_adforces(3, sh_env%natom))
     ALLOCATE(my_forces_adiab(3,sh_env%natom))
     allocate(tau(mol)) ! decoherence time (EDC method)
@@ -2002,7 +2015,8 @@ END SUBROUTINE classically_forbidden_hops
     allocate(tau_pure_deph(mol)) ! decoherence time (EDC method)
     allocate(sh_print_env%tau_deco(mol))
     allocate(adiab_nace_vector(mol))
-!    allocate(sh_print_env%pure_deph(mol))
+
+    decoherence_section => section_vals_get_subs_vals(adiab_section,"DECOHERENCE")
 
     adiab_nace_vector(:) = sh_env%adiab_nace_tp(sh_env%active_state,:)
     !>number of degrees of freedom intensive EDC
@@ -2024,21 +2038,19 @@ END SUBROUTINE classically_forbidden_hops
 !TEST TAU_SCHARTZ
 !tau_schwartz = .TRUE.
 !END TEST
-    
+   ! COMMENT_SG: HARDCODED stuff just for testing purposes
    tau_schwartz = .FALSE.
 !   sh_print_env%pure_deph(:) = .FALSE.
 
-!print *, "NEW_CODE"
 
-!transfor the diabatic into the adiabatic coefficients and calculate tau
-   
-   CALL section_vals_val_get(adiab_section,"DECO_TIME",c_val=tau_param)
+   !> transfor the diabatic into the adiabatic coefficients and calculate tau
+   CALL section_vals_val_get(decoherence_section,"DECO_TIME",c_val=tau_param)
     do i=1,mol 
            if (i .ne. sh_env%active_state) then
               SELECT CASE(tau_param)
               CASE("EDC")
-                    CALL section_vals_val_get(adiab_section,"EDC_C",r_val=C_param)
-                    CALL section_vals_val_get(adiab_section,"EDC_E0",r_val=E_0_param)
+                    CALL section_vals_val_get(decoherence_section,"EDC_C",r_val=C_param)
+                    CALL section_vals_val_get(decoherence_section,"EDC_E0",r_val=E_0_param)
                     !TEST WITHOUT KINETIC: useful if statment when E_0=0 and FROZEN HAMILTONIAN are
                     !used
                     if (E_0_param == 0.0D0) then  
@@ -2053,9 +2065,8 @@ END SUBROUTINE classically_forbidden_hops
                     !instead of using the exact boltzmann factor, at the moment the code uses Temp =
                     !298 K, maybe this point should be modified in future
                     
-                    CALL section_vals_val_get(adiab_section,"THRESHOLD_TAU_FORCES",r_val=mixing_threshold)
-                    CALL section_vals_val_get(adiab_section,"TEMPERATURE_FG_WIDTH",r_val=T_inp)
-!print *, "mixing_threshold", mixing_threshold
+                    CALL section_vals_val_get(decoherence_section,"THRESHOLD_TAU_FORCES",r_val=mixing_threshold)
+                    CALL section_vals_val_get(decoherence_section,"TEMPERATURE_FG_WIDTH",r_val=T_inp)
                     
                     Temp = 3.1693191275167785e-06*T_inp !conver in KbT
                       !Temp = 0.0009444571  !KbT at 298 K
@@ -2102,9 +2113,8 @@ END SUBROUTINE classically_forbidden_hops
                     !instead of using the exact boltzmann factor, at the moment the code uses Temp =
                     !298 K, maybe this point should be modified in future
                     
-                    CALL section_vals_val_get(adiab_section,"THRESHOLD_TAU_FORCES",r_val=mixing_threshold)
-                    CALL section_vals_val_get(adiab_section,"TEMPERATURE_FG_WIDTH",r_val=T_inp)
-!print *, "mixing_threshold", mixing_threshold
+                    CALL section_vals_val_get(decoherence_section,"THRESHOLD_TAU_FORCES",r_val=mixing_threshold)
+                    CALL section_vals_val_get(decoherence_section,"TEMPERATURE_FG_WIDTH",r_val=T_inp)
                     
                     Temp = 3.1693191275167785e-06*T_inp !conver in KbT
                       !Temp = 0.0009444571  !KbT at 298 K
