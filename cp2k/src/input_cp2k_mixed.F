@@ -378,16 +378,6 @@ CONTAINS
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
 
-    CALL keyword_create(keyword, name="CENTER_OF_MASS",&
-         description="Decide if do all electronic propagation and velocities "//&
-                     "rescaling into the center-of-mass frame.",&
-         usage="True", &
-         default_l_val=.TRUE., &
-         lone_keyword_l_val=.TRUE.)
-    CALL section_add_keyword(subsection,keyword)
-    CALL keyword_release(keyword)
-
-
     CALL keyword_create(keyword, name="ELECTRONIC_PARTIAL_STEP",&
          description="Number of electronic steps by atomic step",&
          usage="5", type_of_var=integer_t)
@@ -414,6 +404,40 @@ CONTAINS
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
 
+    CALL keyword_create(keyword, name="NUMBER_DIABATIC_STATES",&
+         description="Number of diabatic states to consider",&
+         usage="2", type_of_var=integer_t)
+    CALL section_add_keyword(subsection,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="NUMBER_ORBITALS",&
+         description="Number of orbitals per sites",&
+         usage="1", type_of_var=integer_t)
+    CALL section_add_keyword(subsection,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="NUMBER_ATOMS_PER_SITE",&
+         description="Number of atoms per site",&
+         usage="1", type_of_var=integer_t)
+    CALL section_add_keyword(subsection,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="NUCLEAR_TIMESTEP",&
+         description="Timestep for atomic motion, must be coherent",&
+         usage="timestep 0.5", type_of_var=real_t, &
+         unit_str = "fs")
+    CALL section_add_keyword(subsection,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="CENTER_OF_MASS",&
+         description="Decide if do all electronic propagation and velocities "//&
+                     "rescaling into the center-of-mass frame.",&
+         usage="True", &
+         default_l_val=.TRUE., &
+         lone_keyword_l_val=.TRUE.)
+    CALL section_add_keyword(subsection,keyword)
+    CALL keyword_release(keyword)
+
 !********************************************************************************
 !> 15-12-11 use this as new section 
     CALL keyword_create(keyword, name="METHOD_COUPLING",&
@@ -431,24 +455,6 @@ CONTAINS
          description="Defines the methods to obtain the adiabatic forces.",&
          n_keywords=1, n_subsections=0, repeats=.FALSE.)
     CALL section_add_subsection(subsection,sub2section)
-
-    CALL keyword_create(keyword, name="NUMBER_DIABATIC_STATES",&
-         description="Number of diabatic states to consider",&
-         usage="2", type_of_var=integer_t)
-    CALL section_add_keyword(sub2section,keyword)
-    CALL keyword_release(keyword)
-
-    CALL keyword_create(keyword, name="NUMBER_ATOMS_PER_SITE",&
-         description="Number of atoms per site",&
-         usage="1", type_of_var=integer_t)
-    CALL section_add_keyword(sub2section,keyword)
-    CALL keyword_release(keyword)
-
-    CALL keyword_create(keyword, name="NUMBER_ORBITALS",&
-         description="Number of orbitals per sites",&
-         usage="1", type_of_var=integer_t)
-    CALL section_add_keyword(sub2section,keyword)
-    CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="CUT_OFF_BETWEEN_SITES",&
          description="Distance cut-off for H_ab calculation",&
@@ -482,13 +488,6 @@ CONTAINS
     CALL keyword_create(keyword, name="ATOMIC_OVERLAP_CUTOFF",&
          description="An atomic overlap cutoff",&
          usage="1.0D-17", type_of_var=real_t)
-    CALL section_add_keyword(sub2section,keyword)
-    CALL keyword_release(keyword)
-
-    CALL keyword_create(keyword, name="NUCLEAR_TIMESTEP",&
-         description="Timestep for atomic motion, must be coherent",&
-         usage="timestep 0.5", type_of_var=real_t, &
-         unit_str = "fs")
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 

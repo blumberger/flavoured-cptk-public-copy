@@ -226,12 +226,14 @@ CONTAINS
      !> Multiple time step calculation of aom gradient
      CALL section_vals_val_get(coupling_section,"MULTIPLE_TIME_STEP",&
                                i_val=sh_env%multiple_time_step)
+     !> Calculate the orbital overlap in the COM reference sistem of the
+     !molecules
+     CALL section_vals_val_get(adiab_section,"CENTER_OF_MASS", l_val=keyword_translate)
 
      optimization_section => section_vals_get_subs_vals(adiab_section,"OPTIMIZATION")
      decoherence_section => section_vals_get_subs_vals(adiab_section,"DECOHERENCE")
      e_conservation_section => section_vals_get_subs_vals(adiab_section,"ENERGY_CONSERVATION")
      
-     CALL section_vals_val_get(adiab_section,"CENTER_OF_MASS", l_val=keyword_translate)
 
      !COMMENT SG: the following keyword could be removed since new nace are
      !better

@@ -123,7 +123,6 @@ CONTAINS
     ALLOCATE(forces_adiab(3,natom))
     factor = 1
 
-
     my_bo_keyword = .TRUE.
     my_test_keyword = .FALSE.
     IF (method_keyword.eq."FSSH") THEN
@@ -140,16 +139,21 @@ CONTAINS
     !> Choose the method to calculate the off-diagonal elements
     SELECT CASE(coupling_keyword)
     CASE("AOM")
-        !> Get the coupling section and all the information 
         coupling_section => section_vals_get_subs_vals(adiab_section, "AOM")
-        CALL section_vals_val_get(coupling_section,"NUMBER_DIABATIC_STATES",&
+        !> COMMENT_SG: this bit is not general becuase it assumes that all the
+        !following arrays have the same number of atoms per site and orbitals
+        !per site 
+
+        !> Get the coupling section and all the information 
+        CALL section_vals_val_get(adiab_section,"NUMBER_DIABATIC_STATES",&
              i_val=nadiab)
-        CALL section_vals_val_get(coupling_section,"NUMBER_ATOMS_PER_SITE",&
+        CALL section_vals_val_get(adiab_section,"NUMBER_ATOMS_PER_SITE",&
              i_val=aom_atoms)
-        CALL section_vals_val_get(coupling_section,"NUMBER_ORBITALS",&
+        CALL section_vals_val_get(adiab_section,"NUMBER_ORBITALS",&
              i_val=norbitals)
-        CALL section_vals_val_get(coupling_section,"NUCLEAR_TIMESTEP",&
+        CALL section_vals_val_get(adiab_section,"NUCLEAR_TIMESTEP",&
              r_val=MDtimestep)
+
         itimes => my_itimes
         DO iparticle = 1, natom
            jparticle = map_index(iparticle)

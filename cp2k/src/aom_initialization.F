@@ -501,7 +501,10 @@ CONTAINS
      CALL section_vals_val_get(coupling_section,"MULTIPLE_TIME_STEP",&
              i_val=sh_env%multiple_time_step)
 
+     !> Calculate the orbital overlap in the COM reference sistem of the
+     !molecules
      CALL section_vals_val_get(adiab_section,"CENTER_OF_MASS", l_val=keyword_translate)
+
      CALL section_vals_val_get(adiab_section,"ELECTRONIC_PARTIAL_STEP",&
              i_val=ELsteps)
 

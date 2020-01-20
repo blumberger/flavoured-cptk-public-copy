@@ -414,7 +414,7 @@ end subroutine modified_surfacehop
         REAL(kind=dp), DIMENSION(:,:), ALLOCATABLE  :: F_11, F_1, F_2, F_3
         CHARACTER(LEN=default_string_length)     :: my_rescale_keyword
         CHARACTER(LEN=default_string_length)     :: nacv_keyword, reversal_keyword
-        TYPE(section_vals_type), POINTER         :: mixed_section, adiab_section, coupling_section
+        TYPE(section_vals_type), POINTER         :: mixed_section, adiab_section!, coupling_section
         TYPE(section_vals_type), POINTER         :: force_env_section, e_conservation_section
         INTEGER                                  :: old_state, new_state
         TYPE(sh_print_env_type)                  :: sh_print_env
@@ -424,14 +424,14 @@ end subroutine modified_surfacehop
 
         NULLIFY(mixed_section)
         NULLIFY(adiab_section)
-        NULLIFY(coupling_section)
+        !NULLIFY(coupling_section)
         NULLIFY(e_conservation_section)
 
         CALL force_env_get(force_env=force_env,&
                        force_env_section=force_env_section)
         mixed_section => section_vals_get_subs_vals(force_env_section,"MIXED")
         adiab_section => section_vals_get_subs_vals(mixed_section, "ADIABATIC")
-        coupling_section => section_vals_get_subs_vals(adiab_section, "AOM")
+        !coupling_section => section_vals_get_subs_vals(adiab_section, "AOM")
         e_conservation_section => section_vals_get_subs_vals(adiab_section, "ENERGY_CONSERVATION")
 
         IF (PRESENT(rescale_keyword)) THEN
@@ -1691,20 +1691,20 @@ END SUBROUTINE classically_forbidden_hops
 
        REAL(kind=dp), DIMENSION(:,:),POINTER     :: velocities_com_tp
        LOGICAL                                   :: translate_keyword, correct_transfer_keyword 
-       TYPE(section_vals_type), POINTER          :: mixed_section, adiab_section, coupling_section
+       TYPE(section_vals_type), POINTER          :: mixed_section, adiab_section!, coupling_section
        TYPE(section_vals_type), POINTER          :: force_env_section, decoherence_section
        TYPE(sh_print_env_type)                   :: sh_print_env
 
        NULLIFY(mixed_section)      
        NULLIFY(adiab_section)      
-       NULLIFY(coupling_section)      
+       !NULLIFY(coupling_section)      
        NULLIFY(decoherence_section)      
 
        CALL force_env_get(force_env=force_env,&
                        force_env_section=force_env_section)
         mixed_section => section_vals_get_subs_vals(force_env_section,"MIXED")
         adiab_section => section_vals_get_subs_vals(mixed_section, "ADIABATIC")
-        coupling_section => section_vals_get_subs_vals(adiab_section, "AOM")
+        !coupling_section => section_vals_get_subs_vals(adiab_section, "AOM")
         decoherence_section => section_vals_get_subs_vals(adiab_section,"DECOHERENCE") 
 
         CALL section_vals_val_get(adiab_section,"CENTER_OF_MASS",l_val=translate_keyword)
