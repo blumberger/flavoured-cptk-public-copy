@@ -50,10 +50,12 @@ MODULE aom_initialization
                                               build_s_tables
 
      USE aom_utils,                    ONLY: makeX,                                &
+                                             adiabaticity,                         &
+                                             calc_hop_nacv_aom,                    &
                                              calc_aom_Xmatrix_elements_first_step, & 
                                              make_adiabX,                          &
                                              !surfacehop,     &
-                                             calcforces,                           &
+                                             calcforces_aom,                           &
                                              read_listcoeff,                       &
                                              read_listdiabcoeff,                   &
                                              calc_coms_and_nlist_aom
@@ -98,12 +100,10 @@ MODULE aom_initialization
      USE distribution_1d_types,        ONLY: distribution_1d_type
 
      USE non_adiabatic_utils,          ONLY: decohere_wf,        &
-                                             calc_hop_nacv_aom,      &
                                              choose_firstadiabat, &
                                              print_matrix_standard_out,&
                                              diab_to_adiab,      &
                                              translate_com,      &
-                                             adiabaticity,       &
                                              propagate_wf,       &
                                              propagate_adiab_wf, &
                                              prop_wf_HS_corr!, & 
@@ -199,6 +199,8 @@ CONTAINS
      ALLOCATE(sh_env%scoeffs(aom_atoms))
 
      allocate(sh_env%coms(3,mol))
+     !> crds is an AOM arrays (xyz, atoms, tm-t-tp) the third dimension
+     !indicates what time this coordinates refer to
      allocate(sh_env%crds(3,c,3))
      allocate(sh_env%dist(mol,mol))
      ALLOCATE(sh_env%NN(mat, mat))
@@ -212,7 +214,7 @@ CONTAINS
      allocate(sh_env%Bt(4,atoms))
      allocate(sh_env%Btp(4,atoms))
      allocate(sh_env%Btm(4,atoms))
-     allocate(sh_env%siteenergies(3,mat))  !COMMENT_SG: why the dim is 3,mat and not mat
+     allocate(sh_env%siteenergies(3,mat))  !COMMENT_SG: First dimension is to be removed
      !> nacv are memory consuming to store however here we are storing them at time
      !t and tp for the multiple time step feature avoing their calculations at
      !each step
@@ -242,14 +244,16 @@ CONTAINS
      ALLOCATE(sh_env%rm_t(3, natom))
      ALLOCATE(sh_env%rm_tm(3, natom))
      ALLOCATE(sh_env%velocities_tp(3, natom))
-     ALLOCATE(sh_env%C_t(mat,mat))
-     ALLOCATE(sh_env%C_tp(mat,mat))
-     ALLOCATE(sh_env%E_t(mat))
-     ALLOCATE(sh_env%E_tp(mat))
+     !> the following arrays are allocated in adiabaticity
+     !ALLOCATE(sh_env%C_t(mat,mat))
+     !ALLOCATE(sh_env%C_tp(mat,mat))
+     !ALLOCATE(sh_env%E_t(mat))
+     !ALLOCATE(sh_env%E_tp(mat))
      ALLOCATE(sh_env%H_t(mat,mat))
      ALLOCATE(sh_env%H_tp(mat,mat))
      ALLOCATE(sh_env%Stt(mat,mat))
      ALLOCATE(sh_env%Stptp(mat,mat))
+   
 
      if (prop_wf_keyword .ne. "DIABATIC_RK_FAST") then
      !> in case DIABATIC_RK_FAST diabatic nace are never calculated, neither in
@@ -478,7 +482,7 @@ CONTAINS
 
      logger => cp_get_default_logger()
 
-
+!------------------  AOM section -------------------------------------
      !> cutoff to define the neighborough list
      CALL section_vals_val_get(coupling_section,"CUT_OFF_CONNECTIVITY",&
              r_val=cutoff_connect)
@@ -500,6 +504,7 @@ CONTAINS
      !> Multiple time step calculation of aom gradient
      CALL section_vals_val_get(coupling_section,"MULTIPLE_TIME_STEP",&
              i_val=sh_env%multiple_time_step)
+!-------------------------------------------------------------------
 
      !> Calculate the orbital overlap in the COM reference sistem of the
      !molecules
@@ -536,6 +541,8 @@ CONTAINS
      ALLOCATE(velocities_com_tp(3, natom))
      allocate(exact_forces(3,natom))
      allocate(ctin(mat))      !ctin goes into the subroutine ZGEMV
+                              !these are carrier wf coefficient in the diab
+                              !basis
 
      !READ THE COORDINATES, ENERGIES AND STATE
      IF (method_keyword.eq."FROZEN_HAMILTONIAN") THEN
@@ -544,6 +551,8 @@ CONTAINS
         CALL translate_com(velocities_tp, keyword_translate, velocities_com_tp, local_particles, atomic_kinds = atomic_kinds)  
      ENDIF
      CALL translate_com(positions_tp, keyword_translate, positions_com_tp, local_particles, atomic_kinds = atomic_kinds)  
+
+!------------------  AOM section -------------------------------------
      do coord=1,3
         sh_env%crds(coord,:,1)   = PACK(positions_com_tp(coord,:), sh_env%ext_pres)
         !At time 0, we must guess the positions at time -1 with the inital velocities
@@ -561,7 +570,7 @@ CONTAINS
      !only if sh_env%multiple_time_step .eq. 1 otherwise we use Multiple time
      !step feature and to save memory we recalculate bneighbour and aneighbour
      !every N steps. This is done also for the NACV giving a huge speed-up. NOTE
-     !that in general is not convenient to recauclate neighboring list at each
+     !that in general is not convenient to recalculate neighboring list at each
      !step because is to expensive to do and not useful.
      if (sh_env%multiple_time_step .eq. 1) then 
        allocate(sh_env%neighbourlist(mol,mol,0:atoms,0:atoms))
@@ -575,6 +584,7 @@ CONTAINS
      !> CONVERT NACV AND CALCULATE EIGENPROPERTIES 
      !> THESE ASSOCIATIONS ARE NEEDED FOR THE NACV CALC
      sh_env%nacv = cbar*sh_env%nacv
+!-----------------------------------------------------------------------------
 
      !> HAMILTONIAN DIAGONALIZATION
      !The adiabaticity subroutine diagonalises the diabatic Hamiltonian H_tp
@@ -703,11 +713,11 @@ CONTAINS
          IF ((new_state).EQ.0) new_state = mat
      ENDIF 
 
-
+!------------------  AOM section --------------------------------------------------------
      !> second part CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE
      !RESULT OF THE SURFACE HOP ROUTINE IS.
      print*, "FOBSH| ACTIVE STATE = ", active_state
-     call calcforces(state=active_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%nacv, atoms=atoms, & 
+     call calcforces_aom(state=active_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%nacv, atoms=atoms, & 
                      scaling=scaling, cbar=cbar, Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                      ext_pres=sh_env%ext_pres)
 
@@ -715,34 +725,28 @@ CONTAINS
         times = DBLE(itimes)
         CALL adiab_print_exact_forces(adiab_section, exact_forces, natom, deltatMD, times)
      ENDIF
+!-----------------------------------------------------------------------------------------------
 
-     !> COMMENT_SG: remove this select CASE
+     !> This selects the most general DIABATIC_RK_FAST that does not include
+     !diabatic nace calculation
      optimization_section => section_vals_get_subs_vals(adiab_section,"OPTIMIZATION")
      CALL section_vals_val_get(optimization_section,"RK_PROPAGATION", c_val=prop_wf_keyword)
-     SELECT CASE(prop_wf_keyword)                                 
-     CASE("DIABATIC_RK")
-     CASE("DIABATIC_RK_FAST")
-     ! in this case diabatic nace are never calculated, neither in the
-     ! propagate_wf nor in the adiabatic nace calculation for the hopping
-     ! probability
-     ! so that all the Sttp and co matrices are also not used and so the memory
-     ! allocate for thme can be deallocated 
+     if (prop_wf_keyword .eq. "DIABATIC_RK_FAST") then 
+         ! in this case diabatic nace are never calculated, neither in the
+         ! propagate_wf nor in the adiabatic nace calculation for the hopping
+         ! probability
+         ! so that all the Sttp and co matrices are also not used and so the memory
+         ! allocate for thme can be deallocated 
          sh_env%no_diab_nace = .True.
-     CASE("DIABATIC_RK_DLI")
-     CASE("ADIABATIC_RK")
-     CASE("HS_CORRECTED_RK")  
-          !> CALC ARRAY OF CLASSICALLY FORBIDDEN HOPS
-          !CALL classically_forbidden_hops(active_state, sh_env, mat,  &
-          !        velocities_com_tp, local_particles, atomic_kinds, nparticle_kind, &
-          !                atomic_kind_set, class_forbidden_hop_tp)
-          !sh_env%class_forbidden_hop_t = class_forbidden_hop_tp
-     CASE DEFAULT                                           
-           CPABORT("There is no method to propagate the wavefunction.") 
-     END SELECT                                             
+     end if
+
      
      !> STORE THE COORDINATES IF NOT SUCCESSFUL RUN
+!------------------  AOM section --------------------------------------------------------
      sh_env%rm_tm      = positions_com_tp - velocities_com_tp*deltatMD
      sh_env%rm_t       = positions_com_tp
+     sh_env%Stt = sh_env%Stptp
+!------------------------------------------------------------------------------------- 
      sh_env%sh_print_env = sh_print_env
      sh_env%ctin        = ctin
      sh_env%ctin_t        = ctin
@@ -753,7 +757,6 @@ CONTAINS
      sh_env%new_state = new_state
      sh_env%active_state = active_state
      !> IMPORTANT FOR THE FIRST TIME STEP
-     sh_env%Stt = sh_env%Stptp
      sh_env%old_state = sh_env%active_state
      sh_env%new_state = -1
      sh_env%successful_hop = .FALSE.

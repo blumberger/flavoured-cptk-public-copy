@@ -162,6 +162,7 @@ CONTAINS
                 velocities_tp(:, jparticle) = particles_mix%els(jparticle)%v(:)
            ENDIF
         END DO
+
         IF (my_itimes.eq.0) THEN
            CALL create_sh_env(nadiab, aom_atoms, norbitals, natom, &
                                positions_tp, coupling_section, adiab_section, & 

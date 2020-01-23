@@ -130,11 +130,13 @@ IMPLICIT NONE
    CHARACTER(len=*), PARAMETER, PRIVATE :: moduleN = 'aom_utils'
 
    PUBLIC :: makeX,                                &
+             calc_hop_nacv_aom,                    &
+             adiabaticity,                         &
              calc_aom_Xmatrix_elements,            & 
              calc_aom_Xmatrix_elements_first_step, & 
              calc_coms_and_nlist_aom,              &
              make_adiabX,                          &
-             calcforces,                           &
+             calcforces_aom,                           &
              read_listcoeff,                       & 
              calc_adiab_nace,                      &
              calc_diabatic_nace,                   &
@@ -144,6 +146,339 @@ IMPLICIT NONE
  
 
 CONTAINS
+
+!**********************************************************************************
+!> \brief Diagonalize the Hamiltonian and calculate eigevlaues and eigenvectors.
+!>        Although this subroutine is not strictly related to AOM (but is is
+!>        general, it has to stay here to avoid compilation issue 
+!>        non_adiabatic_utils.F -> aom_utils.F -> non_adiabatic_utils.F
+!> \author AC [Edited SG]
+!**********************************************************************************
+subroutine adiabaticity(H, C, E)
+        !this subroutine will allow calculation of surface hopping probabilities
+        !between N adiabatic surfaces
+
+        REAL(KIND=dp), dimension(:,:), intent(in) :: H
+        REAL(KIND=dp), dimension(:,:), intent(out), allocatable :: C
+        REAL(KIND=dp), dimension(:), intent(out), allocatable :: E
+        !logical, intent(in) :: store_C
+        !TYPE(sh_env_type), INTENT(INOUT), OPTIONAL               ::    sh_env
+
+        CHARACTER(len=*), PARAMETER :: routineN ='adiabaticity', &
+                               routineP = moduleN//':'//routineN
+
+        integer :: mol
+        integer :: stat, LWORK
+        character(len=1) :: job, up
+        REAL(KIND=dp), dimension(:), allocatable :: DGETRI_WORK
+
+        mol = SIZE(H, 1)
+ 
+        allocate(C(mol,mol))
+        allocate(E(mol))
+        allocate(DGETRI_WORK(3*size(C)-1))
+ 
+        C = H
+
+        job = 'V'
+        up = 'U'
+        !DSYEV is from the BLAS. Returns vector of eigenvalues D and overwrites S with matrix of eigenvectors
+        !Original call establishes optimum size for speed purposes
+        LWORK = -1
+        call DSYEV(job, up, mol, C, mol, E, DGETRI_WORK, LWORK, stat)
+        if (stat /= 0) then
+                CPABORT("Error with subroutine DSYEV: error status")
+        end if
+        LWORK = max(3*size(C)-1, int(DGETRI_WORK(1)))
+
+        deallocate(DGETRI_WORK)
+        allocate(DGETRI_WORK(LWORK))
+
+        call DSYEV(job, up, mol, C, mol, E, DGETRI_WORK, LWORK, stat)
+        if (stat /= 0) then
+                CPABORT("Error with subroutine DSYEV: error status")
+        end if
+        
+        !if (AND.PRESENT(sh_env)) then 
+        !allocate(sh_env%C_tp(mol,mol))
+        !        sh_env%C_tp=C
+        !end if 
+        
+         
+        deallocate(DGETRI_WORK)
+end subroutine adiabaticity
+
+!**********************************************************************************
+!> \brief This calculates the adiabatic nacv according to Eq 11 in Carof 17
+!paper. This subroutine is stricly bound to AOM. Other Hamiltonians would
+!require a different implementation.
+!> \author AC [edited SG] 
+!**********************************************************************************
+SUBROUTINE calc_hop_nacv_aom(sh_env, diagonal_F, hop_nacv, ext_old_state, ext_new_state, symmetry, fast, &
+                         exF_11, exF_1, exF_2, exF_3)
+        TYPE(sh_env_type)                                       :: sh_env
+        REAL(kind=dp), DIMENSION(:,:), INTENT(OUT), ALLOCATABLE  :: hop_nacv
+        INTEGER, OPTIONAL                                        :: ext_old_state, ext_new_state
+        CHARACTER(len=*), OPTIONAL                               :: symmetry
+        LOGICAL, OPTIONAL                                        :: fast
+        REAL(kind=dp), DIMENSION(:,:), INTENT(OUT), ALLOCATABLE, OPTIONAL  :: exF_11, exF_1, exF_2, exF_3
+        REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: diagonal_F
+
+
+        CHARACTER(len=*), PARAMETER :: routineN = 'calc_hop_nacv_aom', &
+        routineP = moduleN//':'//routineN
+
+        INTEGER                                      :: num_mol, nadiab, num_j, natom
+        INTEGER                                      :: old_state, new_state
+        REAL(KIND=dp)                                :: scaling, cbar, diff_energy
+        REAL(KIND=dp)                                :: E_old_state, E_new_state
+        !REAL(KIND=dp), dimension(:,:,:), allocatable :: Fin
+        !REAL(KIND=dp), dimension(:,:,:), allocatable   :: nacv
+        REAL(KIND=dp), dimension(:,:,:,:), allocatable :: Wprime
+        integer, dimension(:,:), allocatable :: NN
+        integer :: i, j, k, mat, d, l, atoms
+        !REAL(KIND=dp), dimension(:,:,:,:), allocatable :: DH, my_DP
+        REAL(KIND=dp), dimension(:,:), allocatable :: F_1, F_11, F_2, F_22, F_3
+        REAL(KIND=dp), dimension(:), allocatable ::   Sdiag
+        REAL(KIND=dp), dimension(:,:), allocatable :: S, C, T, X, LL, Y
+        LOGICAL, dimension(:), allocatable         :: ext_pres
+        LOGICAL                                    :: my_fast
+        REAL(KIND=dp) :: total_norm, error
+        REAL(KIND=dp)                           :: convert_nacv 
+
+        ! Based on paper Carof, Giannini, Blumberger, J. Chem. Phys. 147,
+        ! 214113 (2017), [Carof17]
+
+
+        mat    = SIZE(sh_env%Stptp, 1)
+        natom  = SIZE(diagonal_F, 2)
+        nadiab = SIZE(diagonal_F, 3)
+        atoms  = SIZE(sh_env%connlist1, 2)
+
+        my_fast = .FALSE.
+        IF (PRESENT(fast)) my_fast = fast
+
+        allocate(T(mat,mat))
+        allocate(NN(mat,mat))
+        allocate(S(mat,mat))
+        allocate(C(mat,mat))
+        allocate(X(mat,mat))
+        allocate(Y(mat,mat))
+        allocate(LL(mat,mat))
+
+        allocate(Sdiag(mat))
+        allocate(ext_pres(natom))
+
+        !allocate(DH(mat,mat,natom,3))
+        !allocate(my_DP(mat,mat,natom,3)) 
+        !allocate(nacv(3,mat, mat*atoms)) 
+        allocate(F_1(3,natom))
+        allocate(F_11(3,natom))
+        allocate(F_2(3,natom))
+        allocate(F_22(3,natom))
+        allocate(F_3(3,natom))
+        !allocate(Fin(3,natom, mat))
+        allocate(hop_nacv(3, natom)) 
+
+        scaling = sh_env%scaling
+        cbar = sh_env%cbar
+        NN = sh_env%NN
+        S = sh_env%Stptp
+        C = sh_env%C_tp
+        
+        !nacv = sh_env%nacv
+        !Fin = sh_env%F
+        ext_pres = sh_env%ext_pres       
+        IF (PRESENT(ext_old_state)) THEN
+           old_state = ext_old_state
+        ELSE
+           old_state = sh_env%active_state
+        ENDIF
+        IF (PRESENT(ext_new_state)) THEN
+           new_state = ext_new_state 
+        ELSE
+           new_state = sh_env%new_state
+        ENDIF
+        E_old_state = sh_env%E_tp(old_state)
+        E_new_state = sh_env%E_tp(new_state)
+        IF (E_old_state.EQ.E_new_state) THEN
+           diff_energy = 0.0D0
+        ELSE
+           diff_energy = 1 / (E_new_state - E_old_state)
+        ENDIF  
+
+     IF (.NOT.my_fast) THEN
+           ! Use the full Eq. (14) of [Carof17]
+
+        T = S
+        CALL matinvsqrt(mat, .FALSE., T)
+        X = matmul(T, C)                   ! X is T*U
+        !CALL adiabaticity(T, LL, Sdiag)     
+        CALL adiabaticity(S, LL, Sdiag)    ! LL is L, the matrix that
+        ! diagonalizes S and T. Sdiag is the eigenvalues of S.
+        Y = matmul( transpose(LL), C)     ! Y is L^{dagger}C
+
+        !CALCULATE W' with Eq. (21) if [Carof17]
+        allocate(Wprime(mat,mat,natom,3)) 
+        do d=1,3
+           num_j = -1
+           do j=1,natom
+              IF (ext_pres(j)) THEN
+                  num_j   = num_j + 1
+                  num_mol = int(num_j/atoms) + 1
+              ENDIF
+              do k=1, mat
+                 do l=1, mat
+                    Wprime(k,l,j,d) = 0.0d0
+                    do i=1,mat 
+                       IF (ext_pres(j)) THEN
+                          IF (i.ne.num_mol) THEN
+                             !Wprime(k,l,j,d) = Wprime(k,l,j,d) + my_DP(i,num_mol,j,d) &
+                             Wprime(k,l,j,d) = Wprime(k,l,j,d) + sh_env%nacv(d, i, num_j) &
+                                               *( LL(num_mol,k)*LL(i,l)  + LL(num_mol,l) * LL(i, k))
+                          ENDIF
+                       ENDIF
+                    ENDDO
+                    Wprime(k, l, j, d) = - Wprime( k, l, j, d) / ( SQRT(Sdiag(k))*SQRT(Sdiag(l)) + Sdiag(l) )
+                 ENDDO
+              ENDDO
+           ENDDO
+        ENDDO          
+     ENDIF
+
+
+
+       convert_nacv = - scaling / cbar
+       IF (.NOT.my_fast) THEN
+           num_mol = 0
+           do d=1,3
+              num_j = -1
+              do j=1,natom
+                 F_1(d,j) = 0.0D0
+                 F_11(d,j) = 0.0D0
+                 F_2(d,j) = 0.0D0
+                 F_3(d,j) = 0.0D0
+                 IF (ext_pres(j)) THEN
+                    num_j   = num_j + 1
+                    num_mol = int(num_j/atoms) + 1 
+                 ENDIF
+                 do i=1,mat
+                    !F_1(d,j) = F_1(d,j) + C(i,old_state)*DH(i,i,j,d)*C(i,new_state)*diff_energy
+                    F_1(d,j) = F_1(d,j) + C(i,old_state)*diagonal_F(d,j,i)*C(i,new_state)*diff_energy
+                    IF (ext_pres(j)) THEN
+                       !F_2(d, j) = F_2(d,j) + X(i, old_state) * nacv(d, i, num_mol, j) * X( num_mol, new_state) 
+                       F_2(d, j) = F_2(d,j) + X(i, old_state) * sh_env%nacv(d, i, num_j) * X( num_mol, new_state) 
+                       IF (i.ne.num_mol) THEN
+                          !F_11(d,j) = F_11(d,j) + diff_energy * DH(i,num_mol,j,d) * (              &
+                          F_11(d,j) = F_11(d,j) + diff_energy * convert_nacv*sh_env%nacv(d, i, num_j) * (              &
+                                                 C(num_mol, new_state) * C(i, old_state) +   &
+                                                 C(num_mol, old_state) * C(i,new_state) )
+                       ENDIF
+                       DO k = 1, mat
+                          F_3(d,j) = F_3(d,j) + Y(i, old_state) * Wprime(i, k, j, d) * Y(k, new_state)
+                       ENDDO
+                    ENDIF
+                 ENDDO
+              ENDDO
+           ENDDO 
+
+           ! Carefull with the sign! 
+           hop_nacv = -(F_1 + F_11) + F_2 + F_3
+           IF (PRESENT(symmetry)) THEN
+              DO j=1, natom
+                 DO d=1, 3
+                    print*, "NACV", symmetry, hop_nacv(d,j) 
+                 ENDDO
+              ENDDO
+           ENDIF
+           IF (PRESENT(exF_1))  exF_1  = F_1
+           IF (PRESENT(exF_11)) exF_11 = F_11
+           IF (PRESENT(exF_2))  exF_2  = F_2
+           IF (PRESENT(exF_3))  exF_3  = F_3
+           IF (PRESENT(exF_1)) THEN
+              F_22 = F_2 + F_3
+              total_norm = 0.0D0
+              error = 0.0D0
+              DO j=1, 12
+                 !DO d=1,3
+                 DO d=1, 3
+                       error = error + ( hop_nacv(d,j) - (F_1(d,j) + F_11(d,j)))**2 
+                       total_norm = total_norm +  (hop_nacv(d,j))**2
+                       print*, "hop_nacv", hop_nacv(d,j)
+                       print*, "d_1_term", F_1(d,j) + F_11(d,j)
+                       print*, "total_norm = ", total_norm
+                       print*, "error = ", error
+                 ENDDO
+                 IF (( mod(j,3).eq.1 ).AND. (j < 12)) THEN
+                       print*, "NACVTOTCARBON = ", j, NORM2(hop_nacv(:,j))
+                       print*, "NACVFF1CARBON   = ", j, NORM2(F_1(:,j) + F_11(:,j))
+                 ELSE 
+                       print*, "NACVTOTHYDROGEN = ", j, NORM2(hop_nacv(:,j))
+                       print*, "NACVFF1HYDROGEN   = ", j, NORM2(F_1(:,j) + F_11(:,j))
+                 ENDIF 
+              ENDDO
+              print*, "TOTALNORM = ", sqrt(total_norm)
+              print*, "ERROR =  ", sqrt(error/total_norm)
+           ENDIF
+        ELSE
+           ! Only calculation of term a_{I, ij} in Eq. (14) of [Carof17], i.e.
+           ! Eq. (15)
+           num_mol = 0   ! Molecular index 
+           do d=1,3      ! Cartesian coordinates
+              num_j = 0  ! Active atom index
+              do j=1,natom ! Sum over all the atoms
+                 F_1(d,j) = 0.0D0
+                 F_11(d,j) = 0.0D0
+                 IF (ext_pres(j)) THEN
+                    num_j   = num_j + 1                  ! Update the active atom index
+                    num_mol = int((num_j-1)/atoms) + 1   ! Update the molecular index
+                    ! WARNING: we suppose that all molecules have the same
+                    ! number of atoms
+                 ENDIF
+                 do i=1,mat
+                    !F_1(d,j) = F_1(d,j) + C(i,old_state)*DH(i,i,j,d)*C(i,new_state)*diff_energy
+                    ! Diagonal term, it depends on the forces
+                    F_1(d,j) = F_1(d,j) + C(i,old_state)*diagonal_F(d,j,i)*C(i,new_state)*diff_energy
+                    IF (ext_pres(j)) THEN
+                       IF (i.ne.num_mol) THEN
+                         ! Of diagonal term, only for active atom j present in
+                         ! molecule num_mol
+                         F_11(d,j) = F_11(d,j) + diff_energy * convert_nacv*sh_env%nacv(d, i, num_j) * (&
+                                                 C(num_mol, new_state) * C(i, old_state) +   &
+                                                 C(num_mol, old_state) * C(i,new_state) )
+                       ENDIF
+                    ENDIF
+                 ENDDO
+              ENDDO
+           ENDDO 
+
+           ! minus sign to take the same convention of the paper.
+           hop_nacv = -(F_1 + F_11) 
+        ENDIF
+ 
+        deallocate(T)
+        !deallocate(DH)
+        !deallocate(my_DP)
+        deallocate(F_1)
+        deallocate(F_11)
+        deallocate(F_2)
+        deallocate(F_22)
+        deallocate(F_3)
+END SUBROUTINE calc_hop_nacv_aom
+
+FUNCTION NORM2(array) RESULT(norm)
+         REAL(kind=dp), dimension(:), INTENT(IN) :: array
+        
+         INTEGER       :: i
+         REAL(KIND=dp) :: norm
+ 
+         norm = 0
+         DO i=1, SIZE(array)
+            norm = norm + array(i)*array(i)
+         ENDDO
+         norm = SQRT(norm)
+END FUNCTION NORM2
+
 
 !**********************************************************************************
 !> \brief 
@@ -935,104 +1270,6 @@ end subroutine old_diab_to_adiab
 
 
 
-!**********************************************************************************
-!> \brief Calculate the diabatic NACE first
-!**********************************************************************************
-subroutine nace1(sh_env, mol, deltat)
-
-    TYPE(sh_env_type)                         :: sh_env
-    INTEGER                                    :: mol, i, j, sub, add
-    REAL(KIND=dp)                              :: deltat
-
-    CHARACTER(len=*), PARAMETER :: routineN ='nace1', &
-                routineP = moduleN//':'//routineN
-
-    !> Based on Eq. 19 of paper: Spencer et al., J. Chem. Phys. 145, 064102 (2016)
-
-    !> 1. Calculate the term  D  (first term in Eq. 19)
-    !many allocations
-    !use the matinvsqrt subroutine to find T = S^(-1/2)
-    sh_env%adiab_nace_env%T1 = sh_env%Stmtm
-    sh_env%adiab_nace_env%T2 = sh_env%Stptp
-    call matinvsqrt(mol, .TRUE., sh_env%adiab_nace_env%T1)
-    call matinvsqrt(mol, .TRUE., sh_env%adiab_nace_env%T2)
-    !and do some straightforward first-order numerical derivatives
-    !Time deriv of overlap
-    sh_env%adiab_nace_env%DT = (0.5D0/deltat)*(sh_env%adiab_nace_env%T2 - sh_env%adiab_nace_env%T1)
-    !Time deriv of Lowdin Mat
-    sh_env%adiab_nace_env%DS = (0.5D0/deltat)*(sh_env%Sttp - sh_env%Sttm)
-
-!   THE FOLLOWING CODE IS USEFUL FOR PRINTING NxN MATRICIES       
-!PRINT *, "TST Bef:"
-!DO i=1, mol
-!   DO j=1, mol
-!      WRITE(6, "(A2, e12.4, A2)", advance='no') "| ", sh_env%adiab_nace_env%TST(i,j), " "
-!   END DO
-!   PRINT *, " "
-!END DO
-
-    !with these two loops, calculate the nacv in the time domain between adiabatic wavefunctions
-    !by transforming from the diabatic overlaps
-    !TST = T1*Stt*DT. This is done in 2 steps.
-    !Note that T2 is overwritten in the following DGEMM operation 
-    !1. T2 = Stt*DT
-    CALL DGEMM('N', 'N', mol, mol, mol, 1.0D0, &
-                sh_env%Stt,               mol, &
-                sh_env%adiab_nace_env%DT, mol, &
-                0.0_DP, sh_env%adiab_nace_env%T2, mol)
-
-    !2. TST = T1^{dagg}*T2
-    CALL DGEMM('T', 'N', mol, mol, mol, 1.0_DP, &
-                sh_env%adiab_nace_env%T1,  mol, &
-                sh_env%adiab_nace_env%T2, mol, &       ! at this point diab_D = TST
-                0.0_DP, sh_env%adiab_nace_env%diab_D, mol)
-
-    ! This part takes advantage of the sparse nature of the DS matrix
-    !IS ONLY VALID FOR CHAINS WITH ONLY OFF DIAGONALS ELEMENTS
-    ! Again the mat-mat mult is done in 2 steps:
-    !1. T2 = DS*T1
-   DO j=1, mol
-     sh_env%adiab_nace_env%T2(1,j) = &
-      sh_env%adiab_nace_env%DS(1,2)*sh_env%adiab_nace_env%T1(2,j)
-   END DO
-
-   DO i=2, mol-1
-      DO j=1, mol
-        sub = i-1
-        add = i+1
-        sh_env%adiab_nace_env%T2(i,j) = &
-          sh_env%adiab_nace_env%DS(i,sub)*sh_env%adiab_nace_env%T1(sub,j) &
-        + sh_env%adiab_nace_env%DS(i,add)*sh_env%adiab_nace_env%T1(add,j)
-      END DO
-   END DO
-   sub = mol-1
-   DO j=1, mol
-     sh_env%adiab_nace_env%T2(mol,j) = &
-      sh_env%adiab_nace_env%DS(mol,sub)*sh_env%adiab_nace_env%T1(sub,j)
-   END DO
-
-
-!   ! If the loop above doesn't work then try using this.
-!    !1. T2 = DS*T1
-!    CALL DGEMM('N', 'N', mol, mol, mol, 1.0_DP, &
-!               sh_env%adiab_nace_env%DS, mol, &
-!               sh_env%adiab_nace_env%T1, mol, &
-!               0.0_DP, sh_env%adiab_nace_env%T2, mol)
-
-    !2. TDT = T1^{dagg}*T2 + TST
-    CALL DGEMM('T', 'N', mol, mol, mol, 1.0_DP, &
-                sh_env%adiab_nace_env%T1,  mol, &
-                sh_env%adiab_nace_env%T2, mol, &       ! Now diab_D becomes = TDT + TST
-                1.0_DP, sh_env%adiab_nace_env%diab_D, mol)
-!   THE FOLLOWING CODE IS USEFUL FOR PRINTING NxN MATRICIES       
-PRINT *, "D Bef:"
-DO i=1, mol
-   DO j=1, mol
-      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", sh_env%adiab_nace_env%diab_D(i,j), "  "
-   END DO
-   PRINT *, " "
-END DO
-end subroutine nace1
 
 
 !**********************************************************************************
@@ -1087,16 +1324,6 @@ subroutine nace1_modified(sh_env, mol, deltat)
 !   !TST = T1*Stt*DT. This is done in 2 steps.
 !   !Note that T2 is now overwritten in the following DGEMM operation 
 !   !1. T2 = Stt*DT
-!   CALL DGEMM('N', 'N', mol, mol, mol, 1.0D0, &
-!               sh_env%Stt,               mol, &
-!               sh_env%adiab_nace_env%DT, mol, &
-!               0.0_DP, sh_env%adiab_nace_env%T2, mol)
-!
-!   !2. TST = T1^{dagg}*T2
-!   CALL DGEMM('T', 'N', mol, mol, mol, 1.0_DP, &
-!               sh_env%adiab_nace_env%Ttt,  mol, &
-!               sh_env%adiab_nace_env%T2, mol, &       ! at this point diab_D = TST
-!               0.0_DP, sh_env%adiab_nace_env%diab_D, mol)
 
     !alternative to the double step above
     !2. TST = S^(1/2)*DT
@@ -1105,31 +1332,7 @@ subroutine nace1_modified(sh_env, mol, deltat)
                 sh_env%adiab_nace_env%DT, mol, &
                 0.0_DP, sh_env%adiab_nace_env%diab_D, mol)
 
-    ! This part takes advantage of the sparse nature of the DS matrix
-    ! THIS PART WORKS JUST FOR CHAINS AND IT'S NOT GENERAL
-    ! Again the mat-mat mult is done in 2 steps:
-    !1. T2 = DS*T1
-!   DO j=1, mol
-!     sh_env%adiab_nace_env%T2(1,j) = &
-!      sh_env%adiab_nace_env%DS(1,2)*sh_env%adiab_nace_env%T1(2,j)
-!   END DO
-!   DO i=2, mol-1
-!      DO j=1, mol
-!        sub = i-1
-!        add = i+1
-!        sh_env%adiab_nace_env%T2(i,j) = &
-!          sh_env%adiab_nace_env%DS(i,sub)*sh_env%adiab_nace_env%T1(sub,j) &
-!        + sh_env%adiab_nace_env%DS(i,add)*sh_env%adiab_nace_env%T1(add,j)
-!      END DO
-!   END DO
-!   sub = mol-1
-!   DO j=1, mol
-!     sh_env%adiab_nace_env%T2(mol,j) = &
-!      sh_env%adiab_nace_env%DS(mol,sub)*sh_env%adiab_nace_env%T1(sub,j)
-!   END DO
 
-
-   ! If the loop above doesn't work then try using this.
     !1. T2 = DS*T1
     CALL DGEMM('N', 'N', mol, mol, mol, 1.0_DP, &
                sh_env%adiab_nace_env%DS, mol, &
@@ -1156,9 +1359,10 @@ subroutine nace1_modified(sh_env, mol, deltat)
    sh_env%diabatic_nace_t = (sh_env%adiab_nace_env%diab_D - & 
                               TRANSPOSE(sh_env%adiab_nace_env%diab_D)) / 2
 
-!sh_env%adiab_nace_env%diab_D = sh_env%diabatic_nace !this would
-!antisimmetrize NACE even in the calculation of adiab nace, 
-!We have shown that it makes no difference at all!
+!sh_env%adiab_nace_env%diab_D = sh_env%diabatic_nace 
+!> this previous line would
+!> antisimmetrize NACE even in the calculation of adiab nace, 
+!> We have shown that it makes no difference at all!
 
 end subroutine nace1_modified
 
@@ -1538,7 +1742,7 @@ end subroutine matinvsqrt
 !**********************************************************************************
 !> \brief Calculate adiabatic forces according to Spencer 2016 and Carof 2019
 !**********************************************************************************
-subroutine calcforces(state, Hin, C, nacv, atoms, scaling, cbar, Fin, forces_adiab, & 
+subroutine calcforces_aom(state, Hin, C, nacv, atoms, scaling, cbar, Fin, forces_adiab, & 
                   ext_pres)
 
         !per our full force expression derivation, this calculates the adiabatic forces
@@ -1552,7 +1756,7 @@ subroutine calcforces(state, Hin, C, nacv, atoms, scaling, cbar, Fin, forces_adi
         REAL(KIND=dp), dimension(:,:), POINTER      :: forces_adiab
         LOGICAL, dimension(:), INTENT(IN)           :: ext_pres
 
-        CHARACTER(len=*), PARAMETER :: routineN ='calcforces', &
+        CHARACTER(len=*), PARAMETER :: routineN ='calcforces_aom', &
                                routineP = moduleN//':'//routineN
 
         integer                                     :: i, j, mat, d
@@ -1592,7 +1796,7 @@ subroutine calcforces(state, Hin, C, nacv, atoms, scaling, cbar, Fin, forces_adi
                    ENDDO
                 ENDDO
         ENDDO
-end subroutine calcforces
+end subroutine calcforces_aom
 
 !**********************************************************************************
 !> \brief This reads the wavefunction coefficient section from the restart file, 
@@ -1821,6 +2025,106 @@ print *, "CTIN", ctin
 !******************************************************************************
 !!!!!!!!!!!!!!   DEPRECATED SUB. BELOW  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !******************************************************************************
+
+!**********************************************************************************
+!> \brief Calculate the diabatic NACE first
+! DEPRECATED BECAUSE TIME INCONSISTENT
+!**********************************************************************************
+subroutine nace1(sh_env, mol, deltat)
+
+    TYPE(sh_env_type)                         :: sh_env
+    INTEGER                                    :: mol, i, j, sub, add
+    REAL(KIND=dp)                              :: deltat
+
+    CHARACTER(len=*), PARAMETER :: routineN ='nace1', &
+                routineP = moduleN//':'//routineN
+
+    !> Based on Eq. 19 of paper: Spencer et al., J. Chem. Phys. 145, 064102 (2016)
+
+    !> 1. Calculate the term  D  (first term in Eq. 19)
+    !many allocations
+    !use the matinvsqrt subroutine to find T = S^(-1/2)
+    sh_env%adiab_nace_env%T1 = sh_env%Stmtm
+    sh_env%adiab_nace_env%T2 = sh_env%Stptp
+    call matinvsqrt(mol, .TRUE., sh_env%adiab_nace_env%T1)
+    call matinvsqrt(mol, .TRUE., sh_env%adiab_nace_env%T2)
+    !and do some straightforward first-order numerical derivatives
+    !Time deriv of overlap
+    sh_env%adiab_nace_env%DT = (0.5D0/deltat)*(sh_env%adiab_nace_env%T2 - sh_env%adiab_nace_env%T1)
+    !Time deriv of Lowdin Mat
+    sh_env%adiab_nace_env%DS = (0.5D0/deltat)*(sh_env%Sttp - sh_env%Sttm)
+
+!   THE FOLLOWING CODE IS USEFUL FOR PRINTING NxN MATRICIES       
+!PRINT *, "TST Bef:"
+!DO i=1, mol
+!   DO j=1, mol
+!      WRITE(6, "(A2, e12.4, A2)", advance='no') "| ", sh_env%adiab_nace_env%TST(i,j), " "
+!   END DO
+!   PRINT *, " "
+!END DO
+
+    !with these two loops, calculate the nacv in the time domain between adiabatic wavefunctions
+    !by transforming from the diabatic overlaps
+    !TST = T1*Stt*DT. This is done in 2 steps.
+    !Note that T2 is overwritten in the following DGEMM operation 
+    !1. T2 = Stt*DT
+    CALL DGEMM('N', 'N', mol, mol, mol, 1.0D0, &
+                sh_env%Stt,               mol, &
+                sh_env%adiab_nace_env%DT, mol, &
+                0.0_DP, sh_env%adiab_nace_env%T2, mol)
+
+    !2. TST = T1^{dagg}*T2
+    CALL DGEMM('T', 'N', mol, mol, mol, 1.0_DP, &
+                sh_env%adiab_nace_env%T1,  mol, &
+                sh_env%adiab_nace_env%T2, mol, &       ! at this point diab_D = TST
+                0.0_DP, sh_env%adiab_nace_env%diab_D, mol)
+
+    ! This part takes advantage of the sparse nature of the DS matrix
+    !IS ONLY VALID FOR CHAINS WITH ONLY OFF DIAGONALS ELEMENTS
+    ! Again the mat-mat mult is done in 2 steps:
+    !1. T2 = DS*T1
+   DO j=1, mol
+     sh_env%adiab_nace_env%T2(1,j) = &
+      sh_env%adiab_nace_env%DS(1,2)*sh_env%adiab_nace_env%T1(2,j)
+   END DO
+
+   DO i=2, mol-1
+      DO j=1, mol
+        sub = i-1
+        add = i+1
+        sh_env%adiab_nace_env%T2(i,j) = &
+          sh_env%adiab_nace_env%DS(i,sub)*sh_env%adiab_nace_env%T1(sub,j) &
+        + sh_env%adiab_nace_env%DS(i,add)*sh_env%adiab_nace_env%T1(add,j)
+      END DO
+   END DO
+   sub = mol-1
+   DO j=1, mol
+     sh_env%adiab_nace_env%T2(mol,j) = &
+      sh_env%adiab_nace_env%DS(mol,sub)*sh_env%adiab_nace_env%T1(sub,j)
+   END DO
+
+
+!   ! If the loop above doesn't work then try using this.
+!    !1. T2 = DS*T1
+!    CALL DGEMM('N', 'N', mol, mol, mol, 1.0_DP, &
+!               sh_env%adiab_nace_env%DS, mol, &
+!               sh_env%adiab_nace_env%T1, mol, &
+!               0.0_DP, sh_env%adiab_nace_env%T2, mol)
+
+    !2. TDT = T1^{dagg}*T2 + TST
+    CALL DGEMM('T', 'N', mol, mol, mol, 1.0_DP, &
+                sh_env%adiab_nace_env%T1,  mol, &
+                sh_env%adiab_nace_env%T2, mol, &       ! Now diab_D becomes = TDT + TST
+                1.0_DP, sh_env%adiab_nace_env%diab_D, mol)
+!   THE FOLLOWING CODE IS USEFUL FOR PRINTING NxN MATRICIES       
+PRINT *, "D Bef:"
+DO i=1, mol
+   DO j=1, mol
+      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", sh_env%adiab_nace_env%diab_D(i,j), "  "
+   END DO
+   PRINT *, " "
+END DO
+end subroutine nace1
 
 subroutine calc_adiab_nace_old(sh_env, adiab_section)
         !this subroutine calculates the adiabatic nace used in the calculation

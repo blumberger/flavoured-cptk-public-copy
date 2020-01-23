@@ -50,13 +50,14 @@ MODULE aom_main
 !                                             calc_rvecs, &
 !                                             calc_sab_pete
 
-     USE aom_utils,                    ONLY: makeX,    &
+     USE aom_utils,                    ONLY: makeX,                     &
+                                             adiabaticity,              &
                                              calc_aom_Xmatrix_elements, &
-                                             make_adiabX,      &
-                                             calcforces,     &
-                                             read_listcoeff, &
-                                             calc_adiab_nace, &
-                                             calc_adiab_nace_old, &
+                                             make_adiabX,               &
+                                             calcforces_aom,                &
+                                             read_listcoeff,            &
+                                             calc_adiab_nace,           &
+                                             calc_adiab_nace_old,       &
                                              calc_coms_and_nlist_aom
 
      USE sh_types,                    ONLY: sh_env_type, &
@@ -106,7 +107,6 @@ MODULE aom_main
                                              choose_firstadiabat, &
                                              print_matrix_standard_out,& 
                                              translate_com, &
-                                             adiabaticity,   &
                                              propagate_wf, &
                                              propagate_wf_fast, &
                                              propagate_adiab_wf, &
@@ -206,6 +206,7 @@ CONTAINS
 
      logger => cp_get_default_logger()
 
+!------------------  AOM section -------------------------------------
      !> cutoff to define the neighborough list
      CALL section_vals_val_get(coupling_section,"CUT_OFF_BETWEEN_SITES",&
              r_val=cutoff_sites)
@@ -226,6 +227,8 @@ CONTAINS
      !> Multiple time step calculation of aom gradient
      CALL section_vals_val_get(coupling_section,"MULTIPLE_TIME_STEP",&
                                i_val=sh_env%multiple_time_step)
+!-------------------------------------------------------------------
+
      !> Calculate the orbital overlap in the COM reference sistem of the
      !molecules
      CALL section_vals_val_get(adiab_section,"CENTER_OF_MASS", l_val=keyword_translate)
@@ -275,6 +278,8 @@ CONTAINS
      !> OBTAIN COORDINATES, ENERGIES, STATES, etc. FROM PREVIOUS STEP
      CALL translate_com(positions_tp, keyword_translate, positions_com_tp, local_particles, atomic_kinds = atomic_kinds)  
      CALL translate_com(sh_env%velocities_tp, keyword_translate, velocities_com_tp, local_particles, atomic_kinds = atomic_kinds)  
+
+!------------------  AOM section -------------------------------------
      sh_env%siteenergies = 0.0_dp
      do coord=1,3
         sh_env%crds(coord,:,1) = PACK(sh_env%rm_tm(coord,:), sh_env%ext_pres)
@@ -283,8 +288,6 @@ CONTAINS
         sh_env%siteenergies(3,:) = energies_tp(:) ! CHANGE_AC
      enddo
 
-     !> store adiabatic nace and diabatic from the previous step
-     sh_env%adiab_nace_t = sh_env%adiab_nace_tp
 
      !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
      CALL calc_coms_and_nlist_aom(sh_env, atoms, mol, cutoff_sites, orb)
@@ -301,7 +304,7 @@ CONTAINS
     !TEST NACV ABSENCE:
     !sh_env%nacv = 0.0D0
     !print *, "NACV tp", sh_env%nacv(1,:,:)
-
+!-----------------------------------------------------------------------------
 
      !> THIS KEYWORD helps treating initial itimes correctly in case of restart file
      !usage 
@@ -313,8 +316,12 @@ CONTAINS
      !initialize Adiabatic energies that will be used for trivial hopping and
      !decoherence corrections
      CALL adiabaticity(-AIMAG(sh_env%H_tp), sh_env%C_tp, sh_env%E_tp)
-     !Calculate the overlap between C_tp and C_t, reorder state if required,
-     !calculate the nace
+
+     !> store adiabatic nace and diabatic from the previous step
+     sh_env%adiab_nace_t = sh_env%adiab_nace_tp
+
+     !> Calculate the overlap between C_tp and C_t, reorder state if required,
+     !> calculate the nace
      IF (do_nace_speedup) THEN
         CALL calc_adiab_nace(sh_env, adiab_section)
      ELSE
@@ -329,6 +336,7 @@ CONTAINS
        sh_env%diabatic_nace_tp = sh_env%diabatic_nace_t
      end if
      
+!------------------  AOM section    --------------------------------------------------------
      !> PROPAGATE THE ELECTRON FOR ONE MOLECULAR TIMESTEP
      !>the CHARGE CARRIER WF is called sh_env%ctin
      sh_env%HS_propagation = .FALSE.
@@ -367,7 +375,7 @@ CONTAINS
      CASE DEFAULT                                           
            CPABORT("There is no method to propagate the wavefunction.") 
      END SELECT                                             
-
+! --------------------------------------------------------------------------------------------------
 
      !> SURFACE HOPPING TEST
      !The eigenvectors are needed to calculate the surface hopping probabilities
@@ -397,18 +405,20 @@ CONTAINS
      END IF 
 
 
+!------------------  AOM section    --------------------------------------------------------
      !CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE RESULT OF THE SURFACE
      !HOP ROUTINE IS. 
-     call calcforces(state=sh_env%active_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%nacv, &
+     call calcforces_aom(state=sh_env%active_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%nacv, &
                            atoms=atoms, & 
                            scaling=scaling, cbar=cbar, Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                            ext_pres=sh_env%ext_pres)
      IF (sh_env%attempt_hop) THEN
-         call calcforces(state=sh_env%new_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%nacv, &
+         call calcforces_aom(state=sh_env%new_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%nacv, &
                               atoms=atoms, & 
                               scaling=scaling, cbar=cbar, Fin=diagonal_F, forces_adiab=sh_env%forces_adiab_new, &
                               ext_pres=sh_env%ext_pres)
      ENDIF
+! --------------------------------------------------------------------------------------------------
 
      !> PRINT
      CALL adiab_print_hamiltonian(adiab_section, -AIMAG(sh_env%H_tp), nadiab,norbitals,itimes, deltatMD)
@@ -446,8 +456,11 @@ CONTAINS
      ENDIF
 
      !> TRANSLATE THE COORDINATE FOR ONE TIMESTEP
+!----------------------- AOM ----------------------
      sh_env%rm_tm      = sh_env%rm_t
      sh_env%rm_t       = positions_com_tp
+! --------------------------------------------------------------------------------------------------
+
      sh_env%sh_print_env = sh_print_env
 
      !> DEALLOCATE

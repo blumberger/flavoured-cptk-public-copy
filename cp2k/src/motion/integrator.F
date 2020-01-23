@@ -583,7 +583,7 @@ CONTAINS
           IF (mixing_type.eq.mix_adiab) do_fssh = .TRUE.
        ENDIF
        IF (do_fssh) THEN
-print *, "STARTING_POINT"
+!print *, "STARTING_POINT"
              !We save the velocities for the first timestep, to estimate the
              !position at t--1
              IF (itimes.ge.1) THEN
@@ -601,7 +601,7 @@ print *, "STARTING_POINT"
 
              ! Metadynamics
              CALL metadyn_integrator(force_env, itimes, tmp%vel)
-
+!print *, "BEFORE VV2"
              ! Velocity Verlet (second part)
              ! 2. Update the velocities with the forces in the active
              !    state, even if we attempt to hop
