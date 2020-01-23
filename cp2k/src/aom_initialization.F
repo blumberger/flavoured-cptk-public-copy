@@ -142,53 +142,29 @@ CONTAINS
 
      INTEGER, INTENT(IN)                            :: nadiab,  aom_atoms, norbitals, natom
      REAL(kind=dp), DIMENSION(:,:),POINTER          :: positions_tp
-     TYPE(section_vals_type), POINTER               :: adiab_section, optimization_section
-     TYPE(section_vals_type), POINTER               :: wf_restart_section, decoherence_section
-     TYPE(sh_env_type), INTENT(INOUT)              :: sh_env
+     TYPE(section_vals_type), POINTER               :: adiab_section
+     TYPE(sh_env_type), INTENT(INOUT)               :: sh_env
 
      CHARACTER(len=*), PARAMETER :: routineN ='create_sh_env', &
      routineP = moduleN//':'//routineN
 
-     integer                                        :: i, j, mat, c, coord, mol, atoms, start
-     REAL(KIND=dp)                                  :: cutoff_connect
-     REAL(KIND=dp), dimension(:,:), allocatable     :: crds
-     REAL(KIND=dp), dimension(:,:), allocatable     :: Atp
-     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE       :: pcoefftot, scoefftot
-     LOGICAL, DIMENSION(:), ALLOCATABLE             :: atomlist_mask, submask
-     integer, dimension(:), ALLOCATABLE             :: ext_elements
-     TYPE(cp_sll_val_type), POINTER                 :: listcoeff
+     TYPE(section_vals_type), POINTER               :: optimization_section
+     TYPE(section_vals_type), POINTER               :: wf_restart_section, decoherence_section
+     integer                                        :: mat, c, mol, atoms
      TYPE(cp_sll_val_type), POINTER                 :: listdiabcoeff
-!     LOGICAL                                        :: do_random
      REAL(KIND=dp), DIMENSION(3, 2)                 :: initial_seed
      INTEGER                                        :: input_seed
      TYPE(rng_stream_type), POINTER                 :: rng_stream
-     LOGICAL                                        :: continue_while
-     CHARACTER(LEN=default_string_length)           :: file_name_s_psigma, file_name_s_ppi, deco_keyword,&
-                                                       prop_wf_keyword
-     ! OZ: extra strings for C-S and S-S SAB calc
-     CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_C_S,file_name_s_ppi_C_S
-     CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_S_S,file_name_s_ppi_S_S
-     TYPE(section_vals_type), POINTER               :: coupling_section
-     CHARACTER(LEN=default_string_length)           :: coupling_keyword
+     CHARACTER(LEN=default_string_length)           :: deco_keyword
 
      NULLIFY(rng_stream)
-     NULLIFY(listcoeff)
      NULLIFY(decoherence_section)
      NULLIFY(wf_restart_section)
      NULLIFY(optimization_section)
-     NULLIFY(coupling_section)
 
 
      mol = nadiab ! CHANGE_AC
      atoms = aom_atoms ! CHANGE_AC
-
-     optimization_section => section_vals_get_subs_vals(adiab_section,"OPTIMIZATION")
-
-     !> cutoff to define the neighborough list
-     CALL section_vals_val_get(coupling_section,"CUT_OFF_CONNECTIVITY",&
-             r_val=cutoff_connect)
-     CALL section_vals_val_get(optimization_section,"RK_PROPAGATION", c_val=prop_wf_keyword) 
-
      mat = norbitals*nadiab !> Size of the vectorial space where the wavefunctions are projected
      c = nadiab*aom_atoms !> Numbers of active atoms
 
@@ -233,7 +209,7 @@ CONTAINS
      sh_env%HS_propagation = .FALSE.
 
      ALLOCATE(sh_env%adiab_overlap(mat, mat))
-     !ALLOCATE(sh_env%class_forbidden_hop_t(mat))
+     ALLOCATE(sh_env%class_forbidden_hop_t(mat))
      allocate(sh_env%adiab_nace_t(mat,mat))
      allocate(sh_env%adiab_nace_tp(mat,mat))
 
@@ -269,10 +245,64 @@ CONTAINS
          CALL read_listdiabcoeff(listdiabcoeff, norbitals, nadiab, ctin=sh_env%readcoeff) !Transform them in the complex ctin
      end if
 
+    !=================== AOM array      ===============================================
+    CALL set_aom_env(nadiab, aom_atoms, norbitals, natom,positions_tp,adiab_section,sh_env)
+    
+    !==================================================================================
 
-!=================== AOM array ===================================
-     CALL section_vals_val_get(adiab_section,"METHOD_COUPLING",c_val=coupling_keyword)
+     DEALLOCATE(rng_stream)
+  END SUBROUTINE create_sh_env
+
+  SUBROUTINE set_aom_env(nadiab, aom_atoms, norbitals, natom, &
+                                  positions_tp,     &
+                                  adiab_section,    &
+                                  sh_env)
+
+
+     INTEGER, INTENT(IN)                            :: nadiab,  aom_atoms, norbitals, natom
+     REAL(kind=dp), DIMENSION(:,:),POINTER          :: positions_tp
+     TYPE(section_vals_type), POINTER               :: adiab_section
+     TYPE(sh_env_type), INTENT(INOUT)               :: sh_env
+
+     CHARACTER(len=*), PARAMETER :: routineN ='set_aom_env', &
+     routineP = moduleN//':'//routineN
+
+     TYPE(section_vals_type), POINTER               :: optimization_section
+     integer                                        :: i, j, mat, c, coord, mol, atoms, start
+     REAL(KIND=dp)                                  :: cutoff_connect
+     REAL(KIND=dp), dimension(:,:), allocatable     :: crds_loc
+     REAL(KIND=dp), dimension(:,:), allocatable     :: Atp_loc
+     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE       :: pcoefftot, scoefftot
+     LOGICAL, DIMENSION(:), ALLOCATABLE             :: atomlist_mask, submask
+     integer, dimension(:), ALLOCATABLE             :: ext_elements
+     TYPE(cp_sll_val_type), POINTER                 :: listcoeff
+     LOGICAL                                        :: continue_while
+     CHARACTER(LEN=default_string_length)           :: file_name_s_psigma, file_name_s_ppi,&
+                                                       prop_wf_keyword
+     ! OZ: extra strings for C-S and S-S SAB calc
+     CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_C_S,file_name_s_ppi_C_S
+     CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_S_S,file_name_s_ppi_S_S
+     TYPE(section_vals_type), POINTER               :: coupling_section
+     CHARACTER(LEN=default_string_length)           :: coupling_keyword
+
+     NULLIFY(listcoeff)
+     NULLIFY(optimization_section)
+     NULLIFY(coupling_section)
+
      coupling_section => section_vals_get_subs_vals(adiab_section, "AOM")
+     optimization_section => section_vals_get_subs_vals(adiab_section,"OPTIMIZATION")
+
+     CALL section_vals_val_get(adiab_section,"METHOD_COUPLING",c_val=coupling_keyword)
+     CALL section_vals_val_get(optimization_section,"RK_PROPAGATION", c_val=prop_wf_keyword) 
+     !> cutoff to define the neighborough list
+     CALL section_vals_val_get(coupling_section,"CUT_OFF_CONNECTIVITY",&
+             r_val=cutoff_connect)
+
+     mol = nadiab ! CHANGE_AC
+     atoms = aom_atoms ! CHANGE_AC
+     mat = norbitals*nadiab !> Size of the vectorial space where the wavefunctions are projected
+     c = nadiab*aom_atoms !> Numbers of active atoms
+
 
      ALLOCATE(sh_env%elements(c))
      ALLOCATE(sh_env%connlist1(4,aom_atoms))
@@ -396,25 +426,26 @@ CONTAINS
 
      !> CONSTRUCT THE CONNLIST
      !we fill out the connlist arrays before calculating the nacv
-     allocate(crds(3, c))
-     ALLOCATE(Atp(4,aom_atoms))
+     allocate(crds_loc(3, c))
+     ALLOCATE(Atp_loc(4,aom_atoms))
 
      do coord=1,3
-        crds(coord,:) = PACK(positions_tp(coord,:), sh_env%ext_pres)
+        crds_loc(coord,:) = PACK(positions_tp(coord,:), sh_env%ext_pres)
      enddo
 
-     Atp(2:4,1:aom_atoms) = crds(1:3,1:aom_atoms)
+     Atp_loc(2:4,1:aom_atoms) = crds_loc(1:3,1:aom_atoms)
      !output: sh_env%connlist1, sh_env%connlist2
-     call connect_list2(Atp(2:4,:), sh_env%atomlist, sh_env%connlist1, sh_env%connlist2, cutoff_connect)
+     call connect_list2(Atp_loc(2:4,:), sh_env%atomlist, sh_env%connlist1, sh_env%connlist2, cutoff_connect)
      
      DEALLOCATE(atomlist_mask) 
      DEALLOCATE(submask) 
-     DEALLOCATE(Atp)
-     DEALLOCATE(crds)
-!==================================================================================
+     DEALLOCATE(Atp_loc)
+     DEALLOCATE(crds_loc)
+     DEALLOCATE(ext_elements)
+     DEALLOCATE(scoefftot)
+     DEALLOCATE(pcoefftot)
 
-     DEALLOCATE(rng_stream)
-  END SUBROUTINE create_sh_env
+  END SUBROUTINE set_aom_env
 
   SUBROUTINE create_adiab_nace_env(mol, sh_env)
    
@@ -678,6 +709,9 @@ CONTAINS
              !> print init
              sh_print_env%first_adiabat    = active_state
              ALLOCATE(sh_print_env%pop_init(SIZE(sh_env%C_tp(:,active_state))))
+             !all pop is initialized in the active state, this is a hack to
+             !correct the printing
+             sh_print_env%initrandom      = 0.0D0 ! COMMENT_SG: hack for regtests
              sh_print_env%pop_init(:)      = 0.0D0
              sh_print_env%pop_init(active_state)  = 1.0D0
              CALL adiab_print_sh_info(sh_print_env, keyword = 'START')
