@@ -136,14 +136,12 @@ CONTAINS
 
   SUBROUTINE create_sh_env(nadiab, aom_atoms, norbitals, natom, &
                                   positions_tp,     &
-                                  coupling_section, &
                                   adiab_section,    &
                                   sh_env)
 
 
      INTEGER, INTENT(IN)                            :: nadiab,  aom_atoms, norbitals, natom
      REAL(kind=dp), DIMENSION(:,:),POINTER          :: positions_tp
-     TYPE(section_vals_type), POINTER               :: coupling_section
      TYPE(section_vals_type), POINTER               :: adiab_section, optimization_section
      TYPE(section_vals_type), POINTER               :: wf_restart_section, decoherence_section
      TYPE(sh_env_type), INTENT(INOUT)              :: sh_env
@@ -170,79 +168,40 @@ CONTAINS
      ! OZ: extra strings for C-S and S-S SAB calc
      CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_C_S,file_name_s_ppi_C_S
      CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_S_S,file_name_s_ppi_S_S
+     TYPE(section_vals_type), POINTER               :: coupling_section
+     CHARACTER(LEN=default_string_length)           :: coupling_keyword
 
      NULLIFY(rng_stream)
      NULLIFY(listcoeff)
      NULLIFY(decoherence_section)
      NULLIFY(wf_restart_section)
      NULLIFY(optimization_section)
+     NULLIFY(coupling_section)
 
 
      mol = nadiab ! CHANGE_AC
      atoms = aom_atoms ! CHANGE_AC
 
+     optimization_section => section_vals_get_subs_vals(adiab_section,"OPTIMIZATION")
+
      !> cutoff to define the neighborough list
      CALL section_vals_val_get(coupling_section,"CUT_OFF_CONNECTIVITY",&
              r_val=cutoff_connect)
-!     CALL section_vals_val_get(coupling_section,"RANDOM_DERIVATIVE", l_val=do_random)
-     optimization_section => section_vals_get_subs_vals(adiab_section,"OPTIMIZATION")
      CALL section_vals_val_get(optimization_section,"RK_PROPAGATION", c_val=prop_wf_keyword) 
 
      mat = norbitals*nadiab !> Size of the vectorial space where the wavefunctions are projected
      c = nadiab*aom_atoms !> Numbers of active atoms
 
-     ALLOCATE(sh_env%elements(c))
-     ALLOCATE(sh_env%connlist1(4,aom_atoms))
-     allocate(sh_env%aneighbour(0:atoms,0:atoms))
-     allocate(sh_env%bneighbour(0:atoms,0:atoms))
-     ALLOCATE(sh_env%pcoeffs(aom_atoms,norbitals))
-     ALLOCATE(sh_env%scoeffs(aom_atoms))
 
-     allocate(sh_env%coms(3,mol))
-     !> crds is an AOM arrays (xyz, atoms, tm-t-tp) the third dimension
-     !indicates what time this coordinates refer to
-     allocate(sh_env%crds(3,c,3))
-     allocate(sh_env%dist(mol,mol))
-     ALLOCATE(sh_env%NN(mat, mat))
-     allocate(sh_env%pcoeffsrun(atoms,mat,3)) !pcoeffsrun exists because the p-coefficients
-                                               !need to be renormalised for each structure
-     !first column is now atomic number of atom (e.g. 6 for carbon)
-     !Naming convention: At = A(t), Atp = A(t+1), Atm = A(t-1), etc
-     allocate(sh_env%At(4,atoms))
-     allocate(sh_env%Atp(4,atoms))
-     allocate(sh_env%Atm(4,atoms))
-     allocate(sh_env%Bt(4,atoms))
-     allocate(sh_env%Btp(4,atoms))
-     allocate(sh_env%Btm(4,atoms))
-     allocate(sh_env%siteenergies(3,mat))  !COMMENT_SG: First dimension is to be removed
-     !> nacv are memory consuming to store however here we are storing them at time
-     !t and tp for the multiple time step feature avoing their calculations at
-     !each step
-     ALLOCATE(sh_env%nacv(3,mat, mat*aom_atoms))
      ALLOCATE(sh_env%forces_adiab(3,natom))
      ALLOCATE(sh_env%forces_adiab_new(3,natom))
      ALLOCATE(sh_env%diabatic_nace_tp(mat,mat))
      ALLOCATE(sh_env%diabatic_nace_t(mat,mat))
 
-     sh_env%At = 0.0_dp
-     sh_env%Atp = 0.0_dp
-     sh_env%Atm = 0.0_dp
-     sh_env%Bt  = 0.0_dp
-     sh_env%Btp = 0.0_dp
-     sh_env%Btm = 0.0_dp
-     sh_env%siteenergies = 0.0_dp
-     sh_env%nacv = 0.0_dp
      sh_env%forces_adiab = 0.0_dp
      sh_env%forces_adiab_new = 0.0_dp
      sh_env%diabatic_nace_tp = 0.0_dp
-     !> these arrays are data for the non-adiabatic coupling calculation
-     !> they help efficiency by telling the program which atoms are connected
-     !> and thus which pairs to carry out the calculation for
-     sh_env%aneighbour = 0
-     sh_env%bneighbour = 0
  
-     ALLOCATE(sh_env%rm_t(3, natom))
-     ALLOCATE(sh_env%rm_tm(3, natom))
      ALLOCATE(sh_env%velocities_tp(3, natom))
      !> the following arrays are allocated in adiabaticity
      !ALLOCATE(sh_env%C_t(mat,mat))
@@ -251,24 +210,6 @@ CONTAINS
      !ALLOCATE(sh_env%E_tp(mat))
      ALLOCATE(sh_env%H_t(mat,mat))
      ALLOCATE(sh_env%H_tp(mat,mat))
-     ALLOCATE(sh_env%Stt(mat,mat))
-     ALLOCATE(sh_env%Stptp(mat,mat))
-   
-
-     if (prop_wf_keyword .ne. "DIABATIC_RK_FAST") then
-     !> in case DIABATIC_RK_FAST diabatic nace are never calculated, neither in
-     !> the
-     !> propagate_wf nor in the adiabatic nace calculation for the hopping
-     !> probability
-     !> so that all the Sttp and co matrices are also not used, no point in
-     !> allocate them
-        print *, "FOB-SH: ALLOCATION OF S MATRICES"
-        ALLOCATE(sh_env%Sttp(mat,mat))
-        ALLOCATE(sh_env%Stpt(mat,mat))
-        ALLOCATE(sh_env%Stmt(mat,mat))
-        ALLOCATE(sh_env%Sttm(mat,mat))
-        ALLOCATE(sh_env%Stmtm(mat,mat))
-     end if
      !> wavefunction in the diabatic basis
      ALLOCATE(sh_env%ctin(mat))
      ALLOCATE(sh_env%ctin_t(mat))
@@ -292,9 +233,107 @@ CONTAINS
      sh_env%HS_propagation = .FALSE.
 
      ALLOCATE(sh_env%adiab_overlap(mat, mat))
-     ALLOCATE(sh_env%class_forbidden_hop_t(mat))
+     !ALLOCATE(sh_env%class_forbidden_hop_t(mat))
      allocate(sh_env%adiab_nace_t(mat,mat))
      allocate(sh_env%adiab_nace_tp(mat,mat))
+
+     sh_env%do_deco = .FALSE.
+     decoherence_section => section_vals_get_subs_vals(adiab_section,"DECOHERENCE")
+     CALL section_vals_val_get(decoherence_section,"DECOHERENCE_CORRECTIONS",c_val=deco_keyword)
+     IF (.NOT.(deco_keyword.EQ."NO_DECO_CORR"))  sh_env%do_deco = .TRUE.
+
+     sh_env%do_reorder = .FALSE.
+     optimization_section => section_vals_get_subs_vals(adiab_section,"OPTIMIZATION")
+     CALL section_vals_val_get(optimization_section,"REORDERING_STATES_USING_OVERLAP",&
+                                                      l_val=sh_env%do_reorder)
+     !> INITIALIZE THE RANDOM GENERATOR
+     CALL section_vals_val_get(adiab_section,"SEED",i_val=input_seed)
+     initial_seed(:,:) = REAL(input_seed,KIND=dp)
+     !CALL create_rng_stream(rng_stream=sh_env%rng_stream,&
+     CALL create_rng_stream(rng_stream=rng_stream,&
+                             name="aom fssh",&
+                             distribution_type=UNIFORM, &
+                             seed=initial_seed)
+     ALLOCATE(sh_env%rng_stream)
+     sh_env%rng_stream = rng_stream
+
+     !> Get wavefunction diabatic coefficients from the input file
+     !COMMENT_SG: this section should be optional somehow---STILL TO DO USING e.g.
+     !STEP_START_EVAL keyword in the input 
+     wf_restart_section => section_vals_get_subs_vals(adiab_section,"WAVEFUNCTION_RESTART")
+     CALL section_vals_val_get(wf_restart_section,"RESTART_KEY", l_val=sh_env%restart_key)
+     print *, "RESTART_KEY", sh_env%restart_key
+     if (sh_env%restart_key) then
+         CALL section_vals_val_get(wf_restart_section,"ACTIVE_STATE_RESTART", i_val=sh_env%active_state_res)
+         CALL section_vals_list_get(wf_restart_section,"_DEFAULT_KEYWORD_",list=listdiabcoeff) !Read them in the input files
+         CALL read_listdiabcoeff(listdiabcoeff, norbitals, nadiab, ctin=sh_env%readcoeff) !Transform them in the complex ctin
+     end if
+
+
+!=================== AOM array ===================================
+     CALL section_vals_val_get(adiab_section,"METHOD_COUPLING",c_val=coupling_keyword)
+     coupling_section => section_vals_get_subs_vals(adiab_section, "AOM")
+
+     ALLOCATE(sh_env%elements(c))
+     ALLOCATE(sh_env%connlist1(4,aom_atoms))
+     allocate(sh_env%aneighbour(0:atoms,0:atoms))
+     allocate(sh_env%bneighbour(0:atoms,0:atoms))
+     ALLOCATE(sh_env%pcoeffs(aom_atoms,norbitals))
+     ALLOCATE(sh_env%scoeffs(aom_atoms))
+     allocate(sh_env%coms(3,mol))
+     !> crds is an AOM arrays (xyz, atoms, tm-t-tp) the third dimension
+     !indicates what time this coordinates refer to
+     allocate(sh_env%crds(3,c,3))
+     allocate(sh_env%dist(mol,mol))
+     ALLOCATE(sh_env%NN(mat, mat))
+     allocate(sh_env%pcoeffsrun(atoms,mat,3)) !pcoeffsrun exists because the p-coefficients
+                                               !need to be renormalised for each structure
+     !first column is now atomic number of atom (e.g. 6 for carbon)
+     !Naming convention: At = A(t), Atp = A(t+1), Atm = A(t-1), etc
+     allocate(sh_env%At(4,atoms))
+     allocate(sh_env%Atp(4,atoms))
+     allocate(sh_env%Atm(4,atoms))
+     allocate(sh_env%Bt(4,atoms))
+     allocate(sh_env%Btp(4,atoms))
+     allocate(sh_env%Btm(4,atoms))
+     allocate(sh_env%siteenergies(3,mat))  !COMMENT_SG: First dimension is to be removed
+     !> nacv are memory consuming to store however here we are storing them at time
+     !t and tp for the multiple time step feature avoing their calculations at
+     !each step
+     ALLOCATE(sh_env%nacv(3,mat, mat*aom_atoms))
+     ALLOCATE(sh_env%rm_t(3, natom))
+     ALLOCATE(sh_env%rm_tm(3, natom))
+     ALLOCATE(sh_env%Stt(mat,mat))
+     ALLOCATE(sh_env%Stptp(mat,mat))
+     if (prop_wf_keyword .ne. "DIABATIC_RK_FAST") then
+     !> in case DIABATIC_RK_FAST diabatic nace are never calculated, neither in
+     !> the
+     !> propagate_wf nor in the adiabatic nace calculation for the hopping
+     !> probability
+     !> so that all the Sttp and co matrices are also not used, no point in
+     !> allocate them
+        print *, "FOB-SH: ALLOCATION OF S MATRICES"
+        ALLOCATE(sh_env%Sttp(mat,mat))
+        ALLOCATE(sh_env%Stpt(mat,mat))
+        ALLOCATE(sh_env%Stmt(mat,mat))
+        ALLOCATE(sh_env%Sttm(mat,mat))
+        ALLOCATE(sh_env%Stmtm(mat,mat))
+     end if
+
+     sh_env%At = 0.0_dp
+     sh_env%Atp = 0.0_dp
+     sh_env%Atm = 0.0_dp
+     sh_env%Bt  = 0.0_dp
+     sh_env%Btp = 0.0_dp
+     sh_env%Btm = 0.0_dp
+     sh_env%siteenergies = 0.0_dp
+     sh_env%nacv = 0.0_dp
+     !> these arrays are data for the diabatic nacv calculation
+     !> they help efficiency by telling the program which atoms are connected
+     !> and thus which pairs to carry out the calculation for
+     sh_env%aneighbour = 0
+     sh_env%bneighbour = 0
+
 
      !> Create the overlap look-up table for the AOM coupling calculation
      CALL section_vals_val_get(coupling_section,"PSIGMA_FILE_NAME",&
@@ -322,28 +361,6 @@ CONTAINS
      CALL section_vals_val_get(coupling_section,"CBAR",&
              r_val=sh_env%cbar)
 
-     !> INITIALIZE THE RANDOM GENERATOR
-     CALL section_vals_val_get(adiab_section,"SEED",i_val=input_seed)
-     initial_seed(:,:) = REAL(input_seed,KIND=dp)
-     !CALL create_rng_stream(rng_stream=sh_env%rng_stream,&
-     CALL create_rng_stream(rng_stream=rng_stream,&
-                             name="aom fssh",&
-                             distribution_type=UNIFORM, &
-                             seed=initial_seed)
-     ALLOCATE(sh_env%rng_stream)
-     sh_env%rng_stream = rng_stream
-
-     !> Get wavefunction diabatic coefficients from the input file
-     !COMMENT_SG: this section should be optional somehow---STILL TO DO USING e.g.
-     !STEP_START_EVAL keyword in the input 
-     wf_restart_section => section_vals_get_subs_vals(adiab_section,"WAVEFUNCTION_RESTART")
-     CALL section_vals_val_get(wf_restart_section,"RESTART_KEY", l_val=sh_env%restart_key)
-     print *, "RESTART_KEY", sh_env%restart_key
-     if (sh_env%restart_key) then
-         CALL section_vals_val_get(wf_restart_section,"ACTIVE_STATE_RESTART", i_val=sh_env%active_state_res)
-         CALL section_vals_list_get(wf_restart_section,"_DEFAULT_KEYWORD_",list=listdiabcoeff) !Read them in the input files
-         CALL read_listdiabcoeff(listdiabcoeff, norbitals, nadiab, ctin=sh_env%readcoeff) !Transform them in the complex ctin
-     end if
      
      !> READ THE AOM COEFFICIENT
      CALL section_vals_list_get(coupling_section,"_DEFAULT_KEYWORD_",list=listcoeff) !Read them in the input files
@@ -365,7 +382,9 @@ CONTAINS
      do i=1, aom_atoms 
         submask(i) = atomlist_mask(i + start - 1)
      enddo
+
      allocate(sh_env%atomlist(COUNT(submask(1:aom_atoms))))
+
      sh_env%atomlist = PACK( (/ (i, i=1,aom_atoms) /), submask(1:aom_atoms) ) !List atoms with orbitals
      allocate(sh_env%connlist2(4,size(sh_env%atomlist)))
      do i=1,aom_atoms
@@ -378,24 +397,21 @@ CONTAINS
      !> CONSTRUCT THE CONNLIST
      !we fill out the connlist arrays before calculating the nacv
      allocate(crds(3, c))
+     ALLOCATE(Atp(4,aom_atoms))
+
      do coord=1,3
         crds(coord,:) = PACK(positions_tp(coord,:), sh_env%ext_pres)
      enddo
 
-     ALLOCATE(Atp(4,aom_atoms))
      Atp(2:4,1:aom_atoms) = crds(1:3,1:aom_atoms)
+     !output: sh_env%connlist1, sh_env%connlist2
      call connect_list2(Atp(2:4,:), sh_env%atomlist, sh_env%connlist1, sh_env%connlist2, cutoff_connect)
-
      
-     sh_env%do_deco = .FALSE.
-     decoherence_section => section_vals_get_subs_vals(adiab_section,"DECOHERENCE")
-     CALL section_vals_val_get(decoherence_section,"DECOHERENCE_CORRECTIONS",c_val=deco_keyword)
-     IF (.NOT.(deco_keyword.EQ."NO_DECO_CORR"))  sh_env%do_deco = .TRUE.
-
-     sh_env%do_reorder = .FALSE.
-     optimization_section => section_vals_get_subs_vals(adiab_section,"OPTIMIZATION")
-     CALL section_vals_val_get(optimization_section,"REORDERING_STATES_USING_OVERLAP",&
-                                                      l_val=sh_env%do_reorder)
+     DEALLOCATE(atomlist_mask) 
+     DEALLOCATE(submask) 
+     DEALLOCATE(Atp)
+     DEALLOCATE(crds)
+!==================================================================================
 
      DEALLOCATE(rng_stream)
   END SUBROUTINE create_sh_env
@@ -428,7 +444,6 @@ CONTAINS
                                   velocities_tp,  &
                                   energies_tp,  &
                                   sh_env, itimes, &
-                                  coupling_section, &
                                   adiab_section, my_bo_keyword,  &
                                   atomic_kinds, local_particles,                &
                                   my_test_keyword, method_keyword, diagonal_F)
@@ -440,7 +455,6 @@ CONTAINS
      REAL(kind=dp), DIMENSION(:),  POINTER          :: energies_tp
      TYPE(sh_env_type), INTENT(INOUT)              :: sh_env
      INTEGER, POINTER                               :: itimes
-     TYPE(section_vals_type), POINTER               :: coupling_section
      LOGICAL, INTENT(IN)                            :: my_bo_keyword
      TYPE(section_vals_type), POINTER               :: adiab_section,optimization_section
      TYPE(atomic_kind_list_type), POINTER           :: atomic_kinds
@@ -475,15 +489,21 @@ CONTAINS
      TYPE(cp_logger_type), POINTER                  :: logger
      INTEGER                                        :: unit_nr
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: diagonal_F
+     TYPE(section_vals_type), POINTER               :: coupling_section
+     CHARACTER(LEN=default_string_length)           :: coupling_keyword
 
      NULLIFY(positions_com_tp, velocities_com_tp)
      NULLIFY(logger)
      NULLIFY(optimization_section)
+     NULLIFY(coupling_section)
 
      logger => cp_get_default_logger()
 
+     CALL section_vals_val_get(adiab_section,"METHOD_COUPLING",c_val=coupling_keyword)
 !------------------  AOM section -------------------------------------
      !> cutoff to define the neighborough list
+     coupling_section => section_vals_get_subs_vals(adiab_section, "AOM")
+
      CALL section_vals_val_get(coupling_section,"CUT_OFF_CONNECTIVITY",&
              r_val=cutoff_connect)
      !> cutoff to define the neighborough list

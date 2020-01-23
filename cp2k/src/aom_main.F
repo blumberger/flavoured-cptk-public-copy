@@ -140,11 +140,10 @@ MODULE aom_main
 
 CONTAINS
 
-    SUBROUTINE construct_ham_X_SH(nadiab, aom_atoms, norbitals,  &
-                                  positions_tp,  &
-                                  energies_tp,  &
-                                  sh_env, itimes, &
-                                   coupling_section, &
+    SUBROUTINE construct_ham_X_SH(nadiab, aom_atoms, norbitals,                 &
+                                  positions_tp,                                 &
+                                  energies_tp,                                  &
+                                  sh_env, itimes,                               &
                                   adiab_section, my_bo_keyword,                 & 
                                   atomic_kinds, local_particles,                &
                                   my_test_keyword, diagonal_F)
@@ -156,7 +155,6 @@ CONTAINS
      REAL(kind=dp), DIMENSION(:),  POINTER          :: energies_tp
      TYPE(sh_env_type), INTENT(INOUT)              :: sh_env
      INTEGER, POINTER                               :: itimes
-     TYPE(section_vals_type), POINTER               :: coupling_section
      LOGICAL, INTENT(IN)                            :: my_bo_keyword
      TYPE(section_vals_type), POINTER               :: adiab_section
      TYPE(atomic_kind_list_type), POINTER           :: atomic_kinds
@@ -171,6 +169,8 @@ CONTAINS
 
      TYPE(section_vals_type), POINTER               :: decoherence_section, optimization_section
      TYPE(section_vals_type), POINTER               :: e_conservation_section
+     TYPE(section_vals_type), POINTER               :: coupling_section
+     CHARACTER(LEN=default_string_length)           :: coupling_keyword
      integer                                        :: coord
      integer                                        :: mol, atoms, c,  mat, orb
      REAL(KIND=dp)                                  :: cutoff_sites, cutoff_connect, &
@@ -203,10 +203,14 @@ CONTAINS
      NULLIFY(optimization_section)
      NULLIFY(decoherence_section)
      NULLIFY(e_conservation_section)
+     NULLIFY(coupling_section)
 
      logger => cp_get_default_logger()
 
+     CALL section_vals_val_get(adiab_section,"METHOD_COUPLING",c_val=coupling_keyword)
 !------------------  AOM section -------------------------------------
+     coupling_section => section_vals_get_subs_vals(adiab_section, "AOM")
+
      !> cutoff to define the neighborough list
      CALL section_vals_val_get(coupling_section,"CUT_OFF_BETWEEN_SITES",&
              r_val=cutoff_sites)

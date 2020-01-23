@@ -105,8 +105,8 @@ CONTAINS
     REAL(kind=dp), DIMENSION(:,:),POINTER    :: velocities_tp
     REAL(kind=dp), DIMENSION(:,:),POINTER    :: forces_adiab
     REAL(kind=dp)                            :: factor
-    TYPE(section_vals_type), POINTER         :: coupling_section
-    CHARACTER(LEN=default_string_length)     :: coupling_keyword
+    !TYPE(section_vals_type), POINTER         :: coupling_section
+    !CHARACTER(LEN=default_string_length)     :: coupling_keyword
     TYPE(sh_env_type)                       :: sh_env
     INTEGER, POINTER                         :: itimes
     REAL(KIND=dp)                            :: energy_adiabat
@@ -134,92 +134,90 @@ CONTAINS
 
 
     !> Find the method to calculate the off-diagonal elements
-    CALL section_vals_val_get(adiab_section,"METHOD_COUPLING",c_val=coupling_keyword)
+    !CALL section_vals_val_get(adiab_section,"METHOD_COUPLING",c_val=coupling_keyword)
     CALL get_subsys_map_index(mapping_section, natom, 1, nforce_eval, map_index)
     !> Choose the method to calculate the off-diagonal elements
-    SELECT CASE(coupling_keyword)
-    CASE("AOM")
-        coupling_section => section_vals_get_subs_vals(adiab_section, "AOM")
-        !> COMMENT_SG: this bit is not general becuase it assumes that all the
-        !following arrays have the same number of atoms per site and orbitals
-        !per site 
+    !SELECT CASE(coupling_keyword)
+    !CASE("AOM")
+    !coupling_section => section_vals_get_subs_vals(adiab_section, "AOM")
 
-        !> Get the coupling section and all the information 
-        CALL section_vals_val_get(adiab_section,"NUMBER_DIABATIC_STATES",&
-             i_val=nadiab)
-        CALL section_vals_val_get(adiab_section,"NUMBER_ATOMS_PER_SITE",&
-             i_val=aom_atoms)
-        CALL section_vals_val_get(adiab_section,"NUMBER_ORBITALS",&
-             i_val=norbitals)
-        CALL section_vals_val_get(adiab_section,"NUCLEAR_TIMESTEP",&
-             r_val=MDtimestep)
+    !> COMMENT_SG: this bit is not general becuase it assumes that all the
+    !following arrays have the same number of atoms per site and orbitals
+    !per site 
+    !> Get the coupling section and all the information 
+    CALL section_vals_val_get(adiab_section,"NUMBER_DIABATIC_STATES",&
+         i_val=nadiab)
+    CALL section_vals_val_get(adiab_section,"NUMBER_ATOMS_PER_SITE",&
+         i_val=aom_atoms)
+    CALL section_vals_val_get(adiab_section,"NUMBER_ORBITALS",&
+         i_val=norbitals)
+    CALL section_vals_val_get(adiab_section,"NUCLEAR_TIMESTEP",&
+         r_val=MDtimestep)
 
-        itimes => my_itimes
-        DO iparticle = 1, natom
-           jparticle = map_index(iparticle)
-           positions_tp(:,jparticle)   = particles_mix%els(jparticle)%r(:)
-           IF (my_itimes.eq.0) THEN
-                velocities_tp(:, jparticle) = particles_mix%els(jparticle)%v(:)
-           ENDIF
-        END DO
+    itimes => my_itimes
+    DO iparticle = 1, natom
+       jparticle = map_index(iparticle)
+       positions_tp(:,jparticle)   = particles_mix%els(jparticle)%r(:)
+       IF (my_itimes.eq.0) THEN
+            velocities_tp(:, jparticle) = particles_mix%els(jparticle)%v(:)
+       ENDIF
+    END DO
 
-        IF (my_itimes.eq.0) THEN
-           CALL create_sh_env(nadiab, aom_atoms, norbitals, natom, &
-                               positions_tp, coupling_section, adiab_section, & 
-                               sh_env)
-           sh_env%atoms = aom_atoms
-           sh_env%deltat = MDtimestep
-           !sh_env%natom = SIZE(global_forces(1)%forces,2)
-           sh_env%natom = natom
-           !> instead of passing mixed_env to propagate_aom_namd_first_step we
-           !could probably use a pinter like the one below, to fill
-           !sh_env%F array
-           !sh_env%F = mixed_env%sh_env%F
-           CALL propagate_aom_namd_first_step(nadiab, aom_atoms, norbitals,     &
-                     positions_tp, velocities_tp, energies_tp, sh_env, itimes, &
-                      coupling_section, adiab_section,& 
-                     my_bo_keyword, atomic_kinds, &
-                     local_particles, my_test_keyword, method_keyword, diagonal_F=mixed_env%F)
-        ELSE
-           !> Get the information for the previous timesteps
-           !!!!!!!!!!!!!!!!!!!!!!TO BE MODIFIED!!!!!!!!!!!!!!!!!!!!!!!!!
-           !!! this is a very dangerous step one should use an interface
-           !subroutine to do that!!!!!!!!!!!
-           sh_env = mixed_env%sh_env            
-           !> Velocities are taken directly from the integrator, note from
-           !> velocities_tp
-           !sh_env%velocities_t = velocities_tp
-           IF (sh_env%successful_hop) THEN
-              sh_env%forces_adiab = sh_env%forces_adiab_new
-              sh_env%futur_decohere = .TRUE.
-              !sh_env%successful_hop = .FALSE.
-              sh_env%forces_adiab_new = 0.0D0
-              !sh_env%new_state = -1
-              !sh_env%old_state = -1
-           ELSE
-              !> Main CALL: calculate the Hamiltonian, propagate the electronic dynamics
-              CALL construct_ham_X_SH(nadiab, aom_atoms, norbitals,         &
-                            positions_tp, energies_tp, sh_env, itimes,     &
-                             coupling_section, adiab_section, & 
-                            my_bo_keyword, atomic_kinds,                    &
-                            local_particles, my_test_keyword,diagonal_F=mixed_env%F)
-           ENDIF
-        ENDIF
-        !> IMPORTANT: store all sh_env for the future timesteps.
-        !> NOTE: this is also a tricky step, as the memory for
-        !mixed_env%sh_env object is allocated here. One should improve this
-        !interface subroutine. sh_env is a local structure not a pointer, in
-        !this case equal sign is copying the local structure sh_env (with all
-        !varibales inside it) to another local structure mixed_env%sh_env. In general
-        !for allocated variables inside aom_type.F (aom enviroment) this would
-        !take twice as much of the memory for each varibale. However since most
-        !of the variables inside sh_env are defined as pointers this operation
-        !takes for each variable just as much as the memory it takes to allocate
-        !the variable only once.
-        mixed_env%sh_env=sh_env
-    CASE DEFAULT
-        CPABORT("There is no method to calculate the coupling")
-    END SELECT
+    IF (my_itimes.eq.0) THEN
+       CALL create_sh_env(nadiab, aom_atoms, norbitals, natom, &
+                           positions_tp, adiab_section, & 
+                           sh_env)
+       sh_env%atoms = aom_atoms
+       sh_env%deltat = MDtimestep
+       !sh_env%natom = SIZE(global_forces(1)%forces,2)
+       sh_env%natom = natom
+       !> instead of passing mixed_env to propagate_aom_namd_first_step we
+       !could probably use a pinter like the one below, to fill
+       CALL propagate_aom_namd_first_step(nadiab, aom_atoms, norbitals,     &
+                 positions_tp, velocities_tp, energies_tp, sh_env, itimes, &
+                   adiab_section,& 
+                 my_bo_keyword, atomic_kinds, &
+                 local_particles, my_test_keyword, method_keyword, diagonal_F=mixed_env%F)
+    ELSE
+       !> Get the information for the previous timesteps
+       !!!!!!!!!!!!!!!!!!!!!!TO BE MODIFIED!!!!!!!!!!!!!!!!!!!!!!!!!
+       !!! this is a very dangerous step one should use an interface
+       !subroutine to do that!!!!!!!!!!!
+       sh_env = mixed_env%sh_env            
+       !> Velocities are taken directly from the integrator, note from
+       !> velocities_tp
+       !sh_env%velocities_t = velocities_tp
+       IF (sh_env%successful_hop) THEN
+          sh_env%forces_adiab = sh_env%forces_adiab_new
+          sh_env%futur_decohere = .TRUE.
+          !sh_env%successful_hop = .FALSE.
+          sh_env%forces_adiab_new = 0.0D0
+          !sh_env%new_state = -1
+          !sh_env%old_state = -1
+       ELSE
+          !> Main CALL: calculate the Hamiltonian, propagate the electronic dynamics
+          CALL construct_ham_X_SH(nadiab, aom_atoms, norbitals,         &
+                        positions_tp, energies_tp, sh_env, itimes,     &
+                         adiab_section, & 
+                        my_bo_keyword, atomic_kinds,                    &
+                        local_particles, my_test_keyword,diagonal_F=mixed_env%F)
+       ENDIF
+    ENDIF
+    !> IMPORTANT: store all sh_env for the future timesteps.
+    !> NOTE: this is also a tricky step, as the memory for
+    !mixed_env%sh_env object is allocated here. One should improve this
+    !interface subroutine. sh_env is a local structure not a pointer, in
+    !this case equal sign is copying the local structure sh_env (with all
+    !varibales inside it) to another local structure mixed_env%sh_env. In general
+    !for allocated variables inside aom_type.F (aom enviroment) this would
+    !take twice as much of the memory for each varibale. However since most
+    !of the variables inside sh_env are defined as pointers this operation
+    !takes for each variable just as much as the memory it takes to allocate
+    !the variable only once.
+    mixed_env%sh_env=sh_env
+    !CASE DEFAULT
+    !    CPABORT("There is no method to calculate the coupling")
+    !END SELECT
 
 
     !> IMPORTANT : GIVE BACK THE FORCES TO FIST
