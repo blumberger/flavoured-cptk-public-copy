@@ -66,6 +66,15 @@ IMPLICIT NONE
 
 CONTAINS
 
+
+!**********************************************************************************
+!> \brief This subroutine is first called by force_env_calc_energy_force when
+!>        the simulation starts at time 0. At this point arrays are initialized and the
+!>        Hamiltonian created for the 0th step (first step). For the following steps this
+!>        subroutine acts as an interface to update sh_env variables and to pass them
+!>        back to mixed_env. The nuclear dynamics is further carried on by
+!>        motion/integrator.F module. 
+!**********************************************************************************
     SUBROUTINE  adiab_fssh_routines(particles_mix, virial_mix, results_mix,      &
                  energies_tp, virials, results, nforce_eval,     &
                 map_index, mapping_section, adiab_section, mixed_env, my_itimes, &
@@ -75,7 +84,6 @@ CONTAINS
     TYPE(particle_list_type), POINTER        :: particles_mix
     TYPE(virial_type), POINTER               :: virial_mix
     TYPE(cp_result_type), POINTER            :: results_mix
-!    TYPE(mixed_force_type), DIMENSION(:), POINTER  :: global_forces
     REAL(KIND=dp), DIMENSION(:), POINTER     :: energies_tp
     TYPE(virial_p_type), DIMENSION(:), &
       POINTER                                :: virials
@@ -105,8 +113,6 @@ CONTAINS
     REAL(kind=dp), DIMENSION(:,:),POINTER    :: velocities_tp
     REAL(kind=dp), DIMENSION(:,:),POINTER    :: forces_adiab
     REAL(kind=dp)                            :: factor
-    !TYPE(section_vals_type), POINTER         :: coupling_section
-    !CHARACTER(LEN=default_string_length)     :: coupling_keyword
     TYPE(sh_env_type)                       :: sh_env
     INTEGER, POINTER                         :: itimes
     REAL(KIND=dp)                            :: energy_adiabat
@@ -137,9 +143,6 @@ CONTAINS
     !CALL section_vals_val_get(adiab_section,"METHOD_COUPLING",c_val=coupling_keyword)
     CALL get_subsys_map_index(mapping_section, natom, 1, nforce_eval, map_index)
     !> Choose the method to calculate the off-diagonal elements
-    !SELECT CASE(coupling_keyword)
-    !CASE("AOM")
-    !coupling_section => section_vals_get_subs_vals(adiab_section, "AOM")
 
     !> COMMENT_SG: this bit is not general becuase it assumes that all the
     !following arrays have the same number of atoms per site and orbitals
@@ -157,13 +160,23 @@ CONTAINS
     itimes => my_itimes
     DO iparticle = 1, natom
        jparticle = map_index(iparticle)
+       !SG: the positions that enter the following subroutines are the position
+       !updated after the first half VV. Meaning thy refer to time t+dt 
        positions_tp(:,jparticle)   = particles_mix%els(jparticle)%r(:)
        IF (my_itimes.eq.0) THEN
+            !SG: This velocities are half-time velocities and are stored here
+            !just to estimated the positions of the atoms at t-2dt
+            !(sh_env%rm_tm) in case of AOM and to estimate adiab nacv_first_ts
+            !(deprecated)
             velocities_tp(:, jparticle) = particles_mix%els(jparticle)%v(:)
        ENDIF
     END DO
 
+
     IF (my_itimes.eq.0) THEN
+       !> This 0th step is executed at the very beginning of the simulation, when
+       !qs_mol_dyn_low subroutine calls force_env_calc_energy_force for the
+       !first time and this calls in turn the present subroutinbe
        CALL create_sh_env(nadiab, aom_atoms, norbitals, natom, &
                            positions_tp, adiab_section, & 
                            sh_env)
@@ -178,15 +191,18 @@ CONTAINS
                    adiab_section,& 
                  my_bo_keyword, atomic_kinds, &
                  local_particles, my_test_keyword, method_keyword, diagonal_F=mixed_env%F)
+       DEALLOCATE(velocities_tp)
     ELSE
        !> Get the information for the previous timesteps
        !!!!!!!!!!!!!!!!!!!!!!TO BE MODIFIED!!!!!!!!!!!!!!!!!!!!!!!!!
        !!! this is a very dangerous step one should use an interface
        !subroutine to do that!!!!!!!!!!!
        sh_env = mixed_env%sh_env            
-       !> Velocities are taken directly from the integrator, note from
-       !> velocities_tp
-       !sh_env%velocities_t = velocities_tp
+       !> Velocities are taken directly from the integrator after the first half
+       !of the VV. So in general during **electronic** propagation the only
+       !available velocities are at t+dt/2 (half-time velocities). The reason is
+       !that in general they are never used for the **electronic** propagation.
+       !Except in the case of EFH. 
        IF (sh_env%successful_hop) THEN
           sh_env%forces_adiab = sh_env%forces_adiab_new
           sh_env%futur_decohere = .TRUE.
@@ -269,7 +285,7 @@ CONTAINS
     IF (ASSOCIATED(map_index)) THEN
        DEALLOCATE(map_index)
     END IF
-    DEALLOCATE(positions_tp, velocities_tp, forces_adiab)
+    DEALLOCATE(positions_tp, forces_adiab)
    END SUBROUTINE adiab_fssh_routines
 
 END MODULE non_adiabatic_methods

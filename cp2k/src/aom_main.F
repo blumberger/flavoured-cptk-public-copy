@@ -276,12 +276,9 @@ CONTAINS
      sh_print_env%times = times
      
      ALLOCATE(positions_com_tp(3, natom))
-     ALLOCATE(velocities_com_tp(3, natom))
      allocate(exact_forces(3,natom))
-
      !> OBTAIN COORDINATES, ENERGIES, STATES, etc. FROM PREVIOUS STEP
      CALL translate_com(positions_tp, keyword_translate, positions_com_tp, local_particles, atomic_kinds = atomic_kinds)  
-     CALL translate_com(sh_env%velocities_tp, keyword_translate, velocities_com_tp, local_particles, atomic_kinds = atomic_kinds)  
 
 !------------------  AOM section -------------------------------------
      sh_env%siteenergies = 0.0_dp
@@ -363,7 +360,12 @@ CONTAINS
            !> class_forbidden_hop_tp is calculated refferring to tp to be
            !consistent with the hopping probability, which is evaluated at tp.
            !These transition will be set to zero in the hamiltonian evolution
-           !between t and tp.
+           !between t and tp. However the velocities used are the ones at t+dt/2,
+           !this is a bit inconsistent but we could not find a better way. 
+
+           ALLOCATE(velocities_com_tp(3, natom))
+           CALL translate_com(sh_env%velocities_tp, keyword_translate, velocities_com_tp, &
+                                          local_particles, atomic_kinds = atomic_kinds)  
            CALL classically_forbidden_hops(sh_env%active_state,diagonal_F,  sh_env, mat,  &
                   velocities_com_tp, local_particles, atomic_kinds, nparticle_kind, &
                           atomic_kind_set, class_forbidden_hop_tp)
@@ -376,6 +378,7 @@ CONTAINS
            else 
                 sh_env%HS_propagation = .TRUE.
            end if
+           DEALLOCATE(velocities_com_tp)
      CASE DEFAULT                                           
            CPABORT("There is no method to propagate the wavefunction.") 
      END SELECT                                             
@@ -469,7 +472,6 @@ CONTAINS
 
      !> DEALLOCATE
      DEALLOCATE(positions_com_tp) 
-     DEALLOCATE(velocities_com_tp)
      deallocate(exact_forces)
      deallocate(site_energies, couplings, adiab_c, adiab_pop)
      DEALLOCATE(PC_allrvecs)

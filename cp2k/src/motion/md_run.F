@@ -378,6 +378,7 @@ CONTAINS
           ![NB] Lets let all methods, even ones without consistent energies, succeed here.
           !     They'll fail in actual integrator if needed
           ! consistent_energies=.FALSE. by default
+print *, "FIRST CALL: force_env_calc_energy_force"
           CALL force_env_calc_energy_force (force_env, calc_force=.TRUE.)
        END IF
 
@@ -454,7 +455,6 @@ CONTAINS
 
 ! if we need the initial kinetic energy for Hybrid Monte Carlo
     IF(PRESENT(hmc_e_initial)) hmc_e_initial=md_ener%ekin
-
     ! Real MD Loop
     DO istep=1, simpar%nsteps, md_stride
        ! Increase counters

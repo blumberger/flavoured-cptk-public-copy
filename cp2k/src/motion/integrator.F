@@ -517,9 +517,13 @@ CONTAINS
     IF (simpar%constraint) CALL getold(gci,local_molecules, molecule_set,  &
          molecule_kind_set, particle_set, cell)
 
-    ! Velocity Verlet (first part)
+    ! Velocity Verlet (first part),COMMENT_SG: update position for a full time step and
+    ! velocity for half time step
     CALL vv_first(tmp,atomic_kind_set, local_particles, particle_set, &
          core_particle_set, shell_particle_set, nparticle_kind, shell_adiabatic, dt)
+    !positions refer to t+dt and velocities to t+dt/2
+    !print *, "V0.1", tmp%vel(1,:)
+    !print *, "P0.1", tmp%pos(1,:)
 
     IF(simpar%variable_dt) CALL variable_timestep(md_env,tmp, dt, simpar, para_env, atomic_kind_set,&
          local_particles, particle_set, core_particle_set, shell_particle_set,&
@@ -570,7 +574,6 @@ CONTAINS
           tmp%vel=v_old
           CALL propagation_step(force_env%qs_env, rtp, dft_control%rtp_control)
        END IF
-
 !> CHANGE_AC
 !> 1-01-25
        !> Check if we do Surface Hopping Calculation
@@ -583,11 +586,15 @@ CONTAINS
           IF (mixing_type.eq.mix_adiab) do_fssh = .TRUE.
        ENDIF
        IF (do_fssh) THEN
-!print *, "STARTING_POINT"
              !We save the velocities for the first timestep, to estimate the
-             !position at t--1
+             !position at t-2dt in propagate_aom_namd_first_step (see
+             !explaination is adiab_fssh_routines
+             !print *, "V1", tmp%vel(1,:)  ! This is half time velocity
              IF (itimes.ge.1) THEN
-                force_env%mixed_env%sh_env%velocities_tp = tmp%vel
+                force_env%mixed_env%sh_env%velocities_tp = tmp%vel ! SG: This is half time velocity
+                                              !is never actually used during propagation time except for EFH
+                                                                  ! where is used to determine if a hop would
+                                                                  ! be forbidden
              ENDIF
 
              ! 1. Calculate the forces, Hamiltonian, propagate the wf and try to
@@ -601,13 +608,16 @@ CONTAINS
 
              ! Metadynamics
              CALL metadyn_integrator(force_env, itimes, tmp%vel)
-!print *, "BEFORE VV2"
-             ! Velocity Verlet (second part)
+             ! Velocity Verlet (second part): update half time velocity to
+             ! final time
              ! 2. Update the velocities with the forces in the active
              !    state, even if we attempt to hop
               CALL vv_second(tmp, atomic_kind_set, local_particles, particle_set, &
                              core_particle_set, shell_particle_set, nparticle_kind, shell_adiabatic, dt)
-             
+             !SG: NB -- Velocities tmp%vel(:,:) are now updated to final t+dt time and
+             !consistently used for energy rescaling and decoherence
+             !print *, "V4", tmp%vel(1,:)
+
 !mol = size(force_env%mixed_env%sh_env%Stt,1)
 !print*, "a before =", force_env%mixed_env%sh_env%state_tmdt
 !print*, "a' after enforcement =",  force_env%mixed_env%sh_env%active_state
