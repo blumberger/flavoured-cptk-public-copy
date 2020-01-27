@@ -436,7 +436,7 @@ end subroutine modified_surfacehop
 
 !        IF (PRESENT(rescale_keyword)) THEN
 !           my_rescale_keyword = rescale_keyword
-        IF (.NOT. sh_env%aom_couplings_keyword) THEN
+        IF (.NOT. force_env%mixed_env%sh_env%aom_couplings_keyword) THEN
             !WARNING:::::: when AOM Hamiltonian is not used the only rescaling
             !method that will work is SIMPLE rescaling, SIMPLE_QSYS would work
             !only by defining ext_pres LOGICAL array and NACV FAST rescaling
