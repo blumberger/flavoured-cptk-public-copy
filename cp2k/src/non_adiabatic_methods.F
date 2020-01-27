@@ -45,14 +45,12 @@ MODULE non_adiabatic_methods
 
   USE distribution_1d_types,           ONLY: distribution_1d_type
 
-  USE aom_utils,                       ONLY: read_listcoeff
-
   USE atomic_kind_list_types,          ONLY: atomic_kind_list_type
   USE atomic_kind_types,               ONLY: atomic_kind_type,&
                                              get_atomic_kind,&
                                              get_atomic_kind_set
   USE aom_initialization,              ONLY: create_sh_env,   &
-                                             propagate_aom_namd_first_step
+                                             propagate_namd_first_step
 
 #include "./base/base_uses.f90"
 
@@ -184,9 +182,9 @@ CONTAINS
        sh_env%deltat = MDtimestep
        !sh_env%natom = SIZE(global_forces(1)%forces,2)
        sh_env%natom = natom
-       !> instead of passing mixed_env to propagate_aom_namd_first_step we
+       !> instead of passing mixed_env to propagate_namd_first_step we
        !could probably use a pinter like the one below, to fill
-       CALL propagate_aom_namd_first_step(nadiab, aom_atoms, norbitals,     &
+       CALL propagate_namd_first_step(nadiab, aom_atoms, norbitals,     &
                  positions_tp, velocities_tp, energies_tp, sh_env, itimes, &
                    adiab_section,& 
                  my_bo_keyword, atomic_kinds, &

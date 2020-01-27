@@ -169,17 +169,14 @@ CONTAINS
 
      TYPE(section_vals_type), POINTER               :: decoherence_section, optimization_section
      TYPE(section_vals_type), POINTER               :: e_conservation_section
-     TYPE(section_vals_type), POINTER               :: coupling_section
      CHARACTER(LEN=default_string_length)           :: coupling_keyword
      integer                                        :: coord
      integer                                        :: mol, atoms, c,  mat, orb
-     REAL(KIND=dp)                                  :: cutoff_sites, cutoff_connect, &
-                                                       scaling, deltatMD, deltatE
-     REAL(KIND=dp)                                  :: cbar, minao
+     REAL(KIND=dp)                                  :: deltatMD, deltatE
      INTEGER, dimension(:), allocatable             :: class_forbidden_hop_tp
-     LOGICAL                                        :: analytics, do_nace_speedup
+     LOGICAL                                        :: do_nace_speedup
      INTEGER                                        :: ELsteps   
-     REAL(KIND=dp)                                  :: dR, times 
+     REAL(KIND=dp)                                  :: times 
      REAL(KIND=dp)                                  :: decohere_criterion
      INTEGER                                        :: imol,  natom
      REAL(kind=dp), DIMENSION(:,:), ALLOCATABLE     :: exact_forces
@@ -190,7 +187,6 @@ CONTAINS
      CHARACTER(LEN=default_string_length)           :: prop_wf_keyword 
      CHARACTER(LEN=default_string_length)           :: reversal_keyword
      real(kind=dp), DIMENSION(:,:), allocatable     :: PC_allrvecs
-     LOGICAL                                        :: do_random 
      REAL(KIND=dp), dimension(:), allocatable       :: adiab_pop
      COMPLEX(KIND=dp), dimension(:), allocatable    :: adiab_c
      TYPE(cp_logger_type), POINTER                  :: logger
@@ -203,36 +199,10 @@ CONTAINS
      NULLIFY(optimization_section)
      NULLIFY(decoherence_section)
      NULLIFY(e_conservation_section)
-     NULLIFY(coupling_section)
 
      logger => cp_get_default_logger()
 
      CALL section_vals_val_get(adiab_section,"METHOD_COUPLING",c_val=coupling_keyword)
-!------------------  AOM section -------------------------------------
-     coupling_section => section_vals_get_subs_vals(adiab_section, "AOM")
-
-     !> cutoff to define the neighborough list
-     CALL section_vals_val_get(coupling_section,"CUT_OFF_BETWEEN_SITES",&
-             r_val=cutoff_sites)
-     !> cutoff to define the neighborough list
-     CALL section_vals_val_get(coupling_section,"CUT_OFF_CONNECTIVITY",&
-             r_val=cutoff_connect)
-     !> minao is an atomic overlap cutoff
-     CALL section_vals_val_get(coupling_section,"ATOMIC_OVERLAP_CUTOFF",&
-             r_val=minao)
-     !> dR is the increment for the gradient finite difference calculation 
-     CALL section_vals_val_get(coupling_section,"NACV_INCREMENT",&
-             r_val=dR)
-     !> analytics would probably calculates analytic forces for a 2 state sytems (Spencer 2016)
-     CALL section_vals_val_get(coupling_section,"ANALYTICS", l_val=analytics)
-     !> This remove bias coming from the finite difference calculation of the
-     !> gradients of the Hamiltonian from AOM
-     CALL section_vals_val_get(coupling_section,"RANDOM_DERIVATIVE", l_val=do_random)
-     !> Multiple time step calculation of aom gradient
-     CALL section_vals_val_get(coupling_section,"MULTIPLE_TIME_STEP",&
-                               i_val=sh_env%multiple_time_step)
-!-------------------------------------------------------------------
-
      !> Calculate the orbital overlap in the COM reference sistem of the
      !molecules
      CALL section_vals_val_get(adiab_section,"CENTER_OF_MASS", l_val=keyword_translate)
@@ -253,9 +223,6 @@ CONTAINS
      CALL section_vals_val_get(decoherence_section,"DECOHERENCE_CRITERION",&
              r_val=decohere_criterion)
 
-     !> Scaling factor Hab = scaling*Sab_bar
-     scaling = sh_env%scaling
-     cbar = sh_env%cbar
      atoms = sh_env%atoms !Number of atoms per site
      natom = sh_env%natom !Total number of atoms
      deltatMD = sh_env%deltat !Nuclear timestep
@@ -291,16 +258,16 @@ CONTAINS
 
 
      !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
-     CALL calc_coms_and_nlist_aom(sh_env, atoms, mol, cutoff_sites, orb)
+     CALL calc_coms_and_nlist_aom(sh_env, atoms, mol, sh_env%cutoff_sites, orb)
 
      !> CALCULATE THE HAMILTONIAN, THE STTP MATRIX AND THE NACV
-     CALL calc_aom_Xmatrix_elements(sh_env, itimes, atoms, mol, dR, do_random, cbar, &
-                      scaling, PC_allrvecs, orb, minao)
+     CALL calc_aom_Xmatrix_elements(sh_env, itimes, atoms, mol, sh_env%dR, sh_env%do_random, sh_env%cbar, &
+                      sh_env%scaling, PC_allrvecs, orb, sh_env%minao)
 
      !> CONVERT THE diabatic NACV WITH THE GOOD UNITS
     if (mod(itimes-1, sh_env%multiple_time_step) .eq. 0) then
         print *, "FOBSH| *** OFF-DIAGONAL GRADIENT CALCULATION"
-        sh_env%nacv = cbar*sh_env%nacv
+        sh_env%nacv = sh_env%cbar*sh_env%nacv
     end if
     !TEST NACV ABSENCE:
     !sh_env%nacv = 0.0D0
@@ -417,13 +384,14 @@ CONTAINS
      !HOP ROUTINE IS. 
      call calcforces_aom(state=sh_env%active_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%nacv, &
                            atoms=atoms, & 
-                           scaling=scaling, cbar=cbar, Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
+                           scaling=sh_env%scaling, cbar=sh_env%cbar, Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                            ext_pres=sh_env%ext_pres)
      IF (sh_env%attempt_hop) THEN
          call calcforces_aom(state=sh_env%new_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%nacv, &
                               atoms=atoms, & 
-                              scaling=scaling, cbar=cbar, Fin=diagonal_F, forces_adiab=sh_env%forces_adiab_new, &
-                              ext_pres=sh_env%ext_pres)
+                              scaling=sh_env%scaling, cbar=sh_env%cbar, Fin=diagonal_F, &
+                                                      forces_adiab=sh_env%forces_adiab_new, &
+                                                      ext_pres=sh_env%ext_pres)
      ENDIF
 ! --------------------------------------------------------------------------------------------------
 
@@ -458,7 +426,7 @@ CONTAINS
      CALL adiab_print_nacv(adiab_section, sh_env%nacv, nadiab, norbitals, aom_atoms,itimes, deltatMD)
      CALL adiab_print_adiabat_energies(adiab_section, sh_env%E_tp, nadiab, deltatMD, times)
      CALL adiab_print_pvecs(adiab_section, PC_allrvecs, itimes, deltatMD, times, atoms, nadiab)
-     IF (analytics) THEN
+     IF (sh_env%analytics) THEN
         CALL adiab_print_exact_forces(adiab_section, exact_forces, natom, deltatMD, times)
      ENDIF
 

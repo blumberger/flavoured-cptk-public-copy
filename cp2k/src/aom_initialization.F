@@ -130,7 +130,7 @@ MODULE aom_initialization
      CHARACTER(len=*), PARAMETER, PRIVATE :: moduleN ='aom_initialization'   
 
      PUBLIC :: create_sh_env, &
-               propagate_aom_namd_first_step
+               propagate_namd_first_step
 
 CONTAINS
 
@@ -156,6 +156,7 @@ CONTAINS
      INTEGER                                        :: input_seed
      TYPE(rng_stream_type), POINTER                 :: rng_stream
      CHARACTER(LEN=default_string_length)           :: deco_keyword
+     CHARACTER(LEN=default_string_length)           :: coupling_keyword
 
      NULLIFY(rng_stream)
      NULLIFY(decoherence_section)
@@ -222,6 +223,7 @@ CONTAINS
      optimization_section => section_vals_get_subs_vals(adiab_section,"OPTIMIZATION")
      CALL section_vals_val_get(optimization_section,"REORDERING_STATES_USING_OVERLAP",&
                                                       l_val=sh_env%do_reorder)
+
      !> INITIALIZE THE RANDOM GENERATOR
      CALL section_vals_val_get(adiab_section,"SEED",i_val=input_seed)
      initial_seed(:,:) = REAL(input_seed,KIND=dp)
@@ -245,10 +247,15 @@ CONTAINS
          CALL read_listdiabcoeff(listdiabcoeff, norbitals, nadiab, ctin=sh_env%readcoeff) !Transform them in the complex ctin
      end if
 
-    !=================== AOM array      ===============================================
-    CALL set_aom_env(nadiab, aom_atoms, norbitals, natom,positions_tp,adiab_section,sh_env)
-    
-    !==================================================================================
+    CALL section_vals_val_get(adiab_section,"METHOD_COUPLING",c_val=coupling_keyword)
+    SELECT CASE(coupling_keyword)
+    !---------------- AOM array ---------------------------------------------------------------
+    CASE("AOM")
+         CALL set_aom_env(nadiab, aom_atoms, norbitals, natom,positions_tp,adiab_section,sh_env)
+    !------------------------------------------------------------------------------------------
+    CASE DEFAULT
+        CPABORT("There is no method to calculate the coupling")
+    END SELECT
 
      DEALLOCATE(rng_stream)
   END SUBROUTINE create_sh_env
@@ -269,7 +276,6 @@ CONTAINS
 
      TYPE(section_vals_type), POINTER               :: optimization_section
      integer                                        :: i, j, mat, c, coord, mol, atoms, start
-     REAL(KIND=dp)                                  :: cutoff_connect
      REAL(KIND=dp), dimension(:,:), allocatable     :: crds_loc
      REAL(KIND=dp), dimension(:,:), allocatable     :: Atp_loc
      REAL(KIND=dp), DIMENSION(:), ALLOCATABLE       :: pcoefftot, scoefftot
@@ -283,7 +289,6 @@ CONTAINS
      CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_C_S,file_name_s_ppi_C_S
      CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_S_S,file_name_s_ppi_S_S
      TYPE(section_vals_type), POINTER               :: coupling_section
-     CHARACTER(LEN=default_string_length)           :: coupling_keyword
 
      NULLIFY(listcoeff)
      NULLIFY(optimization_section)
@@ -292,11 +297,52 @@ CONTAINS
      coupling_section => section_vals_get_subs_vals(adiab_section, "AOM")
      optimization_section => section_vals_get_subs_vals(adiab_section,"OPTIMIZATION")
 
-     CALL section_vals_val_get(adiab_section,"METHOD_COUPLING",c_val=coupling_keyword)
      CALL section_vals_val_get(optimization_section,"RK_PROPAGATION", c_val=prop_wf_keyword) 
+
+     !> Initialize input parameters: 
      !> cutoff to define the neighborough list
+
      CALL section_vals_val_get(coupling_section,"CUT_OFF_CONNECTIVITY",&
-             r_val=cutoff_connect)
+             r_val=sh_env%cutoff_connect)
+     !> cutoff to define the neighborough list
+     CALL section_vals_val_get(coupling_section,"CUT_OFF_BETWEEN_SITES",&
+             r_val=sh_env%cutoff_sites)
+     !> minao is an atomic overlap cutoff
+     CALL section_vals_val_get(coupling_section,"ATOMIC_OVERLAP_CUTOFF",&
+             r_val=sh_env%minao)
+     !> dR is the increment for the gradient finite difference calculation
+     CALL section_vals_val_get(coupling_section,"NACV_INCREMENT",&
+             r_val=sh_env%dR)
+     !> analytics would probably calculates analytic forces for a 2 state sytems
+     !(Spencer 2016)
+     CALL section_vals_val_get(coupling_section,"ANALYTICS", l_val=sh_env%analytics)
+     !> This remove bias coming from the finite difference calculation of the
+      !> gradients of the Hamiltonian from AOM
+     CALL section_vals_val_get(coupling_section,"RANDOM_DERIVATIVE", l_val=sh_env%do_random)
+     !> Multiple time step calculation of aom gradient
+     CALL section_vals_val_get(coupling_section,"MULTIPLE_TIME_STEP",&
+             i_val=sh_env%multiple_time_step)
+
+     !> Create the overlap look-up table for the AOM coupling calculation
+     CALL section_vals_val_get(coupling_section,"PSIGMA_FILE_NAME",&
+             c_val=file_name_s_psigma)
+     CALL section_vals_val_get(coupling_section,"PPI_FILE_NAME",&
+             c_val=file_name_s_ppi)
+     ! OZ: C-S and S-S
+     CALL section_vals_val_get(coupling_section,"PSIGMA_C_S_FILE_NAME",&
+             c_val=file_name_s_psigma_C_S)
+     CALL section_vals_val_get(coupling_section,"PPI_C_S_FILE_NAME",&
+             c_val=file_name_s_ppi_C_S)
+     CALL section_vals_val_get(coupling_section,"PSIGMA_S_S_FILE_NAME",&
+             c_val=file_name_s_psigma_S_S)
+     CALL section_vals_val_get(coupling_section,"PPI_S_S_FILE_NAME",&
+             c_val=file_name_s_ppi_S_S)
+     !> Scaling factor Hab = scaling*Sab_bar
+     CALL section_vals_val_get(coupling_section,"SCALING_FACTOR",&
+             r_val=sh_env%scaling)
+     !> cbar factor : Sab = cbar*Sab_bar
+     CALL section_vals_val_get(coupling_section,"CBAR",&
+             r_val=sh_env%cbar)
 
      mol = nadiab ! CHANGE_AC
      atoms = aom_atoms ! CHANGE_AC
@@ -364,33 +410,11 @@ CONTAINS
      sh_env%aneighbour = 0
      sh_env%bneighbour = 0
 
-
-     !> Create the overlap look-up table for the AOM coupling calculation
-     CALL section_vals_val_get(coupling_section,"PSIGMA_FILE_NAME",&
-             c_val=file_name_s_psigma)
-     CALL section_vals_val_get(coupling_section,"PPI_FILE_NAME",&
-             c_val=file_name_s_ppi)
-     ! OZ: C-S and S-S
-     CALL section_vals_val_get(coupling_section,"PSIGMA_C_S_FILE_NAME",&
-             c_val=file_name_s_psigma_C_S)
-     CALL section_vals_val_get(coupling_section,"PPI_C_S_FILE_NAME",&
-             c_val=file_name_s_ppi_C_S)
-     CALL section_vals_val_get(coupling_section,"PSIGMA_S_S_FILE_NAME",&
-             c_val=file_name_s_psigma_S_S)
-     CALL section_vals_val_get(coupling_section,"PPI_S_S_FILE_NAME",&
-             c_val=file_name_s_ppi_S_S)
      ! OZ: add extra arguments...
      CALL build_s_tables(file_name_s_psigma, file_name_s_ppi,&
                          file_name_s_psigma_C_S, file_name_s_ppi_C_S,&
                          file_name_s_psigma_S_S, file_name_s_ppi_S_S)
      
-     !> Scaling factor Hab = scaling*Sab_bar
-     CALL section_vals_val_get(coupling_section,"SCALING_FACTOR",&
-             r_val=sh_env%scaling)
-     !> cbar factor : Sab = cbar*Sab_bar
-     CALL section_vals_val_get(coupling_section,"CBAR",&
-             r_val=sh_env%cbar)
-
      
      !> READ THE AOM COEFFICIENT
      CALL section_vals_list_get(coupling_section,"_DEFAULT_KEYWORD_",list=listcoeff) !Read them in the input files
@@ -435,7 +459,7 @@ CONTAINS
 
      Atp_loc(2:4,1:aom_atoms) = crds_loc(1:3,1:aom_atoms)
      !output: sh_env%connlist1, sh_env%connlist2
-     call connect_list2(Atp_loc(2:4,:), sh_env%atomlist, sh_env%connlist1, sh_env%connlist2, cutoff_connect)
+     call connect_list2(Atp_loc(2:4,:), sh_env%atomlist, sh_env%connlist1, sh_env%connlist2, sh_env%cutoff_connect)
      
      DEALLOCATE(atomlist_mask) 
      DEALLOCATE(submask) 
@@ -470,7 +494,7 @@ CONTAINS
 
   END SUBROUTINE create_adiab_nace_env
 
-  SUBROUTINE propagate_aom_namd_first_step(nadiab, aom_atoms, norbitals,  &
+  SUBROUTINE propagate_namd_first_step(nadiab, aom_atoms, norbitals,  &
                                   positions_tp,  &
                                   velocities_tp,  &
                                   energies_tp,  &
@@ -493,18 +517,15 @@ CONTAINS
      LOGICAL, INTENT(IN)                            :: my_test_keyword
      CHARACTER(LEN=default_string_length)           :: method_keyword
 
-     CHARACTER(len=*), PARAMETER :: routineN ='propagate_aom_namd_first_step', &
+     CHARACTER(len=*), PARAMETER :: routineN ='propagate_namd_first_step', &
      routineP = moduleN//':'//routineN
 
      integer                                        :: coord, mol, atoms, c, & 
                                                        first_diabat, active_state, mat, orb 
-     REAL(KIND=dp)                                  :: cutoff_sites, cutoff_connect, & 
-                                                       scaling, deltatMD, deltatE
-     REAL(KIND=dp)                                  :: cbar, minao
+     REAL(KIND=dp)                                  :: deltatMD, deltatE
      COMPLEX(KIND=dp), dimension(:), allocatable    :: ctin
-     LOGICAL                                        :: decohere, analytics
      INTEGER                                        :: new_state , ELsteps   
-     REAL(KIND=dp)                                  :: dR, times 
+     REAL(KIND=dp)                                  :: times 
      INTEGER                                        :: imol,  natom
      REAL(kind=dp), DIMENSION(:,:), ALLOCATABLE     :: exact_forces
      LOGICAL                                        :: keyword_translate
@@ -513,7 +534,6 @@ CONTAINS
      CHARACTER(LEN=default_string_length)           :: keyword_init, keyword_basis_repr, &
                                                         prop_wf_keyword
      real(kind=dp), DIMENSION(:,:), allocatable     :: PC_allrvecs
-     LOGICAL                                        :: do_random
      REAL(kind=dp), DIMENSION(:), ALLOCATABLE       :: site_energies, couplings
      REAL(KIND=dp), dimension(:), allocatable       :: adiab_pop
      COMPLEX(KIND=dp), dimension(:), allocatable    :: adiab_c
@@ -531,31 +551,6 @@ CONTAINS
      logger => cp_get_default_logger()
 
      CALL section_vals_val_get(adiab_section,"METHOD_COUPLING",c_val=coupling_keyword)
-!------------------  AOM section -------------------------------------
-     !> cutoff to define the neighborough list
-     coupling_section => section_vals_get_subs_vals(adiab_section, "AOM")
-
-     CALL section_vals_val_get(coupling_section,"CUT_OFF_CONNECTIVITY",&
-             r_val=cutoff_connect)
-     !> cutoff to define the neighborough list
-     CALL section_vals_val_get(coupling_section,"CUT_OFF_BETWEEN_SITES",&
-             r_val=cutoff_sites)
-     !> minao is an atomic overlap cutoff
-     CALL section_vals_val_get(coupling_section,"ATOMIC_OVERLAP_CUTOFF",&
-             r_val=minao)
-     !> dR is the increment for the gradient finite difference calculation
-     CALL section_vals_val_get(coupling_section,"NACV_INCREMENT",&
-             r_val=dR)
-     !> analytics would probably calculates analytic forces for a 2 state sytems
-     !(Spencer 2016)
-     CALL section_vals_val_get(coupling_section,"ANALYTICS", l_val=analytics)
-     !> This remove bias coming from the finite difference calculation of the
-      !> gradients of the Hamiltonian from AOM
-     CALL section_vals_val_get(coupling_section,"RANDOM_DERIVATIVE", l_val=do_random)
-     !> Multiple time step calculation of aom gradient
-     CALL section_vals_val_get(coupling_section,"MULTIPLE_TIME_STEP",&
-             i_val=sh_env%multiple_time_step)
-!-------------------------------------------------------------------
 
      !> Calculate the orbital overlap in the COM reference sistem of the
      !molecules
@@ -564,9 +559,6 @@ CONTAINS
      CALL section_vals_val_get(adiab_section,"ELECTRONIC_PARTIAL_STEP",&
              i_val=ELsteps)
 
-     !> Scaling factor Hab = scaling*Sab_bar
-     scaling = sh_env%scaling
-     cbar = sh_env%cbar
      atoms = sh_env%atoms !Number of atoms per site
      natom = sh_env%natom !Total number of atoms
      deltatMD = sh_env%deltat !Nuclear timestep
@@ -615,7 +607,7 @@ CONTAINS
      enddo
     
      !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
-     CALL calc_coms_and_nlist_aom(sh_env, atoms, mol, cutoff_sites, orb)
+     CALL calc_coms_and_nlist_aom(sh_env, atoms, mol, sh_env%cutoff_sites, orb)
 
      ! Allocate neighbouring list just at the first step as Jacob suggested 
      !only if sh_env%multiple_time_step .eq. 1 otherwise we use Multiple time
@@ -629,12 +621,12 @@ CONTAINS
      end if 
 
      !> CALCULATE THE HAMILTONIAN, THE STTP MATRIX AND THE NACV
-     CALL calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_random,cbar, &
-                      scaling, PC_allrvecs, orb, minao)
+     CALL calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, sh_env%dR, sh_env%do_random, sh_env%cbar, &
+                      sh_env%scaling, PC_allrvecs, orb, sh_env%minao)
 
      !> CONVERT NACV AND CALCULATE EIGENPROPERTIES 
      !> THESE ASSOCIATIONS ARE NEEDED FOR THE NACV CALC
-     sh_env%nacv = cbar*sh_env%nacv
+     sh_env%nacv = sh_env%cbar*sh_env%nacv
 !-----------------------------------------------------------------------------
 
      !> HAMILTONIAN DIAGONALIZATION
@@ -672,7 +664,6 @@ CONTAINS
 
      !> INITIALIZE THE WAVEFUNCTION (WE DO NOT PROPAGATE IT AT THE FIRST STEP) 
      IF  (.NOT. my_test_keyword) THEN
-         decohere = .FALSE.
          sh_env%decohere = .FALSE.
          sh_env%attempt_hop = .FALSE.
          !if we want to restart wavefunction then
@@ -772,10 +763,10 @@ CONTAINS
      !RESULT OF THE SURFACE HOP ROUTINE IS.
      print*, "FOBSH| ACTIVE STATE = ", active_state
      call calcforces_aom(state=active_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%nacv, atoms=atoms, & 
-                     scaling=scaling, cbar=cbar, Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
+                     scaling=sh_env%scaling, cbar=sh_env%cbar, Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                      ext_pres=sh_env%ext_pres)
 
-     IF (analytics) THEN
+     IF (sh_env%analytics) THEN
         times = DBLE(itimes)
         CALL adiab_print_exact_forces(adiab_section, exact_forces, natom, deltatMD, times)
      ENDIF
@@ -824,7 +815,7 @@ CONTAINS
     DEALLOCATE(velocities_com_tp)
     DEALLOCATE(PC_allrvecs)    
 
-  END SUBROUTINE propagate_aom_namd_first_step
+  END SUBROUTINE propagate_namd_first_step
 
   !Seems to change the nace not the nacv 
   SUBROUTINE nacv_first_ts(sh_env, diagonal_F, natom, mat, velocities_com_tp)

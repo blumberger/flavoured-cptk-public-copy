@@ -587,7 +587,7 @@ CONTAINS
        ENDIF
        IF (do_fssh) THEN
              !We save the velocities for the first timestep, to estimate the
-             !position at t-2dt in propagate_aom_namd_first_step (see
+             !position at t-2dt in propagate_namd_first_step (see
              !explaination is adiab_fssh_routines
              !print *, "V1", tmp%vel(1,:)  ! This is half time velocity
              IF (itimes.ge.1) THEN
