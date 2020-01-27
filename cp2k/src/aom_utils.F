@@ -495,7 +495,7 @@ SUBROUTINE calc_aom_Xmatrix_elements(sh_env, itimes, atoms, mol, dR, do_random, 
      REAL(KIND=dp), intent(in)                   :: cbar
      REAL(KIND=dp), intent(in)                   :: minao
      REAL(KIND=dp), intent(in) :: scaling
-     real(kind=dp), DIMENSION(:,:), allocatable, intent(out) :: PC_allrvecs
+     real(kind=dp), DIMENSION(:,:), allocatable, intent(inout) :: PC_allrvecs
 
      CHARACTER(len=*), PARAMETER                     :: routineN ='calc_aom_Xmatrix_elements', &
      routineP = moduleN//':'//routineN
@@ -504,7 +504,7 @@ SUBROUTINE calc_aom_Xmatrix_elements(sh_env, itimes, atoms, mol, dR, do_random, 
      integer :: i, j, k, l, m, d, o
      real(kind=dp), allocatable :: PC_rvecs(:,:)
       
-     ALLOCATE(PC_allrvecs(5,mol*atoms))
+     !ALLOCATE(PC_allrvecs(5,mol*atoms))
      ALLOCATE(PC_rvecs(3,atoms))
      !COMMENT: I guess Atm and Btm are only need for the first timestep (itimes = 1)
      !one could duplicate this subroutine and create one only for the first timestep
@@ -841,7 +841,7 @@ SUBROUTINE calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_rando
      REAL(KIND=dp), intent(in)                   :: cbar
      REAL(KIND=dp), intent(in)                   :: minao
      REAL(KIND=dp), intent(in)                   :: scaling
-     real(kind=dp), DIMENSION(:,:), allocatable, intent(out) :: PC_allrvecs
+     real(kind=dp), DIMENSION(:,:), allocatable, intent(inout) :: PC_allrvecs
 
      CHARACTER(len=*), PARAMETER                 :: routineN='calc_aom_Xmatrix_elements_first_step', &
      routineP = moduleN//':'//routineN
@@ -851,7 +851,7 @@ SUBROUTINE calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_rando
      real(kind=dp), allocatable :: PC_rvecs(:,:)
 
 
-     ALLOCATE(PC_allrvecs(5,mol*atoms))
+     !ALLOCATE(PC_allrvecs(5,mol*atoms))
      ALLOCATE(PC_rvecs(3,atoms))
 
      !CALCULATE THE HAMILTONIAN AND THE NACV

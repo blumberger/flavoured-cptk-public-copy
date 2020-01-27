@@ -41,7 +41,8 @@ MODULE non_adiabatic_methods
 
   USE sh_types,                       ONLY: sh_env_type 
 
-  USE aom_main,                        ONLY: construct_ham_X_SH
+  USE sh_main,                        ONLY: construct_ham_X_SH, &
+                                             propagate_namd_first_step
 
   USE distribution_1d_types,           ONLY: distribution_1d_type
 
@@ -49,8 +50,7 @@ MODULE non_adiabatic_methods
   USE atomic_kind_types,               ONLY: atomic_kind_type,&
                                              get_atomic_kind,&
                                              get_atomic_kind_set
-  USE aom_initialization,              ONLY: create_sh_env,   &
-                                             propagate_namd_first_step
+  USE sh_initialization,              ONLY: create_sh_env
 
 #include "./base/base_uses.f90"
 
