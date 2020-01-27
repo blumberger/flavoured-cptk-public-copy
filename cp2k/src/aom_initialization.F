@@ -134,13 +134,13 @@ MODULE aom_initialization
 
 CONTAINS
 
-  SUBROUTINE create_sh_env(nadiab, aom_atoms, norbitals, natom, &
+  SUBROUTINE create_sh_env(nadiab, norbitals, natom, &
                                   positions_tp,     &
                                   adiab_section,    &
                                   sh_env)
 
 
-     INTEGER, INTENT(IN)                            :: nadiab,  aom_atoms, norbitals, natom
+     INTEGER, INTENT(IN)                            :: nadiab, norbitals, natom
      REAL(kind=dp), DIMENSION(:,:),POINTER          :: positions_tp
      TYPE(section_vals_type), POINTER               :: adiab_section
      TYPE(sh_env_type), INTENT(INOUT)               :: sh_env
@@ -150,25 +150,29 @@ CONTAINS
 
      TYPE(section_vals_type), POINTER               :: optimization_section
      TYPE(section_vals_type), POINTER               :: wf_restart_section, decoherence_section
-     integer                                        :: mat, c, mol, atoms
+     integer                                        :: mat, mol
      TYPE(cp_sll_val_type), POINTER                 :: listdiabcoeff
      REAL(KIND=dp), DIMENSION(3, 2)                 :: initial_seed
      INTEGER                                        :: input_seed
      TYPE(rng_stream_type), POINTER                 :: rng_stream
      CHARACTER(LEN=default_string_length)           :: deco_keyword
      CHARACTER(LEN=default_string_length)           :: coupling_keyword
+     REAL(KIND=dp)                                  :: MDtimestep
 
      NULLIFY(rng_stream)
      NULLIFY(decoherence_section)
      NULLIFY(wf_restart_section)
      NULLIFY(optimization_section)
 
+     CALL section_vals_val_get(adiab_section,"NUCLEAR_TIMESTEP",&
+         r_val=MDtimestep)
+     sh_env%deltat = MDtimestep !> MD time step
 
-     mol = nadiab ! CHANGE_AC
-     atoms = aom_atoms ! CHANGE_AC
+     ! COMMENT_SG: mol and mat would need to be looked into carefully to see if
+     ! they make sense for norbitals != 1.
+     mol = nadiab ! CHANGE_AC !> number of adiabatic states considered
      mat = norbitals*nadiab !> Size of the vectorial space where the wavefunctions are projected
-     c = nadiab*aom_atoms !> Numbers of active atoms
-
+     sh_env%natom = natom ! total number of atoms for a given force eval
 
      ALLOCATE(sh_env%forces_adiab(3,natom))
      ALLOCATE(sh_env%forces_adiab_new(3,natom))
@@ -253,7 +257,7 @@ CONTAINS
     !---------------- AOM array ---------------------------------------------------------------
     CASE("AOM")
          sh_env%aom_couplings_keyword = .TRUE.
-         CALL set_aom_env(nadiab, aom_atoms, norbitals, natom,positions_tp,adiab_section,sh_env)
+         CALL set_aom_env(nadiab, norbitals, natom,positions_tp,adiab_section,sh_env)
     !------------------------------------------------------------------------------------------
     CASE DEFAULT
         CPABORT("There is no method to calculate the coupling")
@@ -262,13 +266,13 @@ CONTAINS
      DEALLOCATE(rng_stream)
   END SUBROUTINE create_sh_env
 
-  SUBROUTINE set_aom_env(nadiab, aom_atoms, norbitals, natom, &
+  SUBROUTINE set_aom_env(nadiab,  norbitals, natom, &
                                   positions_tp,     &
                                   adiab_section,    &
                                   sh_env)
 
 
-     INTEGER, INTENT(IN)                            :: nadiab,  aom_atoms, norbitals, natom
+     INTEGER, INTENT(IN)                            :: nadiab, norbitals, natom
      REAL(kind=dp), DIMENSION(:,:),POINTER          :: positions_tp
      TYPE(section_vals_type), POINTER               :: adiab_section
      TYPE(sh_env_type), INTENT(INOUT)               :: sh_env
@@ -277,7 +281,7 @@ CONTAINS
      routineP = moduleN//':'//routineN
 
      TYPE(section_vals_type), POINTER               :: optimization_section
-     integer                                        :: i, j, mat, c, coord, mol, atoms, start
+     integer                                        :: i, j, mat, c, coord, mol, start
      REAL(KIND=dp), dimension(:,:), allocatable     :: crds_loc
      REAL(KIND=dp), dimension(:,:), allocatable     :: Atp_loc
      REAL(KIND=dp), DIMENSION(:), ALLOCATABLE       :: pcoefftot, scoefftot
@@ -291,6 +295,7 @@ CONTAINS
      CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_C_S,file_name_s_ppi_C_S
      CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_S_S,file_name_s_ppi_S_S
      TYPE(section_vals_type), POINTER               :: coupling_section
+     INTEGER                                        :: aom_atoms
 
      NULLIFY(listcoeff)
      NULLIFY(optimization_section)
@@ -345,17 +350,22 @@ CONTAINS
      !> cbar factor : Sab = cbar*Sab_bar
      CALL section_vals_val_get(coupling_section,"CBAR",&
              r_val=sh_env%cbar)
+     !> number of atoms per site (This array is not general for a double phase
+     !with molecules with a different number of atoms per site)
+     CALL section_vals_val_get(coupling_section,"NUMBER_AOM_ATOMS_PER_SITE",&
+         i_val=aom_atoms)
+
 
      mol = nadiab ! CHANGE_AC
-     atoms = aom_atoms ! CHANGE_AC
+     sh_env%atoms = aom_atoms ! CHANGE_AC
      mat = norbitals*nadiab !> Size of the vectorial space where the wavefunctions are projected
      c = nadiab*aom_atoms !> Numbers of active atoms
 
 
      ALLOCATE(sh_env%elements(c))
      ALLOCATE(sh_env%connlist1(4,aom_atoms))
-     allocate(sh_env%aneighbour(0:atoms,0:atoms))
-     allocate(sh_env%bneighbour(0:atoms,0:atoms))
+     allocate(sh_env%aneighbour(0:sh_env%atoms,0:sh_env%atoms))
+     allocate(sh_env%bneighbour(0:sh_env%atoms,0:sh_env%atoms))
      ALLOCATE(sh_env%pcoeffs(aom_atoms,norbitals))
      ALLOCATE(sh_env%scoeffs(aom_atoms))
      allocate(sh_env%coms(3,mol))
@@ -364,16 +374,16 @@ CONTAINS
      allocate(sh_env%crds(3,c,3))
      allocate(sh_env%dist(mol,mol))
      ALLOCATE(sh_env%NN(mat, mat))
-     allocate(sh_env%pcoeffsrun(atoms,mat,3)) !pcoeffsrun exists because the p-coefficients
+     allocate(sh_env%pcoeffsrun(sh_env%atoms,mat,3)) !pcoeffsrun exists because the p-coefficients
                                                !need to be renormalised for each structure
      !first column is now atomic number of atom (e.g. 6 for carbon)
      !Naming convention: At = A(t), Atp = A(t+1), Atm = A(t-1), etc
-     allocate(sh_env%At(4,atoms))
-     allocate(sh_env%Atp(4,atoms))
-     allocate(sh_env%Atm(4,atoms))
-     allocate(sh_env%Bt(4,atoms))
-     allocate(sh_env%Btp(4,atoms))
-     allocate(sh_env%Btm(4,atoms))
+     allocate(sh_env%At(4,sh_env%atoms))
+     allocate(sh_env%Atp(4,sh_env%atoms))
+     allocate(sh_env%Atm(4,sh_env%atoms))
+     allocate(sh_env%Bt(4,sh_env%atoms))
+     allocate(sh_env%Btp(4,sh_env%atoms))
+     allocate(sh_env%Btm(4,sh_env%atoms))
      allocate(sh_env%siteenergies(3,mat))  !COMMENT_SG: First dimension is to be removed
      !> nacv are memory consuming to store however here we are storing them at time
      !t and tp for the multiple time step feature avoing their calculations at
@@ -496,7 +506,7 @@ CONTAINS
 
   END SUBROUTINE create_adiab_nace_env
 
-  SUBROUTINE propagate_namd_first_step(nadiab, aom_atoms, norbitals,  &
+  SUBROUTINE propagate_namd_first_step(nadiab, norbitals,  &
                                   positions_tp,  &
                                   velocities_tp,  &
                                   energies_tp,  &
@@ -506,7 +516,6 @@ CONTAINS
                                   my_test_keyword, method_keyword, diagonal_F)
 
      INTEGER, INTENT(IN)                            :: nadiab,  norbitals 
-     INTEGER, INTENT(IN)                            :: aom_atoms
      REAL(kind=dp), DIMENSION(:,:),POINTER          :: positions_tp
      REAL(kind=dp), DIMENSION(:,:),POINTER          :: velocities_tp
      REAL(kind=dp), DIMENSION(:),  POINTER          :: energies_tp
@@ -522,7 +531,7 @@ CONTAINS
      CHARACTER(len=*), PARAMETER :: routineN ='propagate_namd_first_step', &
      routineP = moduleN//':'//routineN
 
-     integer                                        :: coord, mol, atoms, & 
+     integer                                        :: coord, mol,  & 
                                                        first_diabat, active_state, mat, orb 
      REAL(KIND=dp)                                  :: deltatMD, deltatE
      COMPLEX(KIND=dp), dimension(:), allocatable    :: ctin
@@ -561,7 +570,7 @@ CONTAINS
      CALL section_vals_val_get(adiab_section,"ELECTRONIC_PARTIAL_STEP",&
              i_val=ELsteps)
 
-     atoms = sh_env%atoms !Number of atoms per site
+     !atoms = sh_env%atoms !Number of atoms per site
      natom = sh_env%natom !Total number of atoms
      deltatMD = sh_env%deltat !Nuclear timestep
 
@@ -608,7 +617,7 @@ CONTAINS
          enddo
          
          !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
-         CALL calc_coms_and_nlist_aom(sh_env, atoms, mol, sh_env%cutoff_sites, orb)
+         CALL calc_coms_and_nlist_aom(sh_env, sh_env%atoms, mol, sh_env%cutoff_sites, orb)
 
          ! Allocate neighbouring list just at the first step as Jacob suggested 
          !only if sh_env%multiple_time_step .eq. 1 otherwise we use Multiple time
@@ -617,12 +626,12 @@ CONTAINS
          !that in general is not convenient to recalculate neighboring list at each
          !step because is to expensive to do and not useful.
          if (sh_env%multiple_time_step .eq. 1) then 
-           allocate(sh_env%neighbourlist(mol,mol,0:atoms,0:atoms))
+           allocate(sh_env%neighbourlist(mol,mol,0:sh_env%atoms,0:sh_env%atoms))
            sh_env%neighbourlist = 0
          end if 
 
          !> CALCULATE THE HAMILTONIAN, THE STTP MATRIX AND THE NACV
-         CALL calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, sh_env%dR, sh_env%do_random, sh_env%cbar, &
+         CALL calc_aom_Xmatrix_elements_first_step(sh_env, sh_env%atoms, mol, sh_env%dR, sh_env%do_random, sh_env%cbar, &
                           sh_env%scaling, PC_allrvecs, orb, sh_env%minao)
 
          !> CONVERT NACV AND CALCULATE EIGENPROPERTIES 
@@ -661,10 +670,12 @@ CONTAINS
         CALL adiab_print_site_energies(adiab_section, site_energies, nadiab,deltatMD, times) 
         CALL adiab_print_off_diagonals(adiab_section, couplings, nadiab-1, deltatMD, times)
         CALL adiab_print_adiabat_energies(adiab_section, sh_env%E_tp, nadiab, deltatMD, times)
-        call adiab_print_pvecs(adiab_section, PC_allrvecs, itimes, deltatMD, times, atoms, nadiab)
         CALL adiab_print_hamiltonian(adiab_section, -AIMAG(sh_env%H_tp), nadiab,norbitals,itimes, deltatMD)
         CALL adiab_print_pseudo_hamiltonian(adiab_section, -AIMAG(sh_env%H_tp), nadiab,norbitals,itimes, deltatMD)
-        CALL adiab_print_nacv(adiab_section, sh_env%nacv, nadiab, norbitals, aom_atoms,itimes, deltatMD)
+        IF (sh_env%aom_couplings_keyword) THEN
+            CALL adiab_print_nacv(adiab_section, sh_env%nacv, nadiab, norbitals, sh_env%atoms, itimes, deltatMD)
+            call adiab_print_pvecs(adiab_section, PC_allrvecs, itimes, deltatMD, times, sh_env%atoms, nadiab)
+        END IF
      end if
 
      !> INITIALIZE THE WAVEFUNCTION (WE DO NOT PROPAGATE IT AT THE FIRST STEP) 
@@ -768,7 +779,7 @@ CONTAINS
         !> second part CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE
         !RESULT OF THE SURFACE HOP ROUTINE IS.
         print*, "FOBSH| ACTIVE STATE = ", active_state
-        call calcforces_aom(state=active_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%nacv, atoms=atoms, & 
+        call calcforces_aom(state=active_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%nacv, atoms=sh_env%atoms, & 
                         scaling=sh_env%scaling, cbar=sh_env%cbar, Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                         ext_pres=sh_env%ext_pres)
 

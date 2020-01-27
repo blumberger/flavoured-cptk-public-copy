@@ -416,11 +416,6 @@ CONTAINS
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
 
-    CALL keyword_create(keyword, name="NUMBER_ATOMS_PER_SITE",&
-         description="Number of atoms per site",&
-         usage="1", type_of_var=integer_t)
-    CALL section_add_keyword(subsection,keyword)
-    CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="NUCLEAR_TIMESTEP",&
          description="Timestep for atomic motion, must be coherent",&
@@ -456,6 +451,12 @@ CONTAINS
          n_keywords=1, n_subsections=0, repeats=.FALSE.)
     CALL section_add_subsection(subsection,sub2section)
 
+    CALL keyword_create(keyword, name="NUMBER_AOM_ATOMS_PER_SITE",&
+         description="Number of atoms per site",&
+         usage="1", type_of_var=integer_t)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
     CALL keyword_create(keyword, name="CUT_OFF_BETWEEN_SITES",&
          description="Distance cut-off for H_ab calculation",&
          usage="6.0D0", type_of_var=real_t, &
@@ -470,14 +471,12 @@ CONTAINS
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
-
     CALL keyword_create(keyword, name="SCALING_FACTOR",&
          description="Hab = scaling*Sab",&
          usage="0.50D0*0.065190D0, HARTREE", type_of_var=real_t,&
          unit_str="hartree")
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
-
 
     CALL keyword_create(keyword, name="CBAR",&
          description="Sab constant factor",&

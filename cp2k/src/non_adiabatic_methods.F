@@ -105,8 +105,7 @@ CONTAINS
 
     INTEGER                                  :: iparticle, jparticle, natom,iforce_eval
     INTEGER                                  :: nadiab
-    INTEGER                                  :: norbitals, aom_atoms, init
-    REAL(KIND=dp)                            :: MDtimestep
+    INTEGER                                  :: norbitals, init
     REAL(kind=dp), DIMENSION(:,:),POINTER    :: positions_tp
     REAL(kind=dp), DIMENSION(:,:),POINTER    :: velocities_tp
     REAL(kind=dp), DIMENSION(:,:),POINTER    :: forces_adiab
@@ -148,12 +147,8 @@ CONTAINS
     !> Get the coupling section and all the information 
     CALL section_vals_val_get(adiab_section,"NUMBER_DIABATIC_STATES",&
          i_val=nadiab)
-    CALL section_vals_val_get(adiab_section,"NUMBER_ATOMS_PER_SITE",&
-         i_val=aom_atoms)
     CALL section_vals_val_get(adiab_section,"NUMBER_ORBITALS",&
          i_val=norbitals)
-    CALL section_vals_val_get(adiab_section,"NUCLEAR_TIMESTEP",&
-         r_val=MDtimestep)
 
     itimes => my_itimes
     DO iparticle = 1, natom
@@ -175,16 +170,13 @@ CONTAINS
        !> This 0th step is executed at the very beginning of the simulation, when
        !qs_mol_dyn_low subroutine calls force_env_calc_energy_force for the
        !first time and this calls in turn the present subroutinbe
-       CALL create_sh_env(nadiab, aom_atoms, norbitals, natom, &
+       CALL create_sh_env(nadiab, norbitals, natom, &
                            positions_tp, adiab_section, & 
                            sh_env)
-       sh_env%atoms = aom_atoms
-       sh_env%deltat = MDtimestep
-       !sh_env%natom = SIZE(global_forces(1)%forces,2)
-       sh_env%natom = natom
+
        !> instead of passing mixed_env to propagate_namd_first_step we
        !could probably use a pinter like the one below, to fill
-       CALL propagate_namd_first_step(nadiab, aom_atoms, norbitals,     &
+       CALL propagate_namd_first_step(nadiab, norbitals,     &
                  positions_tp, velocities_tp, energies_tp, sh_env, itimes, &
                    adiab_section,& 
                  my_bo_keyword, atomic_kinds, &
@@ -210,7 +202,7 @@ CONTAINS
           !sh_env%old_state = -1
        ELSE
           !> Main CALL: calculate the Hamiltonian, propagate the electronic dynamics
-          CALL construct_ham_X_SH(nadiab, aom_atoms, norbitals,         &
+          CALL construct_ham_X_SH(nadiab, norbitals,         &
                         positions_tp, energies_tp, sh_env, itimes,     &
                          adiab_section, & 
                         my_bo_keyword, atomic_kinds,                    &

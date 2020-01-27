@@ -140,7 +140,7 @@ MODULE aom_main
 
 CONTAINS
 
-    SUBROUTINE construct_ham_X_SH(nadiab, aom_atoms, norbitals,                 &
+    SUBROUTINE construct_ham_X_SH(nadiab, norbitals,                            &
                                   positions_tp,                                 &
                                   energies_tp,                                  &
                                   sh_env, itimes,                               &
@@ -150,7 +150,6 @@ CONTAINS
 
 
      INTEGER, INTENT(IN)                            :: nadiab,  norbitals 
-     INTEGER, INTENT(IN)                            :: aom_atoms
      REAL(kind=dp), DIMENSION(:,:),POINTER          :: positions_tp
      REAL(kind=dp), DIMENSION(:),  POINTER          :: energies_tp
      TYPE(sh_env_type), INTENT(INOUT)              :: sh_env
@@ -171,7 +170,7 @@ CONTAINS
      TYPE(section_vals_type), POINTER               :: e_conservation_section
      CHARACTER(LEN=default_string_length)           :: coupling_keyword
      integer                                        :: coord
-     integer                                        :: mol, atoms,  mat, orb
+     integer                                        :: mol,  mat, orb
      REAL(KIND=dp)                                  :: deltatMD, deltatE
      INTEGER, dimension(:), allocatable             :: class_forbidden_hop_tp
      LOGICAL                                        :: do_nace_speedup
@@ -219,7 +218,7 @@ CONTAINS
      CALL section_vals_val_get(decoherence_section,"DECOHERENCE_CRITERION",&
              r_val=decohere_criterion)
 
-     atoms = sh_env%atoms !Number of atoms per site
+     !atoms = sh_env%atoms !Number of atoms per site for AOM 
      natom = sh_env%natom !Total number of atoms
      deltatMD = sh_env%deltat !Nuclear timestep
 
@@ -253,10 +252,10 @@ CONTAINS
 
 
          !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
-         CALL calc_coms_and_nlist_aom(sh_env, atoms, mol, sh_env%cutoff_sites, orb)
+         CALL calc_coms_and_nlist_aom(sh_env, sh_env%atoms, mol, sh_env%cutoff_sites, orb)
 
          !> CALCULATE THE HAMILTONIAN, THE STTP MATRIX AND THE NACV
-         CALL calc_aom_Xmatrix_elements(sh_env, itimes, atoms, mol, sh_env%dR, sh_env%do_random, sh_env%cbar, &
+         CALL calc_aom_Xmatrix_elements(sh_env, itimes, sh_env%atoms, mol, sh_env%dR, sh_env%do_random, sh_env%cbar, &
                           sh_env%scaling, PC_allrvecs, orb, sh_env%minao)
 
          !> CONVERT THE diabatic NACV WITH THE GOOD UNITS
@@ -394,12 +393,12 @@ CONTAINS
          !CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE RESULT OF THE SURFACE
          !HOP ROUTINE IS. 
          call calcforces_aom(state=sh_env%active_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%nacv, &
-                               atoms=atoms, & 
+                               atoms=sh_env%atoms, & 
                                scaling=sh_env%scaling, cbar=sh_env%cbar, Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                                ext_pres=sh_env%ext_pres)
          IF (sh_env%attempt_hop) THEN
              call calcforces_aom(state=sh_env%new_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%nacv, &
-                                  atoms=atoms, & 
+                                  atoms=sh_env%atoms, & 
                                   scaling=sh_env%scaling, cbar=sh_env%cbar, Fin=diagonal_F, &
                                                           forces_adiab=sh_env%forces_adiab_new, &
                                                           ext_pres=sh_env%ext_pres)
@@ -439,9 +438,11 @@ CONTAINS
 
      CALL adiab_print_site_energies(adiab_section, site_energies, nadiab, deltatMD, times)
      CALL adiab_print_off_diagonals(adiab_section, couplings, nadiab-1, deltatMD, times)
-     CALL adiab_print_nacv(adiab_section, sh_env%nacv, nadiab, norbitals, aom_atoms,itimes, deltatMD)
      CALL adiab_print_adiabat_energies(adiab_section, sh_env%E_tp, nadiab, deltatMD, times)
-     CALL adiab_print_pvecs(adiab_section, PC_allrvecs, itimes, deltatMD, times, atoms, nadiab)
+     IF (sh_env%aom_couplings_keyword) THEN
+        CALL adiab_print_nacv(adiab_section, sh_env%nacv, nadiab, norbitals, sh_env%atoms ,itimes, deltatMD)
+        CALL adiab_print_pvecs(adiab_section, PC_allrvecs, itimes, deltatMD, times, sh_env%atoms, nadiab)
+     END IF
      IF (sh_env%analytics) THEN
         CALL adiab_print_exact_forces(adiab_section, exact_forces, natom, deltatMD, times)
      ENDIF
