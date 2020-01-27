@@ -171,7 +171,7 @@ CONTAINS
      TYPE(section_vals_type), POINTER               :: e_conservation_section
      CHARACTER(LEN=default_string_length)           :: coupling_keyword
      integer                                        :: coord
-     integer                                        :: mol, atoms, c,  mat, orb
+     integer                                        :: mol, atoms,  mat, orb
      REAL(KIND=dp)                                  :: deltatMD, deltatE
      INTEGER, dimension(:), allocatable             :: class_forbidden_hop_tp
      LOGICAL                                        :: do_nace_speedup
@@ -192,9 +192,6 @@ CONTAINS
      TYPE(cp_logger_type), POINTER                  :: logger
      INTEGER                                        :: unit_nr
      
-!TEST
-!     INTEGER                                    :: d, i,j
-
      NULLIFY(logger)
      NULLIFY(optimization_section)
      NULLIFY(decoherence_section)
@@ -211,7 +208,6 @@ CONTAINS
      decoherence_section => section_vals_get_subs_vals(adiab_section,"DECOHERENCE")
      e_conservation_section => section_vals_get_subs_vals(adiab_section,"ENERGY_CONSERVATION")
      
-
      !COMMENT SG: the following keyword could be removed since new nace are
      !better
      !> uses chunked nace (improved) subroutines as default 
@@ -233,8 +229,6 @@ CONTAINS
      orb = norbitals ! CHANGE_AC
      !> Size of the vectorial space where the wavefunctions are projected
      mat = orb*mol
-     !> Numbers of active atoms 
-     c = mol*atoms
      !> electronic timestep is a fraction of the molecular timestep
      deltatE = deltatMD/ELsteps !CHANGE_AC
 
@@ -247,32 +241,38 @@ CONTAINS
      !> OBTAIN COORDINATES, ENERGIES, STATES, etc. FROM PREVIOUS STEP
      CALL translate_com(positions_tp, keyword_translate, positions_com_tp, local_particles, atomic_kinds = atomic_kinds)  
 
-!------------------  AOM section -------------------------------------
-     sh_env%siteenergies = 0.0_dp
-     do coord=1,3
-        sh_env%crds(coord,:,1) = PACK(sh_env%rm_tm(coord,:), sh_env%ext_pres)
-        sh_env%crds(coord,:,2) = PACK(sh_env%rm_t(coord,:), sh_env%ext_pres)
-        sh_env%crds(coord,:,3) = PACK(positions_com_tp(coord,:), sh_env%ext_pres)
-        sh_env%siteenergies(3,:) = energies_tp(:) ! CHANGE_AC
-     enddo
+     IF (sh_env%aom_couplings_keyword) THEN
+         !------------------  AOM section -------------------------------------
+         sh_env%siteenergies = 0.0_dp
+         do coord=1,3
+            sh_env%crds(coord,:,1) = PACK(sh_env%rm_tm(coord,:), sh_env%ext_pres)
+            sh_env%crds(coord,:,2) = PACK(sh_env%rm_t(coord,:), sh_env%ext_pres)
+            sh_env%crds(coord,:,3) = PACK(positions_com_tp(coord,:), sh_env%ext_pres)
+            sh_env%siteenergies(3,:) = energies_tp(:) ! CHANGE_AC
+         enddo
 
 
-     !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
-     CALL calc_coms_and_nlist_aom(sh_env, atoms, mol, sh_env%cutoff_sites, orb)
+         !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
+         CALL calc_coms_and_nlist_aom(sh_env, atoms, mol, sh_env%cutoff_sites, orb)
 
-     !> CALCULATE THE HAMILTONIAN, THE STTP MATRIX AND THE NACV
-     CALL calc_aom_Xmatrix_elements(sh_env, itimes, atoms, mol, sh_env%dR, sh_env%do_random, sh_env%cbar, &
-                      sh_env%scaling, PC_allrvecs, orb, sh_env%minao)
+         !> CALCULATE THE HAMILTONIAN, THE STTP MATRIX AND THE NACV
+         CALL calc_aom_Xmatrix_elements(sh_env, itimes, atoms, mol, sh_env%dR, sh_env%do_random, sh_env%cbar, &
+                          sh_env%scaling, PC_allrvecs, orb, sh_env%minao)
 
-     !> CONVERT THE diabatic NACV WITH THE GOOD UNITS
-    if (mod(itimes-1, sh_env%multiple_time_step) .eq. 0) then
-        print *, "FOBSH| *** OFF-DIAGONAL GRADIENT CALCULATION"
-        sh_env%nacv = sh_env%cbar*sh_env%nacv
-    end if
-    !TEST NACV ABSENCE:
-    !sh_env%nacv = 0.0D0
-    !print *, "NACV tp", sh_env%nacv(1,:,:)
-!-----------------------------------------------------------------------------
+         !> CONVERT THE diabatic NACV WITH THE GOOD UNITS
+         if (mod(itimes-1, sh_env%multiple_time_step) .eq. 0) then
+             print *, "FOBSH| *** OFF-DIAGONAL GRADIENT CALCULATION"
+             sh_env%nacv = sh_env%cbar*sh_env%nacv
+         end if
+         !TEST NACV ABSENCE:
+         !sh_env%nacv = 0.0D0
+         !print *, "NACV tp", sh_env%nacv(1,:,:)
+         !-----------------------------------------------------------------------------
+     ELSE
+         !> In a possible extension one should add here 
+         CPABORT("Another coupling method to constrcut H should be chosen")
+     END IF
+
 
      !> THIS KEYWORD helps treating initial itimes correctly in case of restart file
      !usage 
@@ -304,52 +304,62 @@ CONTAINS
        sh_env%diabatic_nace_tp = sh_env%diabatic_nace_t
      end if
      
-!------------------  AOM section    --------------------------------------------------------
-     !> PROPAGATE THE ELECTRON FOR ONE MOLECULAR TIMESTEP
-     !>the CHARGE CARRIER WF is called sh_env%ctin
-     sh_env%HS_propagation = .FALSE.
-     CALL section_vals_val_get(optimization_section,"RK_PROPAGATION", c_val=prop_wf_keyword)
-     SELECT CASE(prop_wf_keyword)                                 
-     CASE("DIABATIC_RK")
-           CALL propagate_wf(sh_env%ctin, sh_env, nadiab,  norbitals, ELsteps, &
-                             itimes, adiab_section, deltatMD, deltatE , times, mat)
-     CASE("DIABATIC_RK_FAST")
-           CALL propagate_wf_fast(sh_env%ctin, sh_env, nadiab,  norbitals, ELsteps, &
-                             itimes, adiab_section, deltatMD, deltatE , times, mat)
-     CASE("DIABATIC_RK_DLI")
-           CALL propagate_wf_diab_nace_interpol(sh_env%ctin, sh_env, nadiab,  norbitals, ELsteps, &
-                             itimes, adiab_section, deltatMD, deltatE , times, mat)
-     CASE("ADIABATIC_RK")
-           CALL propagate_adiab_wf(sh_env%E_t, sh_env%E_tp, sh_env%ctin, sh_env, nadiab, norbitals, ELsteps, &
-                                   itimes, adiab_section, deltatMD, deltatE , times,  mat)
-     CASE("HS_CORRECTED_RK")  
-           !> ADIABATIC NACV EVALUATION FOR HS CORRECTION
-           !> class_forbidden_hop_tp is calculated refferring to tp to be
-           !consistent with the hopping probability, which is evaluated at tp.
-           !These transition will be set to zero in the hamiltonian evolution
-           !between t and tp. However the velocities used are the ones at t+dt/2,
-           !this is a bit inconsistent but we could not find a better way. 
+     IF (sh_env%aom_couplings_keyword) THEN
+         !------------------  AOM section    ---------------------------------------------
+         !> PROPAGATE THE ELECTRON FOR ONE MOLECULAR TIMESTEP
+         !>the CHARGE CARRIER WF is called sh_env%ctin
+         sh_env%HS_propagation = .FALSE.
+         CALL section_vals_val_get(optimization_section,"RK_PROPAGATION", c_val=prop_wf_keyword)
+         SELECT CASE(prop_wf_keyword)                                 
+         CASE("DIABATIC_RK")
+               CALL propagate_wf(sh_env%ctin, sh_env, nadiab,  norbitals, ELsteps, &
+                                 itimes, adiab_section, deltatMD, deltatE , times, mat)
+         CASE("DIABATIC_RK_FAST")
+               CALL propagate_wf_fast(sh_env%ctin, sh_env, nadiab,  norbitals, ELsteps, &
+                                 itimes, adiab_section, deltatMD, deltatE , times, mat)
+         CASE("DIABATIC_RK_DLI")
+               CALL propagate_wf_diab_nace_interpol(sh_env%ctin, sh_env, nadiab,  norbitals, ELsteps, &
+                                 itimes, adiab_section, deltatMD, deltatE , times, mat)
+         CASE("ADIABATIC_RK")
+               CALL propagate_adiab_wf(sh_env%E_t, sh_env%E_tp, sh_env%ctin, sh_env, nadiab, norbitals, ELsteps, &
+                                       itimes, adiab_section, deltatMD, deltatE , times,  mat)
+         CASE("HS_CORRECTED_RK")  
+               !> ADIABATIC NACV EVALUATION FOR HS CORRECTION
+               !> class_forbidden_hop_tp is calculated refferring to tp to be
+               !consistent with the hopping probability, which is evaluated at tp.
+               !These transition will be set to zero in the hamiltonian evolution
+               !between t and tp. However the velocities used are the ones at t+dt/2,
+               !this is a bit inconsistent but we could not find a better way. 
 
-           ALLOCATE(velocities_com_tp(3, natom))
-           CALL translate_com(sh_env%velocities_tp, keyword_translate, velocities_com_tp, &
-                                          local_particles, atomic_kinds = atomic_kinds)  
-           CALL classically_forbidden_hops(sh_env%active_state,diagonal_F,  sh_env, mat,  &
-                  velocities_com_tp, local_particles, atomic_kinds, nparticle_kind, &
-                          atomic_kind_set, class_forbidden_hop_tp)
-           CALL prop_wf_HS_corr(sh_env%ctin, sh_env, nadiab,  norbitals, ELsteps, &
-                           itimes, adiab_section, deltatMD, deltatE , times, &
-                            mat, class_forbidden_hop_tp, sh_env%active_state)
-           CALL section_vals_val_get(e_conservation_section,"METHOD_REVERSAL",c_val=reversal_keyword)
-           if (reversal_keyword .eq. "ALWAYS") then
-                sh_env%HS_propagation = .FALSE.
-           else 
-                sh_env%HS_propagation = .TRUE.
-           end if
-           DEALLOCATE(velocities_com_tp)
-     CASE DEFAULT                                           
-           CPABORT("There is no method to propagate the wavefunction.") 
-     END SELECT                                             
-! --------------------------------------------------------------------------------------------------
+               ALLOCATE(velocities_com_tp(3, natom))
+               CALL translate_com(sh_env%velocities_tp, keyword_translate, velocities_com_tp, &
+                                              local_particles, atomic_kinds = atomic_kinds)  
+               CALL classically_forbidden_hops(sh_env%active_state,diagonal_F,  sh_env, mat,  &
+                      velocities_com_tp, local_particles, atomic_kinds, nparticle_kind, &
+                              atomic_kind_set, class_forbidden_hop_tp)
+               CALL prop_wf_HS_corr(sh_env%ctin, sh_env, nadiab,  norbitals, ELsteps, &
+                               itimes, adiab_section, deltatMD, deltatE , times, &
+                                mat, class_forbidden_hop_tp, sh_env%active_state)
+               CALL section_vals_val_get(e_conservation_section,"METHOD_REVERSAL",c_val=reversal_keyword)
+               if (reversal_keyword .eq. "ALWAYS") then
+                    sh_env%HS_propagation = .FALSE.
+               else 
+                    sh_env%HS_propagation = .TRUE.
+               end if
+               DEALLOCATE(velocities_com_tp)
+         CASE DEFAULT                                           
+               CPABORT("There is no method to propagate the wavefunction.") 
+         END SELECT                                             
+         ! -------------------------------------------------------------------------------------------
+     ELSE
+         !> For now the only way to propagate the WF with an Hamiltoninian
+         !different from aom is the FAST propagator, where diabatic NACEa are
+         !neglected. If you wanted to still use the linear interpolation of
+         !diabatic nace you should code up a different way to calculate diabatic_nace_t
+         CALL propagate_wf_fast(sh_env%ctin, sh_env, nadiab,  norbitals, ELsteps, &
+                                 itimes, adiab_section, deltatMD, deltatE , times, mat)
+         
+     END IF
 
      !> SURFACE HOPPING TEST
      !The eigenvectors are needed to calculate the surface hopping probabilities
@@ -379,21 +389,27 @@ CONTAINS
      END IF 
 
 
-!------------------  AOM section    --------------------------------------------------------
-     !CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE RESULT OF THE SURFACE
-     !HOP ROUTINE IS. 
-     call calcforces_aom(state=sh_env%active_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%nacv, &
-                           atoms=atoms, & 
-                           scaling=sh_env%scaling, cbar=sh_env%cbar, Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
-                           ext_pres=sh_env%ext_pres)
-     IF (sh_env%attempt_hop) THEN
-         call calcforces_aom(state=sh_env%new_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%nacv, &
-                              atoms=atoms, & 
-                              scaling=sh_env%scaling, cbar=sh_env%cbar, Fin=diagonal_F, &
-                                                      forces_adiab=sh_env%forces_adiab_new, &
-                                                      ext_pres=sh_env%ext_pres)
-     ENDIF
-! --------------------------------------------------------------------------------------------------
+     IF (sh_env%aom_couplings_keyword) THEN
+         !------------------  AOM section    --------------------------------------------------------
+         !CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE RESULT OF THE SURFACE
+         !HOP ROUTINE IS. 
+         call calcforces_aom(state=sh_env%active_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%nacv, &
+                               atoms=atoms, & 
+                               scaling=sh_env%scaling, cbar=sh_env%cbar, Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
+                               ext_pres=sh_env%ext_pres)
+         IF (sh_env%attempt_hop) THEN
+             call calcforces_aom(state=sh_env%new_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%nacv, &
+                                  atoms=atoms, & 
+                                  scaling=sh_env%scaling, cbar=sh_env%cbar, Fin=diagonal_F, &
+                                                          forces_adiab=sh_env%forces_adiab_new, &
+                                                          ext_pres=sh_env%ext_pres)
+         ENDIF
+         ! --------------------------------------------------------------------------------------------------
+     ELSE
+         !> In a possible extension one should add here 
+         CPABORT("Another way to calculate adiabatic forces should be developed")
+     END IF
+     
 
      !> PRINT
      CALL adiab_print_hamiltonian(adiab_section, -AIMAG(sh_env%H_tp), nadiab,norbitals,itimes, deltatMD)
@@ -431,10 +447,12 @@ CONTAINS
      ENDIF
 
      !> TRANSLATE THE COORDINATE FOR ONE TIMESTEP
-!----------------------- AOM ----------------------
-     sh_env%rm_tm      = sh_env%rm_t
-     sh_env%rm_t       = positions_com_tp
-! --------------------------------------------------------------------------------------------------
+     IF (sh_env%aom_couplings_keyword) THEN
+         !----------------------- AOM ----------------------
+         sh_env%rm_tm      = sh_env%rm_t
+         sh_env%rm_t       = positions_com_tp
+         ! --------------------------------------------------
+     END IF
 
      sh_env%sh_print_env = sh_print_env
 

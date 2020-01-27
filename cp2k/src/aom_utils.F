@@ -1274,9 +1274,13 @@ end subroutine old_diab_to_adiab
 
 !**********************************************************************************
 !> \brief Calculate the diabatic NACE first
-!> NB: this subroutine calculates diabatic NACE (d_kl) in the othogonal basis and in
-!> practice it does exactly the same job as makeX subroutine with the exception
-!> that does not calculate the term H_kl - d_kl
+!>    NB: this subroutine calculates diabatic NACE (d_kl) in the othogonal basis and in
+!>    practice it does exactly the same job as makeX subroutine with the exception
+!>    that does not calculate the term H_kl - d_kl
+!> \param diabatic_nace_t and diab_D are the outputs of these subroutine they
+!>    are the same array but the former is further simmetrized in order to be
+!>    transferred to the propagation subroutine with linear interpolation of
+!>    diabatic_nace_t
 !**********************************************************************************
 subroutine nace1_modified(sh_env, mol, deltat)
 

@@ -248,9 +248,11 @@ CONTAINS
      end if
 
     CALL section_vals_val_get(adiab_section,"METHOD_COUPLING",c_val=coupling_keyword)
+    sh_env%aom_couplings_keyword = .FALSE.
     SELECT CASE(coupling_keyword)
     !---------------- AOM array ---------------------------------------------------------------
     CASE("AOM")
+         sh_env%aom_couplings_keyword = .TRUE.
          CALL set_aom_env(nadiab, aom_atoms, norbitals, natom,positions_tp,adiab_section,sh_env)
     !------------------------------------------------------------------------------------------
     CASE DEFAULT
@@ -520,7 +522,7 @@ CONTAINS
      CHARACTER(len=*), PARAMETER :: routineN ='propagate_namd_first_step', &
      routineP = moduleN//':'//routineN
 
-     integer                                        :: coord, mol, atoms, c, & 
+     integer                                        :: coord, mol, atoms, & 
                                                        first_diabat, active_state, mat, orb 
      REAL(KIND=dp)                                  :: deltatMD, deltatE
      COMPLEX(KIND=dp), dimension(:), allocatable    :: ctin
@@ -569,8 +571,6 @@ CONTAINS
      orb = norbitals ! CHANGE_AC
      !> Size of the vectorial space where the wavefunctions are projected
      mat = orb*mol
-     !> Numbers of active atoms 
-     c = mol*atoms
      !> electronic timestep is a fraction of the molecular timestep
      deltatE = deltatMD/ELsteps !CHANGE_AC
 
@@ -595,39 +595,44 @@ CONTAINS
      ENDIF
      CALL translate_com(positions_tp, keyword_translate, positions_com_tp, local_particles, atomic_kinds = atomic_kinds)  
 
-!------------------  AOM section -------------------------------------
-     do coord=1,3
-        sh_env%crds(coord,:,1)   = PACK(positions_com_tp(coord,:), sh_env%ext_pres)
-        !At time 0, we must guess the positions at time -1 with the inital velocities
-        sh_env%crds(coord,:,2)   = PACK(positions_com_tp(coord,:), sh_env%ext_pres) -  &
-                          PACK(velocities_com_tp(coord,:), sh_env%ext_pres)*deltatMD
-        sh_env%crds(coord,:,3)   = PACK(positions_com_tp(coord,:), sh_env%ext_pres)
-        sh_env%siteenergies(2,:) = 0.0D0 ! CHANGE_AC
-        sh_env%siteenergies(3,:) = energies_tp(:) ! CHANGE_AC
-     enddo
-    
-     !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
-     CALL calc_coms_and_nlist_aom(sh_env, atoms, mol, sh_env%cutoff_sites, orb)
+     IF (sh_env%aom_couplings_keyword) THEN
+         !------------------  AOM section -------------------------------------
+         do coord=1,3
+            sh_env%crds(coord,:,1)   = PACK(positions_com_tp(coord,:), sh_env%ext_pres)
+            !At time 0, we must guess the positions at time -1 with the inital velocities
+            sh_env%crds(coord,:,2)   = PACK(positions_com_tp(coord,:), sh_env%ext_pres) -  &
+                              PACK(velocities_com_tp(coord,:), sh_env%ext_pres)*deltatMD
+            sh_env%crds(coord,:,3)   = PACK(positions_com_tp(coord,:), sh_env%ext_pres)
+            sh_env%siteenergies(2,:) = 0.0D0 ! CHANGE_AC
+            sh_env%siteenergies(3,:) = energies_tp(:) ! CHANGE_AC
+         enddo
+         
+         !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
+         CALL calc_coms_and_nlist_aom(sh_env, atoms, mol, sh_env%cutoff_sites, orb)
 
-     ! Allocate neighbouring list just at the first step as Jacob suggested 
-     !only if sh_env%multiple_time_step .eq. 1 otherwise we use Multiple time
-     !step feature and to save memory we recalculate bneighbour and aneighbour
-     !every N steps. This is done also for the NACV giving a huge speed-up. NOTE
-     !that in general is not convenient to recalculate neighboring list at each
-     !step because is to expensive to do and not useful.
-     if (sh_env%multiple_time_step .eq. 1) then 
-       allocate(sh_env%neighbourlist(mol,mol,0:atoms,0:atoms))
-       sh_env%neighbourlist = 0
-     end if 
+         ! Allocate neighbouring list just at the first step as Jacob suggested 
+         !only if sh_env%multiple_time_step .eq. 1 otherwise we use Multiple time
+         !step feature and to save memory we recalculate bneighbour and aneighbour
+         !every N steps. This is done also for the NACV giving a huge speed-up. NOTE
+         !that in general is not convenient to recalculate neighboring list at each
+         !step because is to expensive to do and not useful.
+         if (sh_env%multiple_time_step .eq. 1) then 
+           allocate(sh_env%neighbourlist(mol,mol,0:atoms,0:atoms))
+           sh_env%neighbourlist = 0
+         end if 
 
-     !> CALCULATE THE HAMILTONIAN, THE STTP MATRIX AND THE NACV
-     CALL calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, sh_env%dR, sh_env%do_random, sh_env%cbar, &
-                      sh_env%scaling, PC_allrvecs, orb, sh_env%minao)
+         !> CALCULATE THE HAMILTONIAN, THE STTP MATRIX AND THE NACV
+         CALL calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, sh_env%dR, sh_env%do_random, sh_env%cbar, &
+                          sh_env%scaling, PC_allrvecs, orb, sh_env%minao)
 
-     !> CONVERT NACV AND CALCULATE EIGENPROPERTIES 
-     !> THESE ASSOCIATIONS ARE NEEDED FOR THE NACV CALC
-     sh_env%nacv = sh_env%cbar*sh_env%nacv
-!-----------------------------------------------------------------------------
+         !> CONVERT NACV AND CALCULATE EIGENPROPERTIES 
+         !> THESE ASSOCIATIONS ARE NEEDED FOR THE NACV CALC
+         sh_env%nacv = sh_env%cbar*sh_env%nacv
+         !-----------------------------------------------------------------------------
+     ELSE
+         !> In a possible extension one should add here 
+         CPABORT("Another coupling method to constrcut H should be chosen")
+     END IF
 
      !> HAMILTONIAN DIAGONALIZATION
      !The adiabaticity subroutine diagonalises the diabatic Hamiltonian H_tp
@@ -758,19 +763,24 @@ CONTAINS
          IF ((new_state).EQ.0) new_state = mat
      ENDIF 
 
-!------------------  AOM section --------------------------------------------------------
-     !> second part CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE
-     !RESULT OF THE SURFACE HOP ROUTINE IS.
-     print*, "FOBSH| ACTIVE STATE = ", active_state
-     call calcforces_aom(state=active_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%nacv, atoms=atoms, & 
-                     scaling=sh_env%scaling, cbar=sh_env%cbar, Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
-                     ext_pres=sh_env%ext_pres)
+     IF (sh_env%aom_couplings_keyword) THEN
+        !------------------  AOM section --------------------------------------------------------
+        !> second part CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE
+        !RESULT OF THE SURFACE HOP ROUTINE IS.
+        print*, "FOBSH| ACTIVE STATE = ", active_state
+        call calcforces_aom(state=active_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%nacv, atoms=atoms, & 
+                        scaling=sh_env%scaling, cbar=sh_env%cbar, Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
+                        ext_pres=sh_env%ext_pres)
 
-     IF (sh_env%analytics) THEN
-        times = DBLE(itimes)
-        CALL adiab_print_exact_forces(adiab_section, exact_forces, natom, deltatMD, times)
-     ENDIF
-!-----------------------------------------------------------------------------------------------
+        IF (sh_env%analytics) THEN
+           times = DBLE(itimes)
+           CALL adiab_print_exact_forces(adiab_section, exact_forces, natom, deltatMD, times)
+        ENDIF
+        !-----------------------------------------------------------------------------------------------
+     ELSE
+         !> In a possible extension one should add here 
+         CPABORT("Another way to calculate adiabatic forces should be developed")
+     END IF
 
      !> This selects the most general DIABATIC_RK_FAST that does not include
      !diabatic nace calculation
@@ -779,19 +789,22 @@ CONTAINS
      if (prop_wf_keyword .eq. "DIABATIC_RK_FAST") then 
          ! in this case diabatic nace are never calculated, neither in the
          ! propagate_wf nor in the adiabatic nace calculation for the hopping
-         ! probability
-         ! so that all the Sttp and co matrices are also not used and so the memory
-         ! allocate for thme can be deallocated 
+         ! probability (thus d_ij = Udot\dagger U)
+         ! so that all the Sttp matrices are also not used and so the memory
+         ! allocate for them can be deallocated 
          sh_env%no_diab_nace = .True.
      end if
 
      
      !> STORE THE COORDINATES IF NOT SUCCESSFUL RUN
-!------------------  AOM section --------------------------------------------------------
-     sh_env%rm_tm      = positions_com_tp - velocities_com_tp*deltatMD
-     sh_env%rm_t       = positions_com_tp
-     sh_env%Stt = sh_env%Stptp
-!------------------------------------------------------------------------------------- 
+     IF (sh_env%aom_couplings_keyword) THEN
+        !------------------  AOM section --------------------------------------------------------
+        sh_env%rm_tm      = positions_com_tp - velocities_com_tp*deltatMD
+        sh_env%rm_t       = positions_com_tp
+        sh_env%Stt = sh_env%Stptp
+        !------------------------------------------------------------------------------------- 
+     END IF
+
      sh_env%sh_print_env = sh_print_env
      sh_env%ctin        = ctin
      sh_env%ctin_t        = ctin
