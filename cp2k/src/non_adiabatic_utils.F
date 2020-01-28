@@ -1769,10 +1769,15 @@ END SUBROUTINE classically_forbidden_hops
                     if ((abs(adiab_nace_vector(i))/(abs(sh_env%E_tp(i)-sh_env%E_tp(sh_env%active_state)))) & 
                                          .ge. mixing_threshold) then
                          !if there is mixing then we use force otherwise we use !pure dephasing
-                         call calcforces_aom(i ,-AIMAG(sh_env%H_tp), sh_env%C_tp, sh_env%nacv, &
-                              sh_env%atoms, &
-                              sh_env%scaling, sh_env%cbar, diagonal_F, my_forces_adiab, &
-                             sh_env%ext_pres)
+                         if (sh_env%aom_couplings_keyword) then
+                            ! forces at the moment can be calculate with AOM Hamiltonian only
+                              call calcforces_aom(i ,-AIMAG(sh_env%H_tp), sh_env%C_tp, sh_env%nacv, &
+                                   sh_env%atoms, &
+                                    sh_env%scaling, sh_env%cbar, diagonal_F, my_forces_adiab, &
+                                    sh_env%ext_pres)
+                         else
+                            CPABORT("There is no method to calculate adiabatic forces for this H")
+                         end if
                          tau(i) = 0.0D0
                          DO iparticle_kind= 1, my_nparticle_kind
                                 atomic_kind => my_atomic_kind_set(iparticle_kind)
@@ -1817,10 +1822,15 @@ END SUBROUTINE classically_forbidden_hops
                     if ((abs(adiab_nace_vector(i))/(abs(sh_env%E_tp(i)-sh_env%E_tp(sh_env%active_state)))) & 
                                          .ge. mixing_threshold) then
                          !if there is mixing then we use force otherwise we use !pure dephasing
-                         call calcforces_aom(i ,-AIMAG(sh_env%H_tp), sh_env%C_tp, sh_env%nacv, &
-                              sh_env%atoms, &
-                              sh_env%scaling, sh_env%cbar, diagonal_F, my_forces_adiab, &
-                              sh_env%ext_pres)
+                         if (sh_env%aom_couplings_keyword) then
+                            ! forces at the moment can be calculate with AOM Hamiltonian only
+                             call calcforces_aom(i ,-AIMAG(sh_env%H_tp), sh_env%C_tp, sh_env%nacv, &
+                                  sh_env%atoms, &
+                                  sh_env%scaling, sh_env%cbar, diagonal_F, my_forces_adiab, &
+                                  sh_env%ext_pres)
+                         else
+                            CPABORT("There is no method to calculate adiabatic forces for this H")
+                         end if
                          tau(i) = 0.0D0
                          tau_forces(i) =  0.0D0
                           tau_pure_deph(i) = 0.0D0
