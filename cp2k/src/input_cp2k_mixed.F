@@ -433,8 +433,9 @@ CONTAINS
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
 
-!********************************************************************************
-!> 15-12-11 use this as new section 
+
+
+    !> start new sub2section METHOD_COUPLING, part of ADIABATIC subsection
     CALL keyword_create(keyword, name="METHOD_COUPLING",&
          description="Defines the methods to obtain the adiabatic forces.",&
          usage="METHOD_COUPLING : AOM",  type_of_var=char_t,&
@@ -444,7 +445,28 @@ CONTAINS
 !********************************************************************************
 
     !-----------------------------------------------------------------------
-    !> start new sub3section AOM part of COUPLING sub2section
+    !> start new sub3section FROZEN_COUPLINGS part of METHOD_COUPLING sub2section
+    NULLIFY(sub2section) 
+    CALL section_create(sub2section,name="FROZEN_COUPLINGS",&
+         description="Defines the methods to obtain the adiabatic forces.",&
+         n_keywords=1, n_subsections=0, repeats=.FALSE.)
+    CALL section_add_subsection(subsection,sub2section)
+
+
+    CALL keyword_create(keyword, name="FIRST_OFF_DIAGONALS_VAL",&
+         description="Hab for the first upper and lower diagonal",&
+         usage="001102479, HARTREE", type_of_var=real_t,&
+         unit_str="hartree")
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    !> releasing FROZEN_COUPLINGS subsection
+    CALL section_release(sub2section)
+    !-----------------------------------------------------------------------
+
+
+    !-----------------------------------------------------------------------
+    !> start new sub3section AOM part of METHOD_COUPLING sub2section
     NULLIFY(sub2section)
     CALL section_create(sub2section,name="AOM",&
          description="Defines the methods to obtain the adiabatic forces.",&
@@ -490,11 +512,6 @@ CONTAINS
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
-    CALL keyword_create(keyword, name="ELECTRONIC_PARTIAL_STEP",&
-         description="Number of electronic steps by atomic step",&
-         usage="5", type_of_var=integer_t)
-    CALL section_add_keyword(sub2section,keyword)
-    CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="COLLAPSE",&
          description="Decide if we use the decoherence procedure",&

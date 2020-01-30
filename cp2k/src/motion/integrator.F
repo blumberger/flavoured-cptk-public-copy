@@ -629,6 +629,9 @@ CONTAINS
 !    " Ctp(a')= ", force_env%mixed_env%sh_env%C_tp(i, force_env%mixed_env%sh_env%active_state), &
 !    " Ctp(f)= ", force_env%mixed_env%sh_env%C_tp(i, force_env%mixed_env%sh_env%new_state)
 !end do
+print *, "force_env%mixed_env%sh_env%attempt_hop", force_env%mixed_env%sh_env%attempt_hop
+print *, "force_env%mixed_env%sh_env%active_state", force_env%mixed_env%sh_env%active_state
+print *, "force_env%mixed_env%sh_env%successful_hop", force_env%mixed_env%sh_env%successful_hop
              ! 3. Check if an attempted hop is successuful or not
              IF (force_env%mixed_env%sh_env%attempt_hop) THEN
                 print*, "FOBSH| Active state before the attempt to hop:", force_env%mixed_env%sh_env%active_state
@@ -663,13 +666,15 @@ CONTAINS
              force_env%mixed_env%sh_env%new_state = -1
              force_env%mixed_env%sh_env%successful_hop = .FALSE.
              force_env%mixed_env%sh_env%attempt_hop = .FALSE.
-
-             if (.NOT. force_env%mixed_env%sh_env%no_diab_nace) then
-                force_env%mixed_env%sh_env%Stmtm = force_env%mixed_env%sh_env%Stt
-                force_env%mixed_env%sh_env%Sttm  = force_env%mixed_env%sh_env%Stpt
-                force_env%mixed_env%sh_env%Stmt  = force_env%mixed_env%sh_env%Sttp
-             end if
-             force_env%mixed_env%sh_env%Stt   = force_env%mixed_env%sh_env%Stptp
+   
+             IF (force_env%mixed_env%sh_env%aom_couplings_keyword) THEN
+                if (.NOT. force_env%mixed_env%sh_env%no_diab_nace) then
+                   force_env%mixed_env%sh_env%Stmtm = force_env%mixed_env%sh_env%Stt
+                   force_env%mixed_env%sh_env%Sttm  = force_env%mixed_env%sh_env%Stpt
+                   force_env%mixed_env%sh_env%Stmt  = force_env%mixed_env%sh_env%Sttp
+                end if
+                force_env%mixed_env%sh_env%Stt   = force_env%mixed_env%sh_env%Stptp
+             END IF 
 
              force_env%mixed_env%sh_env%ctin_t = force_env%mixed_env%sh_env%ctin
              CALL total_momentum(tmp%vel, atomic_kind_set, nparticle_kind, local_particles)!, force_env)

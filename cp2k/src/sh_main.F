@@ -98,19 +98,21 @@ MODULE sh_main
 
      USE distribution_1d_types,        ONLY: distribution_1d_type
 
-     USE non_adiabatic_utils,          ONLY: decohere_wf,       &
-                                             diab_to_adiab,     & 
-                                             surf_hop_type,     &
-                                             choose_firstadiabat, &
-                                             print_matrix_standard_out,& 
-                                             translate_com, &
-                                             propagate_wf, &
-                                             propagate_wf_fast, &
-                                             propagate_adiab_wf, &
+     USE non_adiabatic_utils,          ONLY: decohere_wf,                     &
+                                             calc_frozen_H,                   &
+                                             calcforces_frozenH,              &
+                                             diab_to_adiab,                   & 
+                                             surf_hop_type,                   &
+                                             choose_firstadiabat,             &
+                                             print_matrix_standard_out,       & 
+                                             translate_com,                   &
+                                             propagate_wf,                    &
+                                             propagate_wf_fast,               &
+                                             propagate_adiab_wf,              &
                                              propagate_wf_diab_nace_interpol, &
-                                             prop_wf_HS_corr, & 
-                                             classically_forbidden_hops, &
-                                             define_active_region, &
+                                             prop_wf_HS_corr,                 & 
+                                             classically_forbidden_hops,      &
+                                             define_active_region,            &
                                              calc_psi_after_correction
 
      USE parallel_rng_types,           ONLY: UNIFORM,&
@@ -188,6 +190,7 @@ CONTAINS
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: diagonal_F
      TYPE(section_vals_type), POINTER               :: coupling_section
      CHARACTER(LEN=default_string_length)           :: coupling_keyword
+     INTEGER                                        :: i, d, m, k
 
      NULLIFY(positions_com_tp, velocities_com_tp)
      NULLIFY(logger)
@@ -274,10 +277,54 @@ CONTAINS
          !> THESE ASSOCIATIONS ARE NEEDED FOR THE NACV CALC
          sh_env%nacv = sh_env%cbar*sh_env%nacv
          !-----------------------------------------------------------------------------
+     ELSE IF (sh_env%frozen_couplings_keyword) THEN 
+         !CALL calc_frozen_H(sh_env, energies_tp, orb)
+     sh_env%H_tp(:,:) = cmplx(0.0D0, 0.0D0,dp)
+     ! these loops are inefficients but do the job
+     do i=1,SIZE(energies_tp) !loop over all states
+        do k=1,SIZE(energies_tp)
+           !> diagonal construction
+           if (k==i) then 
+              !since you may want to include multiple orbital per state, you
+              !should loop over orbitals
+              do d=1,orb
+                 sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+d) = cmplx(0.0D0,(-energies_tp(i)),dp) !minus because we propagate -X
+              end do
+           else 
+              ! only valid for first off-diag: TO IMPROVE FURTHER for other
+              ! off diagonals
+              if ((k+1 == i) .or.(k-1 == i)) then
+                 do d=1,orb
+                    do m=1,orb
+                       sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,-0.0011024789,dp) !sign of the off-diag 
+                                                                                                     !does not matter for 1D chains
+                    end do 
+                 end do
+              end if 
+          end if 
+        end do 
+     end do
+
+
      ELSE
          !> In a possible extension one should add here 
          CPABORT("Another coupling method to constrcut H should be chosen")
      END IF
+
+!!TEST FROZEN 
+!    do i =1, size(sh_env%H_tp,1)
+!      do k = 1, size(sh_env%H_tp,1)
+!         if (i .ne. k) then
+!            if ((k+1 == i) .or.(k-1 == i)) then
+!               sh_env%H_tp(i,k) = cmplx(0.0D0,0.001102479,dp) 
+!            else
+!               sh_env%H_tp(i,k) = cmplx(0.0D0,0.0D0,dp)
+!            end if
+!         end if
+!     end do
+!    end do
+!sh_env%nacv = 0.0D0
+!!print *, "sh_env%H_tp(:,:)", sh_env%H_tp
 
      !> HAMILTONIAN DIAGONALIZATION
      !The adiabaticity subroutine diagonalises the diabatic Hamiltonian H_tp
@@ -410,11 +457,11 @@ CONTAINS
          IF ((new_state).EQ.0) new_state = mat
      ENDIF 
 
+     print*, "FOBSH| ACTIVE STATE = ", active_state
      IF (sh_env%aom_couplings_keyword) THEN
         !------------------  AOM section --------------------------------------------------------
         !> second part CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE
         !RESULT OF THE SURFACE HOP ROUTINE IS.
-        print*, "FOBSH| ACTIVE STATE = ", active_state
         call calcforces_aom(state=active_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%nacv, atoms=sh_env%atoms, & 
                         scaling=sh_env%scaling, cbar=sh_env%cbar, Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                         ext_pres=sh_env%ext_pres)
@@ -424,6 +471,10 @@ CONTAINS
            CALL adiab_print_exact_forces(adiab_section, exact_forces, natom, deltatMD, times)
         ENDIF
         !-----------------------------------------------------------------------------------------------
+     ELSE IF (sh_env%frozen_couplings_keyword) THEN 
+        !frozen Hamiltonian case
+        CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=active_state, Fin=diagonal_F, &
+                                  forces_adiab=sh_env%forces_adiab)
      ELSE
          !> In a possible extension one should add here 
          CPABORT("Another way to calculate adiabatic forces should be developed")
@@ -569,6 +620,7 @@ CONTAINS
      COMPLEX(KIND=dp), dimension(:), allocatable    :: adiab_c
      TYPE(cp_logger_type), POINTER                  :: logger
      INTEGER                                        :: unit_nr
+     INTEGER                                        :: i, d, k, m
      
      NULLIFY(logger)
      NULLIFY(optimization_section)
@@ -647,11 +699,57 @@ CONTAINS
          !sh_env%nacv = 0.0D0
          !print *, "NACV tp", sh_env%nacv(1,:,:)
          !-----------------------------------------------------------------------------
+     ELSE IF (sh_env%frozen_couplings_keyword) THEN
+         !> FROZEN COUPLINGS 
+         !CALL calc_frozen_H(sh_env, energies_tp, orb)
+
+         
+     sh_env%H_tp(:,:) = cmplx(0.0D0, 0.0D0,dp)
+     ! these loops are inefficients but do the job
+     do i=1,SIZE(energies_tp) !loop over all states
+        do k=1,SIZE(energies_tp)
+           !> diagonal construction
+           if (k==i) then 
+              !since you may want to include multiple orbital per state, you
+              !should loop over orbitals
+              do d=1,orb
+                 sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+d) = cmplx(0.0D0,(-energies_tp(i)),dp) !minus because we propagate -X
+              end do
+           else 
+              ! only valid for first off-diag: TO IMPROVE FURTHER for other
+              ! off diagonals
+              if ((k+1 == i) .or.(k-1 == i)) then
+                 do d=1,orb
+                    do m=1,orb
+                       sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,-0.0011024789,dp) !sign of the off-diag 
+                                                                                                     !does not matter for 1D chains
+                    end do 
+                 end do
+              end if 
+          end if 
+        end do 
+     end do
+
      ELSE
          !> In a possible extension one should add here 
          CPABORT("Another coupling method to constrcut H should be chosen")
      END IF
 
+
+!!TEST FROZEN 
+!    do i =1, size(sh_env%H_tp,1)
+!      do k = 1, size(sh_env%H_tp,1)
+!         if (i .ne. k) then
+!            if ((k+1 == i) .or.(k-1 == i)) then
+!               sh_env%H_tp(i,k) = cmplx(0.0D0,0.001102479,dp) 
+!            else
+!               sh_env%H_tp(i,k) = cmplx(0.0D0,0.0D0,dp)
+!            end if
+!         end if
+!     end do
+!    end do
+!sh_env%nacv = 0.0D0
+!!print *, "sh_env%H_tp(:,:)", sh_env%H_tp
 
      !> THIS KEYWORD helps treating initial itimes correctly in case of restart file
      !usage 
@@ -776,6 +874,7 @@ CONTAINS
                                atoms=sh_env%atoms, & 
                                scaling=sh_env%scaling, cbar=sh_env%cbar, Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                                ext_pres=sh_env%ext_pres)
+print *, "sh_env%active_state", sh_env%active_state
          IF (sh_env%attempt_hop) THEN
              call calcforces_aom(state=sh_env%new_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%nacv, &
                                   atoms=sh_env%atoms, & 
@@ -783,7 +882,17 @@ CONTAINS
                                                           forces_adiab=sh_env%forces_adiab_new, &
                                                           ext_pres=sh_env%ext_pres)
          ENDIF
+print *, "sh_env%forces_adiab_new", sh_env%forces_adiab_new
          ! --------------------------------------------------------------------------------------------------
+     ELSE IF (sh_env%frozen_couplings_keyword) THEN
+        CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=sh_env%active_state, Fin=diagonal_F, &
+                                  forces_adiab=sh_env%forces_adiab)
+print *, "sh_env%active_state", sh_env%active_state
+        IF (sh_env%attempt_hop) THEN
+                     CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp),C=sh_env%C_tp, state=sh_env%new_state, Fin=diagonal_F, &
+                                  forces_adiab=sh_env%forces_adiab_new)
+        END IF
+print *, "sh_env%forces_adiab_new", sh_env%forces_adiab_new
      ELSE
          !> In a possible extension one should add here 
          CPABORT("Another way to calculate adiabatic forces should be developed")

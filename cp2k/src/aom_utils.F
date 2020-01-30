@@ -1281,6 +1281,8 @@ end subroutine old_diab_to_adiab
 !>    are the same array but the former is further simmetrized in order to be
 !>    transferred to the propagation subroutine with linear interpolation of
 !>    diabatic_nace_t
+!> \note in all the following nace subroutines: "mol" should be replaced by "mat", 
+!>    the latter can deal with degeneracy present in the H   
 !**********************************************************************************
 subroutine nace1_modified(sh_env, mol, deltat)
 
@@ -1661,24 +1663,24 @@ subroutine calc_adiab_nace(sh_env, adiab_section)
         CHARACTER(len=*), PARAMETER :: routineN ='calc_adiab_nace', &
                                        routineP = moduleN//':'//routineN
 
-        INTEGER                                    :: mol
+        INTEGER                                    :: mat
         LOGICAL                                    :: print_here
 
-        mol = size(sh_env%Stt,1)
+        mat = size(sh_env%H_tp,1)
 
         CALL section_vals_val_get(adiab_section,"PRINT_MORE", &
                                                    l_val=print_here)
 
         if (.NOT.sh_env%no_diab_nace) then
-            CALL nace1_modified(sh_env, mol, sh_env%deltat)
+            CALL nace1_modified(sh_env, mat, sh_env%deltat)
         end if
-        !CALL nace1(sh_env, mol, sh_env%deltat)
-        CALL nace2(sh_env, mol, print_here)
+        !CALL nace1(sh_env, mat, sh_env%deltat)
+        CALL nace2(sh_env, mat, print_here)
         CALL nace3(sh_env)
-        CALL nace4(sh_env, mol)
+        CALL nace4(sh_env, mat)
         CALL nace5(sh_env)
-        CALL nace6(sh_env, mol, sh_env%deltat)
-        CALL nace7(sh_env, mol)
+        CALL nace6(sh_env, mat, sh_env%deltat)
+        CALL nace7(sh_env, mat)
  
 end subroutine calc_adiab_nace
 
@@ -1745,6 +1747,7 @@ end subroutine matinvsqrt
 ! easily generalized for other Hamiltonians 
 !**********************************************************************************
 !> \brief Calculate adiabatic forces according to Spencer 2016 and Carof 2019
+!for each atom in the system on the state passed as input.
 !**********************************************************************************
 subroutine calcforces_aom(state, Hin, C, nacv, atoms, scaling, cbar, Fin, forces_adiab, & 
                   ext_pres)
@@ -1754,7 +1757,7 @@ subroutine calcforces_aom(state, Hin, C, nacv, atoms, scaling, cbar, Fin, forces
         integer, intent(in)                         :: state
         REAL(KIND=dp), intent(in), dimension(:,:)   :: Hin, C
         REAL(KIND=dp), intent(in), dimension(:,:,:) :: nacv
-        integer, intent(in)                         :: atoms
+        integer, intent(in)                         :: atoms !this is atoms per mol
         REAL(KIND=dp), intent(in)                   :: scaling, cbar
         REAL(KIND=dp), intent(in), dimension(:,:,:) :: Fin
         REAL(KIND=dp), dimension(:,:), POINTER      :: forces_adiab
@@ -1765,12 +1768,25 @@ subroutine calcforces_aom(state, Hin, C, nacv, atoms, scaling, cbar, Fin, forces
 
         integer                                     :: i, j, mat, d
         INTEGER                                     :: natom
-        INTEGER                                     :: num_mol, nadiab, num_j
+        INTEGER                                     :: num_mol, num_j
         REAL(KIND=dp)                               :: convert_nacv 
 
         natom = SIZE(Fin,2)
-        nadiab= SIZE(Fin,3)
-        mat = size(Hin,1)
+        !nadiab= SIZE(Fin,3)
+        mat = size(Hin,1) ! COMMENT_SG: In general this array could have
+                            !degenerate states (becuase the construction of AOM
+                            !Hamiltonian can be done with multiple orbitals per
+                            !site), however the following subroutine cannot
+                            !handle the degenerate case becuase Fin(d,j,i) is
+                            !the array of diagonal forces and its dimension
+                            !stops at the number of total force_evals
+                            !considered. To sum up if you want this subroutine
+                            !to be able to handle degenerate cases you should
+                            !add a further loop over "orb" like is done for site
+                            !energies of the Hamiltoninan. This is the best
+                            !strategy becuase it would not even require to
+                            !change the dimension of Fin(d,j,i) that is one of
+                            !the biggest arrays in the code.
 
         ! Based on paper [Spencer16]: Spencer et al., J. Chem. Phys. 145, 064102 (2016)
         ! Use Eq. (21) of paper [Spencer16]

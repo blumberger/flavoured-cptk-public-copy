@@ -166,6 +166,10 @@ END TYPE adiab_nace_env_type
 !> BORDERLINE between AOM and something else (DECIDE WHERE TO PUT THEM)
      LOGICAL, DIMENSION(:), POINTER           :: ext_pres
 
+!> FROZEN_COUPLINGS section 
+     REAL(KIND = dp)                          :: first_off_d_Hab
+     
+
 !> Couplings section possibilities
      LOGICAL                                  :: aom_couplings_keyword, frozen_couplings_keyword 
 

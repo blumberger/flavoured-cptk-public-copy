@@ -67,6 +67,8 @@ MODULE non_adiabatic_utils
         CHARACTER(len=*), PARAMETER, PRIVATE :: moduleN ='non_adiabatic_utils'
                                                                                                        
         PUBLIC :: decohere_wf,                     &
+                  calc_frozen_H,                   &
+                  calcforces_frozenH,              &
                   surf_hop_type,                   &
                   check_hop_attempt,               &
                   choose_firstadiabat,             &
@@ -90,6 +92,89 @@ MODULE non_adiabatic_utils
                   
 
 CONTAINS
+
+
+!**********************************************************************************
+!> \brief for now it calculates a tridiagonal matrix as hamiltonian with
+!diagonal elements taken from FF and just off diagonals from input
+!**********************************************************************************
+  subroutine calc_frozen_H(sh_env, energies_tp, orb)
+     TYPE(sh_env_type)                      :: sh_env
+     REAL(kind=dp), DIMENSION(:),  POINTER          :: energies_tp
+     integer, intent(in)                            :: orb
+        
+     CHARACTER(len=*), PARAMETER                     :: routineN ='calc_frozen_H', &
+     routineP = moduleN//':'//routineN
+
+     integer :: i, k, m, d
+
+     sh_env%H_tp(:,:) = cmplx(0.0D0, 0.0D0,dp)
+     ! these loops are inefficients but do the job
+     do i=1,SIZE(energies_tp) !loop over all states
+        do k=1,SIZE(energies_tp)
+           !> diagonal construction
+           if (k==i) then 
+              !since you may want to include multiple orbital per state, you
+              !should loop over orbitals
+              do d=1,orb
+                 sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+d) = cmplx(0.0D0,(-energies_tp(i)),dp) !minus because we propagate -X
+              end do
+           else 
+              ! only valid for first off-diag: TO IMPROVE FURTHER for other
+              ! off diagonals
+              if ((k+1 == i) .or.(k-1 == i)) then
+                 do d=1,orb
+                    do m=1,orb
+                       sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,-sh_env%first_off_d_Hab,dp) !sign of the off-diag 
+                                                                                                     !does not matter for 1D chains
+                    end do 
+                 end do
+              end if 
+          end if 
+        end do 
+     end do
+  end subroutine
+
+
+!**********************************************************************************
+!> \brief TOADD
+!**********************************************************************************
+subroutine calcforces_frozenH(Hin, C, state, Fin, forces_adiab)
+       
+        integer, intent(in)                         :: state
+        REAL(KIND=dp), intent(in), dimension(:,:)   :: Hin, C
+        REAL(KIND=dp), intent(in), dimension(:,:,:) :: Fin
+        REAL(KIND=dp), dimension(:,:), POINTER      :: forces_adiab
+
+
+        CHARACTER(len=*), PARAMETER :: routineN ='calcforces_frozenH', &
+                               routineP = moduleN//':'//routineN
+
+        integer                                     :: i, j, mat, d
+        INTEGER                                     :: natom
+                
+        natom = SIZE(Fin,2)
+        mat = size(Hin,1) !might have denerate states
+
+        !loop over 3 cartesians 
+        do d=1,3 
+           do j=1,natom
+              forces_adiab(d,j) = 0.0D0
+              ! if you wanted to be able to account for degeracy this loop
+              ! should be more complicated, as the one for diagonal energies in
+              ! for example AOM Hamiltonian. 
+              do i=1,mat
+                 ! Diagonal term, it depends on the forces. The minus is already
+                 ! part of diagonal forces calculation from FIST.
+                 forces_adiab(d,j) = forces_adiab(d,j) +(abs(C(i,state))**2)*Fin(d,j,i)
+              end do 
+           end do
+        end do
+        ! OFF Diagonals grandient calculation put to zero in case of frozen
+        ! couplings 
+
+end subroutine calcforces_frozenH
+
 
 !**********************************************************************************
 !> \brief TOADD
@@ -182,7 +267,9 @@ subroutine modified_surfacehop(C1, C2, deltat, &
         INTEGER        :: state_min 
         REAL(KIND=dp), dimension(:), ALLOCATABLE :: enerdiff
  
-        mol = size(sh_env%Stt,1)
+        ! mol should be called "mat" according to the convension used so far,
+        ! because "mat" is compatible with degenerate orbitals
+        mol = size(sh_env%H_tp,1)
 
         ! Based on paper [Spencer16]: Spencer et al., J. Chem. Phys. 145, 064102 (2016)
         ! and paper [Wang14] :
@@ -338,7 +425,7 @@ subroutine modified_surfacehop(C1, C2, deltat, &
 
 
         hop = next_random_number(sh_env%rng_stream)
-        !print *, "RANDOM_NUMBER_HOPPING_PROBA", hop
+        print *, "RANDOM_NUMBER_HOPPING_PROBA", hop
         sh_print_env%hop       = hop
         sh_print_env%old_state = sh_env%active_state
         !and see if this random number causes a surface hop
@@ -437,11 +524,15 @@ end subroutine modified_surfacehop
 !        IF (PRESENT(rescale_keyword)) THEN
 !           my_rescale_keyword = rescale_keyword
         IF (.NOT. force_env%mixed_env%sh_env%aom_couplings_keyword) THEN
+           CALL section_vals_val_get(e_conservation_section,"METHOD_RESCALING",c_val=my_rescale_keyword)
             !WARNING:::::: when AOM Hamiltonian is not used the only rescaling
             !method that will work is SIMPLE rescaling, SIMPLE_QSYS would work
             !only by defining ext_pres LOGICAL array and NACV FAST rescaling
             !would need to be generalized for any Hamiltonian
-            my_rescale_keyword = "SIMPLE"
+            if (.NOT. my_rescale_keyword == "SIMPLE") then
+                CPABORT("The only possible rescaling with H different from AOM is SIMPLE")
+            end if
+            !my_rescale_keyword = "SIMPLE"
         ELSE
            CALL section_vals_val_get(e_conservation_section,"METHOD_RESCALING",c_val=my_rescale_keyword)
         ENDIF

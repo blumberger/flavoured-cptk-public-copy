@@ -78,6 +78,7 @@ CONTAINS
 
      TYPE(section_vals_type), POINTER               :: optimization_section
      TYPE(section_vals_type), POINTER               :: wf_restart_section, decoherence_section
+     !TYPE(section_vals_type), POINTER               :: frozen_coupling_section
      integer                                        :: mat, mol
      TYPE(cp_sll_val_type), POINTER                 :: listdiabcoeff
      REAL(KIND=dp), DIMENSION(3, 2)                 :: initial_seed
@@ -128,7 +129,7 @@ CONTAINS
      ALLOCATE(sh_env%ctin_after_tranf_correction(mat))
      ALLOCATE(sh_env%active_region(mat))
    
-     CALL create_adiab_nace_env(mol, sh_env)
+     CALL create_adiab_nace_env(mat, sh_env)
 
      sh_env%futur_decohere = .FALSE.
      sh_env%decohere       = .FALSE.
@@ -190,6 +191,13 @@ CONTAINS
     !------------------------------------------------------------------------------------------
     CASE("FROZEN_COUPLINGS")
          sh_env%frozen_couplings_keyword = .TRUE.  
+        !NULLIFY(frozen_coupling_section)
+        !frozen_coupling_section => section_vals_get_subs_vals(adiab_section, "FROZEN_COUPLINGS")
+        !!> Get Hab for the first upper and lower diagonal (tridiagonal matrix
+        !!will be formed) 
+        !CALL section_vals_val_get(frozen_coupling_section,"FIRST_OFF_DIAGONALS_VAL",&
+        !    r_val=sh_env%first_off_d_Hab)
+         
     CASE DEFAULT
         CPABORT("There is no method to calculate the coupling")
     END SELECT
@@ -414,26 +422,26 @@ CONTAINS
 
   END SUBROUTINE set_aom_env
 
-  SUBROUTINE create_adiab_nace_env(mol, sh_env)
+  SUBROUTINE create_adiab_nace_env(mat, sh_env)
    
-     INTEGER                       :: mol
+     INTEGER                       :: mat
      TYPE(sh_env_type)            :: sh_env
 
      CHARACTER(len=*), PARAMETER :: routineN ='create_adiab_nace_env', &
      routineP = moduleN//':'//routineN
 
-      ALLOCATE(sh_env%adiab_nace_env%T1(mol,mol))
-      ALLOCATE(sh_env%adiab_nace_env%T2(mol,mol))
-      ALLOCATE(sh_env%adiab_nace_env%DT(mol,mol))
-      ALLOCATE(sh_env%adiab_nace_env%diab_D(mol,mol))
-      ALLOCATE(sh_env%adiab_nace_env%DS(mol,mol))
-      ALLOCATE(sh_env%adiab_nace_env%map_new2old(mol))
-      ALLOCATE(sh_env%adiab_nace_env%map_old2new(mol))
-      ALLOCATE(sh_env%adiab_nace_env%basic(mol))
-      ALLOCATE(sh_env%adiab_nace_env%zeros(mol))
-      ALLOCATE(sh_env%adiab_nace_env%not_associated(mol))
-      ALLOCATE(sh_env%adiab_nace_env%Ttt(mol,mol))
-      ALLOCATE(sh_env%adiab_nace_env%Sttsqrt_var(mol,mol))
+      ALLOCATE(sh_env%adiab_nace_env%T1(mat,mat))
+      ALLOCATE(sh_env%adiab_nace_env%T2(mat,mat))
+      ALLOCATE(sh_env%adiab_nace_env%DT(mat,mat))
+      ALLOCATE(sh_env%adiab_nace_env%diab_D(mat,mat))
+      ALLOCATE(sh_env%adiab_nace_env%DS(mat,mat))
+      ALLOCATE(sh_env%adiab_nace_env%map_new2old(mat))
+      ALLOCATE(sh_env%adiab_nace_env%map_old2new(mat))
+      ALLOCATE(sh_env%adiab_nace_env%basic(mat))
+      ALLOCATE(sh_env%adiab_nace_env%zeros(mat))
+      ALLOCATE(sh_env%adiab_nace_env%not_associated(mat))
+      ALLOCATE(sh_env%adiab_nace_env%Ttt(mat,mat))
+      ALLOCATE(sh_env%adiab_nace_env%Sttsqrt_var(mat,mat))
 
   END SUBROUTINE create_adiab_nace_env
 
