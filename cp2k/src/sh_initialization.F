@@ -65,13 +65,14 @@ CONTAINS
   SUBROUTINE create_sh_env(nadiab, norbitals, natom, &
                                   positions_tp,     &
                                   adiab_section,    &
-                                  sh_env)
+                                  sh_env, my_mol_index)
 
 
      INTEGER, INTENT(IN)                            :: nadiab, norbitals, natom
      REAL(kind=dp), DIMENSION(:,:),POINTER          :: positions_tp
      TYPE(section_vals_type), POINTER               :: adiab_section
      TYPE(sh_env_type), INTENT(INOUT)               :: sh_env
+     INTEGER, DIMENSION(:), POINTER, OPTIONAL       :: my_mol_index !this are the decomp list indeces
 
      CHARACTER(len=*), PARAMETER :: routineN ='create_sh_env', &
      routineP = moduleN//':'//routineN
@@ -87,6 +88,9 @@ CONTAINS
      CHARACTER(LEN=default_string_length)           :: deco_keyword
      CHARACTER(LEN=default_string_length)           :: coupling_keyword
      REAL(KIND=dp)                                  :: MDtimestep
+     !INTEGER, DIMENSION(:), POINTER                 :: idx_active_mols !CHANGE SAM
+     
+
 
      NULLIFY(rng_stream)
      NULLIFY(decoherence_section)
@@ -146,6 +150,8 @@ CONTAINS
      ALLOCATE(sh_env%class_forbidden_hop_t(mat))
      allocate(sh_env%adiab_nace_t(mat,mat))
      allocate(sh_env%adiab_nace_tp(mat,mat))
+      
+        
 
      sh_env%do_deco = .FALSE.
      decoherence_section => section_vals_get_subs_vals(adiab_section,"DECOHERENCE")
@@ -190,14 +196,26 @@ CONTAINS
          CALL set_aom_env(nadiab, norbitals, natom,positions_tp,adiab_section,sh_env)
     !------------------------------------------------------------------------------------------
     CASE("FROZEN_COUPLINGS")
-         sh_env%frozen_couplings_keyword = .TRUE.  
+        sh_env%frozen_couplings_keyword = .TRUE.  
         NULLIFY(frozen_coupling_section)
         frozen_coupling_section => section_vals_get_subs_vals(adiab_section, "FROZEN_COUPLINGS")
         !> Get Hab for the first upper and lower diagonal (tridiagonal matrix
         !will be formed) 
         CALL section_vals_val_get(frozen_coupling_section,"FIRST_OFF_DIAGONALS_VAL",&
             r_val=sh_env%first_off_d_Hab)
-         
+
+        if (PRESENT(my_mol_index)) then
+           ALLOCATE(sh_env%index_active_mols(mol))
+           sh_env%index_active_mols = my_mol_index
+        else if (.NOT. PRESENT(my_mol_index)) then 
+            !no need to allocate section_vals_val_get does that for us
+            CALL section_vals_val_get(frozen_coupling_section,"INDEX_ACTIVE_MOLS",&
+                    i_vals=sh_env%index_active_mols)
+        end if
+
+    print *, "INDEX ACTIVE MOLS:", sh_env%index_active_mols
+
+
     CASE DEFAULT
         CPABORT("There is no method to calculate the coupling")
     END SELECT

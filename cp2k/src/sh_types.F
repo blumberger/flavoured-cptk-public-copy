@@ -173,7 +173,7 @@ END TYPE adiab_nace_env_type
 !> Couplings section possibilities
      LOGICAL                                  :: aom_couplings_keyword, frozen_couplings_keyword 
 
-     !> Constant over the simulations
+!> Constant over the simulations
      integer                                  :: atoms !Number of active atoms
      integer                                  :: natom !Total number of atoms
      REAL(KIND=dp)                            :: deltat !Timestep
@@ -182,6 +182,8 @@ END TYPE adiab_nace_env_type
 
      REAL(KIND = dp), DIMENSION(:,:), POINTER :: forces_adiab, &     
                                                  forces_adiab_new
+!> index active molecules
+     INTEGER, DIMENSION(:), POINTER           :: index_active_mols
 
 !> Use to store the present info in the future timestep
      REAL(KIND = dp), DIMENSION(:,:), POINTER     :: velocities_tp ! velocities step

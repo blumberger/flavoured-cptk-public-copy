@@ -953,7 +953,7 @@ CONTAINS
     END IF
 
     glob_natoms = 0
-!print *, "nforce_eval", nforce_eval
+!> COMMENT_SG: start looping over force_eval section
     DO iforce_eval = 1, nforce_eval
        NULLIFY(subsystems(iforce_eval)%subsys, particles(iforce_eval)%list)
        NULLIFY(results(iforce_eval)%results, virials(iforce_eval)%virial)
@@ -1075,11 +1075,13 @@ CONTAINS
 
 !>SAM COMMENT TAKE CARE OF THIS LINE TO STORE energies_1_mol_list
     force_env%mixed_env%energies = energies
-    IF (ALLOCATED(thermo%pot_list)) THEN
+
+!    IF (ALLOCATED(thermo%pot_list)) THEN
        !force_env%mixed_env%energies_1_mol_list = energies_1_mol_list
 !print *, "force_env%mixed_env%energies_1_mol_list", force_env%mixed_env%energies_1_mol_list
 !print *, "intra_forces_global_NOW", intra_forces_global
-    END IF
+!    END IF
+
     ! Start combining the different sub_force_env
     CALL get_mixed_env(mixed_env=force_env%mixed_env,&
                        mixed_energy=mixed_energy)
@@ -1156,10 +1158,10 @@ CONTAINS
        gen_section => section_vals_get_subs_vals(mixed_section,"GENERIC")
        CALL get_generic_info(gen_section, "MIXING_FUNCTION", coupling_function, force_env%mixed_env%par,&
             force_env%mixed_env%val, energies)
-    IF (ALLOCATED(thermo%pot_list)) THEN
+!    IF (ALLOCATED(thermo%pot_list)) THEN
 !print *, "force_env%mixed_env%energies_1_mol_list INSIDE GENMIX",force_env%mixed_env%energies_1_mol_list
 !print *, "ENERGIES_mix_generic", energies
-    END IF
+!    END IF
        CALL initf(1)
        CALL parsef(1,TRIM(coupling_function),force_env%mixed_env%par)
        ! Now the hardest part.. map energy with corresponding force_eval
@@ -1201,10 +1203,10 @@ CONTAINS
         optimization_section => section_vals_get_subs_vals(adiab_section,"OPTIMIZATION")
 
         mixed_env => force_env%mixed_env
-        IF (ALLOCATED(thermo%pot_list)) THEN
+!        IF (ALLOCATED(thermo%pot_list)) THEN
 !print *, "force_env%mixed_env%energies_1_mol_list INSIDE", mixed_env%energies_1_mol_list
 !print *, "energies_1_mol_list INSIDE", energies_1_mol_list
-        END IF
+!        END IF
         !SELECT CASE(adiab_keyword)
         !CASE("CLASSICAL_PATH")
            !Check that all the FF have the same number of atoms than the 1st FF
@@ -1235,19 +1237,24 @@ CONTAINS
                                                       my_mol_index, act_atoms, &
                                                       global_forces, my_energies, &
                                             molecule_kind_set, local_molecules, molecule_set, mixed_env, my_itimes)
+                CALL adiab_fssh_routines(particles_mix, virial_mix, results_mix,   &
+                        my_energies, virials, results, nforce_eval,&
+                        map_index, mapping_section,adiab_section,mixed_env,my_itimes, &
+                        adiab_keyword, mixed_energy%pot,atomic_kinds, &
+                        local_particles, my_mol_index)
            ELSE
                 
                 CALL section_vals_val_get(optimization_section, "DO_SPEEDUP_LJ", l_val=do_speedup_lj)
                 CALL section_vals_val_get(optimization_section, "DO_SPEEDUP_INTRA", l_val=do_speedup_intra)
                 CALL add_energies_forces(energies, global_forces, my_energies, do_speedup_lj, &
                                                               do_speedup_intra, mixed_env, my_itimes)
+                CALL adiab_fssh_routines(particles_mix, virial_mix, results_mix,   &
+                        my_energies, virials, results, nforce_eval,&
+                        map_index, mapping_section,adiab_section,mixed_env,my_itimes, &
+                        adiab_keyword, mixed_energy%pot,atomic_kinds, &
+                        local_particles)
            END IF
            !print*, "AC_energies", my_energies 
-           CALL adiab_fssh_routines(particles_mix, virial_mix, results_mix,   &
-                my_energies, virials, results, nforce_eval,&
-                map_index, mapping_section,adiab_section,mixed_env,my_itimes, &
-                adiab_keyword, mixed_energy%pot,atomic_kinds, &
-                local_particles)
 
            DEALLOCATE(my_energies)
 !> End CHANGE_AC
@@ -1352,18 +1359,21 @@ CONTAINS
       mixed_env%F(:,:,i) = global_forces(1)%forces
       nkind = SIZE ( molecule_kind_set )
       count3 = 0
-      
+!print *, "nkind molecules", nkind 
       MOL: DO ikind = 1, nkind !loop over molecules
           nmol_per_kind = local_molecules % n_el ( ikind )
+!print *, "nmol_per_kind", nmol_per_kind
           !> nmol_per_kind depends by the topology file
           DO imol = 1, nmol_per_kind
               my_mol = local_molecules % list ( ikind ) % array ( imol )
+!print *, "my_mol", my_mol
               molecule => molecule_set ( my_mol )
               molecule_kind => molecule % molecule_kind
               !IF (ANY(my_mol_index==my_mol) .and. count3 .eq. 0) THEN
               DO j = 1, SIZE(my_mol_index)
                    IF ( my_mol_index(j)==my_mol  .and. my_mol_index(j) /= used_mols(j) .and. count3==0 ) THEN
                     CALL get_molecule ( molecule, first_atom=first_atom, last_atom=last_atom )
+!print *, "first_atom and last", first_atom, last_atom
                     DO aoi=first_atom, last_atom !loop over atoms of interest
                        count_idx = count_idx + 1
                        !print *, "force_charge_to_add_xyz", intra_forces_global(2,:,count_idx)

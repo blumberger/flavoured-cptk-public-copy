@@ -77,7 +77,7 @@ CONTAINS
                  energies_tp, virials, results, nforce_eval,     &
                 map_index, mapping_section, adiab_section, mixed_env, my_itimes, &
                 method_keyword, final_energy, atomic_kinds,      &
-                local_particles)
+                local_particles, my_mol_index)
 
     TYPE(particle_list_type), POINTER        :: particles_mix
     TYPE(virial_type), POINTER               :: virial_mix
@@ -98,6 +98,7 @@ CONTAINS
     REAL(KIND=dp), INTENT(OUT)               :: final_energy
     TYPE(atomic_kind_list_type), POINTER     :: atomic_kinds
     TYPE(distribution_1d_type), POINTER      :: local_particles
+    INTEGER, DIMENSION(:), POINTER, OPTIONAL :: my_mol_index !this are the decomp list indeces 
 
 
     CHARACTER(len=*), PARAMETER :: routineN = 'adiab_classicalpath_routines', &
@@ -115,6 +116,17 @@ CONTAINS
     REAL(KIND=dp)                            :: energy_adiabat
     LOGICAL                                  :: my_bo_keyword
     LOGICAL                                  :: my_test_keyword
+
+    !COMMENT_SG: sh_env is already part of mix_env structure but it is also an
+    !enviroment on his own (a local structure), that is why below you will find a line where
+    !mixed_env%sh_env=sh_env, namely sh_env is passed back to mixed_env%sh_env
+    !this is probably not a very good way of doing things and it might lead to
+    !double counting the memory taken from the array if we had allocatable
+    !instead of pointers in sh_env. That is why almost all arrays in sh_env are
+    !pointers. 
+    !All of this was done becuase this is an easy way to update sh_env
+    !array between different nuclear time step. Indeed, mixed_env survives between time step, 
+    !whereas sh_env is a local structure it exists only at the time step it is created.
 
 
     !natom = SIZE(global_forces(1)%forces,2)
@@ -170,9 +182,18 @@ CONTAINS
        !> This 0th step is executed at the very beginning of the simulation, when
        !qs_mol_dyn_low subroutine calls force_env_calc_energy_force for the
        !first time and this calls in turn the present subroutinbe
-       CALL create_sh_env(nadiab, norbitals, natom, &
+   
+       IF (PRESENT(my_mol_index)) THEN  !check if decomp list is present as
+                                        !input, if not we do not pass it to the create env
+             CALL create_sh_env(nadiab, norbitals, natom, &
+                           positions_tp, adiab_section, & 
+                           sh_env, my_mol_index)
+       ELSE 
+             CALL create_sh_env(nadiab, norbitals, natom, &
                            positions_tp, adiab_section, & 
                            sh_env)
+       END IF 
+            
 
        !> instead of passing mixed_env to propagate_namd_first_step we
        !could probably use a pinter like the one below, to fill
@@ -215,7 +236,7 @@ CONTAINS
     !interface subroutine. sh_env is a local structure not a pointer, in
     !this case equal sign is copying the local structure sh_env (with all
     !varibales inside it) to another local structure mixed_env%sh_env. In general
-    !for allocated variables inside aom_type.F (aom enviroment) this would
+    !for allocated variables inside sh_type.F (sh enviroment) this would
     !take twice as much of the memory for each varibale. However since most
     !of the variables inside sh_env are defined as pointers this operation
     !takes for each variable just as much as the memory it takes to allocate

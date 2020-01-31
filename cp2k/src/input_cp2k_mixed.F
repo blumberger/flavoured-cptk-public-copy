@@ -460,6 +460,14 @@ CONTAINS
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
+    CALL keyword_create(keyword, name="INDEX_ACTIVE_MOLS",&
+         description='Specify the index of mols that are active', &
+         usage="INDEX_MOL_DECOMP <INTEGER> .. <INTEGER>", &
+         type_of_var=integer_t,  n_var=-1, default_i_vals=(/1/))
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+
     !> releasing FROZEN_COUPLINGS subsection
     CALL section_release(sub2section)
     !-----------------------------------------------------------------------

@@ -642,7 +642,6 @@ CONTAINS
                 ENDIF
                 print*, "FOBSH| Active state after the attempt to hop:", force_env%mixed_env%sh_env%active_state
              ENDIF
-print *, "DIED"
              ! 4.Apply the decoherence           
              IF (force_env%mixed_env%sh_env%do_deco) THEN
                 !> here we decohere the WF onto the active state  , that could be a new one in case of successful hop 
