@@ -190,7 +190,7 @@ CONTAINS
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: diagonal_F
      TYPE(section_vals_type), POINTER               :: coupling_section
      CHARACTER(LEN=default_string_length)           :: coupling_keyword
-     INTEGER                                        :: i, d, m, k
+     !INTEGER                                        :: i, d, m, k
 
      NULLIFY(positions_com_tp, velocities_com_tp)
      NULLIFY(logger)
@@ -278,33 +278,8 @@ CONTAINS
          sh_env%nacv = sh_env%cbar*sh_env%nacv
          !-----------------------------------------------------------------------------
      ELSE IF (sh_env%frozen_couplings_keyword) THEN 
-         !CALL calc_frozen_H(sh_env, energies_tp, orb)
-     sh_env%H_tp(:,:) = cmplx(0.0D0, 0.0D0,dp)
-     ! these loops are inefficients but do the job
-     do i=1,SIZE(energies_tp) !loop over all states
-        do k=1,SIZE(energies_tp)
-           !> diagonal construction
-           if (k==i) then 
-              !since you may want to include multiple orbital per state, you
-              !should loop over orbitals
-              do d=1,orb
-                 sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+d) = cmplx(0.0D0,(-energies_tp(i)),dp) !minus because we propagate -X
-              end do
-           else 
-              ! only valid for first off-diag: TO IMPROVE FURTHER for other
-              ! off diagonals
-              if ((k+1 == i) .or.(k-1 == i)) then
-                 do d=1,orb
-                    do m=1,orb
-                       sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,-0.0011024789,dp) !sign of the off-diag 
-                                                                                                     !does not matter for 1D chains
-                    end do 
-                 end do
-              end if 
-          end if 
-        end do 
-     end do
-
+         !> FROZEN COUPLINGS 
+         CALL calc_frozen_H(sh_env, energies_tp, orb)
 
      ELSE
          !> In a possible extension one should add here 
@@ -620,7 +595,7 @@ CONTAINS
      COMPLEX(KIND=dp), dimension(:), allocatable    :: adiab_c
      TYPE(cp_logger_type), POINTER                  :: logger
      INTEGER                                        :: unit_nr
-     INTEGER                                        :: i, d, k, m
+     !INTEGER                                        :: i, d, k, m
      
      NULLIFY(logger)
      NULLIFY(optimization_section)
@@ -701,35 +676,9 @@ CONTAINS
          !-----------------------------------------------------------------------------
      ELSE IF (sh_env%frozen_couplings_keyword) THEN
          !> FROZEN COUPLINGS 
-         !CALL calc_frozen_H(sh_env, energies_tp, orb)
+         CALL calc_frozen_H(sh_env, energies_tp, orb)
 
          
-     sh_env%H_tp(:,:) = cmplx(0.0D0, 0.0D0,dp)
-     ! these loops are inefficients but do the job
-     do i=1,SIZE(energies_tp) !loop over all states
-        do k=1,SIZE(energies_tp)
-           !> diagonal construction
-           if (k==i) then 
-              !since you may want to include multiple orbital per state, you
-              !should loop over orbitals
-              do d=1,orb
-                 sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+d) = cmplx(0.0D0,(-energies_tp(i)),dp) !minus because we propagate -X
-              end do
-           else 
-              ! only valid for first off-diag: TO IMPROVE FURTHER for other
-              ! off diagonals
-              if ((k+1 == i) .or.(k-1 == i)) then
-                 do d=1,orb
-                    do m=1,orb
-                       sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,-0.0011024789,dp) !sign of the off-diag 
-                                                                                                     !does not matter for 1D chains
-                    end do 
-                 end do
-              end if 
-          end if 
-        end do 
-     end do
-
      ELSE
          !> In a possible extension one should add here 
          CPABORT("Another coupling method to constrcut H should be chosen")
@@ -874,7 +823,6 @@ CONTAINS
                                atoms=sh_env%atoms, & 
                                scaling=sh_env%scaling, cbar=sh_env%cbar, Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                                ext_pres=sh_env%ext_pres)
-print *, "sh_env%active_state", sh_env%active_state
          IF (sh_env%attempt_hop) THEN
              call calcforces_aom(state=sh_env%new_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%nacv, &
                                   atoms=sh_env%atoms, & 
@@ -882,17 +830,14 @@ print *, "sh_env%active_state", sh_env%active_state
                                                           forces_adiab=sh_env%forces_adiab_new, &
                                                           ext_pres=sh_env%ext_pres)
          ENDIF
-print *, "sh_env%forces_adiab_new", sh_env%forces_adiab_new
          ! --------------------------------------------------------------------------------------------------
      ELSE IF (sh_env%frozen_couplings_keyword) THEN
         CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=sh_env%active_state, Fin=diagonal_F, &
                                   forces_adiab=sh_env%forces_adiab)
-print *, "sh_env%active_state", sh_env%active_state
         IF (sh_env%attempt_hop) THEN
                      CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp),C=sh_env%C_tp, state=sh_env%new_state, Fin=diagonal_F, &
                                   forces_adiab=sh_env%forces_adiab_new)
         END IF
-print *, "sh_env%forces_adiab_new", sh_env%forces_adiab_new
      ELSE
          !> In a possible extension one should add here 
          CPABORT("Another way to calculate adiabatic forces should be developed")

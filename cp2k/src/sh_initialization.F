@@ -78,7 +78,7 @@ CONTAINS
 
      TYPE(section_vals_type), POINTER               :: optimization_section
      TYPE(section_vals_type), POINTER               :: wf_restart_section, decoherence_section
-     !TYPE(section_vals_type), POINTER               :: frozen_coupling_section
+     TYPE(section_vals_type), POINTER               :: frozen_coupling_section
      integer                                        :: mat, mol
      TYPE(cp_sll_val_type), POINTER                 :: listdiabcoeff
      REAL(KIND=dp), DIMENSION(3, 2)                 :: initial_seed
@@ -191,12 +191,12 @@ CONTAINS
     !------------------------------------------------------------------------------------------
     CASE("FROZEN_COUPLINGS")
          sh_env%frozen_couplings_keyword = .TRUE.  
-        !NULLIFY(frozen_coupling_section)
-        !frozen_coupling_section => section_vals_get_subs_vals(adiab_section, "FROZEN_COUPLINGS")
-        !!> Get Hab for the first upper and lower diagonal (tridiagonal matrix
-        !!will be formed) 
-        !CALL section_vals_val_get(frozen_coupling_section,"FIRST_OFF_DIAGONALS_VAL",&
-        !    r_val=sh_env%first_off_d_Hab)
+        NULLIFY(frozen_coupling_section)
+        frozen_coupling_section => section_vals_get_subs_vals(adiab_section, "FROZEN_COUPLINGS")
+        !> Get Hab for the first upper and lower diagonal (tridiagonal matrix
+        !will be formed) 
+        CALL section_vals_val_get(frozen_coupling_section,"FIRST_OFF_DIAGONALS_VAL",&
+            r_val=sh_env%first_off_d_Hab)
          
     CASE DEFAULT
         CPABORT("There is no method to calculate the coupling")

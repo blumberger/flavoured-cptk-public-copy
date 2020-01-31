@@ -629,9 +629,6 @@ CONTAINS
 !    " Ctp(a')= ", force_env%mixed_env%sh_env%C_tp(i, force_env%mixed_env%sh_env%active_state), &
 !    " Ctp(f)= ", force_env%mixed_env%sh_env%C_tp(i, force_env%mixed_env%sh_env%new_state)
 !end do
-print *, "force_env%mixed_env%sh_env%attempt_hop", force_env%mixed_env%sh_env%attempt_hop
-print *, "force_env%mixed_env%sh_env%active_state", force_env%mixed_env%sh_env%active_state
-print *, "force_env%mixed_env%sh_env%successful_hop", force_env%mixed_env%sh_env%successful_hop
              ! 3. Check if an attempted hop is successuful or not
              IF (force_env%mixed_env%sh_env%attempt_hop) THEN
                 print*, "FOBSH| Active state before the attempt to hop:", force_env%mixed_env%sh_env%active_state
@@ -645,7 +642,7 @@ print *, "force_env%mixed_env%sh_env%successful_hop", force_env%mixed_env%sh_env
                 ENDIF
                 print*, "FOBSH| Active state after the attempt to hop:", force_env%mixed_env%sh_env%active_state
              ENDIF
-
+print *, "DIED"
              ! 4.Apply the decoherence           
              IF (force_env%mixed_env%sh_env%do_deco) THEN
                 !> here we decohere the WF onto the active state  , that could be a new one in case of successful hop 
@@ -759,7 +756,7 @@ print *, "force_env%mixed_env%sh_env%successful_hop", force_env%mixed_env%sh_env
     LOGICAL                                     :: overlap_over_thresh, debug
     REAL(KIND=dp)                               :: max1, max2
 
-     mat    = SIZE(sh_env%Stptp, 1)
+     mat    = SIZE(sh_env%H_tp, 1)
 
      allocate(overlaps(2*mat))
      ALLOCATE(abs_array(mat))
