@@ -48,6 +48,10 @@ MODULE sh_initialization
 
      USE cp_output_handling,           ONLY: cp_print_key_unit_nr, &
                                              cp_print_key_should_output
+     USE molecule_kind_types,             ONLY: molecule_kind_type
+     USE molecule_types_new,              ONLY: molecule_type,&
+                                                get_molecule
+     USE distribution_1d_types,           ONLY: distribution_1d_type
 
 
 #include "./base/base_uses.f90"
@@ -65,13 +69,16 @@ CONTAINS
   SUBROUTINE create_sh_env(nadiab, norbitals, natom, &
                                   positions_tp,     &
                                   adiab_section,    &
-                                  sh_env, my_mol_index)
+                                  sh_env,  molecule_kind_set, local_molecules, molecule_set, my_mol_index)
 
 
      INTEGER, INTENT(IN)                            :: nadiab, norbitals, natom
      REAL(kind=dp), DIMENSION(:,:),POINTER          :: positions_tp
      TYPE(section_vals_type), POINTER               :: adiab_section
      TYPE(sh_env_type), INTENT(INOUT)               :: sh_env
+     TYPE(molecule_kind_type), DIMENSION(:), POINTER    :: molecule_kind_set
+     TYPE(distribution_1d_type), POINTER                :: local_molecules
+     TYPE(molecule_type), DIMENSION(:), POINTER         :: molecule_set
      INTEGER, DIMENSION(:), POINTER, OPTIONAL       :: my_mol_index !this are the decomp list indeces
 
      CHARACTER(len=*), PARAMETER :: routineN ='create_sh_env', &
@@ -90,7 +97,6 @@ CONTAINS
      REAL(KIND=dp)                                  :: MDtimestep
      !INTEGER, DIMENSION(:), POINTER                 :: idx_active_mols !CHANGE SAM
      
-
 
      NULLIFY(rng_stream)
      NULLIFY(decoherence_section)
@@ -186,6 +192,7 @@ CONTAINS
          CALL read_listdiabcoeff(listdiabcoeff, norbitals, nadiab, ctin=sh_env%readcoeff) !Transform them in the complex ctin
      end if
 
+
     CALL section_vals_val_get(adiab_section,"METHOD_COUPLING",c_val=coupling_keyword)
     sh_env%aom_couplings_keyword = .FALSE.
     sh_env%frozen_couplings_keyword = .FALSE.
@@ -213,8 +220,10 @@ CONTAINS
                     i_vals=sh_env%index_active_mols)
         end if
 
-    print *, "INDEX ACTIVE MOLS:", sh_env%index_active_mols
-
+        print *, "FOB_SH| INDEX ACTIVE MOLS:", sh_env%index_active_mols
+        CALL create_ext_press_list(molecule_kind_set, local_molecules, molecule_set, natom, &
+                                          sh_env%index_active_mols, sh_env%ext_pres)
+        print *, "FOB_SH| EXT PRESS:", sh_env%ext_pres
 
     CASE DEFAULT
         CPABORT("There is no method to calculate the coupling")
@@ -222,6 +231,51 @@ CONTAINS
 
      DEALLOCATE(rng_stream)
   END SUBROUTINE create_sh_env
+
+
+subroutine create_ext_press_list(molecule_kind_set, local_molecules, molecule_set, natom, my_mol_index, ext_pres)
+
+     TYPE(molecule_kind_type), DIMENSION(:), POINTER    :: molecule_kind_set
+     TYPE(distribution_1d_type), POINTER                :: local_molecules
+     TYPE(molecule_type), DIMENSION(:), POINTER         :: molecule_set
+     INTEGER, INTENT(IN)                                :: natom
+     INTEGER, DIMENSION(:), POINTER                     :: my_mol_index !this are the decomp list indeces
+     LOGICAL, DIMENSION(:), POINTER,  INTENT(OUT)       :: ext_pres
+
+     CHARACTER(len=*), PARAMETER :: routineN ='create_ext_press_list', &
+     routineP = moduleN//':'//routineN
+
+     INTEGER :: imol, nkind,  nmol_per_kind,  ikind, first_atom, &
+              last_atom, aoi, my_mol, j
+     TYPE(molecule_kind_type), POINTER        :: molecule_kind
+     TYPE(molecule_type), POINTER             :: molecule
+
+     ALLOCATE(ext_pres(natom))
+
+     ext_pres(:) = .FALSE.    
+
+     nkind = SIZE ( molecule_kind_set )
+     MOL: DO ikind = 1, nkind !> loop over kind of molecules (the kind depends on the
+                               !> different names given to the residues in the
+                               !topology file)
+           nmol_per_kind = local_molecules % n_el ( ikind )
+
+           DO imol = 1, nmol_per_kind !loop over molecules of a given kind
+              my_mol = local_molecules % list ( ikind ) % array ( imol )
+              molecule => molecule_set ( my_mol )
+              molecule_kind => molecule % molecule_kind       
+              DO j = 1, SIZE(my_mol_index)
+                 IF ( my_mol_index(j)==my_mol) THEN 
+                    CALL get_molecule ( molecule, first_atom=first_atom, last_atom=last_atom )
+                    DO aoi=first_atom, last_atom !loop over atoms of interest
+                       ext_pres(aoi) = .TRUE.
+                    END DO
+                 END IF   
+              END DO
+           END DO 
+     END DO MOL
+     
+end subroutine create_ext_press_list
 
   SUBROUTINE set_aom_env(nadiab,  norbitals, natom, &
                                   positions_tp,     &

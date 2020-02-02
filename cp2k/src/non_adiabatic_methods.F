@@ -44,13 +44,15 @@ MODULE non_adiabatic_methods
   USE sh_main,                        ONLY: construct_ham_X_SH, &
                                              propagate_namd_first_step
 
-  USE distribution_1d_types,           ONLY: distribution_1d_type
-
   USE atomic_kind_list_types,          ONLY: atomic_kind_list_type
   USE atomic_kind_types,               ONLY: atomic_kind_type,&
                                              get_atomic_kind,&
                                              get_atomic_kind_set
-  USE sh_initialization,              ONLY: create_sh_env
+  USE sh_initialization,               ONLY: create_sh_env
+  USE molecule_kind_types,             ONLY: molecule_kind_type
+  USE molecule_types_new,              ONLY: molecule_type,&
+                                                get_molecule 
+  USE distribution_1d_types,           ONLY: distribution_1d_type
 
 #include "./base/base_uses.f90"
 
@@ -77,7 +79,7 @@ CONTAINS
                  energies_tp, virials, results, nforce_eval,     &
                 map_index, mapping_section, adiab_section, mixed_env, my_itimes, &
                 method_keyword, final_energy, atomic_kinds,      &
-                local_particles, my_mol_index)
+                local_particles, molecule_kind_set, local_molecules, molecule_set, my_mol_index)
 
     TYPE(particle_list_type), POINTER        :: particles_mix
     TYPE(virial_type), POINTER               :: virial_mix
@@ -91,13 +93,16 @@ CONTAINS
     INTEGER, DIMENSION(:), POINTER           :: map_index
     TYPE(section_vals_type), POINTER         :: mapping_section
     TYPE(section_vals_type), POINTER         :: adiab_section
-    TYPE(mixed_environment_type), OPTIONAL, &
+    TYPE(mixed_environment_type),  &
       POINTER                                :: mixed_env
     INTEGER, POINTER                         :: my_itimes
     CHARACTER(LEN=default_string_length)     :: method_keyword
     REAL(KIND=dp), INTENT(OUT)               :: final_energy
     TYPE(atomic_kind_list_type), POINTER     :: atomic_kinds
     TYPE(distribution_1d_type), POINTER      :: local_particles
+    TYPE(molecule_kind_type), DIMENSION(:), POINTER    :: molecule_kind_set
+    TYPE(distribution_1d_type), POINTER                :: local_molecules
+    TYPE(molecule_type), DIMENSION(:), POINTER         :: molecule_set
     INTEGER, DIMENSION(:), POINTER, OPTIONAL :: my_mol_index !this are the decomp list indeces 
 
 
@@ -111,7 +116,7 @@ CONTAINS
     REAL(kind=dp), DIMENSION(:,:),POINTER    :: velocities_tp
     REAL(kind=dp), DIMENSION(:,:),POINTER    :: forces_adiab
     REAL(kind=dp)                            :: factor
-    TYPE(sh_env_type)                       :: sh_env
+    TYPE(sh_env_type)                        :: sh_env
     INTEGER, POINTER                         :: itimes
     REAL(KIND=dp)                            :: energy_adiabat
     LOGICAL                                  :: my_bo_keyword
@@ -187,11 +192,11 @@ CONTAINS
                                         !input, if not we do not pass it to the create env
              CALL create_sh_env(nadiab, norbitals, natom, &
                            positions_tp, adiab_section, & 
-                           sh_env, my_mol_index)
+                           sh_env, molecule_kind_set, local_molecules, molecule_set, my_mol_index)
        ELSE 
              CALL create_sh_env(nadiab, norbitals, natom, &
                            positions_tp, adiab_section, & 
-                           sh_env)
+                           sh_env,  molecule_kind_set, local_molecules, molecule_set)
        END IF 
             
 

@@ -1234,25 +1234,33 @@ CONTAINS
                !print *, "my_mol_index", my_mol_index
 
                 CALL add_energies_forces_mem_saver( energies_1_mol_list, energies, intra_forces_global, &
-                                                      my_mol_index, act_atoms, &
+                                                      my_mol_index, &
                                                       global_forces, my_energies, &
                                             molecule_kind_set, local_molecules, molecule_set, mixed_env, my_itimes)
+               !COMMENT_SG: instead of passing all the variables that come from
+               !cp_subsys_get, I think one could just pass force_env and call
+               !the same subroutine inside  adiab_fssh_routines
                 CALL adiab_fssh_routines(particles_mix, virial_mix, results_mix,   &
                         my_energies, virials, results, nforce_eval,&
                         map_index, mapping_section,adiab_section,mixed_env,my_itimes, &
                         adiab_keyword, mixed_energy%pot,atomic_kinds, &
-                        local_particles, my_mol_index)
+                        local_particles, molecule_kind_set, local_molecules, molecule_set, my_mol_index)
            ELSE
-                
+                !COMMENT_SG: these two additional ways of combining force_evals
+                !should be deprecated and removed.
                 CALL section_vals_val_get(optimization_section, "DO_SPEEDUP_LJ", l_val=do_speedup_lj)
                 CALL section_vals_val_get(optimization_section, "DO_SPEEDUP_INTRA", l_val=do_speedup_intra)
+
                 CALL add_energies_forces(energies, global_forces, my_energies, do_speedup_lj, &
                                                               do_speedup_intra, mixed_env, my_itimes)
+               !COMMENT_SG: instead of passing all the variables that come from
+               !cp_subsys_get, I think one could just pass force_env and call
+               !the same subroutine inside  adiab_fssh_routines
                 CALL adiab_fssh_routines(particles_mix, virial_mix, results_mix,   &
                         my_energies, virials, results, nforce_eval,&
                         map_index, mapping_section,adiab_section,mixed_env,my_itimes, &
                         adiab_keyword, mixed_energy%pot,atomic_kinds, &
-                        local_particles)
+                        local_particles, molecule_kind_set, local_molecules, molecule_set)
            END IF
            !print*, "AC_energies", my_energies 
 
@@ -1296,7 +1304,7 @@ CONTAINS
 
 
  SUBROUTINE add_energies_forces_mem_saver( energies_1_mol_list, energies, intra_forces_global, &
-                                              my_mol_index, act_atoms, &
+                                              my_mol_index, &
                                               global_forces, my_energies, & 
                                             molecule_kind_set, local_molecules, molecule_set, mixed_env, my_itimes)
 
@@ -1306,19 +1314,18 @@ CONTAINS
      POINTER                                :: global_forces
    REAL(KIND=dp), DIMENSION(:), POINTER     :: energies
    REAL(KIND=dp), DIMENSION(:), POINTER     :: my_energies
-   TYPE(molecule_type), POINTER             :: molecule  
-   TYPE(molecule_kind_type), POINTER        :: molecule_kind
-     TYPE(molecule_kind_type), DIMENSION(:), &
-      POINTER                                :: molecule_kind_set
-   TYPE(distribution_1d_type), POINTER      :: local_molecules
-      TYPE(molecule_type), DIMENSION(:), &
-      POINTER                                :: molecule_set
+   TYPE(molecule_kind_type), DIMENSION(:), POINTER    :: molecule_kind_set
+   TYPE(distribution_1d_type), POINTER                :: local_molecules
+   TYPE(molecule_type), DIMENSION(:), POINTER         :: molecule_set
    REAL(KIND=dp), ALLOCATABLE                 :: intra_forces_global(:,:,:) 
    REAL(KIND=dp), ALLOCATABLE               :: energies_1_mol_list(:,:)
    INTEGER, ALLOCATABLE                     :: used_mols(:)
-   INTEGER                                  :: act_atoms
+   !INTEGER                                  :: act_atoms
    INTEGER, DIMENSION(:), POINTER           :: my_mol_index !CHANGE SAM
    INTEGER, POINTER                         :: my_itimes !CHANGE_AC
+
+   TYPE(molecule_kind_type), POINTER        :: molecule_kind
+   TYPE(molecule_type), POINTER             :: molecule  
 
    INTEGER :: i, natom, my_mol, count_idx, count2, count3, j
    INTEGER :: imol, nkind,  nmol_per_kind,  ikind, first_atom, &
@@ -1359,21 +1366,18 @@ CONTAINS
       mixed_env%F(:,:,i) = global_forces(1)%forces
       nkind = SIZE ( molecule_kind_set )
       count3 = 0
-!print *, "nkind molecules", nkind 
-      MOL: DO ikind = 1, nkind !loop over molecules
+      MOL: DO ikind = 1, nkind !> loop over kind of molecules (the kind depends on the
+                               !> different names given to the residues in the topology file)
           nmol_per_kind = local_molecules % n_el ( ikind )
-!print *, "nmol_per_kind", nmol_per_kind
           !> nmol_per_kind depends by the topology file
-          DO imol = 1, nmol_per_kind
+          DO imol = 1, nmol_per_kind !loop over molecules of a given kind
               my_mol = local_molecules % list ( ikind ) % array ( imol )
-!print *, "my_mol", my_mol
               molecule => molecule_set ( my_mol )
               molecule_kind => molecule % molecule_kind
               !IF (ANY(my_mol_index==my_mol) .and. count3 .eq. 0) THEN
               DO j = 1, SIZE(my_mol_index)
                    IF ( my_mol_index(j)==my_mol  .and. my_mol_index(j) /= used_mols(j) .and. count3==0 ) THEN
                     CALL get_molecule ( molecule, first_atom=first_atom, last_atom=last_atom )
-!print *, "first_atom and last", first_atom, last_atom
                     DO aoi=first_atom, last_atom !loop over atoms of interest
                        count_idx = count_idx + 1
                        !print *, "force_charge_to_add_xyz", intra_forces_global(2,:,count_idx)
