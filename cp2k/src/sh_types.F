@@ -174,7 +174,7 @@ END TYPE adiab_nace_env_type
      LOGICAL                                  :: aom_couplings_keyword, frozen_couplings_keyword 
 
 !> Constant over the simulations
-     integer                                  :: atoms !Number of active atoms
+     integer                                  :: atoms_per_site !Number of atoms per site
      integer                                  :: natom !Total number of atoms
      REAL(KIND=dp)                            :: deltat !Timestep
 

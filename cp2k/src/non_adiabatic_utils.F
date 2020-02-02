@@ -1806,7 +1806,7 @@ END SUBROUTINE classically_forbidden_hops
 
     adiab_nace_vector(:) = sh_env%adiab_nace_tp(sh_env%active_state,:)
     !>number of degrees of freedom intensive EDC
-    deg_of_freedom = (mol*sh_env%atoms*3-6)
+    deg_of_freedom = (COUNT(sh_env%ext_pres)*3-6)
 
 
     IF (PRESENT(atomic_kinds)) THEN
@@ -1844,10 +1844,9 @@ END SUBROUTINE classically_forbidden_hops
                     end if
                     tau(i)= (1/abs(sh_env%E_tp(i) - sh_env%E_tp(sh_env%active_state)))* &
                                         (C_param+((E_0_param/K_tot)*deg_of_freedom))
-
               CASE("FORCES_BASED")
                     !Boltzmann factor to use in alpha parameter
-                     KbT = (2*K_tot)/(3*mol*sh_env%atoms)
+                     KbT = (2*K_tot)/(3*COUNT(sh_env%ext_pres))
                     !instead of using the exact boltzmann factor, at the moment the code uses Temp =
                     !298 K, maybe this point should be modified in future
                     
@@ -1863,7 +1862,7 @@ END SUBROUTINE classically_forbidden_hops
                          if (sh_env%aom_couplings_keyword) then
                             ! forces at the moment can be calculate with AOM Hamiltonian only
                               call calcforces_aom(i ,-AIMAG(sh_env%H_tp), sh_env%C_tp, sh_env%nacv, &
-                                   sh_env%atoms, &
+                                   sh_env%atoms_per_site, &
                                     sh_env%scaling, sh_env%cbar, diagonal_F, my_forces_adiab, &
                                     sh_env%ext_pres)
                          else
@@ -1900,7 +1899,7 @@ END SUBROUTINE classically_forbidden_hops
 
               CASE("HYBRID_TAU")
                     !Boltzmann factor to use in alpha parameter
-                     KbT = (2*K_tot)/(3*mol*sh_env%atoms)
+                     KbT = (2*K_tot)/(3*COUNT(sh_env%ext_pres))
                     !instead of using the exact boltzmann factor, at the moment the code uses Temp =
                     !298 K, maybe this point should be modified in future
                     
@@ -1916,7 +1915,7 @@ END SUBROUTINE classically_forbidden_hops
                          if (sh_env%aom_couplings_keyword) then
                             ! forces at the moment can be calculate with AOM Hamiltonian only
                              call calcforces_aom(i ,-AIMAG(sh_env%H_tp), sh_env%C_tp, sh_env%nacv, &
-                                  sh_env%atoms, &
+                                  sh_env%atoms_per_site, &
                                   sh_env%scaling, sh_env%cbar, diagonal_F, my_forces_adiab, &
                                   sh_env%ext_pres)
                          else
@@ -2203,7 +2202,6 @@ END SUBROUTINE classically_forbidden_hops
                  if (qsys_only) then 
                       iparticle = local_particles%list(iparticle_kind)%array(iparticle_local)
                       if (ext_pres(iparticle)) then
-!print *, "ext_pres", ext_pres
                         K_tot = K_tot + mass*( &
                                    array(1, iparticle)**2 + &
                                    array(2, iparticle)**2 + &

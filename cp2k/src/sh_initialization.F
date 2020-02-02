@@ -193,6 +193,25 @@ CONTAINS
      end if
 
 
+    !> create the list of active molecules if not present in DECOMP and the
+    !array of active atoms: ext_pres, which is use for kinetic energy
+    !calculation of the active subsystem.
+    if (PRESENT(my_mol_index)) then
+       ALLOCATE(sh_env%index_active_mols(mol))
+       sh_env%index_active_mols = my_mol_index
+    else if (.NOT. PRESENT(my_mol_index)) then 
+        !no need to allocate section_vals_val_get does that for us
+        CALL section_vals_val_get(adiab_section,"INDEX_ACTIVE_MOLS",&
+                i_vals=sh_env%index_active_mols)
+    end if
+
+    print *, "FOB_SH| INDEX ACTIVE MOLS:", sh_env%index_active_mols
+    CALL create_ext_press_list(molecule_kind_set, local_molecules, molecule_set, natom, &
+                                      sh_env%index_active_mols, sh_env%ext_pres)
+    !print *, "FOB_SH| EXT PRESS:", sh_env%ext_pres
+    !sh_env%total_active_atoms = COUNT(sh_env%ext_pres)
+
+
     CALL section_vals_val_get(adiab_section,"METHOD_COUPLING",c_val=coupling_keyword)
     sh_env%aom_couplings_keyword = .FALSE.
     sh_env%frozen_couplings_keyword = .FALSE.
@@ -211,19 +230,6 @@ CONTAINS
         CALL section_vals_val_get(frozen_coupling_section,"FIRST_OFF_DIAGONALS_VAL",&
             r_val=sh_env%first_off_d_Hab)
 
-        if (PRESENT(my_mol_index)) then
-           ALLOCATE(sh_env%index_active_mols(mol))
-           sh_env%index_active_mols = my_mol_index
-        else if (.NOT. PRESENT(my_mol_index)) then 
-            !no need to allocate section_vals_val_get does that for us
-            CALL section_vals_val_get(frozen_coupling_section,"INDEX_ACTIVE_MOLS",&
-                    i_vals=sh_env%index_active_mols)
-        end if
-
-        print *, "FOB_SH| INDEX ACTIVE MOLS:", sh_env%index_active_mols
-        CALL create_ext_press_list(molecule_kind_set, local_molecules, molecule_set, natom, &
-                                          sh_env%index_active_mols, sh_env%ext_pres)
-        print *, "FOB_SH| EXT PRESS:", sh_env%ext_pres
 
     CASE DEFAULT
         CPABORT("There is no method to calculate the coupling")
@@ -368,15 +374,15 @@ end subroutine create_ext_press_list
 
 
      mol = nadiab ! CHANGE_AC
-     sh_env%atoms = aom_atoms ! CHANGE_AC
+     sh_env%atoms_per_site = aom_atoms ! CHANGE_AC
      mat = norbitals*nadiab !> Size of the vectorial space where the wavefunctions are projected
      c = nadiab*aom_atoms !> Numbers of active atoms
 
 
      ALLOCATE(sh_env%elements(c))
      ALLOCATE(sh_env%connlist1(4,aom_atoms))
-     allocate(sh_env%aneighbour(0:sh_env%atoms,0:sh_env%atoms))
-     allocate(sh_env%bneighbour(0:sh_env%atoms,0:sh_env%atoms))
+     allocate(sh_env%aneighbour(0:sh_env%atoms_per_site,0:sh_env%atoms_per_site))
+     allocate(sh_env%bneighbour(0:sh_env%atoms_per_site,0:sh_env%atoms_per_site))
      ALLOCATE(sh_env%pcoeffs(aom_atoms,norbitals))
      ALLOCATE(sh_env%scoeffs(aom_atoms))
      allocate(sh_env%coms(3,mol))
@@ -385,16 +391,16 @@ end subroutine create_ext_press_list
      allocate(sh_env%crds(3,c,3))
      allocate(sh_env%dist(mol,mol))
      ALLOCATE(sh_env%NN(mat, mat))
-     allocate(sh_env%pcoeffsrun(sh_env%atoms,mat,3)) !pcoeffsrun exists because the p-coefficients
+     allocate(sh_env%pcoeffsrun(sh_env%atoms_per_site,mat,3)) !pcoeffsrun exists because the p-coefficients
                                                !need to be renormalised for each structure
      !first column is now atomic number of atom (e.g. 6 for carbon)
      !Naming convention: At = A(t), Atp = A(t+1), Atm = A(t-1), etc
-     allocate(sh_env%At(4,sh_env%atoms))
-     allocate(sh_env%Atp(4,sh_env%atoms))
-     allocate(sh_env%Atm(4,sh_env%atoms))
-     allocate(sh_env%Bt(4,sh_env%atoms))
-     allocate(sh_env%Btp(4,sh_env%atoms))
-     allocate(sh_env%Btm(4,sh_env%atoms))
+     allocate(sh_env%At(4,sh_env%atoms_per_site))
+     allocate(sh_env%Atp(4,sh_env%atoms_per_site))
+     allocate(sh_env%Atm(4,sh_env%atoms_per_site))
+     allocate(sh_env%Bt(4,sh_env%atoms_per_site))
+     allocate(sh_env%Btp(4,sh_env%atoms_per_site))
+     allocate(sh_env%Btm(4,sh_env%atoms_per_site))
      allocate(sh_env%siteenergies(3,mat))  !COMMENT_SG: First dimension is to be removed
      !> nacv are memory consuming to store however here we are storing them at time
      !t and tp for the multiple time step feature avoing their calculations at
