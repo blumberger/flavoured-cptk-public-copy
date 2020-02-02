@@ -12,9 +12,10 @@
 ! *****************************************************************************
 
 ! *****************************************************************************
-!>  \brief
+!>  \brief This module is used to inizialized all the sh_env variables. It
+!         also initializes coupling section specific variables
+!>  \authors AC and SG 
 ! *****************************************************************************
-
 MODULE sh_initialization 
 
      USE kinds,                        ONLY: default_string_length,               &
@@ -66,6 +67,13 @@ MODULE sh_initialization
 
 CONTAINS
 
+! *****************************************************************************
+!>  \brief This allocates the local sh_env variables. This local structure is
+!          then passed to the more general mixed_env in order to update all the
+!          variables between different time step. 
+!>  \authors AC and SG 
+!>  \date revision 02/02/20
+! *****************************************************************************
   SUBROUTINE create_sh_env(nadiab, norbitals, natom, &
                                   positions_tp,     &
                                   adiab_section,    &
@@ -239,6 +247,14 @@ CONTAINS
   END SUBROUTINE create_sh_env
 
 
+! *****************************************************************************
+!>  \brief This creates the logical list of active molecules ext_pres that is
+!         used to calculate kinetic energy for the active region in case of
+!         decoherence and rescaling. Note in case AOM is used ext_press is
+!         created by reading the AOM coeff from external file.
+!>  \author SG 
+!> \date 02/02/20
+! *****************************************************************************
 subroutine create_ext_press_list(molecule_kind_set, local_molecules, molecule_set, natom, my_mol_index, ext_pres)
 
      TYPE(molecule_kind_type), DIMENSION(:), POINTER    :: molecule_kind_set
@@ -283,6 +299,12 @@ subroutine create_ext_press_list(molecule_kind_set, local_molecules, molecule_se
      
 end subroutine create_ext_press_list
 
+! *****************************************************************************
+!> \brief This allocates aom_env variables. One could in principle put these
+!          variables in a separate derive type structure
+!> \author  SG 
+!> \date 02/02/20
+! *****************************************************************************
   SUBROUTINE set_aom_env(nadiab,  norbitals, natom, &
                                   positions_tp,     &
                                   adiab_section,    &
@@ -500,6 +522,10 @@ end subroutine create_ext_press_list
 
   END SUBROUTINE set_aom_env
 
+! *****************************************************************************
+!> \brief allocates nace variables
+!> \author  MEllis 
+! *****************************************************************************
   SUBROUTINE create_adiab_nace_env(mat, sh_env)
    
      INTEGER                       :: mat

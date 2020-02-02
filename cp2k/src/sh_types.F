@@ -15,7 +15,7 @@
 
 ! *****************************************************************************
 !>      jacob: comment
-! construct_ham_X_SH_full_degen
+! propagate_namd_all_steps_full_degen
 !
 ! This program is designed to propagate a single excess electronic charge
 ! along a molecular dynamics trajectory, either during the trajectory
@@ -132,6 +132,11 @@ TYPE adiab_nace_env_type
 END TYPE adiab_nace_env_type
 
 
+!***************************************************************************************
+!> \brief A storage container for the arrays used in fssh
+!> \authors AC and SG
+!> \edited 02/02/20
+!***************************************************************************************
    TYPE sh_env_type
 !> AOM arrays
      REAL(KIND = dp), DIMENSION(:,:), POINTER :: rm_t,&        ! position step min 1

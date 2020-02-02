@@ -15,7 +15,7 @@
 
 ! *****************************************************************************
 !>      jacob: comment
-! construct_ham_X_SH_full_degen
+! propagate_namd_all_steps_full_degen
 !
 ! This program is designed to propagate a single excess electronic charge
 ! along a molecular dynamics trajectory, either during the trajectory

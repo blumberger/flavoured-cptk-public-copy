@@ -529,8 +529,8 @@ end subroutine modified_surfacehop
             !method that will work is SIMPLE rescaling, SIMPLE_QSYS would work
             !only by defining ext_pres LOGICAL array and NACV FAST rescaling
             !would need to be generalized for any Hamiltonian
-            if (.NOT. my_rescale_keyword == "SIMPLE") then
-                CPABORT("The only possible rescaling with H different from AOM is SIMPLE")
+            if (my_rescale_keyword == "NACV") then
+                CPABORT("Poss. rescaling with H different from AOM are SIMPLE and SIMPLE_QSYS")
             end if
             !my_rescale_keyword = "SIMPLE"
         ELSE
@@ -2218,7 +2218,6 @@ END SUBROUTINE classically_forbidden_hops
               END DO
            END DO
            K_tot = 0.5*K_tot
-
    END SUBROUTINE calc_kinetic_tot
  
 !**********************************************************************************

@@ -5,12 +5,11 @@
 !   !
 !-----------------------------------------------------------------------------!
 
-!!!!!!!!!! CHANGE_AC !!!!!!!!!!!!!
 
 ! *****************************************************************************
 !> \brief Interface for the adiabatic force calculations
 !> \par History
-!>      carof, 2015.12.11: creation, put only ffsh_aom subroutines
+!> \authors AC and SG
 ! *****************************************************************************
 
 
@@ -41,7 +40,7 @@ MODULE non_adiabatic_methods
 
   USE sh_types,                       ONLY: sh_env_type 
 
-  USE sh_main,                        ONLY: construct_ham_X_SH, &
+  USE sh_main,                        ONLY: propagate_namd_all_steps, &
                                              propagate_namd_first_step
 
   USE atomic_kind_list_types,          ONLY: atomic_kind_list_type
@@ -74,6 +73,7 @@ CONTAINS
 !>        subroutine acts as an interface to update sh_env variables and to pass them
 !>        back to mixed_env. The nuclear dynamics is further carried on by
 !>        motion/integrator.F module. 
+!> \author AC and SG
 !**********************************************************************************
     SUBROUTINE  adiab_fssh_routines(particles_mix, virial_mix, results_mix,      &
                  energies_tp, virials, results, nforce_eval,     &
@@ -228,7 +228,7 @@ CONTAINS
           !sh_env%old_state = -1
        ELSE
           !> Main CALL: calculate the Hamiltonian, propagate the electronic dynamics
-          CALL construct_ham_X_SH(nadiab, norbitals,         &
+          CALL propagate_namd_all_steps(nadiab, norbitals,         &
                         positions_tp, energies_tp, sh_env, itimes,     &
                          adiab_section, & 
                         my_bo_keyword, atomic_kinds,                    &

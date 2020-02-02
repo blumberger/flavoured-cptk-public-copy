@@ -9,7 +9,9 @@
 ! *****************************************************************************
 !> \brief Interface for the adiabatic force calculations
 !> \par History
-!>      carof, 2016.01.15: creation, put only ffsh_aom subroutines
+!>      carof, 2016.01.15: Main subroutine for FSSH Hamiltonian creations and
+!>                          propagation of electronic equation of motions
+!> Edited SG
 ! *****************************************************************************
 
 ! *****************************************************************************
@@ -17,7 +19,7 @@
 !  the code has hugely changed since then:
 !
 !>   jacob: OLD comment 
-!    construct_ham_X_SH_full_degen
+!    propagate_namd_all_steps_full_degen
 !
 !    This program is designed to propagate a single excess electronic charge
 !    along a molecular dynamics trajectory, either during the trajectory
@@ -135,13 +137,19 @@ MODULE sh_main
  
         CHARACTER(len=*), PARAMETER, PRIVATE :: moduleN ='sh_main'   
 
-        PUBLIC :: construct_ham_X_SH, & 
+        PUBLIC :: propagate_namd_all_steps, & 
                   propagate_namd_first_step
 
 CONTAINS
 
 !**********************************************************************************
-!> \brief 
+!> \brief  This construct the Hamiltonian and Initialize electronic coefficients
+!at the first time step. Note that it could be merged with the subroutine for
+!the remaining step in future (there is no particular reason why should be
+!separated from that, except for the fact that it was easier to implement like
+!this) 
+!> authors AC and SG
+!> edited 02/02/20
 !**********************************************************************************
   SUBROUTINE propagate_namd_first_step(nadiab, norbitals,  &
                                   positions_tp,  &
@@ -544,9 +552,12 @@ CONTAINS
   END SUBROUTINE nacv_first_ts
 
 !**********************************************************************************
-!> \brief 
+!> \brief  This construct the Hamiltonian, propagate the electronic equation of
+!motion and defines if a hop is attempted or not.
+!> authors AC and SG
+!> edited 02/02/20
 !**********************************************************************************
-    SUBROUTINE construct_ham_X_SH(nadiab, norbitals,                            &
+    SUBROUTINE propagate_namd_all_steps(nadiab, norbitals,                            &
                                   positions_tp,                                 &
                                   energies_tp,                                  &
                                   sh_env, itimes,                               &
@@ -569,7 +580,7 @@ CONTAINS
      TYPE(atomic_kind_type), DIMENSION(:), POINTER  :: atomic_kind_set
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: diagonal_F
 
-     CHARACTER(len=*), PARAMETER :: routineN ='construct_ham_X_SH', &
+     CHARACTER(len=*), PARAMETER :: routineN ='propagate_namd_all_steps', &
      routineP = moduleN//':'//routineN
 
      TYPE(section_vals_type), POINTER               :: decoherence_section, optimization_section
@@ -898,6 +909,6 @@ CONTAINS
      DEALLOCATE(positions_com_tp) 
      deallocate(exact_forces)
      deallocate(site_energies, couplings, adiab_c, adiab_pop)
-    END SUBROUTINE construct_ham_X_SH
+    END SUBROUTINE propagate_namd_all_steps
 
 END MODULE sh_main
