@@ -464,7 +464,10 @@ SUBROUTINE calc_hop_nacv_aom(sh_env, diagonal_F, hop_nacv, ext_old_state, ext_ne
         deallocate(F_2)
         deallocate(F_22)
         deallocate(F_3)
+        deallocate(C)
 END SUBROUTINE calc_hop_nacv_aom
+
+
 
 FUNCTION NORM2(array) RESULT(norm)
          REAL(kind=dp), dimension(:), INTENT(IN) :: array

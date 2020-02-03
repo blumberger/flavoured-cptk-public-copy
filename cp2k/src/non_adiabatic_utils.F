@@ -177,6 +177,105 @@ end subroutine calcforces_frozenH
 
 
 !**********************************************************************************
+!> \brief 
+!**********************************************************************************
+subroutine calc_hop_nacv_frozen_H(sh_env, diagonal_F, hop_nacv, ext_old_state, ext_new_state)
+
+        TYPE(sh_env_type)                                        :: sh_env
+        REAL(kind=dp), DIMENSION(:,:), INTENT(OUT), ALLOCATABLE  :: hop_nacv
+        INTEGER, OPTIONAL                                        :: ext_old_state, ext_new_state
+        REAL(KIND=dp), DIMENSION(:,:,:), POINTER                 :: diagonal_F
+
+
+        CHARACTER(len=*), PARAMETER :: routineN = 'calc_hop_nacv_aom', &
+        routineP = moduleN//':'//routineN
+
+        !INTEGER                                      :: num_mol,  num_j
+        REAL(KIND=dp), dimension(:,:), allocatable   :: C
+        INTEGER                                      :: natom
+        INTEGER                                      :: old_state, new_state
+        REAL(KIND=dp)                                :: diff_energy
+        REAL(KIND=dp)                                :: E_old_state, E_new_state
+        integer                                      :: i, d, j, mat
+        REAL(KIND=dp), dimension(:,:), allocatable   :: F_1!, F_11, F_2, F_22, F_3
+
+        mat    = SIZE(sh_env%H_tp, 1)
+        natom  = SIZE(diagonal_F, 2)
+        !nadiab = SIZE(diagonal_F, 3)
+        !atoms  = SIZE(sh_env%connlist1, 2)
+
+
+        allocate(C(mat,mat))
+        allocate(F_1(3,natom))
+        !allocate(F_11(3,natom))
+        allocate(hop_nacv(3, natom)) 
+
+        C = sh_env%C_tp
+
+        IF (PRESENT(ext_old_state)) THEN
+           old_state = ext_old_state
+        ELSE
+           old_state = sh_env%active_state
+        ENDIF
+        IF (PRESENT(ext_new_state)) THEN
+           new_state = ext_new_state 
+        ELSE
+           new_state = sh_env%new_state
+        ENDIF
+        E_old_state = sh_env%E_tp(old_state)
+        E_new_state = sh_env%E_tp(new_state)
+        IF (E_old_state.EQ.E_new_state) THEN
+           diff_energy = 0.0D0
+        ELSE
+           diff_energy = 1 / (E_new_state - E_old_state)
+        ENDIF  
+
+        ! Only calculation of term a_{I, ij} in Eq. (14) of [Carof17], i.e.
+        ! Eq. (15)
+
+        ! COMMENT_SG: the commented part is just to remind myself that this
+        ! subroutine could be extended to off-diagonals as well if we had the
+        ! nacv for the given Hamiltonian.
+
+        !num_mol = 0   ! Molecular index 
+        do d=1,3      ! Cartesian coordinates
+           !num_j = 0  ! Active atom index
+           do j=1,natom ! Sum over all the atoms
+              F_1(d,j) = 0.0D0
+              !F_11(d,j) = 0.0D0
+              !IF (ext_pres(j)) THEN
+              !   num_j   = num_j + 1                  ! Update the active atom index
+              !   num_mol = int((num_j-1)/atoms) + 1   ! Update the molecular index
+              !   ! WARNING: we suppose that all molecules have the same
+              !   ! number of atoms
+              !ENDIF
+              do i=1,mat
+                 !F_1(d,j) = F_1(d,j) + C(i,old_state)*DH(i,i,j,d)*C(i,new_state)*diff_energy
+                 ! Diagonal term, it depends on the forces
+                 F_1(d,j) = F_1(d,j) + C(i,old_state)*diagonal_F(d,j,i)*C(i,new_state)*diff_energy
+                 !IF (ext_pres(j)) THEN
+                 !   IF (i.ne.num_mol) THEN
+                 !     ! Of diagonal term, only for active atom j present in
+                 !     ! molecule num_mol
+                 !     F_11(d,j) = F_11(d,j) + diff_energy * convert_nacv*sh_env%nacv(d, i, num_j) * (&
+                 !                             C(num_mol, new_state) * C(i, old_state) +   &
+                 !                             C(num_mol, old_state) * C(i,new_state) )
+                 !   ENDIF
+                 !ENDIF
+              ENDDO
+           ENDDO
+        ENDDO 
+
+        ! minus sign to take the same convention of the paper.
+        !hop_nacv = -(F_1 + F_11) 
+        hop_nacv = -(F_1) ! we consider oncly diagonal elements 
+ 
+        deallocate(F_1)
+        deallocate(C)
+
+end subroutine calc_hop_nacv_frozen_H
+
+!**********************************************************************************
 !> \brief TOADD
 !**********************************************************************************
 subroutine surf_hop_type(adiab_section, C1, C2, deltat, &
@@ -521,22 +620,23 @@ end subroutine modified_surfacehop
         !coupling_section => section_vals_get_subs_vals(adiab_section, "AOM")
         e_conservation_section => section_vals_get_subs_vals(adiab_section, "ENERGY_CONSERVATION")
 
-!        IF (PRESENT(rescale_keyword)) THEN
-!           my_rescale_keyword = rescale_keyword
-        IF (.NOT. force_env%mixed_env%sh_env%aom_couplings_keyword) THEN
-           CALL section_vals_val_get(e_conservation_section,"METHOD_RESCALING",c_val=my_rescale_keyword)
-            !WARNING:::::: when AOM Hamiltonian is not used the only rescaling
-            !method that will work is SIMPLE rescaling, SIMPLE_QSYS would work
-            !only by defining ext_pres LOGICAL array and NACV FAST rescaling
-            !would need to be generalized for any Hamiltonian
-            if (my_rescale_keyword == "NACV") then
-                CPABORT("Poss. rescaling with H different from AOM are SIMPLE and SIMPLE_QSYS")
-            end if
-            !my_rescale_keyword = "SIMPLE"
-        ELSE
-           CALL section_vals_val_get(e_conservation_section,"METHOD_RESCALING",c_val=my_rescale_keyword)
-        ENDIF
+!!        IF (PRESENT(rescale_keyword)) THEN
+!!           my_rescale_keyword = rescale_keyword
+!        IF (.NOT. force_env%mixed_env%sh_env%aom_couplings_keyword) THEN
+!           CALL section_vals_val_get(e_conservation_section,"METHOD_RESCALING",c_val=my_rescale_keyword)
+!            !WARNING:::::: when AOM Hamiltonian is not used the only rescaling
+!            !method that will work is SIMPLE rescaling, SIMPLE_QSYS would work
+!            !only by defining ext_pres LOGICAL array and NACV FAST rescaling
+!            !would need to be generalized for any Hamiltonian
+!            if (my_rescale_keyword == "NACV") then
+!                CPABORT("Poss. rescaling with H different from AOM are SIMPLE and SIMPLE_QSYS")
+!            end if
+!            !my_rescale_keyword = "SIMPLE"
+!        ELSE
+!           CALL section_vals_val_get(e_conservation_section,"METHOD_RESCALING",c_val=my_rescale_keyword)
+!        ENDIF
 
+        CALL section_vals_val_get(e_conservation_section,"METHOD_RESCALING",c_val=my_rescale_keyword)
         CALL section_vals_val_get(adiab_section,"CENTER_OF_MASS",l_val=translate_keyword)
         sh_print_env = force_env%mixed_env%sh_env%sh_print_env
 
@@ -617,6 +717,13 @@ end subroutine modified_surfacehop
               IF (sh_print_env%successful_hop) sh_print_env%rescale_factor = rescale_factor
               CALL adiab_print_sh_info(sh_print_env, keyword = 'SIMPLE_RESCALING')
            ELSE 
+              !WARNING:::: the only possible NACV rescaling in case of non AOM
+              !hamitlonian is FAST. 
+              IF (.NOT. force_env%mixed_env%sh_env%aom_couplings_keyword) THEN
+                      IF (.NOT. nacv_keyword == "FAST_FRZ_COUPLING") then
+                         CPABORT("NACV rescaling with non AOM H can be only  FAST_FRZ_COUPLING")
+                      END IF
+              END IF
               SELECT CASE(nacv_keyword)
               CASE("TEST")
                  old_state = force_env%mixed_env%sh_env%active_state
@@ -672,7 +779,9 @@ ENDIF
                  CALL adiab_print_hop_nacv(sh_print_env, hop_nacv) 
               CASE("FAST")
                  CALL calc_hop_nacv_aom( force_env%mixed_env%sh_env, force_env%mixed_env%F, hop_nacv, fast=.TRUE.)
-
+                 CALL adiab_print_hop_nacv(sh_print_env, hop_nacv) 
+              CASE("FAST_FRZ_COUPLING")
+                 CALL calc_hop_nacv_frozen_H( force_env%mixed_env%sh_env, force_env%mixed_env%F, hop_nacv)
                  CALL adiab_print_hop_nacv(sh_print_env, hop_nacv) 
               CASE DEFAULT
                 CPABORT("There is no method to calculate the NACV.")
