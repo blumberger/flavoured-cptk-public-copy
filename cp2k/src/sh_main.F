@@ -198,7 +198,7 @@ CONTAINS
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: diagonal_F
      TYPE(section_vals_type), POINTER               :: coupling_section
      CHARACTER(LEN=default_string_length)           :: coupling_keyword
-     INTEGER                                        :: i, k
+     !INTEGER                                        :: i, k
 
      NULLIFY(positions_com_tp, velocities_com_tp)
      NULLIFY(logger)
@@ -294,20 +294,20 @@ CONTAINS
          CPABORT("Another coupling method to constrcut H should be chosen")
      END IF
 
-!TEST FROZEN 
-    do i =1, size(sh_env%H_tp,1)
-      do k = 1, size(sh_env%H_tp,1)
-         if (i .ne. k) then
-            if ((k+1 == i) .or.(k-1 == i)) then
-               sh_env%H_tp(i,k) = cmplx(0.0D0,0.001102479,dp) 
-            else
-               sh_env%H_tp(i,k) = cmplx(0.0D0,0.0D0,dp)
-            end if
-         end if
-     end do
-    end do
-sh_env%nacv = 0.0D0
-!print *, "sh_env%H_tp(:,:)", sh_env%H_tp
+!!TEST FROZEN 
+!    do i =1, size(sh_env%H_tp,1)
+!      do k = 1, size(sh_env%H_tp,1)
+!         if (i .ne. k) then
+!            if ((k+1 == i) .or.(k-1 == i)) then
+!               sh_env%H_tp(i,k) = cmplx(0.0D0,0.001102479,dp) 
+!            else
+!               sh_env%H_tp(i,k) = cmplx(0.0D0,0.0D0,dp)
+!            end if
+!         end if
+!     end do
+!    end do
+!sh_env%nacv = 0.0D0
+!!print *, "sh_env%H_tp(:,:)", sh_env%H_tp
 
      !> HAMILTONIAN DIAGONALIZATION
      !The adiabaticity subroutine diagonalises the diabatic Hamiltonian H_tp
@@ -607,7 +607,7 @@ sh_env%nacv = 0.0D0
      COMPLEX(KIND=dp), dimension(:), allocatable    :: adiab_c
      TYPE(cp_logger_type), POINTER                  :: logger
      INTEGER                                        :: unit_nr
-     INTEGER                                        :: i, k
+!     INTEGER                                        :: i, k
      
      NULLIFY(logger)
      NULLIFY(optimization_section)
@@ -698,20 +698,20 @@ sh_env%nacv = 0.0D0
 
 
 
-!TEST FROZEN 
-    do i =1, size(sh_env%H_tp,1)
-      do k = 1, size(sh_env%H_tp,1)
-         if (i .ne. k) then
-            if ((k+1 == i) .or.(k-1 == i)) then
-               sh_env%H_tp(i,k) = cmplx(0.0D0,0.001102479,dp) 
-            else
-               sh_env%H_tp(i,k) = cmplx(0.0D0,0.0D0,dp)
-            end if
-         end if
-     end do
-    end do
-sh_env%nacv = 0.0D0
-!print *, "sh_env%H_tp(:,:)", sh_env%H_tp
+!!TEST FROZEN 
+!    do i =1, size(sh_env%H_tp,1)
+!      do k = 1, size(sh_env%H_tp,1)
+!         if (i .ne. k) then
+!            if ((k+1 == i) .or.(k-1 == i)) then
+!               sh_env%H_tp(i,k) = cmplx(0.0D0,0.001102479,dp) 
+!            else
+!               sh_env%H_tp(i,k) = cmplx(0.0D0,0.0D0,dp)
+!            end if
+!         end if
+!     end do
+!    end do
+!sh_env%nacv = 0.0D0
+!!print *, "sh_env%H_tp(:,:)", sh_env%H_tp
 
      !> THIS KEYWORD helps treating initial itimes correctly in case of restart file
      !usage 
