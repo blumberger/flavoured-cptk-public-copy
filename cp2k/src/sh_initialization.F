@@ -24,7 +24,8 @@ MODULE sh_initialization
                                               build_s_tables
 
      USE aom_utils,                    ONLY: read_listcoeff,                       &
-                                             read_listdiabcoeff
+                                             read_listdiabcoeff,                  &
+                                             read_list_tresp 
 
      USE sh_types,                    ONLY: sh_env_type
 
@@ -104,12 +105,17 @@ CONTAINS
      CHARACTER(LEN=default_string_length)           :: coupling_keyword
      REAL(KIND=dp)                                  :: MDtimestep
      !INTEGER, DIMENSION(:), POINTER                 :: idx_active_mols !CHANGE SAM
-     
+     TYPE(cp_sll_val_type), POINTER                 :: list_tresp
+     integer, dimension(:), ALLOCATABLE             :: ext_elements
+     LOGICAL, DIMENSION(:), POINTER                :: active_logical
+     INTEGER                                       :: natom_mol
+     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE      :: tresp_charges
 
      NULLIFY(rng_stream)
      NULLIFY(decoherence_section)
      NULLIFY(wf_restart_section)
      NULLIFY(optimization_section)
+     NULLIFY(list_tresp)
 
      CALL section_vals_val_get(adiab_section,"NUCLEAR_TIMESTEP",&
          r_val=MDtimestep)
@@ -219,6 +225,14 @@ CONTAINS
     !print *, "FOB_SH| EXT PRESS:", sh_env%ext_pres
     !sh_env%total_active_atoms = COUNT(sh_env%ext_pres)
 
+
+
+     !> READ TRESP CHARGES TEST
+     CALL section_vals_list_get(adiab_section,"_DEFAULT_KEYWORD_",list=list_tresp) !Read list tresp from input
+     natom_mol = 24 !!!:::::::::::::::::::::::WARNING ::::::::::::::::::::::::: 
+     CALL read_list_tresp(natom_mol, list_tresp, ext_elements, active_logical, tresp_charges)
+print *, "active_logical", active_logical
+print *, "tresp_charges", tresp_charges
 
     CALL section_vals_val_get(adiab_section,"METHOD_COUPLING",c_val=coupling_keyword)
     sh_env%aom_couplings_keyword = .FALSE.
@@ -471,6 +485,7 @@ end subroutine create_ext_press_list
      CALL section_vals_list_get(coupling_section,"_DEFAULT_KEYWORD_",list=listcoeff) !Read them in the input files
      CALL read_listcoeff(listcoeff, ext_elements, sh_env%ext_pres, &
                          scoefftot, pcoefftot, natom) !Transform them into four arrays
+
      sh_env%elements = PACK(ext_elements, sh_env%ext_pres) !Only select active atoms
      allocate(atomlist_mask(c))
      atomlist_mask =.NOT.((scoefftot.eq.0).AND.(pcoefftot.eq.0)) !Only select atoms with orbitals
@@ -491,6 +506,11 @@ end subroutine create_ext_press_list
      allocate(sh_env%atomlist(COUNT(submask(1:aom_atoms))))
 
      sh_env%atomlist = PACK( (/ (i, i=1,aom_atoms) /), submask(1:aom_atoms) ) !List atoms with orbitals
+                                                                              !namely,
+                                                                              !with
+                                                                              !coeff
+                                                                              !not
+                                                                              !zero
      allocate(sh_env%connlist2(4,size(sh_env%atomlist)))
      do i=1,aom_atoms
           do j=1,norbitals

@@ -141,6 +141,7 @@ IMPLICIT NONE
              calc_adiab_nace,                      &
              calc_diabatic_nace,                   &
              read_listdiabcoeff,                   & 
+             read_list_tresp,                      &
              calc_adiab_nace_old,                  &
              matinvsqrt
  
@@ -2044,6 +2045,110 @@ print *, "CTIN", ctin
    END SUBROUTINE read_listcoeff
 
 
+!**********************************************************************************
+!> \brief 
+!**********************************************************************************
+   SUBROUTINE read_list_tresp(natom_mol, listcoeff, ext_elements, ext_pres, tresp_charges)
+
+    TYPE(cp_sll_val_type), POINTER                         :: listcoeff
+    INTEGER, DIMENSION(:), ALLOCATABLE, INTENT(OUT)        :: ext_elements
+    LOGICAL, DIMENSION(:), POINTER,  INTENT(OUT)           :: ext_pres
+    REAL(KIND=dp), DIMENSION(:), ALLOCATABLE, INTENT(OUT)  :: tresp_charges
+    INTEGER, INTENT(IN)                                    :: natom_mol
+
+    CHARACTER(len=*), PARAMETER :: routineN = 'read_listcoeff', &
+      routineP = moduleN//':'//routineN
+
+    CHARACTER(len=2*default_string_length)                 :: line_att
+    CHARACTER(len=default_string_length)                   :: error_message
+    INTEGER                                                :: default_id, end_c, &
+                                                              iatom, j,  &
+                                                              start_c, wrd
+    LOGICAL                                                :: is_ok
+    TYPE(val_type), POINTER                                :: val
+    INTEGER                                                :: my_pres
+    REAL(KIND=dp)                                          :: my_ext_elements, my_pres2
+
+    NULLIFY(val)
+
+    ALLOCATE(ext_pres(natom_mol))
+    ALLOCATE(ext_elements(natom_mol))
+    ALLOCATE(tresp_charges(natom_mol))
+
+    !this reads line by line the section listcoeff, and for each line it has
+    !the different CASES 
+       DO iatom=1,natom_mol
+          ! we use only the first default_string_length characters of each line
+          is_ok=cp_sll_val_next(listcoeff,val) !logical 
+          CALL val_get(val,c_val=line_att)
+          default_id = str2id(s2s(""))
+          ! Read name and atomic coordinates
+          start_c=1
+          DO wrd=1,5
+             DO j=start_c,LEN(line_att)
+                IF (line_att(j:j)/=' ') THEN
+                   start_c=j
+                   EXIT
+                END IF
+             END DO
+             end_c=LEN(line_att)+1
+             DO j=start_c,LEN(line_att)
+                IF (line_att(j:j)==' ') THEN
+                   end_c=j
+                   EXIT
+                END IF
+             END DO
+             IF(LEN_TRIM(line_att(start_c:end_c-1)) == 0)& !length of the number
+                                                            ! without space
+                CALL cp_abort(__LOCATION__,&
+                     "Incorrectly formatted input line for atom "//&
+                     TRIM(ADJUSTL(cp_to_string(iatom)))//&
+                     " found in COORD section. Input line: <"//&
+                     TRIM(line_att)//"> ")
+             SELECT CASE (wrd)
+             CASE (2)  ! read atomic number 
+                CALL read_float_object(line_att(start_c:end_c-1),&
+                                       my_ext_elements,error_message)
+                ext_elements(iatom) = INT(my_ext_elements)
+                IF(LEN_TRIM(error_message) /= 0)&
+                   CALL cp_abort(__LOCATION__,&
+                        "Incorrectly formatted input line for atom "//&
+                        TRIM(ADJUSTL(cp_to_string(iatom)))//&
+                        " found in COORD section. "//TRIM(error_message)//&
+                        " Input line: <"//TRIM(line_att)//"> ")
+             CASE (3)  ! read active or not atom (carrying a charge)
+                CALL read_float_object(line_att(start_c:end_c-1),&
+                                       my_pres2,error_message)
+                my_pres = INT(my_pres2)
+                IF (my_pres.eq.0) THEN
+                   ext_pres(iatom) = .FALSE.
+                ELSE
+                   ext_pres(iatom) = .TRUE.
+                ENDIF
+                IF(LEN_TRIM(error_message) /= 0)&
+                   CALL cp_abort(__LOCATION__,&
+                        "Incorrectly formatted input line for atom "//&
+                        TRIM(ADJUSTL(cp_to_string(iatom)))//&
+                        " found in COORD section. "//TRIM(error_message)//&
+                        " Input line: <"//TRIM(line_att)//"> ")
+             CASE (4) ! transition charge (this must be divided by sqrt(2) if it
+                      !comes from gaussian fitting of the electrostatic potential 
+                CALL read_float_object(line_att(start_c:end_c-1),&
+                                       tresp_charges(iatom),error_message)
+                IF(LEN_TRIM(error_message) /= 0)&
+                   CALL cp_abort(__LOCATION__,&
+                        "Incorrectly formatted input line for atom "//&
+                        TRIM(ADJUSTL(cp_to_string(iatom)))//&
+                        " found in COORD section. "//TRIM(error_message)//&
+                        " Input line: <"//TRIM(line_att)//"> ")
+
+             END SELECT
+             start_c = end_c
+             IF (start_c > LEN_TRIM(line_att)) EXIT
+          END DO
+      END DO
+
+   END SUBROUTINE read_list_tresp
 
 !******************************************************************************
 !!!!!!!!!!!!!!   DEPRECATED SUB. BELOW  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

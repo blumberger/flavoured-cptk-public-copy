@@ -440,6 +440,13 @@ CONTAINS
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
 
+    CALL keyword_create(keyword, name="_DEFAULT_KEYWORD_",&
+         description="The TRESP charges in the format:"//&
+         "<p><tt>ATOMIC_KIND  LIST NO TRESP</tt></p>",&
+         repeats=.TRUE., usage="{{String} {Int} {Int} {Real}}",&
+         type_of_var=lchar_t)
+    CALL section_add_keyword(subsection,keyword)
+    CALL keyword_release(keyword)
 
     !> start new sub2section METHOD_COUPLING, part of ADIABATIC subsection
     CALL keyword_create(keyword, name="METHOD_COUPLING",&

@@ -250,6 +250,14 @@ CONTAINS
      ENDIF
      CALL translate_com(positions_tp, keyword_translate, positions_com_tp, local_particles, atomic_kinds = atomic_kinds)  
 
+print *, "positions_tp", positions_tp(:,1)
+print *, "positions_tp", positions_tp(:,2)
+print *, "positions_tp", positions_tp(:,3)
+
+print *, "positions_com_tp", positions_com_tp(:,1)
+print *, "positions_com_tp", positions_com_tp(:,2)
+print *, "positions_com_tp", positions_com_tp(:,3)
+
      IF (sh_env%aom_couplings_keyword) THEN
          !------------------  AOM section -------------------------------------
          ALLOCATE(PC_allrvecs(5,mol*sh_env%atoms_per_site))
