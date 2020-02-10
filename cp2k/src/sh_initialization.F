@@ -105,17 +105,17 @@ CONTAINS
      CHARACTER(LEN=default_string_length)           :: coupling_keyword
      REAL(KIND=dp)                                  :: MDtimestep
      !INTEGER, DIMENSION(:), POINTER                 :: idx_active_mols !CHANGE SAM
-     TYPE(cp_sll_val_type), POINTER                 :: list_tresp
-     integer, dimension(:), ALLOCATABLE             :: ext_elements
-     LOGICAL, DIMENSION(:), POINTER                :: active_logical
-     INTEGER                                       :: natom_mol
-     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE      :: tresp_charges
+    !TYPE(cp_sll_val_type), POINTER                 :: list_tresp
+    !integer, dimension(:), ALLOCATABLE             :: ext_elements
+    !LOGICAL, DIMENSION(:), POINTER                :: active_logical
+    !INTEGER                                       :: natom_mol
+    !REAL(KIND=dp), DIMENSION(:), ALLOCATABLE      :: tresp_charges
+    !NULLIFY(list_tresp)
 
      NULLIFY(rng_stream)
      NULLIFY(decoherence_section)
      NULLIFY(wf_restart_section)
      NULLIFY(optimization_section)
-     NULLIFY(list_tresp)
 
      CALL section_vals_val_get(adiab_section,"NUCLEAR_TIMESTEP",&
          r_val=MDtimestep)
@@ -227,12 +227,12 @@ CONTAINS
 
 
 
-     !> READ TRESP CHARGES TEST
-     CALL section_vals_list_get(adiab_section,"_DEFAULT_KEYWORD_",list=list_tresp) !Read list tresp from input
-     natom_mol = 24 !!!:::::::::::::::::::::::WARNING ::::::::::::::::::::::::: 
-     CALL read_list_tresp(natom_mol, list_tresp, ext_elements, active_logical, tresp_charges)
-print *, "active_logical", active_logical
-print *, "tresp_charges", tresp_charges
+!     !> READ TRESP CHARGES TEST
+!     CALL section_vals_list_get(adiab_section,"_DEFAULT_KEYWORD_",list=list_tresp) !Read list tresp from input
+!     natom_mol = 24 !!!:::::::::::::::::::::::WARNING ::::::::::::::::::::::::: 
+!     CALL read_list_tresp(natom_mol, list_tresp, ext_elements, active_logical, tresp_charges)
+!print *, "active_logical", active_logical
+!print *, "tresp_charges", tresp_charges
 
     CALL section_vals_val_get(adiab_section,"METHOD_COUPLING",c_val=coupling_keyword)
     sh_env%aom_couplings_keyword = .FALSE.
@@ -421,11 +421,9 @@ end subroutine create_ext_press_list
      allocate(sh_env%bneighbour(0:sh_env%atoms_per_site,0:sh_env%atoms_per_site))
      ALLOCATE(sh_env%pcoeffs(aom_atoms,norbitals))
      ALLOCATE(sh_env%scoeffs(aom_atoms))
-     allocate(sh_env%coms(3,mol))
      !> crds is an AOM arrays (xyz, atoms, tm-t-tp) the third dimension
      !indicates what time this coordinates refer to
      allocate(sh_env%crds(3,c,3))
-     allocate(sh_env%dist(mol,mol))
      ALLOCATE(sh_env%NN(mat, mat))
      allocate(sh_env%pcoeffsrun(sh_env%atoms_per_site,mat,3)) !pcoeffsrun exists because the p-coefficients
                                                !need to be renormalised for each structure
@@ -532,6 +530,10 @@ end subroutine create_ext_press_list
      !output: sh_env%connlist1, sh_env%connlist2
      call connect_list2(Atp_loc(2:4,:), sh_env%atomlist, sh_env%connlist1, sh_env%connlist2, sh_env%cutoff_connect)
      
+print *, "Atp_loc", Atp_loc
+print *, "sh_env%connlist1", sh_env%connlist1
+print *, "sh_env%connlist2", sh_env%connlist2
+
      DEALLOCATE(atomlist_mask) 
      DEALLOCATE(submask) 
      DEALLOCATE(Atp_loc)

@@ -67,6 +67,7 @@ MODULE non_adiabatic_utils
         CHARACTER(len=*), PARAMETER, PRIVATE :: moduleN ='non_adiabatic_utils'
                                                                                                        
         PUBLIC :: decohere_wf,                     &
+                  calc_coms_and_nlist,             &
                   calc_frozen_H,                   &
                   calcforces_frozenH,              &
                   surf_hop_type,                   &
@@ -93,6 +94,72 @@ MODULE non_adiabatic_utils
 
 CONTAINS
 
+     !SG_COMMENTS: this subroutine is not general! it can accept only the same
+     !number of atoms per molecule and non-degenrate state. To include degeracy
+     !add one more loop as in calc_frozen_H.
+
+!**********************************************************************************
+!> \brief it calculates the COMs of the molecules and the distance between these
+!         COM points. Using an external input, it determines which COMs are within a
+!         given cut-off. 
+!> \note this is general for degeneracy but it cannot deal with different number
+!>       of atoms per mols
+!> \author AC [Edited SG]
+!**********************************************************************************
+SUBROUTINE calc_coms_and_nlist(atoms, mol, cutoff_sites, orb, crds, NN)
+
+     INTEGER, INTENT(IN)                             :: mol, atoms, orb
+     REAL(KIND=dp), intent (IN)                      :: cutoff_sites
+     REAL(KIND=dp), dimension(:,:,:), POINTER        :: crds !crds active atoms in COM ref
+     INTEGER, DIMENSION(:,:), POINTER                :: NN
+
+     CHARACTER(len=*), PARAMETER                     :: routineN='calc_coms_and_nlist', &
+     routineP = moduleN//':'//routineN
+
+     integer                                         :: i, j, m, d
+     REAL(KIND=dp)                                   :: dist
+     REAL(KIND=dp), dimension(:,:), ALLOCATABLE      :: coms
+  
+     allocate(coms(3,mol))
+    
+     !CALCULATE THE CENTER OF MASS
+     !calculate CoMs at first timestep
+     !coms(1 to 3,i) are the x, y and z coordinates of CoM of i
+     coms = 0
+     do i=1,mol
+          do m=1,atoms
+               do d=1,3
+                    coms(d,i) = coms(d,i) + (crds(d,(i-1)*atoms + m,3))/atoms
+               end do
+          end do
+     end do
+
+     !CONSTRUCT NEIGHBOURS LIST
+     do i=1,mol
+          do j=1,mol
+               !> this is like a DOT_PRODUCT to calculate distance
+               dist = ((coms(1,i) - coms(1,j))*(coms(1,i) &
+                - coms(1,j)) + (coms(2,i) - coms(2,j))*&
+               &(coms(2,i) - coms(2,j)) + (coms(3,i) & 
+                - coms(3,j))*(coms(3,i) - coms(3,j)))
+               if (dist < cutoff_sites*cutoff_sites) then
+                    do d=1,orb
+                         do m=1,orb
+                              NN(orb*(i-1)+d,orb*(j-1)+m) = 1
+                         end do
+                    end do
+               else
+                    do d=1,orb
+                         do m=1,orb
+                              NN(orb*(i-1)+d,orb*(j-1)+m) = 0
+                         end do
+                    end do
+               end if                    
+          end do
+     end do
+
+    deallocate(coms)
+END SUBROUTINE calc_coms_and_nlist
 
 !**********************************************************************************
 !> \brief for now it calculates a tridiagonal matrix as hamiltonian with

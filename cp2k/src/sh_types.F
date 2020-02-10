@@ -151,10 +151,8 @@ END TYPE adiab_nace_env_type
      REAL(KIND=dp), DIMENSION(:), POINTER     :: scoeffs
      REAL(KIND = dp)                          :: scaling, cbar, minao !For AOM calculations
      !> Calculate at each timestep
-     REAL(KIND=dp), dimension(:,:), POINTER   :: coms
-     REAL(KIND=dp), dimension(:,:,:), POINTER :: crds !crds active atoms in COM ref
-     REAL(KIND=dp), dimension(:,:), POINTER   :: dist
-     INTEGER, DIMENSION(:,:), POINTER         :: NN
+     REAL(KIND=dp), dimension(:,:,:), POINTER :: crds !crds active atoms in COM reference frames
+     INTEGER, DIMENSION(:,:), POINTER         :: NN   !neighbrouring list
      REAL(KIND=dp), dimension(:,:,:), POINTER :: pcoeffsrun
      REAL(KIND=dp), dimension(:,:), POINTER   :: At, Atm, Atp, Bt, Btm, & 
                                                  Btp, siteenergies

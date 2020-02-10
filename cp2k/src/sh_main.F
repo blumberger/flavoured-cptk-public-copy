@@ -56,8 +56,7 @@ MODULE sh_main
                                              calcforces_aom,                &
                                              read_listcoeff,            &
                                              calc_adiab_nace,           &
-                                             calc_adiab_nace_old,       &
-                                             calc_coms_and_nlist_aom
+                                             calc_adiab_nace_old
 
      USE sh_types,                    ONLY: sh_env_type, &
                                                 sh_print_env_type
@@ -101,6 +100,7 @@ MODULE sh_main
      USE distribution_1d_types,        ONLY: distribution_1d_type
 
      USE non_adiabatic_utils,          ONLY: decohere_wf,                     &
+                                             calc_coms_and_nlist,             &
                                              calc_frozen_H,                   &
                                              calcforces_frozenH,              &
                                              diab_to_adiab,                   & 
@@ -271,8 +271,9 @@ print *, "positions_com_tp", positions_com_tp(:,3)
             sh_env%siteenergies(3,:) = energies_tp(:) ! CHANGE_AC
          enddo
          
-         !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
-         CALL calc_coms_and_nlist_aom(sh_env, sh_env%atoms_per_site, mol, sh_env%cutoff_sites, orb)
+         !> CALCULATE THE CENTER OF MASS AND CONSTRUCT NEIGHBOURS LIST
+         !> COMMENT_SG: it assumes same number of atoms per mol
+         CALL calc_coms_and_nlist(sh_env%atoms_per_site, mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, NN=sh_env%NN)
 
          ! Allocate neighbouring list just at the first step as Jacob suggested 
          !only if sh_env%multiple_time_step .eq. 1 otherwise we use Multiple time
@@ -679,7 +680,8 @@ print *, "positions_com_tp", positions_com_tp(:,3)
 
 
          !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
-         CALL calc_coms_and_nlist_aom(sh_env, sh_env%atoms_per_site, mol, sh_env%cutoff_sites, orb)
+         !> COMMENT_SG: it assumes same number of atoms per mol
+         CALL calc_coms_and_nlist(sh_env%atoms_per_site, mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, NN=sh_env%NN)
 
          !> CALCULATE THE HAMILTONIAN, THE STTP MATRIX AND THE NACV
          CALL calc_aom_Xmatrix_elements(sh_env, itimes, sh_env%atoms_per_site, mol, sh_env%dR, sh_env%do_random, sh_env%cbar, &

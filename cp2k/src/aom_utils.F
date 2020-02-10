@@ -134,7 +134,6 @@ IMPLICIT NONE
              adiabaticity,                         &
              calc_aom_Xmatrix_elements,            & 
              calc_aom_Xmatrix_elements_first_step, & 
-             calc_coms_and_nlist_aom,              &
              make_adiabX,                          &
              calcforces_aom,                           &
              read_listcoeff,                       & 
@@ -236,7 +235,6 @@ SUBROUTINE calc_hop_nacv_aom(sh_env, diagonal_F, hop_nacv, ext_old_state, ext_ne
         !REAL(KIND=dp), dimension(:,:,:), allocatable :: Fin
         !REAL(KIND=dp), dimension(:,:,:), allocatable   :: nacv
         REAL(KIND=dp), dimension(:,:,:,:), allocatable :: Wprime
-        integer, dimension(:,:), allocatable :: NN
         integer :: i, j, k, mat, d, l, atoms
         !REAL(KIND=dp), dimension(:,:,:,:), allocatable :: DH, my_DP
         REAL(KIND=dp), dimension(:,:), allocatable :: F_1, F_11, F_2, F_22, F_3
@@ -260,7 +258,6 @@ SUBROUTINE calc_hop_nacv_aom(sh_env, diagonal_F, hop_nacv, ext_old_state, ext_ne
         IF (PRESENT(fast)) my_fast = fast
 
         allocate(T(mat,mat))
-        allocate(NN(mat,mat))
         allocate(S(mat,mat))
         allocate(C(mat,mat))
         allocate(X(mat,mat))
@@ -283,7 +280,6 @@ SUBROUTINE calc_hop_nacv_aom(sh_env, diagonal_F, hop_nacv, ext_old_state, ext_ne
 
         scaling = sh_env%scaling
         cbar = sh_env%cbar
-        NN = sh_env%NN
         S = sh_env%Stptp
         C = sh_env%C_tp
         
@@ -964,56 +960,6 @@ SUBROUTINE calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_rando
 
 END SUBROUTINE calc_aom_Xmatrix_elements_first_step
 
-!**********************************************************************************
-!> \brief 
-!**********************************************************************************
-SUBROUTINE calc_coms_and_nlist_aom(sh_env, atoms, mol, cutoff_sites, orb)
-
-     TYPE(sh_env_type), INTENT(INOUT)     :: sh_env
-     INTEGER, INTENT(IN)                   :: mol, atoms, orb
-     REAL(KIND=dp), intent (IN)            :: cutoff_sites
-
-     CHARACTER(len=*), PARAMETER                     :: routineN='calc_coms_and_nlist_aom', &
-     routineP = moduleN//':'//routineN
-
-     integer                               :: i, j, m, d
-  
-
-     !CALCULATE THE CENTER OF MASS
-     !calculate CoMs at first timestep
-     !coms(1 to 3,i) are the x, y and z coordinates of CoM of i
-     sh_env%coms = 0
-     do i=1,mol
-          do m=1,atoms
-               do d=1,3
-                    sh_env%coms(d,i) = sh_env%coms(d,i) + (sh_env%crds(d,(i-1)*atoms + m,3))/atoms
-               end do
-          end do
-     end do
-
-     !CONSTRUCT NEIGHBOURS LIST
-     do i=1,mol
-          do j=1,mol
-               sh_env%dist(i,j) = ((sh_env%coms(1,i) - sh_env%coms(1,j))*(sh_env%coms(1,i) &
-                - sh_env%coms(1,j)) + (sh_env%coms(2,i) - sh_env%coms(2,j))*&
-               &(sh_env%coms(2,i) - sh_env%coms(2,j)) + (sh_env%coms(3,i) & 
-                - sh_env%coms(3,j))*(sh_env%coms(3,i) - sh_env%coms(3,j)))
-               if (sh_env%dist(i,j) < cutoff_sites*cutoff_sites) then
-                    do d=1,orb
-                         do m=1,orb
-                              sh_env%NN(orb*(i-1)+d,orb*(j-1)+m) = 1
-                         end do
-                    end do
-               else
-                    do d=1,orb
-                         do m=1,orb
-                              sh_env%NN(orb*(i-1)+d,orb*(j-1)+m) = 0
-                         end do
-                    end do
-               end if                    
-          end do
-     end do
-END SUBROUTINE calc_coms_and_nlist_aom
 
   
 !**********************************************************************************
