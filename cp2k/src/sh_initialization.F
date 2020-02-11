@@ -222,12 +222,17 @@ CONTAINS
 
     print *, "FOB_SH| INDEX ACTIVE MOLS:", sh_env%index_active_mols
     CALL create_ext_press_list(molecule_kind_set, local_molecules, molecule_set, natom, &
-                                      sh_env%index_active_mols, sh_env%ext_pres)
+                                      sh_env%index_active_mols, sh_env%ext_pres, & 
+                                       full_system_info=sh_env%full_system_info)
     !> sh_env%ext_pres will be overwritten in AOM case becuase active molecules
     !may still have inactive atoms (this feature is used for further speed-up)
 
     !print *, "FOB_SH| EXT PRESS:", sh_env%ext_pres
     !sh_env%total_active_atoms = COUNT(sh_env%ext_pres)
+
+
+print *, "dim 1", sh_env%full_system_info(1,:)
+print *, "dim 2", sh_env%full_system_info(2,:)
 
     !initialize couplings
     CALL section_vals_val_get(adiab_section,"METHOD_COUPLING",c_val=coupling_keyword)
@@ -290,7 +295,8 @@ CONTAINS
 !>  \author SG 
 !> \date 02/02/20
 ! *****************************************************************************
-subroutine create_ext_press_list(molecule_kind_set, local_molecules, molecule_set, natom, my_mol_index, ext_pres)
+subroutine create_ext_press_list(molecule_kind_set, local_molecules, molecule_set, natom, my_mol_index, & 
+                                ext_pres, full_system_info)
 
      TYPE(molecule_kind_type), DIMENSION(:), POINTER    :: molecule_kind_set
      TYPE(distribution_1d_type), POINTER                :: local_molecules
@@ -298,29 +304,36 @@ subroutine create_ext_press_list(molecule_kind_set, local_molecules, molecule_se
      INTEGER, INTENT(IN)                                :: natom
      INTEGER, DIMENSION(:), POINTER                     :: my_mol_index !this are the decomp list indeces
      LOGICAL, DIMENSION(:), POINTER,  INTENT(OUT)       :: ext_pres
+     INTEGER, DIMENSION(:,:), ALLOCATABLE, INTENT(OUT)  :: full_system_info
 
      CHARACTER(len=*), PARAMETER :: routineN ='create_ext_press_list', &
      routineP = moduleN//':'//routineN
 
-     INTEGER :: imol, nkind,  nmol_per_kind,  ikind, first_atom, &
-              last_atom, aoi, my_mol, j
-     TYPE(molecule_kind_type), POINTER        :: molecule_kind
-     TYPE(molecule_type), POINTER             :: molecule
+     INTEGER                                            :: imol, nkind,  nmol_per_kind,  ikind, first_atom, &
+                                                            last_atom, aoi, my_mol, j
+     TYPE(molecule_kind_type), POINTER                  :: molecule_kind
+     TYPE(molecule_type), POINTER                       :: molecule
+     INTEGER                                            :: total_num_mol !total number of
+                                                               !mols in the system 
+     INTEGER                                            :: natom_mol, count_
 
      ALLOCATE(ext_pres(natom))
+
 
      ext_pres(:) = .FALSE.    
 
      nkind = SIZE ( molecule_kind_set )
+
+     total_num_mol = 0
      MOL: DO ikind = 1, nkind !> loop over kind of molecules (the kind depends on the
                                !> different names given to the residues in the
                                !topology file)
            nmol_per_kind = local_molecules % n_el ( ikind )
-
            DO imol = 1, nmol_per_kind !loop over molecules of a given kind
               my_mol = local_molecules % list ( ikind ) % array ( imol )
               molecule => molecule_set ( my_mol )
-              molecule_kind => molecule % molecule_kind       
+              molecule_kind => molecule % molecule_kind  
+              total_num_mol = total_num_mol+1
               DO j = 1, SIZE(my_mol_index)
                  IF ( my_mol_index(j)==my_mol) THEN 
                     CALL get_molecule ( molecule, first_atom=first_atom, last_atom=last_atom )
@@ -332,6 +345,38 @@ subroutine create_ext_press_list(molecule_kind_set, local_molecules, molecule_se
            END DO 
      END DO MOL
      
+
+     !>full_system_info contains info about the number of atoms for each mol and
+     !whether this mol is active or not. 
+     !full_system_info(1, atoms_for_each_mol)
+     !full_system_info(2, 1 if active, 0 if not)
+
+     ALLOCATE(full_system_info(2,total_num_mol))
+
+     full_system_info(:,:) = 0
+     count_ = 0
+     nkind = SIZE ( molecule_kind_set )
+     MOL1: DO ikind = 1, nkind
+           nmol_per_kind = local_molecules % n_el ( ikind )
+           DO imol = 1, nmol_per_kind !loop over molecules of a given kind
+              my_mol = local_molecules % list ( ikind ) % array ( imol )
+              molecule => molecule_set ( my_mol )
+              molecule_kind => molecule % molecule_kind
+              CALL get_molecule ( molecule, first_atom=first_atom, last_atom=last_atom )
+              natom_mol = (last_atom-first_atom)+1
+              count_ = count_+1 
+              full_system_info(1,count_) =  natom_mol
+              DO j = 1, SIZE(my_mol_index)
+                 IF ( my_mol_index(j)==my_mol) THEN
+                    full_system_info(2,count_) =  1
+                 END IF
+              END DO
+           END DO
+     END DO MOL1
+              
+!print *, "dim 1", full_system_info(1,:)
+!print *, "dim 2", full_system_info(2,:)
+
 end subroutine create_ext_press_list
 
 ! *****************************************************************************

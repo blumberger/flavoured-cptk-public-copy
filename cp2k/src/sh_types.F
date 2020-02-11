@@ -177,6 +177,8 @@ END TYPE adiab_nace_env_type
 !> Couplings section possibilities
      LOGICAL                                  :: aom_couplings_keyword, frozen_couplings_keyword 
      LOGICAL                                  :: tresp_couplings_keyword 
+ 
+     INTEGER, DIMENSION(:,:), ALLOCATABLE     :: full_system_info  
 
 !> Constant over the simulations
      integer                                  :: natom !Total number of atoms
