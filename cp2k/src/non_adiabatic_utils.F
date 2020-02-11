@@ -68,6 +68,7 @@ MODULE non_adiabatic_utils
                                                                                                        
         PUBLIC :: decohere_wf,                     &
                   calc_coms_and_nlist,             &
+                  calc_tresp_coup,                 &
                   calc_frozen_H,                   &
                   calcforces_frozenH,              &
                   surf_hop_type,                   &
@@ -162,27 +163,62 @@ SUBROUTINE calc_coms_and_nlist(mol, cutoff_sites, orb, crds, active_system_info,
 END SUBROUTINE calc_coms_and_nlist
 
 !**********************************************************************************
-!> \brief 
+!> \brief calculates coupling using TrESP charges from input. 
+
+!> \param energies_tp, site energies
+!> \param orb, number of states per mol (for degeneragy)
+!> \param NN, nearest neighbour list to apply cut-off radious to coulomb sum 
+!> \param crds, coordinates active atoms 
+!> \param active_system_info, initial and final index for the active mols
+!> \param tresp_charges, initial tresp read from input (to be generalized to different mols)
+
+!> \output sh_env%H_tp
+!> \author SG
 !**********************************************************************************
-  subroutine calc_tresp_coup(sh_env, energies_tp, orb, tresp_charges)
+  subroutine calc_tresp_coup(sh_env, energies_tp, orb, NN, crds, active_system_info, tresp_charges)
 
      TYPE(sh_env_type)                               :: sh_env
      REAL(kind=dp), DIMENSION(:),  POINTER           :: energies_tp
      integer, intent(in)                             :: orb
-     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE        :: tresp_charges  !tresp
+     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE, &
+                                   INTENT(IN)        :: tresp_charges  !tresp
                                                                        !charges taken from input file, they refer 
                                                                        !to a single mol and should be extended
                                                                        !for multi-phase system
+     INTEGER, DIMENSION(:,:), POINTER, INTENT(IN)    :: NN
+     REAL(kind=dp), DIMENSION(:,:,:),POINTER, &
+                                   INTENT(IN)        :: crds
+     INTEGER, DIMENSION(:,:), ALLOCATABLE, &
+                                   INTENT(IN)        :: active_system_info
+
      CHARACTER(len=*), PARAMETER                     :: routineN ='calc_frozen_H', &
      routineP = moduleN//':'//routineN
 
-     integer :: i, k, m, d
+     integer                                         :: i, k, m, d, dim_
+     integer                                         :: init_atom_mol1, final_atom_mol1, atoms_per_mol1
+     integer                                         :: init_atom_mol2, final_atom_mol2, atoms_per_mol2
+     real(kind=dp), allocatable, dimension(:,:)      :: crd1, crd2
+     real(kind=dp), allocatable, dimension(:)        :: charges1, charges2
+     real(kind=dp)                                   :: tresp_coup
+
+
+     !> COMMENT_SG: Tresp charegs array should be generalized for multiple molecules
+     !and phases
+     !> COMMENT_SG: This is the only NON general bit of the whole subroutine. It
+     !assumes just one type of charges
+     !#########  WARNING ##############################################
+     ALLOCATE(charges1(SIZE(tresp_charges)))
+     ALLOCATE(charges2(SIZE(tresp_charges)))
+     charges1 = tresp_charges
+     charges2 = tresp_charges
+     !#################################################################
+
 
      sh_env%H_tp(:,:) = cmplx(0.0D0, 0.0D0,dp)
      do i=1,SIZE(energies_tp) !loop over all non-degerate states
         do k=1,SIZE(energies_tp)
-
-           if (sh_env%NN(i,k) == 1) then
+           ! do calculation only for molecules within cut-off radious. 
+           if (NN(i,k) == 1) then
  
               !> diagonal construction
               if (k==i) then 
@@ -196,11 +232,34 @@ END SUBROUTINE calc_coms_and_nlist
                  if ( k > i ) then
                     do d=1,orb
                        do m=1,orb
-print *, tresp_charges
+                          !> find coordinates mol 1 of the pair
+                          init_atom_mol1 = sh_env%active_system_info(1,i)
+                          final_atom_mol1 = sh_env%active_system_info(2,i)
+                          atoms_per_mol1 = (final_atom_mol1-init_atom_mol1)+1
 
+                          !> find coordinates mol 2 of the pair
+                          init_atom_mol2 = sh_env%active_system_info(1,k)
+                          final_atom_mol2 = sh_env%active_system_info(2,k)
+                          atoms_per_mol2 = (final_atom_mol2-init_atom_mol2)+1
+
+                          !> this allocation deallocation is maybe inefficient
+                          !but it was the only thing I found to be general for
+                          !multi-phases
+                          ALLOCATE(crd1(3,atoms_per_mol1))
+                          ALLOCATE(crd2(3,atoms_per_mol2))
+
+                          do dim_=1,3
+                             crd1(dim_,:) = crds(dim_, init_atom_mol1:final_atom_mol1, 3)
+                             crd2(dim_,:) = crds(dim_, init_atom_mol2:final_atom_mol2, 3)
+                          end do
+!print *, "PAIR", i,k
+!print *, "crd1(dim_,:)", crd1(:,:)
+!print *, "crd2(dim_,:)", crd2(:,:)
+                          CALL calc_trsp_ab(crd1, crd2, charges1, charges2, tresp_coup)
                           !!##### CALL COUPLING 
-                          sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,-0.0011024789,dp) !sign of the off-diag 
-                                                                                                !does not matter for 1D chains
+                          sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,-tresp_coup,dp) !sign of the off-diag is minus consisently with diagonals
+                         DEALLOCATE(crd1,crd2)
+
                       end do
                    end do
                  else
@@ -220,45 +279,44 @@ print *, tresp_charges
 
 
 
-!!**********************************************************************************
-!!> \brief given crds of mol1 and mol2 and the respective charges (that might in
-!!general be different for the two mols), this calculates the tresp_coup. 
-!!> author SG 
-!!**********************************************************************************
-!subroutine calc_trsp_ab(crd1, crd2, charges1, charges2, tresp_coup)
-!
-!   real(kind=dp), allocatable, dimension(:,:), intent(in)  :: crd1, crd2
-!   real(kind=dp), allocatable, intent(in)                  :: charges1(:), charges2(:)
-!   real(kind=dp), intent(out)                              :: tresp_coup
-!
-!   real(kind=dp),  dimension(3) :: vect
-!   real(kind=dp)              :: tresp_coup, dist, !Ang2Bohr, AU2eV
-!   real(kind=dp)              :: x=2.0
-!   logical                    :: Gaussian_charges
-!   integer :: i,j
-!
-!!   Ang2Bohr=1.889725989
-!!   AU2eV=27.211399
-!
-!   Gaussian_charges = .True. !put in input file
-!
-!   !> Gaussian charges must be divided by sqrt(2)
-!   if (Gaussian_charges) then
-!     charges1(:) = (charges1(:)/SQRT(x))
-!     charges2(:) = (charges2(:)/SQRT(x))
-!   end if
-!
-!   tresp_coup = 0.0d0
-!   do i=1,SIZE(crd1,2)
-!      do j=1,SIZE(crd2,2)
-!         vect(:) = (crd1(:,i))-(crd2(:,j))
-!         dist = SQRT(DOT_PRODUCT(vect,vect))
-!         tresp_coup = tresp_coup + (charges1(i)*charges2(j))/dist
-!      end do
-!   end do
-!
-!print *, "tresp_coup", tresp_coup
-!end subroutine
+!**********************************************************************************
+!> \brief given crds of mol1 and mol2 and the respective charges (that might in
+!general be different for the two mols), this calculates the tresp_coup. 
+!> author SG 
+!**********************************************************************************
+subroutine calc_trsp_ab(crd1, crd2, charges1, charges2, tresp_coup)
+
+   real(kind=dp), allocatable, dimension(:,:), intent(in)  :: crd1, crd2
+   real(kind=dp), intent(out)                              :: tresp_coup
+   real(kind=dp), allocatable, dimension(:), intent(inout) :: charges1, charges2
+
+   real(kind=dp),  dimension(3) :: vect
+   real(kind=dp)                :: dist !Ang2Bohr, AU2eV
+   real(kind=dp)                :: x=2.0
+   logical                      :: Gaussian_charges
+   integer :: i,j
+
+!   Ang2Bohr=1.889725989
+!   AU2eV=27.211399
+
+   Gaussian_charges = .True. !put in input file
+
+   !> Gaussian charges must be divided by sqrt(2). Have a look at Multiwfn.pdf doc
+   if (Gaussian_charges) then
+     charges1(:) = (charges1(:)/SQRT(x))
+     charges2(:) = (charges2(:)/SQRT(x))
+   end if
+   !> coulombic interaction
+   tresp_coup = 0.0d0
+   do i=1,SIZE(crd1,2)
+      do j=1,SIZE(crd2,2)
+         vect(:) = (crd1(:,i))-(crd2(:,j))
+         dist = SQRT(DOT_PRODUCT(vect,vect))
+         tresp_coup = tresp_coup + (charges1(i)*charges2(j))/dist
+      end do
+   end do
+
+end subroutine
 
 
 !**********************************************************************************

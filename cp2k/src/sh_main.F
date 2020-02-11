@@ -101,6 +101,7 @@ MODULE sh_main
 
      USE non_adiabatic_utils,          ONLY: decohere_wf,                     &
                                              calc_coms_and_nlist,             &
+                                             calc_tresp_coup,                 &
                                              calc_frozen_H,                   &
                                              calcforces_frozenH,              &
                                              diab_to_adiab,                   & 
@@ -164,7 +165,7 @@ CONTAINS
      REAL(kind=dp), DIMENSION(:,:),POINTER          :: positions_tp
      REAL(kind=dp), DIMENSION(:,:),POINTER          :: velocities_tp
      REAL(kind=dp), DIMENSION(:),  POINTER          :: energies_tp
-     TYPE(sh_env_type), INTENT(INOUT)              :: sh_env
+     TYPE(sh_env_type), INTENT(INOUT)               :: sh_env
      INTEGER, POINTER                               :: itimes
      LOGICAL, INTENT(IN)                            :: my_bo_keyword
      TYPE(section_vals_type), POINTER               :: adiab_section,optimization_section
@@ -250,16 +251,9 @@ CONTAINS
      ENDIF
      CALL translate_com(positions_tp, keyword_translate, positions_com_tp, local_particles, atomic_kinds = atomic_kinds)  
 
-print *, "positions_tp", positions_tp(:,1)
-print *, "positions_tp", positions_tp(:,2)
-print *, "positions_tp", positions_tp(:,3)
-
-print *, "positions_com_tp", positions_com_tp(:,1)
-print *, "positions_com_tp", positions_com_tp(:,2)
-print *, "positions_com_tp", positions_com_tp(:,3)
 
      IF (sh_env%aom_couplings_keyword) THEN
-         !------------------  AOM section -------------------------------------
+         !> ------------------  AOM section -------------------------------------
          ALLOCATE(PC_allrvecs(5,mol*sh_env%atoms_per_site))
          do coord=1,3
             sh_env%crds(coord,:,1)   = PACK(positions_com_tp(coord,:), sh_env%ext_pres)
@@ -270,9 +264,7 @@ print *, "positions_com_tp", positions_com_tp(:,3)
             sh_env%siteenergies(2,:) = 0.0D0 ! CHANGE_AC
             sh_env%siteenergies(3,:) = energies_tp(:) ! CHANGE_AC
          enddo
-print *, "sh_env%ext_pres", sh_env%ext_pres
-print *, "SIZE sh_env%ext_pres", SIZE(sh_env%ext_pres)         
-print *, "positions_com_tp(coord,:)", SIZE(positions_com_tp(1,:))
+
          !> CALCULATE THE CENTER OF MASS AND CONSTRUCT NEIGHBOURS LIST
          !> COMMENT_SG: it assumes same number of atoms per mol
          CALL calc_coms_and_nlist(mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, &
@@ -293,9 +285,6 @@ print *, "positions_com_tp(coord,:)", SIZE(positions_com_tp(1,:))
          CALL calc_aom_Xmatrix_elements_first_step(sh_env, sh_env%atoms_per_site, mol, sh_env%dR, sh_env%do_random, sh_env%cbar, &
                           sh_env%scaling, PC_allrvecs, orb, sh_env%minao)
 
-print *, "sh_env%cutoff_sites",sh_env%cutoff_sites
-print *, "NN", sh_env%NN 
-
          !> CONVERT NACV AND CALCULATE EIGENPROPERTIES 
          !> THESE ASSOCIATIONS ARE NEEDED FOR THE NACV CALC
          sh_env%nacv = sh_env%cbar*sh_env%nacv
@@ -310,21 +299,15 @@ print *, "NN", sh_env%NN
             sh_env%crds(coord,:,1)   = 0.0D0 !time tm not used
             sh_env%crds(coord,:,2)   = 0.0D0 !time t not used
             sh_env%crds(coord,:,3)   = PACK(positions_com_tp(coord,:), sh_env%ext_pres)
-            !sh_env%crds(coord,:,3)   = 0.0D0
          enddo
          
-print *, "sh_env%ext_pres", sh_env%ext_pres
-print *, "SIZE sh_env%ext_pres", SIZE(sh_env%ext_pres)         
-print *, "positions_com_tp(coord,:)", SIZE(positions_com_tp(1,:))
          !> CALCULATE THE CENTER OF MASS AND CONSTRUCT NEIGHBOURS LIST
          !this is needed to calculate the NN list
          CALL calc_coms_and_nlist(mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, &
                                     active_system_info=sh_env%active_system_info, NN=sh_env%NN)
 
-print *, "sh_env%cutoff_sites",sh_env%cutoff_sites
-print *, "NN", sh_env%NN 
-
-         CALL calc_frozen_H(sh_env, energies_tp, orb)
+         CALL calc_tresp_coup(sh_env, energies_tp, orb, NN=sh_env%NN, crds=sh_env%crds, &
+                             active_system_info=sh_env%active_system_info, tresp_charges=sh_env%tresp_charges)
 
      ELSE
          !> In a possible extension one should add here 
@@ -745,7 +728,8 @@ print *, "NN", sh_env%NN
          CALL calc_coms_and_nlist(mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, &
                                     active_system_info=sh_env%active_system_info, NN=sh_env%NN)
 
-         CALL calc_frozen_H(sh_env, energies_tp, orb)
+         CALL calc_tresp_coup(sh_env, energies_tp, orb, NN=sh_env%NN, crds=sh_env%crds, &
+                             active_system_info=sh_env%active_system_info, tresp_charges=sh_env%tresp_charges)
 
      ELSE
          !> In a possible extension one should add here 

@@ -171,7 +171,6 @@ CONTAINS
      allocate(sh_env%adiab_nace_t(mat,mat))
      allocate(sh_env%adiab_nace_tp(mat,mat))
       
-        
 
      sh_env%do_deco = .FALSE.
      decoherence_section => section_vals_get_subs_vals(adiab_section,"DECOHERENCE")
@@ -228,12 +227,6 @@ CONTAINS
 
     !print *, "FOB_SH| EXT PRESS:", sh_env%ext_pres
     !sh_env%total_active_atoms = COUNT(sh_env%ext_pres)
-
-print *, "dim 1", sh_env%active_system_info(1,:)
-print *, "dim 2", sh_env%active_system_info(2,:)
-
-print *, "pos", positions_tp(1,sh_env%active_system_info(1,1):sh_env%active_system_info(2,1))/1.889725989 
-print *, "pos", positions_tp(1,sh_env%active_system_info(1,2):sh_env%active_system_info(2,2))/1.889725989 
 
     !initialize couplings
     CALL section_vals_val_get(adiab_section,"METHOD_COUPLING",c_val=coupling_keyword)
