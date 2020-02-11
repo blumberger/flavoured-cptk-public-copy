@@ -163,6 +163,8 @@ END TYPE adiab_nace_env_type
      LOGICAL                                  :: analytics, do_random
      REAL(KIND=dp)                            :: dR
 
+!> TRESP arrays
+     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE :: tresp_charges
 
 !> BORDERLINE used for AOM and some other couplings mainly TRESP
      LOGICAL, DIMENSION(:), POINTER           :: ext_pres
@@ -179,6 +181,7 @@ END TYPE adiab_nace_env_type
      LOGICAL                                  :: tresp_couplings_keyword 
  
      INTEGER, DIMENSION(:,:), ALLOCATABLE     :: full_system_info  
+     INTEGER, DIMENSION(:,:), ALLOCATABLE     :: active_system_info  
 
 !> Constant over the simulations
      integer                                  :: natom !Total number of atoms

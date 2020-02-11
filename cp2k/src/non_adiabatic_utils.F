@@ -94,29 +94,27 @@ MODULE non_adiabatic_utils
 
 CONTAINS
 
-     !SG_COMMENTS: this subroutine is not general! it can accept only the same
-     !number of atoms per molecule and non-degenrate state. To include degeracy
-     !add one more loop as in calc_frozen_H.
-
 !**********************************************************************************
 !> \brief it calculates the COMs of the molecules and the distance between these
 !         COM points. Using an external input, it determines which COMs are within a
 !         given cut-off. 
-!> \note this is general for degeneracy but it cannot deal with different number
-!>       of atoms per mols
+!> \note this is general for degeneracy and also for different num of atoms per mol
 !> \author AC [Edited SG]
 !**********************************************************************************
-SUBROUTINE calc_coms_and_nlist(atoms, mol, cutoff_sites, orb, crds, NN)
+SUBROUTINE calc_coms_and_nlist(mol, cutoff_sites, orb, crds, active_system_info, NN)
 
-     INTEGER, INTENT(IN)                             :: mol, atoms, orb
+     INTEGER, INTENT(IN)                             :: mol, orb
      REAL(KIND=dp), intent (IN)                      :: cutoff_sites
-     REAL(KIND=dp), dimension(:,:,:), POINTER        :: crds !crds active atoms in COM ref
-     INTEGER, DIMENSION(:,:), POINTER                :: NN
+     REAL(KIND=dp), dimension(:,:,:), POINTER, &
+                                      INTENT(IN)     :: crds !crds active atoms in COM ref
+     INTEGER, DIMENSION(:,:), ALLOCATABLE, &
+                                      INTENT(IN)     :: active_system_info
+     INTEGER, DIMENSION(:,:), POINTER, INTENT(OUT)   :: NN
 
      CHARACTER(len=*), PARAMETER                     :: routineN='calc_coms_and_nlist', &
      routineP = moduleN//':'//routineN
 
-     integer                                         :: i, j, m, d
+     integer                                         :: i, j, m, d, atoms
      REAL(KIND=dp)                                   :: dist
      REAL(KIND=dp), dimension(:,:), ALLOCATABLE      :: coms
   
@@ -127,6 +125,8 @@ SUBROUTINE calc_coms_and_nlist(atoms, mol, cutoff_sites, orb, crds, NN)
      !coms(1 to 3,i) are the x, y and z coordinates of CoM of i
      coms = 0
      do i=1,mol
+          !> counts the active atoms for each molecules to make it general
+          atoms = (active_system_info(2,i) - active_system_info(1,i)) + 1
           do m=1,atoms
                do d=1,3
                     coms(d,i) = coms(d,i) + (crds(d,(i-1)*atoms + m,3))/atoms
@@ -164,11 +164,15 @@ END SUBROUTINE calc_coms_and_nlist
 !**********************************************************************************
 !> \brief 
 !**********************************************************************************
-  subroutine calc_tresp_coup(sh_env, energies_tp, orb) !tresp_charges, crds)
-     TYPE(sh_env_type)                      :: sh_env
-     REAL(kind=dp), DIMENSION(:),  POINTER          :: energies_tp
-     integer, intent(in)                            :: orb
-        
+  subroutine calc_tresp_coup(sh_env, energies_tp, orb, tresp_charges)
+
+     TYPE(sh_env_type)                               :: sh_env
+     REAL(kind=dp), DIMENSION(:),  POINTER           :: energies_tp
+     integer, intent(in)                             :: orb
+     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE        :: tresp_charges  !tresp
+                                                                       !charges taken from input file, they refer 
+                                                                       !to a single mol and should be extended
+                                                                       !for multi-phase system
      CHARACTER(len=*), PARAMETER                     :: routineN ='calc_frozen_H', &
      routineP = moduleN//':'//routineN
 
@@ -180,7 +184,6 @@ END SUBROUTINE calc_coms_and_nlist
 
            if (sh_env%NN(i,k) == 1) then
  
-
               !> diagonal construction
               if (k==i) then 
                  !since you may want to include multiple orbital per state, you
@@ -193,10 +196,11 @@ END SUBROUTINE calc_coms_and_nlist
                  if ( k > i ) then
                     do d=1,orb
                        do m=1,orb
-                           
+print *, tresp_charges
+
                           !!##### CALL COUPLING 
                           sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,-0.0011024789,dp) !sign of the off-diag 
-                                                                                                        !does not matter for 1D chains
+                                                                                                !does not matter for 1D chains
                       end do
                    end do
                  else
@@ -215,9 +219,52 @@ END SUBROUTINE calc_coms_and_nlist
   end subroutine
 
 
+
+!!**********************************************************************************
+!!> \brief given crds of mol1 and mol2 and the respective charges (that might in
+!!general be different for the two mols), this calculates the tresp_coup. 
+!!> author SG 
+!!**********************************************************************************
+!subroutine calc_trsp_ab(crd1, crd2, charges1, charges2, tresp_coup)
+!
+!   real(kind=dp), allocatable, dimension(:,:), intent(in)  :: crd1, crd2
+!   real(kind=dp), allocatable, intent(in)                  :: charges1(:), charges2(:)
+!   real(kind=dp), intent(out)                              :: tresp_coup
+!
+!   real(kind=dp),  dimension(3) :: vect
+!   real(kind=dp)              :: tresp_coup, dist, !Ang2Bohr, AU2eV
+!   real(kind=dp)              :: x=2.0
+!   logical                    :: Gaussian_charges
+!   integer :: i,j
+!
+!!   Ang2Bohr=1.889725989
+!!   AU2eV=27.211399
+!
+!   Gaussian_charges = .True. !put in input file
+!
+!   !> Gaussian charges must be divided by sqrt(2)
+!   if (Gaussian_charges) then
+!     charges1(:) = (charges1(:)/SQRT(x))
+!     charges2(:) = (charges2(:)/SQRT(x))
+!   end if
+!
+!   tresp_coup = 0.0d0
+!   do i=1,SIZE(crd1,2)
+!      do j=1,SIZE(crd2,2)
+!         vect(:) = (crd1(:,i))-(crd2(:,j))
+!         dist = SQRT(DOT_PRODUCT(vect,vect))
+!         tresp_coup = tresp_coup + (charges1(i)*charges2(j))/dist
+!      end do
+!   end do
+!
+!print *, "tresp_coup", tresp_coup
+!end subroutine
+
+
 !**********************************************************************************
 !> \brief for now it calculates a tridiagonal matrix as hamiltonian with
 !diagonal elements taken from FF and just off diagonals from input
+!> author SG
 !**********************************************************************************
   subroutine calc_frozen_H(sh_env, energies_tp, orb)
      TYPE(sh_env_type)                      :: sh_env

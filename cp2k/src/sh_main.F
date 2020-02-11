@@ -261,7 +261,6 @@ print *, "positions_com_tp", positions_com_tp(:,3)
      IF (sh_env%aom_couplings_keyword) THEN
          !------------------  AOM section -------------------------------------
          ALLOCATE(PC_allrvecs(5,mol*sh_env%atoms_per_site))
-print *, "ENTER"
          do coord=1,3
             sh_env%crds(coord,:,1)   = PACK(positions_com_tp(coord,:), sh_env%ext_pres)
             !At time 0, we must guess the positions at time -1 with the inital velocities
@@ -276,7 +275,8 @@ print *, "SIZE sh_env%ext_pres", SIZE(sh_env%ext_pres)
 print *, "positions_com_tp(coord,:)", SIZE(positions_com_tp(1,:))
          !> CALCULATE THE CENTER OF MASS AND CONSTRUCT NEIGHBOURS LIST
          !> COMMENT_SG: it assumes same number of atoms per mol
-         CALL calc_coms_and_nlist(sh_env%atoms_per_site, mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, NN=sh_env%NN)
+         CALL calc_coms_and_nlist(mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, &
+                                    active_system_info=sh_env%active_system_info, NN=sh_env%NN)
 
          ! Allocate neighbouring list just at the first step as Jacob suggested 
          !only if sh_env%multiple_time_step .eq. 1 otherwise we use Multiple time
@@ -306,9 +306,6 @@ print *, "NN", sh_env%NN
 
      ELSE IF (sh_env%tresp_couplings_keyword) THEN 
          !> TRESP COUPLINGS
-print *, "ENTER"
-print *, " positions_com_tp(coord,i)",  SIZE(positions_com_tp,2)
-print *, "SIZE sh_env%ext_pres", SIZE(sh_env%ext_pres)         
          do coord=1,3
             sh_env%crds(coord,:,1)   = 0.0D0 !time tm not used
             sh_env%crds(coord,:,2)   = 0.0D0 !time t not used
@@ -320,8 +317,9 @@ print *, "sh_env%ext_pres", sh_env%ext_pres
 print *, "SIZE sh_env%ext_pres", SIZE(sh_env%ext_pres)         
 print *, "positions_com_tp(coord,:)", SIZE(positions_com_tp(1,:))
          !> CALCULATE THE CENTER OF MASS AND CONSTRUCT NEIGHBOURS LIST
-         !> COMMENT_SG: it assumes same number of atoms per mol
-         CALL calc_coms_and_nlist(sh_env%atoms_per_site, mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, NN=sh_env%NN)
+         !this is needed to calculate the NN list
+         CALL calc_coms_and_nlist(mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, &
+                                    active_system_info=sh_env%active_system_info, NN=sh_env%NN)
 
 print *, "sh_env%cutoff_sites",sh_env%cutoff_sites
 print *, "NN", sh_env%NN 
@@ -715,8 +713,8 @@ print *, "NN", sh_env%NN
          enddo
 
          !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
-         !> COMMENT_SG: it assumes same number of atoms per mol
-         CALL calc_coms_and_nlist(sh_env%atoms_per_site, mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, NN=sh_env%NN)
+         CALL calc_coms_and_nlist(mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, &
+                                    active_system_info=sh_env%active_system_info, NN=sh_env%NN)
 
          !> CALCULATE THE HAMILTONIAN, THE STTP MATRIX AND THE NACV
          CALL calc_aom_Xmatrix_elements(sh_env, itimes, sh_env%atoms_per_site, mol, sh_env%dR, sh_env%do_random, sh_env%cbar, &
@@ -744,8 +742,8 @@ print *, "NN", sh_env%NN
          enddo
 
          !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
-         !> COMMENT_SG: it assumes same number of atoms per mol
-         CALL calc_coms_and_nlist(sh_env%atoms_per_site, mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, NN=sh_env%NN)
+         CALL calc_coms_and_nlist(mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, &
+                                    active_system_info=sh_env%active_system_info, NN=sh_env%NN)
 
          CALL calc_frozen_H(sh_env, energies_tp, orb)
 
