@@ -95,7 +95,7 @@ CONTAINS
 
      TYPE(section_vals_type), POINTER               :: optimization_section
      TYPE(section_vals_type), POINTER               :: wf_restart_section, decoherence_section
-     TYPE(section_vals_type), POINTER               :: frozen_coupling_section
+     TYPE(section_vals_type), POINTER               :: frozen_coupling_section,tresp_coupling_section
      integer                                        :: mat, mol
      TYPE(cp_sll_val_type), POINTER                 :: listdiabcoeff
      REAL(KIND=dp), DIMENSION(3, 2)                 :: initial_seed
@@ -104,13 +104,14 @@ CONTAINS
      CHARACTER(LEN=default_string_length)           :: deco_keyword
      CHARACTER(LEN=default_string_length)           :: coupling_keyword
      REAL(KIND=dp)                                  :: MDtimestep
-     !INTEGER, DIMENSION(:), POINTER                 :: idx_active_mols !CHANGE SAM
-    !TYPE(cp_sll_val_type), POINTER                 :: list_tresp
-    !integer, dimension(:), ALLOCATABLE             :: ext_elements
-    !LOGICAL, DIMENSION(:), POINTER                :: active_logical
-    !INTEGER                                       :: natom_mol
-    !REAL(KIND=dp), DIMENSION(:), ALLOCATABLE      :: tresp_charges
-    !NULLIFY(list_tresp)
+
+     TYPE(cp_sll_val_type), POINTER                 :: list_tresp
+     integer, dimension(:), ALLOCATABLE             :: ext_elements
+     LOGICAL, DIMENSION(:), POINTER                :: active_logical
+     INTEGER                                       :: natom_mol, c
+     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE      :: tresp_charges
+
+     NULLIFY(list_tresp)
 
      NULLIFY(rng_stream)
      NULLIFY(decoherence_section)
@@ -222,21 +223,18 @@ CONTAINS
     print *, "FOB_SH| INDEX ACTIVE MOLS:", sh_env%index_active_mols
     CALL create_ext_press_list(molecule_kind_set, local_molecules, molecule_set, natom, &
                                       sh_env%index_active_mols, sh_env%ext_pres)
+    !> sh_env%ext_pres will be overwritten in AOM case becuase active molecules
+    !may still have inactive atoms (this feature is used for further speed-up)
+
     !print *, "FOB_SH| EXT PRESS:", sh_env%ext_pres
     !sh_env%total_active_atoms = COUNT(sh_env%ext_pres)
 
-
-
-!     !> READ TRESP CHARGES TEST
-!     CALL section_vals_list_get(adiab_section,"_DEFAULT_KEYWORD_",list=list_tresp) !Read list tresp from input
-!     natom_mol = 24 !!!:::::::::::::::::::::::WARNING ::::::::::::::::::::::::: 
-!     CALL read_list_tresp(natom_mol, list_tresp, ext_elements, active_logical, tresp_charges)
-!print *, "active_logical", active_logical
-!print *, "tresp_charges", tresp_charges
-
+    !initialize couplings
     CALL section_vals_val_get(adiab_section,"METHOD_COUPLING",c_val=coupling_keyword)
     sh_env%aom_couplings_keyword = .FALSE.
     sh_env%frozen_couplings_keyword = .FALSE.
+    sh_env%tresp_couplings_keyword = .FALSE.
+
     SELECT CASE(coupling_keyword)
     !---------------- AOM array ---------------------------------------------------------------
     CASE("AOM")
@@ -251,6 +249,29 @@ CONTAINS
         !will be formed) 
         CALL section_vals_val_get(frozen_coupling_section,"FIRST_OFF_DIAGONALS_VAL",&
             r_val=sh_env%first_off_d_Hab)
+    CASE("TRESP_COUPLINGS")
+        sh_env%tresp_couplings_keyword = .TRUE.
+        !sh_env%frozen_couplings_keyword = .TRUE.  !test
+        sh_env%first_off_d_Hab = -0.0011024789     !test
+
+        !----------- put in a new subroutine -----------------------------
+        NULLIFY(tresp_coupling_section)
+        tresp_coupling_section => section_vals_get_subs_vals(adiab_section, "TRESP_COUPLINGS")
+        !> READ TRESP CHARGES TEST
+        CALL section_vals_list_get(tresp_coupling_section,"_DEFAULT_KEYWORD_",list=list_tresp) !Read list tresp from input
+        CALL section_vals_val_get(tresp_coupling_section,"CUT_OFF_BETWEEN_SITES",&
+             r_val=sh_env%cutoff_sites)
+        !### COMMENT_SG: not general for multiphase
+        CALL section_vals_val_get(tresp_coupling_section,"NUMBER_AOM_ATOMS_PER_SITE",&
+             i_val=natom_mol)
+        sh_env%atoms_per_site = natom_mol
+        CALL read_list_tresp(sh_env%atoms_per_site, list_tresp, ext_elements, active_logical, tresp_charges) 
+        !> active_logical is not necessary since inactive atoms will anyway have 0
+        !charges that will nullify the term in the coulomb sum 
+        
+        c = nadiab*sh_env%atoms_per_site !> Numbers of active atoms per mol 
+        allocate(sh_env%crds(3,c,3))  !> crds active atoms
+        ALLOCATE(sh_env%NN(mat, mat))
 
 
     CASE DEFAULT
@@ -422,7 +443,7 @@ end subroutine create_ext_press_list
      ALLOCATE(sh_env%pcoeffs(aom_atoms,norbitals))
      ALLOCATE(sh_env%scoeffs(aom_atoms))
      !> crds is an AOM arrays (xyz, atoms, tm-t-tp) the third dimension
-     !indicates what time this coordinates refer to
+     !indicates what time the coordinates refer to
      allocate(sh_env%crds(3,c,3))
      ALLOCATE(sh_env%NN(mat, mat))
      allocate(sh_env%pcoeffsrun(sh_env%atoms_per_site,mat,3)) !pcoeffsrun exists because the p-coefficients
@@ -530,9 +551,6 @@ end subroutine create_ext_press_list
      !output: sh_env%connlist1, sh_env%connlist2
      call connect_list2(Atp_loc(2:4,:), sh_env%atomlist, sh_env%connlist1, sh_env%connlist2, sh_env%cutoff_connect)
      
-print *, "Atp_loc", Atp_loc
-print *, "sh_env%connlist1", sh_env%connlist1
-print *, "sh_env%connlist2", sh_env%connlist2
 
      DEALLOCATE(atomlist_mask) 
      DEALLOCATE(submask) 

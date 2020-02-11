@@ -440,13 +440,6 @@ CONTAINS
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
 
-    CALL keyword_create(keyword, name="_DEFAULT_KEYWORD_",&
-         description="The TRESP charges in the format:"//&
-         "<p><tt>ATOMIC_KIND  LIST NO TRESP</tt></p>",&
-         repeats=.TRUE., usage="{{String} {Int} {Int} {Real}}",&
-         type_of_var=lchar_t)
-    CALL section_add_keyword(subsection,keyword)
-    CALL keyword_release(keyword)
 
     !> start new sub2section METHOD_COUPLING, part of ADIABATIC subsection
     CALL keyword_create(keyword, name="METHOD_COUPLING",&
@@ -479,6 +472,38 @@ CONTAINS
     CALL section_release(sub2section)
     !-----------------------------------------------------------------------
 
+    !-----------------------------------------------------------------------
+    !> start new sub3section TRESP_COUPLINGS part of METHOD_COUPLING sub2section
+    NULLIFY(sub2section) 
+    CALL section_create(sub2section,name="TRESP_COUPLINGS",&
+         description="Defines the methods to obtain the couplings.",&
+         n_keywords=1, n_subsections=0, repeats=.FALSE.)
+    CALL section_add_subsection(subsection,sub2section)
+
+    CALL keyword_create(keyword, name="NUMBER_AOM_ATOMS_PER_SITE",&
+         description="Number of atoms per site",&
+         usage="1", type_of_var=integer_t)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="CUT_OFF_BETWEEN_SITES",&
+         description="Distance cut-off for H_ab calculation",&
+         usage="6.0D0", type_of_var=real_t, &
+         unit_str="angstrom")
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="_DEFAULT_KEYWORD_",&
+         description="The TRESP charges in the format:"//&
+         "<p><tt>ATOMIC_KIND  LIST NO TRESP</tt></p>",&
+         repeats=.TRUE., usage="{{String} {Int} {Int} {Real}}",&
+         type_of_var=lchar_t)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    !> releasing FROZEN_COUPLINGS subsection
+    CALL section_release(sub2section)
+    !-----------------------------------------------------------------------
 
     !-----------------------------------------------------------------------
     !> start new sub3section AOM part of METHOD_COUPLING sub2section

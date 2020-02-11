@@ -114,7 +114,6 @@ MODULE aom_utils
                                               calc_rvecs, &
                                               calc_sab_pete
 !  USE non_adiabatic_utils,             ONLY: simple_vel_rescaling, &
-!                                             translate_com,        &
 !                                             cal_delta_energy_nacv,&
 !                                             diab_to_adiab
 

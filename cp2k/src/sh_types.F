@@ -151,8 +151,6 @@ END TYPE adiab_nace_env_type
      REAL(KIND=dp), DIMENSION(:), POINTER     :: scoeffs
      REAL(KIND = dp)                          :: scaling, cbar, minao !For AOM calculations
      !> Calculate at each timestep
-     REAL(KIND=dp), dimension(:,:,:), POINTER :: crds !crds active atoms in COM reference frames
-     INTEGER, DIMENSION(:,:), POINTER         :: NN   !neighbrouring list
      REAL(KIND=dp), dimension(:,:,:), POINTER :: pcoeffsrun
      REAL(KIND=dp), dimension(:,:), POINTER   :: At, Atm, Atp, Bt, Btm, & 
                                                  Btp, siteenergies
@@ -166,8 +164,11 @@ END TYPE adiab_nace_env_type
      REAL(KIND=dp)                            :: dR
 
 
-!> BORDERLINE between AOM and something else (DECIDE WHERE TO PUT THEM)
+!> BORDERLINE used for AOM and some other couplings mainly TRESP
      LOGICAL, DIMENSION(:), POINTER           :: ext_pres
+     REAL(KIND=dp), dimension(:,:,:), POINTER :: crds !crds active atoms in COM reference frames
+     INTEGER, DIMENSION(:,:), POINTER         :: NN   !neighbrouring list
+     integer                                  :: atoms_per_site !Number of atoms per site
 
 !> FROZEN_COUPLINGS section 
      REAL(KIND = dp)                          :: first_off_d_Hab
@@ -175,9 +176,9 @@ END TYPE adiab_nace_env_type
 
 !> Couplings section possibilities
      LOGICAL                                  :: aom_couplings_keyword, frozen_couplings_keyword 
+     LOGICAL                                  :: tresp_couplings_keyword 
 
 !> Constant over the simulations
-     integer                                  :: atoms_per_site !Number of atoms per site
      integer                                  :: natom !Total number of atoms
      REAL(KIND=dp)                            :: deltat !Timestep
 

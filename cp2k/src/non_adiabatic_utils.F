@@ -162,6 +162,60 @@ SUBROUTINE calc_coms_and_nlist(atoms, mol, cutoff_sites, orb, crds, NN)
 END SUBROUTINE calc_coms_and_nlist
 
 !**********************************************************************************
+!> \brief 
+!**********************************************************************************
+  subroutine calc_tresp_coup(sh_env, energies_tp, orb) !tresp_charges, crds)
+     TYPE(sh_env_type)                      :: sh_env
+     REAL(kind=dp), DIMENSION(:),  POINTER          :: energies_tp
+     integer, intent(in)                            :: orb
+        
+     CHARACTER(len=*), PARAMETER                     :: routineN ='calc_frozen_H', &
+     routineP = moduleN//':'//routineN
+
+     integer :: i, k, m, d
+
+     sh_env%H_tp(:,:) = cmplx(0.0D0, 0.0D0,dp)
+     do i=1,SIZE(energies_tp) !loop over all non-degerate states
+        do k=1,SIZE(energies_tp)
+
+           if (sh_env%NN(i,k) == 1) then
+ 
+
+              !> diagonal construction
+              if (k==i) then 
+                 !since you may want to include multiple orbital per state, you
+                 !should loop over orbitals
+                 do d=1,orb
+                    sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+d) = cmplx(0.0D0,(-energies_tp(i)),dp) !minus because we propagate -X
+                 end do
+              else 
+                 !loop over upper diagonal
+                 if ( k > i ) then
+                    do d=1,orb
+                       do m=1,orb
+                           
+                          !!##### CALL COUPLING 
+                          sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,-0.0011024789,dp) !sign of the off-diag 
+                                                                                                        !does not matter for 1D chains
+                      end do
+                   end do
+                 else
+                    do d=1,orb 
+                       do m=1,orb 
+                          sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m) = sh_env%H_tp(orb*(k-1)+m,orb*(i-1)+d)
+                       end do 
+                    end do
+                 end if 
+              end if 
+
+
+           end if
+        end do 
+     end do
+  end subroutine
+
+
+!**********************************************************************************
 !> \brief for now it calculates a tridiagonal matrix as hamiltonian with
 !diagonal elements taken from FF and just off diagonals from input
 !**********************************************************************************
@@ -177,11 +231,12 @@ END SUBROUTINE calc_coms_and_nlist
 
      sh_env%H_tp(:,:) = cmplx(0.0D0, 0.0D0,dp)
      ! these loops are inefficients but do the job
-     do i=1,SIZE(energies_tp) !loop over all states
+     do i=1,SIZE(energies_tp) !loop over all non-generate states 
         do k=1,SIZE(energies_tp)
            !> diagonal construction
            if (k==i) then 
-              !since you may want to include multiple orbital per state, you
+              !since you may want to include multiple orbital per state (for the
+              !degenerate case)), you
               !should loop over orbitals
               do d=1,orb
                  sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+d) = cmplx(0.0D0,(-energies_tp(i)),dp) !minus because we propagate -X
@@ -200,6 +255,7 @@ END SUBROUTINE calc_coms_and_nlist
           end if 
         end do 
      end do
+print *, sh_env%H_tp
   end subroutine
 
 

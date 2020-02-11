@@ -261,6 +261,7 @@ print *, "positions_com_tp", positions_com_tp(:,3)
      IF (sh_env%aom_couplings_keyword) THEN
          !------------------  AOM section -------------------------------------
          ALLOCATE(PC_allrvecs(5,mol*sh_env%atoms_per_site))
+print *, "ENTER"
          do coord=1,3
             sh_env%crds(coord,:,1)   = PACK(positions_com_tp(coord,:), sh_env%ext_pres)
             !At time 0, we must guess the positions at time -1 with the inital velocities
@@ -270,7 +271,9 @@ print *, "positions_com_tp", positions_com_tp(:,3)
             sh_env%siteenergies(2,:) = 0.0D0 ! CHANGE_AC
             sh_env%siteenergies(3,:) = energies_tp(:) ! CHANGE_AC
          enddo
-         
+print *, "sh_env%ext_pres", sh_env%ext_pres
+print *, "SIZE sh_env%ext_pres", SIZE(sh_env%ext_pres)         
+print *, "positions_com_tp(coord,:)", SIZE(positions_com_tp(1,:))
          !> CALCULATE THE CENTER OF MASS AND CONSTRUCT NEIGHBOURS LIST
          !> COMMENT_SG: it assumes same number of atoms per mol
          CALL calc_coms_and_nlist(sh_env%atoms_per_site, mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, NN=sh_env%NN)
@@ -290,12 +293,39 @@ print *, "positions_com_tp", positions_com_tp(:,3)
          CALL calc_aom_Xmatrix_elements_first_step(sh_env, sh_env%atoms_per_site, mol, sh_env%dR, sh_env%do_random, sh_env%cbar, &
                           sh_env%scaling, PC_allrvecs, orb, sh_env%minao)
 
+print *, "sh_env%cutoff_sites",sh_env%cutoff_sites
+print *, "NN", sh_env%NN 
+
          !> CONVERT NACV AND CALCULATE EIGENPROPERTIES 
          !> THESE ASSOCIATIONS ARE NEEDED FOR THE NACV CALC
          sh_env%nacv = sh_env%cbar*sh_env%nacv
          !-----------------------------------------------------------------------------
      ELSE IF (sh_env%frozen_couplings_keyword) THEN 
          !> FROZEN COUPLINGS 
+         CALL calc_frozen_H(sh_env, energies_tp, orb)
+
+     ELSE IF (sh_env%tresp_couplings_keyword) THEN 
+         !> TRESP COUPLINGS
+print *, "ENTER"
+print *, " positions_com_tp(coord,i)",  SIZE(positions_com_tp,2)
+print *, "SIZE sh_env%ext_pres", SIZE(sh_env%ext_pres)         
+         do coord=1,3
+            sh_env%crds(coord,:,1)   = 0.0D0 !time tm not used
+            sh_env%crds(coord,:,2)   = 0.0D0 !time t not used
+            sh_env%crds(coord,:,3)   = PACK(positions_com_tp(coord,:), sh_env%ext_pres)
+            !sh_env%crds(coord,:,3)   = 0.0D0
+         enddo
+         
+print *, "sh_env%ext_pres", sh_env%ext_pres
+print *, "SIZE sh_env%ext_pres", SIZE(sh_env%ext_pres)         
+print *, "positions_com_tp(coord,:)", SIZE(positions_com_tp(1,:))
+         !> CALCULATE THE CENTER OF MASS AND CONSTRUCT NEIGHBOURS LIST
+         !> COMMENT_SG: it assumes same number of atoms per mol
+         CALL calc_coms_and_nlist(sh_env%atoms_per_site, mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, NN=sh_env%NN)
+
+print *, "sh_env%cutoff_sites",sh_env%cutoff_sites
+print *, "NN", sh_env%NN 
+
          CALL calc_frozen_H(sh_env, energies_tp, orb)
 
      ELSE
@@ -449,6 +479,8 @@ print *, "positions_com_tp", positions_com_tp(:,3)
          IF ((new_state).EQ.0) new_state = mat
      ENDIF 
 
+
+     !> ######## FORCES CALCULATION   ###########################################################
      print*, "FOBSH| ACTIVE STATE = ", active_state
      IF (sh_env%aom_couplings_keyword) THEN
         !------------------  AOM section --------------------------------------------------------
@@ -465,6 +497,11 @@ print *, "positions_com_tp", positions_com_tp(:,3)
         ENDIF
         !-----------------------------------------------------------------------------------------------
      ELSE IF (sh_env%frozen_couplings_keyword) THEN 
+        !frozen Hamiltonian case
+        CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=active_state, Fin=diagonal_F, &
+                                  forces_adiab=sh_env%forces_adiab)
+
+     ELSE IF (sh_env%tresp_couplings_keyword) THEN 
         !frozen Hamiltonian case
         CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=active_state, Fin=diagonal_F, &
                                   forces_adiab=sh_env%forces_adiab)
@@ -666,7 +703,6 @@ print *, "positions_com_tp", positions_com_tp(:,3)
      allocate(exact_forces(3,natom))
      !> OBTAIN COORDINATES, ENERGIES, STATES, etc. FROM PREVIOUS STEP
      CALL translate_com(positions_tp, keyword_translate, positions_com_tp, local_particles, atomic_kinds = atomic_kinds)  
-
      IF (sh_env%aom_couplings_keyword) THEN
          !------------------  AOM section -------------------------------------
          ALLOCATE(PC_allrvecs(5,mol*sh_env%atoms_per_site))
@@ -677,7 +713,6 @@ print *, "positions_com_tp", positions_com_tp(:,3)
             sh_env%crds(coord,:,3) = PACK(positions_com_tp(coord,:), sh_env%ext_pres)
             sh_env%siteenergies(3,:) = energies_tp(:) ! CHANGE_AC
          enddo
-
 
          !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
          !> COMMENT_SG: it assumes same number of atoms per mol
@@ -700,7 +735,20 @@ print *, "positions_com_tp", positions_com_tp(:,3)
          !> FROZEN COUPLINGS 
          CALL calc_frozen_H(sh_env, energies_tp, orb)
 
-         
+     ELSE IF (sh_env%tresp_couplings_keyword) THEN
+         !> TRESP COUPLINGS 
+         do coord=1,3
+            sh_env%crds(coord,:,1) = 0.0D0 !time tm is not used 
+            sh_env%crds(coord,:,2) = 0.0D0 !time t is not used
+            sh_env%crds(coord,:,3) = PACK(positions_com_tp(coord,:), sh_env%ext_pres)
+         enddo
+
+         !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
+         !> COMMENT_SG: it assumes same number of atoms per mol
+         CALL calc_coms_and_nlist(sh_env%atoms_per_site, mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, NN=sh_env%NN)
+
+         CALL calc_frozen_H(sh_env, energies_tp, orb)
+
      ELSE
          !> In a possible extension one should add here 
          CPABORT("Another coupling method to constrcut H should be chosen")
@@ -861,6 +909,15 @@ print *, "positions_com_tp", positions_com_tp(:,3)
                      CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp),C=sh_env%C_tp, state=sh_env%new_state, Fin=diagonal_F, &
                                   forces_adiab=sh_env%forces_adiab_new)
         END IF
+
+     ELSE IF (sh_env%tresp_couplings_keyword) THEN
+        CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=sh_env%active_state, Fin=diagonal_F, &
+                                  forces_adiab=sh_env%forces_adiab)
+        IF (sh_env%attempt_hop) THEN
+                     CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp),C=sh_env%C_tp, state=sh_env%new_state, Fin=diagonal_F, &
+                                  forces_adiab=sh_env%forces_adiab_new)
+        END IF
+
      ELSE
          !> In a possible extension one should add here 
          CPABORT("Another way to calculate adiabatic forces should be developed")
