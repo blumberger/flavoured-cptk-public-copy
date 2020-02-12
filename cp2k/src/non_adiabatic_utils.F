@@ -168,14 +168,15 @@ END SUBROUTINE calc_coms_and_nlist
 !> \param energies_tp, site energies
 !> \param orb, number of states per mol (for degeneragy)
 !> \param NN, nearest neighbour list to apply cut-off radious to coulomb sum 
-!> \param crds, coordinates active atoms 
+!> \param positions_com_tp, coordinates of total system from which we choose
+!         active ones.
 !> \param active_system_info, initial and final index for the active mols
 !> \param tresp_charges, initial tresp read from input (to be generalized to different mols)
 
 !> \output sh_env%H_tp
 !> \author SG
 !**********************************************************************************
-  subroutine calc_tresp_coup(sh_env, energies_tp, orb, NN, crds, active_system_info, tresp_charges)
+  subroutine calc_tresp_coup(sh_env, energies_tp, orb, NN, positions_com_tp, active_system_info, tresp_charges)
 
      TYPE(sh_env_type)                               :: sh_env
      REAL(kind=dp), DIMENSION(:),  POINTER           :: energies_tp
@@ -186,8 +187,8 @@ END SUBROUTINE calc_coms_and_nlist
                                                                        !to a single mol and should be extended
                                                                        !for multi-phase system
      INTEGER, DIMENSION(:,:), POINTER, INTENT(IN)    :: NN
-     REAL(kind=dp), DIMENSION(:,:,:),POINTER, &
-                                   INTENT(IN)        :: crds
+     REAL(kind=dp), DIMENSION(:,:),POINTER, &
+                                   INTENT(IN)        :: positions_com_tp
      INTEGER, DIMENSION(:,:), ALLOCATABLE, &
                                    INTENT(IN)        :: active_system_info
 
@@ -242,6 +243,7 @@ END SUBROUTINE calc_coms_and_nlist
                           final_atom_mol2 = sh_env%active_system_info(2,k)
                           atoms_per_mol2 = (final_atom_mol2-init_atom_mol2)+1
 
+
                           !> this allocation deallocation is maybe inefficient
                           !but it was the only thing I found to be general for
                           !multi-phases
@@ -249,15 +251,18 @@ END SUBROUTINE calc_coms_and_nlist
                           ALLOCATE(crd2(3,atoms_per_mol2))
 
                           do dim_=1,3
-                             crd1(dim_,:) = crds(dim_, init_atom_mol1:final_atom_mol1, 3)
-                             crd2(dim_,:) = crds(dim_, init_atom_mol2:final_atom_mol2, 3)
+                             crd1(dim_,:) = positions_com_tp(dim_, init_atom_mol1:final_atom_mol1)
+                             crd2(dim_,:) = positions_com_tp(dim_, init_atom_mol2:final_atom_mol2)
                           end do
+
 !print *, "PAIR", i,k
 !print *, "crd1(dim_,:)", crd1(:,:)
 !print *, "crd2(dim_,:)", crd2(:,:)
+                          ! calc coupling for a given pair of states
                           CALL calc_trsp_ab(crd1, crd2, charges1, charges2, tresp_coup)
-                          !!##### CALL COUPLING 
                           sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,-tresp_coup,dp) !sign of the off-diag is minus consisently with diagonals
+                          !test to recover frozen coup for a chain:
+                          !sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,0.0011024789,dp)
                          DEALLOCATE(crd1,crd2)
 
                       end do
@@ -360,7 +365,6 @@ end subroutine
           end if 
         end do 
      end do
-print *, sh_env%H_tp
   end subroutine
 
 

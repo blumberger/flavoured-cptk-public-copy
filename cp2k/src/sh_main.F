@@ -306,7 +306,7 @@ CONTAINS
          CALL calc_coms_and_nlist(mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, &
                                     active_system_info=sh_env%active_system_info, NN=sh_env%NN)
 
-         CALL calc_tresp_coup(sh_env, energies_tp, orb, NN=sh_env%NN, crds=sh_env%crds, &
+         CALL calc_tresp_coup(sh_env, energies_tp, orb, NN=sh_env%NN, positions_com_tp=positions_com_tp, &
                              active_system_info=sh_env%active_system_info, tresp_charges=sh_env%tresp_charges)
 
      ELSE
@@ -728,7 +728,7 @@ CONTAINS
          CALL calc_coms_and_nlist(mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, &
                                     active_system_info=sh_env%active_system_info, NN=sh_env%NN)
 
-         CALL calc_tresp_coup(sh_env, energies_tp, orb, NN=sh_env%NN, crds=sh_env%crds, &
+         CALL calc_tresp_coup(sh_env, energies_tp, orb, NN=sh_env%NN, positions_com_tp=positions_com_tp, &
                              active_system_info=sh_env%active_system_info, tresp_charges=sh_env%tresp_charges)
 
      ELSE
