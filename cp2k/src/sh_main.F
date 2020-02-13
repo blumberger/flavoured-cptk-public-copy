@@ -264,7 +264,9 @@ CONTAINS
             sh_env%siteenergies(2,:) = 0.0D0 ! CHANGE_AC
             sh_env%siteenergies(3,:) = energies_tp(:) ! CHANGE_AC
          enddo
-
+print *, "coord", sh_env%crds(:,1,3)
+print *, "coord", sh_env%crds(:,2,3)
+print *, "coord", sh_env%crds(:,3,3)
          !> CALCULATE THE CENTER OF MASS AND CONSTRUCT NEIGHBOURS LIST
          !> COMMENT_SG: it assumes same number of atoms per mol
          CALL calc_coms_and_nlist(mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, &

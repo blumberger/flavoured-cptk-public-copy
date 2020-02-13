@@ -201,6 +201,7 @@ END SUBROUTINE calc_coms_and_nlist
      real(kind=dp), allocatable, dimension(:,:)      :: crd1, crd2
      real(kind=dp), allocatable, dimension(:)        :: charges1, charges2
      real(kind=dp)                                   :: tresp_coup
+     real(kind=dp),  dimension(:,:), allocatable     :: grad1 !gradients acting on atoms of mol1
 
 
      !> COMMENT_SG: Tresp charegs array should be generalized for multiple molecules
@@ -255,7 +256,7 @@ END SUBROUTINE calc_coms_and_nlist
                              crd2(dim_,:) = positions_com_tp(dim_, init_atom_mol2:final_atom_mol2)
                           end do
 
-!print *, "PAIR", i,k
+print *, "PAIR", i,k
 !print *, "crd1(dim_,:)", crd1(:,:)
 !print *, "crd2(dim_,:)", crd2(:,:)
                           ! calc coupling for a given pair of states
@@ -263,7 +264,21 @@ END SUBROUTINE calc_coms_and_nlist
                           sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,-tresp_coup,dp) !sign of the off-diag is minus consisently with diagonals
                           !test to recover frozen coup for a chain:
                           !sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,0.0011024789,dp)
-                         DEALLOCATE(crd1,crd2)
+                          
+                          ! calc gradient on atoms belonging to mol 1 (namely i), from
+                          ! atoms belonging to mol 2( namely k)
+                          CALL calc_grad_coup( crd1, crd2, charges1, charges2, grad1) 
+                          
+                          ! I should find a way to store grad1 in a more general
+                          ! global_grad array that in principle should have
+                          ! dimension (3, mat, mat, natoms_TOTAL_active) or in a reduce
+                          ! form assuming all atoms_per_mol the same (3, mat, mat*natoms_per_mol))
+  
+                          !global_grad(:,i, )
+
+                          DEALLOCATE(crd1,crd2)
+
+
 
                       end do
                    end do
@@ -282,6 +297,53 @@ END SUBROUTINE calc_coms_and_nlist
      end do
   end subroutine
 
+! COMMENT_SG this subroutine is just a replication of the one below, you should
+! merge them together
+subroutine calc_grad_coup( crd1, crd2, charges1, charges2, grad1)
+
+   real(kind=dp), allocatable, dimension(:,:), intent(in)  :: crd1, crd2
+   real(kind=dp),  dimension(:,:), allocatable, intent(out) :: grad1 !gradients acting on atoms of mol1
+   real(kind=dp), allocatable, dimension(:), intent(inout) :: charges1, charges2
+
+   real(kind=dp),  dimension(3) :: vect
+   real(kind=dp)              :: dist
+   real(kind=dp)              :: x=2.0
+   logical                    :: Gaussian_charges
+   integer :: t,j
+
+   !Ang2Bohr=1.889725989
+   !AU2eV=27.211399
+
+   Gaussian_charges = .True. !put in input file
+
+   allocate(grad1(3,SIZE(crd1,2)))
+   !allocate(grad2(3,SIZE(crd2,2))) 
+
+   !> Gaussian charges must be divided by sqrt(2)
+   if (Gaussian_charges) then
+     charges1(:) = (charges1(:)/SQRT(x))
+     charges2(:) = (charges2(:)/SQRT(x))
+   end if
+
+   ! These are probably just the gradient from molecule 2 onto molecule 1.
+   ! Maybe for each pair we should also do the other way around.
+
+   grad1(:,:) = 0.0d0 !NB gradient is put to zero here to sum over the atoms of
+                      !the other mol
+   do t=1,SIZE(crd1,2)
+      do j=1,SIZE(crd2,2)
+         vect(:) = (crd1(:,t))-(crd2(:,j))
+         dist = SQRT(DOT_PRODUCT(vect,vect))
+
+         grad1(1,t) =  grad1(1,t) + ((charges1(t)*charges2(j))/(dist*dist*dist))*vect(1)
+         grad1(2,t) =  grad1(2,t) + ((charges1(t)*charges2(j))/(dist*dist*dist))*vect(2)
+         grad1(3,t) =  grad1(3,t) + ((charges1(t)*charges2(j))/(dist*dist*dist))*vect(3)
+      end do
+      grad1(:,t) = -grad1(:,t)
+print *, "grad", grad1(:,t)
+   end do
+
+end subroutine
 
 
 !**********************************************************************************
@@ -299,7 +361,7 @@ subroutine calc_trsp_ab(crd1, crd2, charges1, charges2, tresp_coup)
    real(kind=dp)                :: dist !Ang2Bohr, AU2eV
    real(kind=dp)                :: x=2.0
    logical                      :: Gaussian_charges
-   integer :: i,j
+   integer :: t,j
 
 !   Ang2Bohr=1.889725989
 !   AU2eV=27.211399
@@ -313,11 +375,11 @@ subroutine calc_trsp_ab(crd1, crd2, charges1, charges2, tresp_coup)
    end if
    !> coulombic interaction
    tresp_coup = 0.0d0
-   do i=1,SIZE(crd1,2)
+   do t=1,SIZE(crd1,2)
       do j=1,SIZE(crd2,2)
-         vect(:) = (crd1(:,i))-(crd2(:,j))
+         vect(:) = (crd1(:,t))-(crd2(:,j))
          dist = SQRT(DOT_PRODUCT(vect,vect))
-         tresp_coup = tresp_coup + (charges1(i)*charges2(j))/dist
+         tresp_coup = tresp_coup + (charges1(t)*charges2(j))/dist
       end do
    end do
 

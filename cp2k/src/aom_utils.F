@@ -912,6 +912,10 @@ SUBROUTINE calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_rando
                                         end do
                                    end do
                               else
+print *, "sh_env%Atp", sh_env%Atp
+print *, "sh_env%connlist2", sh_env%connlist2
+print *, "sh_env%Btp", sh_env%Btp
+
                                    do d=1,orb
                                         do m=1,orb
                                              call calc_sab(sh_env%Atp, sh_env%connlist2, &
