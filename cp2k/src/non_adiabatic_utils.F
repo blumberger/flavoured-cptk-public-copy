@@ -303,13 +303,14 @@ subroutine calc_grad_coup( crd1, crd2, charges1, charges2, grad1)
 
    real(kind=dp), allocatable, dimension(:,:), intent(in)  :: crd1, crd2
    real(kind=dp),  dimension(:,:), allocatable, intent(out) :: grad1 !gradients acting on atoms of mol1
-   real(kind=dp), allocatable, dimension(:), intent(inout) :: charges1, charges2
+   real(kind=dp), allocatable, dimension(:), intent(in) :: charges1, charges2
 
    real(kind=dp),  dimension(3) :: vect
    real(kind=dp)              :: dist
    real(kind=dp)              :: x=2.0
    logical                    :: Gaussian_charges
    integer :: t,j
+   real(kind=dp), allocatable, dimension(:)               :: char1, char2
 
    !Ang2Bohr=1.889725989
    !AU2eV=27.211399
@@ -318,11 +319,16 @@ subroutine calc_grad_coup( crd1, crd2, charges1, charges2, grad1)
 
    allocate(grad1(3,SIZE(crd1,2)))
    !allocate(grad2(3,SIZE(crd2,2))) 
+   allocate(char1(SIZE(charges1)))
+   allocate(char2(SIZE(charges2)))
 
    !> Gaussian charges must be divided by sqrt(2)
    if (Gaussian_charges) then
-     charges1(:) = (charges1(:)/SQRT(x))
-     charges2(:) = (charges2(:)/SQRT(x))
+     char1(:) = (charges1(:)/SQRT(x))
+     char2(:) = (charges2(:)/SQRT(x))
+   else
+     char1(:) = charges1(:)
+     char2(:) = charges2(:)
    end if
 
    ! These are probably just the gradient from molecule 2 onto molecule 1.
@@ -330,19 +336,21 @@ subroutine calc_grad_coup( crd1, crd2, charges1, charges2, grad1)
 
    grad1(:,:) = 0.0d0 !NB gradient is put to zero here to sum over the atoms of
                       !the other mol
+   vect = 0.0d0
    do t=1,SIZE(crd1,2)
       do j=1,SIZE(crd2,2)
          vect(:) = (crd1(:,t))-(crd2(:,j))
          dist = SQRT(DOT_PRODUCT(vect,vect))
 
-         grad1(1,t) =  grad1(1,t) + ((charges1(t)*charges2(j))/(dist*dist*dist))*vect(1)
-         grad1(2,t) =  grad1(2,t) + ((charges1(t)*charges2(j))/(dist*dist*dist))*vect(2)
-         grad1(3,t) =  grad1(3,t) + ((charges1(t)*charges2(j))/(dist*dist*dist))*vect(3)
+         grad1(1,t) =  grad1(1,t) + ((char1(t)*char2(j))/(dist*dist*dist))*vect(1)
+         grad1(2,t) =  grad1(2,t) + ((char1(t)*char2(j))/(dist*dist*dist))*vect(2)
+         grad1(3,t) =  grad1(3,t) + ((char1(t)*char2(j))/(dist*dist*dist))*vect(3)
       end do
       grad1(:,t) = -grad1(:,t)
 print *, "grad", grad1(:,t)
    end do
 
+   deallocate(char1, char2)
 end subroutine
 
 
@@ -355,34 +363,44 @@ subroutine calc_trsp_ab(crd1, crd2, charges1, charges2, tresp_coup)
 
    real(kind=dp), allocatable, dimension(:,:), intent(in)  :: crd1, crd2
    real(kind=dp), intent(out)                              :: tresp_coup
-   real(kind=dp), allocatable, dimension(:), intent(inout) :: charges1, charges2
+   real(kind=dp), allocatable, dimension(:), intent(in)    :: charges1, charges2
 
    real(kind=dp),  dimension(3) :: vect
    real(kind=dp)                :: dist !Ang2Bohr, AU2eV
    real(kind=dp)                :: x=2.0
    logical                      :: Gaussian_charges
    integer :: t,j
+   real(kind=dp), allocatable, dimension(:)               :: char1, char2
 
 !   Ang2Bohr=1.889725989
 !   AU2eV=27.211399
 
    Gaussian_charges = .True. !put in input file
 
+   allocate(char1(SIZE(charges1)))
+   allocate(char2(SIZE(charges2)))
+
    !> Gaussian charges must be divided by sqrt(2). Have a look at Multiwfn.pdf doc
    if (Gaussian_charges) then
-     charges1(:) = (charges1(:)/SQRT(x))
-     charges2(:) = (charges2(:)/SQRT(x))
+     char1(:) = (charges1(:)/SQRT(x))
+     char2(:) = (charges2(:)/SQRT(x))
+   else
+     char1(:) = charges1(:)
+     char2(:) = charges2(:)
    end if
+
+   vect = 0.0d0
    !> coulombic interaction
    tresp_coup = 0.0d0
    do t=1,SIZE(crd1,2)
       do j=1,SIZE(crd2,2)
          vect(:) = (crd1(:,t))-(crd2(:,j))
          dist = SQRT(DOT_PRODUCT(vect,vect))
-         tresp_coup = tresp_coup + (charges1(t)*charges2(j))/dist
+         tresp_coup = tresp_coup + (char1(t)*char2(j))/dist
       end do
    end do
 
+   deallocate(char1, char2)
 end subroutine
 
 
