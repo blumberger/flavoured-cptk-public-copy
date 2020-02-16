@@ -172,7 +172,7 @@ END SUBROUTINE calc_coms_and_nlist
 !         active ones.
 !> \param active_system_info, initial and final index for the active mols
 !> \param tresp_charges, initial tresp read from input (to be generalized to different mols)
-!> \note BE CAREFULL: the implementation has not been tested for orb !=1!
+!> \note BE CAREFULL: the implementation has not been tested for orb !=1 (namely, degeneragy)
 !> \output sh_env%H_tp
 !> \author SG
 !**********************************************************************************
@@ -258,26 +258,37 @@ END SUBROUTINE calc_coms_and_nlist
                              crd_k(dim_,:) = positions_com_tp(dim_, init_atom_mol_k:final_atom_mol_k)
                           end do
 
-print *, "PAIR", i,k
-!print *, "crd_k(dim_,:)", crd_k(:,:)
+!print *, "PAIR", i,k
                           ! calc coupling for a given pair of states
                           CALL calc_trsp_ab(crd_i, crd_k, charges1, charges2, tresp_coup)
                           sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,-tresp_coup,dp) !sign of the off-diag is minus consisently with diagonals
                           !test to recover frozen coup for a chain:
                           !sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,0.0011024789,dp)
+
+                          !> For the gradient in the case of TrESP (as it was
+                          !for nacv in case of AOM) the idea is that the
+                          !gradient on atom I are non-zero only if this atom
+                          !belong to a molecule of the pair that are
+                          !interacting. We save the gradient on atom I belonging
+                          !to mol i coming from the other atoms on mol k and
+                          !viceversa. See Overleaf note for a better discussion. 
                           
-                          ! calc gradient on atoms belonging to mol 1 (namely i), from
-                          ! atoms belonging to mol 2( namely k)
-print *, "state", orb*(k-1)+d, "atoms", init_atom_mol_i, final_atom_mol_i 
+                          ! calc gradient on atoms belonging to mol i, from
+                          ! atoms belonging to mol k, and store the former array
+!print *, "state", orb*(k-1)+d, "atoms", init_atom_mol_i, final_atom_mol_i 
                           CALL calc_grad_coup( crd_i, crd_k, charges1, charges2, grad1) 
 
+                          !> store gradient in the correct array entry
                           sh_env%grad_tresp(1,orb*(k-1)+d,init_atom_mol_i:final_atom_mol_i) = grad1(1,:)
                           sh_env%grad_tresp(2,orb*(k-1)+d,init_atom_mol_i:final_atom_mol_i) = grad1(2,:)
                           sh_env%grad_tresp(3,orb*(k-1)+d,init_atom_mol_i:final_atom_mol_i) = grad1(3,:)
 
-print *, "state", orb*(i-1)+m, "atoms", init_atom_mol_k, final_atom_mol_k 
+                          ! calc gradient on atoms belonging to mol k, from
+                          ! atoms belonging to mol i, and store the former arrays
+!print *, "state", orb*(i-1)+m, "atoms", init_atom_mol_k, final_atom_mol_k 
                           CALL calc_grad_coup( crd_k, crd_i, charges2, charges1, grad1) 
                           
+                          !> store gradient in the correct array entry
                           sh_env%grad_tresp(1,orb*(i-1)+m,init_atom_mol_k:final_atom_mol_k) = grad1(1,:)                        
                           sh_env%grad_tresp(2,orb*(i-1)+m,init_atom_mol_k:final_atom_mol_k) = grad1(2,:)                        
                           sh_env%grad_tresp(3,orb*(i-1)+m,init_atom_mol_k:final_atom_mol_k) = grad1(3,:)                        
@@ -287,10 +298,7 @@ print *, "state", orb*(i-1)+m, "atoms", init_atom_mol_k, final_atom_mol_k
                           ! dimension (3, mat, mat, natoms_TOTAL_active) or in a reduce
                           ! form assuming all atoms_per_mol the same (3, mat, mat*natoms_per_mol))
   
-                          !global_grad(:,i, )
-
                           DEALLOCATE(crd_i,crd_k)
-
                       end do
                    end do
                  else

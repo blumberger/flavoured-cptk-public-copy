@@ -933,11 +933,11 @@ SUBROUTINE calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_rando
                                              sh_env%scoeffs, sh_env%aneighbour(:,:), sh_env%bneighbour(:,:), dR, &
                                              do_random, sh_env)
 
-print *, "PAIR of states", i, k
-print *, "indeces1", orb*(k-1)+d, "from to", (i-1)*atoms+1, i*atoms
-print *, "nacv1", sh_env%nacv(:,orb*(k-1)+d,(i-1)*atoms+1:i*atoms) 
-print *, "indeces2", orb*(i-1)+m, "from to", (k-1)*atoms+1, k*atoms
-print *, "nacv2", sh_env%nacv(:,orb*(i-1)+m,(k-1)*atoms+1:k*atoms)
+!print *, "PAIR of states", i, k
+!print *, "indeces1", orb*(k-1)+d, "from to", (i-1)*atoms+1, i*atoms
+!print *, "nacv1", sh_env%nacv(:,orb*(k-1)+d,(i-1)*atoms+1:i*atoms) 
+!print *, "indeces2", orb*(i-1)+m, "from to", (k-1)*atoms+1, k*atoms
+!print *, "nacv2", sh_env%nacv(:,orb*(i-1)+m,(k-1)*atoms+1:k*atoms)
 
 
                                         end do
@@ -965,16 +965,16 @@ print *, "nacv2", sh_env%nacv(:,orb*(i-1)+m,(k-1)*atoms+1:k*atoms)
      enddo !loop-over i
      DEALLOCATE(PC_rvecs)
 
-!PRINT OUT TEST 
-OPEN (UNIT = 24, FILE = "NACV_formatted.dat", STATUS="NEW")
-
-do i=1,atoms*orb*mol
-  do k=1, orb*mol
-     write(24,*) "atom", i, "state", k, sh_env%nacv(:,k,i)
-  end do  
-end do
-
-200 close (24)
+!!PRINT OUT TEST 
+!OPEN (UNIT = 24, FILE = "NACV_formatted.dat", STATUS="NEW")
+!
+!do i=1,atoms*orb*mol
+!  do k=1, orb*mol
+!     write(24,*) "atom", i, "state", k, sh_env%nacv(:,k,i)
+!  end do  
+!end do
+!
+!200 close (24)
 
 END SUBROUTINE calc_aom_Xmatrix_elements_first_step
 
@@ -1763,19 +1763,25 @@ subroutine calcforces_aom(state, Hin, C, nacv, atoms, scaling, cbar, Fin, forces
         do d=1,3                        ! sum of cartesian 
                 num_j = 0               ! active atom index
                 do j=1,natom            ! sum over all atoms
+print *, "atom_j", j
                    forces_adiab(d,j) = 0.0D0
+
                    IF (ext_pres(j)) THEN   
                       num_j   = num_j + 1                 ! update active atom index
                       num_mol = int((num_j-1)/atoms) + 1  ! update molecular index
+print *, "num_mol", num_mol
                       ! WARNING: we suppose that all molecules have the same
                       ! number of atoms
                    ENDIF
+
                    do i=1,mat
+print *, "state_i", i
                       ! Diagonal term, it depends on the forces
                       forces_adiab(d,j) = forces_adiab(d,j) + (abs(C(i,state))**2)*Fin(d,j,i)
                       ! Of diagonal term, only for active atom j present in
                       ! molecule num_mol
                       IF (ext_pres(j)) THEN
+                         
                          IF (i.ne.num_mol) THEN
                             forces_adiab(d,j) = forces_adiab(d,j) + &
                                         2.0D0*((C(num_mol,state))*nacv(d,i, num_j)*C(i,state))*convert_nacv
