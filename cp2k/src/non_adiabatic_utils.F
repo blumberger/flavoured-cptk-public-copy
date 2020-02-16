@@ -258,7 +258,7 @@ END SUBROUTINE calc_coms_and_nlist
                              crd_k(dim_,:) = positions_com_tp(dim_, init_atom_mol_k:final_atom_mol_k)
                           end do
 
-!print *, "PAIR", i,k
+print *, "PAIR", i,k
                           ! calc coupling for a given pair of states
                           CALL calc_trsp_ab(crd_i, crd_k, charges1, charges2, tresp_coup)
                           sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,-tresp_coup,dp) !sign of the off-diag is minus consisently with diagonals
@@ -275,23 +275,23 @@ END SUBROUTINE calc_coms_and_nlist
                           
                           ! calc gradient on atoms belonging to mol i, from
                           ! atoms belonging to mol k, and store the former array
-!print *, "state", orb*(k-1)+d, "atoms", init_atom_mol_i, final_atom_mol_i 
+print *, "state", orb*(k-1)+d, "atoms", (i-1)*atoms_per_mol_i+1, i*atoms_per_mol_i 
                           CALL calc_grad_coup( crd_i, crd_k, charges1, charges2, grad1) 
 
                           !> store gradient in the correct array entry
-                          sh_env%grad_tresp(1,orb*(k-1)+d,init_atom_mol_i:final_atom_mol_i) = grad1(1,:)
-                          sh_env%grad_tresp(2,orb*(k-1)+d,init_atom_mol_i:final_atom_mol_i) = grad1(2,:)
-                          sh_env%grad_tresp(3,orb*(k-1)+d,init_atom_mol_i:final_atom_mol_i) = grad1(3,:)
+                          sh_env%grad_tresp(1,orb*(k-1)+d,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i) = grad1(1,:)
+                          sh_env%grad_tresp(2,orb*(k-1)+d,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i) = grad1(2,:)
+                          sh_env%grad_tresp(3,orb*(k-1)+d,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i) = grad1(3,:)
 
                           ! calc gradient on atoms belonging to mol k, from
                           ! atoms belonging to mol i, and store the former arrays
-!print *, "state", orb*(i-1)+m, "atoms", init_atom_mol_k, final_atom_mol_k 
+print *, "state", orb*(i-1)+m, "atoms", (k-1)*atoms_per_mol_k+1, k*atoms_per_mol_k 
                           CALL calc_grad_coup( crd_k, crd_i, charges2, charges1, grad1) 
                           
                           !> store gradient in the correct array entry
-                          sh_env%grad_tresp(1,orb*(i-1)+m,init_atom_mol_k:final_atom_mol_k) = grad1(1,:)                        
-                          sh_env%grad_tresp(2,orb*(i-1)+m,init_atom_mol_k:final_atom_mol_k) = grad1(2,:)                        
-                          sh_env%grad_tresp(3,orb*(i-1)+m,init_atom_mol_k:final_atom_mol_k) = grad1(3,:)                        
+                          sh_env%grad_tresp(1,orb*(i-1)+m,(k-1)*atoms_per_mol_k+1:k*atoms_per_mol_k) = grad1(1,:)                        
+                          sh_env%grad_tresp(2,orb*(i-1)+m,(k-1)*atoms_per_mol_k+1:k*atoms_per_mol_k) = grad1(2,:)                        
+                          sh_env%grad_tresp(3,orb*(i-1)+m,(k-1)*atoms_per_mol_k+1:k*atoms_per_mol_k) = grad1(3,:)                        
  
                           ! I should find a way to store grad1 in a more general
                           ! global_grad array that in principle should have

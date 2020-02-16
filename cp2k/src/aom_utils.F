@@ -932,11 +932,11 @@ SUBROUTINE calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_rando
                                              sh_env%scoeffs, sh_env%aneighbour(:,:), sh_env%bneighbour(:,:), dR, &
                                              do_random, sh_env)
 
-!print *, "PAIR of states", i, k
-!print *, "indeces1", orb*(k-1)+d, "from to", (i-1)*atoms+1, i*atoms
-!print *, "nacv1", sh_env%nacv(:,orb*(k-1)+d,(i-1)*atoms+1:i*atoms) 
-!print *, "indeces2", orb*(i-1)+m, "from to", (k-1)*atoms+1, k*atoms
-!print *, "nacv2", sh_env%nacv(:,orb*(i-1)+m,(k-1)*atoms+1:k*atoms)
+print *, "PAIR of states", i, k
+print *, "indeces1", orb*(k-1)+d, "from to", (i-1)*atoms+1, i*atoms
+print *, "nacv1", sh_env%nacv(:,orb*(k-1)+d,(i-1)*atoms+1:i*atoms) 
+print *, "indeces2", orb*(i-1)+m, "from to", (k-1)*atoms+1, k*atoms
+print *, "nacv2", sh_env%nacv(:,orb*(i-1)+m,(k-1)*atoms+1:k*atoms)
 
 
                                         end do
