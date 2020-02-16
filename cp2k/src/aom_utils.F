@@ -134,7 +134,6 @@ IMPLICIT NONE
              calc_aom_Xmatrix_elements,            & 
              calc_aom_Xmatrix_elements_first_step, & 
              make_adiabX,                          &
-             calcforces_aom,                           &
              read_listcoeff,                       & 
              calc_adiab_nace,                      &
              calc_diabatic_nace,                   &
@@ -1711,87 +1710,6 @@ subroutine matinvsqrt(mol, invert, S)
 end subroutine matinvsqrt
 
 
-! COMMENT_SG: this subroutine is still a bit tight up to AOM and should be
-! easily generalized for other Hamiltonians 
-!**********************************************************************************
-!> \brief Calculate adiabatic forces according to Spencer 2016 and Carof 2019
-!for each atom in the system on the state passed as input.
-!**********************************************************************************
-subroutine calcforces_aom(state, Hin, C, nacv, atoms, scaling, cbar, Fin, forces_adiab, & 
-                  ext_pres)
-
-        !per our full force expression derivation, this calculates the adiabatic forces
-        !on each atom
-        integer, intent(in)                         :: state
-        REAL(KIND=dp), intent(in), dimension(:,:)   :: Hin, C
-        REAL(KIND=dp), intent(in), dimension(:,:,:) :: nacv
-        integer, intent(in)                         :: atoms !this is atoms per mol
-        REAL(KIND=dp), intent(in)                   :: scaling, cbar
-        REAL(KIND=dp), intent(in), dimension(:,:,:) :: Fin
-        REAL(KIND=dp), dimension(:,:), POINTER      :: forces_adiab
-        LOGICAL, dimension(:), INTENT(IN)           :: ext_pres
-
-        CHARACTER(len=*), PARAMETER :: routineN ='calcforces_aom', &
-                               routineP = moduleN//':'//routineN
-
-        integer                                     :: i, j, mat, d
-        INTEGER                                     :: natom
-        INTEGER                                     :: num_mol, num_j
-        REAL(KIND=dp)                               :: convert_nacv 
-
-        natom = SIZE(Fin,2)
-        !nadiab= SIZE(Fin,3)
-        mat = size(Hin,1) ! COMMENT_SG: In general this array could have
-                            !degenerate states (becuase the construction of AOM
-                            !Hamiltonian can be done with multiple orbitals per
-                            !site), however the following subroutine cannot
-                            !handle the degenerate case becuase Fin(d,j,i) is
-                            !the array of diagonal forces and its dimension
-                            !stops at the number of total force_evals
-                            !considered. To sum up if you want this subroutine
-                            !to be able to handle degenerate cases you should
-                            !add a further loop over "orb" like is done for site
-                            !energies of the Hamiltoninan. This is the best
-                            !strategy becuase it would not even require to
-                            !change the dimension of Fin(d,j,i) that is one of
-                            !the biggest arrays in the code.
-
-        ! Based on paper [Spencer16]: Spencer et al., J. Chem. Phys. 145, 064102 (2016)
-        ! Use Eq. (21) of paper [Spencer16]
-        convert_nacv = - scaling / cbar ! to convert the FOB NACV
-        num_mol = 0                     ! molecular index
-        do d=1,3                        ! sum of cartesian 
-                num_j = 0               ! active atom index
-                do j=1,natom            ! sum over all atoms
-print *, "atom_j", j
-                   forces_adiab(d,j) = 0.0D0
-
-                   IF (ext_pres(j)) THEN   
-                      num_j   = num_j + 1                 ! update active atom index
-                      num_mol = int((num_j-1)/atoms) + 1  ! update molecular index
-print *, "num_mol", num_mol
-                      ! WARNING: we suppose that all molecules have the same
-                      ! number of atoms
-                   ENDIF
-
-                   do i=1,mat
-print *, "state_i", i
-                      ! Diagonal term, it depends on the forces
-                      forces_adiab(d,j) = forces_adiab(d,j) + (abs(C(i,state))**2)*Fin(d,j,i)
-                      ! Of diagonal term, only for active atom j present in
-                      ! molecule num_mol
-                      IF (ext_pres(j)) THEN
-                         
-                         IF (i.ne.num_mol) THEN
-                            forces_adiab(d,j) = forces_adiab(d,j) + &
-                                        2.0D0*((C(num_mol,state))*nacv(d,i, num_j)*C(i,state))*convert_nacv
-                         ENDIF
-                      ENDIF
-                   ENDDO
-                ENDDO
-        ENDDO
-end subroutine calcforces_aom
-
 !**********************************************************************************
 !> \brief This reads the wavefunction coefficient section from the restart file, 
 !> the whole restart procedure most probably not completely general and it would
@@ -2123,6 +2041,82 @@ print *, "CTIN", ctin
 !******************************************************************************
 !!!!!!!!!!!!!!   DEPRECATED SUB. BELOW  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !******************************************************************************
+
+!**********************************************************************************
+!> \brief Calculate adiabatic forces according to Spencer 2016 and Carof 2019
+!for each atom in the system on the state passed as input.
+!**********************************************************************************
+subroutine calcforces_aom(state, Hin, C, nacv, atoms, scaling, cbar, Fin, forces_adiab, & 
+                  ext_pres)
+
+        !per our full force expression derivation, this calculates the adiabatic forces
+        !on each atom
+        integer, intent(in)                         :: state
+        REAL(KIND=dp), intent(in), dimension(:,:)   :: Hin, C
+        REAL(KIND=dp), intent(in), dimension(:,:,:) :: nacv
+        integer, intent(in)                         :: atoms !this is atoms per mol
+        REAL(KIND=dp), intent(in)                   :: scaling, cbar
+        REAL(KIND=dp), intent(in), dimension(:,:,:) :: Fin
+        REAL(KIND=dp), dimension(:,:), POINTER      :: forces_adiab
+        LOGICAL, dimension(:), INTENT(IN)           :: ext_pres
+
+        CHARACTER(len=*), PARAMETER :: routineN ='calcforces_aom', &
+                               routineP = moduleN//':'//routineN
+
+        integer                                     :: i, j, mat, d
+        INTEGER                                     :: natom
+        INTEGER                                     :: num_mol, num_j
+        REAL(KIND=dp)                               :: convert_nacv 
+
+        natom = SIZE(Fin,2)
+        !nadiab= SIZE(Fin,3)
+        mat = size(Hin,1) ! COMMENT_SG: In general this array could have
+                            !degenerate states (becuase the construction of AOM
+                            !Hamiltonian can be done with multiple orbitals per
+                            !site), however the following subroutine cannot
+                            !handle the degenerate case becuase Fin(d,j,i) is
+                            !the array of diagonal forces and its dimension
+                            !stops at the number of total force_evals
+                            !considered. To sum up if you want this subroutine
+                            !to be able to handle degenerate cases you should
+                            !add a further loop over "orb" like is done for site
+                            !energies of the Hamiltoninan. This is the best
+                            !strategy becuase it would not even require to
+                            !change the dimension of Fin(d,j,i) that is one of
+                            !the biggest arrays in the code.
+
+        ! Based on paper [Spencer16]: Spencer et al., J. Chem. Phys. 145, 064102 (2016)
+        ! Use Eq. (21) of paper [Spencer16]
+        convert_nacv = - scaling / cbar ! to convert the FOB NACV
+        num_mol = 0                     ! molecular index
+        do d=1,3                        ! sum of cartesian 
+                num_j = 0               ! active atom index
+                do j=1,natom            ! sum over all atoms
+                   forces_adiab(d,j) = 0.0D0
+
+                   IF (ext_pres(j)) THEN   
+                      num_j   = num_j + 1                 ! update active atom index
+                      num_mol = int((num_j-1)/atoms) + 1  ! update molecular index
+                      ! WARNING: we suppose that all molecules have the same
+                      ! number of atoms
+                   ENDIF
+
+                   do i=1,mat
+                      ! Diagonal term, it depends on the forces
+                      forces_adiab(d,j) = forces_adiab(d,j) + (abs(C(i,state))**2)*Fin(d,j,i)
+                      ! Of diagonal term, only for active atom j present in
+                      ! molecule num_mol
+                      IF (ext_pres(j)) THEN
+                         
+                         IF (i.ne.num_mol) THEN
+                            forces_adiab(d,j) = forces_adiab(d,j) + &
+                                        2.0D0*((C(num_mol,state))*nacv(d,i, num_j)*C(i,state))*convert_nacv
+                         ENDIF
+                      ENDIF
+                   ENDDO
+                ENDDO
+        ENDDO
+end subroutine calcforces_aom
 
 !**********************************************************************************
 !> \brief Calculate the diabatic NACE first
