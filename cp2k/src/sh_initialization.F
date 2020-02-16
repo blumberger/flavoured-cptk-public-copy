@@ -108,7 +108,7 @@ CONTAINS
      TYPE(cp_sll_val_type), POINTER                 :: list_tresp
      integer, dimension(:), ALLOCATABLE             :: ext_elements
      LOGICAL, DIMENSION(:), POINTER                :: active_logical
-     INTEGER                                       :: natom_mol, c
+     INTEGER                                       :: natom_mol
 
      NULLIFY(list_tresp)
 
@@ -272,10 +272,14 @@ CONTAINS
         !> active_logical is not necessary since inactive atoms will anyway have 0
         !charges that will nullify the term in the coulomb sum 
         
-        c = nadiab*sh_env%atoms_per_site !> Numbers of active atoms per mol 
-        allocate(sh_env%crds(3,c,3))  !> crds active atoms
+        !c = nadiab*sh_env%atoms_per_site !> Numbers of active atoms per mol 
+        allocate(sh_env%crds(3,COUNT(sh_env%ext_pres),3))  !> crds active atoms
         ALLOCATE(sh_env%NN(mat, mat))
-
+        !COMMENT_SG: COUNT(sh_env%ext_pres) is the total number of active atoms,
+        !note that I did not use mat*active_atoms_per_mol to be more general for
+        !multi-phase
+        ALLOCATE(sh_env%grad_tresp(3,mat, COUNT(sh_env%ext_pres)))
+ 
 
     CASE DEFAULT
         CPABORT("There is no method to calculate the coupling")
@@ -513,9 +517,6 @@ end subroutine create_ext_press_list
      allocate(sh_env%Btp(4,sh_env%atoms_per_site))
      allocate(sh_env%Btm(4,sh_env%atoms_per_site))
      allocate(sh_env%siteenergies(3,mat))  !COMMENT_SG: First dimension is to be removed
-     !> nacv are memory consuming to store however here we are storing them at time
-     !t and tp for the multiple time step feature avoing their calculations at
-     !each step
      ALLOCATE(sh_env%nacv(3,mat, mat*aom_atoms))
      ALLOCATE(sh_env%rm_t(3, natom))
      ALLOCATE(sh_env%rm_tm(3, natom))

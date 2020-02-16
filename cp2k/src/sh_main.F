@@ -697,6 +697,7 @@ print *, "coord", sh_env%crds(:,3,3)
             sh_env%siteenergies(3,:) = energies_tp(:) ! CHANGE_AC
          enddo
 
+
          !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
          CALL calc_coms_and_nlist(mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, &
                                     active_system_info=sh_env%active_system_info, NN=sh_env%NN)
@@ -726,6 +727,13 @@ print *, "coord", sh_env%crds(:,3,3)
             sh_env%crds(coord,:,3) = PACK(positions_com_tp(coord,:), sh_env%ext_pres)
          enddo
 
+print *, "positions_tp(:,:)", positions_tp(:,1)
+print *, "positions_tp(:,:)", positions_tp(:,2)
+print *, "positions_tp(:,:)", positions_tp(:,3)
+
+print *, "positions_com_tp(:,:)", positions_com_tp(:,1)
+print *, "positions_com_tp(:,:)", positions_com_tp(:,2)
+print *, "positions_com_tp(:,:)", positions_com_tp(:,3)
          !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
          CALL calc_coms_and_nlist(mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, &
                                     active_system_info=sh_env%active_system_info, NN=sh_env%NN)

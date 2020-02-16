@@ -181,7 +181,8 @@ CONTAINS
             velocities_tp(:, jparticle) = particles_mix%els(jparticle)%v(:)
        ENDIF
     END DO
-
+print *, "positions_tp(:,jparticle)", positions_tp(:,1)
+print *, "positions_tp(:,jparticle)", positions_tp(:,2)
 
     IF (my_itimes.eq.0) THEN
        !> This 0th step is executed at the very beginning of the simulation, when

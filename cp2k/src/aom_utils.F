@@ -912,9 +912,6 @@ SUBROUTINE calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_rando
                                         end do
                                    end do
                               else
-print *, "sh_env%Atp", sh_env%Atp
-print *, "sh_env%connlist2", sh_env%connlist2
-print *, "sh_env%Btp", sh_env%Btp
 
                                    do d=1,orb
                                         do m=1,orb
@@ -924,7 +921,6 @@ print *, "sh_env%Btp", sh_env%Btp
                                                           sh_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3))
                                              sh_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
                                              sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0, -scaling*S,dp)
-
                                              call calc_dRSab(sh_env%Atp, sh_env%atomlist, sh_env%connlist1, &
                                              sh_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3), sh_env%scoeffs, &
                                              !nacv(1:3,orb*(k-1)+d,orb*(i-1)+m,(i-1)*atoms+1:i*atoms), &
@@ -936,6 +932,14 @@ print *, "sh_env%Btp", sh_env%Btp
                                              !sh_env%scoeffs, sh_env%neighbourlist(k,i,:,:), sh_env%neighbourlist(i,k,:,:), dR, &
                                              sh_env%scoeffs, sh_env%aneighbour(:,:), sh_env%bneighbour(:,:), dR, &
                                              do_random, sh_env)
+
+print *, "PAIR of states", i, k
+print *, "indeces1", orb*(k-1)+d, "from to", (i-1)*atoms+1, i*atoms
+print *, "nacv1", sh_env%nacv(:,orb*(k-1)+d,(i-1)*atoms+1:i*atoms) 
+print *, "indeces2", orb*(i-1)+m, "from to", (k-1)*atoms+1, k*atoms
+print *, "nacv2", sh_env%nacv(:,orb*(i-1)+m,(k-1)*atoms+1:k*atoms)
+
+
                                         end do
                                    end do
                               endif 
@@ -960,6 +964,17 @@ print *, "sh_env%Btp", sh_env%Btp
 
      enddo !loop-over i
      DEALLOCATE(PC_rvecs)
+
+!PRINT OUT TEST 
+OPEN (UNIT = 24, FILE = "NACV_formatted.dat", STATUS="NEW")
+
+do i=1,atoms*orb*mol
+  do k=1, orb*mol
+     write(24,*) "atom", i, "state", k, sh_env%nacv(:,k,i)
+  end do  
+end do
+
+200 close (24)
 
 END SUBROUTINE calc_aom_Xmatrix_elements_first_step
 

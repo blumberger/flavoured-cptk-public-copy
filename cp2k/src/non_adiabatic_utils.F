@@ -172,7 +172,7 @@ END SUBROUTINE calc_coms_and_nlist
 !         active ones.
 !> \param active_system_info, initial and final index for the active mols
 !> \param tresp_charges, initial tresp read from input (to be generalized to different mols)
-
+!> \note BE CAREFULL: the implementation has not been tested for orb !=1!
 !> \output sh_env%H_tp
 !> \author SG
 !**********************************************************************************
@@ -196,9 +196,9 @@ END SUBROUTINE calc_coms_and_nlist
      routineP = moduleN//':'//routineN
 
      integer                                         :: i, k, m, d, dim_
-     integer                                         :: init_atom_mol1, final_atom_mol1, atoms_per_mol1
-     integer                                         :: init_atom_mol2, final_atom_mol2, atoms_per_mol2
-     real(kind=dp), allocatable, dimension(:,:)      :: crd1, crd2
+     integer                                         :: init_atom_mol_i, final_atom_mol_i, atoms_per_mol_i
+     integer                                         :: init_atom_mol_k, final_atom_mol_k, atoms_per_mol_k
+     real(kind=dp), allocatable, dimension(:,:)      :: crd_i, crd_k
      real(kind=dp), allocatable, dimension(:)        :: charges1, charges2
      real(kind=dp)                                   :: tresp_coup
      real(kind=dp),  dimension(:,:), allocatable     :: grad1 !gradients acting on atoms of mol1
@@ -217,6 +217,8 @@ END SUBROUTINE calc_coms_and_nlist
 
 
      sh_env%H_tp(:,:) = cmplx(0.0D0, 0.0D0,dp)
+     sh_env%grad_tresp = 0.0D0
+
      do i=1,SIZE(energies_tp) !loop over all non-degerate states
         do k=1,SIZE(energies_tp)
            ! do calculation only for molecules within cut-off radious. 
@@ -235,40 +237,51 @@ END SUBROUTINE calc_coms_and_nlist
                     do d=1,orb
                        do m=1,orb
                           !> find coordinates mol 1 of the pair
-                          init_atom_mol1 = sh_env%active_system_info(1,i)
-                          final_atom_mol1 = sh_env%active_system_info(2,i)
-                          atoms_per_mol1 = (final_atom_mol1-init_atom_mol1)+1
+                          init_atom_mol_i = sh_env%active_system_info(1,i)
+                          final_atom_mol_i = sh_env%active_system_info(2,i)
+                          atoms_per_mol_i = (final_atom_mol_i-init_atom_mol_i)+1
 
                           !> find coordinates mol 2 of the pair
-                          init_atom_mol2 = sh_env%active_system_info(1,k)
-                          final_atom_mol2 = sh_env%active_system_info(2,k)
-                          atoms_per_mol2 = (final_atom_mol2-init_atom_mol2)+1
+                          init_atom_mol_k = sh_env%active_system_info(1,k)
+                          final_atom_mol_k = sh_env%active_system_info(2,k)
+                          atoms_per_mol_k = (final_atom_mol_k-init_atom_mol_k)+1
 
 
                           !> this allocation deallocation is maybe inefficient
                           !but it was the only thing I found to be general for
                           !multi-phases
-                          ALLOCATE(crd1(3,atoms_per_mol1))
-                          ALLOCATE(crd2(3,atoms_per_mol2))
+                          ALLOCATE(crd_i(3,atoms_per_mol_i))
+                          ALLOCATE(crd_k(3,atoms_per_mol_k))
 
                           do dim_=1,3
-                             crd1(dim_,:) = positions_com_tp(dim_, init_atom_mol1:final_atom_mol1)
-                             crd2(dim_,:) = positions_com_tp(dim_, init_atom_mol2:final_atom_mol2)
+                             crd_i(dim_,:) = positions_com_tp(dim_, init_atom_mol_i:final_atom_mol_i)
+                             crd_k(dim_,:) = positions_com_tp(dim_, init_atom_mol_k:final_atom_mol_k)
                           end do
 
 print *, "PAIR", i,k
-!print *, "crd1(dim_,:)", crd1(:,:)
-!print *, "crd2(dim_,:)", crd2(:,:)
+!print *, "crd_k(dim_,:)", crd_k(:,:)
                           ! calc coupling for a given pair of states
-                          CALL calc_trsp_ab(crd1, crd2, charges1, charges2, tresp_coup)
+                          CALL calc_trsp_ab(crd_i, crd_k, charges1, charges2, tresp_coup)
                           sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,-tresp_coup,dp) !sign of the off-diag is minus consisently with diagonals
                           !test to recover frozen coup for a chain:
                           !sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,0.0011024789,dp)
                           
                           ! calc gradient on atoms belonging to mol 1 (namely i), from
                           ! atoms belonging to mol 2( namely k)
-                          CALL calc_grad_coup( crd1, crd2, charges1, charges2, grad1) 
+print *, "state", orb*(k-1)+d, "atoms", init_atom_mol_i, final_atom_mol_i 
+                          CALL calc_grad_coup( crd_i, crd_k, charges1, charges2, grad1) 
+
+                          sh_env%grad_tresp(1,orb*(k-1)+d,init_atom_mol_i:final_atom_mol_i) = grad1(1,:)
+                          sh_env%grad_tresp(2,orb*(k-1)+d,init_atom_mol_i:final_atom_mol_i) = grad1(2,:)
+                          sh_env%grad_tresp(3,orb*(k-1)+d,init_atom_mol_i:final_atom_mol_i) = grad1(3,:)
+
+print *, "state", orb*(i-1)+m, "atoms", init_atom_mol_k, final_atom_mol_k 
+                          CALL calc_grad_coup( crd_k, crd_i, charges2, charges1, grad1) 
                           
+                          sh_env%grad_tresp(1,orb*(i-1)+m,init_atom_mol_k:final_atom_mol_k) = grad1(1,:)                        
+                          sh_env%grad_tresp(2,orb*(i-1)+m,init_atom_mol_k:final_atom_mol_k) = grad1(2,:)                        
+                          sh_env%grad_tresp(3,orb*(i-1)+m,init_atom_mol_k:final_atom_mol_k) = grad1(3,:)                        
+ 
                           ! I should find a way to store grad1 in a more general
                           ! global_grad array that in principle should have
                           ! dimension (3, mat, mat, natoms_TOTAL_active) or in a reduce
@@ -276,9 +289,7 @@ print *, "PAIR", i,k
   
                           !global_grad(:,i, )
 
-                          DEALLOCATE(crd1,crd2)
-
-
+                          DEALLOCATE(crd_i,crd_k)
 
                       end do
                    end do
@@ -295,7 +306,19 @@ print *, "PAIR", i,k
            end if
         end do 
      end do
-  end subroutine
+
+!!TEST
+!OPEN (UNIT = 21, FILE = "GRAD_formatted.dat")
+!
+!do i=1,SIZE(sh_env%grad_tresp,3)
+!  do k=1, SIZE(sh_env%grad_tresp,2)
+!     write(21,*) "atom", i, "state", k, sh_env%grad_tresp(:,k,i)
+!  end do
+!end do
+!
+!close (21)
+!stop
+  end subroutine  calc_tresp_coup
 
 ! COMMENT_SG this subroutine is just a replication of the one below, you should
 ! merge them together
@@ -331,8 +354,9 @@ subroutine calc_grad_coup( crd1, crd2, charges1, charges2, grad1)
      char2(:) = charges2(:)
    end if
 
-   ! These are probably just the gradient from molecule 2 onto molecule 1.
-   ! Maybe for each pair we should also do the other way around.
+   ! These the gradient from molecule 2 atoms onto molecule 1 atoms. Basically
+   ! each atom on molecule 1 will feel the gradients given by the sum of the
+   ! atoms on molecule 2. See Note Overleaf for the equation. 
 
    grad1(:,:) = 0.0d0 !NB gradient is put to zero here to sum over the atoms of
                       !the other mol
@@ -347,11 +371,12 @@ subroutine calc_grad_coup( crd1, crd2, charges1, charges2, grad1)
          grad1(3,t) =  grad1(3,t) + ((char1(t)*char2(j))/(dist*dist*dist))*vect(3)
       end do
       grad1(:,t) = -grad1(:,t)
-print *, "grad", grad1(:,t)
+!print *, "grad", grad1(:,t)
    end do
+print *, "grad", grad1(:,:)
 
    deallocate(char1, char2)
-end subroutine
+end subroutine  calc_grad_coup
 
 
 !**********************************************************************************
@@ -400,8 +425,9 @@ subroutine calc_trsp_ab(crd1, crd2, charges1, charges2, tresp_coup)
       end do
    end do
 
+print *, "TRESP COUP:", tresp_coup
    deallocate(char1, char2)
-end subroutine
+end subroutine calc_trsp_ab
 
 
 !**********************************************************************************
@@ -445,7 +471,7 @@ end subroutine
           end if 
         end do 
      end do
-  end subroutine
+  end subroutine calc_frozen_H
 
 
 !**********************************************************************************

@@ -165,6 +165,7 @@ END TYPE adiab_nace_env_type
 
 !> TRESP arrays
      REAL(KIND=dp), DIMENSION(:), ALLOCATABLE :: tresp_charges
+     REAL(KIND=dp), DIMENSION(:,:,:), POINTER :: grad_tresp! off-diagonal gradient of tresp Hamilton.
 
 !> BORDERLINE used for AOM and some other couplings mainly TRESP
      LOGICAL, DIMENSION(:), POINTER           :: ext_pres
