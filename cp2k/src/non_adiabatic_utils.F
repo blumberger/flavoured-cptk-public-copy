@@ -483,17 +483,18 @@ end subroutine calc_trsp_ab
 
 !**********************************************************************************
 !> \brief Calculate adiabatic forces according to Spencer 2016 and Carof 2019
-!for each atom in the system on the state passed as input. 
-!> \note So far this is not general for degerate states but it can deal with
-!multi-phases (this should be tested)
-!> \author SG 
+!        for each atom in the system on the state passed as input. 
+!> \note This subroutine has not been tested for degeneracy, but it should be
+!        general enough to handle it.
+!>       A huge part of this subroutine has been taken from AC's calcforces_aom
+!> \author SG  
 !**********************************************************************************
 subroutine calcforces_smart_grad(state, Hin, C, nacv, Fin, forces_adiab, & 
-                  ext_pres,  active_system_info, scaling, cbar)
+                  ext_pres,  active_system_info, orb, scaling, cbar)
 
         !per our full force expression derivation, this calculates the adiabatic forces
         !on each atom
-        integer, intent(in)                         :: state
+        integer, intent(in)                         :: state, orb
         REAL(KIND=dp), intent(in), dimension(:,:)   :: Hin, C
         REAL(KIND=dp), intent(in), dimension(:,:,:) :: nacv
         REAL(KIND=dp), intent(in), dimension(:,:,:) :: Fin
@@ -506,27 +507,18 @@ subroutine calcforces_smart_grad(state, Hin, C, nacv, Fin, forces_adiab, &
         CHARACTER(len=*), PARAMETER :: routineN ='calcforces_smart_grad', &
                                routineP = moduleN//':'//routineN
 
-        integer                                     :: i, j, mat, d
+        integer                                     :: i, j,  d, m
         INTEGER                                     :: natom
         INTEGER                                     :: num_mol, num_j
         REAL(KIND=dp)                               :: convert_nacv 
 
         natom = SIZE(Fin,2)
-        !nadiab= SIZE(Fin,3)
-        mat = size(Hin,1) ! COMMENT_SG: In general this array could have
-                            !degenerate states (becuase the construction of AOM
-                            !Hamiltonian can be done with multiple orbitals per
-                            !site), however the following subroutine cannot
-                            !handle the degenerate case becuase Fin(d,j,i) is
-                            !the array of diagonal forces and its dimension
+
+        !COMMENT_SG: This subroutine should be checked further for degeneracy.
+        !Note that Fin(d,j,i) is the array of diagonal forces and its dimension
                             !stops at the number of total force_evals
-                            !considered. To sum up if you want this subroutine
-                            !to be able to handle degenerate cases you should
-                            !add a further loop over "orb" like is done for site
-                            !energies of the Hamiltoninan. This is the best
-                            !strategy becuase it would not even require to
-                            !change the dimension of Fin(d,j,i) that is one of
-                            !the biggest arrays in the code.
+                            !considered. 
+
 
         ! Based on paper [Spencer16]: Spencer et al., J. Chem. Phys. 145, 064102 (2016)
         ! Use Eq. (21) of paper [Spencer16]
@@ -541,7 +533,7 @@ subroutine calcforces_smart_grad(state, Hin, C, nacv, Fin, forces_adiab, &
                       ! Get the molecule to which j belong, for a general
                       ! system. This is a molecular index needed below. Looping
                       ! over molecules is necessary here.
-                      do i=1,mat
+                      do i=1,SIZE(active_system_info, 2) ! loop over non-deg states
                          IF ((j .GE.  active_system_info(1,i)) .AND. (j .LE. active_system_info(2,i))) THEN
                             num_mol = i
                             EXIT 
@@ -549,21 +541,27 @@ subroutine calcforces_smart_grad(state, Hin, C, nacv, Fin, forces_adiab, &
                       end do
                    ENDIF
 
-                   do i=1,mat
-                      ! Diagonal term, it depends on the forces
-                      forces_adiab(d,j) = forces_adiab(d,j) + (abs(C(i,state))**2)*Fin(d,j,i)
-                      ! Of diagonal term, only for active atom j present in
-                      ! molecule num_mol
-                      IF (ext_pres(j)) THEN
-                         IF (PRESENT(scaling) .AND. PRESENT(cbar)) THEN
-                             IF (i.ne.num_mol) THEN
-                                convert_nacv = - scaling / cbar ! to convert the FOB NACV
-                                forces_adiab(d,j) = forces_adiab(d,j) + &
-                                            2.0D0*((C(num_mol,state))*nacv(d,i, num_j)*C(i,state))*convert_nacv
-                             ENDIF
-                         END IF
-                      ENDIF
-                   ENDDO
+                   do i=1,SIZE(active_system_info, 2)
+                      do m=1,orb
+                        ! Diagonal term, it depends on the forces
+                        ! I assume that diagonal forces
+                        ! for two degenrate
+                        ! states are the same as for site energies
+                        forces_adiab(d,j) = forces_adiab(d,j) + (abs(C(orb*(i-1)+m,state))**2)*Fin(d,j,i)
+                        ! Of diagonal term, only for active atom j present in
+                        ! molecule num_mol
+                        IF (ext_pres(j)) THEN
+                           IF (PRESENT(scaling) .AND. PRESENT(cbar)) THEN
+                               IF (i.ne.num_mol) THEN
+                                  convert_nacv = - scaling / cbar ! to convert the FOB NACV
+                                  forces_adiab(d,j) = forces_adiab(d,j) + &
+                                        2.0D0*((C(orb*(num_mol-1)+m,state))*&
+                                          nacv(d, orb*(i-1)+m, num_j)*C(orb*(i-1)+m,state))*convert_nacv
+                               ENDIF
+                           END IF
+                        ENDIF
+                      end do
+                   end do 
                 ENDDO
         ENDDO
 end subroutine calcforces_smart_grad
@@ -2322,7 +2320,7 @@ END SUBROUTINE classically_forbidden_hops
     TYPE(atomic_kind_type), ALLOCATABLE, TARGET, DIMENSION(:)     :: my_atomic_kind_set
     INTEGER                                        :: my_nparticle_kind
     REAL(kind=dp)                                  :: mass
-    INTEGER                                        :: iparticle_kind
+    INTEGER                                        :: iparticle_kind, orb
     INTEGER                                        :: nparticle_local
     REAL(kind=dp)                                  :: mixing_threshold
     INTEGER                                        :: iparticle_local, iparticle
@@ -2350,6 +2348,9 @@ END SUBROUTINE classically_forbidden_hops
     adiab_nace_vector(:) = sh_env%adiab_nace_tp(sh_env%active_state,:)
     !>number of degrees of freedom intensive EDC
     deg_of_freedom = (COUNT(sh_env%ext_pres)*3-6)
+
+    CALL section_vals_val_get(adiab_section,"NUMBER_ORBITALS",&
+         i_val=orb)
 
 
     IF (PRESENT(atomic_kinds)) THEN
@@ -2406,7 +2407,7 @@ END SUBROUTINE classically_forbidden_hops
                             ! forces at the moment can be calculate with AOM Hamiltonian only
                               call calcforces_smart_grad(i ,-AIMAG(sh_env%H_tp), sh_env%C_tp, sh_env%nacv, &
                                     diagonal_F, my_forces_adiab, &
-                                    sh_env%ext_pres, sh_env%active_system_info, sh_env%scaling, sh_env%cbar)
+                                    sh_env%ext_pres, sh_env%active_system_info, orb, sh_env%scaling, sh_env%cbar)
                          else
                             CPABORT("There is no method to calculate adiabatic forces for this H")
                          end if
@@ -2458,7 +2459,7 @@ END SUBROUTINE classically_forbidden_hops
                             ! forces at the moment can be calculate with AOM Hamiltonian only
                              call calcforces_smart_grad(i ,-AIMAG(sh_env%H_tp), sh_env%C_tp, sh_env%nacv, &
                                   diagonal_F, my_forces_adiab, &
-                                  sh_env%ext_pres, sh_env%active_system_info, sh_env%scaling, sh_env%cbar)
+                                  sh_env%ext_pres, sh_env%active_system_info, orb, sh_env%scaling, sh_env%cbar)
                          else
                             CPABORT("There is no method to calculate adiabatic forces for this H")
                          end if

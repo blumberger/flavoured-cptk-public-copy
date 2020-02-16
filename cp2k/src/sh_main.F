@@ -473,7 +473,7 @@ print *, "coord", sh_env%crds(:,3,3)
                                                             nacv=sh_env%nacv, & 
                                                             Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                                         ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
-                                                      scaling=sh_env%scaling, cbar=sh_env%cbar)
+                                                     orb=orb, scaling=sh_env%scaling, cbar=sh_env%cbar)
 
         IF (sh_env%analytics) THEN
            times = DBLE(itimes)
@@ -885,12 +885,12 @@ print *, "positions_com_tp(:,:)", positions_com_tp(:,3)
          !HOP ROUTINE IS. 
          call calcforces_smart_grad(state=sh_env%active_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%nacv, &
                                Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
-                               ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
+                               ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, orb=orb, &
                                scaling=sh_env%scaling, cbar=sh_env%cbar)
          IF (sh_env%attempt_hop) THEN
              call calcforces_smart_grad(state=sh_env%new_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%nacv, &
                                   Fin=diagonal_F, forces_adiab=sh_env%forces_adiab_new, &
-                                  ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
+                                  ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, orb=orb, &
                                           scaling=sh_env%scaling, cbar=sh_env%cbar)
          ENDIF
          ! --------------------------------------------------------------------------------------------------
