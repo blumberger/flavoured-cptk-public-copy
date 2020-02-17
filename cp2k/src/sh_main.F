@@ -467,7 +467,7 @@ CONTAINS
         !------------------  AOM section --------------------------------------------------------
         !> second part CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE
         !RESULT OF THE SURFACE HOP ROUTINE IS.
-        call calcforces_smart_grad(state=active_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, &
+        call calcforces_smart_grad(state=active_state, C=sh_env%C_tp, &
                                                             nacv=sh_env%nacv, & 
                                                             Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                                         ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
@@ -487,7 +487,7 @@ CONTAINS
         !frozen Hamiltonian case
         !CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=active_state, Fin=diagonal_F, &
         !                          forces_adiab=sh_env%forces_adiab)
-        call calcforces_smart_grad(state=active_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, &
+        call calcforces_smart_grad(state=active_state, C=sh_env%C_tp, &
                                                             nacv=sh_env%grad_tresp, & 
                                                             Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                                         ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
@@ -880,12 +880,12 @@ CONTAINS
          !------------------  AOM section    --------------------------------------------------------
          !CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE RESULT OF THE SURFACE
          !HOP ROUTINE IS. 
-         call calcforces_smart_grad(state=sh_env%active_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%nacv, &
+         call calcforces_smart_grad(state=sh_env%active_state, C=sh_env%C_tp, nacv=sh_env%nacv, &
                                Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                                ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, orb=orb, &
                                scaling=sh_env%scaling, cbar=sh_env%cbar)
          IF (sh_env%attempt_hop) THEN
-             call calcforces_smart_grad(state=sh_env%new_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%nacv, &
+             call calcforces_smart_grad(state=sh_env%new_state, C=sh_env%C_tp, nacv=sh_env%nacv, &
                                   Fin=diagonal_F, forces_adiab=sh_env%forces_adiab_new, &
                                   ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, orb=orb, &
                                           scaling=sh_env%scaling, cbar=sh_env%cbar)
@@ -906,11 +906,11 @@ CONTAINS
         !             CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp),C=sh_env%C_tp, state=sh_env%new_state, Fin=diagonal_F, &
         !                          forces_adiab=sh_env%forces_adiab_new)
         !END IF
-         call calcforces_smart_grad(state=sh_env%active_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%grad_tresp, &
+         call calcforces_smart_grad(state=sh_env%active_state, C=sh_env%C_tp, nacv=sh_env%grad_tresp, &
                                Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                                ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, orb=orb)
          IF (sh_env%attempt_hop) THEN
-             call calcforces_smart_grad(state=sh_env%new_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%grad_tresp, &
+             call calcforces_smart_grad(state=sh_env%new_state, C=sh_env%C_tp, nacv=sh_env%grad_tresp, &
                                   Fin=diagonal_F, forces_adiab=sh_env%forces_adiab_new, &
                                   ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, orb=orb)
          ENDIF

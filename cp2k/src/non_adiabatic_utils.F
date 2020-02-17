@@ -489,13 +489,13 @@ end subroutine calc_trsp_ab
 !>       A huge part of this subroutine has been taken from AC's calcforces_aom
 !> \author SG  
 !**********************************************************************************
-subroutine calcforces_smart_grad(state, Hin, C, nacv, Fin, forces_adiab, & 
+subroutine calcforces_smart_grad(state, C, nacv, Fin, forces_adiab, & 
                   ext_pres,  active_system_info, orb, scaling, cbar)
 
         !per our full force expression derivation, this calculates the adiabatic forces
         !on each atom
         integer, intent(in)                         :: state, orb
-        REAL(KIND=dp), intent(in), dimension(:,:)   :: Hin, C
+        REAL(KIND=dp), intent(in), dimension(:,:)   :: C
         REAL(KIND=dp), intent(in), dimension(:,:,:) :: nacv
         REAL(KIND=dp), intent(in), dimension(:,:,:) :: Fin
         REAL(KIND=dp), dimension(:,:), POINTER      :: forces_adiab
@@ -518,6 +518,7 @@ subroutine calcforces_smart_grad(state, Hin, C, nacv, Fin, forces_adiab, &
         !Note that Fin(d,j,i) is the array of diagonal forces and its dimension
                             !stops at the number of total force_evals
                             !considered. 
+        !The following subroutine may NOT work if orb !=1 (degeneracy)
 
 
         ! Based on paper [Spencer16]: Spencer et al., J. Chem. Phys. 145, 064102 (2016)
@@ -547,7 +548,7 @@ subroutine calcforces_smart_grad(state, Hin, C, nacv, Fin, forces_adiab, &
                         ! I assume that diagonal forces
                         ! for two degenrate
                         ! states are the same as for site energies
-                        forces_adiab(d,j) = forces_adiab(d,j) + (abs(C(orb*(i-1)+m,state))**2)*Fin(d,j,i)
+                        forces_adiab(d,j) = forces_adiab(d,j) + (abs(C(orb*(i-1)+m, orb*(state-1)+m))**2)*Fin(d,j,i)
                         ! Of diagonal term, only for active atom j present in
                         ! molecule num_mol
                         IF (ext_pres(j)) THEN
@@ -556,16 +557,16 @@ subroutine calcforces_smart_grad(state, Hin, C, nacv, Fin, forces_adiab, &
                                IF (i.ne.num_mol) THEN
                                   convert_nacv = - scaling / cbar ! to convert the FOB NACV
                                   forces_adiab(d,j) = forces_adiab(d,j) + &
-                                        2.0D0*((C(orb*(num_mol-1)+m,state))*&
-                                          nacv(d, orb*(i-1)+m, num_j)*C(orb*(i-1)+m,state))*convert_nacv
+                                        2.0D0*((C(orb*(num_mol-1)+m,orb*(state-1)+m))*&
+                                          nacv(d, orb*(i-1)+m, num_j)*C(orb*(i-1)+m,orb*(state-1)+m))*convert_nacv
                                ENDIF
                            ELSE 
                                !> Forces in case of general gradients smartly stored as
                                !> nacv in AOM case
                                IF (i.ne.num_mol) THEN
                                   forces_adiab(d,j) = forces_adiab(d,j) + &
-                                          ((C(orb*(num_mol-1)+m,state))*&
-                                          nacv(d, orb*(i-1)+m, num_j)*C(orb*(i-1)+m,state))
+                                          ((C(orb*(num_mol-1)+m,orb*(state-1)+m))*&
+                                          nacv(d, orb*(i-1)+m, num_j)*C(orb*(i-1)+m,orb*(state-1)+m))
                                ENDIF
                            END IF
                         ENDIF
@@ -2414,7 +2415,7 @@ END SUBROUTINE classically_forbidden_hops
                          !if there is mixing then we use force otherwise we use !pure dephasing
                          if (sh_env%aom_couplings_keyword) then
                             ! forces at the moment can be calculate with AOM Hamiltonian only
-                              call calcforces_smart_grad(i ,-AIMAG(sh_env%H_tp), sh_env%C_tp, sh_env%nacv, &
+                              call calcforces_smart_grad(i , sh_env%C_tp, sh_env%nacv, &
                                     diagonal_F, my_forces_adiab, &
                                     sh_env%ext_pres, sh_env%active_system_info, orb, sh_env%scaling, sh_env%cbar)
                          else
@@ -2466,7 +2467,7 @@ END SUBROUTINE classically_forbidden_hops
                          !if there is mixing then we use force otherwise we use !pure dephasing
                          if (sh_env%aom_couplings_keyword) then
                             ! forces at the moment can be calculate with AOM Hamiltonian only
-                             call calcforces_smart_grad(i ,-AIMAG(sh_env%H_tp), sh_env%C_tp, sh_env%nacv, &
+                             call calcforces_smart_grad(i, sh_env%C_tp, sh_env%nacv, &
                                   diagonal_F, my_forces_adiab, &
                                   sh_env%ext_pres, sh_env%active_system_info, orb, sh_env%scaling, sh_env%cbar)
                          else

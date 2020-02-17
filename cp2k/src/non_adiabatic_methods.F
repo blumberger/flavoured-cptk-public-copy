@@ -206,7 +206,6 @@ CONTAINS
                    adiab_section,& 
                  my_bo_keyword, atomic_kinds, &
                  local_particles, my_test_keyword, method_keyword, diagonal_F=mixed_env%F)
-       DEALLOCATE(velocities_tp)
     ELSE
        !> Get the information for the previous timesteps
        !!!!!!!!!!!!!!!!!!!!!!TO BE MODIFIED!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -301,6 +300,7 @@ CONTAINS
        DEALLOCATE(map_index)
     END IF
     DEALLOCATE(positions_tp, forces_adiab)
+    DEALLOCATE(velocities_tp)
    END SUBROUTINE adiab_fssh_routines
 
 END MODULE non_adiabatic_methods

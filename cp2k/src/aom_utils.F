@@ -170,7 +170,7 @@ subroutine adiabaticity(H, C, E)
         character(len=1) :: job, up
         REAL(KIND=dp), dimension(:), allocatable :: DGETRI_WORK
 
-        mol = SIZE(H, 1)
+        mol = SIZE(H, 1) !this is actually mat because H could be degenerate
  
         allocate(C(mol,mol))
         allocate(E(mol))
@@ -205,6 +205,127 @@ subroutine adiabaticity(H, C, E)
          
         deallocate(DGETRI_WORK)
 end subroutine adiabaticity
+
+!**********************************************************************************
+!> \brief This calculates the adiabatic nacv according to Eq 11 in Carof 17. It
+!is a generalization of calc_hop_nacv_aom for Hamiltonians different from the AOM one.
+!> \author AC [edited SG] 
+!**********************************************************************************
+SUBROUTINE calc_hop_nacv_approx(sh_env, diagonal_F, C, nacv, active_system_info, &
+                                     hop_nacv, scaling, cbar, &
+                                     ext_old_state, ext_new_state)
+
+        TYPE(sh_env_type)                                        :: sh_env
+        REAL(kind=dp), DIMENSION(:,:), INTENT(OUT), ALLOCATABLE  :: hop_nacv
+        REAL(KIND=dp), dimension(:,:,:), INTENT(IN)              :: nacv
+        REAL(KIND=dp), intent(in), dimension(:,:)                :: C
+        INTEGER, DIMENSION(:,:), ALLOCATABLE, &
+                                      INTENT(IN)                 :: active_system_info
+        REAL(KIND=dp), DIMENSION(:,:,:), INTENT(IN)              :: diagonal_F
+        REAL(KIND=dp), intent(in), OPTIONAL                      :: scaling, cbar
+        INTEGER, OPTIONAL                                        :: ext_old_state, ext_new_state
+
+
+        CHARACTER(len=*), PARAMETER :: routineN = 'calc_hop_nacv_approx', &
+        routineP = moduleN//':'//routineN
+
+        INTEGER                                                  :: num_mol, num_j, natom
+        INTEGER                                                  :: old_state, new_state
+        REAL(KIND=dp)                                            :: diff_energy
+        REAL(KIND=dp)                                            :: E_old_state, E_new_state
+        integer                                                  :: i, j, mat, d
+        REAL(KIND=dp), dimension(:,:), allocatable               :: F_1, F_11
+        LOGICAL, dimension(:), allocatable                       :: ext_pres
+        REAL(KIND=dp)                                            :: convert_nacv 
+
+        !COMMENT_SG This subrotine is practically a copy of the calcforces and
+        !they could be merged into a single one with some more options.      
+
+        ! Based on paper Carof, Giannini, Blumberger, J. Chem. Phys. 147,
+        ! 214113 (2017), [Carof17]
+
+
+        natom  = SIZE(diagonal_F, 2)
+        mat = SIZE(diagonal_F, 3) !this is actually mol
+
+
+        allocate(ext_pres(natom))
+        allocate(F_1(3,natom))
+        allocate(F_11(3,natom))
+        allocate(hop_nacv(3, natom)) 
+
+        
+        !nacv = sh_env%nacv
+        !Fin = sh_env%F
+        ext_pres = sh_env%ext_pres       
+        IF (PRESENT(ext_old_state)) THEN
+           old_state = ext_old_state
+        ELSE
+           old_state = sh_env%active_state
+        ENDIF
+        IF (PRESENT(ext_new_state)) THEN
+           new_state = ext_new_state 
+        ELSE
+           new_state = sh_env%new_state
+        ENDIF
+        E_old_state = sh_env%E_tp(old_state)
+        E_new_state = sh_env%E_tp(new_state)
+        IF (E_old_state.EQ.E_new_state) THEN
+           diff_energy = 0.0D0
+        ELSE
+           diff_energy = 1 / (E_new_state - E_old_state)
+        ENDIF  
+
+
+       ! Only calculation of term a_{I, ij} in Eq. (14) of [Carof17], i.e.
+       ! Eq. (15)
+       num_mol = 0   ! Molecular index 
+       do d=1,3      ! Cartesian coordinates
+          num_j = 0  ! Active atom index
+          do j=1,natom ! Sum over all the atoms
+             F_1(d,j) = 0.0D0
+             F_11(d,j) = 0.0D0
+
+             IF (ext_pres(j)) THEN
+                num_j   = num_j + 1                  ! Update the active atom index
+                ! Get the molecule to which j belong, for a general
+                ! system. This is a molecular index needed below. Looping
+                ! over molecules is necessary here.
+                do i=1,SIZE(active_system_info, 2) ! loop over non-deg states
+                   IF ((j .GE.  active_system_info(1,i)) .AND. (j .LE. active_system_info(2,i))) THEN
+                      num_mol = i
+                      EXIT
+                   END IF
+                end do
+             ENDIF
+             do i=1, SIZE(active_system_info, 2) !non-deg
+                !F_1(d,j) = F_1(d,j) + C(i,old_state)*DH(i,i,j,d)*C(i,new_state)*diff_energy
+                ! Diagonal term, it depends on the forces
+                F_1(d,j) = F_1(d,j) + C(i,old_state)*diagonal_F(d,j,i)*C(i,new_state)*diff_energy
+
+                IF (ext_pres(j)) THEN
+                   IF (PRESENT(scaling) .AND. PRESENT(cbar)) THEN 
+                      IF (i.ne.num_mol) THEN
+                      convert_nacv = - scaling / cbar
+                      ! Of diagonal term, only for active atom j present in
+                      ! molecule num_mol
+                      F_11(d,j) = F_11(d,j) + diff_energy * convert_nacv*nacv(d, i, num_j) * (&
+                                             C(num_mol, new_state) * C(i, old_state) +   &
+                                              C(num_mol, old_state) * C(i,new_state) )
+                      END IF
+                   ENDIF
+                ENDIF
+             end do
+          ENDDO
+       ENDDO 
+
+       ! minus sign to take the same convention of the paper.
+       hop_nacv = -(F_1 + F_11) 
+ 
+       deallocate(F_1)
+       deallocate(F_11)
+
+END SUBROUTINE calc_hop_nacv_approx
 
 !**********************************************************************************
 !> \brief This calculates the adiabatic nacv according to Eq 11 in Carof 17
