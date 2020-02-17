@@ -35,11 +35,12 @@ MODULE non_adiabatic_utils
      USE sh_types,                    ONLY: sh_env_type, &      
                                                 sh_print_env_type 
 
-     USE aom_utils,                    ONLY: makeX,              & 
-                                             adiabaticity,       &
-                                             calc_hop_nacv_aom,  &
-                                             make_adiabX,        &
-                                             calc_diabatic_nace, & 
+     USE aom_utils,                    ONLY: makeX,                & 
+                                             adiabaticity,         &
+                                             calc_hop_nacv_aom,    &
+                                             calc_hop_nacv_approx, &
+                                             make_adiabX,          &
+                                             calc_diabatic_nace,   & 
                                              matinvsqrt
 
 !     USE non_adiabatic_types,           ONLY: sh_env_type
@@ -490,7 +491,7 @@ end subroutine calc_trsp_ab
 !> \author SG  
 !**********************************************************************************
 subroutine calcforces_smart_grad(state, C, nacv, Fin, forces_adiab, & 
-                  ext_pres,  active_system_info, orb, scaling, cbar)
+                  ext_pres,  active_system_info, orb, scaling, cbar, frozen_c)
 
         !per our full force expression derivation, this calculates the adiabatic forces
         !on each atom
@@ -503,6 +504,7 @@ subroutine calcforces_smart_grad(state, C, nacv, Fin, forces_adiab, &
         INTEGER, DIMENSION(:,:), ALLOCATABLE, &
                                       INTENT(IN)     :: active_system_info
         REAL(KIND=dp), intent(in), OPTIONAL          :: scaling, cbar
+        LOGICAL, OPTIONAL, INTENT(IN)                :: frozen_c
 
         CHARACTER(len=*), PARAMETER :: routineN ='calcforces_smart_grad', &
                                routineP = moduleN//':'//routineN
@@ -511,6 +513,7 @@ subroutine calcforces_smart_grad(state, C, nacv, Fin, forces_adiab, &
         INTEGER                                     :: natom
         INTEGER                                     :: num_mol, num_j
         REAL(KIND=dp)                               :: convert_nacv 
+        LOGICAL                                     :: my_frozen_c
 
         natom = SIZE(Fin,2)
 
@@ -518,62 +521,71 @@ subroutine calcforces_smart_grad(state, C, nacv, Fin, forces_adiab, &
         !Note that Fin(d,j,i) is the array of diagonal forces and its dimension
                             !stops at the number of total force_evals
                             !considered. 
-        !The following subroutine may NOT work if orb !=1 (degeneracy)
-
+        !The following subroutine may NOT work if orb !=1 (degeneracy). It needs
+        !testing.
 
         ! Based on paper [Spencer16]: Spencer et al., J. Chem. Phys. 145, 064102 (2016)
         ! Use Eq. (21) of paper [Spencer16]
 
+        my_frozen_c = .FALSE.
+        IF (PRESENT(frozen_c)) my_frozen_c = frozen_c
+
+
+
         do d=1,3                        ! sum of cartesian 
-                num_j = 0               ! active atom index
-                do j=1,natom            ! sum over all atoms
-                   forces_adiab(d,j) = 0.0D0
+           num_j = 0               ! active atom index
+           do j=1,natom            ! sum over all atoms
+              forces_adiab(d,j) = 0.0D0
 
-                   IF (ext_pres(j)) THEN   
-                      num_j   = num_j + 1                 ! update active atom index
-                      ! Get the molecule to which j belong, for a general
-                      ! system. This is a molecular index needed below. Looping
-                      ! over molecules is necessary here.
-                      do i=1,SIZE(active_system_info, 2) ! loop over non-deg states
-                         IF ((j .GE.  active_system_info(1,i)) .AND. (j .LE. active_system_info(2,i))) THEN
-                            num_mol = i
-                            EXIT 
-                         END IF
-                      end do
-                   ENDIF
+              IF (ext_pres(j)) THEN   
+                 num_j   = num_j + 1                 ! update active atom index
+                 ! Get the molecule to which j belong, for a general
+                 ! system. This is a molecular index needed below. Looping
+                 ! over molecules is necessary here.
+                 do i=1,SIZE(active_system_info, 2) ! loop over non-deg states
+                    IF ((j .GE.  active_system_info(1,i)) .AND. (j .LE. active_system_info(2,i))) THEN
+                       num_mol = i
+                       EXIT 
+                    END IF
+                 end do
+              ENDIF
 
-                   do i=1,SIZE(active_system_info, 2)
-                      do m=1,orb
-                        ! Diagonal term, it depends on the forces
-                        ! I assume that diagonal forces
-                        ! for two degenrate
-                        ! states are the same as for site energies
-                        forces_adiab(d,j) = forces_adiab(d,j) + (abs(C(orb*(i-1)+m, orb*(state-1)+m))**2)*Fin(d,j,i)
-                        ! Of diagonal term, only for active atom j present in
-                        ! molecule num_mol
-                        IF (ext_pres(j)) THEN
-                           IF (PRESENT(scaling) .AND. PRESENT(cbar)) THEN
-                               !> Forces in case of AOM formalism
-                               IF (i.ne.num_mol) THEN
-                                  convert_nacv = - scaling / cbar ! to convert the FOB NACV
-                                  forces_adiab(d,j) = forces_adiab(d,j) + &
-                                        2.0D0*((C(orb*(num_mol-1)+m,orb*(state-1)+m))*&
-                                          nacv(d, orb*(i-1)+m, num_j)*C(orb*(i-1)+m,orb*(state-1)+m))*convert_nacv
-                               ENDIF
-                           ELSE 
-                               !> Forces in case of general gradients smartly stored as
-                               !> nacv in AOM case
-                               IF (i.ne.num_mol) THEN
-                                  forces_adiab(d,j) = forces_adiab(d,j) + &
-                                          ((C(orb*(num_mol-1)+m,orb*(state-1)+m))*&
-                                          nacv(d, orb*(i-1)+m, num_j)*C(orb*(i-1)+m,orb*(state-1)+m))
-                               ENDIF
-                           END IF
-                        ENDIF
-                      end do
-                   end do 
-                ENDDO
+              do i=1,SIZE(active_system_info, 2)
+                 do m=1,orb
+                   ! Diagonal term, it depends on the forces
+                   ! I assume that diagonal forces
+                   ! for two degenrate
+                   ! states are the same as for site energies
+                   forces_adiab(d,j) = forces_adiab(d,j) + (abs(C(orb*(i-1)+m, orb*(state-1)+m))**2)*Fin(d,j,i)
+ 
+                   ! calculate off diagonal forces if
+                   ! couplings are not frozen
+                   IF (.NOT. my_frozen_c) THEN
+
+                      ! Of diagonal term, only for active atom j present in
+                      ! molecule num_mol
+                      IF (ext_pres(j)) THEN
+                         IF (i.ne.num_mol) THEN
+                             IF (PRESENT(scaling) .AND. PRESENT(cbar)) THEN
+                                !> Forces in case of AOM formalism
+                                convert_nacv = - 2.0D0*scaling / cbar ! to convert the FOB NACV
+                             ELSE 
+                                !> Forces in case of general gradients (smartly stored as
+                                !> nacv in AOM case)
+                                convert_nacv = 1.0D0 !gradient are already a negative object so no minus sign here
+                             END IF
+
+                             forces_adiab(d,j) = forces_adiab(d,j) + &
+                                   ((C(orb*(num_mol-1)+m,orb*(state-1)+m))*&
+                                     nacv(d, orb*(i-1)+m, num_j)*C(orb*(i-1)+m,orb*(state-1)+m))*convert_nacv
+                         ENDIF
+                      ENDIF
+                   END IF
+                 end do
+              end do 
+           ENDDO
         ENDDO
+
 end subroutine calcforces_smart_grad
 
 
@@ -629,7 +641,7 @@ subroutine calc_hop_nacv_frozen_H(sh_env, diagonal_F, hop_nacv, ext_old_state, e
         REAL(KIND=dp), DIMENSION(:,:,:), POINTER                 :: diagonal_F
 
 
-        CHARACTER(len=*), PARAMETER :: routineN = 'calc_hop_nacv_aom', &
+        CHARACTER(len=*), PARAMETER :: routineN = 'calc_hop_nacv_frozen_H', &
         routineP = moduleN//':'//routineN
 
         !INTEGER                                      :: num_mol,  num_j
@@ -1044,7 +1056,7 @@ end subroutine modified_surfacehop
         CHARACTER(LEN=default_string_length)     :: nacv_keyword, reversal_keyword
         TYPE(section_vals_type), POINTER         :: mixed_section, adiab_section!, coupling_section
         TYPE(section_vals_type), POINTER         :: force_env_section, e_conservation_section
-        INTEGER                                  :: old_state, new_state
+        INTEGER                                  :: old_state, new_state, orb
         TYPE(sh_print_env_type)                  :: sh_print_env
         LOGICAL                                  :: translate_keyword
         REAL(kind=dp), DIMENSION(:,:),POINTER    :: velocities_com
@@ -1080,6 +1092,8 @@ end subroutine modified_surfacehop
 
         CALL section_vals_val_get(e_conservation_section,"METHOD_RESCALING",c_val=my_rescale_keyword)
         CALL section_vals_val_get(adiab_section,"CENTER_OF_MASS",l_val=translate_keyword)
+        CALL section_vals_val_get(adiab_section,"NUMBER_ORBITALS",i_val=orb)
+ 
         sh_print_env = force_env%mixed_env%sh_env%sh_print_env
 
         ALLOCATE(velocities_com(SIZE(velocities, 1), SIZE(velocities, 2)))
@@ -1220,7 +1234,14 @@ ENDIF
                  CALL calc_hop_nacv_aom(force_env%mixed_env%sh_env, force_env%mixed_env%F, hop_nacv)
                  CALL adiab_print_hop_nacv(sh_print_env, hop_nacv) 
               CASE("FAST")
-                 CALL calc_hop_nacv_aom( force_env%mixed_env%sh_env, force_env%mixed_env%F, hop_nacv, fast=.TRUE.)
+                 !COMMENT_SG: calc_hop_nacv_approx is a generalization of calc_hop_nacv_aom in the fast=.TRUE. case
+                 !CALL calc_hop_nacv_aom( force_env%mixed_env%sh_env, force_env%mixed_env%F, hop_nacv, fast=.TRUE.)
+                 CALL calc_hop_nacv_approx(force_env%mixed_env%sh_env, diagonal_F=force_env%mixed_env%F, &
+                                           C=force_env%mixed_env%sh_env%C_tp, nacv=force_env%mixed_env%sh_env%nacv, &
+                                           active_system_info=force_env%mixed_env%sh_env%active_system_info, &
+                                            orb=orb, hop_nacv=hop_nacv, &
+                                     scaling=force_env%mixed_env%sh_env%scaling, cbar=force_env%mixed_env%sh_env%cbar)
+
                  CALL adiab_print_hop_nacv(sh_print_env, hop_nacv) 
               CASE("FAST_FRZ_COUPLING")
                  CALL calc_hop_nacv_frozen_H( force_env%mixed_env%sh_env, force_env%mixed_env%F, hop_nacv)

@@ -130,6 +130,7 @@ IMPLICIT NONE
 
    PUBLIC :: makeX,                                &
              calc_hop_nacv_aom,                    &
+             calc_hop_nacv_approx,                 &       
              adiabaticity,                         &
              calc_aom_Xmatrix_elements,            & 
              calc_aom_Xmatrix_elements_first_step, & 
@@ -208,22 +209,29 @@ end subroutine adiabaticity
 
 !**********************************************************************************
 !> \brief This calculates the adiabatic nacv according to Eq 11 in Carof 17. It
-!is a generalization of calc_hop_nacv_aom for Hamiltonians different from the AOM one.
-!> \author AC [edited SG] 
+!          is a generalization of calc_hop_nacv_aom for Hamiltonians 
+!          different from the AOM one. It uses only the "a" term in Carof 17
+!          paper.
+!> \note This subroutine has not been tested for degeneracy, but it should be
+!        general enough to handle it.
+!> \author SG [taken from calc_hop_nacv_aom of AC]
 !**********************************************************************************
 SUBROUTINE calc_hop_nacv_approx(sh_env, diagonal_F, C, nacv, active_system_info, &
-                                     hop_nacv, scaling, cbar, &
+                                     orb, hop_nacv, scaling, cbar, frozen_c, &
                                      ext_old_state, ext_new_state)
 
         TYPE(sh_env_type)                                        :: sh_env
         REAL(kind=dp), DIMENSION(:,:), INTENT(OUT), ALLOCATABLE  :: hop_nacv
         REAL(KIND=dp), dimension(:,:,:), INTENT(IN)              :: nacv
         REAL(KIND=dp), intent(in), dimension(:,:)                :: C
+        REAL(KIND=dp), DIMENSION(:,:,:), INTENT(IN)              :: diagonal_F
+        INTEGER, INTENT(IN)                                      :: orb
         INTEGER, DIMENSION(:,:), ALLOCATABLE, &
                                       INTENT(IN)                 :: active_system_info
-        REAL(KIND=dp), DIMENSION(:,:,:), INTENT(IN)              :: diagonal_F
+
         REAL(KIND=dp), intent(in), OPTIONAL                      :: scaling, cbar
         INTEGER, OPTIONAL                                        :: ext_old_state, ext_new_state
+        LOGICAL, OPTIONAL, INTENT(IN)                            :: frozen_c
 
 
         CHARACTER(len=*), PARAMETER :: routineN = 'calc_hop_nacv_approx', &
@@ -233,10 +241,11 @@ SUBROUTINE calc_hop_nacv_approx(sh_env, diagonal_F, C, nacv, active_system_info,
         INTEGER                                                  :: old_state, new_state
         REAL(KIND=dp)                                            :: diff_energy
         REAL(KIND=dp)                                            :: E_old_state, E_new_state
-        integer                                                  :: i, j, mat, d
+        integer                                                  :: i, j, mat, d,m 
         REAL(KIND=dp), dimension(:,:), allocatable               :: F_1, F_11
         LOGICAL, dimension(:), allocatable                       :: ext_pres
         REAL(KIND=dp)                                            :: convert_nacv 
+        LOGICAL                                                  :: my_frozen_c
 
         !COMMENT_SG This subrotine is practically a copy of the calcforces and
         !they could be merged into a single one with some more options.      
@@ -244,10 +253,15 @@ SUBROUTINE calc_hop_nacv_approx(sh_env, diagonal_F, C, nacv, active_system_info,
         ! Based on paper Carof, Giannini, Blumberger, J. Chem. Phys. 147,
         ! 214113 (2017), [Carof17]
 
+        !The following subroutine may NOT work if orb !=1 (degeneracy). It needs
+        !testing.
+
 
         natom  = SIZE(diagonal_F, 2)
         mat = SIZE(diagonal_F, 3) !this is actually mol
 
+        my_frozen_c = .FALSE.
+        IF (PRESENT(frozen_c)) my_frozen_c = frozen_c
 
         allocate(ext_pres(natom))
         allocate(F_1(3,natom))
@@ -292,29 +306,40 @@ SUBROUTINE calc_hop_nacv_approx(sh_env, diagonal_F, C, nacv, active_system_info,
                 ! system. This is a molecular index needed below. Looping
                 ! over molecules is necessary here.
                 do i=1,SIZE(active_system_info, 2) ! loop over non-deg states
-                   IF ((j .GE.  active_system_info(1,i)) .AND. (j .LE. active_system_info(2,i))) THEN
+                   IF ((j .GE. active_system_info(1,i)) .AND. (j .LE. active_system_info(2,i))) THEN
                       num_mol = i
                       EXIT
                    END IF
                 end do
              ENDIF
              do i=1, SIZE(active_system_info, 2) !non-deg
-                !F_1(d,j) = F_1(d,j) + C(i,old_state)*DH(i,i,j,d)*C(i,new_state)*diff_energy
-                ! Diagonal term, it depends on the forces
-                F_1(d,j) = F_1(d,j) + C(i,old_state)*diagonal_F(d,j,i)*C(i,new_state)*diff_energy
+                do m=1,orb
+                   !F_1(d,j) = F_1(d,j) + C(i,old_state)*DH(i,i,j,d)*C(i,new_state)*diff_energy
+                   ! Diagonal term, it depends on the forces
+                   F_1(d,j) = F_1(d,j) + &
+                       C(orb*(i-1)+m,orb*(old_state-1)+m)*diagonal_F(d,j,i)*C(orb*(i-1)+m,orb*(new_state-1)+m)*diff_energy
 
-                IF (ext_pres(j)) THEN
-                   IF (PRESENT(scaling) .AND. PRESENT(cbar)) THEN 
-                      IF (i.ne.num_mol) THEN
-                      convert_nacv = - scaling / cbar
-                      ! Of diagonal term, only for active atom j present in
-                      ! molecule num_mol
-                      F_11(d,j) = F_11(d,j) + diff_energy * convert_nacv*nacv(d, i, num_j) * (&
-                                             C(num_mol, new_state) * C(i, old_state) +   &
-                                              C(num_mol, old_state) * C(i,new_state) )
-                      END IF
+                   ! calculate off diagonal forces if couplings are not frozen
+                   IF (.NOT. my_frozen_c) THEN
+                     IF (ext_pres(j)) THEN
+                         IF (i.ne.num_mol) THEN
+                            IF (PRESENT(scaling) .AND. PRESENT(cbar)) THEN 
+                                !grandient in case of AOM formalism
+                                convert_nacv = - scaling / cbar
+                            ELSE
+                                !gradient for a genaral H
+                                convert_nacv = 1.0D0  ! no scaling factor since we
+                                                      ! use gradient directly from other methods
+                            END IF
+                         ! Of diagonal term, only for active atom j present in
+                         ! molecule num_mol
+                         F_11(d,j) = F_11(d,j) + diff_energy * convert_nacv*nacv(d, orb*(i-1)+m, num_j) * (&
+                                          C(orb*(num_mol-1)+m, orb*(new_state-1)+m) * C(orb*(i-1)+m, orb*(old_state-1)+m) +   &
+                                          C(orb*(num_mol-1)+m, orb*(old_state-1)+m) * C(orb*(i-1)+m,orb*(new_state-1)+m) )
+                         ENDIF
+                     ENDIF   
                    ENDIF
-                ENDIF
+                end do
              end do
           ENDDO
        ENDDO 
