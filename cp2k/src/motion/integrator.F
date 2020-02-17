@@ -523,7 +523,7 @@ CONTAINS
          core_particle_set, shell_particle_set, nparticle_kind, shell_adiabatic, dt)
     !positions refer to t+dt and velocities to t+dt/2
     !print *, "V0.1", tmp%vel(1,:)
-    print *, "P0.1", tmp%pos(:,1)
+    !print *, "P0.1", tmp%pos(:,1)
 
     IF(simpar%variable_dt) CALL variable_timestep(md_env,tmp, dt, simpar, para_env, atomic_kind_set,&
          local_particles, particle_set, core_particle_set, shell_particle_set,&

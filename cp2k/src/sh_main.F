@@ -264,9 +264,7 @@ CONTAINS
             sh_env%siteenergies(2,:) = 0.0D0 ! CHANGE_AC
             sh_env%siteenergies(3,:) = energies_tp(:) ! CHANGE_AC
          enddo
-print *, "coord", sh_env%crds(:,1,3)
-print *, "coord", sh_env%crds(:,2,3)
-print *, "coord", sh_env%crds(:,3,3)
+
          !> CALCULATE THE CENTER OF MASS AND CONSTRUCT NEIGHBOURS LIST
          !> COMMENT_SG: it assumes same number of atoms per mol
          CALL calc_coms_and_nlist(mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, &
@@ -487,8 +485,14 @@ print *, "coord", sh_env%crds(:,3,3)
 
      ELSE IF (sh_env%tresp_couplings_keyword) THEN 
         !frozen Hamiltonian case
-        CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=active_state, Fin=diagonal_F, &
-                                  forces_adiab=sh_env%forces_adiab)
+        !CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=active_state, Fin=diagonal_F, &
+        !                          forces_adiab=sh_env%forces_adiab)
+        call calcforces_smart_grad(state=active_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, &
+                                                            nacv=sh_env%grad_tresp, & 
+                                                            Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
+                                        ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
+                                                     orb=orb)
+        
      ELSE
          !> In a possible extension one should add here 
          CPABORT("Another way to calculate adiabatic forces should be developed")
@@ -728,13 +732,6 @@ print *, "coord", sh_env%crds(:,3,3)
             sh_env%crds(coord,:,3) = PACK(positions_com_tp(coord,:), sh_env%ext_pres)
          enddo
 
-print *, "positions_tp(:,:)", positions_tp(:,1)
-print *, "positions_tp(:,:)", positions_tp(:,2)
-print *, "positions_tp(:,:)", positions_tp(:,3)
-
-print *, "positions_com_tp(:,:)", positions_com_tp(:,1)
-print *, "positions_com_tp(:,:)", positions_com_tp(:,2)
-print *, "positions_com_tp(:,:)", positions_com_tp(:,3)
          !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
          CALL calc_coms_and_nlist(mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, &
                                     active_system_info=sh_env%active_system_info, NN=sh_env%NN)
@@ -903,12 +900,20 @@ print *, "positions_com_tp(:,:)", positions_com_tp(:,3)
         END IF
 
      ELSE IF (sh_env%tresp_couplings_keyword) THEN
-        CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=sh_env%active_state, Fin=diagonal_F, &
-                                  forces_adiab=sh_env%forces_adiab)
-        IF (sh_env%attempt_hop) THEN
-                     CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp),C=sh_env%C_tp, state=sh_env%new_state, Fin=diagonal_F, &
-                                  forces_adiab=sh_env%forces_adiab_new)
-        END IF
+        !CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=sh_env%active_state, Fin=diagonal_F, &
+        !                          forces_adiab=sh_env%forces_adiab)
+        !IF (sh_env%attempt_hop) THEN
+        !             CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp),C=sh_env%C_tp, state=sh_env%new_state, Fin=diagonal_F, &
+        !                          forces_adiab=sh_env%forces_adiab_new)
+        !END IF
+         call calcforces_smart_grad(state=sh_env%active_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%grad_tresp, &
+                               Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
+                               ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, orb=orb)
+         IF (sh_env%attempt_hop) THEN
+             call calcforces_smart_grad(state=sh_env%new_state,Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, nacv=sh_env%grad_tresp, &
+                                  Fin=diagonal_F, forces_adiab=sh_env%forces_adiab_new, &
+                                  ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, orb=orb)
+         ENDIF
 
      ELSE
          !> In a possible extension one should add here 

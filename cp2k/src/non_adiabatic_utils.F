@@ -258,7 +258,7 @@ END SUBROUTINE calc_coms_and_nlist
                              crd_k(dim_,:) = positions_com_tp(dim_, init_atom_mol_k:final_atom_mol_k)
                           end do
 
-print *, "PAIR", i,k
+!print *, "PAIR", i,k
                           ! calc coupling for a given pair of states
                           CALL calc_trsp_ab(crd_i, crd_k, charges1, charges2, tresp_coup)
                           sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,-tresp_coup,dp) !sign of the off-diag is minus consisently with diagonals
@@ -275,7 +275,7 @@ print *, "PAIR", i,k
                           
                           ! calc gradient on atoms belonging to mol i, from
                           ! atoms belonging to mol k, and store the former array
-print *, "state", orb*(k-1)+d, "atoms", (i-1)*atoms_per_mol_i+1, i*atoms_per_mol_i 
+!print *, "state", orb*(k-1)+d, "atoms", (i-1)*atoms_per_mol_i+1, i*atoms_per_mol_i 
                           CALL calc_grad_coup( crd_i, crd_k, charges1, charges2, grad1) 
 
                           !> store gradient in the correct array entry
@@ -285,7 +285,7 @@ print *, "state", orb*(k-1)+d, "atoms", (i-1)*atoms_per_mol_i+1, i*atoms_per_mol
 
                           ! calc gradient on atoms belonging to mol k, from
                           ! atoms belonging to mol i, and store the former arrays
-print *, "state", orb*(i-1)+m, "atoms", (k-1)*atoms_per_mol_k+1, k*atoms_per_mol_k 
+!print *, "state", orb*(i-1)+m, "atoms", (k-1)*atoms_per_mol_k+1, k*atoms_per_mol_k 
                           CALL calc_grad_coup( crd_k, crd_i, charges2, charges1, grad1) 
                           
                           !> store gradient in the correct array entry
@@ -381,7 +381,7 @@ subroutine calc_grad_coup( crd1, crd2, charges1, charges2, grad1)
       grad1(:,t) = -grad1(:,t)
 !print *, "grad", grad1(:,t)
    end do
-print *, "grad", grad1(:,:)
+!print *, "grad", grad1(:,:)
 
    deallocate(char1, char2)
 end subroutine  calc_grad_coup
@@ -433,7 +433,7 @@ subroutine calc_trsp_ab(crd1, crd2, charges1, charges2, tresp_coup)
       end do
    end do
 
-print *, "TRESP COUP:", tresp_coup
+!print *, "TRESP COUP:", tresp_coup
    deallocate(char1, char2)
 end subroutine calc_trsp_ab
 
@@ -552,11 +552,20 @@ subroutine calcforces_smart_grad(state, Hin, C, nacv, Fin, forces_adiab, &
                         ! molecule num_mol
                         IF (ext_pres(j)) THEN
                            IF (PRESENT(scaling) .AND. PRESENT(cbar)) THEN
+                               !> Forces in case of AOM formalism
                                IF (i.ne.num_mol) THEN
                                   convert_nacv = - scaling / cbar ! to convert the FOB NACV
                                   forces_adiab(d,j) = forces_adiab(d,j) + &
                                         2.0D0*((C(orb*(num_mol-1)+m,state))*&
                                           nacv(d, orb*(i-1)+m, num_j)*C(orb*(i-1)+m,state))*convert_nacv
+                               ENDIF
+                           ELSE 
+                               !> Forces in case of general gradients smartly stored as
+                               !> nacv in AOM case
+                               IF (i.ne.num_mol) THEN
+                                  forces_adiab(d,j) = forces_adiab(d,j) + &
+                                          ((C(orb*(num_mol-1)+m,state))*&
+                                          nacv(d, orb*(i-1)+m, num_j)*C(orb*(i-1)+m,state))
                                ENDIF
                            END IF
                         ENDIF
