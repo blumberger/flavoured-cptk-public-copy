@@ -1266,6 +1266,8 @@ ENDIF
                                            C=force_env%mixed_env%sh_env%C_tp,&
                                            active_system_info=force_env%mixed_env%sh_env%active_system_info, &
                                             orb=orb, hop_nacv=hop_nacv, frozen_c=.TRUE.)       
+                 ELSE 
+                     CPABORT("There is no method to calculate the NACV in FAST approx.")
                  END IF
 
                  CALL adiab_print_hop_nacv(sh_print_env, hop_nacv) 
@@ -2463,6 +2465,16 @@ END SUBROUTINE classically_forbidden_hops
                                     diagonal_F, my_forces_adiab, &
                                     sh_env%ext_pres, sh_env%active_system_info, orb, &
                                        nacv=sh_env%nacv, scaling=sh_env%scaling, cbar=sh_env%cbar)
+                         else if (sh_env%tresp_couplings_keyword) then
+                              call calcforces_smart_grad(i , sh_env%C_tp, &
+                                    diagonal_F, my_forces_adiab, &
+                                    sh_env%ext_pres, sh_env%active_system_info, orb, &
+                                       nacv=sh_env%grad_tresp)
+                         else if (sh_env%frozen_couplings_keyword) then
+                              call calcforces_smart_grad(i , sh_env%C_tp, &
+                                    diagonal_F, my_forces_adiab, &
+                                    sh_env%ext_pres, sh_env%active_system_info, orb, &
+                                       frozen_c=.TRUE.)
                          else
                             CPABORT("There is no method to calculate adiabatic forces for this H")
                          end if
@@ -2516,6 +2528,16 @@ END SUBROUTINE classically_forbidden_hops
                                   diagonal_F, my_forces_adiab, &
                                   sh_env%ext_pres, sh_env%active_system_info, orb, &
                                   nacv=sh_env%nacv, scaling=sh_env%scaling, cbar=sh_env%cbar)
+                         else if (sh_env%tresp_couplings_keyword) then
+                              call calcforces_smart_grad(i , sh_env%C_tp, &
+                                    diagonal_F, my_forces_adiab, &
+                                    sh_env%ext_pres, sh_env%active_system_info, orb, &
+                                       nacv=sh_env%grad_tresp)
+                         else if (sh_env%frozen_couplings_keyword) then
+                              call calcforces_smart_grad(i , sh_env%C_tp, &
+                                    diagonal_F, my_forces_adiab, &
+                                    sh_env%ext_pres, sh_env%active_system_info, orb, &
+                                       frozen_c=.TRUE.)
                          else
                             CPABORT("There is no method to calculate adiabatic forces for this H")
                          end if

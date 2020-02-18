@@ -924,12 +924,12 @@ CONTAINS
          call calcforces_smart_grad(state=sh_env%active_state, C=sh_env%C_tp,&
                                Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                                ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, orb=orb, &
-                                        nacv=sh_env%nacv)
+                                        nacv=sh_env%grad_tresp)
          IF (sh_env%attempt_hop) THEN
              call calcforces_smart_grad(state=sh_env%new_state, C=sh_env%C_tp, &
                                   Fin=diagonal_F, forces_adiab=sh_env%forces_adiab_new, &
                                   ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, orb=orb, &
-                                    nacv=sh_env%nacv)
+                                    nacv=sh_env%grad_tresp)
          ENDIF
 
      ELSE
