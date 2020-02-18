@@ -103,7 +103,7 @@ MODULE sh_main
                                              calc_tresp_coup,                 &
                                              calc_frozen_H,                   &
                                              calcforces_smart_grad,           &
-                                             calcforces_frozenH,              &
+                                             !calcforces_frozenH,              &
                                              diab_to_adiab,                   & 
                                              surf_hop_type,                   &
                                              choose_firstadiabat,             &
@@ -468,10 +468,10 @@ CONTAINS
         !> second part CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE
         !RESULT OF THE SURFACE HOP ROUTINE IS.
         call calcforces_smart_grad(state=active_state, C=sh_env%C_tp, &
-                                                            nacv=sh_env%nacv, & 
                                                             Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                                         ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
-                                                     orb=orb, scaling=sh_env%scaling, cbar=sh_env%cbar)
+                                                          orb=orb, nacv=sh_env%nacv, & 
+                                                          scaling=sh_env%scaling, cbar=sh_env%cbar)
 
         IF (sh_env%analytics) THEN
            times = DBLE(itimes)
@@ -480,18 +480,21 @@ CONTAINS
         !-----------------------------------------------------------------------------------------------
      ELSE IF (sh_env%frozen_couplings_keyword) THEN 
         !frozen Hamiltonian case
-        CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=active_state, Fin=diagonal_F, &
-                                  forces_adiab=sh_env%forces_adiab)
+        !CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=active_state, Fin=diagonal_F, &
+        !                          forces_adiab=sh_env%forces_adiab)
+        call calcforces_smart_grad(state=active_state, C=sh_env%C_tp, &
+                                        Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
+                                        ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
+                                        orb=orb, frozen_c=.TRUE.)
 
      ELSE IF (sh_env%tresp_couplings_keyword) THEN 
         !frozen Hamiltonian case
         !CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=active_state, Fin=diagonal_F, &
         !                          forces_adiab=sh_env%forces_adiab)
         call calcforces_smart_grad(state=active_state, C=sh_env%C_tp, &
-                                                            nacv=sh_env%grad_tresp, & 
-                                                            Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
+                                        Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                                         ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
-                                                     orb=orb)
+                                        orb=orb, nacv=sh_env%grad_tresp)
         
      ELSE
          !> In a possible extension one should add here 
@@ -880,24 +883,36 @@ CONTAINS
          !------------------  AOM section    --------------------------------------------------------
          !CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE RESULT OF THE SURFACE
          !HOP ROUTINE IS. 
-         call calcforces_smart_grad(state=sh_env%active_state, C=sh_env%C_tp, nacv=sh_env%nacv, &
+         call calcforces_smart_grad(state=sh_env%active_state, C=sh_env%C_tp, &
                                Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                                ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, orb=orb, &
+                               nacv=sh_env%nacv, &
                                scaling=sh_env%scaling, cbar=sh_env%cbar)
          IF (sh_env%attempt_hop) THEN
-             call calcforces_smart_grad(state=sh_env%new_state, C=sh_env%C_tp, nacv=sh_env%nacv, &
+             call calcforces_smart_grad(state=sh_env%new_state, C=sh_env%C_tp, &
                                   Fin=diagonal_F, forces_adiab=sh_env%forces_adiab_new, &
                                   ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, orb=orb, &
+                                          nacv=sh_env%nacv, &
                                           scaling=sh_env%scaling, cbar=sh_env%cbar)
          ENDIF
          ! --------------------------------------------------------------------------------------------------
      ELSE IF (sh_env%frozen_couplings_keyword) THEN
-        CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=sh_env%active_state, Fin=diagonal_F, &
-                                  forces_adiab=sh_env%forces_adiab)
-        IF (sh_env%attempt_hop) THEN
-                     CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp),C=sh_env%C_tp, state=sh_env%new_state, Fin=diagonal_F, &
-                                  forces_adiab=sh_env%forces_adiab_new)
-        END IF
+        !CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=sh_env%active_state, Fin=diagonal_F, &
+        !                          forces_adiab=sh_env%forces_adiab)
+        !IF (sh_env%attempt_hop) THEN
+        !             CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp),C=sh_env%C_tp, state=sh_env%new_state, Fin=diagonal_F, &
+        !                          forces_adiab=sh_env%forces_adiab_new)
+        !END IF
+         call calcforces_smart_grad(state=sh_env%active_state, C=sh_env%C_tp,&
+                               Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
+                               ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, orb=orb, &
+                               frozen_c=.TRUE.)
+         IF (sh_env%attempt_hop) THEN
+             call calcforces_smart_grad(state=sh_env%new_state, C=sh_env%C_tp, &
+                                  Fin=diagonal_F, forces_adiab=sh_env%forces_adiab_new, &
+                                  ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, orb=orb, &
+                                    frozen_c=.TRUE.)
+         ENDIF
 
      ELSE IF (sh_env%tresp_couplings_keyword) THEN
         !CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=sh_env%active_state, Fin=diagonal_F, &
@@ -906,13 +921,15 @@ CONTAINS
         !             CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp),C=sh_env%C_tp, state=sh_env%new_state, Fin=diagonal_F, &
         !                          forces_adiab=sh_env%forces_adiab_new)
         !END IF
-         call calcforces_smart_grad(state=sh_env%active_state, C=sh_env%C_tp, nacv=sh_env%grad_tresp, &
+         call calcforces_smart_grad(state=sh_env%active_state, C=sh_env%C_tp,&
                                Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
-                               ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, orb=orb)
+                               ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, orb=orb, &
+                                        nacv=sh_env%nacv)
          IF (sh_env%attempt_hop) THEN
-             call calcforces_smart_grad(state=sh_env%new_state, C=sh_env%C_tp, nacv=sh_env%grad_tresp, &
+             call calcforces_smart_grad(state=sh_env%new_state, C=sh_env%C_tp, &
                                   Fin=diagonal_F, forces_adiab=sh_env%forces_adiab_new, &
-                                  ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, orb=orb)
+                                  ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, orb=orb, &
+                                    nacv=sh_env%nacv)
          ENDIF
 
      ELSE
