@@ -101,8 +101,10 @@ MODULE sh_main
      USE non_adiabatic_utils,          ONLY: decohere_wf,                     &
                                              calc_coms_and_nlist,             &
                                              calc_tresp_coup,                 &
+                                             !calc_tresp_coup_test,                 &
                                              calc_frozen_H,                   &
                                              calcforces_smart_grad,           &
+                                             !calcforces_smart_grad_test,           &
                                              !calcforces_frozenH,              &
                                              diab_to_adiab,                   & 
                                              surf_hop_type,                   &
@@ -200,7 +202,7 @@ CONTAINS
      TYPE(section_vals_type), POINTER               :: coupling_section
      CHARACTER(LEN=default_string_length)           :: coupling_keyword
      REAL(KIND=dp)                                  :: convert_nacv
-     !INTEGER                                        :: i, k
+     !INTEGER                                        :: i
 
      NULLIFY(positions_com_tp, velocities_com_tp)
      NULLIFY(logger)
@@ -310,6 +312,9 @@ CONTAINS
          CALL calc_tresp_coup(sh_env, energies_tp, orb, NN=sh_env%NN, positions_com_tp=positions_com_tp, &
                              active_system_info=sh_env%active_system_info, tresp_charges=sh_env%tresp_charges)
 
+!TO REMOVE
+!         CALL calc_tresp_coup_test(sh_env, energies_tp, orb, NN=sh_env%NN, positions_com_tp=positions_com_tp, &
+!                             active_system_info=sh_env%active_system_info, tresp_charges=sh_env%tresp_charges)
      ELSE
          !> In a possible extension one should add here 
          CPABORT("Another coupling method to constrcut H should be chosen")
@@ -497,7 +502,28 @@ CONTAINS
                                         Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                                         ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
                                         orb=orb, nacv=sh_env%grad_tresp)
-        
+       
+!!!TEST TO REMOVE
+!OPEN (UNIT = 21, FILE = "FORCES_formatted.dat")
+!
+!do i=1,SIZE(sh_env%forces_adiab,2) !atoms
+!     write(21,*) "atom", i, sh_env%forces_adiab(:,i)
+!end do
+!close (21) 
+!
+!        call calcforces_smart_grad_test(state=active_state, C=sh_env%C_tp, &
+!                                        Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
+!                                        ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
+!                                        orb=orb, full_grad=sh_env%test_grad_tresp)
+!       
+!!!TEST TO REMOVE
+!OPEN (UNIT = 21, FILE = "FORCES_formatted_FULL.dat")
+!
+!do i=1,SIZE(sh_env%forces_adiab,2) !atoms
+!     write(21,*) "atom", i, sh_env%forces_adiab(:,i)
+!end do
+!close (21) 
+
      ELSE
          !> In a possible extension one should add here 
          CPABORT("Another way to calculate adiabatic forces should be developed")

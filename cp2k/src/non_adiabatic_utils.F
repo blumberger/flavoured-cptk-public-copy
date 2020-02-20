@@ -68,8 +68,10 @@ MODULE non_adiabatic_utils
         PUBLIC :: decohere_wf,                     &
                   calc_coms_and_nlist,             &
                   calc_tresp_coup,                 &
+                  !calc_tresp_coup_test,                 &
                   calc_frozen_H,                   &
                   calcforces_smart_grad,           &
+                  !calcforces_smart_grad_test,           &
                   !calcforces_frozenH,              &
                   surf_hop_type,                   &
                   check_hop_attempt,               &
@@ -464,7 +466,7 @@ END SUBROUTINE calc_hop_nacv_approx
         end do 
      end do
 
-!!TEST
+!TEST
 !OPEN (UNIT = 21, FILE = "GRAD_formatted.dat")
 !
 !do i=1,SIZE(sh_env%grad_tresp,3)
@@ -474,8 +476,10 @@ END SUBROUTINE calc_hop_nacv_approx
 !end do
 !
 !close (21)
-!stop
+!!stop
   end subroutine  calc_tresp_coup
+
+
 
 ! COMMENT_SG this subroutine is just a replication of the one below, you should
 ! merge them together
@@ -678,7 +682,6 @@ subroutine calcforces_smart_grad(state, C, Fin, forces_adiab, &
 
         my_frozen_c = .FALSE.
         IF (PRESENT(frozen_c)) my_frozen_c = frozen_c
-
 
 
         do d=1,3                        ! sum of cartesian 
@@ -4185,6 +4188,290 @@ subroutine calc_hop_nacv_frozen_H(sh_env, diagonal_F, hop_nacv, ext_old_state, e
         deallocate(C)
 
 end subroutine calc_hop_nacv_frozen_H
+
+!**********************************************************************************
+!> \brief just a test subroutine for full Gradient storage in case of tresp
+
+!> \author SG
+!**********************************************************************************
+  subroutine calc_tresp_coup_test(sh_env, energies_tp, orb, NN, positions_com_tp, active_system_info, tresp_charges)
+
+     TYPE(sh_env_type)                               :: sh_env
+     REAL(kind=dp), DIMENSION(:),  POINTER           :: energies_tp
+     integer, intent(in)                             :: orb
+     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE, &
+                                   INTENT(IN)        :: tresp_charges  !tresp
+                                                                       !charges taken from input file, they refer 
+                                                                       !to a single mol and should be extended
+                                                                       !for multi-phase system
+     INTEGER, DIMENSION(:,:), POINTER, INTENT(IN)    :: NN
+     REAL(kind=dp), DIMENSION(:,:),POINTER, &
+                                   INTENT(IN)        :: positions_com_tp
+     INTEGER, DIMENSION(:,:), ALLOCATABLE, &
+                                   INTENT(IN)        :: active_system_info
+
+     CHARACTER(len=*), PARAMETER                     :: routineN ='calc_tresp_coup', &
+     routineP = moduleN//':'//routineN
+
+     integer                                         :: i, k, m, d, dim_, l
+     integer                                         :: init_atom_mol_i, final_atom_mol_i, atoms_per_mol_i
+     integer                                         :: init_atom_mol_k, final_atom_mol_k, atoms_per_mol_k
+     real(kind=dp), allocatable, dimension(:,:)      :: crd_i, crd_k
+     real(kind=dp), allocatable, dimension(:)        :: charges1, charges2
+     real(kind=dp)                                   :: tresp_coup
+     real(kind=dp),  dimension(:,:), allocatable     :: grad1 !gradients acting on atoms of mol1
+
+
+     !> COMMENT_SG: Tresp charegs array should be generalized for multiple molecules
+     !and phases
+     !> COMMENT_SG: This is the only NON general bit of the whole subroutine. It
+     !assumes just one type of charges
+     !#########  WARNING ##############################################
+     ALLOCATE(charges1(SIZE(tresp_charges)))
+     ALLOCATE(charges2(SIZE(tresp_charges)))
+     charges1 = tresp_charges
+     charges2 = tresp_charges
+     !#################################################################
+
+
+     sh_env%H_tp(:,:) = cmplx(0.0D0, 0.0D0,dp)
+     sh_env%test_grad_tresp = 0.0D0
+
+     do i=1,SIZE(energies_tp) !loop over all non-degerate states
+        do k=1,SIZE(energies_tp)
+           ! do calculation only for molecules within cut-off radious. 
+           if (NN(i,k) == 1) then
+ 
+              !> diagonal construction
+              if (k==i) then 
+                 !since you may want to include multiple orbital per state, you
+                 !should loop over orbitals
+                 do d=1,orb
+                    sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+d) = cmplx(0.0D0,(-energies_tp(i)),dp) !minus because we propagate -X
+                 end do
+              else 
+                 !loop over upper diagonal
+                 if ( k > i ) then
+                    do d=1,orb
+                       do m=1,orb
+                          !> find coordinates mol 1 of the pair
+                          init_atom_mol_i = sh_env%active_system_info(1,i)
+                          final_atom_mol_i = sh_env%active_system_info(2,i)
+                          atoms_per_mol_i = (final_atom_mol_i-init_atom_mol_i)+1
+
+                          !> find coordinates mol 2 of the pair
+                          init_atom_mol_k = sh_env%active_system_info(1,k)
+                          final_atom_mol_k = sh_env%active_system_info(2,k)
+                          atoms_per_mol_k = (final_atom_mol_k-init_atom_mol_k)+1
+
+
+                          !> this allocation deallocation is maybe inefficient
+                          !but it was the only thing I found to be general for
+                          !multi-phases
+                          ALLOCATE(crd_i(3,atoms_per_mol_i))
+                          ALLOCATE(crd_k(3,atoms_per_mol_k))
+
+                          do dim_=1,3
+                             crd_i(dim_,:) = positions_com_tp(dim_, init_atom_mol_i:final_atom_mol_i)
+                             crd_k(dim_,:) = positions_com_tp(dim_, init_atom_mol_k:final_atom_mol_k)
+                          end do
+
+print *, "PAIR", i,k
+                          ! calc coupling for a given pair of states
+                          CALL calc_trsp_ab(crd_i, crd_k, charges1, charges2, tresp_coup)
+                          sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,-tresp_coup,dp) !sign of the off-diag is minus consisently with diagonals
+                          !test to recover frozen coup for a chain:
+                          !sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,0.0011024789,dp)
+
+                          !> For the gradient in the case of TrESP (as it was
+                          !for nacv in case of AOM) the idea is that the
+                          !gradient on atom I are non-zero only if this atom
+                          !belong to a molecule of the pair that are
+                          !interacting. We save the gradient on atom I belonging
+                          !to mol i coming from the other atoms on mol k and
+                          !viceversa. See Overleaf note for a better discussion. 
+                          
+                          ! calc gradient on atoms belonging to mol i, from
+                          ! atoms belonging to mol k, and store the former array
+!print *, "state", orb*(k-1)+d, "atoms", (i-1)*atoms_per_mol_i+1, i*atoms_per_mol_i 
+                          CALL calc_grad_coup( crd_i, crd_k, charges1, charges2, grad1) 
+
+
+                          !> store gradient in the correct array entry
+                          sh_env%test_grad_tresp(1, orb*(i-1)+d, orb*(k-1)+d,&
+                                                   (i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i) = grad1(1,:)
+                          sh_env%test_grad_tresp(2, orb*(i-1)+d, orb*(k-1)+d,&
+                                                   (i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i) = grad1(2,:)
+                          sh_env%test_grad_tresp(3, orb*(i-1)+d, orb*(k-1)+d, &
+                                                   (i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i) = grad1(3,:)
+
+                          ! calc gradient on atoms belonging to mol k, from
+                          ! atoms belonging to mol i, and store the former arrays
+!print *, "state", orb*(i-1)+m, "atoms", (k-1)*atoms_per_mol_k+1, k*atoms_per_mol_k 
+                          CALL calc_grad_coup( crd_k, crd_i, charges2, charges1, grad1) 
+                          
+                      
+                          !> store gradient in the correct array entry
+                          sh_env%test_grad_tresp(1, orb*(i-1)+m, orb*(k-1)+d, &
+                                               (k-1)*atoms_per_mol_k+1:k*atoms_per_mol_k) = grad1(1,:)                        
+                          sh_env%test_grad_tresp(2, orb*(i-1)+m, orb*(k-1)+d, &
+                                               (k-1)*atoms_per_mol_k+1:k*atoms_per_mol_k) = grad1(2,:)                        
+                          sh_env%test_grad_tresp(3, orb*(i-1)+m, orb*(k-1)+d, &
+                                               (k-1)*atoms_per_mol_k+1:k*atoms_per_mol_k) = grad1(3,:)                        
+ 
+                          ! I should find a way to store grad1 in a more general
+                          ! global_grad array that in principle should have
+                          ! dimension (3, mat, mat, natoms_TOTAL_active) or in a reduce
+                          ! form assuming all atoms_per_mol the same (3, mat, mat*natoms_per_mol))
+  
+                          DEALLOCATE(crd_i,crd_k)
+                      end do
+                   end do
+                 else
+                    do d=1,orb 
+                       do m=1,orb 
+                          sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m) = sh_env%H_tp(orb*(k-1)+m,orb*(i-1)+d)
+                          sh_env%test_grad_tresp(1,orb*(i-1)+d,orb*(k-1)+m,:) = &
+                                         sh_env%test_grad_tresp(1,orb*(k-1)+d,orb*(i-1)+m,:)
+                          sh_env%test_grad_tresp(2,orb*(i-1)+d,orb*(k-1)+m,:) = &
+                                         sh_env%test_grad_tresp(2,orb*(k-1)+d,orb*(i-1)+m,:)
+                          sh_env%test_grad_tresp(3,orb*(i-1)+d,orb*(k-1)+m,:) = &
+                                         sh_env%test_grad_tresp(3,orb*(k-1)+d,orb*(i-1)+m,:)
+                       end do 
+                    end do
+                 end if 
+              end if 
+
+
+           end if
+        end do 
+     end do
+
+!!TEST
+OPEN (UNIT = 21, FILE = "GRAD_formatted_FULL.dat")
+
+do i=1,SIZE(sh_env%test_grad_tresp,4) !atoms
+  do k=1, SIZE(sh_env%test_grad_tresp,2)   !mol
+     do l=1, SIZE(sh_env%test_grad_tresp,2)   !mol
+     write(21,*) "atom", i, "state", k, l, sh_env%test_grad_tresp(:,k,l,i)
+     end do
+  end do
+end do
+
+close (21)
+  end subroutine  calc_tresp_coup_test
+
+
+
+subroutine calcforces_smart_grad_test(state, C, Fin, forces_adiab, & 
+                  ext_pres,  active_system_info, orb, full_grad, convert_nacv, frozen_c)
+
+        !per our full force expression derivation, this calculates the adiabatic forces
+        !on each atom
+        integer, intent(in)                         :: state, orb
+        REAL(KIND=dp), intent(in), dimension(:,:)   :: C
+        REAL(KIND=dp), intent(in), dimension(:,:,:) :: Fin
+        REAL(KIND=dp), dimension(:,:), POINTER      :: forces_adiab
+        LOGICAL, dimension(:), INTENT(IN)           :: ext_pres
+        INTEGER, DIMENSION(:,:), ALLOCATABLE, &
+                                      INTENT(IN)     :: active_system_info
+        REAL(KIND=dp), intent(in), OPTIONAL          :: convert_nacv
+        LOGICAL, OPTIONAL, INTENT(IN)                :: frozen_c
+        REAL(KIND=dp), intent(in), dimension(:,:,:,:), &
+                                      OPTIONAL       :: full_grad
+
+        CHARACTER(len=*), PARAMETER :: routineN ='calcforces_smart_grad', &
+                               routineP = moduleN//':'//routineN
+
+        integer                                     :: i, j,  d, l
+        INTEGER                                     :: natom
+        INTEGER                                     :: num_mol, num_j
+        REAL(KIND=dp)                               :: my_convert_nacv 
+        LOGICAL                                     :: my_frozen_c
+
+        natom = SIZE(Fin,2)
+
+        !COMMENT_SG: This subroutine should be checked further for degeneracy.
+        !Note that Fin(d,j,i) is the array of diagonal forces and its dimension
+                            !stops at the number of total force_evals
+                            !considered. 
+        !The following subroutine may NOT work if orb !=1 (degeneracy). It needs
+        !testing.
+
+        ! Based on paper [Spencer16]: Spencer et al., J. Chem. Phys. 145, 064102 (2016)
+        ! Use Eq. (21) of paper [Spencer16]
+
+        my_frozen_c = .FALSE.
+        IF (PRESENT(frozen_c)) my_frozen_c = frozen_c
+
+
+        do d=1,3                        ! sum of cartesian 
+           num_j = 0               ! active atom index
+           do j=1,natom            ! sum over all atoms
+              forces_adiab(d,j) = 0.0D0
+
+              IF (ext_pres(j)) THEN   
+                 num_j   = num_j + 1                 ! update active atom index
+                 ! Get the molecule to which j belong, for a general
+                 ! system. This is a molecular index needed below. Looping
+                 ! over molecules is necessary here.
+                 do i=1,SIZE(active_system_info, 2) ! loop over non-deg states
+                    IF ((j .GE.  active_system_info(1,i)) .AND. (j .LE. active_system_info(2,i))) THEN
+                       num_mol = i
+                       EXIT 
+                    END IF
+                 end do
+              ENDIF
+
+              do i=1,SIZE(active_system_info, 2)
+                   ! Diagonal term, it depends on the forces
+                   ! I assume that diagonal forces
+                   ! for two degenrate
+                   ! states are the same as for site energies
+                   forces_adiab(d,j) = forces_adiab(d,j) + (abs(C(i, state))**2)*Fin(d,j,i)
+
+                   
+                   do l=1, SIZE(active_system_info, 2)
+                      my_convert_nacv = 1.0D0
+                      if (l .ne. i) THEN 
+                         forces_adiab(d,j) = forces_adiab(d,j) + &
+                            (C(i, state)*&
+                              full_grad(d, i,l, num_j)*C(l,state))
+                      end if
+                   end do 
+              end do 
+                      
+ 
+            !       ! calculate off diagonal forces if
+            !       ! couplings are not frozen
+            !       IF (.NOT. my_frozen_c) THEN
+
+            !          ! Of diagonal term, only for active atom j present in
+            !          ! molecule num_mol
+            !          IF (ext_pres(j)) THEN
+            !             IF (i.ne.num_mol) THEN
+            !                 IF (PRESENT(convert_nacv)) THEN
+            !                    !> Forces in case of AOM formalism
+            !                    my_convert_nacv = convert_nacv ! to convert the FOB NACV
+            !                 ELSE 
+            !                    !> Forces in case of general gradients (smartly stored as
+            !                    !> nacv in AOM case)
+            !                    my_convert_nacv = 1.0D0 !gradient are already a negative object so no minus sign here
+            !                 END IF
+
+            !                 forces_adiab(d,j) = forces_adiab(d,j) + &
+            !                       ((C(orb*(num_mol-1)+m,orb*(state-1)+m))*&
+            !                         nacv(d, orb*(i-1)+m, num_j)*C(orb*(i-1)+m,orb*(state-1)+m))*my_convert_nacv*2.0D0
+            !             ENDIF
+            !          ENDIF
+            !       END IF
+            !     end do
+            !  end do 
+           ENDDO
+        ENDDO
+
+end subroutine calcforces_smart_grad_test
+
 
 !!!!!!! DEPRECATED !!!!!
 ! Could be removed

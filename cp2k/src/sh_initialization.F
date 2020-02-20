@@ -279,6 +279,8 @@ CONTAINS
         !note that I did not use mat*active_atoms_per_mol to be more general for
         !multi-phase
         ALLOCATE(sh_env%grad_tresp(3,mat, COUNT(sh_env%ext_pres)))
+!TEST
+!        ALLOCATE(sh_env%test_grad_tresp(3,mat, mat, COUNT(sh_env%ext_pres)))
  
 
     CASE DEFAULT
