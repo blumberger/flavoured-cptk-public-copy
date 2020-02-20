@@ -199,6 +199,7 @@ CONTAINS
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: diagonal_F
      TYPE(section_vals_type), POINTER               :: coupling_section
      CHARACTER(LEN=default_string_length)           :: coupling_keyword
+     REAL(KIND=dp)                                  :: convert_nacv
      !INTEGER                                        :: i, k
 
      NULLIFY(positions_com_tp, velocities_com_tp)
@@ -467,11 +468,12 @@ CONTAINS
         !------------------  AOM section --------------------------------------------------------
         !> second part CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE
         !RESULT OF THE SURFACE HOP ROUTINE IS.
+        convert_nacv = -sh_env%scaling/sh_env%cbar
         call calcforces_smart_grad(state=active_state, C=sh_env%C_tp, &
                                                             Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                                         ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
                                                           orb=orb, nacv=sh_env%nacv, & 
-                                                          scaling=sh_env%scaling, cbar=sh_env%cbar)
+                                                          convert_nacv=convert_nacv)
 
         IF (sh_env%analytics) THEN
            times = DBLE(itimes)
@@ -644,6 +646,7 @@ CONTAINS
      COMPLEX(KIND=dp), dimension(:), allocatable    :: adiab_c
      TYPE(cp_logger_type), POINTER                  :: logger
      INTEGER                                        :: unit_nr
+     REAL(KIND=dp)                                  :: convert_nacv
 !     INTEGER                                        :: i, k
      
      NULLIFY(logger)
@@ -883,17 +886,19 @@ CONTAINS
          !------------------  AOM section    --------------------------------------------------------
          !CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE RESULT OF THE SURFACE
          !HOP ROUTINE IS. 
+         convert_nacv = -sh_env%scaling/sh_env%cbar
          call calcforces_smart_grad(state=sh_env%active_state, C=sh_env%C_tp, &
                                Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                                ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, orb=orb, &
                                nacv=sh_env%nacv, &
-                               scaling=sh_env%scaling, cbar=sh_env%cbar)
+                               convert_nacv=convert_nacv)
          IF (sh_env%attempt_hop) THEN
+             convert_nacv = -sh_env%scaling/sh_env%cbar
              call calcforces_smart_grad(state=sh_env%new_state, C=sh_env%C_tp, &
                                   Fin=diagonal_F, forces_adiab=sh_env%forces_adiab_new, &
                                   ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, orb=orb, &
                                           nacv=sh_env%nacv, &
-                                          scaling=sh_env%scaling, cbar=sh_env%cbar)
+                                          convert_nacv=convert_nacv)
          ENDIF
          ! --------------------------------------------------------------------------------------------------
      ELSE IF (sh_env%frozen_couplings_keyword) THEN

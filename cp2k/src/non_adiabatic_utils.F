@@ -172,7 +172,7 @@ END SUBROUTINE calc_coms_and_nlist
 !> \author SG [taken from calc_hop_nacv_aom of AC]
 !**********************************************************************************
 SUBROUTINE calc_hop_nacv_approx(sh_env, diagonal_F, C, active_system_info, &
-                                     orb, hop_nacv, nacv, scaling, cbar, frozen_c, &
+                                     orb, hop_nacv, nacv, convert_nacv, frozen_c, &
                                      ext_old_state, ext_new_state)
 
         TYPE(sh_env_type)                                        :: sh_env
@@ -184,9 +184,9 @@ SUBROUTINE calc_hop_nacv_approx(sh_env, diagonal_F, C, active_system_info, &
                                       INTENT(IN)                 :: active_system_info
         REAL(KIND=dp), dimension(:,:,:), INTENT(IN), OPTIONAL    :: nacv
 
-        REAL(KIND=dp), intent(in), OPTIONAL                      :: scaling, cbar
         INTEGER, OPTIONAL                                        :: ext_old_state, ext_new_state
         LOGICAL, OPTIONAL, INTENT(IN)                            :: frozen_c
+        REAL(KIND=dp), intent(in), OPTIONAL                      :: convert_nacv
 
 
         CHARACTER(len=*), PARAMETER :: routineN = 'calc_hop_nacv_approx', &
@@ -199,7 +199,7 @@ SUBROUTINE calc_hop_nacv_approx(sh_env, diagonal_F, C, active_system_info, &
         integer                                                  :: i, j, mat, d,m 
         REAL(KIND=dp), dimension(:,:), allocatable               :: F_1, F_11
         LOGICAL, dimension(:), allocatable                       :: ext_pres
-        REAL(KIND=dp)                                            :: convert_nacv 
+        REAL(KIND=dp)                                            :: my_convert_nacv 
         LOGICAL                                                  :: my_frozen_c
 
         !COMMENT_SG This subrotine is practically a copy of the calcforces and
@@ -278,19 +278,22 @@ SUBROUTINE calc_hop_nacv_approx(sh_env, diagonal_F, C, active_system_info, &
                    IF (.NOT. my_frozen_c) THEN
                      IF (ext_pres(j)) THEN
                          IF (i.ne.num_mol) THEN
-                            IF (PRESENT(scaling) .AND. PRESENT(cbar)) THEN 
+                            IF (PRESENT(convert_nacv)) THEN 
                                 !grandient in case of AOM formalism
-                                convert_nacv = - scaling / cbar
+                                my_convert_nacv = convert_nacv
                             ELSE
                                 !gradient for a genaral H
-                                convert_nacv = 1.0D0  ! no scaling factor since we
+                                my_convert_nacv = 1.0D0  ! no scaling factor since we
                                                       ! use gradient directly from other methods
                             END IF
                          ! Of diagonal term, only for active atom j present in
                          ! molecule num_mol
-                         F_11(d,j) = F_11(d,j) + diff_energy * convert_nacv*nacv(d, orb*(i-1)+m, num_j) * (&
+                         !> Note this equation is a generalization of calcforces
+                         !one for two different adiabatic states old and new
+                         F_11(d,j) = F_11(d,j) + diff_energy * my_convert_nacv*nacv(d, orb*(i-1)+m, num_j) * (&
                                           C(orb*(num_mol-1)+m, orb*(new_state-1)+m) * C(orb*(i-1)+m, orb*(old_state-1)+m) +   &
                                           C(orb*(num_mol-1)+m, orb*(old_state-1)+m) * C(orb*(i-1)+m,orb*(new_state-1)+m) )
+                        
                          ENDIF
                      ENDIF   
                    ENDIF
@@ -636,7 +639,7 @@ end subroutine calc_trsp_ab
 !> \author SG  
 !**********************************************************************************
 subroutine calcforces_smart_grad(state, C, Fin, forces_adiab, & 
-                  ext_pres,  active_system_info, orb, nacv, scaling, cbar, frozen_c)
+                  ext_pres,  active_system_info, orb, nacv, convert_nacv, frozen_c)
 
         !per our full force expression derivation, this calculates the adiabatic forces
         !on each atom
@@ -647,7 +650,7 @@ subroutine calcforces_smart_grad(state, C, Fin, forces_adiab, &
         LOGICAL, dimension(:), INTENT(IN)           :: ext_pres
         INTEGER, DIMENSION(:,:), ALLOCATABLE, &
                                       INTENT(IN)     :: active_system_info
-        REAL(KIND=dp), intent(in), OPTIONAL          :: scaling, cbar
+        REAL(KIND=dp), intent(in), OPTIONAL          :: convert_nacv
         LOGICAL, OPTIONAL, INTENT(IN)                :: frozen_c
         REAL(KIND=dp), intent(in), dimension(:,:,:), &
                                       OPTIONAL       :: nacv
@@ -658,7 +661,7 @@ subroutine calcforces_smart_grad(state, C, Fin, forces_adiab, &
         integer                                     :: i, j,  d, m
         INTEGER                                     :: natom
         INTEGER                                     :: num_mol, num_j
-        REAL(KIND=dp)                               :: convert_nacv 
+        REAL(KIND=dp)                               :: my_convert_nacv 
         LOGICAL                                     :: my_frozen_c
 
         natom = SIZE(Fin,2)
@@ -712,18 +715,18 @@ subroutine calcforces_smart_grad(state, C, Fin, forces_adiab, &
                       ! molecule num_mol
                       IF (ext_pres(j)) THEN
                          IF (i.ne.num_mol) THEN
-                             IF (PRESENT(scaling) .AND. PRESENT(cbar)) THEN
+                             IF (PRESENT(convert_nacv)) THEN
                                 !> Forces in case of AOM formalism
-                                convert_nacv = - 2.0D0*scaling / cbar ! to convert the FOB NACV
+                                my_convert_nacv = convert_nacv ! to convert the FOB NACV
                              ELSE 
                                 !> Forces in case of general gradients (smartly stored as
                                 !> nacv in AOM case)
-                                convert_nacv = 1.0D0 !gradient are already a negative object so no minus sign here
+                                my_convert_nacv = 1.0D0 !gradient are already a negative object so no minus sign here
                              END IF
 
                              forces_adiab(d,j) = forces_adiab(d,j) + &
                                    ((C(orb*(num_mol-1)+m,orb*(state-1)+m))*&
-                                     nacv(d, orb*(i-1)+m, num_j)*C(orb*(i-1)+m,orb*(state-1)+m))*convert_nacv
+                                     nacv(d, orb*(i-1)+m, num_j)*C(orb*(i-1)+m,orb*(state-1)+m))*my_convert_nacv*2.0D0
                          ENDIF
                       ENDIF
                    END IF
@@ -1067,6 +1070,7 @@ end subroutine modified_surfacehop
         TYPE(sh_print_env_type)                  :: sh_print_env
         LOGICAL                                  :: translate_keyword
         REAL(kind=dp), DIMENSION(:,:),POINTER    :: velocities_com
+        REAL(KIND=dp)                            :: convert_nacv
 
 
         NULLIFY(mixed_section)
@@ -1245,27 +1249,28 @@ ENDIF
                  IF (force_env%mixed_env%sh_env%aom_couplings_keyword) THEN
                     !COMMENT_SG: calc_hop_nacv_approx is a generalization of calc_hop_nacv_aom in the fast=.TRUE. case
                     !CALL calc_hop_nacv_aom( force_env%mixed_env%sh_env, force_env%mixed_env%F, hop_nacv, fast=.TRUE.)
+                    convert_nacv = -force_env%mixed_env%sh_env%scaling/force_env%mixed_env%sh_env%cbar
                     CALL calc_hop_nacv_approx(force_env%mixed_env%sh_env, diagonal_F=force_env%mixed_env%F, &
                                            C=force_env%mixed_env%sh_env%C_tp,&
                                            active_system_info=force_env%mixed_env%sh_env%active_system_info, &
-                                            orb=orb, hop_nacv=hop_nacv, &          
-                                            nacv=force_env%mixed_env%sh_env%nacv, &
-                                     scaling=force_env%mixed_env%sh_env%scaling, cbar=force_env%mixed_env%sh_env%cbar)
+                                           orb=orb, hop_nacv=hop_nacv, &          
+                                           nacv=force_env%mixed_env%sh_env%nacv, &
+                                           convert_nacv=convert_nacv)
                  !> TRESP gradient stored
                  ELSE IF ( force_env%mixed_env%sh_env%tresp_couplings_keyword) THEN
                     !CALL calc_hop_nacv_frozen_H( force_env%mixed_env%sh_env, force_env%mixed_env%F, hop_nacv)
                     CALL calc_hop_nacv_approx(force_env%mixed_env%sh_env, diagonal_F=force_env%mixed_env%F, &
                                            C=force_env%mixed_env%sh_env%C_tp, &
                                            active_system_info=force_env%mixed_env%sh_env%active_system_info, &
-                                            orb=orb, hop_nacv=hop_nacv, &          
-                                            nacv=force_env%mixed_env%sh_env%grad_tresp)
+                                           orb=orb, hop_nacv=hop_nacv, &          
+                                           nacv=force_env%mixed_env%sh_env%grad_tresp)
                  !> FRZ couplings case
                  ELSE IF ( force_env%mixed_env%sh_env%frozen_couplings_keyword) THEN
                     !CALL calc_hop_nacv_frozen_H( force_env%mixed_env%sh_env, force_env%mixed_env%F, hop_nacv)
                     CALL calc_hop_nacv_approx(force_env%mixed_env%sh_env, diagonal_F=force_env%mixed_env%F, &
                                            C=force_env%mixed_env%sh_env%C_tp,&
                                            active_system_info=force_env%mixed_env%sh_env%active_system_info, &
-                                            orb=orb, hop_nacv=hop_nacv, frozen_c=.TRUE.)       
+                                           orb=orb, hop_nacv=hop_nacv, frozen_c=.TRUE.)       
                  ELSE 
                      CPABORT("There is no method to calculate the NACV in FAST approx.")
                  END IF
@@ -2388,6 +2393,7 @@ END SUBROUTINE classically_forbidden_hops
     REAL(kind=dp), DIMENSION(:,:),POINTER          :: my_forces_adiab
     LOGICAL                                        :: tau_schwartz
     TYPE(section_vals_type), POINTER               :: decoherence_section
+    REAL(KIND=dp)                                  :: convert_nacv
 
     NULLIFY(decoherence_section)
  
@@ -2460,11 +2466,12 @@ END SUBROUTINE classically_forbidden_hops
                                          .ge. mixing_threshold) then
                          !if there is mixing then we use force otherwise we use !pure dephasing
                          if (sh_env%aom_couplings_keyword) then
-                            ! forces at the moment can be calculate with AOM Hamiltonian only
+                              ! forces at the moment can be calculate with AOM Hamiltonian only
+                              convert_nacv = -sh_env%scaling/sh_env%cbar
                               call calcforces_smart_grad(i , sh_env%C_tp, &
                                     diagonal_F, my_forces_adiab, &
                                     sh_env%ext_pres, sh_env%active_system_info, orb, &
-                                       nacv=sh_env%nacv, scaling=sh_env%scaling, cbar=sh_env%cbar)
+                                       nacv=sh_env%nacv, convert_nacv=convert_nacv)
                          else if (sh_env%tresp_couplings_keyword) then
                               call calcforces_smart_grad(i , sh_env%C_tp, &
                                     diagonal_F, my_forces_adiab, &
@@ -2524,10 +2531,11 @@ END SUBROUTINE classically_forbidden_hops
                          !if there is mixing then we use force otherwise we use !pure dephasing
                          if (sh_env%aom_couplings_keyword) then
                             ! forces at the moment can be calculate with AOM Hamiltonian only
+                             convert_nacv = -sh_env%scaling/sh_env%cbar
                              call calcforces_smart_grad(i, sh_env%C_tp, &
                                   diagonal_F, my_forces_adiab, &
                                   sh_env%ext_pres, sh_env%active_system_info, orb, &
-                                  nacv=sh_env%nacv, scaling=sh_env%scaling, cbar=sh_env%cbar)
+                                  nacv=sh_env%nacv, convert_nacv=convert_nacv)
                          else if (sh_env%tresp_couplings_keyword) then
                               call calcforces_smart_grad(i , sh_env%C_tp, &
                                     diagonal_F, my_forces_adiab, &
