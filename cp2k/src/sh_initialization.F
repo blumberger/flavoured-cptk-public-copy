@@ -280,7 +280,7 @@ CONTAINS
         !multi-phase
         ALLOCATE(sh_env%grad_tresp(3,mat, COUNT(sh_env%ext_pres)))
 !TEST
-!        ALLOCATE(sh_env%test_grad_tresp(3,mat, mat, COUNT(sh_env%ext_pres)))
+        !ALLOCATE(sh_env%test_grad_tresp(3,mat, mat, COUNT(sh_env%ext_pres)))
  
 
     CASE DEFAULT

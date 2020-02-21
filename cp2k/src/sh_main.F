@@ -502,7 +502,7 @@ CONTAINS
                                         Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                                         ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
                                         orb=orb, nacv=sh_env%grad_tresp)
-       
+      
 !!!TEST TO REMOVE
 !OPEN (UNIT = 21, FILE = "FORCES_formatted.dat")
 !
@@ -523,7 +523,6 @@ CONTAINS
 !     write(21,*) "atom", i, sh_env%forces_adiab(:,i)
 !end do
 !close (21) 
-
      ELSE
          !> In a possible extension one should add here 
          CPABORT("Another way to calculate adiabatic forces should be developed")

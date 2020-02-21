@@ -466,7 +466,7 @@ END SUBROUTINE calc_hop_nacv_approx
         end do 
      end do
 
-!TEST
+!!TEST
 !OPEN (UNIT = 21, FILE = "GRAD_formatted.dat")
 !
 !do i=1,SIZE(sh_env%grad_tresp,3)
@@ -4431,6 +4431,7 @@ subroutine calcforces_smart_grad_test(state, C, Fin, forces_adiab, &
                    forces_adiab(d,j) = forces_adiab(d,j) + (abs(C(i, state))**2)*Fin(d,j,i)
 
                    
+                 IF (ext_pres(j)) THEN
                    do l=1, SIZE(active_system_info, 2)
                       my_convert_nacv = 1.0D0
                       if (l .ne. i) THEN 
@@ -4439,6 +4440,7 @@ subroutine calcforces_smart_grad_test(state, C, Fin, forces_adiab, &
                               full_grad(d, i,l, num_j)*C(l,state))
                       end if
                    end do 
+                END IF
               end do 
                       
  
