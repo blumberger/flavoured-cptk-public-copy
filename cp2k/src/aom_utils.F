@@ -101,11 +101,11 @@ MODULE aom_utils
   USE force_env_types,                 ONLY: force_env_get, &
                                              force_env_type
 
-  USE non_adiabatic_types,             ONLY: sh_env_type
+ ! USE non_adiabatic_types,             ONLY: sh_env_type
 
   USE parallel_rng_types,              ONLY: next_random_number 
 
-  USE sh_types,                       ONLY: sh_env_type
+!  USE sh_types,                       ONLY: sh_env_type
 
   USE aom_overlapfinal,               ONLY:  connect_list2, &
                                               calc_sab, &
