@@ -109,8 +109,8 @@ CONTAINS
      TYPE(cp_sll_val_type), POINTER                 :: list_tresp
      TYPE(cp_sll_val_type), POINTER                 :: frz_couplings_list
      integer, dimension(:), ALLOCATABLE             :: ext_elements
-     LOGICAL, DIMENSION(:), POINTER                :: active_logical
-     INTEGER                                       :: natom_mol, ninteractions
+     LOGICAL, DIMENSION(:), POINTER                 :: active_logical
+     INTEGER                                        :: natom_mol, ninteractions
 
      NULLIFY(list_tresp)
      NULLIFY(frz_couplings_list)
@@ -248,16 +248,22 @@ CONTAINS
         NULLIFY(frozen_coupling_section)
         frozen_coupling_section => section_vals_get_subs_vals(adiab_section, "FROZEN_COUPLINGS")
         !> Get Hab for the first upper and lower diagonal (tridiagonal matrix
-        !will be formed) 
-        CALL section_vals_val_get(frozen_coupling_section,"INTERACTION_NUMBER",&
-             i_val=ninteractions)
-        CALL section_vals_list_get(frozen_coupling_section,"_DEFAULT_KEYWORD_",list=frz_couplings_list) !Read list tresp from input
-        CALL read_list_frz_couplings(ninteractions, frz_couplings_list, sh_env%frz_coup_connectivity, sh_env%frz_couplings) 
-print *, "frz_couplings", sh_env%frz_coup_connectivity(:,1)
-print *, "frz_couplings", sh_env%frz_coup_connectivity(:,2)
-print *, "sh_env%frz_couplings", sh_env%frz_couplings
-        CALL section_vals_val_get(frozen_coupling_section,"FIRST_OFF_DIAGONALS_VAL",&
-            r_val=sh_env%first_off_d_Hab)
+        !will be formed)
+         
+        CALL section_vals_val_get(frozen_coupling_section,"CONNECTIVITY_FRZ_C",&
+             l_val=sh_env%connectivity_frz_c)
+        IF (sh_env%connectivity_frz_c) THEN 
+           CALL section_vals_val_get(frozen_coupling_section,"INTERACTION_NUMBER",&
+                i_val=ninteractions)
+           CALL section_vals_list_get(frozen_coupling_section,"_DEFAULT_KEYWORD_",list=frz_couplings_list) !Read list tresp from input
+           CALL read_list_frz_couplings(ninteractions, frz_couplings_list, sh_env%frz_coup_connectivity, sh_env%frz_couplings) 
+!print *, "frz_couplings", sh_env%frz_coup_connectivity(:,1)
+!print *, "frz_couplings", sh_env%frz_coup_connectivity(:,2)
+!print *, "sh_env%frz_couplings", sh_env%frz_couplings
+        ELSE
+           CALL section_vals_val_get(frozen_coupling_section,"FIRST_OFF_DIAGONALS_VAL",&
+             r_val=sh_env%first_off_d_Hab)
+        END IF
     CASE("TRESP_COUPLINGS")
         sh_env%tresp_couplings_keyword = .TRUE.
         !sh_env%frozen_couplings_keyword = .TRUE.  !test

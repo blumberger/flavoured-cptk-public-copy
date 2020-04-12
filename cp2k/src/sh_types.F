@@ -179,6 +179,7 @@ END TYPE adiab_nace_env_type
      REAL(KIND = dp)                          :: first_off_d_Hab
      REAL(KIND=dp), DIMENSION(:), POINTER     :: frz_couplings
      INTEGER, DIMENSION(:,:), POINTER         :: frz_coup_connectivity
+     LOGICAL                                  :: connectivity_frz_c
      
 
 !> Couplings section possibilities

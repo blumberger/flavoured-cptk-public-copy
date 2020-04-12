@@ -604,7 +604,7 @@ end subroutine calc_trsp_ab
      CHARACTER(len=*), PARAMETER                     :: routineN ='calc_frozen_H', &
      routineP = moduleN//':'//routineN
 
-     integer :: i, k, m, d
+     integer :: i, k, m, d, frz_ind
 
      sh_env%H_tp(:,:) = cmplx(0.0D0, 0.0D0,dp)
      ! these loops are inefficients but do the job
@@ -619,19 +619,35 @@ end subroutine calc_trsp_ab
                  sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+d) = cmplx(0.0D0,(-energies_tp(i)),dp) !minus because we propagate -X
               end do
            else 
-              ! only valid for first off-diag: TO IMPROVE FURTHER for other
-              ! off diagonals
-              if ((k+1 == i) .or.(k-1 == i)) then
-                 do d=1,orb
-                    do m=1,orb
-                       sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,-sh_env%first_off_d_Hab,dp) !sign of the off-diag 
+              if (.not. sh_env%connectivity_frz_c) then
+                 ! only valid for first off-diag: TO IMPROVE FURTHER for other
+                 ! off diagonals
+                 if ((k+1 == i) .or.(k-1 == i)) then
+                    do d=1,orb
+                       do m=1,orb
+                          sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,-sh_env%first_off_d_Hab,dp) !sign of the off-diag 
                                                                                                      !does not matter for 1D chains
-                    end do 
-                 end do
+                       end do 
+                    end do
+                 end if
               end if 
           end if 
         end do 
      end do
+
+     ! add frz_ couplings from input and also diagonal if different from zero
+     if (sh_env%connectivity_frz_c) then
+         do frz_ind=1,SIZE(sh_env%frz_couplings) ! loop over stuff in the input
+            i = sh_env%frz_coup_connectivity(frz_ind,1) 
+            k = sh_env%frz_coup_connectivity(frz_ind,2)
+            do d=1,orb
+               ! we use the sum because we initialize H to zero and in this way
+               ! we can add the off-diagonals and diagonals if present
+               sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+d) = &
+                  sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+d) + cmplx(0.0D0,(-sh_env%frz_couplings(frz_ind)),dp)
+            end do
+         end do
+     end if 
   end subroutine calc_frozen_H
 
 !**********************************************************************************

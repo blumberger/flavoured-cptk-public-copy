@@ -458,6 +458,14 @@ CONTAINS
          n_keywords=1, n_subsections=0, repeats=.FALSE.)
     CALL section_add_subsection(subsection,sub2section)
 
+    CALL keyword_create(keyword, name="CONNECTIVITY_FRZ_C",&
+         description="Decide if we use the decoherence procedure",&
+         usage="True", & 
+         default_l_val=.FALSE., &
+         lone_keyword_l_val=.TRUE.)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
     CALL keyword_create(keyword, name="INTERACTION_NUMBER",&
          description="Number of interactions",&
          usage="1", type_of_var=integer_t)
@@ -475,6 +483,7 @@ CONTAINS
     CALL keyword_create(keyword, name="FIRST_OFF_DIAGONALS_VAL",&
          description="Hab for the first upper and lower diagonal",&
          usage="001102479, HARTREE", type_of_var=real_t,&
+         default_r_val=0.000_dp,    &
          unit_str="hartree")
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
