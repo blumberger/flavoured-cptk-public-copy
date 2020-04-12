@@ -458,6 +458,19 @@ CONTAINS
          n_keywords=1, n_subsections=0, repeats=.FALSE.)
     CALL section_add_subsection(subsection,sub2section)
 
+    CALL keyword_create(keyword, name="INTERACTION_NUMBER",&
+         description="Number of interactions",&
+         usage="1", type_of_var=integer_t)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="_DEFAULT_KEYWORD_",&
+         description="The FRZ COUPLINGS from connectivity in the format:"//&
+         "<p><tt>ATOMIC_KIND  LIST NO TRESP</tt></p>",&
+         repeats=.TRUE., usage="{{Int} {Int} {Real}}",&
+         type_of_var=lchar_t)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="FIRST_OFF_DIAGONALS_VAL",&
          description="Hab for the first upper and lower diagonal",&

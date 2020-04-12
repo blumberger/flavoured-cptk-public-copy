@@ -139,6 +139,7 @@ IMPLICIT NONE
              calc_diabatic_nace,                   &
              read_listdiabcoeff,                   & 
              read_list_tresp,                      &
+             read_list_frz_couplings,              &
              calc_adiab_nace_old,                  &
              matinvsqrt
  
@@ -1152,7 +1153,6 @@ subroutine calc_diabatic_nace(mol, H, Stt, Sttp, Sttm, Stptp, Stmtm, deltat, NAC
        IF (PRESENT(NACE)) THEN
           NACE = diab_NACE
        ENDIF
-
        deallocate(Sttinvsqrt, Sttsqrt, Stptpinvsqrt, Stmtminvsqrt, Sterm1, Sterm2, Splace1, Splace2)
        deallocate(diab_NACE)
 
@@ -1332,7 +1332,6 @@ subroutine nace1_modified(sh_env, mol, deltat)
 !sh_env%diabatic_nace_t refers at time T (namely t-dt) not Tp
    sh_env%diabatic_nace_t = (sh_env%adiab_nace_env%diab_D - & 
                               TRANSPOSE(sh_env%adiab_nace_env%diab_D)) / 2
-
 !sh_env%adiab_nace_env%diab_D = sh_env%diabatic_nace 
 !> this previous line would
 !> antisimmetrize NACE even in the calculation of adiab nace, 
@@ -1933,6 +1932,103 @@ print *, "CTIN", ctin
 
    END SUBROUTINE read_listcoeff
 
+!**********************************************************************************
+!> \brief 
+!**********************************************************************************
+   SUBROUTINE read_list_frz_couplings(ninteractions, listcoeff, h1, frz_couplings)
+
+    TYPE(cp_sll_val_type), POINTER                         :: listcoeff
+    INTEGER, DIMENSION(:,:), POINTER, INTENT(OUT)        :: h1
+    !INTEGER, DIMENSION(:), ALLOCATABLE, INTENT(OUT)        :: h2
+    REAL(KIND=dp), DIMENSION(:), POINTER, INTENT(OUT)  :: frz_couplings
+    INTEGER, INTENT(IN)                                    :: ninteractions
+
+    CHARACTER(len=*), PARAMETER :: routineN = 'read_listcoeff', &
+      routineP = moduleN//':'//routineN
+
+    CHARACTER(len=2*default_string_length)                 :: line_att
+    CHARACTER(len=default_string_length)                   :: error_message
+    INTEGER                                                :: default_id, end_c, &
+                                                              iatom, j,  &
+                                                              start_c, wrd
+    LOGICAL                                                :: is_ok
+    TYPE(val_type), POINTER                                :: val
+    REAL(KIND=dp)                                          :: my_pres
+
+    NULLIFY(val)
+
+    ALLOCATE(h1(ninteractions,2))
+    ALLOCATE(frz_couplings(ninteractions))
+
+    !this reads line by line the section listcoeff, and for each line it has
+    !the different CASES 
+       DO iatom=1,ninteractions
+          ! we use only the first default_string_length characters of each line
+          is_ok=cp_sll_val_next(listcoeff,val) !logical 
+          CALL val_get(val,c_val=line_att)
+          default_id = str2id(s2s(""))
+          ! Read name and atomic coordinates
+          start_c=1
+          DO wrd=1,3
+             DO j=start_c,LEN(line_att)
+                IF (line_att(j:j)/=' ') THEN
+                   start_c=j
+                   EXIT
+                END IF
+             END DO
+             end_c=LEN(line_att)+1
+             DO j=start_c,LEN(line_att)
+                IF (line_att(j:j)==' ') THEN
+                   end_c=j
+                   EXIT
+                END IF
+             END DO
+             !IF(LEN_TRIM(line_att(start_c:end_c-1)) == 0)& !length of the number
+             !                                               ! without space
+             !   CALL cp_abort(__LOCATION__,&
+             !        "Incorrectly formatted input line for atom "//&
+             !        TRIM(ADJUSTL(cp_to_string(iatom)))//&
+             !        " found in COORD section. Input line: <"//&
+             !        TRIM(line_att)//"> ")
+             SELECT CASE (wrd)
+             CASE (1)  ! read active or not atom (carrying a charge)
+                CALL read_float_object(line_att(start_c:end_c-1),&
+                                       my_pres,error_message)
+                h1(iatom,1) = INT(my_pres)
+                IF(LEN_TRIM(error_message) /= 0)&
+                   CALL cp_abort(__LOCATION__,&
+                        "Incorrectly formatted input line for atom "//&
+                        TRIM(ADJUSTL(cp_to_string(iatom)))//&
+                        " found in COORD section. "//TRIM(error_message)//&
+                        " Input line: <"//TRIM(line_att)//"> ")
+             CASE (2)  ! read active or not atom (carrying a charge)
+                CALL read_float_object(line_att(start_c:end_c-1),&
+                                       my_pres,error_message)
+                h1(iatom,2) = INT(my_pres)
+                IF(LEN_TRIM(error_message) /= 0)&
+                   CALL cp_abort(__LOCATION__,&
+                        "Incorrectly formatted input line for atom "//&
+                        TRIM(ADJUSTL(cp_to_string(iatom)))//&
+                        " found in COORD section. "//TRIM(error_message)//&
+                        " Input line: <"//TRIM(line_att)//"> ")
+             CASE (3) ! transition charge (this must be divided by sqrt(2) if it
+                      !comes from gaussian fitting of the electrostatic potential 
+                CALL read_float_object(line_att(start_c:end_c-1),&
+                                       frz_couplings(iatom),error_message)
+                IF(LEN_TRIM(error_message) /= 0)&
+                   CALL cp_abort(__LOCATION__,&
+                        "Incorrectly formatted input line for atom "//&
+                        TRIM(ADJUSTL(cp_to_string(iatom)))//&
+                        " found in COORD section. "//TRIM(error_message)//&
+                        " Input line: <"//TRIM(line_att)//"> ")
+
+             END SELECT
+             start_c = end_c
+             IF (start_c > LEN_TRIM(line_att)) EXIT
+          END DO
+      END DO
+
+   END SUBROUTINE read_list_frz_couplings
 
 !**********************************************************************************
 !> \brief 

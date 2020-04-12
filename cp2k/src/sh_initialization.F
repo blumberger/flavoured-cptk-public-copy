@@ -25,7 +25,8 @@ MODULE sh_initialization
 
      USE aom_utils,                    ONLY: read_listcoeff,                       &
                                              read_listdiabcoeff,                  &
-                                             read_list_tresp 
+                                             read_list_tresp,                     &
+                                             read_list_frz_couplings   
 
      USE sh_types,                    ONLY: sh_env_type
 
@@ -106,11 +107,13 @@ CONTAINS
      REAL(KIND=dp)                                  :: MDtimestep
 
      TYPE(cp_sll_val_type), POINTER                 :: list_tresp
+     TYPE(cp_sll_val_type), POINTER                 :: frz_couplings_list
      integer, dimension(:), ALLOCATABLE             :: ext_elements
      LOGICAL, DIMENSION(:), POINTER                :: active_logical
-     INTEGER                                       :: natom_mol
+     INTEGER                                       :: natom_mol, ninteractions
 
      NULLIFY(list_tresp)
+     NULLIFY(frz_couplings_list)
 
      NULLIFY(rng_stream)
      NULLIFY(decoherence_section)
@@ -246,6 +249,13 @@ CONTAINS
         frozen_coupling_section => section_vals_get_subs_vals(adiab_section, "FROZEN_COUPLINGS")
         !> Get Hab for the first upper and lower diagonal (tridiagonal matrix
         !will be formed) 
+        CALL section_vals_val_get(frozen_coupling_section,"INTERACTION_NUMBER",&
+             i_val=ninteractions)
+        CALL section_vals_list_get(frozen_coupling_section,"_DEFAULT_KEYWORD_",list=frz_couplings_list) !Read list tresp from input
+        CALL read_list_frz_couplings(ninteractions, frz_couplings_list, sh_env%frz_coup_connectivity, sh_env%frz_couplings) 
+print *, "frz_couplings", sh_env%frz_coup_connectivity(:,1)
+print *, "frz_couplings", sh_env%frz_coup_connectivity(:,2)
+print *, "sh_env%frz_couplings", sh_env%frz_couplings
         CALL section_vals_val_get(frozen_coupling_section,"FIRST_OFF_DIAGONALS_VAL",&
             r_val=sh_env%first_off_d_Hab)
     CASE("TRESP_COUPLINGS")
@@ -295,7 +305,11 @@ CONTAINS
 !>  \brief This creates the logical list of active molecules ext_pres that is
 !         used to calculate kinetic energy for the active region in case of
 !         decoherence and rescaling. Note in case AOM is used ext_press is
-!         created by reading the AOM coeff from external file.
+!         created by reading the AOM coeff from external file. 
+!         It also creates active_system_info which is an 2D array with info
+!         about initial and final atoms of a give molecule. It is useful to
+!         consider multi-phase systems where n atoms may vary between different
+!         molecules
 !>  \author SG 
 !> \date 02/02/20
 ! *****************************************************************************

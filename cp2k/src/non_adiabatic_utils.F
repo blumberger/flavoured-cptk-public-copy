@@ -636,7 +636,9 @@ end subroutine calc_trsp_ab
 
 !**********************************************************************************
 !> \brief Calculate adiabatic forces according to Spencer 2016 and Carof 2019
-!        for each atom in the system on the state passed as input. 
+!        for each atom in the system on the state passed as input. This
+!        subroutines is general for Frozen Coupling case, AOM and TRESP (becuase
+!        the off-diagonal gradients are stored in the same way).  
 !> \note This subroutine has not been tested for degeneracy, but it should be
 !        general enough to handle it.
 !>       A huge part of this subroutine has been taken from AC's calcforces_aom
