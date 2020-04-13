@@ -645,6 +645,7 @@ end subroutine calc_trsp_ab
                ! we can add the off-diagonals and diagonals if present
                sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+d) = &
                   sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+d) + cmplx(0.0D0,(-sh_env%frz_couplings(frz_ind)),dp)
+               sh_env%H_tp(orb*(k-1)+d,orb*(i-1)+d) = sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+d)
             end do
          end do
      end if 
