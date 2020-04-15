@@ -105,7 +105,7 @@ MODULE sh_main
                                              calc_frozen_H,                   &
                                              calcforces_smart_grad,           &
                                              !calcforces_smart_grad_test,           &
-                                             !calcforces_frozenH,              &
+                                             calcforces_frozenH,              &
                                              diab_to_adiab,                   & 
                                              surf_hop_type,                   &
                                              choose_firstadiabat,             &
@@ -269,7 +269,6 @@ CONTAINS
          enddo
 
          !> CALCULATE THE CENTER OF MASS AND CONSTRUCT NEIGHBOURS LIST
-         !> COMMENT_SG: it assumes same number of atoms per mol
          CALL calc_coms_and_nlist(mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, &
                                     active_system_info=sh_env%active_system_info, NN=sh_env%NN)
 
@@ -486,13 +485,17 @@ CONTAINS
         ENDIF
         !-----------------------------------------------------------------------------------------------
      ELSE IF (sh_env%frozen_couplings_keyword) THEN 
-        !frozen Hamiltonian case
-        !CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=active_state, Fin=diagonal_F, &
-        !                          forces_adiab=sh_env%forces_adiab)
-        call calcforces_smart_grad(state=active_state, C=sh_env%C_tp, &
+        IF (sh_env%multistate) THEN
+        !frozen Hamiltonian case and multi-phase (dimension of H larger than
+        !number of active mols)
+            CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=active_state, Fin=diagonal_F, &
+                                  forces_adiab=sh_env%forces_adiab)
+        ELSE 
+            call calcforces_smart_grad(state=active_state, C=sh_env%C_tp, &
                                         Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                                         ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
                                         orb=orb, frozen_c=.TRUE.)
+        END IF
 
      ELSE IF (sh_env%tresp_couplings_keyword) THEN 
         !frozen Hamiltonian case
@@ -927,22 +930,25 @@ CONTAINS
          ENDIF
          ! --------------------------------------------------------------------------------------------------
      ELSE IF (sh_env%frozen_couplings_keyword) THEN
-        !CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=sh_env%active_state, Fin=diagonal_F, &
-        !                          forces_adiab=sh_env%forces_adiab)
-        !IF (sh_env%attempt_hop) THEN
-        !             CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp),C=sh_env%C_tp, state=sh_env%new_state, Fin=diagonal_F, &
-        !                          forces_adiab=sh_env%forces_adiab_new)
-        !END IF
-         call calcforces_smart_grad(state=sh_env%active_state, C=sh_env%C_tp,&
+         IF (sh_env%multistate) THEN
+            CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=sh_env%active_state, Fin=diagonal_F, &
+                                     forces_adiab=sh_env%forces_adiab)
+            IF (sh_env%attempt_hop) THEN
+                      CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp),C=sh_env%C_tp, state=sh_env%new_state, Fin=diagonal_F, &
+                                  forces_adiab=sh_env%forces_adiab_new)
+            END IF
+         ELSE
+            call calcforces_smart_grad(state=sh_env%active_state, C=sh_env%C_tp,&
                                Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                                ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, orb=orb, &
                                frozen_c=.TRUE.)
-         IF (sh_env%attempt_hop) THEN
-             call calcforces_smart_grad(state=sh_env%new_state, C=sh_env%C_tp, &
+            IF (sh_env%attempt_hop) THEN
+               call calcforces_smart_grad(state=sh_env%new_state, C=sh_env%C_tp, &
                                   Fin=diagonal_F, forces_adiab=sh_env%forces_adiab_new, &
                                   ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, orb=orb, &
                                     frozen_c=.TRUE.)
-         ENDIF
+            ENDIF
+         END IF
 
      ELSE IF (sh_env%tresp_couplings_keyword) THEN
         !CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=sh_env%active_state, Fin=diagonal_F, &

@@ -440,6 +440,14 @@ CONTAINS
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
 
+    CALL keyword_create(keyword, name="MULTI_STATES",&
+         description="Tell the forces calculation if you have more non-degenerate states "//&
+                     "than active molecules",&
+         usage="false", &
+         default_l_val=.FALSE., &
+         lone_keyword_l_val=.FALSE.)
+    CALL section_add_keyword(subsection,keyword)
+    CALL keyword_release(keyword)
 
     !> start new sub2section METHOD_COUPLING, part of ADIABATIC subsection
     CALL keyword_create(keyword, name="METHOD_COUPLING",&

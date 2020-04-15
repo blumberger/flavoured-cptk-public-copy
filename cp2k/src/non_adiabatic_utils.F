@@ -72,7 +72,7 @@ MODULE non_adiabatic_utils
                   calc_frozen_H,                   &
                   calcforces_smart_grad,           &
                   !calcforces_smart_grad_test,           &
-                  !calcforces_frozenH,              &
+                  calcforces_frozenH,              &
                   surf_hop_type,                   &
                   check_hop_attempt,               &
                   choose_firstadiabat,             &
@@ -592,8 +592,12 @@ end subroutine calc_trsp_ab
 
 
 !**********************************************************************************
-!> \brief for now it calculates a tridiagonal matrix as hamiltonian with
-!diagonal elements taken from FF and just off diagonals from input
+!> \brief This subroutine creates an Hamiltonian with a dimension given by the
+!    number of FORCE_EVALS sections used to define the diagonal. The latter are
+!    taken from the classical force-field energies, whereas the off-diagonals
+!    can be ether input from an external file or the other possibility is just
+!    the specification of the first off-diagonals for the creation of a
+!    tridiagonal matrix.
 !> author SG
 !**********************************************************************************
   subroutine calc_frozen_H(sh_env, energies_tp, orb)
@@ -652,12 +656,170 @@ end subroutine calc_trsp_ab
   end subroutine calc_frozen_H
 
 !**********************************************************************************
+!> \brief This subroutine is used only when there are more non-degenerate states
+!         than the number of active molecules and the loop is over number of
+!         states. So this subrotine can handle the CT Hamiltonian with 
+!         (NdonorxNacceptor)^2 states. However it cannot work with fluctuating 
+!         couplings becuase for now the off-diagonal forces are set to zero.
+!         Since couplings are frozen. 
+!\author  SG
+!**********************************************************************************
+subroutine calcforces_frozenH(Hin, C, state, Fin, forces_adiab)
+       
+        integer, intent(in)                         :: state
+        REAL(KIND=dp), intent(in), dimension(:,:)   :: Hin, C
+        REAL(KIND=dp), intent(in), dimension(:,:,:) :: Fin
+        REAL(KIND=dp), dimension(:,:), POINTER      :: forces_adiab
+
+
+        CHARACTER(len=*), PARAMETER :: routineN ='calcforces_frozenH', &
+                               routineP = moduleN//':'//routineN
+
+        integer                                     :: i, j, mat, d
+        INTEGER                                     :: natom
+                
+        natom = SIZE(Fin,2)
+        mat = size(Hin,1) !might have denerate states and also a larger number
+                          !of states then the active molecules. Therefore as long as the couplings are
+                          !fixed this can be used for calculating multi-phase and CT Hamiltoninans
+        !loop over 3 cartesians 
+        do d=1,3 
+           do j=1,natom
+              forces_adiab(d,j) = 0.0D0
+              ! if you wanted to be able to account for degeracy this loop
+              ! should be more complicated, as the one for diagonal energies in
+              ! for example AOM Hamiltonian. 
+              do i=1,mat
+                 ! Diagonal term, it depends on the forces. The minus is already
+                 ! part of diagonal forces calculation from FIST.
+                 forces_adiab(d,j) = forces_adiab(d,j) +(abs(C(i,state))**2)*Fin(d,j,i)
+              end do 
+           end do
+        end do
+        ! OFF Diagonals grandient calculation are zero in case of frozen
+        ! couplings that is why do not need to be considered here. 
+
+end subroutine calcforces_frozenH
+
+!**********************************************************************************
+!> \brief This subroutine is used only when there are more non-degenerate states
+!         than the number of active molecules and the loop is over number of
+!         states. So this subrotine can handle the CT Hamiltonian with 
+!         (NdonorxNacceptor)^2 states. However it cannot work with fluctuating 
+!         couplings becuase for now the off-diagonal forces are set to zero.
+!         Since couplings are frozen. 
+!\author  SG
+!**********************************************************************************
+subroutine calc_hop_nacv_frozen_H(sh_env, diagonal_F, hop_nacv, ext_old_state, ext_new_state)
+
+        TYPE(sh_env_type)                                        :: sh_env
+        REAL(kind=dp), DIMENSION(:,:), INTENT(OUT), ALLOCATABLE  :: hop_nacv
+        INTEGER, OPTIONAL                                        :: ext_old_state, ext_new_state
+        REAL(KIND=dp), DIMENSION(:,:,:), POINTER                 :: diagonal_F
+
+
+        CHARACTER(len=*), PARAMETER :: routineN = 'calc_hop_nacv_frozen_H', &
+        routineP = moduleN//':'//routineN
+
+        !INTEGER                                      :: num_mol,  num_j
+        REAL(KIND=dp), dimension(:,:), allocatable   :: C
+        INTEGER                                      :: natom
+        INTEGER                                      :: old_state, new_state
+        REAL(KIND=dp)                                :: diff_energy
+        REAL(KIND=dp)                                :: E_old_state, E_new_state
+        integer                                      :: i, d, j, mat
+        REAL(KIND=dp), dimension(:,:), allocatable   :: F_1!, F_11, F_2, F_22, F_3
+
+        mat    = SIZE(sh_env%H_tp, 1)
+        natom  = SIZE(diagonal_F, 2)
+        !nadiab = SIZE(diagonal_F, 3)
+        !atoms  = SIZE(sh_env%connlist1, 2)
+
+
+        allocate(C(mat,mat))
+        allocate(F_1(3,natom))
+        !allocate(F_11(3,natom))
+        allocate(hop_nacv(3, natom)) 
+
+        C = sh_env%C_tp
+
+        IF (PRESENT(ext_old_state)) THEN
+           old_state = ext_old_state
+        ELSE
+           old_state = sh_env%active_state
+        ENDIF
+        IF (PRESENT(ext_new_state)) THEN
+           new_state = ext_new_state 
+        ELSE
+           new_state = sh_env%new_state
+        ENDIF
+        E_old_state = sh_env%E_tp(old_state)
+        E_new_state = sh_env%E_tp(new_state)
+        IF (E_old_state.EQ.E_new_state) THEN
+           diff_energy = 0.0D0
+        ELSE
+           diff_energy = 1 / (E_new_state - E_old_state)
+        ENDIF  
+
+        ! Only calculation of term a_{I, ij} in Eq. (14) of [Carof17], i.e.
+        ! Eq. (15)
+
+        ! COMMENT_SG: the commented part is just to remind myself that this
+        ! subroutine could be extended to off-diagonals as well if we had the
+        ! nacv for the given Hamiltonian.
+
+        !num_mol = 0   ! Molecular index 
+        do d=1,3      ! Cartesian coordinates
+           !num_j = 0  ! Active atom index
+           do j=1,natom ! Sum over all the atoms
+              F_1(d,j) = 0.0D0
+              !F_11(d,j) = 0.0D0
+              !IF (ext_pres(j)) THEN
+              !   num_j   = num_j + 1                  ! Update the active atom index
+              !   num_mol = int((num_j-1)/atoms) + 1   ! Update the molecular index
+              !   ! WARNING: we suppose that all molecules have the same
+              !   ! number of atoms
+              !ENDIF
+              do i=1,mat
+                 !F_1(d,j) = F_1(d,j) + C(i,old_state)*DH(i,i,j,d)*C(i,new_state)*diff_energy
+                 ! Diagonal term, it depends on the forces
+                 F_1(d,j) = F_1(d,j) + C(i,old_state)*diagonal_F(d,j,i)*C(i,new_state)*diff_energy
+                 !IF (ext_pres(j)) THEN
+                 !   IF (i.ne.num_mol) THEN
+                 !     ! Of diagonal term, only for active atom j present in
+                 !     ! molecule num_mol
+                 !     F_11(d,j) = F_11(d,j) + diff_energy * convert_nacv*sh_env%nacv(d, i, num_j) * (&
+                 !                             C(num_mol, new_state) * C(i, old_state) +   &
+                 !                             C(num_mol, old_state) * C(i,new_state) )
+                 !   ENDIF
+                 !ENDIF
+              ENDDO
+           ENDDO
+        ENDDO 
+
+        ! minus sign to take the same convention of the paper.
+        !hop_nacv = -(F_1 + F_11) 
+        hop_nacv = -(F_1) ! we consider oncly diagonal elements 
+ 
+        deallocate(F_1)
+        deallocate(C)
+
+end subroutine calc_hop_nacv_frozen_H
+
+!**********************************************************************************
 !> \brief Calculate adiabatic forces according to Spencer 2016 and Carof 2019
 !        for each atom in the system on the state passed as input. This
 !        subroutines is general for Frozen Coupling case, AOM and TRESP (becuase
 !        the off-diagonal gradients are stored in the same way).  
 !> \note This subroutine has not been tested for degeneracy, but it should be
 !        general enough to handle it.
+!        IMPORTANT: in general this subroutine assumes that the number of states
+!        is the same as the number of active molecules (except in the case of
+!        degeneracy present). With this subroutine like it is, one cannot
+!        calculate the forces for a multi-phase Hamiltonian like the CT block
+!        for example, where the total number of states is
+!        (N-donor+N-acceptor)^2. This is becuase the off-diagonals may be stored differently 
+!        and the nmol index should be calculated with a different loop.
 !>       A huge part of this subroutine has been taken from AC's calcforces_aom
 !> \author SG  
 !**********************************************************************************
@@ -720,7 +882,7 @@ subroutine calcforces_smart_grad(state, C, Fin, forces_adiab, &
                     END IF
                  end do
               ENDIF
-
+              
               do i=1,SIZE(active_system_info, 2)
                  do m=1,orb
                    ! Diagonal term, it depends on the forces
@@ -1288,11 +1450,14 @@ ENDIF
                                            nacv=force_env%mixed_env%sh_env%grad_tresp)
                  !> FRZ couplings case
                  ELSE IF ( force_env%mixed_env%sh_env%frozen_couplings_keyword) THEN
-                    !CALL calc_hop_nacv_frozen_H( force_env%mixed_env%sh_env, force_env%mixed_env%F, hop_nacv)
-                    CALL calc_hop_nacv_approx(force_env%mixed_env%sh_env, diagonal_F=force_env%mixed_env%F, &
+                    IF (force_env%mixed_env%sh_env%multistate) THEN
+                        CALL calc_hop_nacv_frozen_H( force_env%mixed_env%sh_env, force_env%mixed_env%F, hop_nacv)
+                    ELSE
+                        CALL calc_hop_nacv_approx(force_env%mixed_env%sh_env, diagonal_F=force_env%mixed_env%F, &
                                            C=force_env%mixed_env%sh_env%C_tp,&
                                            active_system_info=force_env%mixed_env%sh_env%active_system_info, &
                                            orb=orb, hop_nacv=hop_nacv, frozen_c=.TRUE.)       
+                    END IF
                  ELSE 
                      CPABORT("There is no method to calculate the NACV in FAST approx.")
                  END IF
@@ -2500,10 +2665,14 @@ END SUBROUTINE classically_forbidden_hops
                                     sh_env%ext_pres, sh_env%active_system_info, orb, &
                                        nacv=sh_env%grad_tresp)
                          else if (sh_env%frozen_couplings_keyword) then
-                              call calcforces_smart_grad(i , sh_env%C_tp, &
+                             IF (sh_env%multistate) THEN
+                                 CPABORT("Multistate not implemented for FORCE-BASED DECO")
+                             ELSE
+                                  call calcforces_smart_grad(i , sh_env%C_tp, &
                                     diagonal_F, my_forces_adiab, &
                                     sh_env%ext_pres, sh_env%active_system_info, orb, &
                                        frozen_c=.TRUE.)
+                             END IF
                          else
                             CPABORT("There is no method to calculate adiabatic forces for this H")
                          end if
@@ -2564,10 +2733,14 @@ END SUBROUTINE classically_forbidden_hops
                                     sh_env%ext_pres, sh_env%active_system_info, orb, &
                                        nacv=sh_env%grad_tresp)
                          else if (sh_env%frozen_couplings_keyword) then
-                              call calcforces_smart_grad(i , sh_env%C_tp, &
+                             IF (sh_env%multistate) THEN
+                                 CPABORT("Multistate not implemented for FORCE-BASED DECO")
+                             ELSE
+                                 call calcforces_smart_grad(i , sh_env%C_tp, &
                                     diagonal_F, my_forces_adiab, &
                                     sh_env%ext_pres, sh_env%active_system_info, orb, &
                                        frozen_c=.TRUE.)
+                             END IF
                          else
                             CPABORT("There is no method to calculate adiabatic forces for this H")
                          end if
@@ -4069,144 +4242,6 @@ END SUBROUTINE classically_forbidden_hops
 !*********************************************************************************
 
 
-!**********************************************************************************
-!> \brief DEPRECATED! Although this subroutine is good for testing frozen
-!coupling case
-!**********************************************************************************
-subroutine calcforces_frozenH(Hin, C, state, Fin, forces_adiab)
-       
-        integer, intent(in)                         :: state
-        REAL(KIND=dp), intent(in), dimension(:,:)   :: Hin, C
-        REAL(KIND=dp), intent(in), dimension(:,:,:) :: Fin
-        REAL(KIND=dp), dimension(:,:), POINTER      :: forces_adiab
-
-
-        CHARACTER(len=*), PARAMETER :: routineN ='calcforces_frozenH', &
-                               routineP = moduleN//':'//routineN
-
-        integer                                     :: i, j, mat, d
-        INTEGER                                     :: natom
-                
-        natom = SIZE(Fin,2)
-        mat = size(Hin,1) !might have denerate states
-
-        !loop over 3 cartesians 
-        do d=1,3 
-           do j=1,natom
-              forces_adiab(d,j) = 0.0D0
-              ! if you wanted to be able to account for degeracy this loop
-              ! should be more complicated, as the one for diagonal energies in
-              ! for example AOM Hamiltonian. 
-              do i=1,mat
-                 ! Diagonal term, it depends on the forces. The minus is already
-                 ! part of diagonal forces calculation from FIST.
-                 forces_adiab(d,j) = forces_adiab(d,j) +(abs(C(i,state))**2)*Fin(d,j,i)
-              end do 
-           end do
-        end do
-        ! OFF Diagonals grandient calculation put to zero in case of frozen
-        ! couplings 
-
-end subroutine calcforces_frozenH
-
-!**********************************************************************************
-!> \brief DEPRECATED, Although good for testing Frozen coupling Hamiltonians 
-!**********************************************************************************
-subroutine calc_hop_nacv_frozen_H(sh_env, diagonal_F, hop_nacv, ext_old_state, ext_new_state)
-
-        TYPE(sh_env_type)                                        :: sh_env
-        REAL(kind=dp), DIMENSION(:,:), INTENT(OUT), ALLOCATABLE  :: hop_nacv
-        INTEGER, OPTIONAL                                        :: ext_old_state, ext_new_state
-        REAL(KIND=dp), DIMENSION(:,:,:), POINTER                 :: diagonal_F
-
-
-        CHARACTER(len=*), PARAMETER :: routineN = 'calc_hop_nacv_frozen_H', &
-        routineP = moduleN//':'//routineN
-
-        !INTEGER                                      :: num_mol,  num_j
-        REAL(KIND=dp), dimension(:,:), allocatable   :: C
-        INTEGER                                      :: natom
-        INTEGER                                      :: old_state, new_state
-        REAL(KIND=dp)                                :: diff_energy
-        REAL(KIND=dp)                                :: E_old_state, E_new_state
-        integer                                      :: i, d, j, mat
-        REAL(KIND=dp), dimension(:,:), allocatable   :: F_1!, F_11, F_2, F_22, F_3
-
-        mat    = SIZE(sh_env%H_tp, 1)
-        natom  = SIZE(diagonal_F, 2)
-        !nadiab = SIZE(diagonal_F, 3)
-        !atoms  = SIZE(sh_env%connlist1, 2)
-
-
-        allocate(C(mat,mat))
-        allocate(F_1(3,natom))
-        !allocate(F_11(3,natom))
-        allocate(hop_nacv(3, natom)) 
-
-        C = sh_env%C_tp
-
-        IF (PRESENT(ext_old_state)) THEN
-           old_state = ext_old_state
-        ELSE
-           old_state = sh_env%active_state
-        ENDIF
-        IF (PRESENT(ext_new_state)) THEN
-           new_state = ext_new_state 
-        ELSE
-           new_state = sh_env%new_state
-        ENDIF
-        E_old_state = sh_env%E_tp(old_state)
-        E_new_state = sh_env%E_tp(new_state)
-        IF (E_old_state.EQ.E_new_state) THEN
-           diff_energy = 0.0D0
-        ELSE
-           diff_energy = 1 / (E_new_state - E_old_state)
-        ENDIF  
-
-        ! Only calculation of term a_{I, ij} in Eq. (14) of [Carof17], i.e.
-        ! Eq. (15)
-
-        ! COMMENT_SG: the commented part is just to remind myself that this
-        ! subroutine could be extended to off-diagonals as well if we had the
-        ! nacv for the given Hamiltonian.
-
-        !num_mol = 0   ! Molecular index 
-        do d=1,3      ! Cartesian coordinates
-           !num_j = 0  ! Active atom index
-           do j=1,natom ! Sum over all the atoms
-              F_1(d,j) = 0.0D0
-              !F_11(d,j) = 0.0D0
-              !IF (ext_pres(j)) THEN
-              !   num_j   = num_j + 1                  ! Update the active atom index
-              !   num_mol = int((num_j-1)/atoms) + 1   ! Update the molecular index
-              !   ! WARNING: we suppose that all molecules have the same
-              !   ! number of atoms
-              !ENDIF
-              do i=1,mat
-                 !F_1(d,j) = F_1(d,j) + C(i,old_state)*DH(i,i,j,d)*C(i,new_state)*diff_energy
-                 ! Diagonal term, it depends on the forces
-                 F_1(d,j) = F_1(d,j) + C(i,old_state)*diagonal_F(d,j,i)*C(i,new_state)*diff_energy
-                 !IF (ext_pres(j)) THEN
-                 !   IF (i.ne.num_mol) THEN
-                 !     ! Of diagonal term, only for active atom j present in
-                 !     ! molecule num_mol
-                 !     F_11(d,j) = F_11(d,j) + diff_energy * convert_nacv*sh_env%nacv(d, i, num_j) * (&
-                 !                             C(num_mol, new_state) * C(i, old_state) +   &
-                 !                             C(num_mol, old_state) * C(i,new_state) )
-                 !   ENDIF
-                 !ENDIF
-              ENDDO
-           ENDDO
-        ENDDO 
-
-        ! minus sign to take the same convention of the paper.
-        !hop_nacv = -(F_1 + F_11) 
-        hop_nacv = -(F_1) ! we consider oncly diagonal elements 
- 
-        deallocate(F_1)
-        deallocate(C)
-
-end subroutine calc_hop_nacv_frozen_H
 
 !**********************************************************************************
 !> \brief just a test subroutine for full Gradient storage in case of tresp
@@ -4381,7 +4416,13 @@ close (21)
   end subroutine  calc_tresp_coup_test
 
 
-
+! This subroutine is just used as test case to check if the forces would be the
+! same when one would store the full array of diagonal forces. In fact,
+! considering that for AOM and TRESP we have pairwise interaction and, for the
+! reasons explained in Spencer 2016, one has a lot of zeros in the nacv arrays.
+! So the smartest way to store the nacv array (diagonal forces) is just to not
+! consider those zeros. This subroutine would check if storing the full nacv
+! would give the same resulst. In the tested case of Tresp, the answer was yes. 
 subroutine calcforces_smart_grad_test(state, C, Fin, forces_adiab, & 
                   ext_pres,  active_system_info, orb, full_grad, convert_nacv, frozen_c)
 
@@ -4399,7 +4440,7 @@ subroutine calcforces_smart_grad_test(state, C, Fin, forces_adiab, &
         REAL(KIND=dp), intent(in), dimension(:,:,:,:), &
                                       OPTIONAL       :: full_grad
 
-        CHARACTER(len=*), PARAMETER :: routineN ='calcforces_smart_grad', &
+        CHARACTER(len=*), PARAMETER :: routineN ='calcforces_smart_grad_test', &
                                routineP = moduleN//':'//routineN
 
         integer                                     :: i, j,  d, l

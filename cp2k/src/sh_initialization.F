@@ -228,9 +228,20 @@ CONTAINS
     !> sh_env%ext_pres will be overwritten in AOM case becuase active molecules
     !may still have inactive atoms (this feature is used for further speed-up)
 
-    !print *, "FOB_SH| EXT PRESS:", sh_env%ext_pres
     !sh_env%total_active_atoms = COUNT(sh_env%ext_pres)
+    !print *, "FOB_SH| EXT PRESS:", sh_env%ext_pres
+    !print *, "TOT ACTIVE ATOMS", COUNT(sh_env%ext_pres)
+    !print *, "active sys info", sh_env%active_system_info(1, :)
+    !print *, "active sys info", sh_env%active_system_info(2, :)
 
+    ! Tell the program if you want a multi-state Hamiltonian: meaning an
+    ! Hamiltonian like the CT one, where the number of states is different from
+    ! the number of active molecules. 
+    ! COMMENT_SG: this keyword is temporary and in future forces calculation and
+    ! adiabatic nacv calculations should be generalized to handle a multi-state
+    ! hamiltoninan even without freezing the couplings
+    CALL section_vals_val_get(adiab_section,"MULTI_STATES",l_val=sh_env%multistate)
+    !sh_env%multistate = .False.
     !initialize couplings
     CALL section_vals_val_get(adiab_section,"METHOD_COUPLING",c_val=coupling_keyword)
     sh_env%aom_couplings_keyword = .FALSE.
@@ -241,9 +252,15 @@ CONTAINS
     !---------------- AOM array ---------------------------------------------------------------
     CASE("AOM")
          sh_env%aom_couplings_keyword = .TRUE.
+         if (sh_env%multistate) then
+            CPABORT("Multi-state forces not implemented")
+         end if   
          CALL set_aom_env(nadiab, norbitals, natom,positions_tp,adiab_section,sh_env)
     !------------------------------------------------------------------------------------------
     CASE("FROZEN_COUPLINGS")
+        ! Frozen coupling would have the possibility of using multi-state for
+        ! the CT block for example. 
+        !sh_env%multistate = .TRUE.
         sh_env%frozen_couplings_keyword = .TRUE.  
         NULLIFY(frozen_coupling_section)
         frozen_coupling_section => section_vals_get_subs_vals(adiab_section, "FROZEN_COUPLINGS")
@@ -265,6 +282,10 @@ CONTAINS
              r_val=sh_env%first_off_d_Hab)
         END IF
     CASE("TRESP_COUPLINGS")
+         if (sh_env%multistate) then
+            CPABORT("Multi-state forces not implemented")
+         end if   
+         CALL set_aom_env(nadiab, norbitals, natom,positions_tp,adiab_section,sh_env)
         sh_env%tresp_couplings_keyword = .TRUE.
         !sh_env%frozen_couplings_keyword = .TRUE.  !test
         sh_env%first_off_d_Hab = -0.0011024789     !test

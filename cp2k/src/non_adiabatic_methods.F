@@ -199,8 +199,6 @@ CONTAINS
        END IF 
             
 
-       !> instead of passing mixed_env to propagate_namd_first_step we
-       !could probably use a pinter like the one below, to fill
        CALL propagate_namd_first_step(nadiab, norbitals,     &
                  positions_tp, velocities_tp, energies_tp, sh_env, itimes, &
                    adiab_section,& 
@@ -209,7 +207,7 @@ CONTAINS
     ELSE
        !> Get the information for the previous timesteps
        !!!!!!!!!!!!!!!!!!!!!!TO BE MODIFIED!!!!!!!!!!!!!!!!!!!!!!!!!
-       !!! this is a very dangerous step one should use an interface
+       !!! this is a dangerous step one should use an interface
        !subroutine to do that!!!!!!!!!!!
        sh_env = mixed_env%sh_env            
        !> Velocities are taken directly from the integrator after the first half

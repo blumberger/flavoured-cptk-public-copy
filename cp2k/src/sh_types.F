@@ -189,6 +189,10 @@ END TYPE adiab_nace_env_type
      INTEGER, DIMENSION(:,:), ALLOCATABLE     :: full_system_info  
      INTEGER, DIMENSION(:,:), ALLOCATABLE     :: active_system_info  
 
+!> Multi state approach in case of a different number of states and active
+!molecules
+     LOGICAL                                  :: multistate
+
 !> Constant over the simulations
      integer                                  :: natom !Total number of atoms
      REAL(KIND=dp)                            :: deltat !Timestep
