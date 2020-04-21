@@ -807,23 +807,28 @@ CONTAINS
      CALL adiabaticity(-AIMAG(sh_env%H_tp), sh_env%C_tp, sh_env%E_tp)
 
      !> store adiabatic nace and diabatic from the previous step
-     sh_env%adiab_nace_t = sh_env%adiab_nace_tp
+     sh_env%adiab_nace_t = sh_env%adiab_nace_tp !adiabatic nace at t are used just
+                                                !for adiabatic propagation which is DEPRECATED
 
      !> Calculate the overlap between C_tp and C_t, reorder state if required,
-     !> calculate the nace
+     !> calculate the adiabatic nace [and diabatic nace at (t)]
      IF (do_nace_speedup) THEN
         CALL calc_adiab_nace(sh_env, adiab_section)
      ELSE
         CALL calc_adiab_nace_old(sh_env, adiab_section)
      END IF
+print *, "sh_env%diabatic_nace_t", sh_env%diabatic_nace_t(1,2)
+print *, "sh_env%diabatic_nace_tp", sh_env%diabatic_nace_tp(1,2)
 
      !>this if statement is usefull at t=1 becuase sh_env%diabatic_nace_tp
      !> is not present and we would need it in the interpolation scheme during the
      !> wavefunction propagation, so no we approximate that sh_env%diabatic_nace_t =0
-     !> and sh_env%diabatic_nace_tp = sh_env%diabatic_nace_t
      if (itimes.eq.1 .or. sh_env%restart_key)  then
-       sh_env%diabatic_nace_tp = sh_env%diabatic_nace_t
+       sh_env%diabatic_nace_t = sh_env%diabatic_nace_tp
      end if
+
+print *, "sh_env%diabatic_nace_t AFTER", sh_env%diabatic_nace_t(1,2)
+print *, "sh_env%diabatic_nace_tp AFTER", sh_env%diabatic_nace_tp(1,2)
      
      IF (sh_env%aom_couplings_keyword) THEN
          !------------------  AOM section    ---------------------------------------------

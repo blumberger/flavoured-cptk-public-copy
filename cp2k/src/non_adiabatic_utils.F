@@ -3122,6 +3122,7 @@ END SUBROUTINE classically_forbidden_hops
              D_0  = sh_env%diabatic_nace_t
 
              X1 = my_H_t - D_0
+print *, "D0", D_0(1,2)
 
              do t2=1,int(deltatMD/deltatE)
                     !create timestepped equivalents
@@ -3166,9 +3167,12 @@ END SUBROUTINE classically_forbidden_hops
                      my_H_t = H_2
                      D_0 = D_2
                      X1  = X2
+print *, "D2 inner", D_2(1,2)
              end do
 
-             CALL adiab_print_nace(adiab_section, D_2, nadiab, norbitals, itimes, deltatMD, times)
+print *, "D2", D_2(1,2)
+print *, "D_tp", sh_env%diabatic_nace_tp(1,2)
+             CALL adiab_print_nace(adiab_section, sh_env%diabatic_nace_tp, nadiab, norbitals, itimes, deltatMD, times)
              CALL adiab_print_coeff(adiab_section, ctin,nadiab, norbitals,itimes, deltatMD, &
                                     times)
              CALL adiab_print_pop(adiab_section, abs(ctotal),nadiab,norbitals,itimes, deltatMD, &
@@ -3481,7 +3485,7 @@ END SUBROUTINE classically_forbidden_hops
 
              call makeX(mat, H_0, Stt_int, Sttp_int, Sttm_int, Stptp_int, &
                                              Stmtm_int, X1, deltatMD, NACE)
-
+print *, "NACE out", NACE(1,2)
              do t2=1,int(deltatMD/deltatE)
                     !create timestepped equivalents
                     H_1 = H_0 + 0.5D0*Hdiff
@@ -3574,7 +3578,9 @@ END SUBROUTINE classically_forbidden_hops
                      H_0 = H_2
                      X1  = X2
 
+print *, "D2 inner", NACE(1,2)
              end do
+print *, "D2", NACE(1,2)
              CALL adiab_print_nace(adiab_section, NACE, nadiab, norbitals, itimes, deltatMD, times)
              CALL adiab_print_coeff(adiab_section, ctin,nadiab, norbitals,itimes, deltatMD, &
                                     times)

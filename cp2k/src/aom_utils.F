@@ -1239,7 +1239,6 @@ end subroutine old_diab_to_adiab
 
 
 
-
 !**********************************************************************************
 !> \brief Calculate the diabatic NACE first
 !>    NB: this subroutine calculates diabatic NACE (d_kl) in the othogonal basis and in
@@ -1329,8 +1328,8 @@ subroutine nace1_modified(sh_env, mol, deltat)
 !END DO
 
 !NB: becuase of the way finite differences are defined actually here
-!sh_env%diabatic_nace_t refers at time T (namely t-dt) not Tp
-   sh_env%diabatic_nace_t = (sh_env%adiab_nace_env%diab_D - & 
+!sh_env%diabatic_nace_t refers at time T (namely t-dt) not Tp !!TO BE FIXED
+   sh_env%diabatic_nace_tp = (sh_env%adiab_nace_env%diab_D - & 
                               TRANSPOSE(sh_env%adiab_nace_env%diab_D)) / 2
 !sh_env%adiab_nace_env%diab_D = sh_env%diabatic_nace 
 !> this previous line would

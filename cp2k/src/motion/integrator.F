@@ -651,7 +651,7 @@ CONTAINS
              ! 5. Check if it's trivial crossing (only for printing purpose)
              !    Probably I would need to check the overalp here
              CALL adiab_overlap_check(force_env%mixed_env%sh_env)
-
+print *, "ENTER integrator.F"
              ! 6. Update all variables for the next time step.
              force_env%mixed_env%sh_env%C_t = force_env%mixed_env%sh_env%C_tp
              force_env%mixed_env%sh_env%H_t = force_env%mixed_env%sh_env%H_tp
