@@ -983,6 +983,9 @@ END SUBROUTINE calc_aom_Xmatrix_elements_first_step
   
 !**********************************************************************************
 !> \brief 
+!> \Note this subroutine could be optimized by putting the local
+!allocation/deallocation step only at the first step and then overwriting the
+!matrices like it is done in nace1 
 !**********************************************************************************
 subroutine makeX(mol, H, Stt, Sttp, Sttm, Stptp, Stmtm, X, deltat, NACE)
         !X is the name I give to the matrix in the solution to the Schroedinger equation:
@@ -1238,7 +1241,6 @@ end subroutine old_diab_to_adiab
 
 
 
-
 !**********************************************************************************
 !> \brief Calculate the diabatic NACE first
 !>    NB: this subroutine calculates diabatic NACE (d_kl) in the othogonal basis and in
@@ -1250,8 +1252,9 @@ end subroutine old_diab_to_adiab
 !>    diabatic_nace_t
 !> \note in all the following nace subroutines: "mol" should be replaced by "mat", 
 !>    the latter can deal with degeneracy present in the H   
+!> \note the orthogonal NACE calculated here refer to time T!, like H_t (not Tp) 
 !**********************************************************************************
-subroutine nace1_modified(sh_env, mol, deltat)
+subroutine nace1_time_t(sh_env, mol, deltat)
 
     TYPE(sh_env_type)                         :: sh_env
     INTEGER                                    :: mol!, i, j!, sub, add
@@ -1259,65 +1262,55 @@ subroutine nace1_modified(sh_env, mol, deltat)
 
     CHARACTER(len=*), PARAMETER :: routineN ='nace1', &
                 routineP = moduleN//':'//routineN
-!TEST
-!    REAL(KIND=dp), dimension(:,:), allocatable     :: my_NACE
 
     !> Based on Eq. 19 of paper: Spencer et al., J. Chem. Phys. 145, 064102 (2016)
-
-    !> 1. Calculate the term  D  (first term in Eq. 19)
-    !many allocations
+    !> Refer to Overleaf Note by SG  
+    ! note T1, T2, Sqrt are just supporting matrices they get overwrited
+     
+    !*********  FIRST PART *****************
     !use the matinvsqrt subroutine to find T = S^(-1/2)
     sh_env%adiab_nace_env%T1 = sh_env%Stmtm
     sh_env%adiab_nace_env%T2 = sh_env%Stptp
+    !find S^{-1/2} at given time
     call matinvsqrt(mol, .TRUE., sh_env%adiab_nace_env%T1)
     call matinvsqrt(mol, .TRUE., sh_env%adiab_nace_env%T2)
-    !and do some straightforward first-order numerical derivatives
 
-    sh_env%adiab_nace_env%Ttt = sh_env%Stt
-    call matinvsqrt(mol, .TRUE., sh_env%adiab_nace_env%Ttt)
-    sh_env%adiab_nace_env%Sttsqrt_var = sh_env%Stt
-    call matinvsqrt(mol, .FALSE., sh_env%adiab_nace_env%Sttsqrt_var)
+    !find S^{1/2} at a given time
+    sh_env%adiab_nace_env%Ssqrt = sh_env%Stt
+    call matinvsqrt(mol, .FALSE., sh_env%adiab_nace_env%Ssqrt)
 
-    !Time deriv of overlap Tdot
+    !Time deriv of Tdot(at time T) = DT = [STpTp^{-1/2} - STmTm^{-1/2}]*(1/2dt) 
     sh_env%adiab_nace_env%DT = (0.5D0/deltat)*(sh_env%adiab_nace_env%T2 - sh_env%adiab_nace_env%T1)
-    !Time deriv of Lowdin Mat Dprime
-    sh_env%adiab_nace_env%DS = (0.5D0/deltat)*(sh_env%Sttp - sh_env%Sttm)
 
-!   THE FOLLOWING CODE IS USEFUL FOR PRINTING NxN MATRICIES       
-!PRINT *, "TST Bef:"
-!DO i=1, mol
-!   DO j=1, mol
-!      WRITE(6, "(A2, e12.4, A2)", advance='no') "| ", sh_env%adiab_nace_env%TST(i,j), " "
-!   END DO
-!   PRINT *, " "
-!END DO
-
-!   !with these two loops, calculate the nacv in the time domain between adiabatic wavefunctions
-!   !by transforming from the diabatic overlaps
-!   !TST = T1*Stt*DT. This is done in 2 steps.
-!   !Note that T2 is now overwritten in the following DGEMM operation 
-!   !1. T2 = Stt*DT
-
-    !alternative to the double step above
-    !2. TST = S^(1/2)*DT
+    !Second term (at time T) = T*S*DT = S^{1/2}*DT = S_TT^{1/2}*DT  
     CALL DGEMM('N', 'N', mol, mol, mol, 1.0D0, &
-                sh_env%adiab_nace_env%Sttsqrt_var, mol, &
+                sh_env%adiab_nace_env%Ssqrt, mol, &
                 sh_env%adiab_nace_env%DT, mol, &
                 0.0_DP, sh_env%adiab_nace_env%diab_D, mol)
 
 
-    !1. T2 = DS*T1
+    !*********  SECOND  PART *****************
+    !Overwrites T1 to save space so now: T1 = STT^{-1/2}
+    sh_env%adiab_nace_env%T1 = sh_env%Stt
+    call matinvsqrt(mol, .TRUE., sh_env%adiab_nace_env%T1)
+
+    !Time deriv Dprime (at time T) = [STTp^{-1/2} - STTm^{-1/2}]*(1/2dt) 
+    sh_env%adiab_nace_env%DS = (0.5D0/deltat)*(sh_env%Sttp - sh_env%Sttm)
+
+    ! Overwriting T2 to save space 
+    !T2 = DS*T1 = DS*STT^{-1/2}
     CALL DGEMM('N', 'N', mol, mol, mol, 1.0_DP, &
                sh_env%adiab_nace_env%DS, mol, &
-               sh_env%adiab_nace_env%Ttt, mol, &
+               sh_env%adiab_nace_env%T1, mol, &
                0.0_DP, sh_env%adiab_nace_env%T2, mol)
 
-
-    !2. TDT = T1^{dagg}*T2 + TST
+    !The total orthogonal diabatic NACE (at time T)= T*D*T + T*S*DT
+    !Diab NACE = T1^{dagg}*T2 + T*S*DT
     CALL DGEMM('T', 'N', mol, mol, mol, 1.0_DP, &
-                sh_env%adiab_nace_env%Ttt,  mol, &
-                sh_env%adiab_nace_env%T2, mol, &       ! Now diab_D becomes = TDT + TST
+                sh_env%adiab_nace_env%T1,  mol, &
+                sh_env%adiab_nace_env%T2, mol, &       ! Now diab_D becomes = T*D*T + T*S*DT
                 1.0_DP, sh_env%adiab_nace_env%diab_D, mol)
+
 !!   THE FOLLOWING CODE IS USEFUL FOR PRINTING NxN MATRICIES       
 !PRINT *, "D Bef:"
 !DO i=1, mol
@@ -1328,15 +1321,14 @@ subroutine nace1_modified(sh_env, mol, deltat)
 !END DO
 
 !NB: becuase of the way finite differences are defined actually here
-!sh_env%diabatic_nace_t refers at time T (namely t-dt) not Tp !!TO BE FIXED
+!sh_env%diabatic_nace_t refers at time T (namely t-dt) not Tp 
    sh_env%diabatic_nace_tp = (sh_env%adiab_nace_env%diab_D - & 
                               TRANSPOSE(sh_env%adiab_nace_env%diab_D)) / 2
-!sh_env%adiab_nace_env%diab_D = sh_env%diabatic_nace 
 !> this previous line would
 !> antisimmetrize NACE even in the calculation of adiab nace, 
 !> We have shown that it makes no difference at all!
 
-end subroutine nace1_modified
+end subroutine nace1_time_t
 
 
 !**********************************************************************************
@@ -1638,7 +1630,7 @@ subroutine calc_adiab_nace(sh_env, adiab_section)
                                                    l_val=print_here)
 
         if (.NOT.sh_env%no_diab_nace) then
-            CALL nace1_modified(sh_env, mat, sh_env%deltat)
+            CALL nace1_time_t(sh_env, mat, sh_env%deltat)
         end if
         !CALL nace1(sh_env, mat, sh_env%deltat)
         CALL nace2(sh_env, mat, print_here)

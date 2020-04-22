@@ -126,8 +126,7 @@ TYPE adiab_nace_env_type
    INTEGER, dimension(:),  allocatable        :: not_associated
 
    !SG NEW VARIABLES
-   REAL(KIND=dp), dimension(:,:), allocatable :: Ttt
-   REAL(KIND=dp), dimension(:,:), allocatable :: Sttsqrt_var
+   REAL(KIND=dp), dimension(:,:), allocatable :: Ssqrt
 
 END TYPE adiab_nace_env_type
 

@@ -285,7 +285,6 @@ CONTAINS
          if (sh_env%multistate) then
             CPABORT("Multi-state forces not implemented")
          end if   
-         CALL set_aom_env(nadiab, norbitals, natom,positions_tp,adiab_section,sh_env)
         sh_env%tresp_couplings_keyword = .TRUE.
         !sh_env%frozen_couplings_keyword = .TRUE.  !test
         sh_env%first_off_d_Hab = -0.0011024789     !test
@@ -684,8 +683,7 @@ end subroutine create_ext_press_list
       ALLOCATE(sh_env%adiab_nace_env%basic(mat))
       ALLOCATE(sh_env%adiab_nace_env%zeros(mat))
       ALLOCATE(sh_env%adiab_nace_env%not_associated(mat))
-      ALLOCATE(sh_env%adiab_nace_env%Ttt(mat,mat))
-      ALLOCATE(sh_env%adiab_nace_env%Sttsqrt_var(mat,mat))
+      ALLOCATE(sh_env%adiab_nace_env%Ssqrt(mat,mat))
 
   END SUBROUTINE create_adiab_nace_env
 
