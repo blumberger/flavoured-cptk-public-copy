@@ -810,8 +810,6 @@ CONTAINS
      !> store adiabatic nace and diabatic from the previous step
      sh_env%adiab_nace_t = sh_env%adiab_nace_tp !adiabatic nace at t are used just
                                                 !for adiabatic propagation which is DEPRECATED
-print *, "sh_env%diabatic_nace_t", sh_env%diabatic_nace_t(1,2)
-print *, "sh_env%diabatic_nace_tp", sh_env%diabatic_nace_tp(1,2)
 
      !>this if statement is usefull at t=1 becuase sh_env%diabatic_nace_t
      !> was not calculated in the init step. We need sh_env%diabatic_nace_t  
@@ -833,8 +831,6 @@ print *, "sh_env%diabatic_nace_tp", sh_env%diabatic_nace_tp(1,2)
         CALL calc_adiab_nace_old(sh_env, adiab_section)
      END IF
 
-print *, "sh_env%diabatic_nace_t AFTER", sh_env%diabatic_nace_t(1,2)
-print *, "sh_env%diabatic_nace_tp AFTER", sh_env%diabatic_nace_tp(1,2)
      
      IF (sh_env%aom_couplings_keyword) THEN
          !------------------  AOM section    ---------------------------------------------
