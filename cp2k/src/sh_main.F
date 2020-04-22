@@ -55,7 +55,8 @@ MODULE sh_main
                                              make_adiabX,               &
                                              read_listcoeff,            &
                                              calc_adiab_nace,           &
-                                             calc_adiab_nace_old
+                                             calc_adiab_nace_old,       &
+                                             nace1_time_t
 
      USE sh_types,                    ONLY: sh_env_type, &
                                                 sh_print_env_type
@@ -809,6 +810,20 @@ CONTAINS
      !> store adiabatic nace and diabatic from the previous step
      sh_env%adiab_nace_t = sh_env%adiab_nace_tp !adiabatic nace at t are used just
                                                 !for adiabatic propagation which is DEPRECATED
+print *, "sh_env%diabatic_nace_t", sh_env%diabatic_nace_t(1,2)
+print *, "sh_env%diabatic_nace_tp", sh_env%diabatic_nace_tp(1,2)
+
+     !>this if statement is usefull at t=1 becuase sh_env%diabatic_nace_t
+     !> was not calculated in the init step. We need sh_env%diabatic_nace_t  
+     !> in the interpolation scheme during with DLI
+     if (itimes.eq.1 .or. sh_env%restart_key)  then
+        if (.NOT.sh_env%no_diab_nace) then
+            !this calculates sh_env%diabatic_nace_t
+            CALL nace1_time_t(sh_env, mat, sh_env%deltat)
+            !temp
+            !sh_env%diabatic_nace_t = sh_env%diabatic_nace_tp
+        end if
+     end if
 
      !> Calculate the overlap between C_tp and C_t, reorder state if required,
      !> calculate the adiabatic nace [and diabatic nace at (t)]
@@ -817,15 +832,6 @@ CONTAINS
      ELSE
         CALL calc_adiab_nace_old(sh_env, adiab_section)
      END IF
-print *, "sh_env%diabatic_nace_t", sh_env%diabatic_nace_t(1,2)
-print *, "sh_env%diabatic_nace_tp", sh_env%diabatic_nace_tp(1,2)
-
-     !>this if statement is usefull at t=1 becuase sh_env%diabatic_nace_tp
-     !> is not present and we would need it in the interpolation scheme during the
-     !> wavefunction propagation, so no we approximate that sh_env%diabatic_nace_t =0
-     if (itimes.eq.1 .or. sh_env%restart_key)  then
-       sh_env%diabatic_nace_t = sh_env%diabatic_nace_tp
-     end if
 
 print *, "sh_env%diabatic_nace_t AFTER", sh_env%diabatic_nace_t(1,2)
 print *, "sh_env%diabatic_nace_tp AFTER", sh_env%diabatic_nace_tp(1,2)

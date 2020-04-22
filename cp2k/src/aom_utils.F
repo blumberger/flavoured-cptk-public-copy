@@ -141,7 +141,8 @@ IMPLICIT NONE
              read_list_tresp,                      &
              read_list_frz_couplings,              &
              calc_adiab_nace_old,                  &
-             matinvsqrt
+             matinvsqrt,                           &
+             nace1_time_t                   
  
 
 CONTAINS
@@ -1240,6 +1241,93 @@ subroutine old_diab_to_adiab( sh_env, C2, old_state, mol, cstate, ct, C1, cttm_a
 end subroutine old_diab_to_adiab
 
 
+!**********************************************************************************
+!> \brief Calculate the diabatic NACE first at time Tp
+!>    NB: this subroutine calculates diabatic NACE (d_kl) in the othogonal basis and in
+!>    practice it does exactly the same job as makeX subroutine with the exception
+!>    that does not calculate the term H_kl - d_kl
+!> \param diabatic_nace_t and diab_D are the outputs of these subroutine they
+!>    are the same array but the former is further simmetrized in order to be
+!>    transferred to the propagation subroutine with linear interpolation of
+!>    diabatic_nace_t
+!> \note in all the following nace subroutines: "mol" should be replaced by "mat", 
+!>    the latter can deal with degeneracy present in the H   
+!**********************************************************************************
+subroutine nace1_time_tp(sh_env, mol, deltat)
+
+    TYPE(sh_env_type)                         :: sh_env
+    INTEGER                                    :: mol!, i, j!, sub, add
+    REAL(KIND=dp)                              :: deltat
+
+    CHARACTER(len=*), PARAMETER :: routineN ='nace1', &
+                routineP = moduleN//':'//routineN
+
+    !> Refer to Overleaf Note by SG  
+    ! note T1, T2, Sqrt are just supporting matrices they get overwrited
+     
+    !*********  FIRST PART *****************
+    !use the matinvsqrt subroutine to find T = S^(-1/2)
+    sh_env%adiab_nace_env%T1 = sh_env%Stt
+    sh_env%adiab_nace_env%T2 = sh_env%Stptp
+    !find S^{-1/2} at given time
+    call matinvsqrt(mol, .TRUE., sh_env%adiab_nace_env%T1)
+    call matinvsqrt(mol, .TRUE., sh_env%adiab_nace_env%T2)
+
+    !find S^{1/2} at a given time
+    sh_env%adiab_nace_env%Ssqrt = sh_env%Stptp
+    call matinvsqrt(mol, .FALSE., sh_env%adiab_nace_env%Ssqrt)
+
+    !Time deriv of Tdot(at time Tp) = DT = [STpTp^{-1/2} - STT^{-1/2}]*(1/dt) 
+    sh_env%adiab_nace_env%DT = (1.0D0/deltat)*(sh_env%adiab_nace_env%T2 - sh_env%adiab_nace_env%T1)
+
+    !Second term (at time Tp) = T*S*DT = S^{1/2}*DT = S_TpTp^{1/2}*DT  
+    CALL DGEMM('N', 'N', mol, mol, mol, 1.0D0, &
+                sh_env%adiab_nace_env%Ssqrt, mol, &
+                sh_env%adiab_nace_env%DT, mol, &
+                0.0_DP, sh_env%adiab_nace_env%diab_D, mol)
+
+
+    !*********  SECOND  PART *****************
+    !Overwrites T1 to save space so now: T1 = STpTp^{-1/2}
+    sh_env%adiab_nace_env%T1 = sh_env%Stptp
+    call matinvsqrt(mol, .TRUE., sh_env%adiab_nace_env%T1)
+
+    !Time deriv Dprime (at time Tp) = [STpTp^{-1/2} - STpT^{-1/2}]*(1/dt) 
+    sh_env%adiab_nace_env%DS = (1.0D0/deltat)*(sh_env%Stptp - sh_env%Stpt)
+
+    ! Overwriting T2 to save space 
+    !T2 = DS*T1 = DS*STpTp^{-1/2}
+    CALL DGEMM('N', 'N', mol, mol, mol, 1.0_DP, &
+               sh_env%adiab_nace_env%DS, mol, &
+               sh_env%adiab_nace_env%T1, mol, &
+               0.0_DP, sh_env%adiab_nace_env%T2, mol)
+
+    !The total orthogonal diabatic NACE (at time Tp)= T*D*T + T*S*DT
+    !Diab NACE = T1^{dagg}*T2 + T*S*DT
+    CALL DGEMM('T', 'N', mol, mol, mol, 1.0_DP, &
+                sh_env%adiab_nace_env%T1,  mol, &
+                sh_env%adiab_nace_env%T2, mol, &       ! Now diab_D becomes = T*D*T + T*S*DT
+                1.0_DP, sh_env%adiab_nace_env%diab_D, mol)
+
+!!   THE FOLLOWING CODE IS USEFUL FOR PRINTING NxN MATRICIES       
+!PRINT *, "D Bef:"
+!DO i=1, mol
+!   DO j=1, mol
+!      WRITE(*, "(A2, e12.4, A2)", advance='no') "  ", sh_env%adiab_nace_env%diab_D(i,j), "  "
+!   END DO
+!   PRINT *, " "
+!END DO
+
+!NB: becuase of the way finite differences are defined actually here
+!sh_env%diabatic_nace_t refers at time T (namely t-dt) not Tp 
+   sh_env%diabatic_nace_tp = (sh_env%adiab_nace_env%diab_D - & 
+                              TRANSPOSE(sh_env%adiab_nace_env%diab_D)) / 2
+!> this previous line would
+!> antisimmetrize NACE even in the calculation of adiab nace, 
+!> We have shown that it makes no difference at all!
+
+end subroutine nace1_time_tp
+
 
 !**********************************************************************************
 !> \brief Calculate the diabatic NACE first
@@ -1322,7 +1410,7 @@ subroutine nace1_time_t(sh_env, mol, deltat)
 
 !NB: becuase of the way finite differences are defined actually here
 !sh_env%diabatic_nace_t refers at time T (namely t-dt) not Tp 
-   sh_env%diabatic_nace_tp = (sh_env%adiab_nace_env%diab_D - & 
+   sh_env%diabatic_nace_t = (sh_env%adiab_nace_env%diab_D - & 
                               TRANSPOSE(sh_env%adiab_nace_env%diab_D)) / 2
 !> this previous line would
 !> antisimmetrize NACE even in the calculation of adiab nace, 
@@ -1630,7 +1718,7 @@ subroutine calc_adiab_nace(sh_env, adiab_section)
                                                    l_val=print_here)
 
         if (.NOT.sh_env%no_diab_nace) then
-            CALL nace1_time_t(sh_env, mat, sh_env%deltat)
+            CALL nace1_time_tp(sh_env, mat, sh_env%deltat)
         end if
         !CALL nace1(sh_env, mat, sh_env%deltat)
         CALL nace2(sh_env, mat, print_here)
