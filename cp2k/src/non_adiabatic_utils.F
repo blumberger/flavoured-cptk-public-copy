@@ -353,7 +353,7 @@ END SUBROUTINE calc_hop_nacv_approx
      real(kind=dp), allocatable, dimension(:)        :: charges1, charges2
      real(kind=dp)                                   :: tresp_coup
      real(kind=dp),  dimension(:,:), allocatable     :: grad1 !gradients acting on atoms of mol1
-
+     logical                                         :: Gaussian_charges
 
      !> COMMENT_SG: Tresp charegs array should be generalized for multiple molecules
      !and phases
@@ -365,7 +365,8 @@ END SUBROUTINE calc_hop_nacv_approx
      charges1 = tresp_charges
      charges2 = tresp_charges
      !#################################################################
-
+     !Tresp charges from gaussian code fitting must be divided by srt(2)
+     Gaussian_charges = sh_env%Gaussian_charges
 
      sh_env%H_tp(:,:) = cmplx(0.0D0, 0.0D0,dp)
      sh_env%grad_tresp = 0.0D0
@@ -411,7 +412,7 @@ END SUBROUTINE calc_hop_nacv_approx
 
 !print *, "PAIR", i,k
                           ! calc coupling for a given pair of states
-                          CALL calc_trsp_ab(crd_i, crd_k, charges1, charges2, tresp_coup)
+                          CALL calc_trsp_ab(crd_i, crd_k, charges1, charges2, tresp_coup, Gaussian_charges)
                           sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,-tresp_coup,dp) !sign of the off-diag is minus consisently with diagonals
                           !test to recover frozen coup for a chain:
                           !sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,0.0011024789,dp)
@@ -427,7 +428,7 @@ END SUBROUTINE calc_hop_nacv_approx
                           ! calc gradient on atoms belonging to mol i, from
                           ! atoms belonging to mol k, and store the former array
 !print *, "state", orb*(k-1)+d, "atoms", (i-1)*atoms_per_mol_i+1, i*atoms_per_mol_i 
-                          CALL calc_grad_coup( crd_i, crd_k, charges1, charges2, grad1) 
+                          CALL calc_grad_coup( crd_i, crd_k, charges1, charges2, grad1, Gaussian_charges) 
 
                           !> store gradient in the correct array entry
                           sh_env%grad_tresp(1,orb*(k-1)+d,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i) = grad1(1,:)
@@ -437,7 +438,7 @@ END SUBROUTINE calc_hop_nacv_approx
                           ! calc gradient on atoms belonging to mol k, from
                           ! atoms belonging to mol i, and store the former arrays
 !print *, "state", orb*(i-1)+m, "atoms", (k-1)*atoms_per_mol_k+1, k*atoms_per_mol_k 
-                          CALL calc_grad_coup( crd_k, crd_i, charges2, charges1, grad1) 
+                          CALL calc_grad_coup( crd_k, crd_i, charges2, charges1, grad1, Gaussian_charges) 
                           
                           !> store gradient in the correct array entry
                           sh_env%grad_tresp(1,orb*(i-1)+m,(k-1)*atoms_per_mol_k+1:k*atoms_per_mol_k) = grad1(1,:)                        
@@ -466,6 +467,7 @@ END SUBROUTINE calc_hop_nacv_approx
         end do 
      end do
 
+    DEALLOCATE(charges1,charges2)
 !!TEST
 !OPEN (UNIT = 21, FILE = "GRAD_formatted.dat")
 !
@@ -483,30 +485,30 @@ END SUBROUTINE calc_hop_nacv_approx
 
 ! COMMENT_SG this subroutine is just a replication of the one below, you should
 ! merge them together
-subroutine calc_grad_coup( crd1, crd2, charges1, charges2, grad1)
+subroutine calc_grad_coup( crd1, crd2, charges1, charges2, grad1, Gaussian_charges)
 
-   real(kind=dp), allocatable, dimension(:,:), intent(in)  :: crd1, crd2
+   real(kind=dp), allocatable, dimension(:,:), intent(in)   :: crd1, crd2
    real(kind=dp),  dimension(:,:), allocatable, intent(out) :: grad1 !gradients acting on atoms of mol1
-   real(kind=dp), allocatable, dimension(:), intent(in) :: charges1, charges2
+   real(kind=dp), allocatable, dimension(:), intent(in)     :: charges1, charges2
+   logical                                                  :: Gaussian_charges
 
    real(kind=dp),  dimension(3) :: vect
    real(kind=dp)              :: dist
    real(kind=dp)              :: x=2.0
-   logical                    :: Gaussian_charges
    integer :: t,j
    real(kind=dp), allocatable, dimension(:)               :: char1, char2
 
    !Ang2Bohr=1.889725989
    !AU2eV=27.211399
 
-   Gaussian_charges = .True. !put in input file
+   !Gaussian_charges = .True. !put in input file
 
    allocate(grad1(3,SIZE(crd1,2)))
    !allocate(grad2(3,SIZE(crd2,2))) 
    allocate(char1(SIZE(charges1)))
    allocate(char2(SIZE(charges2)))
 
-   !> Gaussian charges must be divided by sqrt(2)
+   !> Gaussian TRESP charges must be divided by sqrt(2)
    if (Gaussian_charges) then
      char1(:) = (charges1(:)/SQRT(x))
      char2(:) = (charges2(:)/SQRT(x))
@@ -545,23 +547,23 @@ end subroutine  calc_grad_coup
 !general be different for the two mols), this calculates the tresp_coup. 
 !> author SG 
 !**********************************************************************************
-subroutine calc_trsp_ab(crd1, crd2, charges1, charges2, tresp_coup)
+subroutine calc_trsp_ab(crd1, crd2, charges1, charges2, tresp_coup,Gaussian_charges)
 
    real(kind=dp), allocatable, dimension(:,:), intent(in)  :: crd1, crd2
    real(kind=dp), intent(out)                              :: tresp_coup
    real(kind=dp), allocatable, dimension(:), intent(in)    :: charges1, charges2
+   logical                                                 :: Gaussian_charges
 
    real(kind=dp),  dimension(3) :: vect
    real(kind=dp)                :: dist !Ang2Bohr, AU2eV
    real(kind=dp)                :: x=2.0
-   logical                      :: Gaussian_charges
    integer :: t,j
    real(kind=dp), allocatable, dimension(:)               :: char1, char2
 
 !   Ang2Bohr=1.889725989
 !   AU2eV=27.211399
 
-   Gaussian_charges = .True. !put in input file
+   !Gaussian_charges = .True. !put in input file
 
    allocate(char1(SIZE(charges1)))
    allocate(char2(SIZE(charges2)))
@@ -590,6 +592,150 @@ subroutine calc_trsp_ab(crd1, crd2, charges1, charges2, tresp_coup)
    deallocate(char1, char2)
 end subroutine calc_trsp_ab
 
+!**********************************************************************************
+!> \brief This subroutine should be used to update site energies and forces for
+!CT states in presence of a coulomb pair-wise potential. Each state is a pair of
+!|donor,acceptor> molecules and to calculate the gradients, we consider each
+!atom of the donor and loop over all the atoms of the acceptor and viceversa.
+!> \date 02/05/2020
+!> author SG 
+!**********************************************************************************
+
+  subroutine add_coulomb_energy_to_CT(sh_env, energies_tp, positions_com_tp)
+   TYPE(sh_env_type)                              :: sh_env
+   REAL(kind=dp), DIMENSION(:),  POINTER, &
+                                   INTENT(INOUT)  :: energies_tp !inout var
+   REAL(kind=dp), DIMENSION(:,:),POINTER, &
+                                   INTENT(IN)        :: positions_com_tp
+  
+   CHARACTER(len=*), PARAMETER                    :: routineN ='add_coulomb_energy_to_CT', &
+     routineP = moduleN//':'//routineN
+   
+   INTEGER                                        :: i, j, state, dim_
+   integer                                        :: init_atom_mol_i, final_atom_mol_i, atoms_per_mol_i
+   integer                                        :: init_atom_mol_k, final_atom_mol_k, atoms_per_mol_k
+   INTEGER, DIMENSION(:,:), ALLOCATABLE           :: CT_states_info
+   INTEGER, DIMENSION(:), ALLOCATABLE             :: donor_index, acceptor_index 
+   real(kind=dp), allocatable, dimension(:,:)      :: crd_i, crd_k
+   real(kind=dp), allocatable, dimension(:)        :: charges1, charges2
+   real(kind=dp)                                   :: coulomb_coup  
+   logical                                         :: Gaussian_charges
+   real(kind=dp),  dimension(:,:), allocatable     :: grad1
+   real(kind=dp),  dimension(:,:, :), allocatable  :: grad_coulomb
+
+   Gaussian_charges = sh_env%Gaussian_charges 
+ 
+
+
+print *, "Gaussian_charges", Gaussian_charges 
+   !hardcoded states 
+   ALLOCATE(CT_states_info(2,SIZE(energies_tp))) 
+   ALLOCATE(donor_index(3))   !!!!! HARDCODED
+   ALLOCATE(acceptor_index(3))  !!! HARDCODED
+   donor_index = (/3,4,5/)
+   acceptor_index = (/6,7,8/)
+   
+   !construct CT states 
+   state = 0
+   do i=1,SIZE(donor_index)
+      do j=1,SIZE(acceptor_index)
+         state = state + 1
+         CT_states_info(1,state) = donor_index(i) 
+         CT_states_info(2,state) = acceptor_index(j)
+      end do
+   end do
+
+   !*******************!!!!!!!!***************************
+   ! HARDCODED: do not do this here but only once in sh_env, and most
+   ! importantly find a better way to store this huge array for big systems,
+   ! either recalculating forces on the fly or just store the non-zero elements
+   ! and get this info from full_system_info
+   ALLOCATE(grad_coulomb(3,SIZE(CT_states_info,2),248))
+   grad_coulomb = 0.0D0
+
+print *, "CT_states_info", CT_states_info
+   !loop over CT states and get the atoms and the coulomb interaction between
+   !them
+   do state=1,SIZE(CT_states_info,2) 
+      !> find coordinates mol 1 of the pair
+      init_atom_mol_i = sh_env%full_system_info(1,CT_states_info(1,state))
+      final_atom_mol_i = sh_env%full_system_info(2,CT_states_info(1,state))
+      atoms_per_mol_i = (final_atom_mol_i-init_atom_mol_i)+1
+
+print *, "mol1", init_atom_mol_i, final_atom_mol_i, atoms_per_mol_i
+
+      !> find coordinates mol 2 of the pair
+      init_atom_mol_k = sh_env%full_system_info(1,CT_states_info(2,state))
+      final_atom_mol_k = sh_env%full_system_info(2,CT_states_info(2,state))
+      atoms_per_mol_k = (final_atom_mol_k-init_atom_mol_k)+1
+
+print *, "mol2", init_atom_mol_k, final_atom_mol_k, atoms_per_mol_k
+print *, "-------------"
+
+      !> this allocation deallocation is maybe inefficient
+      !but it was the only thing I found to be general for
+      !multi-phases
+      ALLOCATE(crd_i(3,atoms_per_mol_i))
+      ALLOCATE(crd_k(3,atoms_per_mol_k))
+
+      do dim_=1,3
+         crd_i(dim_,:) = positions_com_tp(dim_, init_atom_mol_i:final_atom_mol_i)
+         crd_k(dim_,:) = positions_com_tp(dim_, init_atom_mol_k:final_atom_mol_k)
+      end do                                                                                        
+
+      !! ALLOCATE COULOMB CHARGES: Do this outside the loop for donor and
+      !acceptor charges
+      ALLOCATE(charges1(atoms_per_mol_i))
+      ALLOCATE(charges2(atoms_per_mol_k))
+      
+      charges1(:) = 1.0D0
+      charges2(:) = 1.0D0
+
+      !! calc coulomb iteraction for a given pair of molecules
+      CALL calc_trsp_ab(crd_i, crd_k, charges1, charges2, coulomb_coup, Gaussian_charges)  
+print *, "COULOMB", coulomb_coup
+      
+print *, "REMEBER TO ADD screening"
+      !screening = 1.0D0 ! take this from input
+         !> site energies are modified by the coulomb potential 
+      !energies_tp(state) = energies_tp(state) + (1.0D0/screening)*coulomb_coup 
+    
+      !> calculate the gradients
+      CALL calc_grad_coup(crd_i, crd_k, charges1, charges2, grad1, Gaussian_charges)
+print *, "grad on i from k"
+do i=1,SIZE(grad1,2)
+  print *, grad1(:,i)
+end do
+      ! instead of doing this update Fin like for site energies
+      !! Full storage very inefficient: TO CHANGE
+      grad_coulomb(1,state,init_atom_mol_i:final_atom_mol_i) = grad1(1,:)  
+      grad_coulomb(2,state,init_atom_mol_i:final_atom_mol_i) = grad1(2,:)  
+      grad_coulomb(3,state,init_atom_mol_i:final_atom_mol_i) = grad1(3,:)  
+
+!print *, "state",    
+      CALL calc_grad_coup(crd_k, crd_i, charges2, charges1, grad1, Gaussian_charges)
+print *, "grad on k from i"
+do i=1,SIZE(grad1,2)
+  print *, grad1(:,i)
+end do
+      ! instead of doing this update Fin like for site energies
+      !! Full storage very inefficient: TO CHANGE
+      grad_coulomb(1,state,init_atom_mol_k:final_atom_mol_k) = grad1(1,:)  
+      grad_coulomb(2,state,init_atom_mol_k:final_atom_mol_k) = grad1(2,:)  
+      grad_coulomb(3,state,init_atom_mol_k:final_atom_mol_k) = grad1(3,:)  
+       
+    
+      DEALLOCATE(crd_i,crd_k)
+      DEALLOCATE(charges1,charges2)
+      
+   end do 
+
+!print *, "S1", grad_coulomb(1,1,:)
+            
+   DEALLOCATE(grad_coulomb)
+        
+  end subroutine 
+
 
 !**********************************************************************************
 !> \brief This subroutine creates an Hamiltonian with a dimension given by the
@@ -600,15 +746,21 @@ end subroutine calc_trsp_ab
 !    tridiagonal matrix.
 !> author SG
 !**********************************************************************************
-  subroutine calc_frozen_H(sh_env, energies_tp, orb)
-     TYPE(sh_env_type)                      :: sh_env
+  subroutine calc_frozen_H(sh_env, energies_tp, orb, positions_com_tp)
+     TYPE(sh_env_type)                              :: sh_env
      REAL(kind=dp), DIMENSION(:),  POINTER          :: energies_tp
      integer, intent(in)                            :: orb
+     REAL(kind=dp), DIMENSION(:,:),POINTER, &
+                                   INTENT(IN)        :: positions_com_tp
         
-     CHARACTER(len=*), PARAMETER                     :: routineN ='calc_frozen_H', &
+     CHARACTER(len=*), PARAMETER                    :: routineN ='calc_frozen_H', &
      routineP = moduleN//':'//routineN
 
-     integer :: i, k, m, d, frz_ind
+     integer                                        :: i, k, m, d, frz_ind
+
+
+     !TEST: positions_com_tp just used here to create diagonals
+     !CALL add_coulomb_energy_to_CT(sh_env, energies_tp, positions_com_tp)
 
      sh_env%H_tp(:,:) = cmplx(0.0D0, 0.0D0,dp)
      ! these loops are inefficients but do the job
@@ -659,7 +811,7 @@ end subroutine calc_trsp_ab
 !> \brief This subroutine is used only when there are more non-degenerate states
 !         than the number of active molecules and the loop is over number of
 !         states. So this subrotine can handle the CT Hamiltonian with 
-!         (NdonorxNacceptor)^2 states. However it cannot work with fluctuating 
+!         (NdonorxNacceptor) states. However it cannot work with fluctuating 
 !         couplings becuase for now the off-diagonal forces are set to zero.
 !         Since couplings are frozen. 
 !\author  SG
@@ -4273,6 +4425,7 @@ END SUBROUTINE classically_forbidden_hops
      real(kind=dp), allocatable, dimension(:)        :: charges1, charges2
      real(kind=dp)                                   :: tresp_coup
      real(kind=dp),  dimension(:,:), allocatable     :: grad1 !gradients acting on atoms of mol1
+     logical                                         :: Gaussian_charges
 
 
      !> COMMENT_SG: Tresp charegs array should be generalized for multiple molecules
@@ -4285,8 +4438,8 @@ END SUBROUTINE classically_forbidden_hops
      charges1 = tresp_charges
      charges2 = tresp_charges
      !#################################################################
-
-
+     Gaussian_charges  = sh_env%Gaussian_charges
+   
      sh_env%H_tp(:,:) = cmplx(0.0D0, 0.0D0,dp)
      sh_env%test_grad_tresp = 0.0D0
 
@@ -4331,7 +4484,7 @@ END SUBROUTINE classically_forbidden_hops
 
 print *, "PAIR", i,k
                           ! calc coupling for a given pair of states
-                          CALL calc_trsp_ab(crd_i, crd_k, charges1, charges2, tresp_coup)
+                          CALL calc_trsp_ab(crd_i, crd_k, charges1, charges2, tresp_coup, Gaussian_charges)
                           sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,-tresp_coup,dp) !sign of the off-diag is minus consisently with diagonals
                           !test to recover frozen coup for a chain:
                           !sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,0.0011024789,dp)
@@ -4347,7 +4500,7 @@ print *, "PAIR", i,k
                           ! calc gradient on atoms belonging to mol i, from
                           ! atoms belonging to mol k, and store the former array
 !print *, "state", orb*(k-1)+d, "atoms", (i-1)*atoms_per_mol_i+1, i*atoms_per_mol_i 
-                          CALL calc_grad_coup( crd_i, crd_k, charges1, charges2, grad1) 
+                          CALL calc_grad_coup( crd_i, crd_k, charges1, charges2, grad1, Gaussian_charges) 
 
 
                           !> store gradient in the correct array entry
@@ -4361,7 +4514,7 @@ print *, "PAIR", i,k
                           ! calc gradient on atoms belonging to mol k, from
                           ! atoms belonging to mol i, and store the former arrays
 !print *, "state", orb*(i-1)+m, "atoms", (k-1)*atoms_per_mol_k+1, k*atoms_per_mol_k 
-                          CALL calc_grad_coup( crd_k, crd_i, charges2, charges1, grad1) 
+                          CALL calc_grad_coup( crd_k, crd_i, charges2, charges1, grad1, Gaussian_charges) 
                           
                       
                           !> store gradient in the correct array entry

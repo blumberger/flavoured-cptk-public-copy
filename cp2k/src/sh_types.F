@@ -167,6 +167,7 @@ END TYPE adiab_nace_env_type
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER :: grad_tresp! off-diagonal gradient of tresp Hamilton.
      !> this is a test keyword for full storage of tresp gradient
      REAL(KIND=dp), DIMENSION(:,:,:,:), POINTER :: test_grad_tresp! off-diagonal gradient of tresp Hamilonian
+     LOGICAL                                  ::  Gaussian_charges
 
 !> BORDERLINE used for AOM and some other couplings mainly TRESP
      LOGICAL, DIMENSION(:), POINTER           :: ext_pres

@@ -224,16 +224,18 @@ CONTAINS
     print *, "FOB_SH| INDEX ACTIVE MOLS:", sh_env%index_active_mols
     CALL create_ext_press_list(molecule_kind_set, local_molecules, molecule_set, natom, &
                                       sh_env%index_active_mols, sh_env%ext_pres, & 
-                                   sh_env%active_system_info)!, full_system_info=sh_env%full_system_info)
+                                   sh_env%active_system_info, full_system_info=sh_env%full_system_info)
     !> sh_env%ext_pres will be overwritten in AOM case becuase active molecules
     !may still have inactive atoms (this feature is used for further speed-up)
 
     !sh_env%total_active_atoms = COUNT(sh_env%ext_pres)
     !print *, "FOB_SH| EXT PRESS:", sh_env%ext_pres
     !print *, "TOT ACTIVE ATOMS", COUNT(sh_env%ext_pres)
-    !print *, "active sys info", sh_env%active_system_info(1, :)
-    !print *, "active sys info", sh_env%active_system_info(2, :)
+    print *, "active sys info", sh_env%active_system_info(1, :)
+    print *, "active sys info", sh_env%active_system_info(2, :)
 
+    print *, "full sys info", sh_env%full_system_info(1, :)
+    print *, "full sys info", sh_env%full_system_info(2, :)
     ! Tell the program if you want a multi-state Hamiltonian: meaning an
     ! Hamiltonian like the CT one, where the number of states is different from
     ! the number of active molecules. 
@@ -247,6 +249,7 @@ CONTAINS
     sh_env%aom_couplings_keyword = .FALSE.
     sh_env%frozen_couplings_keyword = .FALSE.
     sh_env%tresp_couplings_keyword = .FALSE.
+    sh_env%Gaussian_charges = .FALSE.
 
     SELECT CASE(coupling_keyword)
     !---------------- AOM array ---------------------------------------------------------------
@@ -287,7 +290,7 @@ CONTAINS
          end if   
         sh_env%tresp_couplings_keyword = .TRUE.
         !sh_env%frozen_couplings_keyword = .TRUE.  !test
-        sh_env%first_off_d_Hab = -0.0011024789     !test
+        !sh_env%first_off_d_Hab = -0.0011024789     !test
 
         !----------- put in a new subroutine -----------------------------
         NULLIFY(tresp_coupling_section)
@@ -296,7 +299,12 @@ CONTAINS
         CALL section_vals_list_get(tresp_coupling_section,"_DEFAULT_KEYWORD_",list=list_tresp) !Read list tresp from input
         CALL section_vals_val_get(tresp_coupling_section,"CUT_OFF_BETWEEN_SITES",&
              r_val=sh_env%cutoff_sites)
-        !### COMMENT_SG: not general for multiphase
+        ! determine if the TRESP are taken from Gaussian code and divide by
+        ! sqrt(2) if that's the case (see Multiwfn.pdf for explanation)
+        CALL section_vals_val_get(tresp_coupling_section,"TRESP_FROM_GAUSSIAN",&
+             l_val=sh_env%Gaussian_charges)
+        !### COMMENT_SG: not general for multiphase: but it could be easily
+        !charged by giving different charges for different molecules
         CALL section_vals_val_get(tresp_coupling_section,"NUMBER_AOM_ATOMS_PER_SITE",&
              i_val=natom_mol)
         sh_env%atoms_per_site = natom_mol
@@ -366,11 +374,11 @@ subroutine create_ext_press_list(molecule_kind_set, local_molecules, molecule_se
      ALLOCATE(ext_pres(natom))
 
      !>active_system_info contains info about the number of initial and final atom for each mol. 
-     !full_system_info(1, start index)
-     !full_system_info(2, final index)
+     !active_system_info(1, start index)
+     !active_system_info(2, final index)
      ALLOCATE(active_system_info(2,SIZE(my_mol_index)))
 
-
+     !initialization
      ext_pres(:) = .FALSE.    
 
      nkind = SIZE ( molecule_kind_set )

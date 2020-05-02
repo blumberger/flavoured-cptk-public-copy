@@ -467,7 +467,7 @@ CONTAINS
     CALL section_add_subsection(subsection,sub2section)
 
     CALL keyword_create(keyword, name="CONNECTIVITY_FRZ_C",&
-         description="Decide if we use the decoherence procedure",&
+         description="Decide if we use the connectivity from input",&
          usage="True", & 
          default_l_val=.FALSE., &
          lone_keyword_l_val=.TRUE.)
@@ -510,9 +510,18 @@ CONTAINS
          n_keywords=1, n_subsections=0, repeats=.FALSE.)
     CALL section_add_subsection(subsection,sub2section)
 
+
     CALL keyword_create(keyword, name="NUMBER_AOM_ATOMS_PER_SITE",&
          description="Number of atoms per site",&
          usage="1", type_of_var=integer_t)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="TRESP_FROM_GAUSSIAN",&
+         description="Determine if TRESP are from Gaussian code: divide sqrt(2)",&
+         usage="True", & 
+         default_l_val=.TRUE., &
+         lone_keyword_l_val=.TRUE.)
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 

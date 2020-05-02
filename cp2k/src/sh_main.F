@@ -294,7 +294,7 @@ CONTAINS
          !-----------------------------------------------------------------------------
      ELSE IF (sh_env%frozen_couplings_keyword) THEN 
          !> FROZEN COUPLINGS 
-         CALL calc_frozen_H(sh_env, energies_tp, orb)
+         CALL calc_frozen_H(sh_env, energies_tp, orb,positions_com_tp=positions_com_tp)
 
      ELSE IF (sh_env%tresp_couplings_keyword) THEN 
          !> TRESP COUPLINGS
@@ -757,7 +757,7 @@ CONTAINS
          !-----------------------------------------------------------------------------
      ELSE IF (sh_env%frozen_couplings_keyword) THEN
          !> FROZEN COUPLINGS 
-         CALL calc_frozen_H(sh_env, energies_tp, orb)
+         CALL calc_frozen_H(sh_env, energies_tp, orb,positions_com_tp=positions_com_tp)
 
      ELSE IF (sh_env%tresp_couplings_keyword) THEN
          !> TRESP COUPLINGS 
