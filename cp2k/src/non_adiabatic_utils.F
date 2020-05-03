@@ -40,7 +40,8 @@ MODULE non_adiabatic_utils
                                              calc_hop_nacv_aom,    &
                                              make_adiabX,          &
                                              calc_diabatic_nace,   & 
-                                             matinvsqrt
+                                             matinvsqrt,           &
+                                             read_list_tresp
 
 !     USE non_adiabatic_types,           ONLY: sh_env_type
 
@@ -54,6 +55,12 @@ MODULE non_adiabatic_utils
 
      USE force_env_types,                ONLY: force_env_get, &
                                             force_env_type
+
+     USE cp_linked_list_val,           ONLY: &
+         cp_sll_val_create, cp_sll_val_dealloc, cp_sll_val_get_el_at, &
+         cp_sll_val_get_length, cp_sll_val_get_rest, cp_sll_val_insert_el_at, &
+         cp_sll_val_next, cp_sll_val_p_type, cp_sll_val_rm_el_at, &
+         cp_sll_val_set_el_at, cp_sll_val_type
 
 
 
@@ -601,12 +608,15 @@ end subroutine calc_trsp_ab
 !> \date 02/05/2020
 !> author SG 
 !**********************************************************************************
-  subroutine add_coulomb_energy_to_CT(sh_env, energies_tp, positions_com_tp)
+  subroutine add_coulomb_energy_to_CT(sh_env, adiab_section, energies_tp, diagonal_F, positions_com_tp)
    TYPE(sh_env_type)                              :: sh_env
+   TYPE(section_vals_type), POINTER               :: adiab_section
    REAL(kind=dp), DIMENSION(:),  POINTER, &
                                    INTENT(INOUT)  :: energies_tp !inout var
+   REAL(KIND=dp), DIMENSION(:,:,:), POINTER, &
+                                   INTENT(INOUT)  :: diagonal_F
    REAL(kind=dp), DIMENSION(:,:),POINTER, &
-                                   INTENT(IN)        :: positions_com_tp
+                                   INTENT(IN)     :: positions_com_tp
   
    CHARACTER(len=*), PARAMETER                    :: routineN ='add_coulomb_energy_to_CT', &
      routineP = moduleN//':'//routineN
@@ -615,27 +625,56 @@ end subroutine calc_trsp_ab
    integer                                        :: init_atom_mol_i, final_atom_mol_i, atoms_per_mol_i
    integer                                        :: init_atom_mol_k, final_atom_mol_k, atoms_per_mol_k
    INTEGER, DIMENSION(:,:), ALLOCATABLE           :: CT_states_info
-   INTEGER, DIMENSION(:), ALLOCATABLE             :: donor_index, acceptor_index 
+   INTEGER, DIMENSION(:), POINTER                 :: donor_index, acceptor_index 
    real(kind=dp), allocatable, dimension(:,:)      :: crd_i, crd_k
    real(kind=dp), allocatable, dimension(:)        :: charges1, charges2
-   real(kind=dp)                                   :: coulomb_coup  
+   real(kind=dp)                                   :: coulomb_coup, screening  
    logical                                         :: Gaussian_charges
    real(kind=dp),  dimension(:,:), allocatable     :: grad1
-   real(kind=dp),  dimension(:,:, :), allocatable  :: grad_coulomb
+   !real(kind=dp),  dimension(:,:, :), allocatable  :: grad_coulomb
+   integer                                         :: atoms_per_donor, atoms_per_acceptor
+   TYPE(cp_sll_val_type), POINTER                  :: list_tresp
+   integer, dimension(:), ALLOCATABLE              :: ext_elements1, ext_elements2 
+   LOGICAL, DIMENSION(:), POINTER                 :: active_logical1, active_logical2
+   TYPE(section_vals_type), POINTER               :: site_energy_section
+
+
+   NULLIFY(site_energy_section)
+   NULLIFY(list_tresp)
+   site_energy_section => section_vals_get_subs_vals(adiab_section,"METHOD_SITE_ENERGIES")
+
+   CALL section_vals_val_get(site_energy_section,"N_DONOR_ATOMS",&
+             i_val=atoms_per_donor) 
+   CALL section_vals_val_get(site_energy_section,"N_ACCEPTOR_ATOMS",&
+             i_val=atoms_per_acceptor) 
+   CALL section_vals_list_get(site_energy_section,"_DEFAULT_KEYWORD_",list=list_tresp)
+   CALL read_list_tresp(atoms_per_donor, list_tresp, ext_elements1, &
+                                           active_logical1, charges1)
+   CALL read_list_tresp(atoms_per_acceptor, list_tresp, ext_elements2, &
+                                           active_logical2, charges2)
+
+   CALL section_vals_val_get(site_energy_section,"INDEX_DONOR_MOLS",&
+                i_vals=donor_index)
+   CALL section_vals_val_get(site_energy_section,"INDEX_ACCEPTOR_MOLS",&
+                i_vals=acceptor_index)
+
+   CALL section_vals_val_get(site_energy_section,"DIELECTRIC_SCREENING",&
+             r_val=screening) 
+  
+   !screening = 3.0D0 ! take this from input HARDCODED
+print *, "screening", screening
+
+   ALLOCATE(CT_states_info(2,SIZE(energies_tp))) 
+   !hardcoded states 
+!   ALLOCATE(donor_index(3))   !!!!! HARDCODED
+!   ALLOCATE(acceptor_index(3))  !!! HARDCODED
+!   donor_index = (/3,4,5/)
+!   acceptor_index = (/6,7,8/)
 
    Gaussian_charges = sh_env%Gaussian_charges 
- 
-
-
-print *, "Gaussian_charges", Gaussian_charges 
-   !hardcoded states 
-   ALLOCATE(CT_states_info(2,SIZE(energies_tp))) 
-   ALLOCATE(donor_index(3))   !!!!! HARDCODED
-   ALLOCATE(acceptor_index(3))  !!! HARDCODED
-   donor_index = (/3,4,5/)
-   acceptor_index = (/6,7,8/)
    
-   !construct CT states 
+   !! BE CAREFULL: this definition of the state should match the one for the FORCE_EVALS
+   !construct CT states: they are defined such that donor is the first index
    state = 0
    do i=1,SIZE(donor_index)
       do j=1,SIZE(acceptor_index)
@@ -645,15 +684,16 @@ print *, "Gaussian_charges", Gaussian_charges
       end do
    end do
 
+
    !*******************!!!!!!!!***************************
    ! HARDCODED: do not do this here but only once in sh_env, and most
    ! importantly find a better way to store this huge array for big systems,
    ! either recalculating forces on the fly or just store the non-zero elements
    ! and get this info from full_system_info
-   ALLOCATE(grad_coulomb(3,SIZE(CT_states_info,2),248))
-   grad_coulomb = 0.0D0
+!   ALLOCATE(grad_coulomb(3,SIZE(CT_states_info,2),248))
+!   grad_coulomb = 0.0D0
 
-print *, "CT_states_info", CT_states_info
+!print *, "CT_states_info", CT_states_info
    !loop over CT states and get the atoms and the coulomb interaction between
    !them
    do state=1,SIZE(CT_states_info,2) 
@@ -662,15 +702,15 @@ print *, "CT_states_info", CT_states_info
       final_atom_mol_i = sh_env%full_system_info(2,CT_states_info(1,state))
       atoms_per_mol_i = (final_atom_mol_i-init_atom_mol_i)+1
 
-print *, "mol1", init_atom_mol_i, final_atom_mol_i, atoms_per_mol_i
+!print *, "mol1", init_atom_mol_i, final_atom_mol_i, atoms_per_mol_i
 
       !> find coordinates mol 2 of the pair
       init_atom_mol_k = sh_env%full_system_info(1,CT_states_info(2,state))
       final_atom_mol_k = sh_env%full_system_info(2,CT_states_info(2,state))
       atoms_per_mol_k = (final_atom_mol_k-init_atom_mol_k)+1
 
-print *, "mol2", init_atom_mol_k, final_atom_mol_k, atoms_per_mol_k
-print *, "-------------"
+!print *, "mol2", init_atom_mol_k, final_atom_mol_k, atoms_per_mol_k
+!print *, "-------------"
 
       !> this allocation deallocation is maybe inefficient
       !but it was the only thing I found to be general for
@@ -683,56 +723,63 @@ print *, "-------------"
          crd_k(dim_,:) = positions_com_tp(dim_, init_atom_mol_k:final_atom_mol_k)
       end do                                                                                        
 
-      !! ALLOCATE COULOMB CHARGES: Do this outside the loop for donor and
-      !acceptor charges
-      ALLOCATE(charges1(atoms_per_mol_i))
-      ALLOCATE(charges2(atoms_per_mol_k))
-      
-      charges1(:) = 1.0D0
-      charges2(:) = 1.0D0
-
       !! calc coulomb iteraction for a given pair of molecules
       CALL calc_trsp_ab(crd_i, crd_k, charges1, charges2, coulomb_coup, Gaussian_charges)  
-print *, "COULOMB", coulomb_coup
+      print *, "FOBSH| Coulob pot:", coulomb_coup
       
-print *, "REMEBER TO ADD screening"
-      !screening = 1.0D0 ! take this from input
-         !> site energies are modified by the coulomb potential 
-      !energies_tp(state) = energies_tp(state) + (1.0D0/screening)*coulomb_coup 
+      !> site energies are modified by the coulomb potential 
+      energies_tp(state) = energies_tp(state) + (1.0D0/screening)*coulomb_coup 
     
       !> calculate the gradients
       CALL calc_grad_coup(crd_i, crd_k, charges1, charges2, grad1, Gaussian_charges)
-print *, "grad on i from k"
-do i=1,SIZE(grad1,2)
-  print *, grad1(:,i)
-end do
-      ! instead of doing this update Fin like for site energies
-      !! Full storage very inefficient: TO CHANGE
-      grad_coulomb(1,state,init_atom_mol_i:final_atom_mol_i) = grad1(1,:)  
-      grad_coulomb(2,state,init_atom_mol_i:final_atom_mol_i) = grad1(2,:)  
-      grad_coulomb(3,state,init_atom_mol_i:final_atom_mol_i) = grad1(3,:)  
 
-!print *, "state",    
-      CALL calc_grad_coup(crd_k, crd_i, charges2, charges1, grad1, Gaussian_charges)
-print *, "grad on k from i"
-do i=1,SIZE(grad1,2)
-  print *, grad1(:,i)
-end do
+!print *, "grad on i from k"
+!do i=1,SIZE(grad1,2)
+!  print *, grad1(:,i)
+!end do
+
+     diagonal_F(1,init_atom_mol_i:final_atom_mol_i,state) = &
+                 diagonal_F(1,init_atom_mol_i:final_atom_mol_i,state)  + (1.0D0/screening)*grad1(1,:)
+     diagonal_F(2,init_atom_mol_i:final_atom_mol_i,state) = &
+                 diagonal_F(2,init_atom_mol_i:final_atom_mol_i,state)  + (1.0D0/screening)*grad1(2,:)  
+     diagonal_F(3,init_atom_mol_i:final_atom_mol_i,state) = &
+                 diagonal_F(3,init_atom_mol_i:final_atom_mol_i,state)  + (1.0D0/screening)*grad1(3,:)  
+
       ! instead of doing this update Fin like for site energies
       !! Full storage very inefficient: TO CHANGE
-      grad_coulomb(1,state,init_atom_mol_k:final_atom_mol_k) = grad1(1,:)  
-      grad_coulomb(2,state,init_atom_mol_k:final_atom_mol_k) = grad1(2,:)  
-      grad_coulomb(3,state,init_atom_mol_k:final_atom_mol_k) = grad1(3,:)  
+      !grad_coulomb(1,state,init_atom_mol_i:final_atom_mol_i) = grad1(1,:)  
+      !grad_coulomb(2,state,init_atom_mol_i:final_atom_mol_i) = grad1(2,:)  
+      !grad_coulomb(3,state,init_atom_mol_i:final_atom_mol_i) = grad1(3,:)  
+
+      CALL calc_grad_coup(crd_k, crd_i, charges2, charges1, grad1, Gaussian_charges)
+!print *, "grad on k from i"
+!do i=1,SIZE(grad1,2)
+!  print *, grad1(:,i)
+!end do
+
+     diagonal_F(1,init_atom_mol_k:final_atom_mol_k,state) = &
+                 diagonal_F(1,init_atom_mol_k:final_atom_mol_k,state)  + (1.0D0/screening)*grad1(1,:)
+     diagonal_F(2,init_atom_mol_k:final_atom_mol_k,state) = &
+                 diagonal_F(2,init_atom_mol_k:final_atom_mol_k,state)  + (1.0D0/screening)*grad1(2,:)  
+     diagonal_F(3,init_atom_mol_k:final_atom_mol_k,state) = &
+                 diagonal_F(3,init_atom_mol_k:final_atom_mol_k,state)  + (1.0D0/screening)*grad1(3,:)  
+
+      ! instead of doing this update Fin like for site energies
+      !! Full storage very inefficient: TO CHANGE
+      !grad_coulomb(1,state,init_atom_mol_k:final_atom_mol_k) = grad1(1,:)  
+      !grad_coulomb(2,state,init_atom_mol_k:final_atom_mol_k) = grad1(2,:)  
+      !grad_coulomb(3,state,init_atom_mol_k:final_atom_mol_k) = grad1(3,:)  
        
     
       DEALLOCATE(crd_i,crd_k)
-      DEALLOCATE(charges1,charges2)
       
    end do 
 
 !print *, "S1", grad_coulomb(1,1,:)
             
-   DEALLOCATE(grad_coulomb)
+   DEALLOCATE(charges1,charges2,ext_elements1,ext_elements2)
+   DEALLOCATE(CT_states_info) 
+!   DEALLOCATE(grad_coulomb)
         
   end subroutine 
 

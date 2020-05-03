@@ -260,7 +260,7 @@ CONTAINS
      ! Site energies are modified only if multistate is active
      IF (sh_env%multistate) THEN
          IF (sh_env%add_coulomb_pot) THEN
-                CALL add_coulomb_energy_to_CT(sh_env, energies_tp, positions_com_tp)
+                CALL add_coulomb_energy_to_CT(sh_env, adiab_section, energies_tp, diagonal_F, positions_com_tp)
          END IF
      END IF
 
@@ -740,7 +740,7 @@ CONTAINS
      ! Site energies are modified only if multistate is active
      IF (sh_env%multistate) THEN
          IF (sh_env%add_coulomb_pot) THEN
-                CALL add_coulomb_energy_to_CT(sh_env, energies_tp, positions_com_tp)
+                CALL add_coulomb_energy_to_CT(sh_env, adiab_section, energies_tp, diagonal_F, positions_com_tp)
          END IF
      END IF
      !######### COUPLING DEFINITION AND H CONSTRUCTION ########################

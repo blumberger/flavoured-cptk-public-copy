@@ -468,6 +468,46 @@ CONTAINS
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
+    CALL keyword_create(keyword, name="DIELECTRIC_SCREENING",&
+         description="Dielectric epsilon",&
+         usage="3.0 WITHOUT UNITS", type_of_var=real_t)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="N_DONOR_ATOMS",&
+         description="Number of atoms per site",&
+         usage="1", type_of_var=integer_t)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="N_ACCEPTOR_ATOMS",&
+         description="Number of atoms per site",&
+         usage="1", type_of_var=integer_t)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="_DEFAULT_KEYWORD_",&
+         description="The ESP charges in the format:"//&
+         "<p><tt>ATOMIC_KIND  LIST NO TRESP</tt></p>",&
+         repeats=.TRUE., usage="{{String} {Int} {Int} {Real}}",&
+         type_of_var=lchar_t)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="INDEX_DONOR_MOLS",&
+         description='Specify the index in xys of mols', &
+         usage="INDEX_DONOR_MOLS <INTEGER> .. <INTEGER>", &
+         type_of_var=integer_t,  n_var=-1, default_i_vals=(/1/))
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="INDEX_ACCEPTOR_MOLS",&
+         description='Specify the index in xys of mols', &
+         usage="INDEX_ACCEPTOR_MOLS <INTEGER> .. <INTEGER>", &
+         type_of_var=integer_t,  n_var=-1, default_i_vals=(/1/))
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
    !> releasing METHOD_SITE_ENERGIES subsection
    CALL section_release(sub2section)
 
@@ -519,8 +559,6 @@ CONTAINS
          unit_str="hartree")
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
-
-
 
     !> releasing FROZEN_COUPLINGS subsection
     CALL section_release(sub2section)

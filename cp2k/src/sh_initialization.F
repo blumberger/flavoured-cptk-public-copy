@@ -119,6 +119,7 @@ CONTAINS
      NULLIFY(decoherence_section)
      NULLIFY(wf_restart_section)
      NULLIFY(optimization_section)
+     NULLIFY(site_energy_section)
 
      CALL section_vals_val_get(adiab_section,"NUCLEAR_TIMESTEP",&
          r_val=MDtimestep)
