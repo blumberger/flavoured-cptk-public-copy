@@ -103,6 +103,7 @@ MODULE sh_main
                                              calc_coms_and_nlist,             &
                                              calc_tresp_coup,                 &
                                              !calc_tresp_coup_test,                 &
+                                             add_coulomb_energy_to_CT,        &
                                              calc_frozen_H,                   &
                                              calcforces_smart_grad,           &
                                              !calcforces_smart_grad_test,           &
@@ -255,7 +256,15 @@ CONTAINS
      ENDIF
      CALL translate_com(positions_tp, keyword_translate, positions_com_tp, local_particles, atomic_kinds = atomic_kinds)  
 
+     !#####################  SITE ENERGIES SECTION  #############################
+     ! Site energies are modified only if multistate is active
+     IF (sh_env%multistate) THEN
+         IF (sh_env%add_coulomb_pot) THEN
+                CALL add_coulomb_energy_to_CT(sh_env, energies_tp, positions_com_tp)
+         END IF
+     END IF
 
+     !######### COUPLING DEFINITION AND H CONSTRUCTION ########################
      IF (sh_env%aom_couplings_keyword) THEN
          !> ------------------  AOM section -------------------------------------
          ALLOCATE(PC_allrvecs(5,mol*sh_env%atoms_per_site))
@@ -487,8 +496,8 @@ CONTAINS
         !-----------------------------------------------------------------------------------------------
      ELSE IF (sh_env%frozen_couplings_keyword) THEN 
         IF (sh_env%multistate) THEN
-        !frozen Hamiltonian case and multi-phase (dimension of H larger than
-        !number of active mols)
+            !frozen Hamiltonian case and multi-phase (dimension of H larger than
+            !number of active mols)
             CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=active_state, Fin=diagonal_F, &
                                   forces_adiab=sh_env%forces_adiab)
         ELSE 
@@ -726,6 +735,15 @@ CONTAINS
      allocate(exact_forces(3,natom))
      !> OBTAIN COORDINATES, ENERGIES, STATES, etc. FROM PREVIOUS STEP
      CALL translate_com(positions_tp, keyword_translate, positions_com_tp, local_particles, atomic_kinds = atomic_kinds)  
+
+     !#####################  SITE ENERGIES SECTION  #############################
+     ! Site energies are modified only if multistate is active
+     IF (sh_env%multistate) THEN
+         IF (sh_env%add_coulomb_pot) THEN
+                CALL add_coulomb_energy_to_CT(sh_env, energies_tp, positions_com_tp)
+         END IF
+     END IF
+     !######### COUPLING DEFINITION AND H CONSTRUCTION ########################
      IF (sh_env%aom_couplings_keyword) THEN
          !------------------  AOM section -------------------------------------
          ALLOCATE(PC_allrvecs(5,mol*sh_env%atoms_per_site))
@@ -778,8 +796,6 @@ CONTAINS
          !> In a possible extension one should add here 
          CPABORT("Another coupling method to constrcut H should be chosen")
      END IF
-
-
 
 !!TEST FROZEN 
 !    do i =1, size(sh_env%H_tp,1)

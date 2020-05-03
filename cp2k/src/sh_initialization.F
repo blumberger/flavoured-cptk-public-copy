@@ -94,7 +94,7 @@ CONTAINS
      CHARACTER(len=*), PARAMETER :: routineN ='create_sh_env', &
      routineP = moduleN//':'//routineN
 
-     TYPE(section_vals_type), POINTER               :: optimization_section
+     TYPE(section_vals_type), POINTER               :: optimization_section, site_energy_section
      TYPE(section_vals_type), POINTER               :: wf_restart_section, decoherence_section
      TYPE(section_vals_type), POINTER               :: frozen_coupling_section,tresp_coupling_section
      integer                                        :: mat, mol
@@ -239,10 +239,14 @@ CONTAINS
     ! Tell the program if you want a multi-state Hamiltonian: meaning an
     ! Hamiltonian like the CT one, where the number of states is different from
     ! the number of active molecules. 
+
+     site_energy_section => section_vals_get_subs_vals(adiab_section,"METHOD_SITE_ENERGIES")
     ! COMMENT_SG: this keyword is temporary and in future forces calculation and
     ! adiabatic nacv calculations should be generalized to handle a multi-state
     ! hamiltoninan even without freezing the couplings
-    CALL section_vals_val_get(adiab_section,"MULTI_STATES",l_val=sh_env%multistate)
+    CALL section_vals_val_get(site_energy_section,"MULTI_STATES",l_val=sh_env%multistate)
+    CALL section_vals_val_get(site_energy_section,"ADD_COULOMB_POTENTIAL",l_val=sh_env%add_coulomb_pot)
+
     !sh_env%multistate = .False.
     !initialize couplings
     CALL section_vals_val_get(adiab_section,"METHOD_COUPLING",c_val=coupling_keyword)

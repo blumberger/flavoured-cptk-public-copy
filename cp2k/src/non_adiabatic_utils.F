@@ -72,6 +72,7 @@ MODULE non_adiabatic_utils
                   calc_frozen_H,                   &
                   calcforces_smart_grad,           &
                   !calcforces_smart_grad_test,           &
+                  add_coulomb_energy_to_CT,        &
                   calcforces_frozenH,              &
                   surf_hop_type,                   &
                   check_hop_attempt,               &
@@ -600,7 +601,6 @@ end subroutine calc_trsp_ab
 !> \date 02/05/2020
 !> author SG 
 !**********************************************************************************
-
   subroutine add_coulomb_energy_to_CT(sh_env, energies_tp, positions_com_tp)
    TYPE(sh_env_type)                              :: sh_env
    REAL(kind=dp), DIMENSION(:),  POINTER, &
@@ -758,9 +758,6 @@ end do
 
      integer                                        :: i, k, m, d, frz_ind
 
-
-     !TEST: positions_com_tp just used here to create diagonals
-     !CALL add_coulomb_energy_to_CT(sh_env, energies_tp, positions_com_tp)
 
      sh_env%H_tp(:,:) = cmplx(0.0D0, 0.0D0,dp)
      ! these loops are inefficients but do the job

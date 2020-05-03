@@ -440,14 +440,38 @@ CONTAINS
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
 
+    !-----------------------------------------------------------------------
+    !> start new sub2section METHOD_SITE_ENERGIES part ADIABATIC subsection
+    
+   NULLIFY(sub2section)
+   CALL section_create(sub2section,name="METHOD_SITE_ENERGIES",&
+        description="Defines the site energies,"//&
+                     "for example coulomb interaction in case of CT",&
+        n_keywords=1, n_subsections=0, repeats=.FALSE.)
+   CALL section_add_subsection(subsection,sub2section)
+
     CALL keyword_create(keyword, name="MULTI_STATES",&
          description="Tell the forces calculation if you have more non-degenerate states "//&
                      "than active molecules",&
          usage="false", &
          default_l_val=.FALSE., &
          lone_keyword_l_val=.FALSE.)
-    CALL section_add_keyword(subsection,keyword)
+    CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="ADD_COULOMB_POTENTIAL",&
+         description="add coulomb potential in case of CT "//&
+                     "states",&
+         usage="false", &
+         default_l_val=.FALSE., &
+         lone_keyword_l_val=.FALSE.)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+   !> releasing METHOD_SITE_ENERGIES subsection
+   CALL section_release(sub2section)
+
+!********************************************************************************
 
     !> start new sub2section METHOD_COUPLING, part of ADIABATIC subsection
     CALL keyword_create(keyword, name="METHOD_COUPLING",&
