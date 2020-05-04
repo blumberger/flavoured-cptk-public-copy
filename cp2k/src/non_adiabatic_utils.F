@@ -529,6 +529,7 @@ subroutine calc_grad_coup( crd1, crd2, charges1, charges2, grad1, Gaussian_charg
    ! each atom on molecule 1 will feel the gradients given by the sum of the
    ! atoms on molecule 2. See Note Overleaf for the equation. 
 
+   !NOTE: these are gradients, so the forces = -gradients
    grad1(:,:) = 0.0d0 !NB gradient is put to zero here to sum over the atoms of
                       !the other mol
    vect = 0.0d0
@@ -738,12 +739,13 @@ print *, "screening", screening
 !  print *, grad1(:,i)
 !end do
 
+     !> NOTE: the forces = -gradients 
      diagonal_F(1,init_atom_mol_i:final_atom_mol_i,state) = &
-                 diagonal_F(1,init_atom_mol_i:final_atom_mol_i,state)  + (1.0D0/screening)*grad1(1,:)
+                 diagonal_F(1,init_atom_mol_i:final_atom_mol_i,state)  - (1.0D0/screening)*grad1(1,:)
      diagonal_F(2,init_atom_mol_i:final_atom_mol_i,state) = &
-                 diagonal_F(2,init_atom_mol_i:final_atom_mol_i,state)  + (1.0D0/screening)*grad1(2,:)  
+                 diagonal_F(2,init_atom_mol_i:final_atom_mol_i,state)  - (1.0D0/screening)*grad1(2,:)  
      diagonal_F(3,init_atom_mol_i:final_atom_mol_i,state) = &
-                 diagonal_F(3,init_atom_mol_i:final_atom_mol_i,state)  + (1.0D0/screening)*grad1(3,:)  
+                 diagonal_F(3,init_atom_mol_i:final_atom_mol_i,state)  - (1.0D0/screening)*grad1(3,:)  
 
       ! instead of doing this update Fin like for site energies
       !! Full storage very inefficient: TO CHANGE
@@ -757,12 +759,13 @@ print *, "screening", screening
 !  print *, grad1(:,i)
 !end do
 
+     !> NOTE: the forces = -gradients 
      diagonal_F(1,init_atom_mol_k:final_atom_mol_k,state) = &
-                 diagonal_F(1,init_atom_mol_k:final_atom_mol_k,state)  + (1.0D0/screening)*grad1(1,:)
+                 diagonal_F(1,init_atom_mol_k:final_atom_mol_k,state)  - (1.0D0/screening)*grad1(1,:)
      diagonal_F(2,init_atom_mol_k:final_atom_mol_k,state) = &
-                 diagonal_F(2,init_atom_mol_k:final_atom_mol_k,state)  + (1.0D0/screening)*grad1(2,:)  
+                 diagonal_F(2,init_atom_mol_k:final_atom_mol_k,state)  - (1.0D0/screening)*grad1(2,:)  
      diagonal_F(3,init_atom_mol_k:final_atom_mol_k,state) = &
-                 diagonal_F(3,init_atom_mol_k:final_atom_mol_k,state)  + (1.0D0/screening)*grad1(3,:)  
+                 diagonal_F(3,init_atom_mol_k:final_atom_mol_k,state)  - (1.0D0/screening)*grad1(3,:)  
 
       ! instead of doing this update Fin like for site energies
       !! Full storage very inefficient: TO CHANGE
