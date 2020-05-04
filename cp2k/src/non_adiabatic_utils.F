@@ -179,6 +179,10 @@ END SUBROUTINE calc_coms_and_nlist
 !          paper.
 !> \note This subroutine has not been tested for degeneracy, but it should be
 !        general enough to handle it.
+!> \note AOM forces convert_nacv is passed as input and is bnegative so forces = -grad
+!        TRESP are passed as grad and so the convert_grad_to_forces = -1 so that
+!        forces = -grad  
+!        DIAGONAL forces are already -grad and so no need to charge their sign
 !> \author SG [taken from calc_hop_nacv_aom of AC]
 !**********************************************************************************
 SUBROUTINE calc_hop_nacv_approx(sh_env, diagonal_F, C, active_system_info, &
@@ -209,7 +213,7 @@ SUBROUTINE calc_hop_nacv_approx(sh_env, diagonal_F, C, active_system_info, &
         integer                                                  :: i, j, mat, d,m 
         REAL(KIND=dp), dimension(:,:), allocatable               :: F_1, F_11
         LOGICAL, dimension(:), allocatable                       :: ext_pres
-        REAL(KIND=dp)                                            :: my_convert_nacv 
+        REAL(KIND=dp)                                            :: convert_grad_to_forces 
         LOGICAL                                                  :: my_frozen_c
 
         !COMMENT_SG This subrotine is practically a copy of the calcforces and
@@ -290,17 +294,17 @@ SUBROUTINE calc_hop_nacv_approx(sh_env, diagonal_F, C, active_system_info, &
                          IF (i.ne.num_mol) THEN
                             IF (PRESENT(convert_nacv)) THEN 
                                 !grandient in case of AOM formalism
-                                my_convert_nacv = convert_nacv
+                                convert_grad_to_forces = convert_nacv
                             ELSE
                                 !gradient for a genaral H
-                                my_convert_nacv = 1.0D0  ! no scaling factor since we
+                                convert_grad_to_forces = -1.0D0  ! no scaling factor since we
                                                       ! use gradient directly from other methods
                             END IF
                          ! Of diagonal term, only for active atom j present in
                          ! molecule num_mol
                          !> Note this equation is a generalization of calcforces
                          !one for two different adiabatic states old and new
-                         F_11(d,j) = F_11(d,j) + diff_energy * my_convert_nacv*nacv(d, orb*(i-1)+m, num_j) * (&
+                         F_11(d,j) = F_11(d,j) + diff_energy * convert_grad_to_forces*nacv(d, orb*(i-1)+m, num_j) * (&
                                           C(orb*(num_mol-1)+m, orb*(new_state-1)+m) * C(orb*(i-1)+m, orb*(old_state-1)+m) +   &
                                           C(orb*(num_mol-1)+m, orb*(old_state-1)+m) * C(orb*(i-1)+m,orb*(new_state-1)+m) )
                         
@@ -425,6 +429,8 @@ END SUBROUTINE calc_hop_nacv_approx
                           !test to recover frozen coup for a chain:
                           !sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0,0.0011024789,dp)
 
+                          !> CAREFULL: forces will be opposite to grad_tresp
+                             
                           !> For the gradient in the case of TrESP (as it was
                           !for nacv in case of AOM) the idea is that the
                           !gradient on atom I are non-zero only if this atom
@@ -493,6 +499,18 @@ END SUBROUTINE calc_hop_nacv_approx
 
 ! COMMENT_SG this subroutine is just a replication of the one below, you should
 ! merge them together
+!**********************************************************************************
+!> \brief calculates coulomb interaction gradients ( this could be TRESP or ESP
+!        charges. 
+!> I have checked this subroutine against an external code and discuss with AC
+!         as well
+!> \param Gaussian_charges is a logical to be switched to True when TRESP
+!        charges have been obtained by Gaussian09 or 16 codes, as these charges have to
+!         be divided by sqrt(2)
+!> \param grad1, CAREFULL this is a gradient, so the forces must be opposite sign: 
+!         forces = -grad1
+!> \author SG
+!**********************************************************************************
 subroutine calc_grad_coup( crd1, crd2, charges1, charges2, grad1, Gaussian_charges)
 
    real(kind=dp), allocatable, dimension(:,:), intent(in)   :: crd1, crd2
@@ -542,7 +560,7 @@ subroutine calc_grad_coup( crd1, crd2, charges1, charges2, grad1, Gaussian_charg
          grad1(2,t) =  grad1(2,t) + ((char1(t)*char2(j))/(dist*dist*dist))*vect(2)
          grad1(3,t) =  grad1(3,t) + ((char1(t)*char2(j))/(dist*dist*dist))*vect(3)
       end do
-      grad1(:,t) = -grad1(:,t)
+      grad1(:,t) = -grad1(:,t) ! this minus comes from \nabla (1/|r|) = -\vect{r}/|r|^3
 !print *, "grad", grad1(:,t)
    end do
 !print *, "grad", grad1(:,:)
@@ -1017,9 +1035,13 @@ end subroutine calc_hop_nacv_frozen_H
 !        degeneracy present). With this subroutine like it is, one cannot
 !        calculate the forces for a multi-phase Hamiltonian like the CT block
 !        for example, where the total number of states is
-!        (N-donor+N-acceptor)^2. This is becuase the off-diagonals may be stored differently 
+!        (N-donor+N-acceptor). This is becuase the off-diagonals may be stored differently 
 !        and the nmol index should be calculated with a different loop.
 !>       A huge part of this subroutine has been taken from AC's calcforces_aom
+!> \note AOM forces convert_nacv is passed as input and is bnegative so forces = -grad
+!        TRESP are passed as grad and so the convert_grad_to_forces = -1 so that
+!        forces = -grad  
+!        DIAGONAL forces are already -grad and so no need to charge their sign
 !> \author SG  
 !**********************************************************************************
 subroutine calcforces_smart_grad(state, C, Fin, forces_adiab, & 
@@ -1045,7 +1067,7 @@ subroutine calcforces_smart_grad(state, C, Fin, forces_adiab, &
         integer                                     :: i, j,  d, m
         INTEGER                                     :: natom
         INTEGER                                     :: num_mol, num_j
-        REAL(KIND=dp)                               :: my_convert_nacv 
+        REAL(KIND=dp)                               :: convert_grad_to_forces 
         LOGICAL                                     :: my_frozen_c
 
         natom = SIZE(Fin,2)
@@ -1100,16 +1122,17 @@ subroutine calcforces_smart_grad(state, C, Fin, forces_adiab, &
                          IF (i.ne.num_mol) THEN
                              IF (PRESENT(convert_nacv)) THEN
                                 !> Forces in case of AOM formalism
-                                my_convert_nacv = convert_nacv ! to convert the FOB NACV
+                                convert_grad_to_forces = convert_nacv ! to convert the FOB NACV
                              ELSE 
                                 !> Forces in case of general gradients (smartly stored as
                                 !> nacv in AOM case)
-                                my_convert_nacv = 1.0D0 !gradient are already a negative object so no minus sign here
+                                convert_grad_to_forces = -1.0D0 !gradient are passed as input so off-diagonals are
+                                                                ! -grad
                              END IF
 
                              forces_adiab(d,j) = forces_adiab(d,j) + &
                                    ((C(orb*(num_mol-1)+m,orb*(state-1)+m))*&
-                                     nacv(d, orb*(i-1)+m, num_j)*C(orb*(i-1)+m,orb*(state-1)+m))*my_convert_nacv*2.0D0
+                                     nacv(d, orb*(i-1)+m, num_j)*C(orb*(i-1)+m,orb*(state-1)+m))*convert_grad_to_forces*2.0D0
                          ENDIF
                       ENDIF
                    END IF
@@ -4622,6 +4645,10 @@ close (21)
 ! So the smartest way to store the nacv array (diagonal forces) is just to not
 ! consider those zeros. This subroutine would check if storing the full nacv
 ! would give the same resulst. In the tested case of Tresp, the answer was yes. 
+!> \note AOM forces convert_nacv is passed as input and is bnegative so forces = -grad
+!        TRESP are passed as grad and so the convert_grad_to_forces = -1 so that
+!        forces = -grad  
+!        DIAGONAL forces are already -grad and so no need to charge sign
 subroutine calcforces_smart_grad_test(state, C, Fin, forces_adiab, & 
                   ext_pres,  active_system_info, orb, full_grad, convert_nacv, frozen_c)
 
@@ -4645,7 +4672,7 @@ subroutine calcforces_smart_grad_test(state, C, Fin, forces_adiab, &
         integer                                     :: i, j,  d, l
         INTEGER                                     :: natom
         INTEGER                                     :: num_mol, num_j
-        REAL(KIND=dp)                               :: my_convert_nacv 
+        REAL(KIND=dp)                               :: convert_grad_to_forces 
         LOGICAL                                     :: my_frozen_c
 
         natom = SIZE(Fin,2)
@@ -4692,7 +4719,7 @@ subroutine calcforces_smart_grad_test(state, C, Fin, forces_adiab, &
                    
                  IF (ext_pres(j)) THEN
                    do l=1, SIZE(active_system_info, 2)
-                      my_convert_nacv = 1.0D0
+                      convert_grad_to_forces = -1.0D0
                       if (l .ne. i) THEN 
                          forces_adiab(d,j) = forces_adiab(d,j) + &
                             (C(i, state)*&
@@ -4713,16 +4740,16 @@ subroutine calcforces_smart_grad_test(state, C, Fin, forces_adiab, &
             !             IF (i.ne.num_mol) THEN
             !                 IF (PRESENT(convert_nacv)) THEN
             !                    !> Forces in case of AOM formalism
-            !                    my_convert_nacv = convert_nacv ! to convert the FOB NACV
+            !                    convert_grad_to_forces = convert_nacv ! to convert the FOB NACV
             !                 ELSE 
             !                    !> Forces in case of general gradients (smartly stored as
             !                    !> nacv in AOM case)
-            !                    my_convert_nacv = 1.0D0 !gradient are already a negative object so no minus sign here
+            !                    convert_grad_to_forces = 1.0D0 !gradient are already a negative object so no minus sign here
             !                 END IF
 
             !                 forces_adiab(d,j) = forces_adiab(d,j) + &
             !                       ((C(orb*(num_mol-1)+m,orb*(state-1)+m))*&
-            !                         nacv(d, orb*(i-1)+m, num_j)*C(orb*(i-1)+m,orb*(state-1)+m))*my_convert_nacv*2.0D0
+            !                         nacv(d, orb*(i-1)+m, num_j)*C(orb*(i-1)+m,orb*(state-1)+m))*convert_grad_to_forces*2.0D0
             !             ENDIF
             !          ENDIF
             !       END IF
