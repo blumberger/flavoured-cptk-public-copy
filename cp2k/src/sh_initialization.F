@@ -232,11 +232,12 @@ CONTAINS
     !sh_env%total_active_atoms = COUNT(sh_env%ext_pres)
     !print *, "FOB_SH| EXT PRESS:", sh_env%ext_pres
     !print *, "TOT ACTIVE ATOMS", COUNT(sh_env%ext_pres)
-    print *, "active sys info", sh_env%active_system_info(1, :)
-    print *, "active sys info", sh_env%active_system_info(2, :)
 
-    print *, "full sys info", sh_env%full_system_info(1, :)
-    print *, "full sys info", sh_env%full_system_info(2, :)
+    !print *, "active sys info", sh_env%active_system_info(1, :)
+    !print *, "active sys info", sh_env%active_system_info(2, :)
+
+    !print *, "full sys info", sh_env%full_system_info(1, :)
+    !print *, "full sys info", sh_env%full_system_info(2, :)
     ! Tell the program if you want a multi-state Hamiltonian: meaning an
     ! Hamiltonian like the CT one, where the number of states is different from
     ! the number of active molecules. 
