@@ -650,7 +650,6 @@ end subroutine calc_trsp_ab
    real(kind=dp)                                   :: coulomb_coup, screening  
    logical                                         :: Gaussian_charges
    real(kind=dp),  dimension(:,:), allocatable     :: grad1
-   !real(kind=dp),  dimension(:,:, :), allocatable  :: grad_coulomb
    integer                                         :: atoms_per_donor, atoms_per_acceptor
    TYPE(cp_sll_val_type), POINTER                  :: list_tresp
    integer, dimension(:), ALLOCATABLE              :: ext_elements1, ext_elements2 
@@ -680,15 +679,8 @@ end subroutine calc_trsp_ab
    CALL section_vals_val_get(site_energy_section,"DIELECTRIC_SCREENING",&
              r_val=screening) 
   
-   !screening = 3.0D0 ! take this from input HARDCODED
-print *, "screening", screening
 
    ALLOCATE(CT_states_info(2,SIZE(energies_tp))) 
-   !hardcoded states 
-!   ALLOCATE(donor_index(3))   !!!!! HARDCODED
-!   ALLOCATE(acceptor_index(3))  !!! HARDCODED
-!   donor_index = (/3,4,5/)
-!   acceptor_index = (/6,7,8/)
 
    Gaussian_charges = sh_env%Gaussian_charges 
    
@@ -703,14 +695,6 @@ print *, "screening", screening
       end do
    end do
 
-
-   !*******************!!!!!!!!***************************
-   ! HARDCODED: do not do this here but only once in sh_env, and most
-   ! importantly find a better way to store this huge array for big systems,
-   ! either recalculating forces on the fly or just store the non-zero elements
-   ! and get this info from full_system_info
-!   ALLOCATE(grad_coulomb(3,SIZE(CT_states_info,2),248))
-!   grad_coulomb = 0.0D0
 
 !print *, "CT_states_info", CT_states_info
    !loop over CT states and get the atoms and the coulomb interaction between
@@ -744,12 +728,13 @@ print *, "screening", screening
 
       !! calc coulomb iteraction for a given pair of molecules
       CALL calc_trsp_ab(crd_i, crd_k, charges1, charges2, coulomb_coup, Gaussian_charges)  
-      print *, "FOBSH| Coulob pot:", coulomb_coup
+      !print *, "FOBSH| Coulob pot:", coulomb_coup
       
       !> site energies are modified by the coulomb potential 
       energies_tp(state) = energies_tp(state) + (1.0D0/screening)*coulomb_coup 
     
-      !> calculate the gradients
+      !> calculate the gradients: from the second mol (k) onto the atoms of the
+      !first mol (i)
       CALL calc_grad_coup(crd_i, crd_k, charges1, charges2, grad1, Gaussian_charges)
 
 !print *, "grad on i from k"
@@ -757,7 +742,8 @@ print *, "screening", screening
 !  print *, grad1(:,i)
 !end do
 
-     !> NOTE: the forces = -gradients 
+     !> NOTE: the forces = -gradients, that's way there is a minus sign. Also
+     !remember that the  diagonal_F from FIST are already opposite to grad. 
      diagonal_F(1,init_atom_mol_i:final_atom_mol_i,state) = &
                  diagonal_F(1,init_atom_mol_i:final_atom_mol_i,state)  - (1.0D0/screening)*grad1(1,:)
      diagonal_F(2,init_atom_mol_i:final_atom_mol_i,state) = &
@@ -765,12 +751,9 @@ print *, "screening", screening
      diagonal_F(3,init_atom_mol_i:final_atom_mol_i,state) = &
                  diagonal_F(3,init_atom_mol_i:final_atom_mol_i,state)  - (1.0D0/screening)*grad1(3,:)  
 
-      ! instead of doing this update Fin like for site energies
-      !! Full storage very inefficient: TO CHANGE
-      !grad_coulomb(1,state,init_atom_mol_i:final_atom_mol_i) = grad1(1,:)  
-      !grad_coulomb(2,state,init_atom_mol_i:final_atom_mol_i) = grad1(2,:)  
-      !grad_coulomb(3,state,init_atom_mol_i:final_atom_mol_i) = grad1(3,:)  
 
+      !> calculate the gradients: from the second mol (i) onto the atoms of the
+      !first mol (k)
       CALL calc_grad_coup(crd_k, crd_i, charges2, charges1, grad1, Gaussian_charges)
 !print *, "grad on k from i"
 !do i=1,SIZE(grad1,2)
@@ -785,22 +768,13 @@ print *, "screening", screening
      diagonal_F(3,init_atom_mol_k:final_atom_mol_k,state) = &
                  diagonal_F(3,init_atom_mol_k:final_atom_mol_k,state)  - (1.0D0/screening)*grad1(3,:)  
 
-      ! instead of doing this update Fin like for site energies
-      !! Full storage very inefficient: TO CHANGE
-      !grad_coulomb(1,state,init_atom_mol_k:final_atom_mol_k) = grad1(1,:)  
-      !grad_coulomb(2,state,init_atom_mol_k:final_atom_mol_k) = grad1(2,:)  
-      !grad_coulomb(3,state,init_atom_mol_k:final_atom_mol_k) = grad1(3,:)  
-       
     
       DEALLOCATE(crd_i,crd_k)
       
    end do 
 
-!print *, "S1", grad_coulomb(1,1,:)
-            
    DEALLOCATE(charges1,charges2,ext_elements1,ext_elements2)
    DEALLOCATE(CT_states_info) 
-!   DEALLOCATE(grad_coulomb)
         
   end subroutine 
 
@@ -922,7 +896,7 @@ end subroutine calcforces_frozenH
 !> \brief This subroutine is used only when there are more non-degenerate states
 !         than the number of active molecules and the loop is over number of
 !         states. So this subrotine can handle the CT Hamiltonian with 
-!         (NdonorxNacceptor)^2 states. However it cannot work with fluctuating 
+!         (NdonorxNacceptor) states. However it cannot work with fluctuating 
 !         couplings becuase for now the off-diagonal forces are set to zero.
 !         Since couplings are frozen. 
 !\author  SG
