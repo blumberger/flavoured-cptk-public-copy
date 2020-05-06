@@ -133,6 +133,9 @@ MODULE force_env_methods
   USE molecule_kind_types,             ONLY: molecule_kind_type
   USE molecule_types_new,              ONLY: molecule_type,&
                                                 get_molecule
+  USE sh_site_energies_methods,        ONLY: add_energies_forces_mem_saver, &
+                                             add_energies_forces 
+
 #include "./base/base_uses.f90"
 !> CHANGE_AC
 !> 15-12-11
@@ -1218,13 +1221,8 @@ CONTAINS
               END IF
            ENDDO 
            !print*, "AC_energies", energies 
-!           CALL section_vals_val_get(force_env_section, "DO_DECOMP", &
-!                                         l_val=do_decomposition)
-!print *, "do_decomposition", do_decompositioin
-! SAM COMMENT: I could not use the previous keyword because for some reason was
-! false
-           !TOFINISH
-           !CALL fist_env_get(fist_env)
+
+
 
 !           PRINT *, "dO decomp = ", ALLOCATED(thermo%pot_list) 
            IF (ALLOCATED(thermo%pot_list)) THEN
@@ -1300,190 +1298,5 @@ CONTAINS
     END IF
     CALL cp_print_key_finished_output(unit_nr,logger,mixed_section,"PRINT%DIPOLE")
   END SUBROUTINE mixed_energy_forces
-
-
-
- SUBROUTINE add_energies_forces_mem_saver( energies_1_mol_list, energies, intra_forces_global, &
-                                              my_mol_index, &
-                                              global_forces, my_energies, & 
-                                            molecule_kind_set, local_molecules, molecule_set, mixed_env, my_itimes)
-
-   TYPE(mixed_environment_type), OPTIONAL, &
-      POINTER                                :: mixed_env
-   TYPE(mixed_force_type), DIMENSION(:), &
-     POINTER                                :: global_forces
-   REAL(KIND=dp), DIMENSION(:), POINTER     :: energies
-   REAL(KIND=dp), DIMENSION(:), POINTER     :: my_energies
-   TYPE(molecule_kind_type), DIMENSION(:), POINTER    :: molecule_kind_set
-   TYPE(distribution_1d_type), POINTER                :: local_molecules
-   TYPE(molecule_type), DIMENSION(:), POINTER         :: molecule_set
-   REAL(KIND=dp), ALLOCATABLE                 :: intra_forces_global(:,:,:) 
-   REAL(KIND=dp), ALLOCATABLE               :: energies_1_mol_list(:,:)
-   INTEGER, ALLOCATABLE                     :: used_mols(:)
-   !INTEGER                                  :: act_atoms
-   INTEGER, DIMENSION(:), POINTER           :: my_mol_index !CHANGE SAM
-   INTEGER, POINTER                         :: my_itimes !CHANGE_AC
-
-   TYPE(molecule_kind_type), POINTER        :: molecule_kind
-   TYPE(molecule_type), POINTER             :: molecule  
-
-   INTEGER :: i, natom, my_mol, count_idx, count2, count3, j
-   INTEGER :: imol, nkind,  nmol_per_kind,  ikind, first_atom, &
-              last_atom, aoi!, test
-
-   NULLIFY( my_energies)
-!SAM COMMENT: MAYBE FIND A BETTER WAY TO ALLOCATE THIS
-   ALLOCATE(my_energies(SIZE(energies_1_mol_list(1,:))))
-  !> WARNING: here we assume that all force evals have the same number of atoms
-  natom = SIZE(global_forces(1)%forces(:,:), 2)
-
-  ALLOCATE(used_mols(SIZE(energies_1_mol_list(1,:))))
- !> we do F allocation just at the first step and never again just to NOT
- !allocate and deallocate this big array at every step. NOTE that this array is
- !now never deallocated and just deallocated by the compiler at the very end.
- !One should probably write a subroutine that deallocate all allocatable just
- !this at the very end of cp2k
-  if(my_itimes .eq. 0) then
-     ALLOCATE(mixed_env%F(3,natom, SIZE(energies_1_mol_list(1,:))))
-  end if
-
-  count2 = 1
-  count3 = 0
-  used_mols(:) = -1
-
-    count_idx = 0
-   DO i = 1, SIZE(energies_1_mol_list(1,:)) !loop over num of adiabatic states 
-      !print *, "INTRA+LJ", energies(1), "   ", energies(2)
-      !> we create site energies from the 2 force_evals sections
-      my_energies(i) = energies(1) + energies_1_mol_list(2,i) - energies_1_mol_list(1,i)
-
-!      ALLOCATE(my_global_forces(i)%forces( 3,natom))
-!      my_global_forces(i)%forces = global_forces(1)%forces
- 
-      !> we allocate diagonal forces array. All the atoms for a give state i
-      !assume the value of the neutral force_field that contains: intra +
-      !nonbonded interactions
-      mixed_env%F(:,:,i) = global_forces(1)%forces
-      nkind = SIZE ( molecule_kind_set )
-      count3 = 0
-      MOL: DO ikind = 1, nkind !> loop over kind of molecules (the kind depends on the
-                               !> different names given to the residues in the topology file)
-          nmol_per_kind = local_molecules % n_el ( ikind )
-          !> nmol_per_kind depends by the topology file
-          DO imol = 1, nmol_per_kind !loop over molecules of a given kind
-              my_mol = local_molecules % list ( ikind ) % array ( imol )
-              molecule => molecule_set ( my_mol )
-              molecule_kind => molecule % molecule_kind
-              !IF (ANY(my_mol_index==my_mol) .and. count3 .eq. 0) THEN
-              DO j = 1, SIZE(my_mol_index)
-                   IF ( my_mol_index(j)==my_mol  .and. my_mol_index(j) /= used_mols(j) .and. count3==0 ) THEN
-                    CALL get_molecule ( molecule, first_atom=first_atom, last_atom=last_atom )
-                    DO aoi=first_atom, last_atom !loop over atoms of interest
-                       count_idx = count_idx + 1
-                       !print *, "force_charge_to_add_xyz", intra_forces_global(2,:,count_idx)
-                       !print *, "force_neutral_to_add_xyz", intra_forces_global(1,:,count_idx)
-                       !print *, "force_already_there", global_forces(1)%forces(:,aoi)
-                       !my_global_forces(i)%forces(:, aoi) = my_global_forces(i)%forces(:, aoi) + &
-                       !           intra_forces_global(2,:,count_idx) - intra_forces_global(1,:,count_idx)
-                       !> Additiona and subtruction scheme to use just two
-                       !Force_eval section instead of N and save a huge amount
-                       !of memory
-                       mixed_env%F(:,aoi,i) = mixed_env%F(:,aoi,i) + &
-                                  intra_forces_global(2,:,count_idx) - intra_forces_global(1,:,count_idx)
-                    END DO
-                    used_mols(count2) = my_mol
-                    count3 = 1
-                    count2 = count2 + 1  
-                   END IF
-              END DO
-          END DO
-      END DO MOL
-   END DO
- DEALLOCATE(used_mols)
-
-  END SUBROUTINE add_energies_forces_mem_saver
-
-  SUBROUTINE add_energies_forces(energies, global_forces, my_energies,  do_speedup_lj, do_speedup_intra, &
-                                                            mixed_env, my_itimes)
-
-!TYPE(force_env_type), POINTER                :: force_env
-
-    TYPE(mixed_force_type), DIMENSION(:), &
-      POINTER                                :: global_forces
-   TYPE(mixed_environment_type), OPTIONAL, &
-      POINTER                                :: mixed_env
-    REAL(KIND=dp), DIMENSION(:), POINTER     :: energies
-!    TYPE(mixed_force_type), DIMENSION(:), &
-!      POINTER                                :: my_global_forces
-    REAL(KIND=dp), DIMENSION(:), POINTER     :: my_energies
-    INTEGER, POINTER                         :: my_itimes 
-
-!    TYPE(force_env_type), POINTER            :: sub_force_envs
-!    TYPE(fist_env_type), POINTER             :: charge_fist_env, &
-!                                                neutral_fist_env
-!    TYPE(fist_energy_type), POINTER          :: charged_thermo, &
-!                                                neutral_thermo
-
-
-    LOGICAL, INTENT(IN) :: do_speedup_lj, do_speedup_intra
-
-    INTEGER :: i, natom, number_state
-
-    
-    NULLIFY( my_energies)
-    if ((do_speedup_lj).AND.(.NOT.(do_speedup_intra))) then
-       !ALLOCATE(my_global_forces(SIZE(energies)-1))
-      !> WARNING: here we assume that all force evals have the same number of atoms
-       natom = SIZE(global_forces(1)%forces(:,:), 2)
-       if(my_itimes .eq. 0) then
-           ALLOCATE(mixed_env%F(3,natom, SIZE(energies)-1))
-       end if
-       ALLOCATE(my_energies(SIZE(energies)-1))
-       DO i = 2, SIZE(energies)
-          my_energies(i-1) = energies(i) + energies(1)
-          natom = SIZE(global_forces(i)%forces(:,:), 2)
-          !ALLOCATE(my_global_forces(i-1)%forces( 3,natom))
-          mixed_env%F(:,:,i-1) = global_forces(i)%forces + global_forces(1)%forces
-!          my_global_forces(i-1)%forces = global_forces(i)%forces + global_forces(1)%forces
-       ENDDO
-
-    else if ((do_speedup_lj).AND.(do_speedup_intra)) then
-       number_state = (SIZE(energies)-1) /2
-       !ALLOCATE(my_global_forces( number_state ))
-      !> WARNING: here we assume that all force evals have the same number of atoms
-       natom = SIZE(global_forces(1)%forces(:,:), 2)
-       if(my_itimes .eq. 0) then
-           ALLOCATE(mixed_env%F(3,natom, number_state))
-       end if
-       ALLOCATE(my_energies(  number_state ))
-       DO i = 1, number_state
-          my_energies(i) =  energies(1) + energies(2*i) - energies(2*i + 1)
-          natom = SIZE(global_forces(i)%forces(:,:), 2)
-!          ALLOCATE(my_global_forces(i)%forces( 3,natom))
-           mixed_env%F(:,:,i) = global_forces(1)%forces + global_forces(2*i)%forces - global_forces(2*i + 1)%forces
-!          my_global_forces(i)%forces =  global_forces(1)%forces + global_forces(2*i)%forces - global_forces(2*i + 1)%forces
-       ENDDO
-
-    else if ((.NOT.(do_speedup_lj)).AND.(.NOT.(do_speedup_intra))) then
-       !ALLOCATE(my_global_forces(SIZE(energies)))
-      !> WARNING: here we assume that all force evals have the same number of atoms
-       natom = SIZE(global_forces(1)%forces(:,:), 2)
-       if(my_itimes .eq. 0) then
-           ALLOCATE(mixed_env%F(3,natom, SIZE(energies)))
-       end if
-       ALLOCATE(my_energies(SIZE(energies)))
-       DO i = 1, SIZE(energies)
-          my_energies(i) = energies(i)
-          natom = SIZE(global_forces(i)%forces(:,:), 2)
-!          ALLOCATE(my_global_forces(i)%forces( 3,natom))
-          mixed_env%F(:,:,i) = global_forces(i)%forces
-!          my_global_forces(i)%forces = global_forces(i)%forces
-        ENDDO
-    ELSE
-        CPABORT("Cannot do speed-up intra without speedup-lj")
-    ENDIF
-
-  END SUBROUTINE add_energies_forces
-
 
 END MODULE force_env_methods
