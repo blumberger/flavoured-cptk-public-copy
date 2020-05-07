@@ -133,7 +133,7 @@ MODULE force_env_methods
   USE molecule_kind_types,             ONLY: molecule_kind_type
   USE molecule_types_new,              ONLY: molecule_type,&
                                                 get_molecule
-  USE sh_site_energies_methods,        ONLY: add_energies_forces_mem_saver, &
+  USE sh_site_energies_methods,        ONLY: add_energies_forces_mem_saver_V2, &
                                              add_energies_forces, &
                                              create_ext_press_list 
 
@@ -1240,7 +1240,6 @@ CONTAINS
 print *, "natom", natom
 print *, my_mol_index
 print *, "TIMESSS", my_itimes
-         IF (my_itimes .eq. 0) THEN
             !> create the list of active molecules if not present in DECOMP
             !and the array of active atoms: ext_pres, which is use for kinetic energy
             !calculation of the active subsystem.
@@ -1259,7 +1258,6 @@ print *, "active sys info", active_system_info(2, :)
 
 print *, "full sys info", full_system_info(1, :)
 print *, "full sys info", full_system_info(2, :)
-         END IF
 
 !           PRINT *, "dO decomp = ", ALLOCATED(thermo%pot_list) 
            IF (ALLOCATED(thermo%pot_list)) THEN
@@ -1268,10 +1266,14 @@ print *, "full sys info", full_system_info(2, :)
                !                   i_vals=my_mol_index)
                !print *, "my_mol_index", my_mol_index
 
-                CALL add_energies_forces_mem_saver( energies_1_mol_list, energies, intra_forces_global, &
-                                                      my_mol_index, &
+                CALL add_energies_forces_mem_saver_V2( energies_1_mol_list, energies, intra_forces_global, &
                                                       global_forces, my_energies, &
-                                            molecule_kind_set, local_molecules, molecule_set, mixed_env, my_itimes)
+                                                      active_system_info, &
+                                                       mixed_env, my_itimes)
+                !CALL add_energies_forces_mem_saver( energies_1_mol_list, energies, intra_forces_global, &
+                !                                      my_mol_index, &
+                !                                      global_forces, my_energies, &
+                !                            molecule_kind_set, local_molecules, molecule_set, mixed_env, my_itimes)
                !COMMENT_SG: instead of passing all the variables that come from
                !cp_subsys_get, I think one could just pass force_env and call
                !the same subroutine inside  adiab_fssh_routines
