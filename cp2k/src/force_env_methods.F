@@ -1240,14 +1240,14 @@ CONTAINS
 print *, "natom", natom
 print *, my_mol_index
 print *, "TIMESSS", my_itimes
-            !> create the list of active molecules if not present in DECOMP
-            !and the array of active atoms: ext_pres, which is use for kinetic energy
-            !calculation of the active subsystem.
-            CALL create_ext_press_list(molecule_kind_set, local_molecules, molecule_set, natom, &
-                                        my_mol_index,  ext_pres, & 
-                                        active_system_info, full_system_info=full_system_info)
-            !> sh_env%ext_pres will be overwritten in AOM case becuase active molecules
-            !may still have inactive atoms (this feature is used for further speed-up)
+           !> create the list of active molecules if not present in DECOMP
+           !and the array of active atoms: ext_pres, which is use for kinetic energy
+           !calculation of the active subsystem.
+           CALL create_ext_press_list(molecule_kind_set, local_molecules, molecule_set, natom, &
+                                       my_mol_index,  ext_pres, & 
+                                       active_system_info, full_system_info=full_system_info)
+           !> sh_env%ext_pres will be overwritten in AOM case becuase active molecules
+           !may still have inactive atoms (this feature is used for further speed-up)
 
 !sh_env%total_active_atoms = COUNT(sh_env%ext_pres)
 print *, "FOB_SH| EXT PRESS:", ext_pres
@@ -1274,6 +1274,7 @@ print *, "full sys info", full_system_info(2, :)
                 !                                      my_mol_index, &
                 !                                      global_forces, my_energies, &
                 !                            molecule_kind_set, local_molecules, molecule_set, mixed_env, my_itimes)
+
                !COMMENT_SG: instead of passing all the variables that come from
                !cp_subsys_get, I think one could just pass force_env and call
                !the same subroutine inside  adiab_fssh_routines
