@@ -654,29 +654,31 @@ end subroutine calc_trsp_ab
    TYPE(cp_sll_val_type), POINTER                  :: list_tresp
    integer, dimension(:), ALLOCATABLE              :: ext_elements1, ext_elements2 
    LOGICAL, DIMENSION(:), POINTER                 :: active_logical1, active_logical2
-   TYPE(section_vals_type), POINTER               :: site_energy_section
+   TYPE(section_vals_type), POINTER               :: site_energy_section,ct_block 
 
 
    NULLIFY(site_energy_section)
+   NULLIFY(ct_block)
    NULLIFY(list_tresp)
    site_energy_section => section_vals_get_subs_vals(adiab_section,"METHOD_SITE_ENERGIES")
+   ct_block => section_vals_get_subs_vals(site_energy_section,"CT_BLOCK")
 
-   CALL section_vals_val_get(site_energy_section,"N_DONOR_ATOMS",&
+   CALL section_vals_val_get(ct_block,"N_DONOR_ATOMS",&
              i_val=atoms_per_donor) 
-   CALL section_vals_val_get(site_energy_section,"N_ACCEPTOR_ATOMS",&
+   CALL section_vals_val_get(ct_block,"N_ACCEPTOR_ATOMS",&
              i_val=atoms_per_acceptor) 
-   CALL section_vals_list_get(site_energy_section,"_DEFAULT_KEYWORD_",list=list_tresp)
+   CALL section_vals_list_get(ct_block,"_DEFAULT_KEYWORD_",list=list_tresp)
    CALL read_list_tresp(atoms_per_donor, list_tresp, ext_elements1, &
                                            active_logical1, charges1)
    CALL read_list_tresp(atoms_per_acceptor, list_tresp, ext_elements2, &
                                            active_logical2, charges2)
 
-   CALL section_vals_val_get(site_energy_section,"INDEX_DONOR_MOLS",&
+   CALL section_vals_val_get(ct_block,"INDEX_DONOR_MOLS",&
                 i_vals=donor_index)
-   CALL section_vals_val_get(site_energy_section,"INDEX_ACCEPTOR_MOLS",&
+   CALL section_vals_val_get(ct_block,"INDEX_ACCEPTOR_MOLS",&
                 i_vals=acceptor_index)
 
-   CALL section_vals_val_get(site_energy_section,"DIELECTRIC_SCREENING",&
+   CALL section_vals_val_get(ct_block,"DIELECTRIC_SCREENING",&
              r_val=screening) 
   
 

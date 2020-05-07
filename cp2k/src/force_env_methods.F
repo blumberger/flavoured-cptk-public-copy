@@ -861,6 +861,7 @@ CONTAINS
 !> To create a new way to combine the force
 !> To get the adiabatic force 
     TYPE(section_vals_type), POINTER         :: adiab_section, optimization_section
+    TYPE(section_vals_type), POINTER         :: site_energy_section
     CHARACTER(LEN=default_string_length)     :: adiab_keyword
     TYPE(mixed_environment_type), POINTER    :: mixed_env
     TYPE(atomic_kind_list_type), POINTER     :: atomic_kinds
@@ -888,6 +889,7 @@ CONTAINS
     INTEGER, DIMENSION(:,:), ALLOCATABLE     :: full_system_info
     INTEGER, DIMENSION(:,:), ALLOCATABLE     :: active_system_info
     LOGICAL, DIMENSION(:), POINTER           :: ext_pres
+    LOGICAL                                  :: multistate
 
     NULLIFY(atomic_kinds, local_particles, molecule_set, molecule_kind_set, local_molecules)
 !> End CHANGE_AC and SAM
@@ -1261,10 +1263,18 @@ print *, "full sys info", full_system_info(2, :)
 
 !           PRINT *, "dO decomp = ", ALLOCATED(thermo%pot_list) 
            IF (ALLOCATED(thermo%pot_list)) THEN
-               !subsys_section => section_vals_get_subs_vals(force_env_section, "SUBSYS")
-               !CALL section_vals_val_get(subsys_section, "INDEX_MOL_DECOMP",& !CHANGE SAM
-               !                   i_vals=my_mol_index)
-               !print *, "my_mol_index", my_mol_index
+
+               site_energy_section => section_vals_get_subs_vals(adiab_section,"METHOD_SITE_ENERGIES")
+               ! this keyword determines if the number of states is larger then
+               ! the number of molecules in decomp (e.g. in case of CT states)
+               CALL section_vals_val_get(site_energy_section,"MULTI_STATES",l_val=multistate)
+               
+               !COMMENT_SG: Eventually at this point one could add a SELECT CASE
+               !for different FORCE_ENV add-sub schemes for FE-CT-CR Hamiltoninans
+               !IF (multistate) THEN 
+            
+               !ELSE
+
 
                 CALL add_energies_forces_mem_saver_V2( energies_1_mol_list, energies, intra_forces_global, &
                                                       global_forces, my_energies, &

@@ -443,7 +443,7 @@ CONTAINS
     !-----------------------------------------------------------------------
     !> start new sub2section METHOD_SITE_ENERGIES part ADIABATIC subsection
     
-   NULLIFY(sub2section)
+   NULLIFY(sub2section,sub3section)
    CALL section_create(sub2section,name="METHOD_SITE_ENERGIES",&
         description="Defines the site energies,"//&
                      "for example coulomb interaction in case of CT",&
@@ -459,31 +459,45 @@ CONTAINS
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
+
+    CALL keyword_create(keyword, name="BLOCK_TYPE",&
+         description="Determine the Block to use",&
+         usage="BLOCK_TYPE : CT_BLOCK",  type_of_var=char_t,&
+         n_var=-1)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+   CALL section_create(sub3section,name="CT_BLOCK",&
+        description="Defines the CT BLOCK,"//&
+                     "and the interactions",&
+        n_keywords=1, n_subsections=0, repeats=.FALSE.)
+   CALL section_add_subsection(sub2section,sub3section)
+
     CALL keyword_create(keyword, name="ADD_COULOMB_POTENTIAL",&
          description="add coulomb potential in case of CT "//&
                      "states",&
          usage="false", &
          default_l_val=.FALSE., &
          lone_keyword_l_val=.FALSE.)
-    CALL section_add_keyword(sub2section,keyword)
+    CALL section_add_keyword(sub3section,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="DIELECTRIC_SCREENING",&
          description="Dielectric epsilon",&
          usage="3.0 WITHOUT UNITS", type_of_var=real_t)
-    CALL section_add_keyword(sub2section,keyword)
+    CALL section_add_keyword(sub3section,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="N_DONOR_ATOMS",&
          description="Number of atoms per site",&
          usage="1", type_of_var=integer_t)
-    CALL section_add_keyword(sub2section,keyword)
+    CALL section_add_keyword(sub3section,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="N_ACCEPTOR_ATOMS",&
          description="Number of atoms per site",&
          usage="1", type_of_var=integer_t)
-    CALL section_add_keyword(sub2section,keyword)
+    CALL section_add_keyword(sub3section,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="_DEFAULT_KEYWORD_",&
@@ -491,23 +505,24 @@ CONTAINS
          "<p><tt>ATOMIC_KIND  LIST NO TRESP</tt></p>",&
          repeats=.TRUE., usage="{{String} {Int} {Int} {Real}}",&
          type_of_var=lchar_t)
-    CALL section_add_keyword(sub2section,keyword)
+    CALL section_add_keyword(sub3section,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="INDEX_DONOR_MOLS",&
          description='Specify the index in xys of mols', &
          usage="INDEX_DONOR_MOLS <INTEGER> .. <INTEGER>", &
          type_of_var=integer_t,  n_var=-1, default_i_vals=(/1/))
-    CALL section_add_keyword(sub2section,keyword)
+    CALL section_add_keyword(sub3section,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="INDEX_ACCEPTOR_MOLS",&
          description='Specify the index in xys of mols', &
          usage="INDEX_ACCEPTOR_MOLS <INTEGER> .. <INTEGER>", &
          type_of_var=integer_t,  n_var=-1, default_i_vals=(/1/))
-    CALL section_add_keyword(sub2section,keyword)
+    CALL section_add_keyword(sub3section,keyword)
     CALL keyword_release(keyword)
 
+   CALL section_release(sub3section)
    !> releasing METHOD_SITE_ENERGIES subsection
    CALL section_release(sub2section)
 

@@ -97,6 +97,7 @@ CONTAINS
      routineP = moduleN//':'//routineN
 
      TYPE(section_vals_type), POINTER               :: optimization_section, site_energy_section
+     TYPE(section_vals_type), POINTER               :: ct_block
      TYPE(section_vals_type), POINTER               :: wf_restart_section, decoherence_section
      TYPE(section_vals_type), POINTER               :: frozen_coupling_section,tresp_coupling_section
      integer                                        :: mat, mol
@@ -105,7 +106,7 @@ CONTAINS
      INTEGER                                        :: input_seed
      TYPE(rng_stream_type), POINTER                 :: rng_stream
      CHARACTER(LEN=default_string_length)           :: deco_keyword
-     CHARACTER(LEN=default_string_length)           :: coupling_keyword
+     CHARACTER(LEN=default_string_length)           ::coupling_keyword
      REAL(KIND=dp)                                  :: MDtimestep
 
      TYPE(cp_sll_val_type), POINTER                 :: list_tresp
@@ -260,8 +261,12 @@ CONTAINS
     ! adiabatic nacv calculations should be generalized to handle a multi-state
     ! hamiltoninan even without freezing the couplings
     CALL section_vals_val_get(site_energy_section,"MULTI_STATES",l_val=sh_env%multistate)
-    CALL section_vals_val_get(site_energy_section,"ADD_COULOMB_POTENTIAL",l_val=sh_env%add_coulomb_pot)
-
+    if (sh_env%multistate) then 
+       ct_block => section_vals_get_subs_vals(site_energy_section,"CT_BLOCK")
+       CALL section_vals_val_get(ct_block,"ADD_COULOMB_POTENTIAL", &
+                                                             l_val=sh_env%add_coulomb_pot)
+    end if 
+  
     !sh_env%multistate = .False.
     !initialize couplings
     CALL section_vals_val_get(adiab_section,"METHOD_COUPLING",c_val=coupling_keyword)
