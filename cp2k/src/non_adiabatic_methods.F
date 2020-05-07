@@ -79,7 +79,7 @@ CONTAINS
                  energies_tp, virials, results, nforce_eval,     &
                 map_index, mapping_section, adiab_section, mixed_env, my_itimes, &
                 method_keyword, final_energy, atomic_kinds,      &
-                local_particles, molecule_kind_set, local_molecules, molecule_set, my_mol_index)
+                local_particles,  my_mol_index, ext_pres, active_system_info, full_system_info)
 
     TYPE(particle_list_type), POINTER        :: particles_mix
     TYPE(virial_type), POINTER               :: virial_mix
@@ -100,10 +100,14 @@ CONTAINS
     REAL(KIND=dp), INTENT(OUT)               :: final_energy
     TYPE(atomic_kind_list_type), POINTER     :: atomic_kinds
     TYPE(distribution_1d_type), POINTER      :: local_particles
-    TYPE(molecule_kind_type), DIMENSION(:), POINTER    :: molecule_kind_set
-    TYPE(distribution_1d_type), POINTER                :: local_molecules
-    TYPE(molecule_type), DIMENSION(:), POINTER         :: molecule_set
-    INTEGER, DIMENSION(:), POINTER, OPTIONAL :: my_mol_index !this are the decomp list indeces 
+    !TYPE(molecule_kind_type), DIMENSION(:), POINTER    :: molecule_kind_set
+    !TYPE(distribution_1d_type), POINTER                :: local_molecules
+    !TYPE(molecule_type), DIMENSION(:), POINTER         :: molecule_set
+    INTEGER, DIMENSION(:), POINTER           :: my_mol_index !this are the decomp list indeces 
+    INTEGER, DIMENSION(:,:), ALLOCATABLE     :: full_system_info
+    INTEGER, DIMENSION(:,:), ALLOCATABLE     :: active_system_info
+    LOGICAL, DIMENSION(:), POINTER           :: ext_pres
+    
 
 
     CHARACTER(len=*), PARAMETER :: routineN = 'adiab_classicalpath_routines', &
@@ -152,7 +156,6 @@ CONTAINS
        my_test_keyword = .TRUE. 
     ENDIF
 
-
     !> Find the method to calculate the off-diagonal elements
     !CALL section_vals_val_get(adiab_section,"METHOD_COUPLING",c_val=coupling_keyword)
     CALL get_subsys_map_index(mapping_section, natom, 1, nforce_eval, map_index)
@@ -187,16 +190,9 @@ CONTAINS
        !qs_mol_dyn_low subroutine calls force_env_calc_energy_force for the
        !first time and this calls in turn the present subroutinbe
    
-       IF (PRESENT(my_mol_index)) THEN  !check if decomp list is present as
-                                        !input, if not we do not pass it to the create env
-             CALL create_sh_env(nadiab, norbitals, natom, &
+       CALL create_sh_env(nadiab, norbitals, natom, &
                            positions_tp, adiab_section, & 
-                           sh_env, molecule_kind_set, local_molecules, molecule_set, my_mol_index)
-       ELSE 
-             CALL create_sh_env(nadiab, norbitals, natom, &
-                           positions_tp, adiab_section, & 
-                           sh_env,  molecule_kind_set, local_molecules, molecule_set)
-       END IF 
+                           sh_env, my_mol_index, ext_pres, active_system_info, full_system_info)
             
 
        CALL propagate_namd_first_step(nadiab, norbitals,     &

@@ -204,7 +204,7 @@ END TYPE adiab_nace_env_type
      REAL(KIND = dp), DIMENSION(:,:), POINTER :: forces_adiab, &     
                                                  forces_adiab_new
 !> index active molecules
-     INTEGER, DIMENSION(:), POINTER           :: index_active_mols
+!     INTEGER, DIMENSION(:), ALLOCATABLE           :: index_active_mols
 
 !> Use to store the present info in the future timestep
      REAL(KIND = dp), DIMENSION(:,:), POINTER     :: velocities_tp ! velocities step

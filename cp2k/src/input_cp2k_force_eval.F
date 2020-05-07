@@ -118,7 +118,7 @@ CONTAINS
    CALL keyword_create(keyword, name="DO_DECOMP",&
                        description="Number of decompositions for the energy and forces.",&
                        usage="NUM_DECOMP {logical}",&
-                       default_l_val=.FALSE.)
+                       default_l_val=.FALSE., lone_keyword_l_val=.False.)
    CALL section_add_keyword(section,keyword)
    CALL keyword_release(keyword)
  !END CHANGE 

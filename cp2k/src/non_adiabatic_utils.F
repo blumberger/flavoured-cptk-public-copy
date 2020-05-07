@@ -212,7 +212,7 @@ SUBROUTINE calc_hop_nacv_approx(sh_env, diagonal_F, C, active_system_info, &
         REAL(KIND=dp)                                            :: E_old_state, E_new_state
         integer                                                  :: i, j, mat, d,m 
         REAL(KIND=dp), dimension(:,:), allocatable               :: F_1, F_11
-        LOGICAL, dimension(:), allocatable                       :: ext_pres
+        !LOGICAL, dimension(:), allocatable                       :: ext_pres
         REAL(KIND=dp)                                            :: convert_grad_to_forces 
         LOGICAL                                                  :: my_frozen_c
 
@@ -232,7 +232,7 @@ SUBROUTINE calc_hop_nacv_approx(sh_env, diagonal_F, C, active_system_info, &
         my_frozen_c = .FALSE.
         IF (PRESENT(frozen_c)) my_frozen_c = frozen_c
 
-        allocate(ext_pres(natom))
+        !allocate(ext_pres(natom))
         allocate(F_1(3,natom))
         allocate(F_11(3,natom))
         allocate(hop_nacv(3, natom)) 
@@ -240,7 +240,7 @@ SUBROUTINE calc_hop_nacv_approx(sh_env, diagonal_F, C, active_system_info, &
         
         !nacv = sh_env%nacv
         !Fin = sh_env%F
-        ext_pres = sh_env%ext_pres       
+        !ext_pres = sh_env%ext_pres       
         IF (PRESENT(ext_old_state)) THEN
            old_state = ext_old_state
         ELSE
@@ -269,7 +269,7 @@ SUBROUTINE calc_hop_nacv_approx(sh_env, diagonal_F, C, active_system_info, &
              F_1(d,j) = 0.0D0
              F_11(d,j) = 0.0D0
 
-             IF (ext_pres(j)) THEN
+             IF (sh_env%ext_pres(j)) THEN
                 num_j   = num_j + 1                  ! Update the active atom index
                 ! Get the molecule to which j belong, for a general
                 ! system. This is a molecular index needed below. Looping
@@ -290,7 +290,7 @@ SUBROUTINE calc_hop_nacv_approx(sh_env, diagonal_F, C, active_system_info, &
 
                    ! calculate off diagonal forces if couplings are not frozen
                    IF (.NOT. my_frozen_c) THEN
-                     IF (ext_pres(j)) THEN
+                     IF (sh_env%ext_pres(j)) THEN
                          IF (i.ne.num_mol) THEN
                             IF (PRESENT(convert_nacv)) THEN 
                                 !grandient in case of AOM formalism
