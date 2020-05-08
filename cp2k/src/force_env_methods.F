@@ -1241,29 +1241,21 @@ CONTAINS
              CPABORT("The program must know the index of ative mol")
          END IF          
 
-print *, "natom", natom
-print *, my_mol_index
-print *, "TIMESSS", my_itimes
            !> create the list of active molecules if not present in DECOMP
            !and the array of active atoms: ext_pres, which is use for kinetic energy
            !calculation of the active subsystem.
+           !> ext_pres will be overwritten in AOM case becuase active molecules
+           !may still have inactive atoms (this feature is used for further speed-up)
            CALL create_ext_press_list(molecule_kind_set, local_molecules, molecule_set, natom, &
                                        my_mol_index,  ext_pres, & 
                                        active_system_info, full_system_info=full_system_info)
-           !> sh_env%ext_pres will be overwritten in AOM case becuase active molecules
-           !may still have inactive atoms (this feature is used for further speed-up)
 
-!sh_env%total_active_atoms = COUNT(sh_env%ext_pres)
-print *, "FOB_SH| EXT PRESS:", ext_pres
-!print *, "TOT ACTIVE ATOMS", COUNT(sh_env%ext_pres)
+!print *, "FOB_SH| EXT PRESS:", ext_pres
+!print *, "active sys info", active_system_info(1, :)
+!print *, "active sys info", active_system_info(2, :)
+!print *, "full sys info", full_system_info(1, :)
+!print *, "full sys info", full_system_info(2, :)
 
-print *, "active sys info", active_system_info(1, :)
-print *, "active sys info", active_system_info(2, :)
-
-print *, "full sys info", full_system_info(1, :)
-print *, "full sys info", full_system_info(2, :)
-
-!           PRINT *, "dO decomp = ", ALLOCATED(thermo%pot_list) 
            IF (ALLOCATED(thermo%pot_list)) THEN
 
                site_energy_section => section_vals_get_subs_vals(adiab_section,"METHOD_SITE_ENERGIES")
@@ -1291,9 +1283,6 @@ print *, "full sys info", full_system_info(2, :)
                 !                            molecule_kind_set, local_molecules, molecule_set, mixed_env, my_itimes)
                END IF 
 
-               !COMMENT_SG: instead of passing all the variables that come from
-               !cp_subsys_get, I think one could just pass force_env and call
-               !the same subroutine inside  adiab_fssh_routines
                 CALL adiab_fssh_routines(particles_mix, virial_mix, results_mix,   &
                         my_energies, virials, results, nforce_eval,&
                         map_index, mapping_section,adiab_section,mixed_env,my_itimes, &
@@ -1307,9 +1296,6 @@ print *, "full sys info", full_system_info(2, :)
 
                 CALL add_energies_forces(energies, global_forces, my_energies, do_speedup_lj, &
                                                               do_speedup_intra, mixed_env, my_itimes)
-               !COMMENT_SG: instead of passing all the variables that come from
-               !cp_subsys_get, I think one could just pass force_env and call
-               !the same subroutine inside  adiab_fssh_routines
                 CALL adiab_fssh_routines(particles_mix, virial_mix, results_mix,   &
                         my_energies, virials, results, nforce_eval,&
                         map_index, mapping_section,adiab_section,mixed_env,my_itimes, &

@@ -686,7 +686,7 @@ end subroutine calc_trsp_ab
 
    Gaussian_charges = sh_env%Gaussian_charges 
    
-   !! BE CAREFULL: this definition of the state should match the one for the FORCE_EVALS
+   !> BE CAREFULL: this definition of the state should match the one for the FORCE_EVALS
    !construct CT states: they are defined such that donor is the first index
    state = 0
    do i=1,SIZE(donor_index)
@@ -702,14 +702,17 @@ end subroutine calc_trsp_ab
    !loop over CT states and get the atoms and the coulomb interaction between
    !them
    do state=1,SIZE(CT_states_info,2) 
-      !> find coordinates mol 1 of the pair
+      !> find coordinates mol 1 of the pair, note that e.g. donor_index(1) might
+      !not start from 1 (depending on the system set-up) and so the
+      !full_system_info array is usefull to get the correct molecule
+      !correspoding to donor_index(1)
       init_atom_mol_i = sh_env%full_system_info(1,CT_states_info(1,state))
       final_atom_mol_i = sh_env%full_system_info(2,CT_states_info(1,state))
       atoms_per_mol_i = (final_atom_mol_i-init_atom_mol_i)+1
 
 !print *, "mol1", init_atom_mol_i, final_atom_mol_i, atoms_per_mol_i
 
-      !> find coordinates mol 2 of the pair
+      !> find coordinates mol 2 of the pair, same comment as before
       init_atom_mol_k = sh_env%full_system_info(1,CT_states_info(2,state))
       final_atom_mol_k = sh_env%full_system_info(2,CT_states_info(2,state))
       atoms_per_mol_k = (final_atom_mol_k-init_atom_mol_k)+1
