@@ -135,7 +135,9 @@ MODULE force_env_methods
                                                 get_molecule
   USE sh_site_energies_methods,        ONLY: add_energies_forces_mem_saver_V2, &
                                              add_energies_forces, &
-                                             create_ext_press_list 
+                                             create_ext_press_list, &
+                                             ct_block_energies_forces,&
+                                              add_energies_forces_mem_saver
 
 #include "./base/base_uses.f90"
 !> CHANGE_AC
@@ -1269,14 +1271,17 @@ print *, "full sys info", full_system_info(2, :)
                ! the number of molecules in decomp (e.g. in case of CT states)
                CALL section_vals_val_get(site_energy_section,"MULTI_STATES",l_val=multistate)
                
+               IF (multistate) THEN 
                !COMMENT_SG: Eventually at this point one could add a SELECT CASE
                !for different FORCE_ENV add-sub schemes for FE-CT-CR Hamiltoninans
-               !IF (multistate) THEN 
-            
-               !ELSE
-
-
-                CALL add_energies_forces_mem_saver_V2( energies_1_mol_list, energies, intra_forces_global, &
+                
+                   CALL ct_block_energies_forces(adiab_section,energies_1_mol_list, energies, &
+                                    intra_forces_global, global_forces, my_energies, &
+                                    active_system_info, mixed_env, my_itimes)
+               ELSE
+                !> This does add-sub scheme for Hamiltoninans wheer num of
+                !states = num of molecules (e.g. AOM and TRESP)
+                   CALL add_energies_forces_mem_saver_V2( energies_1_mol_list, energies, intra_forces_global, &
                                                       global_forces, my_energies, &
                                                       active_system_info, &
                                                        mixed_env, my_itimes)
@@ -1284,6 +1289,7 @@ print *, "full sys info", full_system_info(2, :)
                 !                                      my_mol_index, &
                 !                                      global_forces, my_energies, &
                 !                            molecule_kind_set, local_molecules, molecule_set, mixed_env, my_itimes)
+               END IF 
 
                !COMMENT_SG: instead of passing all the variables that come from
                !cp_subsys_get, I think one could just pass force_env and call
