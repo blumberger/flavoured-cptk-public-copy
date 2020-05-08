@@ -687,7 +687,9 @@ end subroutine calc_trsp_ab
    Gaussian_charges = sh_env%Gaussian_charges 
    
    !> BE CAREFULL: this definition of the state should match the one for the FORCE_EVALS
-   !construct CT states: they are defined such that donor is the first index
+   !construct CT states: they are defined such that donor is the first index. 
+   ! Although we have checked that is still general when accpetor comes before
+   ! donor in the xyz
    state = 0
    do i=1,SIZE(donor_index)
       do j=1,SIZE(acceptor_index)
