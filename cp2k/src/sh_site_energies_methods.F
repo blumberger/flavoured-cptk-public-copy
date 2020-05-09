@@ -175,7 +175,9 @@ end subroutine create_ext_press_list
 
 ! *****************************************************************************
 !> \brief This subroutine does the addition and subtraction scheme for the CT
-!states  
+!         states  
+!> \note The donor and acceptor phase MUST be consecutive in the xyz, namely
+!         DDDD-AAAAA, this subrotine will not work for DADADADAD phases
 !> \note This subroutine gives non-degenerate site_energies (degeneracy may be
 !        introduce in the fssh specific subroutines)
 !> \par History
