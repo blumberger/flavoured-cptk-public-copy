@@ -460,12 +460,12 @@ CONTAINS
     CALL keyword_release(keyword)
 
 
-    CALL keyword_create(keyword, name="BLOCK_TYPE",&
-         description="Determine the Block to use",&
-         usage="BLOCK_TYPE : CT_BLOCK",  type_of_var=char_t,&
-         n_var=-1)
-    CALL section_add_keyword(sub2section,keyword)
-    CALL keyword_release(keyword)
+    !CALL keyword_create(keyword, name="BLOCK_TYPE",&
+    !     description="Determine the Block to use",&
+    !     usage="BLOCK_TYPE : CT_BLOCK",  type_of_var=char_t,&
+    !     n_var=-1)
+    !CALL section_add_keyword(sub2section,keyword)
+    !CALL keyword_release(keyword)
 
    CALL section_create(sub3section,name="CT_BLOCK",&
         description="Defines the CT BLOCK,"//&
@@ -523,6 +523,24 @@ CONTAINS
     CALL keyword_release(keyword)
 
    CALL section_release(sub3section)
+
+   NULLIFY(sub3section)
+   CALL section_create(sub3section,name="FE_BLOCK",&
+        description="Defines the FE BLOCK,"//&
+                     "and the interactions",&
+        n_keywords=1, n_subsections=0, repeats=.FALSE.)
+   CALL section_add_subsection(sub2section,sub3section)
+
+    CALL keyword_create(keyword, name="INDEX_EXC_MOLS",&
+         description='Specify the index in xys of mols', &
+         usage="INDEX_DONOR_MOLS <INTEGER> .. <INTEGER>", &
+         type_of_var=integer_t,  n_var=-1, default_i_vals=(/1/))
+    CALL section_add_keyword(sub3section,keyword)
+    CALL keyword_release(keyword)
+
+   CALL section_release(sub3section)
+
+
    !> releasing METHOD_SITE_ENERGIES subsection
    CALL section_release(sub2section)
 

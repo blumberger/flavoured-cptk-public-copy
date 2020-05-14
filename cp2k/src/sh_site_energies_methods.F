@@ -180,10 +180,11 @@ end subroutine create_ext_press_list
 !         DDDD-AAAAA, this subrotine will not work for DADADADAD phases
 !> \note This subroutine gives non-degenerate site_energies (degeneracy may be
 !        introduce in the fssh specific subroutines)
-!> \par History
+!> \par History XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+!CHANGEEEEEEEEEEEEEEEE
 !> \author SG 
 ! *****************************************************************************
-SUBROUTINE ct_block_energies_forces(adiab_section,energies_1_mol_list, energies, &
+SUBROUTINE fe_ct_block_energies_forces(adiab_section,energies_1_mol_list, energies, &
                                     intra_forces_global, global_forces, my_energies, &
                                     active_system_info, mixed_env, my_itimes)
 
@@ -199,7 +200,7 @@ SUBROUTINE ct_block_energies_forces(adiab_section,energies_1_mol_list, energies,
    INTEGER, POINTER                          :: my_itimes !CHANGE_AC
    INTEGER, DIMENSION(:,:), INTENT(IN)       :: active_system_info
 
-   CHARACTER(len=*), PARAMETER :: routineN ='add_energies_forces_mem_saver_V2', &
+   CHARACTER(len=*), PARAMETER :: routineN ='fe_ct_block_energies_forces', &
      routineP = moduleN//':'//routineN
 
    INTEGER :: init_atom_mol_i, final_atom_mol_i, atoms_per_mol_i
@@ -207,39 +208,52 @@ SUBROUTINE ct_block_energies_forces(adiab_section,energies_1_mol_list, energies,
    INTEGER                                   :: i,j, ind1, ind2, indfirst,indsec
    INTEGER                                   :: start_i,end_i,start_j,end_j,atoms
    TYPE(section_vals_type), POINTER          :: site_energy_section
-   TYPE(section_vals_type), POINTER          :: ct_block
-   INTEGER, DIMENSION(:), POINTER            :: donor_index, acceptor_index
+   TYPE(section_vals_type), POINTER          :: ct_block, fe_block
+   INTEGER, DIMENSION(:), POINTER            :: donor_index, acceptor_index, exc_index
    INTEGER                                   :: total_states, state,nadiab, natom
    INTEGER, DIMENSION(:,:), ALLOCATABLE      :: intra_forces_info
    INTEGER, DIMENSION(:), ALLOCATABLE        :: first_ind, second_ind
  
-   NULLIFY(site_energy_section,ct_block)
+   NULLIFY(site_energy_section,ct_block, fe_block)
    NULLIFY( my_energies)
  
+   ! TOTAL number states
+   CALL section_vals_val_get(adiab_section,"NUMBER_DIABATIC_STATES",&
+                        i_val=nadiab)
+
    site_energy_section => section_vals_get_subs_vals(adiab_section,"METHOD_SITE_ENERGIES")
    ct_block => section_vals_get_subs_vals(site_energy_section,"CT_BLOCK")
+   fe_block => section_vals_get_subs_vals(site_energy_section,"FE_BLOCK")
+
    CALL section_vals_val_get(ct_block,"INDEX_DONOR_MOLS",&
                         i_vals=donor_index)
    CALL section_vals_val_get(ct_block,"INDEX_ACCEPTOR_MOLS",&
                         i_vals=acceptor_index)
-   CALL section_vals_val_get(adiab_section,"NUMBER_DIABATIC_STATES",&
-                        i_val=nadiab)
 
-   !> some checks 
-   total_states = SIZE(donor_index)*SIZE(acceptor_index)
+   CALL section_vals_val_get(fe_block,"INDEX_EXC_MOLS",&
+                        i_vals=exc_index)
+
+   !> some checks  N*N+N is the total number of states
+   total_states = SIZE(donor_index)*SIZE(acceptor_index) + SIZE(exc_index)
    IF (total_states .ne. nadiab) THEN 
       CPABORT("NUMBER_DIABATIC_STATES different from total n states")
    END IF
    ind1 = donor_index(1) 
    do i=2,SIZE(donor_index)
       if (donor_index(i) .le. ind1) THEN 
-        CPABORT("Donor mol must be acending")
+        CPABORT("Donor mol must be ascending")
       end if
    end do
    ind1 = acceptor_index(1) 
    do i=2,SIZE(acceptor_index)
       if (acceptor_index(i) .le. ind1) THEN 
         CPABORT("Acceptor mol must be ascending")
+      end if
+   end do
+   ind1 = exc_index(1) 
+   do i=2,SIZE(exc_index)
+      if (exc_index(i) .le. ind1) THEN 
+        CPABORT("EXC mol must be ascending")
       end if
    end do
 
@@ -308,7 +322,223 @@ SUBROUTINE ct_block_energies_forces(adiab_section,energies_1_mol_list, energies,
  
    !> BE CAREFULL: this definition of the state should match the one for the
    !FORCE_EVALS
-   !construct CT states: they are defined such that donor is the first index
+   !!!WARING::::: I assumed donor and acceptor are consecutively stored, this
+   !depends on the system set-up and it's not general!!!
+   state = 0
+   do i=1,SIZE(first_ind)
+      ind1 = first_ind(i)
+      do j=1,SIZE(second_ind)
+         ind2 = second_ind(j)
+         state = state + 1
+!print *, "STATES", ind1,ind2
+         !> we create site energies from the 2 force_evals sections: the first
+         !neutral, the second charged (with donor and acc Froce-fields).
+         my_energies(state) = energies(1) + &
+                  energies_1_mol_list(2,ind1) - energies_1_mol_list(1,ind1) + & 
+                  energies_1_mol_list(2,ind2) - energies_1_mol_list(1,ind2)  
+!print *, "ENER:", my_energies(state)
+
+         !> we allocate diagonal forces array. All the atoms for a give state i
+         !get the value of the neutral force_field that contains: intra +
+         !nonbonded interactions
+         mixed_env%F(:,:,state) = global_forces(1)%forces
+         
+         !> find index mol i (which is state i) of the pair
+         init_atom_mol_i = active_system_info(1,ind1)
+         final_atom_mol_i = active_system_info(2,ind1)
+         atoms_per_mol_i = (final_atom_mol_i-init_atom_mol_i)+1
+
+         !> find index mol j (which is state j) of the pair
+         init_atom_mol_j = active_system_info(1,ind2)
+         final_atom_mol_j = active_system_info(2,ind2)
+         atoms_per_mol_j = (final_atom_mol_j-init_atom_mol_j)+1
+
+         !> since  mixed_env%F stores all the atoms the numbering is a
+         !bit more triky and relies on the "global numbering" (which is an info
+         !contained in active_system_info). Whereas intra_forces_global stores
+         !just the active atoms and so the numbering should be sequential and
+         !this info is included in intra_forces_info
+        start_i = intra_forces_info(1,ind1)
+        end_i = intra_forces_info(2,ind1)
+!print *, "index don", init_atom_mol_i, final_atom_mol_i
+!print *, "NEW", start_i, end_i
+        !> first molecule i of the pair
+        mixed_env%F(1,init_atom_mol_i:final_atom_mol_i,state) = &
+                           mixed_env%F(1,init_atom_mol_i:final_atom_mol_i,state) + &
+                           intra_forces_global(2,1,start_i:end_i) - &
+                           intra_forces_global(1,1,start_i:end_i)
+        mixed_env%F(2,init_atom_mol_i:final_atom_mol_i,state) = &
+                           mixed_env%F(2,init_atom_mol_i:final_atom_mol_i,state) + &
+                           intra_forces_global(2,2,start_i:end_i) - &
+                           intra_forces_global(1,2,start_i:end_i)
+        mixed_env%F(3,init_atom_mol_i:final_atom_mol_i,state) = &
+                           mixed_env%F(3,init_atom_mol_i:final_atom_mol_i,state) + &
+                           intra_forces_global(2,3,start_i:end_i) - &
+                           intra_forces_global(1,3,start_i:end_i)
+
+        start_j = intra_forces_info(1,ind2)
+        end_j = intra_forces_info(2,ind2)
+!print*, "index acc", init_atom_mol_j, final_atom_mol_j
+!print *, "NEW", start_j, end_j
+        !> second mol j of the pair
+        mixed_env%F(1,init_atom_mol_j:final_atom_mol_j,state) = &
+                           mixed_env%F(1,init_atom_mol_j:final_atom_mol_j,state) + &
+                           intra_forces_global(2,1,start_j:end_j) - &
+                           intra_forces_global(1,1,start_j:end_j)
+        mixed_env%F(2,init_atom_mol_j:final_atom_mol_j,state) = &
+                           mixed_env%F(2,init_atom_mol_j:final_atom_mol_j,state) + &
+                           intra_forces_global(2,2,start_j:end_j) - &
+                           intra_forces_global(1,2,start_j:end_j)
+        mixed_env%F(3,init_atom_mol_j:final_atom_mol_j,state) = &
+                           mixed_env%F(3,init_atom_mol_j:final_atom_mol_j,state) + &
+                           intra_forces_global(2,3,start_j:end_j) - &
+                           intra_forces_global(1,3,start_j:end_j)
+
+      end do
+   end do
+
+   DEALLOCATE(intra_forces_info)
+   DEALLOCATE(first_ind)
+   DEALLOCATE(second_ind)
+
+END SUBROUTINE fe_ct_block_energies_forces
+
+! *****************************************************************************
+!> \brief This subroutine does the addition and subtraction scheme for the CT
+!         states  
+!> \note The donor and acceptor phase MUST be consecutive in the xyz, namely
+!         DDDD-AAAAA, this subrotine will not work for DADADADAD phases
+!> \note This subroutine gives non-degenerate site_energies (degeneracy may be
+!        introduce in the fssh specific subroutines)
+!> \par History
+!> \author SG 
+! *****************************************************************************
+SUBROUTINE ct_block_energies_forces(adiab_section,energies_1_mol_list, energies, &
+                                    intra_forces_global, global_forces, my_energies, &
+                                    active_system_info, mixed_env, my_itimes)
+
+   TYPE(section_vals_type), POINTER          :: adiab_section
+   TYPE(mixed_environment_type), &
+      POINTER                                :: mixed_env
+   TYPE(mixed_force_type), DIMENSION(:), &
+     POINTER                                 :: global_forces
+   REAL(KIND=dp), DIMENSION(:), POINTER      :: energies
+   REAL(KIND=dp), DIMENSION(:), POINTER      :: my_energies
+   REAL(KIND=dp), ALLOCATABLE                :: intra_forces_global(:,:,:) 
+   REAL(KIND=dp), ALLOCATABLE                :: energies_1_mol_list(:,:)
+   INTEGER, POINTER                          :: my_itimes !CHANGE_AC
+   INTEGER, DIMENSION(:,:), INTENT(IN)       :: active_system_info
+
+   CHARACTER(len=*), PARAMETER :: routineN ='add_energies_forces_mem_saver_V2', &
+     routineP = moduleN//':'//routineN
+
+   INTEGER :: init_atom_mol_i, final_atom_mol_i, atoms_per_mol_i
+   INTEGER :: init_atom_mol_j, final_atom_mol_j, atoms_per_mol_j
+   INTEGER                                   :: i,j, ind1, ind2, indfirst,indsec
+   INTEGER                                   :: start_i,end_i,start_j,end_j,atoms
+   TYPE(section_vals_type), POINTER          :: site_energy_section
+   TYPE(section_vals_type), POINTER          :: ct_block
+   INTEGER, DIMENSION(:), POINTER            :: donor_index, acceptor_index
+   INTEGER                                   :: total_states, state,nadiab, natom
+   INTEGER, DIMENSION(:,:), ALLOCATABLE      :: intra_forces_info
+   INTEGER, DIMENSION(:), ALLOCATABLE        :: first_ind, second_ind
+ 
+   NULLIFY(site_energy_section,ct_block)
+   NULLIFY( my_energies)
+ 
+   site_energy_section => section_vals_get_subs_vals(adiab_section,"METHOD_SITE_ENERGIES")
+   ct_block => section_vals_get_subs_vals(site_energy_section,"CT_BLOCK")
+   CALL section_vals_val_get(ct_block,"INDEX_DONOR_MOLS",&
+                        i_vals=donor_index)
+   CALL section_vals_val_get(ct_block,"INDEX_ACCEPTOR_MOLS",&
+                        i_vals=acceptor_index)
+   CALL section_vals_val_get(adiab_section,"NUMBER_DIABATIC_STATES",&
+                        i_val=nadiab)
+
+   !> some checks 
+   total_states = SIZE(donor_index)*SIZE(acceptor_index)
+   IF (total_states .ne. nadiab) THEN 
+      CPABORT("NUMBER_DIABATIC_STATES different from total n states")
+   END IF
+   ind1 = donor_index(1) 
+   do i=2,SIZE(donor_index)
+      if (donor_index(i) .le. ind1) THEN 
+        CPABORT("Donor mol must be ascending")
+      end if
+   end do
+   ind1 = acceptor_index(1) 
+   do i=2,SIZE(acceptor_index)
+      if (acceptor_index(i) .le. ind1) THEN 
+        CPABORT("Acceptor mol must be ascending")
+      end if
+   end do
+
+!!! ~~~~~~~~ ARRIVED HERE 
+   !> this are the output add-sub energies and forces
+   ALLOCATE(my_energies(nadiab))
+   natom = SIZE(global_forces(1)%forces(:,:), 2)
+
+   !> we do F allocation just at the first step and never again just to NOT
+   !allocate and deallocate this big array at every step. NOTE that this array is
+   !now never deallocated and just deallocated by the compiler at the very end.
+   !One should probably write a subroutine that deallocate all allocatable just
+   !this at the very end of cp2k
+    if(my_itimes .eq. 0) then
+       ALLOCATE(mixed_env%F(3,natom,nadiab))
+    end if
+  
+   !> construct a intra_forces_info array with the index of the atoms that are
+   !part of the intra_forces_global array that stores only the active atoms.
+   !intra_forces_info is therefore an array with the same shape as
+   !active_system_info but with sequential numbering of the atoms.
+   ALLOCATE(intra_forces_info(2,SIZE(active_system_info,2)))
+   atoms = 0
+   do i=1,SIZE(active_system_info,2)
+         !> find numer of atoms in mol i
+         init_atom_mol_i = active_system_info(1,i)
+         final_atom_mol_i = active_system_info(2,i)
+         atoms_per_mol_i = (final_atom_mol_i-init_atom_mol_i)+1
+         atoms = atoms + atoms_per_mol_i
+         intra_forces_info(1,i) = (atoms - atoms_per_mol_i)+1
+         intra_forces_info(2,i) = atoms
+   end do
+
+!print *, "intra_forces_info(1,i)", intra_forces_info(1,:)   
+!print *, "intra_forces_info(2,i)", intra_forces_info(2,:)   
+
+   !> This will swap the index in case acceptor molecules comes before the donor
+   !molecules in the xyz file.
+   if (donor_index(1) .ge. acceptor_index(1)) then
+     ALLOCATE(first_ind(SIZE(donor_index)))
+     ALLOCATE(second_ind(SIZE(acceptor_index)))
+     indfirst = 0
+     do i=1,SIZE(acceptor_index)
+        indfirst = indfirst + 1
+        second_ind(i) = indfirst
+        do j=1,SIZE(donor_index)
+           indsec = j + SIZE(acceptor_index)
+           first_ind(j) = indsec
+        end do
+     end do
+   else
+     ALLOCATE(first_ind(SIZE(donor_index)))
+     ALLOCATE(second_ind(SIZE(acceptor_index)))
+     indfirst = 0
+     do i=1,SIZE(donor_index)
+        indfirst = indfirst + 1
+        first_ind(i) = indfirst
+        do j=1,SIZE(acceptor_index)
+           indsec = j + SIZE(donor_index)
+           second_ind(j) = indsec
+        end do
+     end do
+   end if 
+
+!print *, "FIRST IND", first_ind
+!print *, "SEC IND", second_ind
+ 
+   !> BE CAREFULL: this definition of the state should match the one for the
+   !FORCE_EVALS
    !!!WARING::::: I assumed donor and acceptor are consecutively stored, this
    !depends on the system set-up and it's not general!!!
    state = 0
@@ -426,6 +656,8 @@ END SUBROUTINE ct_block_energies_forces
      routineP = moduleN//':'//routineN
 
    INTEGER :: i, natom, init_atom_mol_i, final_atom_mol_i, atoms_per_mol_i
+   INTEGER, DIMENSION(:,:), ALLOCATABLE      :: intra_forces_info
+   INTEGER                                   :: start_i,end_i,atoms
 
    NULLIFY( my_energies)
    !> WARNING: the following allocation is fine as the number of states is the
@@ -445,6 +677,22 @@ END SUBROUTINE ct_block_energies_forces
       ALLOCATE(mixed_env%F(3,natom, SIZE(energies_1_mol_list(1,:))))
    end if
 
+   !> construct a intra_forces_info array with the index of the atoms that are
+   !part of the intra_forces_global array that stores only the active atoms.
+   !intra_forces_info is therefore an array with the same shape as
+   !active_system_info but with sequential numbering of the atoms.
+   ALLOCATE(intra_forces_info(2,SIZE(active_system_info,2)))
+   atoms = 0
+   do i=1,SIZE(active_system_info,2)
+         !> find numer of atoms in mol i
+         init_atom_mol_i = active_system_info(1,i)
+         final_atom_mol_i = active_system_info(2,i)
+         atoms_per_mol_i = (final_atom_mol_i-init_atom_mol_i)+1
+         atoms = atoms + atoms_per_mol_i
+         intra_forces_info(1,i) = (atoms - atoms_per_mol_i)+1
+         intra_forces_info(2,i) = atoms
+   end do
+
    !> loop over each (active) state of the system, namely active mol 
    DO i = 1, SIZE(energies_1_mol_list(1,:)) !loop over num of adiabatic states 
       !> we create site energies from the 2 force_evals sections: the first
@@ -461,24 +709,27 @@ END SUBROUTINE ct_block_energies_forces
       final_atom_mol_i = active_system_info(2,i)
       atoms_per_mol_i = (final_atom_mol_i-init_atom_mol_i)+1
 
+
       !> since intra_forces_global stores only active atoms the numbering is a
       !bit more triky and relies on the n of atoms per mol (which is an info
       !contained in active_system_info)
+      start_i = intra_forces_info(1,i)
+      end_i = intra_forces_info(2,i)
       mixed_env%F(1,init_atom_mol_i:final_atom_mol_i,i) = &
                          mixed_env%F(1,init_atom_mol_i:final_atom_mol_i,i) + &
-                         intra_forces_global(2,1,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i) - &
-                         intra_forces_global(1,1,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i)
+                         intra_forces_global(2,1,start_i:end_i) - &
+                         intra_forces_global(1,1,start_i:end_i)
       mixed_env%F(2,init_atom_mol_i:final_atom_mol_i,i) = &
                          mixed_env%F(2,init_atom_mol_i:final_atom_mol_i,i) + &
-                         intra_forces_global(2,2,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i) - &
-                         intra_forces_global(1,2,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i)
+                         intra_forces_global(2,2,start_i:end_i) - &
+                         intra_forces_global(1,2,start_i:end_i)
       mixed_env%F(3,init_atom_mol_i:final_atom_mol_i,i) = &
                          mixed_env%F(3,init_atom_mol_i:final_atom_mol_i,i) + &
-                         intra_forces_global(2,3,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i) - &
-                         intra_forces_global(1,3,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i)
-
+                         intra_forces_global(2,3,start_i:end_i) - &
+                         intra_forces_global(1,3,start_i:end_i)
    END DO
-
+  
+  DEALLOCATE(intra_forces_info)
   END SUBROUTINE add_energies_forces_mem_saver_V2
 
 ! *****************************************************************************
