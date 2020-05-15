@@ -893,6 +893,7 @@ CONTAINS
     INTEGER, DIMENSION(:,:), ALLOCATABLE     :: active_system_info
     LOGICAL, DIMENSION(:), POINTER           :: ext_pres
     LOGICAL                                  :: multistate
+    CHARACTER(LEN=default_string_length)     :: block_type_keyword
 
     NULLIFY(atomic_kinds, local_particles, molecule_set, molecule_kind_set, local_molecules)
 !> End CHANGE_AC and SAM
@@ -1256,8 +1257,10 @@ CONTAINS
 !print *, "active sys info", active_system_info(2, :)
 !print *, "full sys info", full_system_info(1, :)
 !print *, "full sys info", full_system_info(2, :)
-
+              
            IF (ALLOCATED(thermo%pot_list)) THEN
+           !Enter this part only if the active atoms DECOMP has been done,
+           !otherwise you MUST provide N FORCE_EVALS one for each site energy
 
                site_energy_section => section_vals_get_subs_vals(adiab_section,"METHOD_SITE_ENERGIES")
                ! this keyword determines if the number of states is larger then
@@ -1265,16 +1268,31 @@ CONTAINS
                CALL section_vals_val_get(site_energy_section,"MULTI_STATES",l_val=multistate)
                
                IF (multistate) THEN 
-               !COMMENT_SG: Eventually at this point one could add a SELECT CASE
-               !for different FORCE_ENV add-sub schemes for FE-CT-CR Hamiltoninans
-                
-                   CALL ct_block_energies_forces(adiab_section,energies_1_mol_list, energies, &
+
+                   CALL section_vals_val_get(site_energy_section,"BLOCK_TYPE",c_val=block_type_keyword) 
+                   SELECT CASE(block_type_keyword)
+                   CASE("CT")   
+                      CALL ct_block_energies_forces(adiab_section,energies_1_mol_list, energies, &
                                     intra_forces_global, global_forces, my_energies, &
                                     active_system_info, mixed_env, my_itimes, my_mol_index)
 
-                   !CALL fe_ct_block_energies_forces(adiab_section,energies_1_mol_list, energies, &
-                   !                 intra_forces_global, global_forces, my_energies, &
-                   !                 active_system_info, mixed_env, my_itimes, my_mol_index)
+                   CASE("FE-CT")   
+                      CALL fe_ct_block_energies_forces(adiab_section,energies_1_mol_list, energies, &
+                                    intra_forces_global, global_forces, my_energies, &
+                                    active_system_info, mixed_env, my_itimes, my_mol_index)
+
+                   CASE("FE")  ! this could be used also for just hole or electron like done so far 
+                      CALL add_energies_forces_mem_saver_V2( energies_1_mol_list, energies, &
+                                                      intra_forces_global, &
+                                                      global_forces, my_energies, &
+                                                      active_system_info, &
+                                                       mixed_env, my_itimes)
+                   CASE("FE-CT-CR")
+                      CPABORT("Not implemented yet")   
+                   CASE DEFAULT
+                      CPABORT("Site energy construction not specified")
+                   END SELECT
+
                ELSE
                 !> This does add-sub scheme for Hamiltoninans wheer num of
                 !states = num of molecules (e.g. AOM and TRESP)
@@ -1282,6 +1300,7 @@ CONTAINS
                                                       global_forces, my_energies, &
                                                       active_system_info, &
                                                        mixed_env, my_itimes)
+                !OLD subroutine
                 !CALL add_energies_forces_mem_saver( energies_1_mol_list, energies, intra_forces_global, &
                 !                                      my_mol_index, &
                 !                                      global_forces, my_energies, &

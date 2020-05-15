@@ -106,7 +106,7 @@ CONTAINS
      INTEGER                                        :: input_seed
      TYPE(rng_stream_type), POINTER                 :: rng_stream
      CHARACTER(LEN=default_string_length)           :: deco_keyword
-     CHARACTER(LEN=default_string_length)           ::coupling_keyword
+     CHARACTER(LEN=default_string_length)           :: coupling_keyword
      REAL(KIND=dp)                                  :: MDtimestep
 
      TYPE(cp_sll_val_type), POINTER                 :: list_tresp

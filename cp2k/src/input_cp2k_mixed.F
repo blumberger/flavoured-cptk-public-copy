@@ -460,12 +460,12 @@ CONTAINS
     CALL keyword_release(keyword)
 
 
-    !CALL keyword_create(keyword, name="BLOCK_TYPE",&
-    !     description="Determine the Block to use",&
-    !     usage="BLOCK_TYPE : CT_BLOCK",  type_of_var=char_t,&
-    !     n_var=-1)
-    !CALL section_add_keyword(sub2section,keyword)
-    !CALL keyword_release(keyword)
+    CALL keyword_create(keyword, name="BLOCK_TYPE",&
+         description="Determine the Block to use",&
+         usage="BLOCK_TYPE : CT",  type_of_var=char_t,&
+         n_var=-1)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
 
    CALL section_create(sub3section,name="CT_BLOCK",&
         description="Defines the CT BLOCK,"//&
