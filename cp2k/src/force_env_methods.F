@@ -1268,13 +1268,13 @@ CONTAINS
                !COMMENT_SG: Eventually at this point one could add a SELECT CASE
                !for different FORCE_ENV add-sub schemes for FE-CT-CR Hamiltoninans
                 
-                   !CALL ct_block_energies_forces(adiab_section,energies_1_mol_list, energies, &
-                   !                 intra_forces_global, global_forces, my_energies, &
-                   !                 active_system_info, mixed_env, my_itimes, my_mol_index)
-
-                   CALL fe_ct_block_energies_forces(adiab_section,energies_1_mol_list, energies, &
+                   CALL ct_block_energies_forces(adiab_section,energies_1_mol_list, energies, &
                                     intra_forces_global, global_forces, my_energies, &
                                     active_system_info, mixed_env, my_itimes, my_mol_index)
+
+                   !CALL fe_ct_block_energies_forces(adiab_section,energies_1_mol_list, energies, &
+                   !                 intra_forces_global, global_forces, my_energies, &
+                   !                 active_system_info, mixed_env, my_itimes, my_mol_index)
                ELSE
                 !> This does add-sub scheme for Hamiltoninans wheer num of
                 !states = num of molecules (e.g. AOM and TRESP)

@@ -1066,6 +1066,10 @@ subroutine calcforces_smart_grad(state, C, Fin, forces_adiab, &
         my_frozen_c = .FALSE.
         IF (PRESENT(frozen_c)) my_frozen_c = frozen_c
 
+        IF (SIZE(active_system_info, 2) .ne. SIZE(Fin,3)) THEN
+            CPABORT("calcforces_smart_grad sub does not work with multi-state/multi-phase H")
+        END IF 
+
 
         do d=1,3                        ! sum of cartesian 
            num_j = 0               ! active atom index
