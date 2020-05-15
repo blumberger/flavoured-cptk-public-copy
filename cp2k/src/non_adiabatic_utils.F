@@ -650,7 +650,7 @@ end subroutine calc_trsp_ab
    real(kind=dp)                                   :: coulomb_coup, screening  
    logical                                         :: Gaussian_charges
    real(kind=dp),  dimension(:,:), allocatable     :: grad1
-   integer                                         :: atoms_per_donor, atoms_per_acceptor
+   integer                                         :: atoms_per_donor, atoms_per_acceptor, total_states 
    TYPE(cp_sll_val_type), POINTER                  :: list_tresp
    integer, dimension(:), ALLOCATABLE              :: ext_elements1, ext_elements2 
    LOGICAL, DIMENSION(:), POINTER                 :: active_logical1, active_logical2
@@ -681,8 +681,8 @@ end subroutine calc_trsp_ab
    CALL section_vals_val_get(ct_block,"DIELECTRIC_SCREENING",&
              r_val=screening) 
   
-
-   ALLOCATE(CT_states_info(2,SIZE(energies_tp))) 
+   total_states = SIZE(donor_index)*SIZE(acceptor_index)
+   ALLOCATE(CT_states_info(2,total_states)) 
 
    Gaussian_charges = sh_env%Gaussian_charges 
    
@@ -699,6 +699,8 @@ end subroutine calc_trsp_ab
       end do
    end do
 
+!print *, "FS", sh_env%full_system_info(1,:)
+!print *, "FS", sh_env%full_system_info(2,:)
 
 !print *, "CT_states_info", CT_states_info
    !loop over CT states and get the atoms and the coulomb interaction between

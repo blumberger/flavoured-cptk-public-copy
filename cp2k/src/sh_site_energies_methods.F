@@ -315,11 +315,11 @@ SUBROUTINE fe_ct_block_energies_forces(adiab_section,energies_1_mol_list, energi
      end do 
    end do
    
-   print *, "DECOMP", my_mol_index
-   print *, "DONOR IND", donor_index
-   print *, "ACCEPTOR IND", acceptor_index
-   print *, "FIRST IND", first_ind
-   print *, "SEC IND", second_ind
+!   print *, "DECOMP", my_mol_index
+!   print *, "DONOR IND", donor_index
+!   print *, "ACCEPTOR IND", acceptor_index
+!   print *, "FIRST IND", first_ind
+!   print *, "SEC IND", second_ind
 
    !> loop over states: not that it does not matter if donor molecules comes
    !after acceptor in the xyz or viceversa, or the molecules are DDDAAA or ADADA
@@ -410,21 +410,17 @@ SUBROUTINE fe_ct_block_energies_forces(adiab_section,energies_1_mol_list, energi
      end do 
    end do
 
-print *, "ENERG", energies_1_mol_list(1,:)
-print *, "ENERG", energies_1_mol_list(2,:)
-print *, "ENERG", energies_1_mol_list(3,:)
 
-print *, "exc_ind", exc_ind
-print *, "STATE to BEFORE FE", state
+!print *, "STATE to BEFORE FE", state
    !> loop over each (active) state starting from where CT were left
    count_ = 0
    DO i = state+1, nadiab !loop over num of adiabatic states until the end
-print *, "GLOB_STATE", i
+!print *, "GLOB_STATE", i
       count_ = count_ + 1
       !> get index actual mol excited BUT in the base 1,2,3..
       ind1 = exc_ind(count_)
 
-print *, "FE STATE", ind1
+!print *, "FE STATE", ind1
       !> we create site energies from the 2 force_evals sections: the first
       !neutral, the second charge and the THIRD excited.
       my_energies(i) = energies(1) + energies_1_mol_list(3,ind1) - energies_1_mol_list(1,ind1)
@@ -445,8 +441,8 @@ print *, "FE STATE", ind1
       !contained in active_system_info)
       start_i = intra_forces_info(1,ind1)
       end_i = intra_forces_info(2,ind1)
-print *, "index exc", init_atom_mol_i, final_atom_mol_i
-print *, "NEW", start_i, end_i
+!print *, "index exc", init_atom_mol_i, final_atom_mol_i
+!print *, "NEW", start_i, end_i
       mixed_env%F(1,init_atom_mol_i:final_atom_mol_i,i) = &
                          mixed_env%F(1,init_atom_mol_i:final_atom_mol_i,i) + &
                          intra_forces_global(3,1,start_i:end_i) - &
@@ -568,8 +564,8 @@ SUBROUTINE ct_block_energies_forces(adiab_section,energies_1_mol_list, energies,
          intra_forces_info(2,i) = atoms
    end do
 
-print *, "intra_forces_info(1,i)", intra_forces_info(1,:)   
-print *, "intra_forces_info(2,i)", intra_forces_info(2,:)   
+!print *, "intra_forces_info(1,i)", intra_forces_info(1,:)   
+!print *, "intra_forces_info(2,i)", intra_forces_info(2,:)   
 
    !get the CT index in the 1,2,3... base (active region basis)
    !independently on the actual molecule
@@ -595,11 +591,11 @@ print *, "intra_forces_info(2,i)", intra_forces_info(2,:)
      end do 
    end do
    
-   print *, "DECOMP", my_mol_index
-   print *, "DONOR IND", donor_index
-   print *, "ACCEPTOR IND", acceptor_index
-   print *, "FIRST IND", first_ind
-   print *, "SEC IND", second_ind
+!   print *, "DECOMP", my_mol_index
+!   print *, "DONOR IND", donor_index
+!   print *, "ACCEPTOR IND", acceptor_index
+!   print *, "FIRST IND", first_ind
+!   print *, "SEC IND", second_ind
 
    !> loop over states: not that it does not matter if donor molecules comes
    !after acceptor in the xyz or viceversa, or the molecules are DDDAAA or ADADA
