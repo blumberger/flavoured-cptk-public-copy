@@ -60,7 +60,7 @@ MODULE sh_site_energies_methods
                add_energies_forces, &
                create_ext_press_list, &
                add_energies_forces_mem_saver, &
-               fe_ct_block_energies_forces 
+               multi_block_energies_forces 
 
 CONTAINS
 
@@ -175,19 +175,17 @@ end subroutine create_ext_press_list
 
 
 ! *****************************************************************************
-!> \brief This subroutine does the addition and subtraction scheme for the CT
-!         states  
-!> \note The donor and acceptor phase MUST be consecutive in the xyz, namely
-!         DDDD-AAAAA, this subrotine will not work for DADADADAD phases
+!> \brief This subroutine does the addition and subtraction scheme for the 
+!         CT, FE, CR states  
 !> \note This subroutine gives non-degenerate site_energies (degeneracy may be
 !        introduce in the fssh specific subroutines)
-!> \par History XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-!CHANGEEEEEEEEEEEEEEEE
+!> \par History 
 !> \author SG 
 ! *****************************************************************************
-SUBROUTINE fe_ct_block_energies_forces(adiab_section,energies_1_mol_list, energies, &
+SUBROUTINE multi_block_energies_forces(adiab_section,energies_1_mol_list, energies, &
                                     intra_forces_global, global_forces, my_energies, &
-                                    active_system_info, mixed_env, my_itimes, my_mol_index)
+                                    active_system_info, mixed_env, my_itimes, my_mol_index, &
+                                    fe_block_keyword, cr_block_keyword)
 
    TYPE(section_vals_type), POINTER          :: adiab_section
    TYPE(mixed_environment_type), &
@@ -200,8 +198,9 @@ SUBROUTINE fe_ct_block_energies_forces(adiab_section,energies_1_mol_list, energi
    REAL(KIND=dp), ALLOCATABLE                :: energies_1_mol_list(:,:)
    INTEGER, POINTER                          :: my_itimes !CHANGE_AC
    INTEGER, DIMENSION(:,:), INTENT(IN)       :: active_system_info
+   LOGICAL, INTENT(IN)                       :: fe_block_keyword, cr_block_keyword
 
-   CHARACTER(len=*), PARAMETER :: routineN ='fe_ct_block_energies_forces', &
+   CHARACTER(len=*), PARAMETER :: routineN ='multi_block_energies_forces', &
      routineP = moduleN//':'//routineN
 
    INTEGER :: init_atom_mol_i, final_atom_mol_i, atoms_per_mol_i
@@ -226,21 +225,41 @@ SUBROUTINE fe_ct_block_energies_forces(adiab_section,energies_1_mol_list, energi
 
    site_energy_section => section_vals_get_subs_vals(adiab_section,"METHOD_SITE_ENERGIES")
    ct_block => section_vals_get_subs_vals(site_energy_section,"CT_BLOCK")
-   fe_block => section_vals_get_subs_vals(site_energy_section,"FE_BLOCK")
 
    CALL section_vals_val_get(ct_block,"INDEX_DONOR_MOLS",&
                         i_vals=donor_index)
    CALL section_vals_val_get(ct_block,"INDEX_ACCEPTOR_MOLS",&
                         i_vals=acceptor_index)
 
-   CALL section_vals_val_get(fe_block,"INDEX_EXC_MOLS",&
+   if (fe_block_keyword) then 
+       fe_block => section_vals_get_subs_vals(site_energy_section,"FE_BLOCK")
+       CALL section_vals_val_get(fe_block,"INDEX_EXC_MOLS",&
                         i_vals=exc_index)
+       ind1 = exc_index(1) 
+       do i=2,SIZE(exc_index)
+          if (exc_index(i) .le. ind1) THEN 
+            CPABORT("EXC mol must be ascending")
+          end if
+       end do
+   end if 
 
-   !> some checks  N*N+N is the total number of states
-   total_states = SIZE(donor_index)*SIZE(acceptor_index) + SIZE(exc_index)
+   if ((fe_block_keyword) .and. (cr_block_keyword)) then
+      !> some checks  N*N+N+1 is the total number of states
+      total_states = SIZE(donor_index)*SIZE(acceptor_index) + SIZE(exc_index) +1
+   else if ((.not. fe_block_keyword) .and. (cr_block_keyword)) then 
+      !> some checks  N*N+1 is the total number of states
+      total_states = SIZE(donor_index)*SIZE(acceptor_index) +1
+   else if ((fe_block_keyword) .and. (.not. cr_block_keyword)) then
+      !> some checks  N*N+N+1 is the total number of states
+      total_states = SIZE(donor_index)*SIZE(acceptor_index) + SIZE(exc_index)
+    else 
+      total_states = SIZE(donor_index)*SIZE(acceptor_index)
+   end if
+   
    IF (total_states .ne. nadiab) THEN 
-      CPABORT("NUMBER_DIABATIC_STATES different from total n states")
+         CPABORT("NUMBER_DIABATIC_STATES different from total n states")
    END IF
+
    ind1 = donor_index(1) 
    do i=2,SIZE(donor_index)
       if (donor_index(i) .le. ind1) THEN 
@@ -251,12 +270,6 @@ SUBROUTINE fe_ct_block_energies_forces(adiab_section,energies_1_mol_list, energi
    do i=2,SIZE(acceptor_index)
       if (acceptor_index(i) .le. ind1) THEN 
         CPABORT("Acceptor mol must be ascending")
-      end if
-   end do
-   ind1 = exc_index(1) 
-   do i=2,SIZE(exc_index)
-      if (exc_index(i) .le. ind1) THEN 
-        CPABORT("EXC mol must be ascending")
       end if
    end do
 
@@ -397,77 +410,95 @@ SUBROUTINE fe_ct_block_energies_forces(adiab_section,energies_1_mol_list, energi
       end do
    end do
 
-  !NOW THE FE BLOCK
-   !exc_ind  is in the 1,2,3..  base (active mol base) to be consisent with
-   !energies_1_mol_list like in the CT case
-   ALLOCATE(exc_ind(SIZE(exc_index)))
-   do i=1,SIZE(exc_index)
-     do j=1,SIZE(my_mol_index) 
-         if (exc_index(i) .eq. my_mol_index(j)) then
-            exc_ind(i) = j 
-            EXIT
-         end if 
-     end do 
-   end do
-
-
-!print *, "STATE to BEFORE FE", state
-   !> loop over each (active) state starting from where CT were left
-   count_ = 0
-   DO i = state+1, nadiab !loop over num of adiabatic states until the end
-!print *, "GLOB_STATE", i
-      count_ = count_ + 1
-      !> get index actual mol excited BUT in the base 1,2,3..
-      ind1 = exc_ind(count_)
-
-!print *, "FE STATE", ind1
-      !> we create site energies from the 2 force_evals sections: the first
-      !neutral, the second charge and the THIRD excited.
-      my_energies(i) = energies(1) + energies_1_mol_list(3,ind1) - energies_1_mol_list(1,ind1)
-
-      !> we allocate diagonal forces array. All the atoms for a give state i
-      !assume the value of the neutral force_field that contains: intra +
-      !nonbonded interactions
-      mixed_env%F(:,:,i) = global_forces(1)%forces
-      
-      !> find index mol i (which is state i) of the pair
-      init_atom_mol_i = active_system_info(1,ind1)
-      final_atom_mol_i = active_system_info(2,ind1)
-      atoms_per_mol_i = (final_atom_mol_i-init_atom_mol_i)+1
-
-
-      !> since intra_forces_global stores only active atoms the numbering is a
-      !bit more triky and relies on the n of atoms per mol (which is an info
-      !contained in active_system_info)
-      start_i = intra_forces_info(1,ind1)
-      end_i = intra_forces_info(2,ind1)
-!print *, "index exc", init_atom_mol_i, final_atom_mol_i
-!print *, "NEW", start_i, end_i
-      mixed_env%F(1,init_atom_mol_i:final_atom_mol_i,i) = &
-                         mixed_env%F(1,init_atom_mol_i:final_atom_mol_i,i) + &
-                         intra_forces_global(3,1,start_i:end_i) - &
-                         intra_forces_global(1,1,start_i:end_i)
-      mixed_env%F(2,init_atom_mol_i:final_atom_mol_i,i) = &
-                         mixed_env%F(2,init_atom_mol_i:final_atom_mol_i,i) + &
-                         intra_forces_global(3,2,start_i:end_i) - &
-                         intra_forces_global(1,2,start_i:end_i)
-      mixed_env%F(3,init_atom_mol_i:final_atom_mol_i,i) = &
-                         mixed_env%F(3,init_atom_mol_i:final_atom_mol_i,i) + &
-                         intra_forces_global(3,3,start_i:end_i) - &
-                         intra_forces_global(1,3,start_i:end_i)
-   END DO
+  !> THE FE BLOCK (always after the CT Block)
+  IF (fe_block_keyword) THEN
+      !exc_ind  is in the 1,2,3..  base (active mol base) to be consisent with
+      !energies_1_mol_list like in the CT case
+      ALLOCATE(exc_ind(SIZE(exc_index)))
+      do i=1,SIZE(exc_index)
+        do j=1,SIZE(my_mol_index) 
+            if (exc_index(i) .eq. my_mol_index(j)) then
+               exc_ind(i) = j 
+               EXIT
+            end if 
+        end do 
+      end do
+   
+      if (cr_block_keyword) then
+         ! in case CR is present
+         total_states = nadiab-1
+      else 
+         total_states = nadiab
+      end if
+   
+   !print *, "STATE to BEFORE FE", state
+      !> loop over each (active) state starting from where CT were left
+      count_ = 0
+      DO i = state+1, total_states !loop over num of adiabatic states until the end
+   !print *, "GLOB_STATE", i
+         count_ = count_ + 1
+         !> get index actual mol excited BUT in the base 1,2,3..
+         ind1 = exc_ind(count_)
+   
+   !print *, "FE STATE", ind1
+         !> we create site energies from the 2 force_evals sections: the first
+         !neutral, the second charge and the THIRD excited.
+         my_energies(i) = energies(1) + energies_1_mol_list(3,ind1) - energies_1_mol_list(1,ind1)
+   
+         !> we allocate diagonal forces array. All the atoms for a give state i
+         !assume the value of the neutral force_field that contains: intra +
+         !nonbonded interactions
+         mixed_env%F(:,:,i) = global_forces(1)%forces
+         
+         !> find index mol i (which is state i) of the pair
+         init_atom_mol_i = active_system_info(1,ind1)
+         final_atom_mol_i = active_system_info(2,ind1)
+         atoms_per_mol_i = (final_atom_mol_i-init_atom_mol_i)+1
+   
+   
+         !> since intra_forces_global stores only active atoms the numbering is a
+         !bit more triky and relies on the n of atoms per mol (which is an info
+         !contained in active_system_info)
+         start_i = intra_forces_info(1,ind1)
+         end_i = intra_forces_info(2,ind1)
+   !print *, "index exc", init_atom_mol_i, final_atom_mol_i
+   !print *, "NEW", start_i, end_i
+         mixed_env%F(1,init_atom_mol_i:final_atom_mol_i,i) = &
+                            mixed_env%F(1,init_atom_mol_i:final_atom_mol_i,i) + &
+                            intra_forces_global(3,1,start_i:end_i) - &
+                            intra_forces_global(1,1,start_i:end_i)
+         mixed_env%F(2,init_atom_mol_i:final_atom_mol_i,i) = &
+                            mixed_env%F(2,init_atom_mol_i:final_atom_mol_i,i) + &
+                            intra_forces_global(3,2,start_i:end_i) - &
+                            intra_forces_global(1,2,start_i:end_i)
+         mixed_env%F(3,init_atom_mol_i:final_atom_mol_i,i) = &
+                            mixed_env%F(3,init_atom_mol_i:final_atom_mol_i,i) + &
+                            intra_forces_global(3,3,start_i:end_i) - &
+                            intra_forces_global(1,3,start_i:end_i)
+      END DO
+      DEALLOCATE(exc_ind)
+   END IF
+   
+  !> THE CR BLOCK (always after the last Block)
+   if (cr_block_keyword) then
+      ! in case CR is present
+      total_states = nadiab
+      my_energies(total_states) = energies(1)
+      mixed_env%F(:,:,total_states) = global_forces(1)%forces
+   end if
+   
 
    DEALLOCATE(intra_forces_info)
    DEALLOCATE(first_ind)
-   DEALLOCATE(second_ind,exc_ind)
+   DEALLOCATE(second_ind)
 
-END SUBROUTINE fe_ct_block_energies_forces
+END SUBROUTINE multi_block_energies_forces
 
 ! *****************************************************************************
+! THE multi_block_energies_forces is more general so this subroutine is
+! DEPRECATED
 !> \brief This subroutine does the addition and subtraction scheme for the CT
 !         states  
-!> \note The donor and acceptor phase can or not be consecutive in the xyz, namely
-!         DDDD-AAAAA or DADADADAD phases
 !> \note This subroutine gives non-degenerate site_energies (degeneracy may be
 !        introduce in the fssh specific subroutines)
 !> \par History

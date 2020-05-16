@@ -624,6 +624,8 @@ end subroutine calc_trsp_ab
 !CT states in presence of a coulomb pair-wise potential. Each state is a pair of
 !|donor,acceptor> molecules and to calculate the gradients, we consider each
 !atom of the donor and loop over all the atoms of the acceptor and viceversa.
+!> \Note this subroutine assume that the CT Block is the first in the
+!        Hamiltonian (These CT, FE, CR are constructed in force_env_method.F) 
 !> \date 02/05/2020
 !> author SG 
 !**********************************************************************************
