@@ -84,7 +84,7 @@ subroutine create_ext_press_list(molecule_kind_set, local_molecules, molecule_se
      TYPE(molecule_type), DIMENSION(:), POINTER         :: molecule_set
      INTEGER, INTENT(IN)                                :: natom
      INTEGER, DIMENSION(:), POINTER                     :: my_mol_index !this are the decomp list indeces
-     LOGICAL, DIMENSION(:), POINTER,  INTENT(OUT)       :: ext_pres
+     LOGICAL, DIMENSION(:), POINTER,  INTENT(INOUT)     :: ext_pres
      INTEGER, DIMENSION(:,:), ALLOCATABLE,               &
                                               OPTIONAL  :: full_system_info
      INTEGER, DIMENSION(:,:), ALLOCATABLE, INTENT(OUT)  :: active_system_info
@@ -99,7 +99,7 @@ subroutine create_ext_press_list(molecule_kind_set, local_molecules, molecule_se
      INTEGER                                            :: total_num_mol !total number of
                                                                !mols in the system 
      INTEGER                                            :: count_
-
+     !> this array is still deallocated 
      ALLOCATE(ext_pres(natom))
 
      !>active_system_info contains info about the number of initial and final atom for each mol. 
