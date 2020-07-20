@@ -739,7 +739,7 @@ end subroutine calc_trsp_ab
 
       !! calc coulomb iteraction for a given pair of molecules
       CALL calc_trsp_ab(crd_i, crd_k, charges1, charges2, coulomb_coup, Gaussian_charges)  
-      !print *, "FOBSH| Coulob pot:", coulomb_coup
+      !print *, "FOBSH| Coulob pot:", CT_states_info(1,state), CT_states_info(2,state),  coulomb_coup
       
       !> site energies are modified by the coulomb potential 
       energies_tp(state) = energies_tp(state) + (1.0D0/screening)*coulomb_coup 
