@@ -729,49 +729,90 @@ CONTAINS
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
-    CALL keyword_create(keyword, name="PPI_FILE_NAME",&
-         description="Specifies the filename that contains the lookup table",&
-         usage="PPI_FILE_NAME <FILENAME>",type_of_var=lchar_t)
-    CALL section_add_keyword(sub2section,keyword)
-    CALL keyword_release(keyword)
+    !CALL keyword_create(keyword, name="PPI_FILE_NAME",&
+    !     description="Specifies the filename that contains the lookup table",&
+    !     usage="PPI_FILE_NAME <FILENAME>",type_of_var=lchar_t)
+    !CALL section_add_keyword(sub2section,keyword)
+    !CALL keyword_release(keyword)
 
-    CALL keyword_create(keyword, name="PSIGMA_FILE_NAME",&
-         description="Specifies the filename that contains the lookup table",&
-         usage="PPI_FILE_NAME <FILENAME>",type_of_var=lchar_t)
-    CALL section_add_keyword(sub2section,keyword)
-    CALL keyword_release(keyword)
+    !CALL keyword_create(keyword, name="PSIGMA_FILE_NAME",&
+    !     description="Specifies the filename that contains the lookup table",&
+    !     usage="PPI_FILE_NAME <FILENAME>",type_of_var=lchar_t)
+    !CALL section_add_keyword(sub2section,keyword)
+    !CALL keyword_release(keyword)
 
     ! OZ: enable C-S and S-S lookup tables keywords
 
-    CALL keyword_create(keyword, name="PPI_C_S_FILE_NAME",&
-         description="Pi-pi C-S AOM lookup table",&
-         usage="PPI_C_S_FILE_NAME <FILENAME>",type_of_var=lchar_t)
-    CALL section_add_keyword(sub2section,keyword)
-    CALL keyword_release(keyword)
+    !CALL keyword_create(keyword, name="PPI_C_S_FILE_NAME",&
+    !     description="Pi-pi C-S AOM lookup table",&
+    !     usage="PPI_C_S_FILE_NAME <FILENAME>",type_of_var=lchar_t)
+    !CALL section_add_keyword(sub2section,keyword)
+    !CALL keyword_release(keyword)
 
-    CALL keyword_create(keyword, name="PSIGMA_C_S_FILE_NAME",&
-         description="Sigma-pi C-S lookup table",&
-         usage="PPI_C_S_FILE_NAME <FILENAME>",type_of_var=lchar_t)
-    CALL section_add_keyword(sub2section,keyword)
-    CALL keyword_release(keyword)
+    !CALL keyword_create(keyword, name="PSIGMA_C_S_FILE_NAME",&
+    !     description="Sigma-pi C-S lookup table",&
+    !     usage="PPI_C_S_FILE_NAME <FILENAME>",type_of_var=lchar_t)
+    !CALL section_add_keyword(sub2section,keyword)
+    !CALL keyword_release(keyword)
 
-    CALL keyword_create(keyword, name="PPI_S_S_FILE_NAME",&
-         description="Pi-pi S-S AOM lookup table",&
-         usage="PPI_S_S_FILE_NAME <FILENAME>",type_of_var=lchar_t)
-    CALL section_add_keyword(sub2section,keyword)
-    CALL keyword_release(keyword)
+    !CALL keyword_create(keyword, name="PPI_S_S_FILE_NAME",&
+    !     description="Pi-pi S-S AOM lookup table",&
+    !     usage="PPI_S_S_FILE_NAME <FILENAME>",type_of_var=lchar_t)
+    !CALL section_add_keyword(sub2section,keyword)
+    !CALL keyword_release(keyword)
 
-    CALL keyword_create(keyword, name="PSIGMA_S_S_FILE_NAME",&
-         description="Sigma-pi S-S lookup table",&
-         usage="PPI_S_S_FILE_NAME <FILENAME>",type_of_var=lchar_t)
-    CALL section_add_keyword(sub2section,keyword)
-    CALL keyword_release(keyword)
+    !CALL keyword_create(keyword, name="PSIGMA_S_S_FILE_NAME",&
+    !     description="Sigma-pi S-S lookup table",&
+    !     usage="PPI_S_S_FILE_NAME <FILENAME>",type_of_var=lchar_t)
+    !CALL section_add_keyword(sub2section,keyword)
+    !CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="_DEFAULT_KEYWORD_",&
          description="The HOMO coefficient in the format:"//&
          "<p><tt>ATOMIC_KIND  LIST NO HOMOS HOMOP</tt></p>",&
          repeats=.TRUE., usage="{{String} {Int} {Int} {Real} {Real}}",&
          type_of_var=lchar_t)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="STO_EXPONENTS",&
+         description="Slater-type orbital mu exponential coeffs",&
+         usage="STO_EXPONENTS <Z:value,Z:value,...>",type_of_var=lchar_t)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="STO_RMIN",&
+         description="Spline rmin",&
+         usage="STO_RMIN <value>", &
+         default_r_val=0.05_dp,    &
+         unit_str="bohr",                   &
+         type_of_var=real_t)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="STO_RMAX",&
+         description="Spline rmax",&
+         usage="STO_RMAX <value>", &
+         default_r_val=15.0_dp,    &
+         unit_str="bohr",                   &
+         type_of_var=real_t)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="STO_DR",&
+         description="Spline dr",&
+         usage="STO_DR <value>", &
+         default_r_val=0.4_dp,    &
+         unit_str="bohr",                   &
+         type_of_var=real_t)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="STO_DEBUG",&
+         description="Write spline debug info",&
+         usage="STO_DEBUG <value>",&
+         default_i_val=0,    &
+         type_of_var=integer_t)
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 

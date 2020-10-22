@@ -9,8 +9,8 @@ MODULE sh_site_energies_methods
 
      USE kinds,                        ONLY: default_string_length,               &
                                              dp
-     USE aom_overlapfinal,             ONLY:  connect_list2,                      &
-                                              build_s_tables
+     USE aom_overlapfinal,             ONLY:  connect_list2!,                      &
+     !                                         build_s_tables
 
      USE aom_utils,                    ONLY: read_listcoeff,                       &
                                              read_listdiabcoeff,                  &

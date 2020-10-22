@@ -39,208 +39,726 @@ module aom_overlapfinal
 
 ! _PC_
 ! OZ: added extra table variables for carbon-sulfur and sulfur-sulfur SAB calc
-DOUBLE PRECISION, DIMENSION(:), ALLOCATABLE :: s_ppi_table, s_psigma_table,&
-                                               s_ppi_table_C_S,&
-                                               s_psigma_table_C_S,&
-                                               s_ppi_table_S_S,&
-                                               s_psigma_table_S_S 
-DOUBLE PRECISION, DIMENSION(:), ALLOCATABLE :: s_ppi_table2, s_psigma_table2
+!DOUBLE PRECISION, DIMENSION(:), ALLOCATABLE :: s_ppi_table, s_psigma_table,&
+!                                               s_ppi_table_C_S,&
+!                                               s_psigma_table_C_S,&
+!                                               s_ppi_table_S_S,&
+!                                               s_psigma_table_S_S 
+
+    real(kind=dp), dimension(:,:,:), allocatable :: STO_psigma_spline_coeffs
+    real(kind=dp), dimension(:,:,:), allocatable :: STO_ppi_spline_coeffs
+    real(kind=dp), dimension(3) :: STO_spline_bounds
+    integer, dimension(18) :: STO_mapZ=(/0,0,0,0,0,0,0,0,0,&
+    0,0,0,0,0,0,0,0,0/)
+    integer, dimension(:,:), allocatable :: STO_map2D
+
+!DOUBLE PRECISION, DIMENSION(:), ALLOCATABLE :: s_ppi_table2, s_psigma_table2
 ! OZ: added extra variables for C-S, S-S SAB calc
-REAL(kind=dp), DIMENSION(3) :: s_ppi_table_dims, s_psigma_table_dims,&
-                               s_ppi_table_dims_C_S, s_psigma_table_dims_C_S,&
-                               s_ppi_table_dims_S_S, s_psigma_table_dims_S_S
+!REAL(kind=dp), DIMENSION(3) :: s_ppi_table_dims, s_psigma_table_dims,&
+!                               s_ppi_table_dims_C_S, s_psigma_table_dims_C_S,&
+!                               s_ppi_table_dims_S_S, s_psigma_table_dims_S_S
 REAL(kind=dp), PARAMETER :: factorials(13) = (/1.0d0, 1.0d0, 2.0d0, 6.0d0, 24.0d0, &
             & 120.0d0, 720.0d0, 5040.0d0, 40320.0d0, 362880.0d0, 3628800.0d0, 39916800.0d0, 47900160.0d0 /)
 
 contains
 
+! OZ
+  subroutine STO_initialize_splines(STO_input_string,STO_rmin,STO_rmax,STO_dr,&
+                                    STO_debug)
+      ! from input
+      CHARACTER(LEN=default_string_length)     :: STO_input_string
+      REAL(kind=dp) :: STO_rmin,STO_rmax,STO_dr
+      INTEGER :: STO_debug
+
+    ! general variables
+    integer :: i,j,k,l,ii,jj
+    integer :: stat_err
+    ! string related
+    character(len=default_string_length) :: substring
+    integer :: species_count
+    integer, dimension(:), allocatable ::  token_pos
+    ! STO related
+    integer, dimension(:), allocatable :: STO_atomic_Z
+    real(kind=dp), dimension(:), allocatable :: STO_mu
+    integer :: STO_species
+    character(len=10) :: typei,typej
+    real(kind=dp) :: pcoeff,t
+    ! linear solver
+    real(kind=dp), dimension(:), allocatable :: A_prec,b,pivot
+    real(kind=dp), dimension(:,:), allocatable :: A
+    integer :: rc
+    ! spline related
+    real(kind=dp), dimension(:), allocatable :: r,y
+    real(kind=dp), dimension(:), allocatable :: d2y
+    integer :: N
+    real(kind=dp) :: a0,a1,a2,a3
+    !real(kind=dp), dimension(:,:,:), allocatable :: STO_psigma_spline_coeffs
+    !real(kind=dp), dimension(:,:,:), allocatable :: STO_ppi_spline_coeffs
+    ! mapping related
+    ! create an atomic number locator array
+    ! presentZ=[0,0,0,....,0] - 18 species; cover from H to Ar
+    integer, dimension(18) :: presentZ=(/0,0,0,0,0,0,0,0,0,&
+    0,0,0,0,0,0,0,0,0/)
+    ! STO_mapZ is an internal mapping array
+    !integer, dimension(18) :: STO_mapZ=(/0,0,0,0,0,0,0,0,0,&
+    !0,0,0,0,0,0,0,0,0/)
+    !integer, dimension(:,:), allocatable :: STO_map2D
+        ! testing
+        integer :: N_test
+        real(kind=dp) :: dr_test,y_test
+        character(len=default_string_length) :: filepath
+
+    if (STO_debug==1) then
+      print*,STO_input_string
+      print*,STO_rmin
+      print*,STO_rmax
+      print*,STO_dr
+      print*,STO_debug
+    end if
+
+    STO_spline_bounds(1)=STO_rmin
+    STO_spline_bounds(2)=STO_rmax
+    STO_spline_bounds(3)=STO_dr
+
+    ! tokenize input string and populate all related arrays
+    ! read an input string in the form of <int>:<real>,<int>:<real>,...
+    ! and store numeric values to arrays
+    species_count=0
+    do i=1,default_string_length
+        if (STO_input_string(i:i)==',') then
+            species_count=species_count+1
+        end if
+    end do
+    species_count=species_count+1
+    ! preallocate arrays
+    allocate(token_pos(species_count),stat=stat_err)
+    allocate(STO_atomic_Z(species_count),stat=stat_err)
+    allocate(STO_mu(species_count),stat=stat_err)
+    j=0
+    do i=1,default_string_length
+        if (STO_input_string(i:i)==',') then
+            j=j+1
+            token_pos(j)=i
+        end if
+    end do
+    token_pos(j+1)=len(trim(STO_input_string))+1
+    substring=STO_input_string(1:token_pos(1)-1)
+    j=0
+    do i=1,default_string_length
+        if (substring(i:i)==':') then
+            j=i
+        end if
+    end do
+    read(substring(1:j-1),*) STO_atomic_Z(1)
+    read(substring(j+1:len(trim(substring))),*) STO_mu(1)
+    do i=1,species_count-1
+        substring=STO_input_string(token_pos(i)+1:token_pos(i+1)-1)
+        j=0
+        do k=1,default_string_length
+            if (substring(k:k)==':') then
+                j=k
+            end if
+        end do
+        read(substring(1:j-1),*) STO_atomic_Z(i+1)
+        read(substring(j+1:len(trim(substring))),*) STO_mu(i+1)
+    end do
+    STO_species=species_count
+
+    ! mapping
+    ! loop on system's species information and set to 1 for present species
+    ! ignore H to Be (1,2,3,4) and Na and Mg (11,12)
+    ! e.g. for a system where we have H,C,N,S, we'll have:
+    ! presentZ[6]=1
+    ! presentZ[7]=1
+    ! presentZ[16]=1
+    ! all the other ones will be zero
+    do i=1,STO_species
+        presentZ(STO_atomic_Z(i))=1
+    end do
+    ! given the presentZ array, create the memory mapping:
+    ! STO_mapZ=[0,0,0,....,0] - 18 elements
+    !do i=1,STO_species
+    !    STO_mapZ(STO_atomic_Z(i))=i
+    !end do 
+    j=0
+    do i=1,18
+        if (presentZ(i)/=0) then
+                j=j+1
+                STO_mapZ(i)=j
+        end if
+    end do
+    allocate(STO_map2D(STO_species,STO_species),stat=stat_err)
+    k=0
+    do i=1,STO_species
+        do j=1,STO_species
+            k=k+1
+            STO_map2D(i,j)=k
+        end do
+    end do
+ 
+! splines
+! preamble
+N=int((STO_rmax-STO_rmin)/STO_dr)+1+1
+! preallocate arrays
+allocate(STO_psigma_spline_coeffs(STO_species*STO_species,N-1,4))
+allocate(STO_ppi_spline_coeffs(STO_species*STO_species,N-1,4))
+allocate(r(N),stat=stat_err)
+allocate(y(N),stat=stat_err)
+! populate distance array
+do i=1,N
+	r(i)=STO_rmin+(i-1)*STO_dr
+end do
+
+! loop on species
+do i=1,STO_species
+	do j=1,STO_species
+		! resolve p type
+		if (STO_atomic_Z(i)>10) then
+			typei='3p'
+		else
+			typei='2p'
+		end if  
+		if (STO_atomic_Z(j)>10) then
+			typej='3p'
+		else
+			typej='2p'
+		end if
+		! calculate p coeff and t
+		pcoeff=0.5*(STO_mu(i)+STO_mu(j))
+
+		! get psigma-psigma values
+		do k=1,N
+			if ((typei=="3p").and.(typej=="2p")) then
+				y(k)=Smulliken_psigma_psigma(r(k)*pcoeff,(STO_mu(j)-STO_mu(i))/(STO_mu(j)+STO_mu(i)),typej,typei)
+			else
+				y(k)=Smulliken_psigma_psigma(r(k)*pcoeff,(STO_mu(i)-STO_mu(j))/(STO_mu(i)+STO_mu(j)),typei,typej)
+			end if
+		end do  
+		! natural splines: linear solver
+		! A matrix
+		allocate(A_prec((N-2)*(N-2)),stat=stat_err)
+		ii=0
+		do k=1,N-2
+			do l=1,N-2
+				ii=ii+1
+				if (l==k) then
+					A_prec(ii)=4.0
+				else
+					A_prec(ii)=0.0
+				end if
+			end do
+		end do
+		do k=2,(N-2)*(N-2)-1
+			if (A_prec(k)==4) then
+				A_prec(k-1)=1.0
+				A_prec(k+1)=1.0
+			end if
+		end do
+		A_prec(2)=1.0
+		A_prec((N-2)*(N-2)-1)=1.0
+		allocate(A(N-2,N-2),stat=stat_err)
+		A=reshape(A_prec,(/N-2,N-2/))
+		! b array
+		allocate(b(N-2),stat=stat_err)
+		allocate(pivot(N-2),stat=stat_err)
+		do k=1,N-2
+			b(k)=(( y(k) - 2.0*y(k+1) + y(k+2)  )*6.0)/(STO_dr**2)
+		end do
+		! SOLVE A*x=b; solution is stored in b
+		call DGESV(N-2,1,A,N-2,pivot,b,N-2,rc)
+		! form the second derivate array
+		allocate(d2y(N),stat=stat_err)
+		k=1
+		d2y(k)=0.0
+		do l=1,N-2
+			k=k+1
+			d2y(k)=b(l)
+		end do
+		k=k+1
+		d2y(k)=0.0
+		! store spline coeffs in memory (3D matrix)
+		do k=1,N-1
+			a0=(1/(6*STO_dr))*(r(k+1)*(-STO_dr + r(k+1))*(d2y(k+1)*(2*STO_dr - r(k+1)) +&
+			d2y(k)*(STO_dr + r(k+1))) + 6*r(k+1)*y(k) + 6*(STO_dr - r(k+1))*y(k+1))
+			a1=(1/(6*STO_dr))*((d2y(k) + 2*d2y(k+1))*STO_dr**2 - 6*d2y(k+1)*STO_dr*r(k+1) +&
+			3*(-d2y(k) + d2y(k+1))*r(k+1)**2 - 6*y(k) + 6*y(k+1))
+			a2=(d2y(k+1)*STO_dr + d2y(k)*r(k+1) - d2y(k+1)*r(k+1))/(2*STO_dr)
+			a3=(-d2y(k) + d2y(k+1))/(6*STO_dr)
+			STO_psigma_spline_coeffs(STO_map2D(STO_mapZ(STO_atomic_Z(i)),STO_mapZ(STO_atomic_Z(j))),k,1)=a0
+			STO_psigma_spline_coeffs(STO_map2D(STO_mapZ(STO_atomic_Z(i)),STO_mapZ(STO_atomic_Z(j))),k,2)=a1
+			STO_psigma_spline_coeffs(STO_map2D(STO_mapZ(STO_atomic_Z(i)),STO_mapZ(STO_atomic_Z(j))),k,3)=a2
+			STO_psigma_spline_coeffs(STO_map2D(STO_mapZ(STO_atomic_Z(i)),STO_mapZ(STO_atomic_Z(j))),k,4)=a3
+                        if(STO_debug==1) then
+			write(*,*) "psigma",STO_map2D(STO_mapZ(STO_atomic_Z(i)),STO_mapZ(STO_atomic_Z(j))),k,&
+								STO_atomic_Z(i),STO_atomic_Z(j),a0,a1,a2,a3
+                        end if
+		end do
+		! free memory
+		deallocate(A_prec)
+		deallocate(A)
+		deallocate(b)
+		deallocate(pivot)
+		deallocate(d2y)
+
+		! get ppi-ppi values
+		do k=1,N
+			if ((typei=="3p").and.(typej=="2p")) then
+				y(k)=Smulliken_ppi_ppi(r(k)*pcoeff,(STO_mu(j)-STO_mu(i))/(STO_mu(j)+STO_mu(i)),typej,typei)
+			else
+				y(k)=Smulliken_ppi_ppi(r(k)*pcoeff,(STO_mu(i)-STO_mu(j))/(STO_mu(i)+STO_mu(j)),typei,typej)
+			end if
+		end do  
+		! natural splines: linear solver
+		! A matrix
+		allocate(A_prec((N-2)*(N-2)),stat=stat_err)
+		ii=0
+		do k=1,N-2
+			do l=1,N-2
+				ii=ii+1
+				if (l==k) then
+					A_prec(ii)=4.0
+				else
+					A_prec(ii)=0.0
+				end if
+			end do
+		end do
+		do k=2,(N-2)*(N-2)-1
+			if (A_prec(k)==4) then
+				A_prec(k-1)=1.0
+				A_prec(k+1)=1.0
+			end if
+		end do
+		A_prec(2)=1.0
+		A_prec((N-2)*(N-2)-1)=1.0
+		allocate(A(N-2,N-2),stat=stat_err)
+		A=reshape(A_prec,(/N-2,N-2/))
+		! b array
+		allocate(b(N-2),stat=stat_err)
+		allocate(pivot(N-2),stat=stat_err)
+		do k=1,N-2
+			b(k)=(( y(k) - 2.0*y(k+1) + y(k+2)  )*6.0)/(STO_dr**2)
+		end do
+		! SOLVE A*x=b; solution is stored in b
+		call DGESV(N-2,1,A,N-2,pivot,b,N-2,rc)
+		! form the second derivate array
+		allocate(d2y(N),stat=stat_err)
+		k=1
+		d2y(k)=0.0
+		do l=1,N-2
+			k=k+1
+			d2y(k)=b(l)
+		end do
+		k=k+1
+		d2y(k)=0.0
+		! store spline coeffs in memory (3D matrix)
+		do k=1,N-1
+			a0=(1/(6*STO_dr))*(r(k+1)*(-STO_dr + r(k+1))*(d2y(k+1)*(2*STO_dr - r(k+1)) +&
+			d2y(k)*(STO_dr + r(k+1))) + 6*r(k+1)*y(k) + 6*(STO_dr - r(k+1))*y(k+1))
+			a1=(1/(6*STO_dr))*((d2y(k) + 2*d2y(k+1))*STO_dr**2 - 6*d2y(k+1)*STO_dr*r(k+1) +&
+			3*(-d2y(k) + d2y(k+1))*r(k+1)**2 - 6*y(k) + 6*y(k+1))
+			a2=(d2y(k+1)*STO_dr + d2y(k)*r(k+1) - d2y(k+1)*r(k+1))/(2*STO_dr)
+			a3=(-d2y(k) + d2y(k+1))/(6*STO_dr)
+			STO_ppi_spline_coeffs(STO_map2D(STO_mapZ(STO_atomic_Z(i)),STO_mapZ(STO_atomic_Z(j))),k,1)=a0
+			STO_ppi_spline_coeffs(STO_map2D(STO_mapZ(STO_atomic_Z(i)),STO_mapZ(STO_atomic_Z(j))),k,2)=a1
+			STO_ppi_spline_coeffs(STO_map2D(STO_mapZ(STO_atomic_Z(i)),STO_mapZ(STO_atomic_Z(j))),k,3)=a2
+			STO_ppi_spline_coeffs(STO_map2D(STO_mapZ(STO_atomic_Z(i)),STO_mapZ(STO_atomic_Z(j))),k,4)=a3
+                        if(STO_debug==1) then
+			write(*,*) "ppi",STO_map2D(STO_mapZ(STO_atomic_Z(i)),STO_mapZ(STO_atomic_Z(j))),k,&
+								STO_atomic_Z(i),STO_atomic_Z(j),a0,a1,a2,a3
+                        end if
+		end do
+		! free memory
+		deallocate(A_prec)
+		deallocate(A)
+		deallocate(b)
+		deallocate(pivot)
+		deallocate(d2y)
+
+	end do
+end do
+
+! free arrays
+deallocate(r)
+deallocate(y)
+
+if(STO_debug==1) then
+! diagnostics
+dr_test=STO_dr/10.0
+N_test=int((STO_rmax-STO_rmin)/dr_test)+1+1
+allocate(r(N_test),stat=stat_err)
+allocate(y(N_test),stat=stat_err)
+do i=1,N_test
+	r(i)=STO_rmin+(i-1)*dr_test
+end do
+do i=1,STO_species
+	do j=1,STO_species
+		! resolve p type
+		if (STO_atomic_Z(i)>10) then
+			typei='3p'
+		else
+			typei='2p'
+		end if  
+		if (STO_atomic_Z(j)>10) then
+			typej='3p'
+		else
+			typej='2p'
+		end if
+		! calculate p coeff and t
+		pcoeff=0.5*(STO_mu(i)+STO_mu(j))
+		! get psigma-psigma values
+		do k=1,N_test
+			if ((typei=="3p").and.(typej=="2p")) then
+				y(k)=Smulliken_psigma_psigma(r(k)*pcoeff,(STO_mu(j)-STO_mu(i))/(STO_mu(j)+STO_mu(i)),typej,typei)
+			else
+				y(k)=Smulliken_psigma_psigma(r(k)*pcoeff,(STO_mu(i)-STO_mu(j))/(STO_mu(i)+STO_mu(j)),typei,typej)
+			end if
+		end do  
+		! write to file
+		write(filepath,'(a,i2.2,a,i2.2,a)') "psigma_",STO_atomic_Z(i),"_",STO_atomic_Z(j),".dat"
+		open(1,file=filepath,action='write')
+		write(1,*) "# psigma; species",STO_atomic_Z(i),STO_atomic_Z(j)
+		do k=1,N_test
+                        if(r(k)<STO_rmax) then
+			y_test=S_splines_psigma(r(k),STO_atomic_Z(i),STO_atomic_Z(j))
+			write(1,*) r(k),y(k),y_test,abs(y(k)-y_test)
+                        end if
+		end do
+		close(1)
+		! get ppi-ppi values
+		do k=1,N_test
+			if ((typei=="3p").and.(typej=="2p")) then
+				y(k)=Smulliken_ppi_ppi(r(k)*pcoeff,(STO_mu(j)-STO_mu(i))/(STO_mu(j)+STO_mu(i)),typej,typei)
+			else
+				y(k)=Smulliken_ppi_ppi(r(k)*pcoeff,(STO_mu(i)-STO_mu(j))/(STO_mu(i)+STO_mu(j)),typei,typej)
+			end if
+		end do  
+		! write to file
+		write(filepath,'(a,i2.2,a,i2.2,a)') "ppi_",STO_atomic_Z(i),"_",STO_atomic_Z(j),".dat"
+		open(1,file=filepath,action='write')
+		write(1,*) "# ppi; species",STO_atomic_Z(i),STO_atomic_Z(j)
+		do k=1,N_test
+                        if(r(k)<STO_rmax) then
+			y_test=S_splines_ppi(r(k),STO_atomic_Z(i),STO_atomic_Z(j))
+			write(1,*) r(k),y(k),y_test,abs(y(k)-y_test)
+                        end if
+		end do
+		close(1)
+	end do
+end do
+
+! free arrays
+deallocate(r)
+deallocate(y)
+end if
+
+! free memory
+deallocate(token_pos)
+deallocate(STO_atomic_Z)
+deallocate(STO_mu)
+
+! to pass to env:
+!deallocate(STO_map2D)
+!deallocate(STO_psigma_spline_coeffs)
+!deallocate(STO_ppi_spline_coeffs)
+! plus array STO_mapZ and scalars STO_rmin,STO_rmax,STO_dr
+
+
+  end subroutine
+
+function Smulliken_psigma_psigma(p,t,type1,type2)
+    !real(kind=dp) :: A
+    !real(kind=dp) :: B
+    real(kind=dp) :: Smulliken_psigma_psigma
+    real(kind=dp), intent(in) :: p,t
+    character(len=10), intent(in) :: type1,type2
+    Smulliken_psigma_psigma=0.0
+    ! 2psigma-2psigma
+    if ((type1=="2p").AND.(type2=="2p")) then
+        if (abs(t)>0.0) then
+            Smulliken_psigma_psigma=(1.0/16.0)*(p*p*p*p*p)*((1.0-t*t)**2.5)*(B(2,p,t)*(A(0,p)+A(4,p))-A(2,p)*(B(0,p,t)+B(4,p,t)))
+        else
+            Smulliken_psigma_psigma=(1.0/120.0)*(p*p*p*p*p)*(5.0*A(4,p)-18.0*A(2,p)+5.0*A(0,p))
+        end if
+    end if
+    ! 2psigma-3psigma
+    if ((type1=="2p").AND.(type2=="3p")) then
+        if (abs(t)>0.0) then
+            Smulliken_psigma_psigma=(1.0/16.0)*(1.0/sqrt(30.0))*(p*p*p*p*p*p)*&
+            ((1.0+t)**2.5)*((1.0-t)**3.5)*(A(2,p)*(B(1,p,t)+B(5,p,t))-A(3,p)*&
+            (B(0,p,t)+B(4,p,t))-B(3,p,t)*(A(0,p)+A(4,p))+B(2,p,t)*(A(1,p)+A(5,p)))
+        else
+            Smulliken_psigma_psigma=(1.0/120.0)*(1.0/sqrt(30.0))*(p*p*p*p*p*p)*(5.0*A(5,p)-18.0*A(3,p)+5.0*A(1,p))
+        end if
+    end if
+    ! 3psigma-3psigma
+    if ((type1=="3p").AND.(type2=="3p")) then
+        if (abs(t)>0.0) then
+            Smulliken_psigma_psigma=(1.0/480.0)*(p*p*p*p*p*p*p)*&
+            ((1.0-t*t)**3.5)*(A(6,p)*B(2,p,t)-A(4,p)*(B(0,p,t)+&
+            2.0*B(4,p,t))+A(2,p)*(B(6,p,t)+2.0*B(2,p,t))-A(0,p)*B(4,p,t))
+        else
+            Smulliken_psigma_psigma=(1.0/25200.0)*(p*p*p*p*p*p*p)*&
+            (35.0*A(6,p)-147.0*A(4,p)+85.0*A(2,p)-21.0*A(0,p))
+        end if
+    end if
+end function
+
+function Smulliken_ppi_ppi(p,t,type1,type2)
+    !real(kind=dp) :: A
+    !real(kind=dp) :: B
+    real(kind=dp) :: Smulliken_ppi_ppi
+    real(kind=dp), intent(in) :: p,t
+    character(len=10), intent(in) :: type1,type2
+    Smulliken_ppi_ppi=0.0
+    ! 2ppi-2ppi
+    if ((type1=="2p").AND.(type2=="2p")) then
+        if (abs(t)>0.0) then
+            Smulliken_ppi_ppi=(1.0/32.0)*(p*p*p*p*p)*((1.0-t*t)**2.5)*(A(4,p)*&
+            (B(0,p,t)-B(2,p,t))+A(2,p)*(B(4,p,t)-B(0,p,t))+A(0,p)*(B(2,p,t)-B(4,p,t)))
+        else
+            Smulliken_ppi_ppi=(1.0/120.0)*(p*p*p*p*p)*(5.0*A(4,p)-6.0*A(2,p)+A(0,p))
+        end if
+    end if
+    ! 2ppi-3ppi
+    if ((type1=="2p").AND.(type2=="3p")) then
+        if (abs(t)>0.0) then
+            Smulliken_ppi_ppi=(1.0/32.0)*(1.0/sqrt(30.0))*(p*p*p*p*p*p)*&
+            ((1.0+t)**2.5)*((1.0-t)**3.5)*(A(5,p)*(B(0,p,t)-B(2,p,t))+&
+            A(4,p)*(B(3,p,t)-B(1,p,t))+A(3,p)*(B(4,p,t)-B(0,p,t))+&
+            A(2,p)*(B(1,p,t)-B(5,p,t))+A(1,p)*(B(2,p,t)-B(4,p,t))+A(0,p)*(B(5,p,t)-B(3,p,t)))
+        else
+            Smulliken_ppi_ppi=(1.0/120.0)*(1.0/sqrt(30.0))*(p*p*p*p*p*p)*(5.0*A(5,p)-6.0*A(3,p)+A(1,p))
+        end if
+    end if
+    ! 3ppi-3ppi
+    if ((type1=="3p").AND.(type2=="3p")) then
+        if (abs(t)>0.0) then
+            Smulliken_ppi_ppi=(1.0/960.0)*(p*p*p*p*p*p*p)*((1.0-t*t)**3.5)*&
+            (A(6,p)*(B(0,p,t)-B(2,p,t))+A(4,p)*(2.0*B(4,p,t)-B(0,p,t)-B(2,p,t))+&
+            A(2,p)*(2.0*B(2,p,t)-B(4,p,t)-B(6,p,t))+A(0,p)*(B(6,p,t)-B(4,p,t)))
+        else
+            Smulliken_ppi_ppi=(1.0/25200.0)*(p*p*p*p*p*p*p)*(35.0*A(6,p)-49.0*A(4,p)+17.0*A(2,p)-3.0*A(0,p))
+        end if
+    end if
+end function
+
+function S_splines_psigma(R,Zi,Zj)
+ real(kind=dp) :: R
+ real(kind=dp) :: a0,a1,a2,a3
+ integer :: Zi,Zj,l
+ real(kind=dp) S_splines_psigma
+ S_splines_psigma=0.0_dp
+ if(R<STO_spline_bounds(2)) then
+  l=int((R-STO_spline_bounds(1))/STO_spline_bounds(3))
+  a0=STO_psigma_spline_coeffs(STO_map2D(STO_mapZ(Zi),STO_mapZ(Zj)),l+1,1)
+  a1=STO_psigma_spline_coeffs(STO_map2D(STO_mapZ(Zi),STO_mapZ(Zj)),l+1,2)
+  a2=STO_psigma_spline_coeffs(STO_map2D(STO_mapZ(Zi),STO_mapZ(Zj)),l+1,3)
+  a3=STO_psigma_spline_coeffs(STO_map2D(STO_mapZ(Zi),STO_mapZ(Zj)),l+1,4)
+  S_splines_psigma=a0+a1*R+a2*R**2+a3*R**3
+ end if
+end function
+
+function S_splines_ppi(R,Zi,Zj)
+ real(kind=dp) :: R
+ real(kind=dp) :: a0,a1,a2,a3
+ integer :: Zi,Zj,l
+ real(kind=dp) S_splines_ppi
+ S_splines_ppi=0.0_dp
+ if(R<STO_spline_bounds(2)) then
+  l=int((R-STO_spline_bounds(1))/STO_spline_bounds(3))
+  a0=STO_ppi_spline_coeffs(STO_map2D(STO_mapZ(Zi),STO_mapZ(Zj)),l+1,1)
+  a1=STO_ppi_spline_coeffs(STO_map2D(STO_mapZ(Zi),STO_mapZ(Zj)),l+1,2)
+  a2=STO_ppi_spline_coeffs(STO_map2D(STO_mapZ(Zi),STO_mapZ(Zj)),l+1,3)
+  a3=STO_ppi_spline_coeffs(STO_map2D(STO_mapZ(Zi),STO_mapZ(Zj)),l+1,4)
+  S_splines_ppi=a0+a1*R+a2*R**2+a3*R**3
+ end if
+end function
+
 !--------PC added functino to build S lookuptable----------
-
 ! OZ: add extra arguments
-  subroutine build_s_tables(file_name_s_psigma, file_name_s_ppi,&
-                            file_name_s_psigma_C_S, file_name_s_ppi_C_S,&
-                            file_name_s_psigma_S_S, file_name_s_ppi_S_S)
-      CHARACTER(LEN=default_string_length)     :: file_name_s_psigma, file_name_s_ppi  
-      ! OZ: C-S and S-S file paths
-      CHARACTER(LEN=default_string_length)     :: file_name_s_psigma_C_S,&
-                                                  file_name_s_ppi_C_S,&
-                                                  file_name_s_psigma_S_S,&
-                                                  file_name_s_ppi_S_S
-      !CHARACTER(len=*), PARAMETER :: routineN = 'build_s_tables', &
-      !   routineP = moduleN//':'//routineN
-
-      REAL(kind=dp) :: Bohr
-      !INTEGER :: nrows,i
-      INTEGER :: nrows, i
-      TYPE(cp_parser_type), POINTER            :: parser
-      LOGICAL                                  :: my_end
- 
- 
-      Bohr = 5.29177E-011
-
-      ! OZ: print lookup table file names
-      print*,"Lookup table files:"
-      print*,file_name_s_psigma
-      print*,file_name_s_ppi
-      print*,file_name_s_psigma_C_S
-      print*,file_name_s_ppi_C_S
-      print*,file_name_s_psigma_S_S
-      print*,file_name_s_ppi_S_S
-      
-
-      !open(1, file="S_psigma.txt")
-      !read(1,*) s_psigma_table_dims
-      !nrows = NINT((s_psigma_table_dims(2)-s_psigma_table_dims(1))/s_psigma_table_dims(3))
-      ! print*, "NROWS", nrows
-      !allocate(s_psigma_table2(nrows))
-      !read(1,*) s_psigma_table2
-
-
-      !open(2, file="S_ppi.txt")
-      !read(2,*) s_ppi_table_dims
-      !nrows = NINT((s_ppi_table_dims(2)-s_ppi_table_dims(1))/s_ppi_table_dims(3))
-      !allocate(s_ppi_table2(nrows))
-      !read(2,*) s_ppi_table2
-
-      NULLIFY (parser)
-      CALL parser_create(parser, file_name_s_psigma)
-      !print*, "HOY"
-      CALL parser_get_next_line(parser,1)
-      !print*, "HOY HOY"
-      READ (parser%input_line, *)  s_psigma_table_dims
-      nrows = NINT((s_psigma_table_dims(2)-s_psigma_table_dims(1))/s_psigma_table_dims(3))
-      ! print*, "NROWS", nrows
-      allocate(s_psigma_table(nrows)) 
-      i = 1
-      Lookup: DO
+!  subroutine build_s_tables(file_name_s_psigma, file_name_s_ppi,&
+!                            file_name_s_psigma_C_S, file_name_s_ppi_C_S,&
+!                            file_name_s_psigma_S_S, file_name_s_ppi_S_S)
+!      CHARACTER(LEN=default_string_length)     :: file_name_s_psigma, file_name_s_ppi  
+!      ! OZ: C-S and S-S file paths
+!      CHARACTER(LEN=default_string_length)     :: file_name_s_psigma_C_S,&
+!                                                  file_name_s_ppi_C_S,&
+!                                                  file_name_s_psigma_S_S,&
+!                                                  file_name_s_ppi_S_S
+!      !CHARACTER(len=*), PARAMETER :: routineN = 'build_s_tables', &
+!      !   routineP = moduleN//':'//routineN
+!
+!      REAL(kind=dp) :: Bohr
+!      !INTEGER :: nrows,i
+!      INTEGER :: nrows, i
+!      TYPE(cp_parser_type), POINTER            :: parser
+!      LOGICAL                                  :: my_end
+! 
+! 
+!      Bohr = 5.29177E-011
+!
+!      ! OZ: print lookup table file names
+!      print*,"Lookup table files:"
+!      print*,file_name_s_psigma
+!      print*,file_name_s_ppi
+!      print*,file_name_s_psigma_C_S
+!      print*,file_name_s_ppi_C_S
+!      print*,file_name_s_psigma_S_S
+!      print*,file_name_s_ppi_S_S 
+!
+!      !open(1, file="S_psigma.txt")
+!      !read(1,*) s_psigma_table_dims
+!      !nrows = NINT((s_psigma_table_dims(2)-s_psigma_table_dims(1))/s_psigma_table_dims(3))
+!      ! print*, "NROWS", nrows
+!      !allocate(s_psigma_table2(nrows))
+!      !read(1,*) s_psigma_table2
+!
+!
+!      !open(2, file="S_ppi.txt")
+!      !read(2,*) s_ppi_table_dims
+!      !nrows = NINT((s_ppi_table_dims(2)-s_ppi_table_dims(1))/s_ppi_table_dims(3))
+!      !allocate(s_ppi_table2(nrows))
+!      !read(2,*) s_ppi_table2
+!
+!      NULLIFY (parser)
+!      CALL parser_create(parser, file_name_s_psigma)
+!      !print*, "HOY"
+!      CALL parser_get_next_line(parser,1)
+!      !print*, "HOY HOY"
+!      READ (parser%input_line, *)  s_psigma_table_dims
+!      nrows = NINT((s_psigma_table_dims(2)-s_psigma_table_dims(1))/s_psigma_table_dims(3))
+!      ! print*, "NROWS", nrows
+!      allocate(s_psigma_table(nrows)) 
+!      i = 1
+!      Lookup: DO
 !          print*, "NEXT"
-          CALL parser_get_next_line(parser,1,at_end=my_end)
+!          CALL parser_get_next_line(parser,1,at_end=my_end)
 !print*, "MY_END", my_end
-          IF ((my_end).OR.( i > nrows)) THEN
-          !IF (my_end) THEN
-             EXIT Lookup
-          ELSE
-             !print*, parser%input_line
-             READ (parser%input_line,*) s_psigma_table(i)
-             i = i + 1
-          ENDIF
-      END DO Lookup 
-      CALL parser_release(parser)
-
-      !IF (ALL(s_psigma_table.ne.s_psigma_table2)) THEN
-      !   CPABORT("NOT EQUAL")
-      !ELSE
-      !   print*, "S_PSIGMA EQUAL"
-      !ENDIF
-
-      NULLIFY (parser)
-      CALL parser_create(parser, file_name_s_ppi)
-      CALL parser_get_next_line(parser,1)
-      READ (parser%input_line, *)  s_ppi_table_dims
-      nrows = NINT((s_ppi_table_dims(2)-s_ppi_table_dims(1))/s_ppi_table_dims(3))
-      allocate(s_ppi_table(nrows))
+!          IF ((my_end).OR.( i > nrows)) THEN
+!          !IF (my_end) THEN
+!             EXIT Lookup
+!          ELSE
+!             !print*, parser%input_line
+!             READ (parser%input_line,*) s_psigma_table(i)
+!             i = i + 1
+!          ENDIF
+!      END DO Lookup 
+!      CALL parser_release(parser)
+!
+!      !IF (ALL(s_psigma_table.ne.s_psigma_table2)) THEN
+!      !   CPABORT("NOT EQUAL")
+!      !ELSE
+!      !   print*, "S_PSIGMA EQUAL"
+!      !ENDIF
+!
+!      NULLIFY (parser)
+!      CALL parser_create(parser, file_name_s_ppi)
+!      CALL parser_get_next_line(parser,1)
+!      READ (parser%input_line, *)  s_ppi_table_dims
+!      nrows = NINT((s_ppi_table_dims(2)-s_ppi_table_dims(1))/s_ppi_table_dims(3))
+!      allocate(s_ppi_table(nrows))
 !      print*, "nrows", nrows 
-      i = 1
-      Lookup_sppi: DO
-          CALL parser_get_next_line(parser,1,at_end=my_end)
-          IF ((my_end).OR.( i > nrows)) THEN
-             EXIT Lookup_sppi
-          ELSE
-             !print*, "i", i
-             READ (parser%input_line,*) s_ppi_table(i)
-             i = i + 1
-          ENDIF
-      END DO Lookup_sppi 
-      CALL parser_release(parser)
-      !IF (ALL(s_ppi_table.ne.s_ppi_table2)) THEN
-      !   CPABORT("NOT EQUAL")
-      !ELSE
-      !   print*, "S_PPI EQUAL"
-      !ENDIF
-
-      ! OZ: read C-S and S-S
-      NULLIFY (parser)
-      CALL parser_create(parser, file_name_s_psigma_C_S)
-      CALL parser_get_next_line(parser,1)
-      READ (parser%input_line, *)  s_psigma_table_dims_C_S
-      nrows = NINT((s_psigma_table_dims_C_S(2)-s_psigma_table_dims_C_S(1))/s_psigma_table_dims_C_S(3))
-      print*, "C-S psigma nrows", nrows
-      allocate(s_psigma_table_C_S(nrows))
-      i = 1
-      Lookup_C_S: DO
-          CALL parser_get_next_line(parser,1,at_end=my_end)
-          IF ((my_end).OR.( i > nrows)) THEN
-             EXIT Lookup_C_S
-          ELSE
-             READ (parser%input_line,*) s_psigma_table_C_S(i)
-             i = i + 1
-          ENDIF
-      END DO Lookup_C_S
-      CALL parser_release(parser)
-
-      NULLIFY (parser)
-      CALL parser_create(parser, file_name_s_ppi_C_S)
-      CALL parser_get_next_line(parser,1)
-      READ (parser%input_line, *)  s_ppi_table_dims_C_S
-      nrows = NINT((s_ppi_table_dims_C_S(2)-s_ppi_table_dims_C_S(1))/s_ppi_table_dims_C_S(3))
-      allocate(s_ppi_table_C_S(nrows))
-      print*, "C-S ppi nrows", nrows
-      i = 1
-      Lookup_sppi_C_S: DO
-          CALL parser_get_next_line(parser,1,at_end=my_end)
-          IF ((my_end).OR.( i > nrows)) THEN
-             EXIT Lookup_sppi_C_S
-          ELSE
-             !print*, "i", i
-             READ (parser%input_line,*) s_ppi_table_C_S(i)
-             i = i + 1
-          ENDIF
-      END DO Lookup_sppi_C_S
-      CALL parser_release(parser)
-
-      NULLIFY (parser)
-      CALL parser_create(parser, file_name_s_psigma_S_S)
-      CALL parser_get_next_line(parser,1)
-      READ (parser%input_line, *)  s_psigma_table_dims_S_S
-      nrows = NINT((s_psigma_table_dims_S_S(2)-s_psigma_table_dims_S_S(1))/s_psigma_table_dims_S_S(3))
-      print*, "S-S psigma nrows", nrows
-      allocate(s_psigma_table_S_S(nrows))
-      i = 1
-      Lookup_S_S: DO
-          CALL parser_get_next_line(parser,1,at_end=my_end)
-          IF ((my_end).OR.( i > nrows)) THEN
-             EXIT Lookup_S_S
-          ELSE
-             READ (parser%input_line,*) s_psigma_table_S_S(i)
-             i = i + 1
-          ENDIF
-      END DO Lookup_S_S
-      CALL parser_release(parser)
-
-      NULLIFY (parser)
-      CALL parser_create(parser, file_name_s_ppi_S_S)
-      CALL parser_get_next_line(parser,1)
-      READ (parser%input_line, *)  s_ppi_table_dims_S_S
-      nrows = NINT((s_ppi_table_dims_S_S(2)-s_ppi_table_dims_S_S(1))/s_ppi_table_dims_S_S(3))
-      allocate(s_ppi_table_S_S(nrows))
-      print*, "S-S ppi nrows", nrows
-      i = 1
-      Lookup_sppi_S_S: DO
-          CALL parser_get_next_line(parser,1,at_end=my_end)
-          IF ((my_end).OR.( i > nrows)) THEN
-             EXIT Lookup_sppi_S_S
-          ELSE
-             !print*, "i", i
-             READ (parser%input_line,*) s_ppi_table_S_S(i)
-             i = i + 1
-          ENDIF
-      END DO Lookup_sppi_S_S
-      CALL parser_release(parser)
-      
-      !-------------------------------------------
-
-
-  end subroutine 
+!      i = 1
+!      Lookup_sppi: DO
+!          CALL parser_get_next_line(parser,1,at_end=my_end)
+!          IF ((my_end).OR.( i > nrows)) THEN
+!             EXIT Lookup_sppi
+!          ELSE
+!             !print*, "i", i
+!             READ (parser%input_line,*) s_ppi_table(i)
+!             i = i + 1
+!          ENDIF
+!      END DO Lookup_sppi 
+!      CALL parser_release(parser)
+!      !IF (ALL(s_ppi_table.ne.s_ppi_table2)) THEN
+!      !   CPABORT("NOT EQUAL")
+!      !ELSE
+!      !   print*, "S_PPI EQUAL"
+!      !ENDIF
+!
+!      ! OZ: read C-S and S-S
+!      NULLIFY (parser)
+!      CALL parser_create(parser, file_name_s_psigma_C_S)
+!      CALL parser_get_next_line(parser,1)
+!      READ (parser%input_line, *)  s_psigma_table_dims_C_S
+!      nrows = NINT((s_psigma_table_dims_C_S(2)-s_psigma_table_dims_C_S(1))/s_psigma_table_dims_C_S(3))
+!      print*, "C-S psigma nrows", nrows
+!      allocate(s_psigma_table_C_S(nrows))
+!      i = 1
+!      Lookup_C_S: DO
+!          CALL parser_get_next_line(parser,1,at_end=my_end)
+!          IF ((my_end).OR.( i > nrows)) THEN
+!             EXIT Lookup_C_S
+!          ELSE
+!             READ (parser%input_line,*) s_psigma_table_C_S(i)
+!             i = i + 1
+!          ENDIF
+!      END DO Lookup_C_S
+!      CALL parser_release(parser)
+!
+!      NULLIFY (parser)
+!      CALL parser_create(parser, file_name_s_ppi_C_S)
+!      CALL parser_get_next_line(parser,1)
+!      READ (parser%input_line, *)  s_ppi_table_dims_C_S
+!      nrows = NINT((s_ppi_table_dims_C_S(2)-s_ppi_table_dims_C_S(1))/s_ppi_table_dims_C_S(3))
+!      allocate(s_ppi_table_C_S(nrows))
+!      print*, "C-S ppi nrows", nrows
+!      i = 1
+!      Lookup_sppi_C_S: DO
+!          CALL parser_get_next_line(parser,1,at_end=my_end)
+!          IF ((my_end).OR.( i > nrows)) THEN
+!             EXIT Lookup_sppi_C_S
+!          ELSE
+!             !print*, "i", i
+!             READ (parser%input_line,*) s_ppi_table_C_S(i)
+!             i = i + 1
+!          ENDIF
+!      END DO Lookup_sppi_C_S
+!      CALL parser_release(parser)
+!
+!      NULLIFY (parser)
+!      CALL parser_create(parser, file_name_s_psigma_S_S)
+!      CALL parser_get_next_line(parser,1)
+!      READ (parser%input_line, *)  s_psigma_table_dims_S_S
+!      nrows = NINT((s_psigma_table_dims_S_S(2)-s_psigma_table_dims_S_S(1))/s_psigma_table_dims_S_S(3))
+!      print*, "S-S psigma nrows", nrows
+!      allocate(s_psigma_table_S_S(nrows))
+!      i = 1
+!      Lookup_S_S: DO
+!          CALL parser_get_next_line(parser,1,at_end=my_end)
+!          IF ((my_end).OR.( i > nrows)) THEN
+!             EXIT Lookup_S_S
+!          ELSE
+!             READ (parser%input_line,*) s_psigma_table_S_S(i)
+!             i = i + 1
+!          ENDIF
+!      END DO Lookup_S_S
+!      CALL parser_release(parser)
+!
+!      NULLIFY (parser)
+!      CALL parser_create(parser, file_name_s_ppi_S_S)
+!      CALL parser_get_next_line(parser,1)
+!      READ (parser%input_line, *)  s_ppi_table_dims_S_S
+!      nrows = NINT((s_ppi_table_dims_S_S(2)-s_ppi_table_dims_S_S(1))/s_ppi_table_dims_S_S(3))
+!      allocate(s_ppi_table_S_S(nrows))
+!      print*, "S-S ppi nrows", nrows
+!      i = 1
+!      Lookup_sppi_S_S: DO
+!          CALL parser_get_next_line(parser,1,at_end=my_end)
+!          IF ((my_end).OR.( i > nrows)) THEN
+!             EXIT Lookup_sppi_S_S
+!          ELSE
+!             !print*, "i", i
+!             READ (parser%input_line,*) s_ppi_table_S_S(i)
+!             i = i + 1
+!          ENDIF
+!      END DO Lookup_sppi_S_S
+!      CALL parser_release(parser)
+!      
+!      !-------------------------------------------
+!
+!
+!  end subroutine 
 
   subroutine center_of_mass(xyz, mass, com)
 
@@ -600,17 +1118,23 @@ contains
       c = expcoeffa * expcoeffb !
       do i=1,size(expcoeffa,2)
         if (dist(i) .gt. abs(epsilon(0.d0))) then
-          t = (mua - musb(i))/(mua + musb(i)) !abs??? 
+          !t = (mua - musb(i))/(mua + musb(i)) !abs??? 
+
+          if((atomicZa/=1).and.(atomicZb(i)/=1)) then
+          sarray(i) = (c(1,i) + c(2,i)) * S_splines_ppi(dist(i),atomicZa,atomicZb(i)) +&
+                                 c(3,i) * S_splines_psigma(dist(i),atomicZa,atomicZb(i))
+          end if
+
           !if (abs(t) .lt. epsilon(0.D0)) then
             ! OZ: species check
-            if ((atomicZa .eq. 6) .and. (atomicZb(i) .eq. 6)) then
-             sarray(i) = (c(1,i) + c(2,i)) * S_ppi_lookup(dist(i)) + c(3,i) * S_psigma_lookup(dist(i))
-            else if ((atomicZa .eq. 6) .and. (atomicZb(i) .eq. 16) .or. &
-                     (atomicZa .eq. 16) .and. (atomicZb(i) .eq. 6)) then
-             sarray(i) = (c(1,i) + c(2,i)) * S_ppi_lookup_C_S(dist(i)) + c(3,i) * S_psigma_lookup_C_S(dist(i))
-            else if ((atomicZa .eq. 16) .and. (atomicZb(i) .eq. 16)) then
-             sarray(i) = (c(1,i) + c(2,i)) * S_ppi_lookup_S_S(dist(i)) + c(3,i) * S_psigma_lookup_S_S(dist(i))
-            end if
+            !if ((atomicZa .eq. 6) .and. (atomicZb(i) .eq. 6)) then
+            ! sarray(i) = (c(1,i) + c(2,i)) * S_ppi_lookup(dist(i)) + c(3,i) * S_psigma_lookup(dist(i))
+            !else if ((atomicZa .eq. 6) .and. (atomicZb(i) .eq. 16) .or. &
+            !         (atomicZa .eq. 16) .and. (atomicZb(i) .eq. 6)) then
+            ! sarray(i) = (c(1,i) + c(2,i)) * S_ppi_lookup_C_S(dist(i)) + c(3,i) * S_psigma_lookup_C_S(dist(i))
+            !else if ((atomicZa .eq. 16) .and. (atomicZb(i) .eq. 16)) then
+            ! sarray(i) = (c(1,i) + c(2,i)) * S_ppi_lookup_S_S(dist(i)) + c(3,i) * S_psigma_lookup_S_S(dist(i))
+            !end if
           !else
           !  sarray(i) = 0.0D0
           !end if
@@ -623,50 +1147,50 @@ contains
   end subroutine calc_overlap_p_Z
 
 
-  subroutine calc_overlap_p(expcoeffa, expcoeffb, mua, musb, dist, sarray)
-!     Subroutine calculating the overlap between p orbitals only currently
-!     currently this is the only one called.
-
-      REAL(KIND=dp), intent(in) :: expcoeffa(:,:)
-      REAL(KIND=dp), intent(in) :: expcoeffb(:,:)
-      REAL(KIND=dp), intent(in) :: mua, musb(:)
-      REAL(KIND=dp), intent(in) :: dist(:)
-      REAL(KIND=dp), intent(out) :: sarray(:)
-      REAL(KIND=dp), allocatable :: c(:,:)
-      !REAL(KIND=dp) :: p, t
-      REAL(KIND=dp) :: t
- 
-      integer :: stat_err
-      integer :: i
-      allocate(c(3,size(expcoeffa,2)), stat=stat_err)
-      if (stat_err .ne. 0) CPABORT(" ")
-      c = expcoeffa * expcoeffb ! 
-      do i=1,size(expcoeffa,2)
-        if (dist(i) .gt. abs(epsilon(0.d0))) then
-! ------- PC remved next two lines for lookup table function --- can replace
-! above value with fixed known tolerance not look up with epsilon each time
-!          p = (mua + musb(i))/2.0D0*dist(i) !mua and musb are slater decay coefficients see eqn 5.12 F thesis
-          t = (mua - musb(i))/(mua + musb(i)) !abs???
-          !print *, "mua and musb are:", mua, musb(i)
-          !sarray(i) = (c(1,i) + c(2,i)) * S_ppi(p,t) + c(3,i) * S_psigma(p,t) !eqn 5.12 fruzina thesis
-!-----PC comment below line in for lookup                
-          if (abs(t) .lt. epsilon(0.D0)) then
-            sarray(i) = (c(1,i) + c(2,i)) * S_ppi_lookup(dist(i)) + c(3,i) * S_psigma_lookup(dist(i))
-          else
-            sarray(i) = 0.0D0
-!            print *, "S_ppi diff:", S_ppi(p,t)-S_ppi_lookup(dist(i))
-!            print *, "S_psigma diff:", S_psigma(p,t)-S_psigma_lookup(dist(i))
-          !else
-            !print *, "(t > 0) S_ppi diff:", S_ppi(p,t)-S_ppi_lookup(dist(i))
-            !print *, "(t > 0) S_psigma diff:", S_psigma(p,t)-S_psigma_lookup(dist(i))
-          end if
-        else
-         sarray(i) = 1.d0
-        end if
-      end do
-      deallocate(c)
-      return
-  end subroutine calc_overlap_p
+!  subroutine calc_overlap_p(expcoeffa, expcoeffb, mua, musb, dist, sarray)
+!!     Subroutine calculating the overlap between p orbitals only currently
+!!     currently this is the only one called.
+!
+!      REAL(KIND=dp), intent(in) :: expcoeffa(:,:)
+!      REAL(KIND=dp), intent(in) :: expcoeffb(:,:)
+!      REAL(KIND=dp), intent(in) :: mua, musb(:)
+!      REAL(KIND=dp), intent(in) :: dist(:)
+!      REAL(KIND=dp), intent(out) :: sarray(:)
+!      REAL(KIND=dp), allocatable :: c(:,:)
+!      !REAL(KIND=dp) :: p, t
+!      REAL(KIND=dp) :: t
+! 
+!      integer :: stat_err
+!      integer :: i
+!      allocate(c(3,size(expcoeffa,2)), stat=stat_err)
+!      if (stat_err .ne. 0) CPABORT(" ")
+!      c = expcoeffa * expcoeffb ! 
+!      do i=1,size(expcoeffa,2)
+!        if (dist(i) .gt. abs(epsilon(0.d0))) then
+!! ------- PC remved next two lines for lookup table function --- can replace
+!! above value with fixed known tolerance not look up with epsilon each time
+!!          p = (mua + musb(i))/2.0D0*dist(i) !mua and musb are slater decay coefficients see eqn 5.12 F thesis
+!          t = (mua - musb(i))/(mua + musb(i)) !abs???
+!          !print *, "mua and musb are:", mua, musb(i)
+!          !sarray(i) = (c(1,i) + c(2,i)) * S_ppi(p,t) + c(3,i) * S_psigma(p,t) !eqn 5.12 fruzina thesis
+!!-----PC comment below line in for lookup                
+!          if (abs(t) .lt. epsilon(0.D0)) then
+!            sarray(i) = (c(1,i) + c(2,i)) * S_ppi_lookup(dist(i)) + c(3,i) * S_psigma_lookup(dist(i))
+!          else
+!            sarray(i) = 0.0D0
+!!            print *, "S_ppi diff:", S_ppi(p,t)-S_ppi_lookup(dist(i))
+!!            print *, "S_psigma diff:", S_psigma(p,t)-S_psigma_lookup(dist(i))
+!          !else
+!            !print *, "(t > 0) S_ppi diff:", S_ppi(p,t)-S_ppi_lookup(dist(i))
+!            !print *, "(t > 0) S_psigma diff:", S_psigma(p,t)-S_psigma_lookup(dist(i))
+!          end if
+!        else
+!         sarray(i) = 1.d0
+!        end if
+!      end do
+!      deallocate(c)
+!      return
+!  end subroutine calc_overlap_p
 
 
   subroutine calc_overlap_s(mua, musb, dist, sarray)
@@ -795,84 +1319,84 @@ contains
 !      end if
 !  end function
 
-  function S_ppi_lookup(R)
+!  function S_ppi_lookup(R)
 !! ----PC uses lookuptable to find S_ppi-----
-      REAL(kind=dp), intent(in) :: R
-      REAL(kind=dp) :: S_ppi_lookup
-      integer :: row      
+!      REAL(kind=dp), intent(in) :: R
+!      REAL(kind=dp) :: S_ppi_lookup
+!      integer :: row      
+!
+!      row = int((R-s_ppi_table_dims(1))/s_ppi_table_dims(3))
+!      IF (row .GE. SIZE(s_ppi_table)) THEN
+!        S_ppi_lookup = 0.0_dp
+!      ELSE
+!        S_ppi_lookup = s_ppi_table(row)
+!      ENDIF
+!
+!  end function
 
-      row = int((R-s_ppi_table_dims(1))/s_ppi_table_dims(3))
-      IF (row .GE. SIZE(s_ppi_table)) THEN
-        S_ppi_lookup = 0.0_dp
-      ELSE
-        S_ppi_lookup = s_ppi_table(row)
-      ENDIF
+!  function S_psigma_lookup(R)
+! ! --------PC uses lookup table to find psigma
+!      REAL(kind=dp), intent(in) :: R
+!      REAL(kind=dp) :: S_psigma_lookup
+!      integer :: row
+!
+!      row = int((R-s_psigma_table_dims(1))/s_psigma_table_dims(3))
+!      IF (row .GE. SIZE(s_psigma_table)) THEN
+!        S_psigma_lookup = 0.0_dp
+!      ELSE
+!        S_psigma_lookup = s_psigma_table(row)
+!      END IF
+!
+!  end function
 
-  end function
-
-  function S_psigma_lookup(R)
- ! --------PC uses lookup table to find psigma
-      REAL(kind=dp), intent(in) :: R
-      REAL(kind=dp) :: S_psigma_lookup
-      integer :: row
-
-      row = int((R-s_psigma_table_dims(1))/s_psigma_table_dims(3))
-      IF (row .GE. SIZE(s_psigma_table)) THEN
-        S_psigma_lookup = 0.0_dp
-      ELSE
-        S_psigma_lookup = s_psigma_table(row)
-      END IF
-
-  end function
-
-  ! OZ: C-S ppi
-  function S_ppi_lookup_C_S(R)
-      REAL(kind=dp), intent(in) :: R
-      REAL(kind=dp) :: S_ppi_lookup_C_S
-      integer :: row
-      row = int((R-s_ppi_table_dims_C_S(1))/s_ppi_table_dims_C_S(3))
-      IF (row .GE. SIZE(s_ppi_table_C_S)) THEN
-        S_ppi_lookup_C_S = 0.0_dp
-      ELSE
-        S_ppi_lookup_C_S = s_ppi_table_C_S(row)
-      ENDIF
-  end function
-  ! OZ: S-S ppi
-  function S_ppi_lookup_S_S(R)
-      REAL(kind=dp), intent(in) :: R
-      REAL(kind=dp) :: S_ppi_lookup_S_S
-      integer :: row
-      row = int((R-s_ppi_table_dims_S_S(1))/s_ppi_table_dims_S_S(3))
-      IF (row .GE. SIZE(s_ppi_table_S_S)) THEN
-        S_ppi_lookup_S_S = 0.0_dp
-      ELSE
-        S_ppi_lookup_S_S = s_ppi_table_S_S(row)
-      ENDIF
-  end function
-  ! OZ: C-S psigma
-  function S_psigma_lookup_C_S(R)
-      REAL(kind=dp), intent(in) :: R
-      REAL(kind=dp) :: S_psigma_lookup_C_S
-      integer :: row
-      row = int((R-s_psigma_table_dims_C_S(1))/s_psigma_table_dims_C_S(3))
-      IF (row .GE. SIZE(s_psigma_table_C_S)) THEN
-        S_psigma_lookup_C_S = 0.0_dp
-      ELSE
-        S_psigma_lookup_C_S = s_psigma_table_C_S(row)
-      END IF
-  end function
-  ! OZ: S-S psigma
-  function S_psigma_lookup_S_S(R)
-      REAL(kind=dp), intent(in) :: R
-      REAL(kind=dp) :: S_psigma_lookup_S_S
-      integer :: row
-      row = int((R-s_psigma_table_dims_S_S(1))/s_psigma_table_dims_S_S(3))
-      IF (row .GE. SIZE(s_psigma_table_S_S)) THEN
-        S_psigma_lookup_S_S = 0.0_dp
-      ELSE
-        S_psigma_lookup_S_S = s_psigma_table_S_S(row)
-      END IF
-  end function
+!  ! OZ: C-S ppi
+!  function S_ppi_lookup_C_S(R)
+!      REAL(kind=dp), intent(in) :: R
+!      REAL(kind=dp) :: S_ppi_lookup_C_S
+!      integer :: row
+!      row = int((R-s_ppi_table_dims_C_S(1))/s_ppi_table_dims_C_S(3))
+!      IF (row .GE. SIZE(s_ppi_table_C_S)) THEN
+!        S_ppi_lookup_C_S = 0.0_dp
+!      ELSE
+!        S_ppi_lookup_C_S = s_ppi_table_C_S(row)
+!      ENDIF
+!  end function
+!  ! OZ: S-S ppi
+!  function S_ppi_lookup_S_S(R)
+!      REAL(kind=dp), intent(in) :: R
+!      REAL(kind=dp) :: S_ppi_lookup_S_S
+!      integer :: row
+!      row = int((R-s_ppi_table_dims_S_S(1))/s_ppi_table_dims_S_S(3))
+!      IF (row .GE. SIZE(s_ppi_table_S_S)) THEN
+!        S_ppi_lookup_S_S = 0.0_dp
+!      ELSE
+!        S_ppi_lookup_S_S = s_ppi_table_S_S(row)
+!      ENDIF
+!  end function
+!  ! OZ: C-S psigma
+!  function S_psigma_lookup_C_S(R)
+!      REAL(kind=dp), intent(in) :: R
+!      REAL(kind=dp) :: S_psigma_lookup_C_S
+!      integer :: row
+!      row = int((R-s_psigma_table_dims_C_S(1))/s_psigma_table_dims_C_S(3))
+!      IF (row .GE. SIZE(s_psigma_table_C_S)) THEN
+!        S_psigma_lookup_C_S = 0.0_dp
+!      ELSE
+!        S_psigma_lookup_C_S = s_psigma_table_C_S(row)
+!      END IF
+!  end function
+!  ! OZ: S-S psigma
+!  function S_psigma_lookup_S_S(R)
+!      REAL(kind=dp), intent(in) :: R
+!      REAL(kind=dp) :: S_psigma_lookup_S_S
+!      integer :: row
+!      row = int((R-s_psigma_table_dims_S_S(1))/s_psigma_table_dims_S_S(3))
+!      IF (row .GE. SIZE(s_psigma_table_S_S)) THEN
+!        S_psigma_lookup_S_S = 0.0_dp
+!      ELSE
+!        S_psigma_lookup_S_S = s_psigma_table_S_S(row)
+!      END IF
+!  end function
 
 
 
@@ -2145,7 +2669,7 @@ deallocate(prervecsa)
           call project_onto_unitvectors(unitvecs, rvecsb, expcoeffb)
 
           !Calculate the overlaps
-          call calc_overlap_p(expcoeffa, expcoeffb, muap, musbp, dist, sarrayp(:,i))
+!          call calc_overlap_p(expcoeffa, expcoeffb, muap, musbp, dist, sarrayp(:,i))
           call calc_overlap_s(muas, musbs, dist, sarrays(:,i))
           call calc_overlap_sp(expcoeffb(3,:), muas, musbp, dist, sarraysp(:,i))
           call calc_overlap_sp(expcoeffa(3,:), muap, musbs, dist, sarrayps(:,i))
@@ -2209,7 +2733,7 @@ deallocate(prervecsa)
              call project_onto_unitvectors(unitvecs(:,1:j,:), rvecsa(:,i), expcoeffa(:,1:j))
              call project_onto_unitvectors(unitvecs(:,1:j,:), rvecsa(:,1:j), expcoeffb(:,1:j))
 
-             call calc_overlap_p(expcoeffa(:,1:j), expcoeffb(:,1:j), muap, musbp(1:j), dist(1:j), sarrayp(1:j,i))
+ !            call calc_overlap_p(expcoeffa(:,1:j), expcoeffb(:,1:j), muap, musbp(1:j), dist(1:j), sarrayp(1:j,i))
              call calc_overlap_s(muas, musbs(1:j), dist(1:j), sarrays(1:j,i))
              call calc_overlap_sp(expcoeffb(3,1:j), muas, musbp(1:j), dist(1:j), sarraysp(1:j,i))
              call calc_overlap_sp(expcoeffa(3,1:j), muap, musbs(1:j), dist(1:j), sarrayps(1:j,i))

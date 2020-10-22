@@ -21,7 +21,8 @@ MODULE sh_initialization
      USE kinds,                        ONLY: default_string_length,               &
                                              dp
      USE aom_overlapfinal,             ONLY:  connect_list2,                      &
-                                              build_s_tables
+     !                                         build_s_tables, &
+                                              STO_initialize_splines
 
      USE aom_utils,                    ONLY: read_listcoeff,                       &
                                              read_listdiabcoeff,                  &
@@ -395,6 +396,9 @@ CONTAINS
      CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_S_S,file_name_s_ppi_S_S
      TYPE(section_vals_type), POINTER               :: coupling_section
      INTEGER                                        :: aom_atoms
+     CHARACTER(LEN=default_string_length)           :: STO_input_string
+     REAL(KIND=dp)                                  :: STO_rmin,STO_rmax,STO_dr
+     INTEGER                                        :: STO_debug
 
      NULLIFY(listcoeff)
      NULLIFY(optimization_section)
@@ -430,19 +434,29 @@ CONTAINS
              i_val=sh_env%multiple_time_step)
 
      !> Create the overlap look-up table for the AOM coupling calculation
-     CALL section_vals_val_get(coupling_section,"PSIGMA_FILE_NAME",&
-             c_val=file_name_s_psigma)
-     CALL section_vals_val_get(coupling_section,"PPI_FILE_NAME",&
-             c_val=file_name_s_ppi)
+     !CALL section_vals_val_get(coupling_section,"PSIGMA_FILE_NAME",&
+     !        c_val=file_name_s_psigma)
+     !CALL section_vals_val_get(coupling_section,"PPI_FILE_NAME",&
+     !        c_val=file_name_s_ppi)
      ! OZ: C-S and S-S
-     CALL section_vals_val_get(coupling_section,"PSIGMA_C_S_FILE_NAME",&
-             c_val=file_name_s_psigma_C_S)
-     CALL section_vals_val_get(coupling_section,"PPI_C_S_FILE_NAME",&
-             c_val=file_name_s_ppi_C_S)
-     CALL section_vals_val_get(coupling_section,"PSIGMA_S_S_FILE_NAME",&
-             c_val=file_name_s_psigma_S_S)
-     CALL section_vals_val_get(coupling_section,"PPI_S_S_FILE_NAME",&
-             c_val=file_name_s_ppi_S_S)
+     !CALL section_vals_val_get(coupling_section,"PSIGMA_C_S_FILE_NAME",&
+     !        c_val=file_name_s_psigma_C_S)
+     !CALL section_vals_val_get(coupling_section,"PPI_C_S_FILE_NAME",&
+     !        c_val=file_name_s_ppi_C_S)
+     !CALL section_vals_val_get(coupling_section,"PSIGMA_S_S_FILE_NAME",&
+     !        c_val=file_name_s_psigma_S_S)
+     !CALL section_vals_val_get(coupling_section,"PPI_S_S_FILE_NAME",&
+     !        c_val=file_name_s_ppi_S_S)
+     CALL section_vals_val_get(coupling_section,"STO_EXPONENTS",&
+             c_val=STO_input_string)
+     CALL section_vals_val_get(coupling_section,"STO_RMIN",&
+             r_val=STO_rmin)
+     CALL section_vals_val_get(coupling_section,"STO_RMAX",&
+             r_val=STO_rmax)
+     CALL section_vals_val_get(coupling_section,"STO_DR",&
+             r_val=STO_dr)
+     CALL section_vals_val_get(coupling_section,"STO_DEBUG",&
+             i_val=STO_debug)
      !> Scaling factor Hab = scaling*Sab_bar
      CALL section_vals_val_get(coupling_section,"SCALING_FACTOR",&
              r_val=sh_env%scaling)
@@ -517,10 +531,12 @@ CONTAINS
      sh_env%bneighbour = 0
 
      ! OZ: add extra arguments...
-     CALL build_s_tables(file_name_s_psigma, file_name_s_ppi,&
-                         file_name_s_psigma_C_S, file_name_s_ppi_C_S,&
-                         file_name_s_psigma_S_S, file_name_s_ppi_S_S)
-     
+     CALL STO_initialize_splines(STO_input_string,STO_rmin,STO_rmax,STO_dr,&
+                                 STO_debug)
+     !CALL build_s_tables(file_name_s_psigma, file_name_s_ppi,&
+     !                    file_name_s_psigma_C_S, file_name_s_ppi_C_S,&
+     !                    file_name_s_psigma_S_S, file_name_s_ppi_S_S)
+      
      
      !> READ THE AOM COEFFICIENT
      CALL section_vals_list_get(coupling_section,"_DEFAULT_KEYWORD_",list=listcoeff) !Read them in the input files
