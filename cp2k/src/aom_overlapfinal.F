@@ -1119,7 +1119,7 @@ end function
       do i=1,size(expcoeffa,2)
         if (dist(i) .gt. abs(epsilon(0.d0))) then
           !t = (mua - musb(i))/(mua + musb(i)) !abs??? 
-
+          
           if((atomicZa/=1).and.(atomicZb(i)/=1)) then
           sarray(i) = (c(1,i) + c(2,i)) * S_splines_ppi(dist(i),atomicZa,atomicZb(i)) +&
                                  c(3,i) * S_splines_psigma(dist(i),atomicZa,atomicZb(i))

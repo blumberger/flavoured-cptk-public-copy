@@ -784,7 +784,7 @@ CONTAINS
     CALL keyword_create(keyword, name="STO_RMIN",&
          description="Spline rmin",&
          usage="STO_RMIN <value>", &
-         default_r_val=0.05_dp,    &
+         default_r_val=0.005_dp,    &
          unit_str="bohr",                   &
          type_of_var=real_t)
     CALL section_add_keyword(sub2section,keyword)
@@ -793,7 +793,7 @@ CONTAINS
     CALL keyword_create(keyword, name="STO_RMAX",&
          description="Spline rmax",&
          usage="STO_RMAX <value>", &
-         default_r_val=15.0_dp,    &
+         default_r_val=19.08622_dp,    &
          unit_str="bohr",                   &
          type_of_var=real_t)
     CALL section_add_keyword(sub2section,keyword)
