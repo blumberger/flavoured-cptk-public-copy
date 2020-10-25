@@ -204,7 +204,8 @@ CONTAINS
      TYPE(section_vals_type), POINTER               :: coupling_section
      CHARACTER(LEN=default_string_length)           :: coupling_keyword
      REAL(KIND=dp)                                  :: convert_nacv
-     !INTEGER                                        :: i
+     INTEGER                                        :: i
+     COMPLEX(KIND=dp), dimension(:), allocatable    :: ctotal
 
      NULLIFY(positions_com_tp, velocities_com_tp)
      NULLIFY(logger)
@@ -450,6 +451,7 @@ CONTAINS
 
          allocate(adiab_c(mat)) 
          allocate(adiab_pop(mat))
+         allocate(ctotal(mat))
 
          !> print info in the output only if we do not restart the file
          if (.NOT. sh_env%restart_key) then
@@ -464,7 +466,13 @@ CONTAINS
                                   nadiab,norbitals,itimes,deltatMD, times)
              end if 
              CALL adiab_print_coeff(adiab_section, ctin,nadiab, norbitals,itimes, deltatMD, times)
-             CALL adiab_print_pop(adiab_section, abs(ctin),nadiab,norbitals,itimes,deltatMD, times)
+             !the name adiab_print_pop is misleading (adiab_print_pop refers to
+             !the diabatic population), for timestep > 0, the latter is printed
+             !from the propagation modules.
+             do i=1,mat
+                ctotal(i) = conjg(ctin(i))*ctin(i)
+             end do
+             CALL adiab_print_pop(adiab_section, abs(ctotal),nadiab,norbitals,itimes,deltatMD, times)
              CALL adiab_print_matrix_density(adiab_section, ctin, nadiab,norbitals,itimes, &
                                         deltatMD, times)
          end if
@@ -583,7 +591,7 @@ CONTAINS
     !> DEALLOCATE
     deallocate(ctin)
     deallocate(exact_forces)
-    deallocate(site_energies, couplings, adiab_c, adiab_pop)
+    deallocate(site_energies, couplings, adiab_c, adiab_pop, ctotal)
     DEALLOCATE(positions_com_tp)
     DEALLOCATE(velocities_com_tp)
 
