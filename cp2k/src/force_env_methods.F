@@ -1368,7 +1368,7 @@ CONTAINS
     DEALLOCATE(subsystems)
     DEALLOCATE(particles)
     DEALLOCATE(energies)
-    IF (ASSOCIATED(ext_pres)) NULLIFY(ext_pres)
+    IF (ASSOCIATED(ext_pres)) DEALLOCATE(ext_pres)
     IF (ALLOCATED(energies_1_mol_list)) DEALLOCATE(energies_1_mol_list)
     IF (ALLOCATED(intra_forces_global)) DEALLOCATE(intra_forces_global)
     DEALLOCATE(glob_natoms)
