@@ -2877,7 +2877,10 @@ END SUBROUTINE classically_forbidden_hops
                                        nacv=sh_env%grad_tresp)
                          else if (sh_env%frozen_couplings_keyword) then
                              IF (sh_env%multistate) THEN
-                                 CPABORT("Multistate not implemented for FORCE-BASED DECO")
+                                 !CPABORT("Multistate not implemented for FORCE-BASED DECO")
+                                 CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, &
+                                      state=i, Fin=diagonal_F, &
+                                      forces_adiab=my_forces_adiab)
                              ELSE
                                   call calcforces_smart_grad(i , sh_env%C_tp, &
                                     diagonal_F, my_forces_adiab, &
@@ -2945,7 +2948,10 @@ END SUBROUTINE classically_forbidden_hops
                                        nacv=sh_env%grad_tresp)
                          else if (sh_env%frozen_couplings_keyword) then
                              IF (sh_env%multistate) THEN
-                                 CPABORT("Multistate not implemented for FORCE-BASED DECO")
+                                 CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, &
+                                      state=i, Fin=diagonal_F, &
+                                      forces_adiab=my_forces_adiab)
+                                 !CPABORT("Multistate not implemented for FORCE-BASED DECO")
                              ELSE
                                  call calcforces_smart_grad(i , sh_env%C_tp, &
                                     diagonal_F, my_forces_adiab, &
