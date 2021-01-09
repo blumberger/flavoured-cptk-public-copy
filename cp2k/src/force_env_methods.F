@@ -1245,14 +1245,15 @@ CONTAINS
          END IF          
 
            !> create the list of active molecules if not present in DECOMP
-           !and the array of active atoms: ext_pres, which is use for kinetic energy
-           !calculation of the active subsystem.
+           !and the array of active atoms: ext_pres (logical array with T for active atoms),
+           ! which is use for kinetic energy calculation of the active subsystem.
            !> ext_pres will be overwritten in AOM case becuase active molecules
            !may still have inactive atoms (this feature is used for further speed-up)
            CALL create_ext_press_list(molecule_kind_set, local_molecules, molecule_set, natom, &
                                        my_mol_index,  ext_pres, & 
                                        active_system_info, full_system_info=full_system_info)
 
+!> some prints to help debugging
 !print *, "FOB_SH| EXT PRESS:", ext_pres
 !print *, "active sys info", active_system_info(1, :)
 !print *, "active sys info", active_system_info(2, :)
@@ -1339,7 +1340,8 @@ CONTAINS
                         local_particles, my_mol_index, ext_pres, active_system_info, full_system_info)
            ELSE
                 !COMMENT_SG: these two additional ways of combining force_evals
-                !should be deprecated and removed.
+                !should be deprecated and removed but they are kept for testing
+                !purposes.
                 CALL section_vals_val_get(optimization_section, "DO_SPEEDUP_LJ", l_val=do_speedup_lj)
                 CALL section_vals_val_get(optimization_section, "DO_SPEEDUP_INTRA", l_val=do_speedup_intra)
 

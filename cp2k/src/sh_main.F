@@ -18,7 +18,7 @@
 ! \brief below a very OLD comment of Jacob (who was the PhD first to write the code) 
 !  the code has hugely changed since then:
 !
-!>   jacob: OLD comment 
+!>   jacob: OLD comment (still somewhat relevant) 
 !    propagate_namd_all_steps_full_degen
 !
 !    This program is designed to propagate a single excess electronic charge
@@ -675,7 +675,7 @@ CONTAINS
      integer                                        :: mol,  mat, orb
      REAL(KIND=dp)                                  :: deltatMD, deltatE
      INTEGER, dimension(:), allocatable             :: class_forbidden_hop_tp
-     LOGICAL                                        :: do_nace_speedup
+     !LOGICAL                                        :: do_nace_speedup
      INTEGER                                        :: ELsteps   
      REAL(KIND=dp)                                  :: times 
      REAL(KIND=dp)                                  :: decohere_criterion
@@ -714,7 +714,7 @@ CONTAINS
      !COMMENT SG: the following keyword could be removed since new nace are
      !better
      !> uses chunked nace (improved) subroutines as default 
-     CALL section_vals_val_get(optimization_section, "DO_SPEEDUP_NACE", l_val=do_nace_speedup)
+     !CALL section_vals_val_get(optimization_section, "DO_SPEEDUP_NACE", l_val=do_nace_speedup)
 
      CALL section_vals_val_get(adiab_section,"ELECTRONIC_PARTIAL_STEP",&
                                i_val=ELsteps)
@@ -849,11 +849,11 @@ CONTAINS
 
      !> Calculate the overlap between C_tp and C_t, reorder state if required,
      !> calculate the adiabatic nace [and diabatic nace at (t)]
-     IF (do_nace_speedup) THEN
+     !IF (do_nace_speedup) THEN
         CALL calc_adiab_nace(sh_env, adiab_section)
-     ELSE
-        CALL calc_adiab_nace_old(sh_env, adiab_section)
-     END IF
+     !ELSE
+     !   CALL calc_adiab_nace_old(sh_env, adiab_section)
+     !END IF
 
      
      IF (sh_env%aom_couplings_keyword) THEN

@@ -170,7 +170,8 @@ END TYPE adiab_nace_env_type
      LOGICAL                                  ::  Gaussian_charges
 
 !> BORDERLINE used for AOM and some other couplings mainly TRESP
-     LOGICAL, DIMENSION(:), POINTER           :: ext_pres
+     LOGICAL, DIMENSION(:), POINTER           :: ext_pres !T or F array 
+                                                          !indicating active atoms
      REAL(KIND=dp), dimension(:,:,:), POINTER :: crds !crds active atoms in COM reference frames
      INTEGER, DIMENSION(:,:), POINTER         :: NN   !neighbrouring list
      integer                                  :: atoms_per_site !Number of atoms per site

@@ -281,7 +281,7 @@ SUBROUTINE multi_block_energies_forces(adiab_section,energies_1_mol_list, energi
    !allocate and deallocate this big array at every step. NOTE that this array is
    !now never deallocated and just deallocated by the compiler at the very end.
    !One should probably write a subroutine that deallocate all allocatable just
-   !this at the very end of cp2k
+   !at the very end of cp2k
     if(my_itimes .eq. 0) then
        ALLOCATE(mixed_env%F(3,natom,nadiab))
     end if
@@ -496,7 +496,7 @@ END SUBROUTINE multi_block_energies_forces
 
 ! *****************************************************************************
 ! THE multi_block_energies_forces is more general so this subroutine is
-! DEPRECATED
+! DEPRECATED. It is kept below for testing purposes if necessary!
 !> \brief This subroutine does the addition and subtraction scheme for the CT
 !         states  
 !> \note This subroutine gives non-degenerate site_energies (degeneracy may be

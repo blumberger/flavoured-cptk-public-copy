@@ -212,8 +212,9 @@ CONTAINS
      ALLOCATE(sh_env%rng_stream)
      sh_env%rng_stream = rng_stream
 
-     !> Get wavefunction diabatic coefficients from the input file
-     !COMMENT_SG: this section should be optional somehow---STILL TO DO USING e.g.
+     !> Get wavefunction diabatic coefficients from the input file for the
+     !restart file option
+     !COMMENT_SG: this section should be optional somehow---STILL TO IMPROVE USING e.g.
      !STEP_START_EVAL keyword in the input 
      wf_restart_section => section_vals_get_subs_vals(adiab_section,"WAVEFUNCTION_RESTART")
      CALL section_vals_val_get(wf_restart_section,"RESTART_KEY", l_val=sh_env%restart_key)
@@ -323,7 +324,7 @@ CONTAINS
         CALL section_vals_list_get(tresp_coupling_section,"_DEFAULT_KEYWORD_",list=list_tresp) !Read list tresp from input
         CALL section_vals_val_get(tresp_coupling_section,"CUT_OFF_BETWEEN_SITES",&
              r_val=sh_env%cutoff_sites)
-        ! determine if the TRESP are taken from Gaussian code and divide by
+        !> determine if the TRESP are taken from Gaussian code and divide by
         ! sqrt(2) if that's the case (see Multiwfn.pdf for explanation)
         CALL section_vals_val_get(tresp_coupling_section,"TRESP_FROM_GAUSSIAN",&
              l_val=sh_env%Gaussian_charges)
@@ -481,7 +482,7 @@ CONTAINS
      allocate(sh_env%Bt(4,sh_env%atoms_per_site))
      allocate(sh_env%Btp(4,sh_env%atoms_per_site))
      allocate(sh_env%Btm(4,sh_env%atoms_per_site))
-     allocate(sh_env%siteenergies(3,mat))  !COMMENT_SG: First dimension is to be removed
+     allocate(sh_env%siteenergies(3,mat))  !COMMENT_SG: First dimension is not usefull
      ALLOCATE(sh_env%nacv(3,mat, mat*aom_atoms))
      ALLOCATE(sh_env%rm_t(3, natom))
      ALLOCATE(sh_env%rm_tm(3, natom))

@@ -3468,7 +3468,7 @@ END SUBROUTINE classically_forbidden_hops
   !         isn't calculated/used. The diabatic NACE is very small compared to
   !         the coupling for situations in which SH is sensible to use (i.e.
   !         outside of the hopping regime) so this subroutine is applicable to
-  !         the majority of sims.
+  !         the majority of sistems.
   ! \author Sam (Matt edited RK4)
   ! \date   23/05/19
   !**********************************************************************************

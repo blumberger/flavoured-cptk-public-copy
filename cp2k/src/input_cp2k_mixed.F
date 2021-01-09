@@ -106,7 +106,7 @@ CONTAINS
 !> To create a new way to combine the force
 !> To get the adiabatic force 
                        "Defines a user-driven generica coupling (support for an unlimited number of force_eval)",&
-                       "Combines the diabatic forces to get the adiabatic forces"),&
+                 "Combines the diabatic forces to get the adiabatic forces (support for an unlimited number of force_eval)"),&
          enum_i_vals=(/mix_linear_combination,mix_minimum,mix_coupled,mix_restrained,mix_generic, &
                        mix_adiab /))
 !> End CHANGE_AC
@@ -190,7 +190,8 @@ CONTAINS
     CALL section_add_subsection(subsection,sub2section)
 
     CALL keyword_create(keyword, name="DO_SPEEDUP_LJ",&
-         description="If DO_SPEEDUP_LJ is TRUE, the first force_eval section will only calculate LJ interactions",&
+         description="If DO_SPEEDUP_LJ is TRUE, the first force_eval section"//&
+                     " will only calculate LJ interactions (DEPRECATED KEYWORD)",&
          usage="True", default_l_val=.True., &
          lone_keyword_l_val=.True.) 
         ! type_of_var=char_t,&
@@ -200,9 +201,9 @@ CONTAINS
 
     CALL keyword_create(keyword, name="DO_SPEEDUP_INTRA",&
          description="If DO_SPEEDUP_INTRA is TRUE, the first force_eval section will only calculate LJ interactions,"//&
-                      "the pair force eval section will calculate intramolecular"//&
-                      "interaction for one charged molecule only and the impair for one neutral"//&
-                      "molecule only. WARNING: DO_SPEEDUP_LJ should be put to TRUE.",&
+                      " the pair force eval section will calculate intramolecular"//&
+                      " interaction for one charged molecule only and the impair for one neutral"//&
+                      " molecule only. WARNING: DO_SPEEDUP_LJ should be put to TRUE. ((DEPRECATED KEYWORD)",&
          usage="True", default_l_val=.True., &
          lone_keyword_l_val=.True.) 
         ! type_of_var=char_t,&
@@ -210,32 +211,34 @@ CONTAINS
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
-    CALL keyword_create(keyword, name="DO_SPEEDUP_NACE",&
-         description="If set to TRUE will apply nace optimisations.",&
-         usage="True", default_l_val=.TRUE., &
-         lone_keyword_l_val=.True.) 
-        ! type_of_var=char_t,&
-        ! n_var=-1)
-    CALL section_add_keyword(sub2section,keyword)
-    CALL keyword_release(keyword)
+    !CALL keyword_create(keyword, name="DO_SPEEDUP_NACE",&
+    !     description="If set to TRUE will apply nace optimisations.",&
+    !     usage="True", default_l_val=.TRUE., &
+    !     lone_keyword_l_val=.True.) 
+    !    ! type_of_var=char_t,&
+    !    ! n_var=-1)
+    !CALL section_add_keyword(sub2section,keyword)
+    !CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="SURF_HOP_CHOICE",&
-         description="Decide whether to use or not the trivial hopping correction",&
-         usage="SURF_HOP_CHOICE: BASIC EXACT", type_of_var=char_t,&
-         n_var=-1)
+         description="Decides whether to use or not the trivial hopping correction (see e.g. Carof17)",&
+         usage="SURF_HOP_CHOICE: TRIVIAL_CORR_WITH_OVERLAP or TRIVIAL_HOP_CORRECT or UNMODIFIED_SURF_HOP", &
+         type_of_var=char_t)
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="RK_PROPAGATION",&
-         description="Decide which RK scheme is used and the approximation level",&
-         usage="DIABATIC or ADIABATIC or HS", & 
+         description="Decides which RK scheme is used and the approximation level (see Giannini20)",&
+         usage="DIABATIC_RK or ADIABATIC_RK (deprecated) or HS_CORRECTED_RK"//&
+         " or DIABATIC_RK_FAST or DIABATIC_RK_DLI", & 
          type_of_var=char_t)
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="REORDERING_STATES_USING_OVERLAP",&
-         description="Choose if you want to activate REORDERING_STATES_USING_OVERLAP",&
-         usage="REORDERING_STATES_USING_OVERLAP: False", default_l_val=.False., &
+         description="Choose if you want to reorder the states with a tracking alghoritm"//&
+                     " (see e.g. Giannini18, Carof19)",&
+         usage="False", default_l_val=.False., &
          lone_keyword_l_val=.True.) 
         ! type_of_var=char_t,&
         ! n_var=-1)
@@ -252,26 +255,24 @@ CONTAINS
    NULLIFY(sub2section)
    CALL section_create(sub2section,name="DECOHERENCE",&
         description="Defines the decoherence methods,"//&
-                     "and related parameters to use",&
+                     " and related parameters to use (see e.g. Giannini18, Carof19, Carof17).",&
         n_keywords=1, n_subsections=0, repeats=.FALSE.)
    CALL section_add_subsection(subsection,sub2section)
 
     CALL keyword_create(keyword, name="DECOHERENCE_CORRECTIONS",&
          description="Defines the methods to decohere the wavefunction if required.",&
-         usage="DECOHERENCE_CORRECTIONS: BASIC EXACT", type_of_var=char_t,&
-         n_var=-1)
+         usage="DECOHERENCE_CORRECTIONS DAMPING", type_of_var=char_t)
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
     
     CALL keyword_create(keyword, name="DECO_TIME",&
-         description="Defines the decoherence time used by the damping",&
-         usage="DECO_TIME: BASIC EXACT", type_of_var=char_t,&
-         n_var=-1)
+         description="Defines the decoherence time used by the damping (see e.g. Carof19)",&
+         usage="DECO_TIME EDC or FORCES_BASED or HYBRID_TAU", type_of_var=char_t)
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="SPURIOUS_TRANSFER_CORR",&
-         description="Choose if you want to activate the spurious tranfer corre.",&
+         description="Choose if you want to activate the spurious tranfer correction (see e.g. Giannini18).",&
          usage="SPURIOUS_TRANSFER_CORR: True", default_l_val=.FALSE., &
          lone_keyword_l_val=.TRUE.) 
         ! type_of_var=char_t,&
@@ -280,31 +281,32 @@ CONTAINS
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="EDC_C",&
-         description="C parameter in the Energy-based deco. correction formula",&
+         description="C parameter in the Energy-based decoherence correction formula (see e.g. Carof 19)",&
          usage="1.0D0", type_of_var=real_t)
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="EDC_E0",&
-         description="E0 parameter in the Energy-based deco. correction formula",&
+         description="E0 parameter in the Energy-based deco. correction formula (see e.g. Carof 19)",&
          usage="0.1D0", type_of_var=real_t)
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="THRESHOLD_TAU_FORCES",&
-         description="threshold used in the forces based calculation",&
+         description="Threshold used in the force based calculation to avoid"//&
+                     " calculating forces for states high in energy (pure dephasing is used instead).",&
          usage="0.1D0", type_of_var=real_t)
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="TEMPERATURE_FG_WIDTH",&
-         description="Temperature to define FG width, currectly 298 K",&
-         usage="0.0009444571", type_of_var=real_t)
+         description="Temperature to define FG width in the force-based formula (see Carof 19)",&
+         usage="300", default_r_val=300.0_dp, type_of_var=real_t)
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="DECOHERENCE_CRITERION",&
-         description="Criterion to decohere",&
+         description="Threshold criteria related to instantaneous decoherence (see Carof 19)",&
          usage="1.0E-05", type_of_var=real_t)
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
@@ -319,28 +321,25 @@ CONTAINS
    NULLIFY(sub2section)
    CALL section_create(sub2section,name="ENERGY_CONSERVATION",&
         description="Defines the velocity adj,"//&
-                     "and related parameters to use",&
+                     "and related parameters to use (see Carof 17)",&
         n_keywords=1, n_subsections=0, repeats=.FALSE.)
    CALL section_add_subsection(subsection,sub2section)
 
    CALL keyword_create(keyword, name="METHOD_RESCALING",&
         description="Defines the methods to rescale the velocities if required.",&
-        usage="METHOD_RESCALING: BASIC EXACT", type_of_var=char_t,&
-        n_var=-1)
+        usage="METHOD_RESCALING SIMPLE or SIMPLE_QSYS or NACV", type_of_var=char_t)
    CALL section_add_keyword(sub2section,keyword)
    CALL keyword_release(keyword)
 
    CALL keyword_create(keyword, name="METHOD_ADIABATIC_NACV",&
         description="Defines the methods to compute the adiabatic NACV for the rescaling.",&
-        usage="METHOD_RESCALING: BASIC EXACT", type_of_var=char_t,&
-        n_var=-1)
+        usage="METHOD_RESCALING TOTAL or FAST or (others ver used)", type_of_var=char_t)
    CALL section_add_keyword(sub2section,keyword)
    CALL keyword_release(keyword)
 
    CALL keyword_create(keyword, name="METHOD_REVERSAL",&
         description="Defines the methods to reverse the velocities after a frustrated hop if required.",&
-        usage="METHOD_RESCALING: BASIC EXACT", type_of_var=char_t,&
-        n_var=-1)
+        usage="METHOD_RESCALING NEVER or ALWAYS or TRUHLAR or SUBOTNIK", type_of_var=char_t)
    CALL section_add_keyword(sub2section,keyword)
    CALL keyword_release(keyword)
 
@@ -349,76 +348,82 @@ CONTAINS
     !-----------------------------------------------------------------------
 
     CALL keyword_create(keyword, name="METHOD_PROPAGATION",&
-         description="Defines the methods to obtain the adiabatic forces.",&
-         usage="METHOD_PROPAGATION : CLASSICAL_PATH, FSSH",  type_of_var=char_t,&
-         n_var=-1)
+         description="Defines the methods to obtain the adiabatic forces usually"//&
+                     " FSSH or BORN_OPPENHEIMER (some other"//&
+                     " options are not used very often and not have been tested in a while, but they are"//& 
+                     " usefull for testing purpose when testing e.g. Rabi Oscillations.",&
+         usage="METHOD_PROPAGATION : CLASSICAL_PATH, FSSH, BORN_OPPENHEIMER",  type_of_var=char_t)
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
  
     CALL keyword_create(keyword, name="PRINT_MORE",&
-         description="Choose if you want to print more stuff",&
+         description="Choose if you want to print more information in FSSH files",&
          usage="PRINT_MORE: True", default_l_val=.True., &
          lone_keyword_l_val=.TRUE.) 
-        ! type_of_var=char_t,&
-        ! n_var=-1)
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="INITIALIZATION",&
-         description="Decide how to initiate the system for wavefunction and surface.",&
+         description="Decide how to initiate the system for wavefunction and surface populations.",&
          usage="DIABATIC or ADIABATIC", & 
          type_of_var=char_t)
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="REPRESENTATION",&
-         description="Decide which representation is used: Diab  or Adiab",&
+         description="Decide which representation is used: Diab  or Adiab basis (the latter is deprecated)",&
          usage="DIABATIC_BASIS or ADIABATIC_BASIS", & 
          type_of_var=char_t)
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="ELECTRONIC_PARTIAL_STEP",&
-         description="Number of electronic steps by atomic step",&
+         description="Number of electronic steps per nuclear step in the RK integration",&
          usage="5", type_of_var=integer_t)
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="FIRST_DIABAT",&
-         description="starting molecule number",&
+         description="Index of the molecule on which to start the wavefunction"//&
+                     " in case of DIABATIC initialization (corresponding adiabatic state is"//&
+                     " chosen as described e.g. in Carof 19)",&
          usage="1", type_of_var=integer_t)
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="FIRST_ADIABAT",&
-         description="starting molecule number",&
+         description="Adiabatic state from which the wavefunction is started in"//&
+                     " case of ADIABATIC initialization (corresponding diabatic wavefunction is"//&
+                     " retrived by projection on the diabatic basis, see Carof 19) ",&
          usage="1", type_of_var=integer_t)
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword,name="SEED",&
          description="Initial seed for the global (pseudo)random number "//&
-         "generator tocreate a stream of normally Gaussian "//&
-         "distributed random numbers.",&
+         " generator tocreate a stream of normally Gaussian "//&
+         " distributed random numbers.",&
          usage="SEED <INTEGER>",default_i_val=2000)
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="NUMBER_DIABATIC_STATES",&
-         description="Number of diabatic states to consider",&
+         description="Number of (non degenerate) diabatic states to consider"//&
+                     " when constructing the Hamiltonian of the system",&
          usage="2", type_of_var=integer_t)
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="NUMBER_ORBITALS",&
-         description="Number of orbitals per sites",&
-         usage="1", type_of_var=integer_t)
+         description="Number of orbitals per sites (e.g. for degenerate states - UNTESTED for !=1 )",&
+         usage="1", type_of_var=integer_t, default_i_val=1)
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
 
 
     CALL keyword_create(keyword, name="NUCLEAR_TIMESTEP",&
-         description="Timestep for atomic motion, must be coherent",&
+         description="Timestep for atomic motion, must be the same as in MD"//&
+                     " section (keyword to remove in future becuase replicated)",&
          usage="timestep 0.5", type_of_var=real_t, &
          unit_str = "fs")
     CALL section_add_keyword(subsection,keyword)
@@ -434,7 +439,7 @@ CONTAINS
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="INDEX_ACTIVE_MOLS",&
-         description='Specify the index of mols that are active', &
+         description='Specify the index of mols that are active if DECOMP not present', &
          usage="INDEX_MOL_DECOMP <INTEGER> .. <INTEGER>", &
          type_of_var=integer_t,  n_var=-1, default_i_vals=(/1/))
     CALL section_add_keyword(subsection,keyword)

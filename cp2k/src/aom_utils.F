@@ -2221,6 +2221,8 @@ print *, "CTIN", ctin
 !**********************************************************************************
 !> \brief Calculate adiabatic forces according to Spencer 2016 and Carof 2019
 !for each atom in the system on the state passed as input.
+! COMMENT_SG: I generalized this subroutine and kept this just for testing
+! purposes
 !**********************************************************************************
 subroutine calcforces_aom(state, Hin, C, nacv, atoms, scaling, cbar, Fin, forces_adiab, & 
                   ext_pres)
