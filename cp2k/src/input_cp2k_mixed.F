@@ -450,14 +450,15 @@ CONTAINS
     
    NULLIFY(sub2section,sub3section)
    CALL section_create(sub2section,name="METHOD_SITE_ENERGIES",&
-        description="Defines the site energies,"//&
-                     "for example coulomb interaction in case of CT",&
+        description="Defines the combination of site energies"//&
+                     " for the construction of the Hamiltonian and implement the"//&
+                     " addition/subtraction scheme for various blocks of H. ",&
         n_keywords=1, n_subsections=0, repeats=.FALSE.)
    CALL section_add_subsection(subsection,sub2section)
 
     CALL keyword_create(keyword, name="MULTI_STATES",&
-         description="Tell the forces calculation if you have more non-degenerate states "//&
-                     "than active molecules",&
+         description="Tell the H and forces calculation if there are more non-degenerate states "//&
+                     "than active molecules (e.g. CT block has N_DxN_A states)",&
          usage="false", &
          default_l_val=.FALSE., &
          lone_keyword_l_val=.FALSE.)
@@ -466,20 +467,20 @@ CONTAINS
 
 
     CALL keyword_create(keyword, name="BLOCK_TYPE",&
-         description="Determine the Block to use",&
-         usage="BLOCK_TYPE : CT",  type_of_var=char_t,&
-         n_var=-1)
+         description="Determine the right site energy combination for the"//&
+                     " generation of a given Hamiltonian (e.g. FE or CT-FE ..)",&
+         usage="BLOCK_TYPE CT or FE or CT-FE or CT-FE-CR or CT-CR",  type_of_var=char_t)
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
    CALL section_create(sub3section,name="CT_BLOCK",&
         description="Defines the CT BLOCK,"//&
-                     "and the interactions",&
+                     "and its interactions",&
         n_keywords=1, n_subsections=0, repeats=.FALSE.)
    CALL section_add_subsection(sub2section,sub3section)
 
     CALL keyword_create(keyword, name="ADD_COULOMB_POTENTIAL",&
-         description="add coulomb potential in case of CT "//&
+         description="add screened Coulomb potential in case of CT "//&
                      "states",&
          usage="false", &
          default_l_val=.FALSE., &
@@ -488,7 +489,7 @@ CONTAINS
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="DIELECTRIC_SCREENING",&
-         description="Dielectric epsilon",&
+         description="Dielectric epsilon of the screened Coulomb",&
          usage="3.0 WITHOUT UNITS", type_of_var=real_t)
     CALL section_add_keyword(sub3section,keyword)
     CALL keyword_release(keyword)
@@ -506,7 +507,7 @@ CONTAINS
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="_DEFAULT_KEYWORD_",&
-         description="The ESP charges in the format:"//&
+         description="The ground state ESP charges in the format:"//&
          "<p><tt>ATOMIC_KIND  LIST NO TRESP</tt></p>",&
          repeats=.TRUE., usage="{{String} {Int} {Int} {Real}}",&
          type_of_var=lchar_t)
@@ -514,14 +515,14 @@ CONTAINS
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="INDEX_DONOR_MOLS",&
-         description='Specify the index in xys of mols', &
+         description='Specify the index of donor mols (xyz or topology order)', &
          usage="INDEX_DONOR_MOLS <INTEGER> .. <INTEGER>", &
          type_of_var=integer_t,  n_var=-1, default_i_vals=(/1/))
     CALL section_add_keyword(sub3section,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="INDEX_ACCEPTOR_MOLS",&
-         description='Specify the index in xys of mols', &
+         description='Specify the index of acceptor mols (xyz or topology order)', &
          usage="INDEX_ACCEPTOR_MOLS <INTEGER> .. <INTEGER>", &
          type_of_var=integer_t,  n_var=-1, default_i_vals=(/1/))
     CALL section_add_keyword(sub3section,keyword)
@@ -531,13 +532,13 @@ CONTAINS
 
    NULLIFY(sub3section)
    CALL section_create(sub3section,name="FE_BLOCK",&
-        description="Defines the FE BLOCK,"//&
+        description="Defines the FE Block,"//&
                      "and the interactions",&
         n_keywords=1, n_subsections=0, repeats=.FALSE.)
    CALL section_add_subsection(sub2section,sub3section)
 
     CALL keyword_create(keyword, name="INDEX_EXC_MOLS",&
-         description='Specify the index in xys of mols', &
+         description='Specify the index of excitonic mols (xyz or topology order)', &
          usage="INDEX_DONOR_MOLS <INTEGER> .. <INTEGER>", &
          type_of_var=integer_t,  n_var=-1, default_i_vals=(/1/))
     CALL section_add_keyword(sub3section,keyword)
@@ -553,9 +554,8 @@ CONTAINS
 
     !> start new sub2section METHOD_COUPLING, part of ADIABATIC subsection
     CALL keyword_create(keyword, name="METHOD_COUPLING",&
-         description="Defines the methods to obtain the adiabatic forces.",&
-         usage="METHOD_COUPLING : AOM",  type_of_var=char_t,&
-         n_var=-1)
+         description="Defines the method to calculate off-diagonal matrix elements.",&
+         usage="METHOD_COUPLING AOM or TRESP or FROZEN_COUPLINGS",  type_of_var=char_t)
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
 !********************************************************************************
@@ -564,7 +564,8 @@ CONTAINS
     !> start new sub3section FROZEN_COUPLINGS part of METHOD_COUPLING sub2section
     NULLIFY(sub2section) 
     CALL section_create(sub2section,name="FROZEN_COUPLINGS",&
-         description="Defines the methods to obtain the adiabatic forces.",&
+         description="Couplings are passed as input and kept frozen during dynamics"//&
+                     " (only site energies fluctuate).",&
          n_keywords=1, n_subsections=0, repeats=.FALSE.)
     CALL section_add_subsection(subsection,sub2section)
 
@@ -577,7 +578,7 @@ CONTAINS
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="INTERACTION_NUMBER",&
-         description="Number of interactions",&
+         description="Number of interactions included in the Hamiltonian",&
          usage="1", type_of_var=integer_t)
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
@@ -591,7 +592,7 @@ CONTAINS
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="FIRST_OFF_DIAGONALS_VAL",&
-         description="Hab for the first upper and lower diagonal",&
+         description="Hab for the first upper and lower diagonals or the Hamitlonian (tridiagonal matrix)",&
          usage="001102479, HARTREE", type_of_var=real_t,&
          default_r_val=0.000_dp,    &
          unit_str="hartree")
@@ -606,7 +607,7 @@ CONTAINS
     !> start new sub3section TRESP_COUPLINGS part of METHOD_COUPLING sub2section
     NULLIFY(sub2section) 
     CALL section_create(sub2section,name="TRESP_COUPLINGS",&
-         description="Defines the methods to obtain the couplings.",&
+         description="Uses transition ESP charges to calculate excitonic couplings.",&
          n_keywords=1, n_subsections=0, repeats=.FALSE.)
     CALL section_add_subsection(subsection,sub2section)
 
@@ -618,7 +619,8 @@ CONTAINS
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="TRESP_FROM_GAUSSIAN",&
-         description="Determine if TRESP are from Gaussian code: divide sqrt(2)",&
+         description="Determines if TRESP are taken from a calculation with Gaussian software."//& 
+                     " If so, charges must be divided by sqrt(2). ",&
          usage="True", & 
          default_l_val=.TRUE., &
          lone_keyword_l_val=.TRUE.)
@@ -626,8 +628,8 @@ CONTAINS
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="CUT_OFF_BETWEEN_SITES",&
-         description="Distance cut-off for H_ab calculation",&
-         usage="6.0D0", type_of_var=real_t, &
+         description="Cut-off distance over which excitonic couplings are set to zero.",&
+         usage="20.0D0", type_of_var=real_t, &
          unit_str="angstrom")
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
@@ -648,7 +650,7 @@ CONTAINS
     !> start new sub3section AOM part of METHOD_COUPLING sub2section
     NULLIFY(sub2section)
     CALL section_create(sub2section,name="AOM",&
-         description="Defines the methods to obtain the adiabatic forces.",&
+         description="Uses AOM to calculate couplings.",&
          n_keywords=1, n_subsections=0, repeats=.FALSE.)
     CALL section_add_subsection(subsection,sub2section)
 
@@ -659,7 +661,7 @@ CONTAINS
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="CUT_OFF_BETWEEN_SITES",&
-         description="Distance cut-off for H_ab calculation",&
+         description="Cut-off distance over which electronic couplings are set to zero.",&
          usage="6.0D0", type_of_var=real_t, &
          unit_str="angstrom")
     CALL section_add_keyword(sub2section,keyword)
@@ -673,14 +675,14 @@ CONTAINS
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="SCALING_FACTOR",&
-         description="Hab = scaling*Sab",&
+         description="Hab = C*Sab. This is the scaling C parametrized prior simulation (see Gajdos 14)",&
          usage="0.50D0*0.065190D0, HARTREE", type_of_var=real_t,&
          unit_str="hartree")
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="CBAR",&
-         description="Sab constant factor",&
+         description="Sab constant factor (see Gajdos 14)",&
          usage="0.5082 WITHOUT UNITS", type_of_var=real_t)
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
@@ -692,17 +694,17 @@ CONTAINS
     CALL keyword_release(keyword)
 
 
-    CALL keyword_create(keyword, name="COLLAPSE",&
-         description="Decide if we use the decoherence procedure",&
-         usage="True", & 
-         default_l_val=.FALSE., &
-         lone_keyword_l_val=.TRUE.)
-    CALL section_add_keyword(sub2section,keyword)
-    CALL keyword_release(keyword)
+    !CALL keyword_create(keyword, name="COLLAPSE",&
+    !     description="Decide if we use the decoherence procedure",&
+    !     usage="True", & 
+    !     default_l_val=.FALSE., &
+    !     lone_keyword_l_val=.TRUE.)
+    !CALL section_add_keyword(sub2section,keyword)
+    !CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="RANDOM_DERIVATIVE",&
          description="Decide if we use forward and backward derivative "//&
-                      "in a random way (True) or only forward (False).",&
+                      "in a random way (True) or only forward (False). (NOTE: keep it True).",&
          usage="True", &
          default_l_val=.TRUE., &
          lone_keyword_l_val=.TRUE.)
@@ -711,22 +713,23 @@ CONTAINS
 
     CALL keyword_create(keyword, name="ANALYTICS",&
          description="Decide if we use the analytical equation rather than "//&
-                      "the numerical expression. Only for 2x2 systems.",&
-         usage="True", &
+                      "the numerical expression. Only for 2x2 systems and useful for testing purpose only.",&
+         usage="False", &
          default_l_val=.FALSE., &
-         lone_keyword_l_val=.TRUE.)
+         lone_keyword_l_val=.FALSE.)
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="MULTIPLE_TIME_STEP",&
-         description="starting molecule number",&
+         description="Optimization for code speed up. Number of steps to skip"//&
+                      " before the next gradient calculation. See Giannini 20 for details.",&
          usage="1", type_of_var=integer_t)
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
 
     CALL keyword_create(keyword, name="NACV_INCREMENT",&
-         description="Spatial Increment to calculate the NACV with Finite Difference.",&
+         description="Spatial Increment to calculate the NACV with Finite Difference. (see Spencer 16).",&
          usage="1E-3*1.889725989D0 (bohr)", & 
          default_r_val=0.00188972598_dp,    &
          unit_str="bohr",                   &
@@ -773,7 +776,7 @@ CONTAINS
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="_DEFAULT_KEYWORD_",&
-         description="The HOMO coefficient in the format:"//&
+         description="HOMO or LUMO preparametrized AOM coefficients in the format:"//&
          "<p><tt>ATOMIC_KIND  LIST NO HOMOS HOMOP</tt></p>",&
          repeats=.TRUE., usage="{{String} {Int} {Int} {Real} {Real}}",&
          type_of_var=lchar_t)
@@ -787,7 +790,7 @@ CONTAINS
     !> WAVEFUNCTION_RESTART subsection part of ADIABATIC section
     NULLIFY(sub2section)
     CALL section_create(sub2section,name="WAVEFUNCTION_RESTART",&
-         description="WF restart",&
+         description="WF restart section (in case one wants to use the restart file capability)",&
          n_keywords=1, n_subsections=0, repeats=.FALSE.)
 
     CALL keyword_create(keyword, name="_DEFAULT_KEYWORD_",&
@@ -799,13 +802,13 @@ CONTAINS
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="ACTIVE_STATE_RESTART",&
-         description="Active state for the restart",&
+         description="Active state for the restart (must be the same as the one where the run stopped)",&
          usage="1",  default_i_val=-1, type_of_var=integer_t)
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="RESTART_KEY",&
-         description="Decide if we use the decoherence procedure",&
+         description="Decides whether to use the restart file capability",&
          usage="True", &
          default_l_val=.FALSE., &
          lone_keyword_l_val=.TRUE.)
@@ -835,7 +838,7 @@ CONTAINS
 
     CALL cp_print_key_section_create(print_key_section=print_key,&
           name="COEFFICIENTS",&
-          description="Control the output of the wavefunction coefficients (diabatic basis).",&
+          description="Controls the output of the wavefunction coefficients (diabatic basis).",&
           common_iter_levels=1,&
           filename="")
      CALL section_add_subsection(sub2section,print_key)
@@ -843,7 +846,7 @@ CONTAINS
     !----------PC
      CALL cp_print_key_section_create(print_key_section=print_key,&
           name="PVECS",&
-          description="Control the output of the p-vectors for PCs visualisation script.",&
+          description="Controls the output of the p-vectors for PCs visualisation script.",&
           common_iter_levels=1,&
           filename="")
      CALL section_add_subsection(sub2section,print_key)
@@ -852,7 +855,7 @@ CONTAINS
 
      CALL cp_print_key_section_create(print_key_section=print_key,&
           name="POPULATIONS",&
-          description="Control the output of the diabatic populations.",&
+          description="Controls the output of the diabatic populations.",&
           common_iter_levels=1,&
           filename="")
      CALL section_add_subsection(sub2section,print_key)
@@ -860,7 +863,7 @@ CONTAINS
 
      CALL cp_print_key_section_create(print_key_section=print_key,&
           name="ADIAB_POPULATIONS",&
-          description="Control the output of the Adiabatic populations.",&
+          description="Controls the output of the Adiabatic populations.",&
           common_iter_levels=1,&
           filename="")
      CALL section_add_subsection(sub2section,print_key)
@@ -868,7 +871,7 @@ CONTAINS
 
      CALL cp_print_key_section_create(print_key_section=print_key,&
           name="ADIABAT_ENERGIES",&
-          description="Control the output of the adiabatic energies.",&
+          description="Controls the output of the adiabatic energies.",&
           common_iter_levels=1,&
           filename="",         &
           unit_str = "hartree")
@@ -877,7 +880,7 @@ CONTAINS
 
      CALL cp_print_key_section_create(print_key_section=print_key,&
           name="SITE_ENERGIES",&
-          description="Control the output of the site energies.",&
+          description="Controls the output of the site energies.",&
           common_iter_levels=1,&
           filename="",         &
           unit_str = "hartree")
@@ -886,7 +889,7 @@ CONTAINS
 
      CALL cp_print_key_section_create(print_key_section=print_key,&
           name="OFF_DIAGONALS",&
-          description="Control the output of the couplings.",&
+          description="Controls the output of the couplings.",&
           common_iter_levels=1,&
           filename="",         &
           unit_str = "hartree")
@@ -895,7 +898,7 @@ CONTAINS
 
      CALL cp_print_key_section_create(print_key_section=print_key,&
           name="HAMILTONIAN",&
-          description="Control the output of the Hamiltonian.",&
+          description="Controls the output of the Hamiltonian.",&
           common_iter_levels=1,&
           filename="",         &
           unit_str = "hartree")
@@ -904,7 +907,7 @@ CONTAINS
 
      CALL cp_print_key_section_create(print_key_section=print_key,&
           name="PSEUDO_HAMILTONIAN",&
-          description="Control the output of the Hamiltonian.",&
+          description="Controls the output of the Hamiltonian in the pseudo format (to save storage space).",&
           common_iter_levels=1,&
           filename="",         &
           unit_str = "hartree")
@@ -922,7 +925,7 @@ CONTAINS
 
      CALL cp_print_key_section_create(print_key_section=print_key,&
           name="SH_INFO",&
-          description="Print the info relative to the surface hopping event:"//&
+          description="Prints the info relative to the surface hopping event:"//&
           "Probability, Frustrated Hop, Decoherence, etc.", &
           common_iter_levels=1,&
           filename="")
@@ -932,7 +935,7 @@ CONTAINS
 
      CALL cp_print_key_section_create(print_key_section=print_key,&
           name="NACE",&
-          description="Control the output of the NACE.",&
+          description="Controls the output of the diabatic NACE.",&
           common_iter_levels=1,&
           filename="",         &
           unit_str = "fs^-1")
@@ -941,7 +944,7 @@ CONTAINS
 
      CALL cp_print_key_section_create(print_key_section=print_key,&
           name="NACV",&
-          description="Control the output of the NACV.",&
+          description="Controls the output of the diabatic NACV.",&
           common_iter_levels=1,&
           filename="",         &
           unit_str = "bohr^-1")
@@ -950,7 +953,7 @@ CONTAINS
 
      CALL cp_print_key_section_create(print_key_section=print_key,&
           name="HOP_NACV",&
-          description="Control the output of the NACV.",&
+          description="Controls the output of the adiabatic NACV.",&
           common_iter_levels=1,&
           filename="",         &
           unit_str = "bohr^-1")
@@ -959,7 +962,7 @@ CONTAINS
 
      CALL cp_print_key_section_create(print_key_section=print_key,&
           name="DENSITY_MATRIX",&
-          description="Control the output of the density matrix (diabatic basis).",&
+          description="Controls the output of the density matrix (diabatic basis).",&
           common_iter_levels=1,&
           filename="")
      CALL section_add_subsection(sub2section,print_key)
@@ -967,7 +970,7 @@ CONTAINS
 
      CALL cp_print_key_section_create(print_key_section=print_key,&
           name="STATE",&
-          description="Control the output of the present state.",&
+          description="Controls the output of the present state.",&
           common_iter_levels=1,&
           filename="")
      CALL section_add_subsection(sub2section,print_key)
@@ -975,7 +978,7 @@ CONTAINS
 
      CALL cp_print_key_section_create(print_key_section=print_key,&
           name="EXACT_FORCES",&
-          description="Control the output of the exact forces in case of ANALYTICS.",&
+          description="Controls the output of the exact forces in case of ANALYTICS.",&
           common_iter_levels=1,&
           filename="")
      CALL section_add_subsection(sub2section,print_key)

@@ -847,6 +847,7 @@ CONTAINS
         end if
      end if
 
+     !> ADIABATIC NACE and REORDERING
      !> Calculate the overlap between C_tp and C_t, reorder state if required,
      !> calculate the adiabatic nace [and diabatic nace at (t)]
      !IF (do_nace_speedup) THEN
@@ -855,11 +856,10 @@ CONTAINS
      !   CALL calc_adiab_nace_old(sh_env, adiab_section)
      !END IF
 
-     
+     !> PROPAGATE THE ELECTRON FOR ONE MOLECULAR TIMESTEP
+     !>the CHARGE CARRIER WF is called sh_env%ctin
      IF (sh_env%aom_couplings_keyword) THEN
          !------------------  AOM section    ---------------------------------------------
-         !> PROPAGATE THE ELECTRON FOR ONE MOLECULAR TIMESTEP
-         !>the CHARGE CARRIER WF is called sh_env%ctin
          sh_env%HS_propagation = .FALSE.
          CALL section_vals_val_get(optimization_section,"RK_PROPAGATION", c_val=prop_wf_keyword)
          SELECT CASE(prop_wf_keyword)                                 
@@ -941,10 +941,10 @@ CONTAINS
      END IF 
 
 
+     !> CALCULATE THE FORCES ON THE ACTIVE STATE, WHATEVER THE RESULT OF THE SURFACE
+     !HOP ROUTINE IS. 
      IF (sh_env%aom_couplings_keyword) THEN
          !------------------  AOM section    --------------------------------------------------------
-         !CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE RESULT OF THE SURFACE
-         !HOP ROUTINE IS. 
          convert_nacv = -sh_env%scaling/sh_env%cbar
          call calcforces_smart_grad(state=sh_env%active_state, C=sh_env%C_tp, &
                                Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
@@ -1005,7 +1005,7 @@ CONTAINS
      END IF
      
 
-     !> PRINT
+     !> PRINT STUFF 
      CALL adiab_print_hamiltonian(adiab_section, -AIMAG(sh_env%H_tp), nadiab,norbitals,itimes, deltatMD)
      CALL adiab_print_pseudo_hamiltonian(adiab_section, -AIMAG(sh_env%H_tp), nadiab,norbitals,itimes, deltatMD)
 

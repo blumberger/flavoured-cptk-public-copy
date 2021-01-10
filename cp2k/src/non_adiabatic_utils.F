@@ -1023,7 +1023,7 @@ end subroutine calc_hop_nacv_frozen_H
 !        (N-donor+N-acceptor). This is becuase the off-diagonals may be stored differently 
 !        and the nmol index should be calculated with a different loop.
 !>       A huge part of this subroutine has been taken from AC's calcforces_aom
-!> \note AOM forces convert_nacv is passed as input and is bnegative so forces = -grad
+!> \note AOM forces convert_nacv is passed as input and is negative so forces = -grad
 !        TRESP are passed as grad and so the convert_grad_to_forces = -1 so that
 !        forces = -grad  
 !        DIAGONAL forces are already -grad and so no need to charge their sign
