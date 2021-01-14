@@ -1207,7 +1207,7 @@ CONTAINS
        force_env%mixed_env%lerr= lerr
        force_env%mixed_env%coupling_function = TRIM(coupling_function)
        CALL finalizef()
-!> CHANGE_AC
+!> CHANGE_AC [Extended SG 2019-2020]
 !> 15-12-11
 !> To create a new way to combine the force
 !> To get the adiabatic force 
@@ -1221,11 +1221,6 @@ CONTAINS
 !print *, "force_env%mixed_env%energies_1_mol_list INSIDE", mixed_env%energies_1_mol_list
 !print *, "energies_1_mol_list INSIDE", energies_1_mol_list
 !        END IF
-        !SELECT CASE(adiab_keyword)
-        !CASE("CLASSICAL_PATH")
-           !Check that all the FF have the same number of atoms than the 1st FF
-           !because in the subroutine the number of atoms will be the one of 1st
-           !FF
            DO iforce_eval = 2, nforce_eval
               IF (glob_natoms(iforce_eval).NE.glob_natoms(1)) THEN
                  CPABORT("Illegal use of CLASSICAL_PATH methods")
@@ -1356,7 +1351,6 @@ CONTAINS
            !print*, "AC_energies", my_energies 
 
            DEALLOCATE(my_energies)
-!> End CHANGE_AC
     CASE DEFAULT
        CPABORT("")
     END SELECT

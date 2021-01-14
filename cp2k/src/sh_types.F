@@ -146,12 +146,16 @@ END TYPE adiab_nace_env_type
                                                                !only if MTS=1
      integer, dimension(:,:), POINTER         :: connlist1, connlist2, & ! AOM neighbouring
                                                  bneighbour, aneighbour
+                       !> bneighbour, aneighbour arrays are data for the diabatic nacv calculation
+                       !> they help efficiency by telling the program which atoms are connected
+                       !> and thus which pairs to carry out the calculation for
      REAL(KIND=dp), DIMENSION(:,:), POINTER   :: pcoeffs ! aom coeffs
      REAL(KIND=dp), DIMENSION(:), POINTER     :: scoeffs
      REAL(KIND = dp)                          :: scaling, cbar, minao !For AOM calculations
      !> Calculate at each timestep
-     REAL(KIND=dp), dimension(:,:,:), POINTER :: pcoeffsrun
-     REAL(KIND=dp), dimension(:,:), POINTER   :: At, Atm, Atp, Bt, Btm, & 
+     REAL(KIND=dp), dimension(:,:,:), POINTER :: pcoeffsrun ! normalized AOM coefficients
+     REAL(KIND=dp), dimension(:,:), POINTER   :: At, Atm, Atp, Bt, Btm, &
+                                                 !A and B are donor and acceptor coordinates at different times  
                                                  Btp, siteenergies
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER :: nacv! off-diagonal gradient of aom Hamilton.
      REAL(KIND=dp), dimension(:,:), POINTER   :: Stt, Stmt, Sttm, Stmtm, &
@@ -173,7 +177,7 @@ END TYPE adiab_nace_env_type
      LOGICAL, DIMENSION(:), POINTER           :: ext_pres !T or F array 
                                                           !indicating active atoms
      REAL(KIND=dp), dimension(:,:,:), POINTER :: crds !crds active atoms in COM reference frames
-     INTEGER, DIMENSION(:,:), POINTER         :: NN   !neighbrouring list
+     INTEGER, DIMENSION(:,:), POINTER         :: NN   !intermolacular neighbrouring list
      integer                                  :: atoms_per_site !Number of atoms per site
 
 !> FROZEN_COUPLINGS section 

@@ -408,7 +408,6 @@ CONTAINS
 
      !> Initialize input parameters: 
      !> cutoff to define the neighborough list
-
      CALL section_vals_val_get(coupling_section,"CUT_OFF_CONNECTIVITY",&
              r_val=sh_env%cutoff_connect)
      !> cutoff to define the neighborough list
@@ -454,7 +453,6 @@ CONTAINS
      !with molecules with a different number of atoms per site)
      CALL section_vals_val_get(coupling_section,"NUMBER_AOM_ATOMS_PER_SITE",&
          i_val=aom_atoms)
-
 
      mol = nadiab ! CHANGE_AC
      sh_env%atoms_per_site = aom_atoms ! CHANGE_AC
@@ -527,8 +525,13 @@ CONTAINS
      CALL section_vals_list_get(coupling_section,"_DEFAULT_KEYWORD_",list=listcoeff) !Read them in the input files
      CALL read_listcoeff(listcoeff, ext_elements, sh_env%ext_pres, &
                          scoefftot, pcoefftot, natom) !Transform them into four arrays
+!print *, "ext_elements",  ext_elements
+!print *, "pcoefftot", pcoefftot
 
      sh_env%elements = PACK(ext_elements, sh_env%ext_pres) !Only select active atoms
+
+!print *, "sh_env%elements", sh_env%elements
+
      allocate(atomlist_mask(c))
      atomlist_mask =.NOT.((scoefftot.eq.0).AND.(pcoefftot.eq.0)) !Only select atoms with orbitals
      allocate(submask(aom_atoms))
@@ -553,6 +556,8 @@ CONTAINS
                                                                               !coeff
                                                                               !not
                                                                               !zero
+!print *, "sh_env%atomlist", sh_env%atomlist
+
      allocate(sh_env%connlist2(4,size(sh_env%atomlist)))
      do i=1,aom_atoms
           do j=1,norbitals
@@ -561,19 +566,33 @@ CONTAINS
           sh_env%scoeffs(i) = scoefftot(start - 1 + i)
      end do
 
+!print *, "sh_env%pcoeffs", sh_env%pcoeffs
+!print *, "sh_env%scoeffs", sh_env%scoeffs
+
      !> CONSTRUCT THE CONNLIST
      !we fill out the connlist arrays before calculating the nacv
      allocate(crds_loc(3, c))
      ALLOCATE(Atp_loc(4,aom_atoms))
 
+     ! coordinate of the active atoms (in bhor?) taken from positions_tp
      do coord=1,3
         crds_loc(coord,:) = PACK(positions_tp(coord,:), sh_env%ext_pres)
      enddo
+!print *, "positions_tp x compo", positions_tp(1,:)
 
      Atp_loc(2:4,1:aom_atoms) = crds_loc(1:3,1:aom_atoms)
      !output: sh_env%connlist1, sh_env%connlist2
      call connect_list2(Atp_loc(2:4,:), sh_env%atomlist, sh_env%connlist1, sh_env%connlist2, sh_env%cutoff_connect)
      
+!print *, "Atp_loc(1,:)", Atp_loc(2,:)
+
+!do i=1,aom_atoms
+!print *, "sh_env%connlist1", sh_env%connlist1(:,i)
+!enddo
+
+!do i=1,size(sh_env%atomlist)
+!print *, "sh_env%connlist2", sh_env%connlist2(:,i)
+!enddo
 
      DEALLOCATE(atomlist_mask) 
      DEALLOCATE(submask) 

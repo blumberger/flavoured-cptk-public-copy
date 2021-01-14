@@ -298,9 +298,8 @@ CONTAINS
          CALL calc_aom_Xmatrix_elements_first_step(sh_env, sh_env%atoms_per_site, mol, sh_env%dR, sh_env%do_random, sh_env%cbar, &
                           sh_env%scaling, PC_allrvecs, orb, sh_env%minao)
 
-         !> CONVERT NACV AND CALCULATE EIGENPROPERTIES 
-         !> THESE ASSOCIATIONS ARE NEEDED FOR THE NACV CALC
          sh_env%nacv = sh_env%cbar*sh_env%nacv
+         !> convert nacv using the true overlap 
          !-----------------------------------------------------------------------------
      ELSE IF (sh_env%frozen_couplings_keyword) THEN 
          !> FROZEN COUPLINGS 
@@ -638,7 +637,7 @@ CONTAINS
 
 !**********************************************************************************
 !> \brief  This construct the Hamiltonian, propagate the electronic equation of
-!motion and defines if a hop is attempted or not.
+!motion and defines if a hop is attempted or not and calculate forces.
 !> authors AC and SG
 !> edited 02/02/20
 !**********************************************************************************
@@ -764,7 +763,7 @@ CONTAINS
          enddo
 
 
-         !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
+         !> CALCULATE THE CENTER OF MASS AND CONSTRUCT (INTERMOLECULAR) NEIGHBOURS LIST
          CALL calc_coms_and_nlist(mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, &
                                     active_system_info=sh_env%active_system_info, NN=sh_env%NN)
 
@@ -781,12 +780,12 @@ CONTAINS
          !sh_env%nacv = 0.0D0
          !print *, "NACV tp", sh_env%nacv(1,:,:)
          !-----------------------------------------------------------------------------
-     ELSE IF (sh_env%frozen_couplings_keyword) THEN
          !> FROZEN COUPLINGS 
+     ELSE IF (sh_env%frozen_couplings_keyword) THEN
          CALL calc_frozen_H(sh_env, energies_tp, orb,positions_com_tp=positions_com_tp)
 
-     ELSE IF (sh_env%tresp_couplings_keyword) THEN
          !> TRESP COUPLINGS 
+     ELSE IF (sh_env%tresp_couplings_keyword) THEN
          do coord=1,3
             sh_env%crds(coord,:,1) = 0.0D0 !time tm is not used 
             sh_env%crds(coord,:,2) = 0.0D0 !time t is not used

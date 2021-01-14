@@ -579,10 +579,10 @@ SUBROUTINE calc_aom_Xmatrix_elements(sh_env, itimes, atoms, mol, dR, do_random, 
                          if (i == k) then
                               CALL diagonal_aom_elem(i,k,orb,itimes,sh_env)
                          !now the off-diagonals                         
-                         else ! ( i == k)
+                         else ! ( i != k)
                               CALL off_diagonal_aom_elem(sh_env,i,k,orb,itimes, atoms, &
                                    dR, S, do_random, cbar, scaling)
-                         end if !(i==k)
+                         end if !(i!=k)
                     else !(NN(i,k) == 1
                          do d=1,orb
                               do m=1,orb
@@ -728,11 +728,11 @@ SUBROUTINE off_diagonal_aom_elem(sh_env,i,k,orb,itimes, atoms, &
                     sh_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
                     sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m) = cmplx(0.0D0, -scaling*S,dp)
 
-                    !> In the following diabatic non-orthog. nace are
-                    !calculated, since calculating them is very time consuming
+                    !> In the following diabatic non-orthog. nacv are
+                    !calculated. Since calculating them is very time consuming
                     !and expensive we opted for a multiple time step scheme.
-                    !while the nacv are within the counter(chosen in the input 
-                    !file) they are considered a
+                    !nacv within the counter(chosen in the input 
+                    !file) are considered a
                     !constant and taken from the prevous time step.
                     !Calcul of the NACV
                     if (mod(itimes-1, sh_env%multiple_time_step) .eq. 0 &
@@ -857,6 +857,7 @@ SUBROUTINE calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_rando
 
      !CALCULATE THE HAMILTONIAN AND THE NACV
      do i=1,mol
+!print *, "state i", i
                !create the array of all its atomic coordinates at t
                !numerical factor converts from Angstroms into Bohr radii
                sh_env%Atp(1,1:atoms) = dble(sh_env%elements((i-1)*atoms+1:i*atoms))
@@ -866,16 +867,20 @@ SUBROUTINE calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_rando
 
                !then for each other molecule
                do k=1,mol
+!print *, "state k", k
                     !create the array of its atomic coordinates at both t and t+dt
                     sh_env%Btp(1,1:atoms) = dble(sh_env%elements((k-1)*atoms+1:k*atoms))
                     do l=1,atoms
                         sh_env%Btp(2:4,l) = sh_env%crds(1:3,(k-1)*atoms+l,3)
                     end do
                     if (i == 1) then
+!print *, "sh_env%pcoeffs", sh_env%pcoeffs
+                         ! SG: renormalize coefficient for the distorted molecule (see Gajdos thesis) 
                          do d=1,orb
                               sh_env%pcoeffsrun(1:atoms,orb*(k-1)+d,3) = sh_env%pcoeffs(1:atoms,d)
                               call calc_sab(sh_env%Btp, sh_env%connlist2, sh_env%pcoeffsrun(:,orb*(k-1)+d,3))
                          end do
+!print  *, "sh_env%pcoeffsrun", sh_env%pcoeffsrun
                     end if  ! (i == 1)
                     do d=1,orb
                          do m=1,orb
@@ -891,6 +896,10 @@ SUBROUTINE calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_rando
                         sh_env%neighbourlist(i,k,:,1:atoms) = sh_env%bneighbour(:,1:atoms)
                         sh_env%neighbourlist(k,i,:,1:atoms) = sh_env%aneighbour(:,1:atoms)
                     end if 
+!print *, "sh_env%aneighbour(:,1:atoms)", sh_env%aneighbour(:,1:atoms)
+!print *, "sh_env%aneighbour(:,1:atoms)", SIZE(sh_env%aneighbour(1,1:atoms))
+!print *, "sh_env%aneighbour(:,1:atoms)", SIZE(sh_env%aneighbour(:,1))
+!print *, "sh_env%bneighbour(:,1:atoms)", sh_env%bneighbour(:,1:atoms)
                     if (sh_env%NN(i,k) == 1) then
                          !first the diagonals
                          if (i == k) then
