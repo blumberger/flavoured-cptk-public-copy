@@ -283,7 +283,16 @@ CONTAINS
          if (sh_env%multistate) then
             CPABORT("Multi-state forces not implemented")
          end if   
-         CALL set_aom_env(nadiab, norbitals, natom,positions_tp,adiab_section,sh_env)
+         !CALL set_aom_env(nadiab, norbitals, natom,positions_tp,adiab_section,sh_env)
+         CALL set_aom_env_multip(nadiab, norbitals, natom,positions_tp,adiab_section,sh_env)
+    !------------------------------------------------------------------------------------------
+    CASE("MULTI-PHASE")
+         sh_env%aom_couplings_keyword = .TRUE.
+         if (sh_env%multistate) then
+            CPABORT("Multi-state forces not implemented")
+         end if   
+         !CALL set_aom_env(nadiab, norbitals, natom,positions_tp,adiab_section,sh_env)
+         CALL set_aom_env_multip(nadiab, norbitals, natom,positions_tp,adiab_section,sh_env)
     !------------------------------------------------------------------------------------------
     CASE("FROZEN_COUPLINGS")
         ! Frozen coupling would have the possibility of using multi-state for
@@ -359,6 +368,271 @@ CONTAINS
      DEALLOCATE(rng_stream)
   END SUBROUTINE create_sh_env
 
+! *****************************************************************************
+!> \brief This allocates aom_env variables. One could in principle put these
+!          variables in a separate derive type structure
+!> \author  SG 
+!> \date XX/XX/21
+! *****************************************************************************
+  SUBROUTINE set_aom_env_multip(nadiab,  norbitals, natom, &
+                                  positions_tp,     &
+                                  adiab_section,    &
+                                  sh_env)
+
+
+     INTEGER, INTENT(IN)                            :: nadiab, norbitals, natom
+     REAL(kind=dp), DIMENSION(:,:),POINTER          :: positions_tp
+     TYPE(section_vals_type), POINTER               :: adiab_section
+     TYPE(sh_env_type), INTENT(INOUT)               :: sh_env
+
+     CHARACTER(len=*), PARAMETER :: routineN ='set_aom_env_multip', &
+     routineP = moduleN//':'//routineN
+
+     TYPE(section_vals_type), POINTER               :: optimization_section
+     integer                                        :: i, j, mat, act_atoms, coord, mol
+     REAL(KIND=dp), dimension(:,:), allocatable     :: crds_loc
+     REAL(KIND=dp), dimension(:,:), allocatable     :: Atp_loc
+     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE       :: pcoefftot, scoefftot
+     LOGICAL, DIMENSION(:), ALLOCATABLE             :: submask
+     integer, dimension(:), ALLOCATABLE             :: ext_elements
+     LOGICAL, dimension(:), POINTER                 :: active_logical
+     TYPE(cp_sll_val_type), POINTER                 :: listcoeff
+     !LOGICAL                                        :: continue_while
+     CHARACTER(LEN=default_string_length)           :: file_name_s_psigma, file_name_s_ppi,&
+                                                       prop_wf_keyword
+     ! OZ: extra strings for C-S and S-S SAB calc
+     CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_C_S,file_name_s_ppi_C_S
+     CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_S_S,file_name_s_ppi_S_S
+     TYPE(section_vals_type), POINTER               :: coupling_section
+     INTEGER                                        :: aom_atoms
+
+     NULLIFY(listcoeff)
+     NULLIFY(optimization_section)
+     NULLIFY(coupling_section)
+
+     coupling_section => section_vals_get_subs_vals(adiab_section, "AOM")
+     optimization_section => section_vals_get_subs_vals(adiab_section,"OPTIMIZATION")
+
+     CALL section_vals_val_get(optimization_section,"RK_PROPAGATION", c_val=prop_wf_keyword) 
+
+     !> Initialize input parameters: 
+     !> cutoff to define the neighborough list
+     CALL section_vals_val_get(coupling_section,"CUT_OFF_CONNECTIVITY",&
+             r_val=sh_env%cutoff_connect)
+     !> cutoff to define the neighborough list
+     CALL section_vals_val_get(coupling_section,"CUT_OFF_BETWEEN_SITES",&
+             r_val=sh_env%cutoff_sites)
+     !> minao is an atomic overlap cutoff
+     CALL section_vals_val_get(coupling_section,"ATOMIC_OVERLAP_CUTOFF",&
+             r_val=sh_env%minao)
+     !> dR is the increment for the gradient finite difference calculation
+     CALL section_vals_val_get(coupling_section,"NACV_INCREMENT",&
+             r_val=sh_env%dR)
+     !> analytics would probably calculates analytic forces for a 2 state sytems
+     !(Spencer 2016)
+     CALL section_vals_val_get(coupling_section,"ANALYTICS", l_val=sh_env%analytics)
+     !> This remove bias coming from the finite difference calculation of the
+      !> gradients of the Hamiltonian from AOM
+     CALL section_vals_val_get(coupling_section,"RANDOM_DERIVATIVE", l_val=sh_env%do_random)
+     !> Multiple time step calculation of aom gradient
+     CALL section_vals_val_get(coupling_section,"MULTIPLE_TIME_STEP",&
+             i_val=sh_env%multiple_time_step)
+
+     !> Create the overlap look-up table for the AOM coupling calculation
+     CALL section_vals_val_get(coupling_section,"PSIGMA_FILE_NAME",&
+             c_val=file_name_s_psigma)
+     CALL section_vals_val_get(coupling_section,"PPI_FILE_NAME",&
+             c_val=file_name_s_ppi)
+     ! OZ: C-S and S-S
+     CALL section_vals_val_get(coupling_section,"PSIGMA_C_S_FILE_NAME",&
+             c_val=file_name_s_psigma_C_S)
+     CALL section_vals_val_get(coupling_section,"PPI_C_S_FILE_NAME",&
+             c_val=file_name_s_ppi_C_S)
+     CALL section_vals_val_get(coupling_section,"PSIGMA_S_S_FILE_NAME",&
+             c_val=file_name_s_psigma_S_S)
+     CALL section_vals_val_get(coupling_section,"PPI_S_S_FILE_NAME",&
+             c_val=file_name_s_ppi_S_S)
+     !> Scaling factor Hab = scaling*Sab_bar
+     CALL section_vals_val_get(coupling_section,"SCALING_FACTOR",&
+             r_val=sh_env%scaling)
+     !> cbar factor : Sab = cbar*Sab_bar
+     CALL section_vals_val_get(coupling_section,"CBAR",&
+             r_val=sh_env%cbar)
+     !> number of atoms per site (This array is not general for a double phase
+     !with molecules with a different number of atoms per site)
+     CALL section_vals_val_get(coupling_section,"NUMBER_AOM_ATOMS_PER_SITE",&
+         i_val=aom_atoms)
+
+     mol = nadiab ! CHANGE_AC
+     sh_env%atoms_per_site = aom_atoms ! CHANGE_AC
+     mat = norbitals*nadiab !> Size of the vectorial space where the wavefunctions are projected
+     !c = nadiab*aom_atoms !> Numbers of active atoms
+     act_atoms = COUNT(sh_env%ext_pres) !> Numbers of active atoms
+print *, "NATOMS", act_atoms
+
+     ALLOCATE(sh_env%elements(aom_atoms))
+     ALLOCATE(sh_env%connlist1(4,aom_atoms))
+     allocate(sh_env%aneighbour(0:sh_env%atoms_per_site,0:sh_env%atoms_per_site))
+     allocate(sh_env%bneighbour(0:sh_env%atoms_per_site,0:sh_env%atoms_per_site))
+     ALLOCATE(sh_env%pcoeffs(aom_atoms,norbitals))
+     ALLOCATE(sh_env%scoeffs(aom_atoms))
+     !> crds is an AOM arrays (xyz, atoms, tm-t-tp) the third dimension
+     !indicates what time the coordinates refer to
+     allocate(sh_env%crds(3,act_atoms,3))
+     ALLOCATE(sh_env%NN(mat, mat))
+     allocate(sh_env%pcoeffsrun(sh_env%atoms_per_site,mat,3)) !pcoeffsrun exists because the p-coefficients
+                                               !need to be renormalised for each structure
+     !first column is now atomic number of atom (e.g. 6 for carbon)
+     !Naming convention: At = A(t), Atp = A(t+1), Atm = A(t-1), etc
+     allocate(sh_env%At(4,sh_env%atoms_per_site))
+     allocate(sh_env%Atp(4,sh_env%atoms_per_site))
+     allocate(sh_env%Atm(4,sh_env%atoms_per_site))
+     allocate(sh_env%Bt(4,sh_env%atoms_per_site))
+     allocate(sh_env%Btp(4,sh_env%atoms_per_site))
+     allocate(sh_env%Btm(4,sh_env%atoms_per_site))
+     allocate(sh_env%siteenergies(3,mat))  !COMMENT_SG: First dimension is not usefull
+     ALLOCATE(sh_env%nacv(3,mat, mat*aom_atoms))
+     ALLOCATE(sh_env%rm_t(3, natom))
+     ALLOCATE(sh_env%rm_tm(3, natom))
+     ALLOCATE(sh_env%Stt(mat,mat))
+     ALLOCATE(sh_env%Stptp(mat,mat))
+     if (prop_wf_keyword .ne. "DIABATIC_RK_FAST") then
+     !> in case DIABATIC_RK_FAST diabatic nace are never calculated, neither in
+     !> the
+     !> propagate_wf nor in the adiabatic nace calculation for the hopping
+     !> probability
+     !> so that all the Sttp and co matrices are also not used, no point in
+     !> allocate them
+        print *, "FOB-SH: ALLOCATION OF S MATRICES"
+        ALLOCATE(sh_env%Sttp(mat,mat))
+        ALLOCATE(sh_env%Stpt(mat,mat))
+        ALLOCATE(sh_env%Stmt(mat,mat))
+        ALLOCATE(sh_env%Sttm(mat,mat))
+        ALLOCATE(sh_env%Stmtm(mat,mat))
+     end if
+
+     sh_env%At = 0.0_dp
+     sh_env%Atp = 0.0_dp
+     sh_env%Atm = 0.0_dp
+     sh_env%Bt  = 0.0_dp
+     sh_env%Btp = 0.0_dp
+     sh_env%Btm = 0.0_dp
+     sh_env%siteenergies = 0.0_dp
+     sh_env%nacv = 0.0_dp
+     !> these arrays are data for the diabatic nacv calculation
+     !> they help efficiency by telling the program which atoms are connected
+     !> and thus which pairs to carry out the calculation for
+     sh_env%aneighbour = 0
+     sh_env%bneighbour = 0
+
+     ! OZ: add extra arguments...
+     CALL build_s_tables(file_name_s_psigma, file_name_s_ppi,&
+                         file_name_s_psigma_C_S, file_name_s_ppi_C_S,&
+                         file_name_s_psigma_S_S, file_name_s_ppi_S_S)
+     
+     
+     !> READ THE AOM COEFFICIENT
+     CALL section_vals_list_get(coupling_section,"_DEFAULT_KEYWORD_",list=listcoeff) !Read them in the input files
+     CALL read_listcoeff(listcoeff, ext_elements, active_logical, &
+                         scoefftot, pcoefftot, aom_atoms) !Transform them into four arrays
+                                                          ! In this case
+                                                          ! external presence is
+                                                          ! not read anymore.
+print *, "ext_elements",  ext_elements
+print *, "pcoefftot", pcoefftot
+
+     !sh_env%elements = PACK(ext_elements, sh_env%ext_pres) !Only select active atoms
+     sh_env%elements = ext_elements !Only select active atoms
+
+print *, "sh_env%elements", sh_env%elements
+
+     allocate(submask(aom_atoms))
+     submask =.NOT.((scoefftot.eq.0).AND.(pcoefftot.eq.0)) !Only select atoms with orbitals
+!print *, "atomlist_mask", atomlist_mask
+!     allocate(submask(aom_atoms))
+!     i = 1
+!     continue_while = .True. 
+!     do while (continue_while)
+!        if (atomlist_mask(i)) then
+!           start = i
+!print *, "start", start
+!           continue_while = .False.
+!         endif
+!         i = i+1
+!print *, "step i", i 
+!     end do
+!     do i=1, aom_atoms 
+!        submask(i) = atomlist_mask(i + start - 1)
+!     enddo
+
+!I need to constrcut this and skip the rest
+print *, "submask", submask
+
+     allocate(sh_env%atomlist(COUNT(submask(1:aom_atoms))))
+
+     sh_env%atomlist = PACK( (/ (i, i=1,aom_atoms) /), submask(1:aom_atoms) ) !List atoms with orbitals
+                                                                              !namely,
+                                                                              !with
+                                                                              !coeff
+                                                                              !not
+                                                                              !zero
+!print *, "sh_env%atomlist", sh_env%atomlist
+
+     ! SG: The loop over norbitals is an attempt to make the code work in case
+     ! of degenerate orbitals per site (NB: in general throughout the code the
+     ! degeneracy is untested and NOT well implemented (since Jacob first version))
+     allocate(sh_env%connlist2(4,size(sh_env%atomlist)))
+     do i=1,aom_atoms
+          do j=1,norbitals
+                !sh_env%pcoeffs(i,j) = pcoefftot( start -1 + i + (j-1)*norbitals)
+                sh_env%pcoeffs(i,j) = pcoefftot(i) ! assume the degenerate are always the same 
+          end do
+          !sh_env%scoeffs(i) = scoefftot(start - 1 + i)
+          sh_env%scoeffs(i) = scoefftot(i) ! assume never degenerate  
+
+     end do
+
+print *, "sh_env%pcoeffs", sh_env%pcoeffs
+print *, "sh_env%scoeffs", sh_env%scoeffs
+
+     !> CONSTRUCT THE CONNLIST
+     ! SG: strange way to proceed to get the connectivity of one molecule (which
+     ! is then assumed to be the same for all molecules) 
+     !we fill out the connlist arrays before calculating the nacv
+     allocate(crds_loc(3, act_atoms))
+     ALLOCATE(Atp_loc(4,aom_atoms))
+
+     ! coordinate of the active atoms taken from positions_tp
+     do coord=1,3
+        crds_loc(coord,:) = PACK(positions_tp(coord,:), sh_env%ext_pres)
+     enddo
+!print *, "positions_tp x compo", positions_tp(1,:)
+
+     ! SG: this line again assume same number of atoms for each molecule and it
+     ! assumes all molecules have the same connlist1 connlist2
+     Atp_loc(2:4,1:aom_atoms) = crds_loc(1:3,1:aom_atoms)
+     !output: sh_env%connlist1, sh_env%connlist2
+     call connect_list2(Atp_loc(2:4,:), sh_env%atomlist, sh_env%connlist1, sh_env%connlist2, sh_env%cutoff_connect)
+     
+print *, "Atp_loc(1,:)", Atp_loc(2,:)
+
+do i=1,aom_atoms
+print *, "sh_env%connlist1", sh_env%connlist1(:,i)
+enddo
+
+do i=1,size(sh_env%atomlist)
+print *, "sh_env%connlist2", sh_env%connlist2(:,i)
+enddo
+
+     !DEALLOCATE(atomlist_mask) 
+     DEALLOCATE(submask) 
+     DEALLOCATE(Atp_loc)
+     DEALLOCATE(crds_loc)
+     DEALLOCATE(ext_elements)
+     DEALLOCATE(scoefftot)
+     DEALLOCATE(pcoefftot)
+
+  END SUBROUTINE set_aom_env_multip
 
 ! *****************************************************************************
 !> \brief This allocates aom_env variables. One could in principle put these
@@ -530,23 +804,27 @@ CONTAINS
 
      sh_env%elements = PACK(ext_elements, sh_env%ext_pres) !Only select active atoms
 
-!print *, "sh_env%elements", sh_env%elements
+print *, "sh_env%elements", sh_env%elements
 
      allocate(atomlist_mask(c))
      atomlist_mask =.NOT.((scoefftot.eq.0).AND.(pcoefftot.eq.0)) !Only select atoms with orbitals
+print *, "atomlist_mask", atomlist_mask
      allocate(submask(aom_atoms))
      i = 1
      continue_while = .True. 
      do while (continue_while)
         if (atomlist_mask(i)) then
            start = i
+print *, "start", start
            continue_while = .False.
          endif
          i = i+1
+print *, "step i", i 
      end do
      do i=1, aom_atoms 
         submask(i) = atomlist_mask(i + start - 1)
      enddo
+print *, "submask", submask
 
      allocate(sh_env%atomlist(COUNT(submask(1:aom_atoms))))
 
@@ -566,33 +844,35 @@ CONTAINS
           sh_env%scoeffs(i) = scoefftot(start - 1 + i)
      end do
 
-!print *, "sh_env%pcoeffs", sh_env%pcoeffs
-!print *, "sh_env%scoeffs", sh_env%scoeffs
+print *, "sh_env%pcoeffs", sh_env%pcoeffs
+print *, "sh_env%scoeffs", sh_env%scoeffs
 
      !> CONSTRUCT THE CONNLIST
      !we fill out the connlist arrays before calculating the nacv
      allocate(crds_loc(3, c))
      ALLOCATE(Atp_loc(4,aom_atoms))
 
-     ! coordinate of the active atoms (in bhor?) taken from positions_tp
+     ! coordinate of the active atoms taken from positions_tp
      do coord=1,3
         crds_loc(coord,:) = PACK(positions_tp(coord,:), sh_env%ext_pres)
      enddo
 !print *, "positions_tp x compo", positions_tp(1,:)
 
+     ! this line again assume same number of atoms for each molecule and it
+     ! assumes all molecules have the same connlist1 connlist2
      Atp_loc(2:4,1:aom_atoms) = crds_loc(1:3,1:aom_atoms)
      !output: sh_env%connlist1, sh_env%connlist2
      call connect_list2(Atp_loc(2:4,:), sh_env%atomlist, sh_env%connlist1, sh_env%connlist2, sh_env%cutoff_connect)
      
-!print *, "Atp_loc(1,:)", Atp_loc(2,:)
+print *, "Atp_loc(1,:)", Atp_loc(2,:)
 
-!do i=1,aom_atoms
-!print *, "sh_env%connlist1", sh_env%connlist1(:,i)
-!enddo
+do i=1,aom_atoms
+print *, "sh_env%connlist1", sh_env%connlist1(:,i)
+enddo
 
-!do i=1,size(sh_env%atomlist)
-!print *, "sh_env%connlist2", sh_env%connlist2(:,i)
-!enddo
+do i=1,size(sh_env%atomlist)
+print *, "sh_env%connlist2", sh_env%connlist2(:,i)
+enddo
 
      DEALLOCATE(atomlist_mask) 
      DEALLOCATE(submask) 

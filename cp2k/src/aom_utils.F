@@ -860,7 +860,8 @@ SUBROUTINE calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_rando
 !print *, "state i", i
                !create the array of all its atomic coordinates at t
                !numerical factor converts from Angstroms into Bohr radii
-               sh_env%Atp(1,1:atoms) = dble(sh_env%elements((i-1)*atoms+1:i*atoms))
+               !sh_env%Atp(1,1:atoms) = dble(sh_env%elements((i-1)*atoms+1:i*atoms))
+               sh_env%Atp(1,1:atoms) = dble(sh_env%elements(:))
                do j=1,atoms
                     sh_env%Atp(2:4,j) = sh_env%crds(1:3,(i-1)*atoms+j,3)
                end do
@@ -869,7 +870,8 @@ SUBROUTINE calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_rando
                do k=1,mol
 !print *, "state k", k
                     !create the array of its atomic coordinates at both t and t+dt
-                    sh_env%Btp(1,1:atoms) = dble(sh_env%elements((k-1)*atoms+1:k*atoms))
+                    !sh_env%Btp(1,1:atoms) = dble(sh_env%elements((k-1)*atoms+1:k*atoms))
+                    sh_env%Btp(1,1:atoms) = dble(sh_env%elements(:))
                     do l=1,atoms
                         sh_env%Btp(2:4,l) = sh_env%crds(1:3,(k-1)*atoms+l,3)
                     end do

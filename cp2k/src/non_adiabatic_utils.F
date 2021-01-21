@@ -169,6 +169,9 @@ SUBROUTINE calc_coms_and_nlist(mol, cutoff_sites, orb, crds, active_system_info,
           end do
      end do
 
+do i=1,mol
+print *, "CONNECTIVITY", NN(i,:)
+end do
     deallocate(coms)
 END SUBROUTINE calc_coms_and_nlist
 
