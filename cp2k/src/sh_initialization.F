@@ -283,8 +283,8 @@ CONTAINS
          if (sh_env%multistate) then
             CPABORT("Multi-state forces not implemented")
          end if   
-         !CALL set_aom_env(nadiab, norbitals, natom,positions_tp,adiab_section,sh_env)
-         CALL set_aom_env_multip(nadiab, norbitals, natom,positions_tp,adiab_section,sh_env)
+         CALL set_aom_env(nadiab, norbitals, natom,positions_tp,adiab_section,sh_env)
+         !CALL set_aom_env_multip(nadiab, norbitals, natom,positions_tp,adiab_section,sh_env)
     !------------------------------------------------------------------------------------------
     CASE("MULTI-PHASE")
          sh_env%aom_couplings_keyword = .TRUE.
@@ -458,10 +458,12 @@ CONTAINS
      !> cbar factor : Sab = cbar*Sab_bar
      CALL section_vals_val_get(coupling_section,"CBAR",&
              r_val=sh_env%cbar)
-     !> number of atoms per site (This array is not general for a double phase
-     !with molecules with a different number of atoms per site)
+     !!> number of atoms per site (This array is not general for a double phase
+     !!with molecules with a different number of atoms per site)
      CALL section_vals_val_get(coupling_section,"NUMBER_AOM_ATOMS_PER_SITE",&
          i_val=aom_atoms)
+      
+     !aom_atoms = 18
 
      mol = nadiab ! CHANGE_AC
      sh_env%atoms_per_site = aom_atoms ! CHANGE_AC
@@ -492,6 +494,7 @@ print *, "NATOMS", act_atoms
      allocate(sh_env%Btm(4,sh_env%atoms_per_site))
      allocate(sh_env%siteenergies(3,mat))  !COMMENT_SG: First dimension is not usefull
      ALLOCATE(sh_env%nacv(3,mat, mat*aom_atoms))
+     !ALLOCATE(sh_env%nacv(3,mat, act_atoms)) !degeneracy is not considered
      ALLOCATE(sh_env%rm_t(3, natom))
      ALLOCATE(sh_env%rm_tm(3, natom))
      ALLOCATE(sh_env%Stt(mat,mat))
@@ -620,6 +623,7 @@ do i=1,aom_atoms
 print *, "sh_env%connlist1", sh_env%connlist1(:,i)
 enddo
 
+print *, "--------"
 do i=1,size(sh_env%atomlist)
 print *, "sh_env%connlist2", sh_env%connlist2(:,i)
 enddo

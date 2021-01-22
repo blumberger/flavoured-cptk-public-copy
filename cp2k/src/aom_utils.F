@@ -848,7 +848,7 @@ SUBROUTINE calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_rando
      routineP = moduleN//':'//routineN
 
      REAL(KIND=dp)                               :: S
-     integer                                     :: i, j, k, l, m, d, o
+     integer                                     :: i, j, k, l, m, d, o, temp
      real(kind=dp), allocatable :: PC_rvecs(:,:)
 
 
@@ -857,7 +857,7 @@ SUBROUTINE calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_rando
 
      !CALCULATE THE HAMILTONIAN AND THE NACV
      do i=1,mol
-!print *, "state i", i
+print *, "state i", i
                !create the array of all its atomic coordinates at t
                !numerical factor converts from Angstroms into Bohr radii
                !sh_env%Atp(1,1:atoms) = dble(sh_env%elements((i-1)*atoms+1:i*atoms))
@@ -868,22 +868,39 @@ SUBROUTINE calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_rando
 
                !then for each other molecule
                do k=1,mol
-!print *, "state k", k
+print *, "state k", k
                     !create the array of its atomic coordinates at both t and t+dt
                     !sh_env%Btp(1,1:atoms) = dble(sh_env%elements((k-1)*atoms+1:k*atoms))
                     sh_env%Btp(1,1:atoms) = dble(sh_env%elements(:))
                     do l=1,atoms
                         sh_env%Btp(2:4,l) = sh_env%crds(1:3,(k-1)*atoms+l,3)
                     end do
+
+
                     if (i == 1) then
-!print *, "sh_env%pcoeffs", sh_env%pcoeffs
-                         ! SG: renormalize coefficient for the distorted molecule (see Gajdos thesis) 
+do temp=1,atoms
+print *, "sh_env%pcoeffs", sh_env%pcoeffs(temp,1)
+enddo
+                         ! SG: renormalize coefficient (atoms, state, tstep) of all k (meaning all molecules)
+                         ! this is a trick to do it once only for all molecules
+                         ! and store them in a more general pcoeffsrun that
+                         ! contains them all. This could be extended by
+                         ! considering that each molecule may have different n
+                         ! atoms.
                          do d=1,orb
                               sh_env%pcoeffsrun(1:atoms,orb*(k-1)+d,3) = sh_env%pcoeffs(1:atoms,d)
                               call calc_sab(sh_env%Btp, sh_env%connlist2, sh_env%pcoeffsrun(:,orb*(k-1)+d,3))
                          end do
-!print  *, "sh_env%pcoeffsrun", sh_env%pcoeffsrun
+do temp=1,atoms
+print  *, "sh_env%pcoeffsrun", sh_env%pcoeffsrun(temp, k, 3)
+enddo
                     end if  ! (i == 1)
+
+print *, "STATES", i, k
+do temp=1,atoms
+print  *, "sh_env%pcoeffsrun entering", sh_env%pcoeffsrun(temp, i, 3), sh_env%pcoeffsrun(temp, k, 3)
+enddo
+
                     do d=1,orb
                          do m=1,orb
                               call sab_screen_new(sh_env%Atp, sh_env%atomlist, sh_env%connlist1, &
@@ -925,15 +942,27 @@ SUBROUTINE calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_rando
                                         end do
                                    end do
                               else
-
+print *, "OFF-DIAGONAL"
                                    do d=1,orb
                                         do m=1,orb
+do temp=1,atoms
+print *, "sh_env%Atp just x", sh_env%Atp(1,temp), sh_env%Atp(2,temp)
+print *, "sh_env%Btp just x", sh_env%Btp(1,temp), sh_env%Btp(2,temp)
+enddo
+
+print *, "sh_env%connlist2", sh_env%connlist2
+
+do temp=1,atoms
+print  *, "sh_env%pcoeffsrun(temp, i, 3)", sh_env%pcoeffsrun(temp, i, 3)
+enddo
+
                                              call calc_sab(sh_env%Atp, sh_env%connlist2, &
                                                           sh_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3),&
                                                           S, sh_env%Btp, sh_env%connlist2, & 
                                                           sh_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3))
                                              sh_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
                                              sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0, -scaling*S,dp)
+
                                              call calc_dRSab(sh_env%Atp, sh_env%atomlist, sh_env%connlist1, &
                                              sh_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3), sh_env%scoeffs, &
                                              !nacv(1:3,orb*(k-1)+d,orb*(i-1)+m,(i-1)*atoms+1:i*atoms), &
@@ -941,16 +970,22 @@ SUBROUTINE calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_rando
                                              sh_env%nacv(1:3,orb*(k-1)+d,(i-1)*atoms+1:i*atoms), &
                                              sh_env%nacv(1:3,orb*(i-1)+m,(k-1)*atoms+1:k*atoms), &
                                              sh_env%Btp, sh_env%atomlist, sh_env%connlist1, & 
-                                                                   sh_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3),&
+                                             sh_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3),&
                                              !sh_env%scoeffs, sh_env%neighbourlist(k,i,:,:), sh_env%neighbourlist(i,k,:,:), dR, &
                                              sh_env%scoeffs, sh_env%aneighbour(:,:), sh_env%bneighbour(:,:), dR, &
                                              do_random, sh_env)
 
-!print *, "PAIR of states", i, k
-!print *, "indeces1", orb*(k-1)+d, "from to", (i-1)*atoms+1, i*atoms
-!print *, "nacv1", sh_env%nacv(:,orb*(k-1)+d,(i-1)*atoms+1:i*atoms) 
-!print *, "indeces2", orb*(i-1)+m, "from to", (k-1)*atoms+1, k*atoms
-!print *, "nacv2", sh_env%nacv(:,orb*(i-1)+m,(k-1)*atoms+1:k*atoms)
+print *, "PAIR of states", i
+print *, "indeces2", orb*(i-1)+m, "from to", (k-1)*atoms+1, k*atoms
+do temp=(k-1)*atoms+1, k*atoms
+print *, "nacv2", sh_env%nacv(1,orb*(i-1)+m,temp), sh_env%nacv(2,orb*(i-1)+m,temp), sh_env%nacv(3,orb*(i-1)+m,temp)
+end do
+
+print *, "PAIR of states", k
+print *, "indeces1", orb*(k-1)+d, "from to", (i-1)*atoms+1, i*atoms
+do temp=(i-1)*atoms+1, i*atoms
+print *, "nacv1", sh_env%nacv(1,orb*(k-1)+d,temp), sh_env%nacv(2,orb*(k-1)+d,temp), sh_env%nacv(3,orb*(k-1)+d,temp)
+enddo 
 
 
                                         end do
