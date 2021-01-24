@@ -388,10 +388,11 @@ CONTAINS
      CHARACTER(len=*), PARAMETER :: routineN ='set_aom_env_multip', &
      routineP = moduleN//':'//routineN
 
-     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE       :: pcoefftot, scoefftot
+     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE       :: pcoefftot_d, scoefftot_d, &
+                                                       pcoefftot_a, scoefftot_a
      TYPE(section_vals_type), POINTER               :: optimization_section
      integer                                        :: i, j, mat, act_atoms, mol
-     integer, dimension(:), ALLOCATABLE             :: ext_elements
+     integer, dimension(:), ALLOCATABLE             :: ext_elements_d, ext_elements_a
      LOGICAL, dimension(:), POINTER                 :: active_logical
      TYPE(cp_sll_val_type), POINTER                 :: listcoeff
      !LOGICAL                                        :: continue_while
@@ -406,6 +407,8 @@ CONTAINS
      INTEGER, DIMENSION(:), POINTER                 :: donor_index, acceptor_index
      REAL(KIND=dp), dimension(:,:), allocatable     :: Atp_loc
      LOGICAL, DIMENSION(:), ALLOCATABLE             :: submask
+     INTEGER                                        :: init_atom_mol_d, final_atom_mol_d, atoms_per_mol_d
+     INTEGER                                        :: init_atom_mol_a, final_atom_mol_a, atoms_per_mol_a
 
      NULLIFY(listcoeff)
      NULLIFY(optimization_section)
@@ -484,11 +487,22 @@ CONTAINS
      !> READ THE AOM COEFFICIENT of DONOR and ACCEPTOR
      CALL section_vals_list_get(coupling_section,"_DEFAULT_KEYWORD_",list=listcoeff) !Read them in the input files
      !Transform them into four arrays. In this case external presence is not read anymore.
-     CALL read_listcoeff(listcoeff, ext_elements, active_logical, &
-                         scoefftot, pcoefftot, atoms_per_donor) !donor
-     CALL read_listcoeff(listcoeff, ext_elements, active_logical, &
-                         scoefftot, pcoefftot, atoms_per_acceptor) !acceptor
+     CALL read_listcoeff(listcoeff, ext_elements_d, active_logical, &
+                         scoefftot_d, pcoefftot_d, atoms_per_donor) !donor
+     CALL read_listcoeff(listcoeff, ext_elements_a, active_logical, &
+                         scoefftot_a, pcoefftot_a, atoms_per_acceptor) !acceptor
 
+     !get the first mol of the donor and the first of the acceptor 
+     init_atom_mol_d = sh_env%full_system_info(1,donor_index(1)) !just get the first donor
+     final_atom_mol_d = sh_env%full_system_info(2,donor_index(1))
+     atoms_per_mol_d = (final_atom_mol_d-init_atom_mol_d)+1
+
+     init_atom_mol_a = sh_env%full_system_info(1,acceptor_index(1)) !just get the first acceptor
+     final_atom_mol_a = sh_env%full_system_info(2,acceptor_index(1))
+     atoms_per_mol_a = (final_atom_mol_a-init_atom_mol_a)+1
+
+print *, "atoms_per_mol_d", atoms_per_mol_d
+print *, "atoms_per_mol_a", atoms_per_mol_a
 
      mol = nadiab ! CHANGE_AC
      sh_env%atoms_per_site = aom_atoms ! CHANGE_AC
@@ -503,10 +517,6 @@ print *, "NATOMS", act_atoms
      allocate(sh_env%bneighbour(0:sh_env%atoms_per_site,0:sh_env%atoms_per_site))
      ALLOCATE(sh_env%pcoeffs(aom_atoms,norbitals))
      ALLOCATE(sh_env%scoeffs(aom_atoms))
-     !> crds is an AOM arrays (xyz, atoms, tm-t-tp) the third dimension
-     !indicates what time the coordinates refer to
-     allocate(sh_env%crds(3,act_atoms,3))
-     ALLOCATE(sh_env%NN(mat, mat))
      allocate(sh_env%pcoeffsrun(sh_env%atoms_per_site,mat,3)) !pcoeffsrun exists because the p-coefficients
                                                !need to be renormalised for each structure
      !first column is now atomic number of atom (e.g. 6 for carbon)
@@ -517,7 +527,6 @@ print *, "NATOMS", act_atoms
      allocate(sh_env%Bt(4,sh_env%atoms_per_site))
      allocate(sh_env%Btp(4,sh_env%atoms_per_site))
      allocate(sh_env%Btm(4,sh_env%atoms_per_site))
-     allocate(sh_env%siteenergies(3,mat))  !COMMENT_SG: First dimension is not usefull
      ALLOCATE(sh_env%nacv(3,mat, mat*aom_atoms))
      !ALLOCATE(sh_env%nacv(3,mat, act_atoms)) !degeneracy is not considered
      ALLOCATE(sh_env%rm_t(3, natom))
@@ -539,6 +548,12 @@ print *, "NATOMS", act_atoms
         ALLOCATE(sh_env%Stmtm(mat,mat))
      end if
 
+     !> crds is an AOM arrays (xyz, atoms, tm-t-tp) the third dimension
+     !indicates what time the coordinates refer to
+     allocate(sh_env%crds(3,act_atoms,3))
+     ALLOCATE(sh_env%NN(mat, mat))
+     allocate(sh_env%siteenergies(3,mat))  !COMMENT_SG: First dimension is not usefull
+
      sh_env%At = 0.0_dp
      sh_env%Atp = 0.0_dp
      sh_env%Atm = 0.0_dp
@@ -558,49 +573,167 @@ print *, "NATOMS", act_atoms
                          file_name_s_psigma_C_S, file_name_s_ppi_C_S,&
                          file_name_s_psigma_S_S, file_name_s_ppi_S_S)
      
-     
-     !> READ THE AOM COEFFICIENT
-     CALL section_vals_list_get(coupling_section,"_DEFAULT_KEYWORD_",list=listcoeff) !Read them in the input files
-     CALL read_listcoeff(listcoeff, ext_elements, active_logical, &
-                         scoefftot, pcoefftot, aom_atoms) 
-     !Transform them into four arrays. In this case external presence is not read anymore.
-
-     !sh_env%elements = PACK(ext_elements, sh_env%ext_pres) !Only select active atoms
-     sh_env%elements = ext_elements !Only select active atoms XXXXXX NOT USEFUL
-
+     !> READ THE AOM COEFFICIENT DONOR
      ! SG: The loop over norbitals is an attempt to make the code work in case
      ! of degenerate orbitals per site (NB: in general throughout the code the
      ! degeneracy is untested and NOT well implemented (since Jacob first version))
-     do i=1,aom_atoms
+     ALLOCATE(sh_env%pcoeffs_d(atoms_per_donor,norbitals))
+     ALLOCATE(sh_env%scoeffs_d(atoms_per_donor))
+     do i=1,atoms_per_donor
           do j=1,norbitals
-                sh_env%pcoeffs(i,j) = pcoefftot(i) ! assume the degenerate are always the same 
+                sh_env%pcoeffs_d(i,j) = pcoefftot_d(i) ! assume the degenerate states are all the same orbital
           end do
-          sh_env%scoeffs(i) = scoefftot(i) ! assume never degenerate  
+          sh_env%scoeffs_d(i) = scoefftot_d(i) ! assume never degenerate  
      end do
- print *, "sh_env%pcoeffs", sh_env%pcoeffs
- print *, "sh_env%scoeffs", sh_env%scoeffs
+ print *, "sh_env%pcoeffs_d", sh_env%pcoeffs_d
+ print *, "sh_env%scoeffs_d", sh_env%scoeffs_d
 
      !> CONSTRUCT THE CONNLIST 
      ! SG: strange way to proceed to get the connectivity of one molecule (which
      ! is then assumed to be the same for all molecules) 
      !we fill out the connlist arrays before calculating the nacv
-     ALLOCATE(Atp_loc(4,aom_atoms))
-     allocate(submask(aom_atoms))
-     submask =.NOT.((scoefftot.eq.0).AND.(pcoefftot.eq.0)) !Only select atoms with orbitals
+     allocate(submask(atoms_per_donor))   !temp array
+     submask =.NOT.((scoefftot_d.eq.0).AND.(pcoefftot_d.eq.0)) !Only select atoms with orbitals
 
-     allocate(sh_env%atomlist(COUNT(submask(1:aom_atoms))))
      !create atome of interest (aoi) list
      !List atoms with orbitals namely, with coeff not zero
-     sh_env%atomlist = PACK( (/ (i, i=1,aom_atoms) /), submask(1:aom_atoms) ) 
-print *, "sh_env%atomlist", sh_env%atomlist
-     allocate(sh_env%connlist2(4,size(sh_env%atomlist)))
+     allocate(sh_env%atomlist_d(COUNT(submask(1:atoms_per_donor))))
+     sh_env%atomlist_d = PACK( (/ (i, i=1,atoms_per_donor) /), submask(1:atoms_per_donor) ) 
+print *, "sh_env%atomlist_d", sh_env%atomlist_d
+     allocate(sh_env%connlist2_d(4,size(sh_env%atomlist_d)))
+     ALLOCATE(sh_env%connlist1_d(4,atoms_per_donor))
 
      ! SG: this line again assume same number of atoms for each molecule and it
      ! assumes all molecules have the same connlist1 connlist2
-     Atp_loc(1,1:aom_atoms) = dble(ext_elements)
-     Atp_loc(2:4,1:aom_atoms) = positions_tp(1:3,55:78) !!HARD CODED XXXXXXXXXXXXX
-     !output: sh_env%connlist1, sh_env%connlist2
-     call connect_list2(Atp_loc(2:4,:), sh_env%atomlist, sh_env%connlist1, sh_env%connlist2, sh_env%cutoff_connect)
+     ALLOCATE(Atp_loc(4,atoms_per_donor)) !temp array
+     Atp_loc(1,1:atoms_per_donor) = dble(ext_elements_d)
+     Atp_loc(2:4,1:atoms_per_donor) = positions_tp(1:3,init_atom_mol_d:final_atom_mol_d)
+     !output: sh_env%connlist1, sh_env%connlist2, which are the intramoleculat
+     !connectivities with and without considering the zeors
+     call connect_list2(Atp_loc(2:4,:), sh_env%atomlist_d, sh_env%connlist1_d, sh_env%connlist2_d, sh_env%cutoff_connect)
+     
+!print *, "Atp_loc(1,:)", Atp_loc(2,:)
+do i=1,atoms_per_donor
+print *, "sh_env%connlist1", sh_env%connlist1_d(:,i)
+enddo
+
+print *, "--------"
+do i=1,size(sh_env%atomlist_d)
+print *, "sh_env%connlist2", sh_env%connlist2_d(:,i)
+enddo
+     DEALLOCATE(ext_elements_d)
+     DEALLOCATE(scoefftot_d)
+     DEALLOCATE(pcoefftot_d)
+     DEALLOCATE(submask) 
+     DEALLOCATE(Atp_loc)
+
+     !> READ THE AOM COEFFICIENT ACCEPTOR PHASE! 
+     ! SG: The loop over norbitals is an attempt to make the code work in case
+     ! of degenerate orbitals per site (NB: in general throughout the code the
+     ! degeneracy is untested and NOT well implemented (since Jacob first version))
+     ALLOCATE(sh_env%pcoeffs_a(atoms_per_acceptor,norbitals))
+     ALLOCATE(sh_env%scoeffs_a(atoms_per_acceptor))
+     do i=1,atoms_per_acceptor
+          do j=1,norbitals
+                sh_env%pcoeffs_a(i,j) = pcoefftot_a(i) ! assume the degenerate states are all the same orbital
+          end do
+          sh_env%scoeffs_a(i) = scoefftot_a(i) ! assume never degenerate  
+     end do
+ print *, "sh_env%pcoeffs_a", sh_env%pcoeffs_a
+ print *, "sh_env%scoeffs_a", sh_env%scoeffs_a
+
+     !> CONSTRUCT THE CONNLIST 
+     ! SG: strange way to proceed to get the connectivity of one molecule (which
+     ! is then assumed to be the same for all molecules) 
+     !we fill out the connlist arrays before calculating the nacv
+     allocate(submask(atoms_per_acceptor))   !temp array
+     submask =.NOT.((scoefftot_a.eq.0).AND.(pcoefftot_a.eq.0)) !Only select atoms with orbitals
+
+     !create atome of interest (aoi) list
+     !List atoms with orbitals namely, with coeff not zero
+     allocate(sh_env%atomlist_a(COUNT(submask(1:atoms_per_acceptor))))
+     sh_env%atomlist_a = PACK( (/ (i, i=1,atoms_per_acceptor) /), submask(1:atoms_per_acceptor) ) 
+print *, "sh_env%atomlist_a", sh_env%atomlist_a
+     allocate(sh_env%connlist2_a(4,size(sh_env%atomlist_a)))
+     ALLOCATE(sh_env%connlist1_a(4,atoms_per_acceptor))
+
+     ! SG: this line again assume same number of atoms for each molecule and it
+     ! assumes all molecules have the same connlist1 connlist2
+     ALLOCATE(Atp_loc(4,atoms_per_acceptor)) !temp array
+     Atp_loc(1,1:atoms_per_acceptor) = dble(ext_elements_a)
+     Atp_loc(2:4,1:atoms_per_acceptor) = positions_tp(1:3,init_atom_mol_a:final_atom_mol_a)
+     !output: sh_env%connlist1, sh_env%connlist2, which are the intramoleculat
+     !connectivities with and without considering the zeors
+     call connect_list2(Atp_loc(2:4,:), sh_env%atomlist_a, sh_env%connlist1_a, sh_env%connlist2_a, sh_env%cutoff_connect)
+     
+!print *, "Atp_loc(1,:)", Atp_loc(2,:)
+do i=1,atoms_per_acceptor
+print *, "sh_env%connlist1", sh_env%connlist1_a(:,i)
+enddo
+
+print *, "--------"
+do i=1,size(sh_env%atomlist_a)
+print *, "sh_env%connlist2", sh_env%connlist2_a(:,i)
+enddo
+ 
+!!!!!!!!!!!!!!!!!!XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX REMOVE
+sh_env%elements = ext_elements_a !Only select active atoms XXXXXX NOT USEFUL
+     DEALLOCATE(ext_elements_a)
+     DEALLOCATE(scoefftot_a)
+     DEALLOCATE(pcoefftot_a)
+     DEALLOCATE(submask) 
+     DEALLOCATE(Atp_loc)
+     
+     !!> READ THE AOM COEFFICIENT
+     !CALL section_vals_list_get(coupling_section,"_DEFAULT_KEYWORD_",list=listcoeff) !Read them in the input files
+     !CALL read_listcoeff(listcoeff, ext_elements, active_logical, &
+     !                    scoefftot, pcoefftot, aom_atoms) 
+     !!Transform them into four arrays. In this case external presence is not read anymore.
+
+     !!sh_env%elements = PACK(ext_elements, sh_env%ext_pres) !Only select active atoms
+     !sh_env%elements = ext_elements_a !Only select active atoms XXXXXX NOT USEFUL
+
+     !! SG: The loop over norbitals is an attempt to make the code work in case
+     !! of degenerate orbitals per site (NB: in general throughout the code the
+     !! degeneracy is untested and NOT well implemented (since Jacob first version))
+     !do i=1,aom_atoms
+     !     do j=1,norbitals
+     !           sh_env%pcoeffs(i,j) = pcoefftot(i) ! assume the degenerate are always the same 
+     !     end do
+     !     sh_env%scoeffs(i) = scoefftot(i) ! assume never degenerate  
+     !end do
+     sh_env%pcoeffs = sh_env%pcoeffs_a
+     sh_env%scoeffs = sh_env%scoeffs_a
+ print *, "sh_env%pcoeffs", sh_env%pcoeffs
+ print *, "sh_env%scoeffs", sh_env%scoeffs
+
+     !!> CONSTRUCT THE CONNLIST 
+     !! SG: strange way to proceed to get the connectivity of one molecule (which
+     !! is then assumed to be the same for all molecules) 
+     !!we fill out the connlist arrays before calculating the nacv
+     !ALLOCATE(Atp_loc(4,aom_atoms))
+     !allocate(submask(aom_atoms))
+     !submask =.NOT.((scoefftot.eq.0).AND.(pcoefftot.eq.0)) !Only select atoms with orbitals
+
+     !allocate(sh_env%atomlist(COUNT(submask(1:aom_atoms))))
+     !!create atome of interest (aoi) list
+     !!List atoms with orbitals namely, with coeff not zero
+     !sh_env%atomlist = PACK( (/ (i, i=1,aom_atoms) /), submask(1:aom_atoms) ) 
+     !print *, "sh_env%atomlist", sh_env%atomlist
+     !allocate(sh_env%connlist2(4,size(sh_env%atomlist)))
+
+     !! SG: this line again assume same number of atoms for each molecule and it
+     !! assumes all molecules have the same connlist1 connlist2
+     !Atp_loc(1,1:aom_atoms) = dble(ext_elements)
+     !Atp_loc(2:4,1:aom_atoms) = positions_tp(1:3,init_atom_mol_a:final_atom_mol_a) !!HARD CODED XXXXXXXXXXXXX
+     !!output: sh_env%connlist1, sh_env%connlist2
+     !call connect_list2(Atp_loc(2:4,:), sh_env%atomlist, sh_env%connlist1, sh_env%connlist2, sh_env%cutoff_connect)
+
+     allocate(sh_env%atomlist(SIZE(sh_env%atomlist_a)))
+     sh_env%atomlist = sh_env%atomlist_a
+     allocate(sh_env%connlist2(4,size(sh_env%atomlist_a)))
+     sh_env%connlist2 = sh_env%connlist2_a
+     sh_env%connlist1 = sh_env%connlist1_a
      
 !print *, "Atp_loc(1,:)", Atp_loc(2,:)
 do i=1,aom_atoms
@@ -611,11 +744,11 @@ print *, "--------"
 do i=1,size(sh_env%atomlist)
 print *, "sh_env%connlist2", sh_env%connlist2(:,i)
 enddo
-     DEALLOCATE(submask) 
-     DEALLOCATE(Atp_loc)
-     DEALLOCATE(ext_elements)
-     DEALLOCATE(scoefftot)
-     DEALLOCATE(pcoefftot)
+     !DEALLOCATE(submask) 
+     !DEALLOCATE(Atp_loc)
+     !DEALLOCATE(ext_elements)
+     !DEALLOCATE(scoefftot)
+     !DEALLOCATE(pcoefftot)
 
 
      ! CALL construct_connlist_singlemol(  )
