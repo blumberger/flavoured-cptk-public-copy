@@ -23,9 +23,10 @@ MODULE sh_initialization
      USE aom_overlapfinal,             ONLY:  connect_list2,                      &
                                               build_s_tables
 
-     USE aom_utils,                    ONLY: read_listcoeff,                       &
+     USE aom_utils,                    ONLY: read_listcoeff,                      &
                                              read_listdiabcoeff,                  &
                                              read_list_tresp,                     &
+                                             calc_multiphase_Xmatrix_elements,    &
                                              read_list_frz_couplings   
 
      USE sh_types,                    ONLY: sh_env_type
@@ -92,6 +93,7 @@ CONTAINS
      !TYPE(distribution_1d_type), POINTER                :: local_molecules
      !TYPE(molecule_type), DIMENSION(:), POINTER         :: molecule_set
      !INTEGER, DIMENSION(:), POINTER, OPTIONAL       :: my_mol_index !this are the decomp list indeces
+     INTEGER, DIMENSION(:), POINTER                 :: my_mol_index !this are the decomp list indeces 
 
      CHARACTER(len=*), PARAMETER :: routineN ='create_sh_env', &
      routineP = moduleN//':'//routineN
@@ -114,7 +116,6 @@ CONTAINS
      integer, dimension(:), ALLOCATABLE             :: ext_elements
      LOGICAL, DIMENSION(:), POINTER                 :: active_logical
      INTEGER                                        :: natom_mol, ninteractions
-     INTEGER, DIMENSION(:), POINTER                 :: my_mol_index 
      INTEGER, DIMENSION(:,:), ALLOCATABLE           :: full_system_info
      INTEGER, DIMENSION(:,:), ALLOCATABLE           :: active_system_info
      LOGICAL, DIMENSION(:), POINTER                 :: ext_pres
@@ -185,7 +186,7 @@ CONTAINS
      !> system info passed to sh_env
      !ALLOCATE(sh_env%index_active_mols(SIZE(my_mol_index)))
      ALLOCATE(sh_env%ext_pres(natom))
-     !sh_env%index_active_mols = my_mol_index
+     sh_env%index_active_mols = my_mol_index
      sh_env%full_system_info  = full_system_info
      sh_env%active_system_info = active_system_info
      sh_env%ext_pres = ext_pres
@@ -293,6 +294,8 @@ CONTAINS
          end if   
          !CALL set_aom_env(nadiab, norbitals, natom,positions_tp,adiab_section,sh_env)
          CALL set_aom_env_multip(nadiab, norbitals, natom,positions_tp,adiab_section,sh_env)
+         !TEST
+         CALL calc_multiphase_Xmatrix_elements(sh_env, adiab_section, active_system_info)
     !------------------------------------------------------------------------------------------
     CASE("FROZEN_COUPLINGS")
         ! Frozen coupling would have the possibility of using multi-state for
@@ -472,9 +475,11 @@ CONTAINS
      !!with molecules with a different number of atoms per site)
      CALL section_vals_val_get(coupling_section,"NUMBER_AOM_ATOMS_PER_SITE",&
          i_val=aom_atoms)
-      
+     
+     ! passing N_DONOR_ATOMS and N_ACCEPTOR_ATOMS is not strictly useful since
+     ! this info is alreadu in full_system_info or active_system_info 
      CALL section_vals_val_get(ct_block,"N_DONOR_ATOMS",&
-              i_val=atoms_per_donor)
+              i_val=atoms_per_donor) 
      CALL section_vals_val_get(ct_block,"N_ACCEPTOR_ATOMS",&
               i_val=atoms_per_acceptor)
 
@@ -500,6 +505,14 @@ CONTAINS
      init_atom_mol_a = sh_env%full_system_info(1,acceptor_index(1)) !just get the first acceptor
      final_atom_mol_a = sh_env%full_system_info(2,acceptor_index(1))
      atoms_per_mol_a = (final_atom_mol_a-init_atom_mol_a)+1
+
+     ! sanity check
+     IF (atoms_per_mol_a .ne. atoms_per_acceptor) THEN 
+        CPABORT("Error in number of atoms acceptor")
+     ENDIF 
+     IF (atoms_per_mol_d .ne. atoms_per_donor) THEN 
+        CPABORT("Error in number of atoms donor")
+     ENDIF 
 
 print *, "atoms_per_mol_d", atoms_per_mol_d
 print *, "atoms_per_mol_a", atoms_per_mol_a

@@ -214,7 +214,7 @@ SUBROUTINE multi_block_energies_forces(adiab_section,energies_1_mol_list, energi
    INTEGER, DIMENSION(:,:), ALLOCATABLE      :: intra_forces_info
    INTEGER, DIMENSION(:), ALLOCATABLE        :: first_ind, second_ind, exc_ind
    INTEGER                                   :: count_
-   INTEGER, DIMENSION(:), INTENT(IN)         :: my_mol_index !CHANGE SAM
+   INTEGER, DIMENSION(:), INTENT(IN)         :: my_mol_index !this is the decomp index
  
    NULLIFY(site_energy_section,ct_block, fe_block)
    NULLIFY( my_energies)

@@ -131,6 +131,7 @@ IMPLICIT NONE
    PUBLIC :: makeX,                                &
              calc_hop_nacv_aom,                    &
              adiabaticity,                         &
+             calc_multiphase_Xmatrix_elements,     &
              calc_aom_Xmatrix_elements,            & 
              calc_aom_Xmatrix_elements_first_step, & 
              make_adiabX,                          &
@@ -479,6 +480,113 @@ FUNCTION NORM2(array) RESULT(norm)
          ENDDO
          norm = SQRT(norm)
 END FUNCTION NORM2
+
+
+!**********************************************************************************
+!> \brief 
+!**********************************************************************************
+SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, adiab_section, active_system_info)
+     TYPE(sh_env_type)                         :: sh_env
+     TYPE(section_vals_type), POINTER          :: adiab_section
+     INTEGER, DIMENSION(:,:), INTENT(IN)       :: active_system_info
+
+     CHARACTER(len=*), PARAMETER               :: routineN ='calc_multiphase_Xmatrix_elements', &
+     routineP = moduleN//':'//routineN
+
+     INTEGER                                   :: state
+     INTEGER :: init_atom_mol_i, final_atom_mol_i, atoms_per_mol_i
+     INTEGER :: init_atom_mol_j, final_atom_mol_j, atoms_per_mol_j
+     INTEGER                                   ::ind1, ind2
+     INTEGER                                   :: i,j, nadiab
+     INTEGER                                   :: start_i,end_i,start_j,end_j
+     INTEGER, DIMENSION(:), POINTER            :: donor_index, acceptor_index
+     INTEGER, DIMENSION(:), ALLOCATABLE        :: first_ind, second_ind
+     INTEGER, DIMENSION(:), ALLOCATABLE        :: my_mol_index !this is the decomp index
+     TYPE(section_vals_type), POINTER          :: site_energy_section, ct_block
+
+
+     NULLIFY(site_energy_section,ct_block)
+
+     ! TOTAL number states
+     !CALL section_vals_val_get(adiab_section,"NUMBER_DIABATIC_STATES",&
+     !                     i_val=nadiab)
+     nadiab = 4 !! XXX HARDCODED FOR TESTING
+     
+     site_energy_section => section_vals_get_subs_vals(adiab_section,"METHOD_SITE_ENERGIES")
+     ct_block => section_vals_get_subs_vals(site_energy_section,"CT_BLOCK")
+     
+     CALL section_vals_val_get(ct_block,"INDEX_DONOR_MOLS",&
+                          i_vals=donor_index)
+     CALL section_vals_val_get(ct_block,"INDEX_ACCEPTOR_MOLS",&
+                          i_vals=acceptor_index)
+  
+     ! some checks for the indeces are done in multi_block_energies_forces
+     ! subroutine and could be repeated here   
+
+     !get the CT index in the 1,2,3... base (active region basis)
+     !independently on the actual molecule
+     !numbering
+     my_mol_index  = sh_env%index_active_mols
+     !my_mol_index  = (/2,3,4,5/) !XXX HARDODED
+     
+     ALLOCATE(second_ind(SIZE(acceptor_index)))
+     do i=1,SIZE(acceptor_index)
+       do j=1,SIZE(my_mol_index)
+           if (acceptor_index(i) .eq. my_mol_index(j)) then
+              second_ind(i) = j
+              EXIT
+           end if
+       end do
+     end do
+   
+     ALLOCATE(first_ind(SIZE(donor_index)))
+     do i=1,SIZE(donor_index)
+       do j=1,SIZE(my_mol_index)
+           if (donor_index(i) .eq. my_mol_index(j)) then
+              first_ind(i) = j
+              EXIT
+           end if
+       end do
+     end do     
+    
+    print *, "DECOMP", my_mol_index
+    print *, "DONOR IND", donor_index
+    print *, "ACCEPTOR IND", acceptor_index
+    print *, "FIRST IND", first_ind
+    print *, "SEC IND", second_ind
+  
+   !> loop over states: not that it does not matter if donor molecules comes
+   !after acceptor in the xyz or viceversa, or the molecules are DDDAAA or ADADA
+   !as the index of each molecule is referred to DECOMP file
+   state = 0
+   do i=1,SIZE(first_ind)
+      ind1 = first_ind(i)
+      do j=1,SIZE(second_ind)
+         ind2 = second_ind(j)
+         state = state + 1
+  
+         !> find index mol i (which is state i) of the pair
+         init_atom_mol_i = active_system_info(1,ind1)
+         final_atom_mol_i = active_system_info(2,ind1)
+         atoms_per_mol_i = (final_atom_mol_i-init_atom_mol_i)+1
+
+         !> find index mol j (which is state j) of the pair
+         init_atom_mol_j = active_system_info(1,ind2)
+         final_atom_mol_j = active_system_info(2,ind2)
+         atoms_per_mol_j = (final_atom_mol_j-init_atom_mol_j)+1
+         
+print *, "index don", init_atom_mol_i, final_atom_mol_i
+print *, "NEW", start_i, end_i
+
+print*, "index acc", init_atom_mol_j, final_atom_mol_j
+print *, "NEW", start_j, end_j
+
+
+      end do
+   end do
+ 
+
+END SUBROUTINE
 
 
 !**********************************************************************************
