@@ -485,11 +485,13 @@ END FUNCTION NORM2
 !**********************************************************************************
 !> \brief 
 !**********************************************************************************
-SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section)
+SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, positions_com_tp)
      TYPE(sh_env_type)                         :: sh_env
      REAL(kind=dp), DIMENSION(:),  POINTER     :: energies_tp
      TYPE(section_vals_type), POINTER          :: adiab_section
      INTEGER                                   :: orb ! state space dimension including degeneracy
+     REAL(kind=dp), DIMENSION(:,:),POINTER, &
+                                   INTENT(IN)        :: positions_com_tp
 
      CHARACTER(len=*), PARAMETER               :: routineN ='calc_multiphase_Xmatrix_elements', &
      routineP = moduleN//':'//routineN
@@ -499,13 +501,17 @@ SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_sect
      INTEGER :: init_atom_mol_i, final_atom_mol_i, atoms_per_mol_i
      INTEGER :: init_atom_mol_j, final_atom_mol_j, atoms_per_mol_j
      INTEGER                                   ::ind1, ind2
-     INTEGER                                   :: i,j, nadiab
+     INTEGER                                   :: nadiab, i, j
      !INTEGER                                   :: start_i,end_i,start_j,end_j
      INTEGER, DIMENSION(:), POINTER            :: donor_index, acceptor_index
      INTEGER, DIMENSION(:), ALLOCATABLE        :: first_ind, second_ind
      INTEGER, DIMENSION(:), ALLOCATABLE        :: my_mol_index !this is the decomp index
      TYPE(section_vals_type), POINTER          :: site_energy_section, ct_block
      INTEGER, DIMENSION(:,:), ALLOCATABLE      :: CT_states_info
+     real(kind=dp), allocatable, dimension(:,:) :: Atp, Btp
+     REAL(KIND=dp), DIMENSION(:), POINTER     :: coeffap, coeffbp
+     REAL(KIND=dp)                            :: S
+
 
      NULLIFY(site_energy_section,ct_block)
 
@@ -584,6 +590,10 @@ SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_sect
       end do
    end do
 
+   ! SG: It would be probably faster just to calculate couplings within the
+   ! phases, store them (book-keeping) and the fill the H afterwards in a second
+   ! loop. Even the normalization of the AOM coeff should be done once and then
+   ! stored like in Jacob Hamiltonian.
 
    sh_env%H_tp(:,:) = cmplx(0.0D0, 0.0D0,dp)
 
@@ -601,24 +611,57 @@ print *, "STATE1",  CT_states_info(1,state1), CT_states_info(2,state1)
 print *, "STATE2",  CT_states_info(1,state2), CT_states_info(2,state2)
                if (CT_states_info(1,state1) .eq. CT_states_info(1,state2)) then 
 
-                   print *, "IT'S HOLE COUPL"
-                   !> find index mol i (which is state i) of the pair
+                   print *, "IT'S ELECTR COUPL"
+                   !> find index mol i (which is part of acceptor phase) of the pair
                    init_atom_mol_i = active_system_info(1,CT_states_info(2,state1))
                    final_atom_mol_i = active_system_info(2, CT_states_info(2,state1))
                    atoms_per_mol_i = (final_atom_mol_i-init_atom_mol_i)+1
            
-                   !> find index mol j (which is state j) of the pair
+                   !> find index mol j (which is part of acceptor phase) of the pair
                    init_atom_mol_j = active_system_info(1,CT_states_info(2,state2))
                    final_atom_mol_j = active_system_info(2,CT_states_info(2,state2))
                    atoms_per_mol_j = (final_atom_mol_j-init_atom_mol_j)+1
 print *, "index don", init_atom_mol_i, final_atom_mol_i
 print*, "index acc", init_atom_mol_j, final_atom_mol_j
 
+                   !> this allocation deallocation is maybe inefficient
+                   ! and one could just pass the positions direcly to calc_sab
+                   ALLOCATE(Atp(4,atoms_per_mol_i))
+                   ALLOCATE(Btp(4,atoms_per_mol_j))                    
+                   ALLOCATE(coeffap(atoms_per_mol_i))
+                   ALLOCATE(coeffbp(atoms_per_mol_j))
+             
+                   Atp(1,1:atoms_per_mol_i) = dble(sh_env%ext_elements_a)
+                   Btp(1,1:atoms_per_mol_j) = dble(sh_env%ext_elements_a) 
+                   Atp(2:4,1:atoms_per_mol_i) = positions_com_tp(1:3, init_atom_mol_i:final_atom_mol_i)
+                   Btp(2:4,1:atoms_per_mol_j) = positions_com_tp(1:3, init_atom_mol_j:final_atom_mol_j)
+
+                   !Give donor phase coeffiecients to be normalized (note all
+                   !the coefficients could be normalizized only once in a single
+                   !loop)
+                       
+                   coeffap = sh_env%pcoeffs_a ! they are in-out of calc_sab
+                   coeffbp = sh_env%pcoeffs_a ! they are in-out of calc_sab
+                   !sh_env%connlist2_d is the same because i and j are the same
+                   !(donor phase)
+                   !connlistsa = sh_env%connlist2_a
+                   !connlistsd =  sh_env%connlist2_a
+                   !Normalisation of the coefficients without the s orbitals
+                   call calc_sab(Atp, sh_env%connlist2_a, coeffap)
+                   call calc_sab(Btp, sh_env%connlist2_a, coeffbp)
+
+                   !Calculate Sab
+                   call calc_sab(Atp, sh_env%connlist2_d, coeffap, & 
+                             S, Btp, sh_env%connlist2_d, coeffbp)
+
+print *, 'This is overlap with calc_sab', S
+                   DEALLOCATE(Atp,Btp)        
+                   DEALLOCATE(coeffap, coeffbp)        
+
                    sh_env%H_tp(state1, state2) = cmplx(0.0D0, 0.020,dp) !HARDCODED XXX
 
-
                else if (CT_states_info(2,state1) .eq. CT_states_info(2,state2)) then 
-                   print *, "IT'S ELECTRON COUPL" 
+                   print *, "IT'S HOLE COUPL" 
                    !> find index mol i (which is state i) of the pair
                    init_atom_mol_i = active_system_info(1,CT_states_info(1,state1))
                    final_atom_mol_i = active_system_info(2, CT_states_info(1,state1))

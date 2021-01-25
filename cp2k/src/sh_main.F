@@ -307,7 +307,7 @@ CONTAINS
          CALL calc_frozen_H(sh_env, energies_tp, orb,positions_com_tp=positions_com_tp)
      ELSE IF (sh_env%multiphase_couplings_keyword) THEN 
          !> MULTI-PHASE COUPLINGS 
-         CALL calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section)
+         CALL calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, positions_com_tp)
 
      ELSE IF (sh_env%tresp_couplings_keyword) THEN 
          !> TRESP COUPLINGS
@@ -802,7 +802,7 @@ print *, "ACTIVE STATE", active_state
 
      !> MULTI-PHASE COUPLINGS 
      ELSE IF (sh_env%multiphase_couplings_keyword) THEN 
-         CALL calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section)
+         CALL calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, positions_com_tp)
 
          !> TRESP COUPLINGS 
      ELSE IF (sh_env%tresp_couplings_keyword) THEN

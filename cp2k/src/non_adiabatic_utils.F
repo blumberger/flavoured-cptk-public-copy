@@ -416,7 +416,8 @@ END SUBROUTINE calc_hop_nacv_approx
 
                           !> this allocation deallocation is maybe inefficient
                           !but it was the only thing I found to be general for
-                          !multi-phases
+                          !multi-phases (in case molecules have different number
+                          !of atoms)
                           ALLOCATE(crd_i(3,atoms_per_mol_i))
                           ALLOCATE(crd_k(3,atoms_per_mol_k))
 

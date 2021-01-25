@@ -138,11 +138,12 @@ END TYPE adiab_nace_env_type
 !***************************************************************************************
    TYPE sh_env_type
 !> AOM arrays specific for donor acceptor multiphase
-     REAL(KIND=dp), DIMENSION(:,:), POINTER   :: pcoeffs_d, pcoeffs_a
+     REAL(KIND=dp), DIMENSION(:), POINTER     :: pcoeffs_d, pcoeffs_a
      REAL(KIND=dp), DIMENSION(:), POINTER     :: scoeffs_d, scoeffs_a
      INTEGER, DIMENSION(:), POINTER           :: atomlist_d, atomlist_a !List atoms with orbitals
      integer, dimension(:,:), POINTER         :: connlist1_d, connlist2_d, & ! AOM connectivities of individual mols
                                                  connlist1_a, connlist2_a
+     integer, dimension(:), ALLOCATABLE       :: ext_elements_d, ext_elements_a ! atomic number
 !> AOM arrays
      REAL(KIND = dp), DIMENSION(:,:), POINTER :: rm_t,&        ! position step min 1
                                                  rm_tm       ! position step min 2
