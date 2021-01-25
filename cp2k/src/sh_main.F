@@ -50,6 +50,7 @@ MODULE sh_main
      USE aom_utils,                    ONLY: makeX,                     &
                                              calc_hop_nacv_aom,         &
                                              adiabaticity,              &
+                                             calc_multiphase_Xmatrix_elements, &
                                              calc_aom_Xmatrix_elements_first_step, & 
                                              calc_aom_Xmatrix_elements, &
                                              make_adiabX,               &
@@ -304,6 +305,9 @@ CONTAINS
      ELSE IF (sh_env%frozen_couplings_keyword) THEN 
          !> FROZEN COUPLINGS 
          CALL calc_frozen_H(sh_env, energies_tp, orb,positions_com_tp=positions_com_tp)
+     ELSE IF (sh_env%multiphase_couplings_keyword) THEN 
+         !> MULTI-PHASE COUPLINGS 
+         CALL calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section)
 
      ELSE IF (sh_env%tresp_couplings_keyword) THEN 
          !> TRESP COUPLINGS
@@ -452,6 +456,7 @@ CONTAINS
          allocate(adiab_pop(mat))
          allocate(ctotal(mat))
 
+print *, "ACTIVE STATE", active_state
          !> print info in the output only if we do not restart the file
          if (.NOT. sh_env%restart_key) then
              !NB: this subroutine is wasted computational work if adiab_pop is not
@@ -513,6 +518,17 @@ CONTAINS
                                         ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
                                         orb=orb, frozen_c=.TRUE.)
         END IF
+
+     ! MULTI-PHASE FORCES XXX
+     ELSE IF (sh_env%multiphase_couplings_keyword) THEN
+         IF (sh_env%multistate) THEN
+            !frozen Hamiltonian case and multi-phase (dimension of H larger than
+            !number of active mols)
+            CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=active_state, Fin=diagonal_F, &
+                                     forces_adiab=sh_env%forces_adiab)
+         ELSE
+             CPABORT("MULTI-STATE MUST BE TRUE")
+         END IF
 
      ELSE IF (sh_env%tresp_couplings_keyword) THEN 
         !frozen Hamiltonian case
@@ -780,9 +796,13 @@ CONTAINS
          !sh_env%nacv = 0.0D0
          !print *, "NACV tp", sh_env%nacv(1,:,:)
          !-----------------------------------------------------------------------------
-         !> FROZEN COUPLINGS 
+     !> FROZEN COUPLINGS 
      ELSE IF (sh_env%frozen_couplings_keyword) THEN
          CALL calc_frozen_H(sh_env, energies_tp, orb,positions_com_tp=positions_com_tp)
+
+     !> MULTI-PHASE COUPLINGS 
+     ELSE IF (sh_env%multiphase_couplings_keyword) THEN 
+         CALL calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section)
 
          !> TRESP COUPLINGS 
      ELSE IF (sh_env%tresp_couplings_keyword) THEN
@@ -961,6 +981,8 @@ CONTAINS
          ! --------------------------------------------------------------------------------------------------
      ELSE IF (sh_env%frozen_couplings_keyword) THEN
          IF (sh_env%multistate) THEN
+            !frozen Hamiltonian case and multi-phase (dimension of H larger than
+            !number of active mols)
             CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=sh_env%active_state, Fin=diagonal_F, &
                                      forces_adiab=sh_env%forces_adiab)
             IF (sh_env%attempt_hop) THEN
@@ -978,6 +1000,20 @@ CONTAINS
                                   ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, orb=orb, &
                                     frozen_c=.TRUE.)
             ENDIF
+         END IF
+     ! MULTI-PHASE FORCES
+     ELSE IF (sh_env%multiphase_couplings_keyword) THEN
+         IF (sh_env%multistate) THEN
+            !frozen Hamiltonian case and multi-phase (dimension of H larger than
+            !number of active mols)
+            CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=sh_env%active_state, Fin=diagonal_F, &
+                                     forces_adiab=sh_env%forces_adiab)
+            IF (sh_env%attempt_hop) THEN
+                      CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp),C=sh_env%C_tp, state=sh_env%new_state, Fin=diagonal_F, &
+                                  forces_adiab=sh_env%forces_adiab_new)
+            END IF
+         ELSE
+             CPABORT("MULTI-STATE MUST BE TRUE")
          END IF
 
      ELSE IF (sh_env%tresp_couplings_keyword) THEN

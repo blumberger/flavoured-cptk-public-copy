@@ -887,6 +887,10 @@ subroutine calcforces_frozenH(Hin, C, state, Fin, forces_adiab)
         mat = size(Hin,1) !might have denerate states and also a larger number
                           !of states then the active molecules. Therefore as long as the couplings are
                           !fixed this can be used for calculating multi-phase and CT Hamiltoninans
+print *, "SIZE", mat
+print *, "natom", natom
+print *, "EIGEN", SIZE(C,2)
+print *, "statestate", state
         !loop over 3 cartesians 
         do d=1,3 
            do j=1,natom
@@ -1671,6 +1675,13 @@ ENDIF
                                            C=force_env%mixed_env%sh_env%C_tp,&
                                            active_system_info=force_env%mixed_env%sh_env%active_system_info, &
                                            orb=orb, hop_nacv=hop_nacv, frozen_c=.TRUE.)       
+                    END IF
+                 !> MULTI-PHASE  COUPLING CASE
+                 ELSE IF ( force_env%mixed_env%sh_env%multiphase_couplings_keyword) THEN
+                    IF (force_env%mixed_env%sh_env%multistate) THEN
+                        CALL calc_hop_nacv_frozen_H( force_env%mixed_env%sh_env, force_env%mixed_env%F, hop_nacv)
+                    ELSE
+                         CPABORT("MULTI-STATE MUST BE TRUE")
                     END IF
                  ELSE 
                      CPABORT("There is no method to calculate the NACV in FAST approx.")

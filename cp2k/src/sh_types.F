@@ -196,6 +196,7 @@ END TYPE adiab_nace_env_type
 !> Couplings section possibilities
      LOGICAL                                  :: aom_couplings_keyword, frozen_couplings_keyword 
      LOGICAL                                  :: tresp_couplings_keyword 
+     LOGICAL                                  :: multiphase_couplings_keyword 
  
      INTEGER, DIMENSION(:,:), ALLOCATABLE     :: full_system_info  
      INTEGER, DIMENSION(:,:), ALLOCATABLE     :: active_system_info  

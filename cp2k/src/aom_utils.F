@@ -485,32 +485,34 @@ END FUNCTION NORM2
 !**********************************************************************************
 !> \brief 
 !**********************************************************************************
-SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, adiab_section, active_system_info)
+SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section)
      TYPE(sh_env_type)                         :: sh_env
+     REAL(kind=dp), DIMENSION(:),  POINTER     :: energies_tp
      TYPE(section_vals_type), POINTER          :: adiab_section
-     INTEGER, DIMENSION(:,:), INTENT(IN)       :: active_system_info
+     INTEGER                                   :: orb ! state space dimension including degeneracy
 
      CHARACTER(len=*), PARAMETER               :: routineN ='calc_multiphase_Xmatrix_elements', &
      routineP = moduleN//':'//routineN
 
-     INTEGER                                   :: state
+     INTEGER, DIMENSION(:,:), ALLOCATABLE      :: active_system_info
+     INTEGER                                   :: state, total_states, state1, state2
      INTEGER :: init_atom_mol_i, final_atom_mol_i, atoms_per_mol_i
      INTEGER :: init_atom_mol_j, final_atom_mol_j, atoms_per_mol_j
      INTEGER                                   ::ind1, ind2
      INTEGER                                   :: i,j, nadiab
-     INTEGER                                   :: start_i,end_i,start_j,end_j
+     !INTEGER                                   :: start_i,end_i,start_j,end_j
      INTEGER, DIMENSION(:), POINTER            :: donor_index, acceptor_index
      INTEGER, DIMENSION(:), ALLOCATABLE        :: first_ind, second_ind
      INTEGER, DIMENSION(:), ALLOCATABLE        :: my_mol_index !this is the decomp index
      TYPE(section_vals_type), POINTER          :: site_energy_section, ct_block
-
+     INTEGER, DIMENSION(:,:), ALLOCATABLE      :: CT_states_info
 
      NULLIFY(site_energy_section,ct_block)
 
      ! TOTAL number states
-     !CALL section_vals_val_get(adiab_section,"NUMBER_DIABATIC_STATES",&
-     !                     i_val=nadiab)
-     nadiab = 4 !! XXX HARDCODED FOR TESTING
+     CALL section_vals_val_get(adiab_section,"NUMBER_DIABATIC_STATES",&
+                          i_val=nadiab)
+     !nadiab = 4 !! XXX HARDCODED FOR TESTING
      
      site_energy_section => section_vals_get_subs_vals(adiab_section,"METHOD_SITE_ENERGIES")
      ct_block => section_vals_get_subs_vals(site_energy_section,"CT_BLOCK")
@@ -522,7 +524,19 @@ SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, adiab_section, active_system
   
      ! some checks for the indeces are done in multi_block_energies_forces
      ! subroutine and could be repeated here   
+     total_states = SIZE(donor_index)*SIZE(acceptor_index)
+     ALLOCATE(CT_states_info(2,total_states))
+     IF (total_states .ne. nadiab) THEN
+         CPABORT("NUMBER_DIABATIC_STATES DIFFERENT FROM N*N STATES")
+     END IF
+     IF (total_states .ne. nadiab*orb) THEN
+         CPABORT("DEGENERACY NOT IMPLEMENTED")
+     END IF
+     IF (total_states .ne. SIZE(energies_tp)) THEN
+         CPABORT("PROBLEM WITH SITE ENERGIES NUMBER OF STATES")
+     END IF
 
+     active_system_info = sh_env%active_system_info
      !get the CT index in the 1,2,3... base (active region basis)
      !independently on the actual molecule
      !numbering
@@ -555,6 +569,7 @@ SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, adiab_section, active_system
     print *, "FIRST IND", first_ind
     print *, "SEC IND", second_ind
   
+
    !> loop over states: not that it does not matter if donor molecules comes
    !after acceptor in the xyz or viceversa, or the molecules are DDDAAA or ADADA
    !as the index of each molecule is referred to DECOMP file
@@ -564,27 +579,85 @@ SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, adiab_section, active_system
       do j=1,SIZE(second_ind)
          ind2 = second_ind(j)
          state = state + 1
-  
-         !> find index mol i (which is state i) of the pair
-         init_atom_mol_i = active_system_info(1,ind1)
-         final_atom_mol_i = active_system_info(2,ind1)
-         atoms_per_mol_i = (final_atom_mol_i-init_atom_mol_i)+1
-
-         !> find index mol j (which is state j) of the pair
-         init_atom_mol_j = active_system_info(1,ind2)
-         final_atom_mol_j = active_system_info(2,ind2)
-         atoms_per_mol_j = (final_atom_mol_j-init_atom_mol_j)+1
-         
-print *, "index don", init_atom_mol_i, final_atom_mol_i
-print *, "NEW", start_i, end_i
-
-print*, "index acc", init_atom_mol_j, final_atom_mol_j
-print *, "NEW", start_j, end_j
-
-
+         CT_states_info(1,state) = ind1
+         CT_states_info(2,state) = ind2
       end do
    end do
- 
+
+
+   sh_env%H_tp(:,:) = cmplx(0.0D0, 0.0D0,dp)
+
+do state=1, SIZE(CT_states_info(1,:))
+print *,  CT_states_info(1,state), CT_states_info(2,state)
+enddo
+            
+  do state1=1, SIZE(CT_states_info(1,:))
+    !loop over upper diagonal
+       do state2=1, SIZE(CT_states_info(2,:)) 
+print *, "HHHHHHH", state1, state2
+           !if connectivity allows XXXX
+           if (state2 >  state1) then 
+print *, "STATE1",  CT_states_info(1,state1), CT_states_info(2,state1)
+print *, "STATE2",  CT_states_info(1,state2), CT_states_info(2,state2)
+               if (CT_states_info(1,state1) .eq. CT_states_info(1,state2)) then 
+
+                   print *, "IT'S HOLE COUPL"
+                   !> find index mol i (which is state i) of the pair
+                   init_atom_mol_i = active_system_info(1,CT_states_info(2,state1))
+                   final_atom_mol_i = active_system_info(2, CT_states_info(2,state1))
+                   atoms_per_mol_i = (final_atom_mol_i-init_atom_mol_i)+1
+           
+                   !> find index mol j (which is state j) of the pair
+                   init_atom_mol_j = active_system_info(1,CT_states_info(2,state2))
+                   final_atom_mol_j = active_system_info(2,CT_states_info(2,state2))
+                   atoms_per_mol_j = (final_atom_mol_j-init_atom_mol_j)+1
+print *, "index don", init_atom_mol_i, final_atom_mol_i
+print*, "index acc", init_atom_mol_j, final_atom_mol_j
+
+                   sh_env%H_tp(state1, state2) = cmplx(0.0D0, 0.020,dp) !HARDCODED XXX
+
+
+               else if (CT_states_info(2,state1) .eq. CT_states_info(2,state2)) then 
+                   print *, "IT'S ELECTRON COUPL" 
+                   !> find index mol i (which is state i) of the pair
+                   init_atom_mol_i = active_system_info(1,CT_states_info(1,state1))
+                   final_atom_mol_i = active_system_info(2, CT_states_info(1,state1))
+                   atoms_per_mol_i = (final_atom_mol_i-init_atom_mol_i)+1
+           
+                   !> find index mol j (which is state j) of the pair
+                   init_atom_mol_j = active_system_info(1,CT_states_info(1,state2))
+                   final_atom_mol_j = active_system_info(2,CT_states_info(1,state2))
+                   atoms_per_mol_j = (final_atom_mol_j-init_atom_mol_j)+1
+print *, "index don", init_atom_mol_i, final_atom_mol_i
+print*, "index acc", init_atom_mol_j, final_atom_mol_j
+
+                   sh_env%H_tp(state1, state2) = cmplx(0.0D0, 0.040,dp) !HARDCODED XXX
+
+               else
+                   print *, "NOT INTERACTING"
+               end if
+!print *, "index don", init_atom_mol_i, final_atom_mol_i
+!print*, "index acc", init_atom_mol_j, final_atom_mol_j
+           else 
+                if (state2 .eq. state1) then
+                   !minus because we propagate -X
+                   sh_env%H_tp(state1, state2) = cmplx(0.0D0,(-energies_tp(state1)),dp) 
+                else 
+print *, "LOWER PART"
+                   sh_env%H_tp(state1, state2) = sh_env%H_tp(state2, state1)
+                   
+                end if 
+           end if
+     end do
+  end do
+
+do state1=1, SIZE(sh_env%H_tp,1)
+   print *, "H", sh_env%H_tp(state1,:)
+end do
+
+   DEALLOCATE(CT_states_info) 
+   DEALLOCATE(first_ind)
+   DEALLOCATE(second_ind)
 
 END SUBROUTINE
 
@@ -968,8 +1041,8 @@ SUBROUTINE calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_rando
 print *, "state i", i
                !create the array of all its atomic coordinates at t
                !numerical factor converts from Angstroms into Bohr radii
-               !sh_env%Atp(1,1:atoms) = dble(sh_env%elements((i-1)*atoms+1:i*atoms))
-               sh_env%Atp(1,1:atoms) = dble(sh_env%elements(:))
+               sh_env%Atp(1,1:atoms) = dble(sh_env%elements((i-1)*atoms+1:i*atoms))
+               !sh_env%Atp(1,1:atoms) = dble(sh_env%elements(:))
                do j=1,atoms
                     sh_env%Atp(2:4,j) = sh_env%crds(1:3,(i-1)*atoms+j,3)
                end do
@@ -978,8 +1051,8 @@ print *, "state i", i
                do k=1,mol
 print *, "state k", k
                     !create the array of its atomic coordinates at both t and t+dt
-                    !sh_env%Btp(1,1:atoms) = dble(sh_env%elements((k-1)*atoms+1:k*atoms))
-                    sh_env%Btp(1,1:atoms) = dble(sh_env%elements(:))
+                    sh_env%Btp(1,1:atoms) = dble(sh_env%elements((k-1)*atoms+1:k*atoms))
+                    !sh_env%Btp(1,1:atoms) = dble(sh_env%elements(:))
                     do l=1,atoms
                         sh_env%Btp(2:4,l) = sh_env%crds(1:3,(k-1)*atoms+l,3)
                     end do
