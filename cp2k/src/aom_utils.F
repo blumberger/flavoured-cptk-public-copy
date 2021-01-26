@@ -501,7 +501,7 @@ SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_sect
      INTEGER :: init_atom_mol_i, final_atom_mol_i, atoms_per_mol_i
      INTEGER :: init_atom_mol_j, final_atom_mol_j, atoms_per_mol_j
      INTEGER                                   ::ind1, ind2
-     INTEGER                                   :: nadiab, i, j
+     INTEGER                                   :: nadiab, i, j, temp
      !INTEGER                                   :: start_i,end_i,start_j,end_j
      INTEGER, DIMENSION(:), POINTER            :: donor_index, acceptor_index
      INTEGER, DIMENSION(:), ALLOCATABLE        :: first_ind, second_ind
@@ -611,7 +611,6 @@ print *, "STATE1",  CT_states_info(1,state1), CT_states_info(2,state1)
 print *, "STATE2",  CT_states_info(1,state2), CT_states_info(2,state2)
                if (CT_states_info(1,state1) .eq. CT_states_info(1,state2)) then 
 
-                   print *, "IT'S ELECTR COUPL"
                    !> find index mol i (which is part of acceptor phase) of the pair
                    init_atom_mol_i = active_system_info(1,CT_states_info(2,state1))
                    final_atom_mol_i = active_system_info(2, CT_states_info(2,state1))
@@ -624,8 +623,9 @@ print *, "STATE2",  CT_states_info(1,state2), CT_states_info(2,state2)
 print *, "index don", init_atom_mol_i, final_atom_mol_i
 print*, "index acc", init_atom_mol_j, final_atom_mol_j
 
-                   !> this allocation deallocation is maybe inefficient
-                   ! and one could just pass the positions direcly to calc_sab
+                   !> this allocation deallocation is maybe inefficient. Since
+                   !for a given phase molecules have the same number of atoms
+                   !the allocation could be done at the beginning
                    ALLOCATE(Atp(4,atoms_per_mol_i))
                    ALLOCATE(Btp(4,atoms_per_mol_j))                    
                    ALLOCATE(coeffap(atoms_per_mol_i))
@@ -639,7 +639,6 @@ print*, "index acc", init_atom_mol_j, final_atom_mol_j
                    !Give donor phase coeffiecients to be normalized (note all
                    !the coefficients could be normalizized only once in a single
                    !loop)
-                       
                    coeffap = sh_env%pcoeffs_a ! they are in-out of calc_sab
                    coeffbp = sh_env%pcoeffs_a ! they are in-out of calc_sab
                    !sh_env%connlist2_d is the same because i and j are the same
@@ -651,16 +650,17 @@ print*, "index acc", init_atom_mol_j, final_atom_mol_j
                    call calc_sab(Btp, sh_env%connlist2_a, coeffbp)
 
                    !Calculate Sab
-                   call calc_sab(Atp, sh_env%connlist2_d, coeffap, & 
-                             S, Btp, sh_env%connlist2_d, coeffbp)
+                   call calc_sab(Atp, sh_env%connlist2_a, coeffap, & 
+                             S, Btp, sh_env%connlist2_a, coeffbp)
 
-print *, 'This is overlap with calc_sab', S
+                   sh_env%H_tp(state1, state2) = cmplx(0.0D0, -sh_env%scaling*S,dp) !Minus to be consistent with diago
+print *, "IT'S ELECTR COUPL", S
                    DEALLOCATE(Atp,Btp)        
                    DEALLOCATE(coeffap, coeffbp)        
 
-                   sh_env%H_tp(state1, state2) = cmplx(0.0D0, 0.020,dp) !HARDCODED XXX
 
                else if (CT_states_info(2,state1) .eq. CT_states_info(2,state2)) then 
+
                    print *, "IT'S HOLE COUPL" 
                    !> find index mol i (which is state i) of the pair
                    init_atom_mol_i = active_system_info(1,CT_states_info(1,state1))
@@ -674,7 +674,57 @@ print *, 'This is overlap with calc_sab', S
 print *, "index don", init_atom_mol_i, final_atom_mol_i
 print*, "index acc", init_atom_mol_j, final_atom_mol_j
 
-                   sh_env%H_tp(state1, state2) = cmplx(0.0D0, 0.040,dp) !HARDCODED XXX
+
+                   !> this allocation deallocation is maybe inefficient. Since
+                   !for a given phase molecules have the same number of atoms
+                   !the allocation could be done at the beginning
+                   ALLOCATE(Atp(4,atoms_per_mol_i))
+                   ALLOCATE(Btp(4,atoms_per_mol_j))                    
+                   ALLOCATE(coeffap(atoms_per_mol_i))
+                   ALLOCATE(coeffbp(atoms_per_mol_j))
+             
+                   Atp(1,1:atoms_per_mol_i) = dble(sh_env%ext_elements_d) !donor
+                   Btp(1,1:atoms_per_mol_j) = dble(sh_env%ext_elements_d) !donor
+                   Atp(2:4,1:atoms_per_mol_i) = positions_com_tp(1:3, init_atom_mol_i:final_atom_mol_i)
+                   Btp(2:4,1:atoms_per_mol_j) = positions_com_tp(1:3, init_atom_mol_j:final_atom_mol_j)
+
+                   !Give donor phase coeffiecients to be normalized (note all
+                   !the coefficients could be normalizized only once in a single
+                   !loop)
+                   coeffap = sh_env%pcoeffs_d ! they are in-out of calc_sab
+                   coeffbp = sh_env%pcoeffs_d ! they are in-out of calc_sab
+                   !sh_env%connlist2_d is the same because i and j are the same
+                   !(donor phase)
+                   !connlistsa = sh_env%connlist2_a
+                   !connlistsd =  sh_env%connlist2_a
+
+do temp=1,SIZE(coeffap)
+print *, "coeffap, coeffbp", coeffap(temp), coeffbp(temp)
+enddo
+do temp=1, SIZE(Atp,2)
+print *, "xyza", Atp(1,temp), Atp(2,temp)
+enddo
+do temp=1, SIZE(Btp,2)
+print *, "xyzb", Btp(1,temp), Btp(2,temp)
+enddo
+
+                   !Normalisation of the coefficients without the s orbitals
+                   call calc_sab(Atp, sh_env%connlist2_d, coeffap) !donor
+                   call calc_sab(Btp, sh_env%connlist2_d, coeffbp) !donor
+
+print *, "NORMALIZED"
+do temp=1,SIZE(coeffap)
+print *, "coeffap, coeffbp", coeffap(temp), coeffbp(temp)
+enddo
+
+                   !Calculate Sab
+                   call calc_sab(Atp, sh_env%connlist2_d, coeffap, & 
+                             S, Btp, sh_env%connlist2_d, coeffbp)
+
+                   sh_env%H_tp(state1, state2) = cmplx(0.0D0, -sh_env%scaling*S,dp) !Minus consistent with diagonals
+print *, "IT'S HOLE COUPL", S
+                   DEALLOCATE(Atp,Btp)        
+                   DEALLOCATE(coeffap, coeffbp)        
 
                else
                    print *, "NOT INTERACTING"
@@ -695,7 +745,7 @@ print *, "LOWER PART"
   end do
 
 do state1=1, SIZE(sh_env%H_tp,1)
-   print *, "H", sh_env%H_tp(state1,:)
+   print *, "H", -AIMAG(sh_env%H_tp(state1,:))
 end do
 
    DEALLOCATE(CT_states_info) 
