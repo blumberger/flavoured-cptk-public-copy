@@ -509,8 +509,11 @@ SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_sect
      TYPE(section_vals_type), POINTER          :: site_energy_section, ct_block
      INTEGER, DIMENSION(:,:), ALLOCATABLE      :: CT_states_info
      real(kind=dp), allocatable, dimension(:,:) :: Atp, Btp
-     REAL(KIND=dp), DIMENSION(:), POINTER     :: coeffap, coeffbp
+     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE  :: coeffap, coeffbp
+     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE  :: coeffas, coeffbs
+     REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE  :: nacva, nacvb
      REAL(KIND=dp)                            :: S
+     INTEGER, DIMENSION(:,:), ALLOCATABLE      ::  bneighbour, aneighbour
 
 
      NULLIFY(site_energy_section,ct_block)
@@ -547,7 +550,6 @@ SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_sect
      !independently on the actual molecule
      !numbering
      my_mol_index  = sh_env%index_active_mols
-     !my_mol_index  = (/2,3,4,5/) !XXX HARDODED
      
      ALLOCATE(second_ind(SIZE(acceptor_index)))
      do i=1,SIZE(acceptor_index)
@@ -623,6 +625,8 @@ print *, "STATE2",  CT_states_info(1,state2), CT_states_info(2,state2)
 print *, "index don", init_atom_mol_i, final_atom_mol_i
 print*, "index acc", init_atom_mol_j, final_atom_mol_j
 
+                    !! THIS CAN BE PUT IN ANOTHER SUBROUTINE      !!!!!!!!!!!!!!!!!!!!!!!!!!
+
                    !> this allocation deallocation is maybe inefficient. Since
                    !for a given phase molecules have the same number of atoms
                    !the allocation could be done at the beginning
@@ -657,7 +661,7 @@ print*, "index acc", init_atom_mol_j, final_atom_mol_j
 print *, "IT'S ELECTR COUPL", S
                    DEALLOCATE(Atp,Btp)        
                    DEALLOCATE(coeffap, coeffbp)        
-
+                   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
                else if (CT_states_info(2,state1) .eq. CT_states_info(2,state2)) then 
 
@@ -674,6 +678,7 @@ print *, "IT'S ELECTR COUPL", S
 print *, "index don", init_atom_mol_i, final_atom_mol_i
 print*, "index acc", init_atom_mol_j, final_atom_mol_j
 
+                    !! THIS CAN BE PUT IN ANOTHER SUBROUTINE      !!!!!!!!!!!!!!!!!!!!!!!!!!
 
                    !> this allocation deallocation is maybe inefficient. Since
                    !for a given phase molecules have the same number of atoms
@@ -723,6 +728,61 @@ enddo
 
                    sh_env%H_tp(state1, state2) = cmplx(0.0D0, -sh_env%scaling*S,dp) !Minus consistent with diagonals
 print *, "IT'S HOLE COUPL", S
+  
+               !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                   ALLOCATE(aneighbour(0:size(sh_env%atomlist_d),0:atoms_per_mol_i))
+                   ALLOCATE(bneighbour(0:size(sh_env%atomlist_d),0:atoms_per_mol_j))
+                   ALLOCATE(coeffas(atoms_per_mol_i))
+                   ALLOCATE(coeffbs(atoms_per_mol_j))
+                   ALLOCATE(nacva(3, atoms_per_mol_i))
+                   ALLOCATE(nacvb(3, atoms_per_mol_j))
+                   aneighbour = 0
+                   bneighbour = 0
+                   nacva = 0.0d0
+                   nacvb = 0.0d0
+
+
+                   call sab_screen_new(Atp, sh_env%atomlist_d, sh_env%connlist1_d, coeffap,&
+                         sh_env%atomlist_d, Btp, sh_env%atomlist_d, sh_env%connlist1_d, coeffbp,&
+                         aneighbour(:,1:atoms_per_mol_i), &
+                         bneighbour(:,1:atoms_per_mol_j), &
+                         sh_env%minao)
+
+print *, "aneighbour"
+do i=1,size(aneighbour,2)
+    print*, aneighbour(:,i)
+end do
+print *, "bneighbour"
+do i=1,size(bneighbour,2)
+    print*, bneighbour(:,i)
+end do
+                  
+                   coeffas = sh_env%scoeffs_d ! they are in-out of calc_dRSab
+                   coeffbs = sh_env%scoeffs_d ! they are in-out of calc_dRSab
+
+                   call calc_dRSab(Atp, sh_env%atomlist_d, sh_env%connlist1_d, coeffap, coeffas, &
+                         nacva, nacvb, Btp, sh_env%atomlist_d, sh_env%connlist1_d, &
+                         coeffbp, coeffbs, aneighbour, bneighbour, sh_env%dR, sh_env%do_random, sh_env)
+
+print*, "index acc", init_atom_mol_j, final_atom_mol_j
+print*, 'NAC vector components on the nuclei of the acceptor'
+do j=1,size(nacvb,2)
+     !write(*,*) nacva(1,j),  nacva(2,j),  nacva(3,j)
+     write(*,*) nacvb(1,j),  nacvb(2,j),  nacvb(3,j)
+end do
+
+print *, "index don", init_atom_mol_i, final_atom_mol_i
+print*, 'NAC vector components on the nuclei of the donor'
+do j=1,size(nacva,2)
+     write(*,*) nacva(1,j),  nacva(2,j),  nacva(3,j)
+     !write(*,*) nacvb(1,j),  nacvb(2,j),  nacvb(3,j)
+end do
+
+
+                   DEALLOCATE(aneighbour, bneighbour)
+                   DEALLOCATE(coeffas, coeffbs)
+                   DEALLOCATE(nacva, nacvb)
+
                    DEALLOCATE(Atp,Btp)        
                    DEALLOCATE(coeffap, coeffbp)        
 
