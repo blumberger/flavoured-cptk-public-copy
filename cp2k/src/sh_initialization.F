@@ -517,9 +517,6 @@ CONTAINS
         CPABORT("Error in number of atoms donor")
      ENDIF 
 
-print *, "atoms_per_mol_d", atoms_per_mol_d
-print *, "atoms_per_mol_a", atoms_per_mol_a
-
       IF (norbitals .ne. 1) THEN
         CPABORT("DEGENERACY IS NOT IMPLEMENTED FOR MULTI-PHASE")
       ENDIF
@@ -527,7 +524,6 @@ print *, "atoms_per_mol_a", atoms_per_mol_a
 
      mat = norbitals*nadiab !> Size of the vectorial space where the wavefunctions are projected
      act_atoms = COUNT(sh_env%ext_pres) !> Numbers of active atoms
-print *, "NATOMS", act_atoms
 
      !mol = nadiab ! CHANGE_AC
      !sh_env%atoms_per_site = aom_atoms ! CHANGE_AC
@@ -625,7 +621,6 @@ print *, "NATOMS", act_atoms
      !List atoms with orbitals namely, with coeff not zero
      allocate(sh_env%atomlist_d(COUNT(submask(1:atoms_per_donor))))
      sh_env%atomlist_d = PACK( (/ (i, i=1,atoms_per_donor) /), submask(1:atoms_per_donor) ) 
-print *, "sh_env%atomlist_d", sh_env%atomlist_d
      allocate(sh_env%connlist2_d(4,size(sh_env%atomlist_d)))
      ALLOCATE(sh_env%connlist1_d(4,atoms_per_donor))
 
@@ -639,14 +634,14 @@ print *, "sh_env%atomlist_d", sh_env%atomlist_d
      call connect_list2(Atp_loc(2:4,:), sh_env%atomlist_d, sh_env%connlist1_d, sh_env%connlist2_d, sh_env%cutoff_connect)
      
 !print *, "Atp_loc(1,:)", Atp_loc(2,:)
-do i=1,atoms_per_donor
-print *, "sh_env%connlist1", sh_env%connlist1_d(:,i)
-enddo
-
-print *, "--------"
-do i=1,size(sh_env%atomlist_d)
-print *, "sh_env%connlist2", sh_env%connlist2_d(:,i)
-enddo
+!do i=1,atoms_per_donor
+!print *, "sh_env%connlist1", sh_env%connlist1_d(:,i)
+!enddo
+!
+!print *, "--------"
+!do i=1,size(sh_env%atomlist_d)
+!print *, "sh_env%connlist2", sh_env%connlist2_d(:,i)
+!enddo
 
      ! coefficients donor phase
      ALLOCATE(sh_env%pcoeffs_d(atoms_per_donor))
@@ -689,7 +684,6 @@ enddo
      !List atoms with orbitals namely, with coeff not zero
      allocate(sh_env%atomlist_a(COUNT(submask(1:atoms_per_acceptor))))
      sh_env%atomlist_a = PACK( (/ (i, i=1,atoms_per_acceptor) /), submask(1:atoms_per_acceptor) ) 
-print *, "sh_env%atomlist_a", sh_env%atomlist_a
      allocate(sh_env%connlist2_a(4,size(sh_env%atomlist_a)))
      ALLOCATE(sh_env%connlist1_a(4,atoms_per_acceptor))
 
@@ -702,15 +696,15 @@ print *, "sh_env%atomlist_a", sh_env%atomlist_a
      !connectivities with and without considering the zeors
      call connect_list2(Atp_loc(2:4,:), sh_env%atomlist_a, sh_env%connlist1_a, sh_env%connlist2_a, sh_env%cutoff_connect)
      
-!print *, "Atp_loc(1,:)", Atp_loc(2,:)
-do i=1,atoms_per_acceptor
-print *, "sh_env%connlist1", sh_env%connlist1_a(:,i)
-enddo
-
-print *, "--------"
-do i=1,size(sh_env%atomlist_a)
-print *, "sh_env%connlist2", sh_env%connlist2_a(:,i)
-enddo
+!!print *, "Atp_loc(1,:)", Atp_loc(2,:)
+!do i=1,atoms_per_acceptor
+!print *, "sh_env%connlist1", sh_env%connlist1_a(:,i)
+!enddo
+!
+!print *, "--------"
+!do i=1,size(sh_env%atomlist_a)
+!print *, "sh_env%connlist2", sh_env%connlist2_a(:,i)
+!enddo
  
      ! coefficients acceptor phase
      ALLOCATE(sh_env%pcoeffs_a(atoms_per_acceptor))
@@ -852,6 +846,8 @@ enddo
      allocate(sh_env%Btm(4,sh_env%atoms_per_site))
      allocate(sh_env%siteenergies(3,mat))  !COMMENT_SG: First dimension is not usefull
      ALLOCATE(sh_env%nacv(3,mat, mat*aom_atoms))
+     ALLOCATE(sh_env%nacv_tot(3,mat, mat, c))    !TEST 
+     sh_env%nacv_tot = 0.0d0
      ALLOCATE(sh_env%rm_t(3, natom))
      ALLOCATE(sh_env%rm_tm(3, natom))
      ALLOCATE(sh_env%Stt(mat,mat))
@@ -895,32 +891,25 @@ enddo
      CALL section_vals_list_get(coupling_section,"_DEFAULT_KEYWORD_",list=listcoeff) !Read them in the input files
      CALL read_listcoeff(listcoeff, ext_elements, sh_env%ext_pres, &
                          scoefftot, pcoefftot, natom) !Transform them into four arrays
-!print *, "ext_elements",  ext_elements
-!print *, "pcoefftot", pcoefftot
 
      sh_env%elements = PACK(ext_elements, sh_env%ext_pres) !Only select active atoms
 
-print *, "sh_env%elements", sh_env%elements
 
      allocate(atomlist_mask(c))
      atomlist_mask =.NOT.((scoefftot.eq.0).AND.(pcoefftot.eq.0)) !Only select atoms with orbitals
-print *, "atomlist_mask", atomlist_mask
      allocate(submask(aom_atoms))
      i = 1
      continue_while = .True. 
      do while (continue_while)
         if (atomlist_mask(i)) then
            start = i
-print *, "start", start
            continue_while = .False.
          endif
          i = i+1
-print *, "step i", i 
      end do
      do i=1, aom_atoms 
         submask(i) = atomlist_mask(i + start - 1)
      enddo
-print *, "submask", submask
 
      allocate(sh_env%atomlist(COUNT(submask(1:aom_atoms))))
 
@@ -930,8 +919,6 @@ print *, "submask", submask
                                                                               !coeff
                                                                               !not
                                                                               !zero
-!print *, "sh_env%atomlist", sh_env%atomlist
-
      allocate(sh_env%connlist2(4,size(sh_env%atomlist)))
      do i=1,aom_atoms
           do j=1,norbitals
@@ -940,8 +927,6 @@ print *, "submask", submask
           sh_env%scoeffs(i) = scoefftot(start - 1 + i)
      end do
 
-print *, "sh_env%pcoeffs", sh_env%pcoeffs
-print *, "sh_env%scoeffs", sh_env%scoeffs
 
      !> CONSTRUCT THE CONNLIST
      !we fill out the connlist arrays before calculating the nacv
@@ -952,7 +937,6 @@ print *, "sh_env%scoeffs", sh_env%scoeffs
      do coord=1,3
         crds_loc(coord,:) = PACK(positions_tp(coord,:), sh_env%ext_pres)
      enddo
-!print *, "positions_tp x compo", positions_tp(1,:)
 
      ! this line again assume same number of atoms for each molecule and it
      ! assumes all molecules have the same connlist1 connlist2
@@ -960,15 +944,14 @@ print *, "sh_env%scoeffs", sh_env%scoeffs
      !output: sh_env%connlist1, sh_env%connlist2
      call connect_list2(Atp_loc(2:4,:), sh_env%atomlist, sh_env%connlist1, sh_env%connlist2, sh_env%cutoff_connect)
      
-print *, "Atp_loc(1,:)", Atp_loc(2,:)
 
-do i=1,aom_atoms
-print *, "sh_env%connlist1", sh_env%connlist1(:,i)
-enddo
-
-do i=1,size(sh_env%atomlist)
-print *, "sh_env%connlist2", sh_env%connlist2(:,i)
-enddo
+!do i=1,aom_atoms
+!print *, "sh_env%connlist1", sh_env%connlist1(:,i)
+!enddo
+!
+!do i=1,size(sh_env%atomlist)
+!print *, "sh_env%connlist2", sh_env%connlist2(:,i)
+!enddo
 
      DEALLOCATE(atomlist_mask) 
      DEALLOCATE(submask) 

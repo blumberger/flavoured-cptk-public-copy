@@ -165,6 +165,7 @@ END TYPE adiab_nace_env_type
                                                  !A and B are donor and acceptor coordinates at different times  
                                                  Btp, siteenergies
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER :: nacv! off-diagonal gradient of aom Hamilton.
+     REAL(KIND=dp), DIMENSION(:,:,:,:), POINTER :: nacv_tot! off-diagonal gradient of aom Hamilton.
      REAL(KIND=dp), dimension(:,:), POINTER   :: Stt, Stmt, Sttm, Stmtm, &
                                                  Stptp, Sttp, Stpt
      !> multiple time step

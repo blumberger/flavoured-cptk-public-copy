@@ -501,7 +501,7 @@ SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_sect
      INTEGER :: init_atom_mol_i, final_atom_mol_i, atoms_per_mol_i
      INTEGER :: init_atom_mol_j, final_atom_mol_j, atoms_per_mol_j
      INTEGER                                   ::ind1, ind2
-     INTEGER                                   :: nadiab, i, j, temp
+     INTEGER                                   :: nadiab, i, j!, temp
      !INTEGER                                   :: start_i,end_i,start_j,end_j
      INTEGER, DIMENSION(:), POINTER            :: donor_index, acceptor_index
      INTEGER, DIMENSION(:), ALLOCATABLE        :: first_ind, second_ind
@@ -571,11 +571,11 @@ SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_sect
        end do
      end do     
     
-    print *, "DECOMP", my_mol_index
-    print *, "DONOR IND", donor_index
-    print *, "ACCEPTOR IND", acceptor_index
-    print *, "FIRST IND", first_ind
-    print *, "SEC IND", second_ind
+   !print *, "DECOMP", my_mol_index
+   !print *, "DONOR IND", donor_index
+   !print *, "ACCEPTOR IND", acceptor_index
+   !print *, "FIRST IND", first_ind
+   !print *, "SEC IND", second_ind
   
 
    !> loop over states: not that it does not matter if donor molecules comes
@@ -606,11 +606,11 @@ enddo
   do state1=1, SIZE(CT_states_info(1,:))
     !loop over upper diagonal
        do state2=1, SIZE(CT_states_info(2,:)) 
-print *, "HHHHHHH", state1, state2
+!print *, "HHHHHHH", state1, state2
            !if connectivity allows XXXX
            if (state2 >  state1) then 
-print *, "STATE1",  CT_states_info(1,state1), CT_states_info(2,state1)
-print *, "STATE2",  CT_states_info(1,state2), CT_states_info(2,state2)
+!print *, "STATE1",  CT_states_info(1,state1), CT_states_info(2,state1)
+!print *, "STATE2",  CT_states_info(1,state2), CT_states_info(2,state2)
                if (CT_states_info(1,state1) .eq. CT_states_info(1,state2)) then 
 
                    !> find index mol i (which is part of acceptor phase) of the pair
@@ -622,8 +622,8 @@ print *, "STATE2",  CT_states_info(1,state2), CT_states_info(2,state2)
                    init_atom_mol_j = active_system_info(1,CT_states_info(2,state2))
                    final_atom_mol_j = active_system_info(2,CT_states_info(2,state2))
                    atoms_per_mol_j = (final_atom_mol_j-init_atom_mol_j)+1
-print *, "index don", init_atom_mol_i, final_atom_mol_i
-print*, "index acc", init_atom_mol_j, final_atom_mol_j
+!print *, "index don", init_atom_mol_i, final_atom_mol_i
+!print*, "index acc", init_atom_mol_j, final_atom_mol_j
 
                     !! THIS CAN BE PUT IN ANOTHER SUBROUTINE      !!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -659,13 +659,68 @@ print*, "index acc", init_atom_mol_j, final_atom_mol_j
 
                    sh_env%H_tp(state1, state2) = cmplx(0.0D0, -sh_env%scaling*S,dp) !Minus to be consistent with diago
 print *, "IT'S ELECTR COUPL", S
+
+                   ALLOCATE(aneighbour(0:size(sh_env%atomlist_a),0:atoms_per_mol_i)) !atom list is the first dim
+                   ALLOCATE(bneighbour(0:size(sh_env%atomlist_a),0:atoms_per_mol_j)) !atom list is the first dim
+                   ALLOCATE(coeffas(atoms_per_mol_i))
+                   ALLOCATE(coeffbs(atoms_per_mol_j))
+                   ALLOCATE(nacva(3, atoms_per_mol_i))
+                   ALLOCATE(nacvb(3, atoms_per_mol_j))
+                   aneighbour = 0
+                   bneighbour = 0
+                   nacva = 0.0d0
+                   nacvb = 0.0d0
+
+
+                   call sab_screen_new(Atp, sh_env%atomlist_a, sh_env%connlist1_a, coeffap,&
+                         sh_env%atomlist_a, Btp, sh_env%atomlist_a, sh_env%connlist1_a, coeffbp,&
+                         aneighbour(:,1:atoms_per_mol_i), &
+                         bneighbour(:,1:atoms_per_mol_j), &
+                         sh_env%minao)
+
+!print *, "aneighbour"
+!do i=1,size(aneighbour,2)
+!    print*, aneighbour(:,i)
+!end do
+!print *, "bneighbour"
+!do i=1,size(bneighbour,2)
+!    print*, bneighbour(:,i)
+!end do
+                  
+                   coeffas = sh_env%scoeffs_a ! they are in-out of calc_dRSab
+                   coeffbs = sh_env%scoeffs_a ! they are in-out of calc_dRSab
+
+                   call calc_dRSab(Atp, sh_env%atomlist_a, sh_env%connlist1_a, coeffap, coeffas, &
+                         nacva, nacvb, Btp, sh_env%atomlist_a, sh_env%connlist1_a, &
+                         coeffbp, coeffbs, aneighbour, bneighbour, sh_env%dR, sh_env%do_random, sh_env)
+
+open(20, file = 'nacv_multip_ap.dat', status = 'old', position="append",action="write")
+write(20,*) "states", state1, state2
+write(20,*) "index acc", init_atom_mol_j, final_atom_mol_j
+write(20,*) 'NAC vector components on the nuclei of the acceptor'
+do j=1,size(nacvb,2)
+     !write(*,*) nacva(1,j),  nacva(2,j),  nacva(3,j)
+     write(20,*) nacvb(1,j),  nacvb(2,j),  nacvb(3,j)
+end do
+
+write(20,*) "index don", init_atom_mol_i, final_atom_mol_i
+write(20,*) 'NAC vector components on the nuclei of the donor'
+do j=1,size(nacva,2)
+     write(20,*) nacva(1,j),  nacva(2,j),  nacva(3,j)
+     !write(*,*) nacvb(1,j),  nacvb(2,j),  nacvb(3,j)
+end do
+close(20)
+
+
+                   DEALLOCATE(aneighbour, bneighbour)
+                   DEALLOCATE(coeffas, coeffbs)
+                   DEALLOCATE(nacva, nacvb)
                    DEALLOCATE(Atp,Btp)        
                    DEALLOCATE(coeffap, coeffbp)        
                    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
                else if (CT_states_info(2,state1) .eq. CT_states_info(2,state2)) then 
 
-                   print *, "IT'S HOLE COUPL" 
                    !> find index mol i (which is state i) of the pair
                    init_atom_mol_i = active_system_info(1,CT_states_info(1,state1))
                    final_atom_mol_i = active_system_info(2, CT_states_info(1,state1))
@@ -675,8 +730,8 @@ print *, "IT'S ELECTR COUPL", S
                    init_atom_mol_j = active_system_info(1,CT_states_info(1,state2))
                    final_atom_mol_j = active_system_info(2,CT_states_info(1,state2))
                    atoms_per_mol_j = (final_atom_mol_j-init_atom_mol_j)+1
-print *, "index don", init_atom_mol_i, final_atom_mol_i
-print*, "index acc", init_atom_mol_j, final_atom_mol_j
+!print *, "index don", init_atom_mol_i, final_atom_mol_i
+!print*, "index acc", init_atom_mol_j, final_atom_mol_j
 
                     !! THIS CAN BE PUT IN ANOTHER SUBROUTINE      !!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -703,24 +758,24 @@ print*, "index acc", init_atom_mol_j, final_atom_mol_j
                    !connlistsa = sh_env%connlist2_a
                    !connlistsd =  sh_env%connlist2_a
 
-do temp=1,SIZE(coeffap)
-print *, "coeffap, coeffbp", coeffap(temp), coeffbp(temp)
-enddo
-do temp=1, SIZE(Atp,2)
-print *, "xyza", Atp(1,temp), Atp(2,temp)
-enddo
-do temp=1, SIZE(Btp,2)
-print *, "xyzb", Btp(1,temp), Btp(2,temp)
-enddo
+!do temp=1,SIZE(coeffap)
+!print *, "coeffap, coeffbp", coeffap(temp), coeffbp(temp)
+!enddo
+!do temp=1, SIZE(Atp,2)
+!print *, "xyza", Atp(1,temp), Atp(2,temp)
+!enddo
+!do temp=1, SIZE(Btp,2)
+!print *, "xyzb", Btp(1,temp), Btp(2,temp)
+!enddo
 
                    !Normalisation of the coefficients without the s orbitals
                    call calc_sab(Atp, sh_env%connlist2_d, coeffap) !donor
                    call calc_sab(Btp, sh_env%connlist2_d, coeffbp) !donor
 
-print *, "NORMALIZED"
-do temp=1,SIZE(coeffap)
-print *, "coeffap, coeffbp", coeffap(temp), coeffbp(temp)
-enddo
+!print *, "NORMALIZED"
+!do temp=1,SIZE(coeffap)
+!print *, "coeffap, coeffbp", coeffap(temp), coeffbp(temp)
+!enddo
 
                    !Calculate Sab
                    call calc_sab(Atp, sh_env%connlist2_d, coeffap, & 
@@ -730,8 +785,8 @@ enddo
 print *, "IT'S HOLE COUPL", S
   
                !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                   ALLOCATE(aneighbour(0:size(sh_env%atomlist_d),0:atoms_per_mol_i))
-                   ALLOCATE(bneighbour(0:size(sh_env%atomlist_d),0:atoms_per_mol_j))
+                   ALLOCATE(aneighbour(0:size(sh_env%atomlist_d),0:atoms_per_mol_i)) !atom list is the first dim
+                   ALLOCATE(bneighbour(0:size(sh_env%atomlist_d),0:atoms_per_mol_j)) !atom list is the first dim
                    ALLOCATE(coeffas(atoms_per_mol_i))
                    ALLOCATE(coeffbs(atoms_per_mol_j))
                    ALLOCATE(nacva(3, atoms_per_mol_i))
@@ -748,14 +803,14 @@ print *, "IT'S HOLE COUPL", S
                          bneighbour(:,1:atoms_per_mol_j), &
                          sh_env%minao)
 
-print *, "aneighbour"
-do i=1,size(aneighbour,2)
-    print*, aneighbour(:,i)
-end do
-print *, "bneighbour"
-do i=1,size(bneighbour,2)
-    print*, bneighbour(:,i)
-end do
+!print *, "aneighbour"
+!do i=1,size(aneighbour,2)
+!    print*, aneighbour(:,i)
+!end do
+!print *, "bneighbour"
+!do i=1,size(bneighbour,2)
+!    print*, bneighbour(:,i)
+!end do
                   
                    coeffas = sh_env%scoeffs_d ! they are in-out of calc_dRSab
                    coeffbs = sh_env%scoeffs_d ! they are in-out of calc_dRSab
@@ -764,19 +819,22 @@ end do
                          nacva, nacvb, Btp, sh_env%atomlist_d, sh_env%connlist1_d, &
                          coeffbp, coeffbs, aneighbour, bneighbour, sh_env%dR, sh_env%do_random, sh_env)
 
-print*, "index acc", init_atom_mol_j, final_atom_mol_j
-print*, 'NAC vector components on the nuclei of the acceptor'
+open(20, file = 'nacv_multip.dat', status = 'old', position="append",action="write")
+write(20,*) "states", state1, state2
+write(20,*) "index acc", init_atom_mol_j, final_atom_mol_j
+write(20,*) 'NAC vector components on the nuclei of the acceptor'
 do j=1,size(nacvb,2)
      !write(*,*) nacva(1,j),  nacva(2,j),  nacva(3,j)
-     write(*,*) nacvb(1,j),  nacvb(2,j),  nacvb(3,j)
+     write(20,*) nacvb(1,j),  nacvb(2,j),  nacvb(3,j)
 end do
 
-print *, "index don", init_atom_mol_i, final_atom_mol_i
-print*, 'NAC vector components on the nuclei of the donor'
+write(20,*) "index don", init_atom_mol_i, final_atom_mol_i
+write(20,*) 'NAC vector components on the nuclei of the donor'
 do j=1,size(nacva,2)
-     write(*,*) nacva(1,j),  nacva(2,j),  nacva(3,j)
+     write(20,*) nacva(1,j),  nacva(2,j),  nacva(3,j)
      !write(*,*) nacvb(1,j),  nacvb(2,j),  nacvb(3,j)
 end do
+close(20)
 
 
                    DEALLOCATE(aneighbour, bneighbour)
@@ -796,7 +854,7 @@ end do
                    !minus because we propagate -X
                    sh_env%H_tp(state1, state2) = cmplx(0.0D0,(-energies_tp(state1)),dp) 
                 else 
-print *, "LOWER PART"
+!print *, "LOWER PART"
                    sh_env%H_tp(state1, state2) = sh_env%H_tp(state2, state1)
                    
                 end if 
@@ -804,9 +862,9 @@ print *, "LOWER PART"
      end do
   end do
 
-do state1=1, SIZE(sh_env%H_tp,1)
-   print *, "H", -AIMAG(sh_env%H_tp(state1,:))
-end do
+!do state1=1, SIZE(sh_env%H_tp,1)
+!   print *, "H", -AIMAG(sh_env%H_tp(state1,:))
+!end do
 
    DEALLOCATE(CT_states_info) 
    DEALLOCATE(first_ind)
@@ -1182,8 +1240,8 @@ SUBROUTINE calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_rando
      routineP = moduleN//':'//routineN
 
      REAL(KIND=dp)                               :: S
-     integer                                     :: i, j, k, l, m, d, o, temp
-     real(kind=dp), allocatable :: PC_rvecs(:,:)
+     integer                                     :: i, j, k, l, m, d, o, temp, ci
+     real(kind=dp), allocatable                  :: PC_rvecs(:,:)
 
 
      !ALLOCATE(PC_allrvecs(5,mol*atoms))
@@ -1212,9 +1270,9 @@ print *, "state k", k
 
 
                     if (i == 1) then
-do temp=1,atoms
-print *, "sh_env%pcoeffs", sh_env%pcoeffs(temp,1)
-enddo
+!do temp=1,atoms
+!print *, "sh_env%pcoeffs", sh_env%pcoeffs(temp,1)
+!enddo
                          ! SG: renormalize coefficient (atoms, state, tstep) of all k (meaning all molecules)
                          ! this is a trick to do it once only for all molecules
                          ! and store them in a more general pcoeffsrun that
@@ -1225,15 +1283,15 @@ enddo
                               sh_env%pcoeffsrun(1:atoms,orb*(k-1)+d,3) = sh_env%pcoeffs(1:atoms,d)
                               call calc_sab(sh_env%Btp, sh_env%connlist2, sh_env%pcoeffsrun(:,orb*(k-1)+d,3))
                          end do
-do temp=1,atoms
-print  *, "sh_env%pcoeffsrun", sh_env%pcoeffsrun(temp, k, 3)
-enddo
+!do temp=1,atoms
+!print  *, "sh_env%pcoeffsrun", sh_env%pcoeffsrun(temp, k, 3)
+!enddo
                     end if  ! (i == 1)
 
-print *, "STATES", i, k
-do temp=1,atoms
-print  *, "sh_env%pcoeffsrun entering", sh_env%pcoeffsrun(temp, i, 3), sh_env%pcoeffsrun(temp, k, 3)
-enddo
+!print *, "STATES", i, k
+!do temp=1,atoms
+!print  *, "sh_env%pcoeffsrun entering", sh_env%pcoeffsrun(temp, i, 3), sh_env%pcoeffsrun(temp, k, 3)
+!enddo
 
                     do d=1,orb
                          do m=1,orb
@@ -1273,22 +1331,41 @@ enddo
                                         do d=1,orb
                                              sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = sh_env%H_tp(orb*(k-1)+m,orb*(i-1)+d)
                                              sh_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = sh_env%Stptp(orb*(k-1)+m,orb*(i-1)+d)
+                     
+                             !call calc_sab(sh_env%Atp, sh_env%connlist2, &
+                             !                             sh_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3),&
+                             !                             S, sh_env%Btp, sh_env%connlist2, & 
+                             !                             sh_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3))
+                             !                sh_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
+                             !                sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0, -scaling*S,dp)
+
+                                            !call calc_dRSab(sh_env%Atp, sh_env%atomlist, sh_env%connlist1, &
+                                            !sh_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3), sh_env%scoeffs, &
+                                            !sh_env%nacv_tot(1:3,orb*(k-1)+d,orb*(i-1)+m,(i-1)*atoms+1:i*atoms), &
+                                            !sh_env%nacv_tot(1:3,orb*(i-1)+m,orb*(k-1)+d,(k-1)*atoms+1:k*atoms), &
+                                            !!sh_env%nacv(1:3,orb*(k-1)+d,(i-1)*atoms+1:i*atoms), &
+                                            !!sh_env%nacv(1:3,orb*(i-1)+m,(k-1)*atoms+1:k*atoms), &
+                                            !sh_env%Btp, sh_env%atomlist, sh_env%connlist1, & 
+                                            !sh_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3),&
+                                            !!sh_env%scoeffs, sh_env%neighbourlist(k,i,:,:), sh_env%neighbourlist(i,k,:,:), dR, &
+                                            !sh_env%scoeffs, sh_env%aneighbour(:,:), sh_env%bneighbour(:,:), dR, &
+                                            !do_random, sh_env)
+                                            
+
                                         end do
                                    end do
                               else
 print *, "OFF-DIAGONAL"
                                    do d=1,orb
                                         do m=1,orb
-do temp=1,atoms
-print *, "sh_env%Atp just x", sh_env%Atp(1,temp), sh_env%Atp(2,temp)
-print *, "sh_env%Btp just x", sh_env%Btp(1,temp), sh_env%Btp(2,temp)
-enddo
-
-print *, "sh_env%connlist2", sh_env%connlist2
-
-do temp=1,atoms
-print  *, "sh_env%pcoeffsrun(temp, i, 3)", sh_env%pcoeffsrun(temp, i, 3)
-enddo
+!do temp=1,atoms
+!print *, "sh_env%Atp just x", sh_env%Atp(1,temp), sh_env%Atp(2,temp)
+!print *, "sh_env%Btp just x", sh_env%Btp(1,temp), sh_env%Btp(2,temp)
+!enddo
+!print *, "sh_env%connlist2", sh_env%connlist2
+!do temp=1,atoms
+!print  *, "sh_env%pcoeffsrun(temp, i, 3)", sh_env%pcoeffsrun(temp, i, 3)
+!enddo
 
                                              call calc_sab(sh_env%Atp, sh_env%connlist2, &
                                                           sh_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3),&
@@ -1309,17 +1386,32 @@ enddo
                                              sh_env%scoeffs, sh_env%aneighbour(:,:), sh_env%bneighbour(:,:), dR, &
                                              do_random, sh_env)
 
-print *, "PAIR of states", i
-print *, "indeces2", orb*(i-1)+m, "from to", (k-1)*atoms+1, k*atoms
+open(20, file = 'nacv_multip.dat', status = 'old', position="append",action="write")
+write (20,*) "states", i, k
+write (20,*) "index acc", orb*(i-1)+m, "from to", (k-1)*atoms+1, k*atoms
+write (20,*) "NAC vector components on the nuclei of the acceptor"
 do temp=(k-1)*atoms+1, k*atoms
-print *, "nacv2", sh_env%nacv(1,orb*(i-1)+m,temp), sh_env%nacv(2,orb*(i-1)+m,temp), sh_env%nacv(3,orb*(i-1)+m,temp)
+write (20,*) sh_env%nacv(1,orb*(i-1)+m,temp), sh_env%nacv(2,orb*(i-1)+m,temp), sh_env%nacv(3,orb*(i-1)+m,temp)
 end do
 
-print *, "PAIR of states", k
-print *, "indeces1", orb*(k-1)+d, "from to", (i-1)*atoms+1, i*atoms
+write (20,*) "index donor", orb*(k-1)+d, "from to", (i-1)*atoms+1, i*atoms
+write (20,*) "NAC vector components on the nuclei of the donor"
 do temp=(i-1)*atoms+1, i*atoms
-print *, "nacv1", sh_env%nacv(1,orb*(k-1)+d,temp), sh_env%nacv(2,orb*(k-1)+d,temp), sh_env%nacv(3,orb*(k-1)+d,temp)
+write (20,*) sh_env%nacv(1,orb*(k-1)+d,temp), sh_env%nacv(2,orb*(k-1)+d,temp), sh_env%nacv(3,orb*(k-1)+d,temp)
 enddo 
+close(20)
+
+                                             call calc_dRSab(sh_env%Atp, sh_env%atomlist, sh_env%connlist1, &
+                                             sh_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3), sh_env%scoeffs, &
+                                             sh_env%nacv_tot(1:3,orb*(k-1)+d,orb*(i-1)+m,(i-1)*atoms+1:i*atoms), &
+                                             sh_env%nacv_tot(1:3,orb*(i-1)+m,orb*(k-1)+d,(k-1)*atoms+1:k*atoms), &
+                                             !sh_env%nacv(1:3,orb*(k-1)+d,(i-1)*atoms+1:i*atoms), &
+                                             !sh_env%nacv(1:3,orb*(i-1)+m,(k-1)*atoms+1:k*atoms), &
+                                             sh_env%Btp, sh_env%atomlist, sh_env%connlist1, & 
+                                             sh_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3),&
+                                             !sh_env%scoeffs, sh_env%neighbourlist(k,i,:,:), sh_env%neighbourlist(i,k,:,:), dR, &
+                                             sh_env%scoeffs, sh_env%aneighbour(:,:), sh_env%bneighbour(:,:), dR, &
+                                             do_random, sh_env)
 
 
                                         end do
@@ -1347,17 +1439,29 @@ enddo
      enddo !loop-over i
      DEALLOCATE(PC_rvecs)
 
-!!PRINT OUT TEST 
-!OPEN (UNIT = 24, FILE = "NACV_formatted.dat", STATUS="NEW")
-!
-!do i=1,atoms*orb*mol
-!  do k=1, orb*mol
-!     write(24,*) "atom", i, "state", k, sh_env%nacv(:,k,i)
-!  end do  
-!end do
-!
-!200 close (24)
+!PRINT OUT TEST 
+OPEN (UNIT = 24, FILE = "nacv_formatted.dat", STATUS="NEW")
 
+do k=1, mol
+   write(24,*) "state", k
+   do i=1,54 !! HARDCODEC NUMBER OF ACTIVE ATOMS XXX
+     write(24,*)  sh_env%nacv(1,k,i), sh_env%nacv(2,k,i), sh_env%nacv(3,k,i)
+  end do  
+end do
+close (24)
+
+!PRINT OUT TEST 
+OPEN (UNIT = 25, FILE = "nacv_formatted_total.dat", STATUS="NEW")
+
+do k=1, mol
+do i=1, mol
+   write(25,*) "state", k,i
+   do ci=1,54
+     write(25,*)  sh_env%nacv_tot(1,k,i, ci), sh_env%nacv_tot(2,k,i,ci), sh_env%nacv_tot(3,k,i, ci)
+  end do  
+end do
+end do
+close (25)
 END SUBROUTINE calc_aom_Xmatrix_elements_first_step
 
 

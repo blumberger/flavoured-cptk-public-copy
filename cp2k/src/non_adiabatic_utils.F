@@ -486,6 +486,17 @@ END SUBROUTINE calc_hop_nacv_approx
      end do
 
     DEALLOCATE(charges1,charges2)
+
+!OPEN (UNIT = 21, FILE = "GRAD_formatted.dat", STATUS="NEW")
+!
+!do k=1, SIZE(sh_env%grad_tresp,2)
+! write(21,*) "state", k
+! do i=1,SIZE(sh_env%grad_tresp,3)
+!     write(21,*)  sh_env%grad_tresp(1,k,i), sh_env%grad_tresp(2,k,i), sh_env%grad_tresp(3,k,i)
+!  end do
+!end do
+!
+!close (21)
 !!TEST
 !OPEN (UNIT = 21, FILE = "GRAD_formatted.dat")
 !
@@ -496,7 +507,7 @@ END SUBROUTINE calc_hop_nacv_approx
 !end do
 !
 !close (21)
-!!stop
+!stop
   end subroutine  calc_tresp_coup
 
 
@@ -4498,7 +4509,7 @@ END SUBROUTINE classically_forbidden_hops
      CHARACTER(len=*), PARAMETER                     :: routineN ='calc_tresp_coup', &
      routineP = moduleN//':'//routineN
 
-     integer                                         :: i, k, m, d, dim_, l
+     integer                                         :: i, k, m, d, dim_!, l
      integer                                         :: init_atom_mol_i, final_atom_mol_i, atoms_per_mol_i
      integer                                         :: init_atom_mol_k, final_atom_mol_k, atoms_per_mol_k
      real(kind=dp), allocatable, dimension(:,:)      :: crd_i, crd_k
@@ -4633,18 +4644,30 @@ print *, "PAIR", i,k
         end do 
      end do
 
+!!!TEST
+!OPEN (UNIT = 21, FILE = "GRAD_formatted_FULL.dat")
+!
+!do i=1,SIZE(sh_env%test_grad_tresp,4) !atoms
+!  do k=1, SIZE(sh_env%test_grad_tresp,2)   !mol
+!     do l=1, SIZE(sh_env%test_grad_tresp,2)   !mol
+!     write(21,*) "atom", i, "state", k, l, sh_env%test_grad_tresp(:,k,l,i)
+!     end do
+!  end do
+!end do
+!close (21)
 !!TEST
-OPEN (UNIT = 21, FILE = "GRAD_formatted_FULL.dat")
+!OPEN (UNIT = 21, FILE = "GRAD_formatted_FULL.dat")
+!
+!  do k=1, SIZE(sh_env%test_grad_tresp,2)   !mol
+!     do l=1, SIZE(sh_env%test_grad_tresp,2)   !mol
+!      write(21,*) "states", k,l
+!     do i=1,SIZE(sh_env%test_grad_tresp,4) !atoms
+!     write(21,*) sh_env%test_grad_tresp(:,k,l,i)
+!     end do
+!  end do
+!end do
+!close (21)
 
-do i=1,SIZE(sh_env%test_grad_tresp,4) !atoms
-  do k=1, SIZE(sh_env%test_grad_tresp,2)   !mol
-     do l=1, SIZE(sh_env%test_grad_tresp,2)   !mol
-     write(21,*) "atom", i, "state", k, l, sh_env%test_grad_tresp(:,k,l,i)
-     end do
-  end do
-end do
-
-close (21)
   end subroutine  calc_tresp_coup_test
 
 

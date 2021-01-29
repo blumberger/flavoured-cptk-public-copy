@@ -325,9 +325,9 @@ CONTAINS
          CALL calc_tresp_coup(sh_env, energies_tp, orb, NN=sh_env%NN, positions_com_tp=positions_com_tp, &
                              active_system_info=sh_env%active_system_info, tresp_charges=sh_env%tresp_charges)
 
-!TO REMOVE
-!         CALL calc_tresp_coup_test(sh_env, energies_tp, orb, NN=sh_env%NN, positions_com_tp=positions_com_tp, &
-!                             active_system_info=sh_env%active_system_info, tresp_charges=sh_env%tresp_charges)
+!TEST
+         !CALL calc_tresp_coup_test(sh_env, energies_tp, orb, NN=sh_env%NN, positions_com_tp=positions_com_tp, &
+         !                    active_system_info=sh_env%active_system_info, tresp_charges=sh_env%tresp_charges)
      ELSE
          !> In a possible extension one should add here 
          CPABORT("Another coupling method to constrcut H should be chosen")
@@ -540,7 +540,7 @@ print *, "ACTIVE STATE", active_state
                                         orb=orb, nacv=sh_env%grad_tresp)
       
 !!!TEST TO REMOVE
-!OPEN (UNIT = 21, FILE = "FORCES_formatted.dat")
+!OPEN (UNIT = 21, FILE = "FORCES_formatted.dat", position="append",action="write")
 !
 !do i=1,SIZE(sh_env%forces_adiab,2) !atoms
 !     write(21,*) "atom", i, sh_env%forces_adiab(:,i)
@@ -553,12 +553,14 @@ print *, "ACTIVE STATE", active_state
 !                                        orb=orb, full_grad=sh_env%test_grad_tresp)
 !       
 !!!TEST TO REMOVE
-!OPEN (UNIT = 21, FILE = "FORCES_formatted_FULL.dat")
+!OPEN (UNIT = 27, FILE = "FORCES_formatted_FULL.dat", position="append",action="write")
 !
 !do i=1,SIZE(sh_env%forces_adiab,2) !atoms
-!     write(21,*) "atom", i, sh_env%forces_adiab(:,i)
+!     write(27,*) "atom", i, sh_env%forces_adiab(:,i)
 !end do
-!close (21) 
+!close (27) 
+
+
      ELSE
          !> In a possible extension one should add here 
          CPABORT("Another way to calculate adiabatic forces should be developed")
@@ -708,7 +710,7 @@ print *, "ACTIVE STATE", active_state
      TYPE(cp_logger_type), POINTER                  :: logger
      INTEGER                                        :: unit_nr
      REAL(KIND=dp)                                  :: convert_nacv
-!     INTEGER                                        :: i, k
+     !INTEGER                                        :: i
      
      NULLIFY(logger)
      NULLIFY(optimization_section)
@@ -1027,6 +1029,26 @@ print *, "ACTIVE STATE", active_state
                                Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                                ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, orb=orb, &
                                         nacv=sh_env%grad_tresp)
+
+!!!TEST TO REMOVE
+!OPEN (UNIT = 21, FILE = "FORCES_formatted.dat", position="append",action="write")
+!
+!do i=1,SIZE(sh_env%forces_adiab,2) !atoms
+!     write(21,*) "atom", i, sh_env%forces_adiab(:,i)
+!end do
+!close (21) 
+!        call calcforces_smart_grad_test(state=sh_env%active_state, C=sh_env%C_tp, &
+!                                        Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
+!                                        ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
+!                                        orb=orb, full_grad=sh_env%test_grad_tresp)
+!       
+!!!TEST TO REMOVE
+!OPEN (UNIT = 27, FILE = "FORCES_formatted_FULL.dat", position="append",action="write")
+!
+!do i=1,SIZE(sh_env%forces_adiab,2) !atoms
+!     write(27,*) "atom", i, sh_env%forces_adiab(:,i)
+!end do
+!close (27) 
          IF (sh_env%attempt_hop) THEN
              call calcforces_smart_grad(state=sh_env%new_state, C=sh_env%C_tp, &
                                   Fin=diagonal_F, forces_adiab=sh_env%forces_adiab_new, &
