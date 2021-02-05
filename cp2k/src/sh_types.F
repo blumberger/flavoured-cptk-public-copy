@@ -137,13 +137,14 @@ END TYPE adiab_nace_env_type
 !> \edited 02/02/20
 !***************************************************************************************
    TYPE sh_env_type
-!> AOM arrays specific for donor acceptor multiphase
+!> AOM arrays specific for donor acceptor MULTIPHASE
      REAL(KIND=dp), DIMENSION(:), POINTER     :: pcoeffs_d, pcoeffs_a
      REAL(KIND=dp), DIMENSION(:), POINTER     :: scoeffs_d, scoeffs_a
      INTEGER, DIMENSION(:), POINTER           :: atomlist_d, atomlist_a !List atoms with orbitals
      integer, dimension(:,:), POINTER         :: connlist1_d, connlist2_d, & ! AOM connectivities of individual mols
                                                  connlist1_a, connlist2_a
      integer, dimension(:), ALLOCATABLE       :: ext_elements_d, ext_elements_a ! atomic number
+
 !> AOM arrays
      REAL(KIND = dp), DIMENSION(:,:), POINTER :: rm_t,&        ! position step min 1
                                                  rm_tm       ! position step min 2
@@ -156,8 +157,8 @@ END TYPE adiab_nace_env_type
                        !> bneighbour, aneighbour arrays are data for the diabatic nacv calculation
                        !> they help efficiency by telling the program which atoms are connected
                        !> and thus which pairs to carry out the calculation for
-     REAL(KIND=dp), DIMENSION(:,:), POINTER   :: pcoeffs ! aom coeffs
-     REAL(KIND=dp), DIMENSION(:), POINTER     :: scoeffs
+     REAL(KIND=dp), DIMENSION(:,:), POINTER   :: pcoeffs ! aom coeffs for single phase H
+     REAL(KIND=dp), DIMENSION(:), POINTER     :: scoeffs ! aom coeffs for single phase H
      REAL(KIND = dp)                          :: scaling, cbar, minao !For AOM calculations
      !> Calculate at each timestep
      REAL(KIND=dp), dimension(:,:,:), POINTER :: pcoeffsrun ! normalized AOM coefficients
