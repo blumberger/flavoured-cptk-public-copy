@@ -583,15 +583,17 @@ SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_sect
    print *, "ACCEPTOR IND", acceptor_index
    print *, "FIRST IND", first_ind
    print *, "SEC IND", second_ind
+
+print *, "OUT sh_env%connlist1_d", sh_env%connlist1_d
  
-   print *, "CALC DONOR PHASE STUFF"
-   CALL calc_aom_coup_nacv_single_phase(sh_env, atoms_per_donor, sh_env%ext_elements_d, sh_env%pcoeffs_d, &
-                                           first_ind, sh_env%connlist1_d, sh_env%connlist2_d, sh_env%atomlist_d, &
-                                           positions_com_tp, active_system_info)
-   print *, "CALC ACCEPTOR PHASE STUFF"
-   CALL calc_aom_coup_nacv_single_phase(sh_env, atoms_per_acceptor, sh_env%ext_elements_a, sh_env%pcoeffs_a, &
-                                           second_ind, sh_env%connlist1_a, sh_env%connlist2_a, sh_env%atomlist_a, &
-                                           positions_com_tp, active_system_info)
+!  print *, "CALC DONOR PHASE STUFF"
+!  CALL calc_aom_coup_nacv_single_phase(sh_env, atoms_per_donor, sh_env%ext_elements_d, sh_env%pcoeffs_d, sh_env%scoeffs_d, &
+!                                          first_ind, sh_env%connlist1_d, sh_env%connlist2_d, sh_env%atomlist_d, &
+!                                          positions_com_tp, active_system_info)
+  print *, "CALC ACCEPTOR PHASE STUFF"
+  CALL calc_aom_coup_nacv_single_phase(sh_env, atoms_per_acceptor, sh_env%ext_elements_a, sh_env%pcoeffs_a, sh_env%scoeffs_a, &
+                                          second_ind, sh_env%connlist1_a, sh_env%connlist2_a, sh_env%atomlist_a, &
+                                          positions_com_tp, active_system_info)
 
 
 
@@ -916,12 +918,13 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
      routineP = moduleN//':'//routineN
 
      integer :: i, ind_i, init_atom_mol_i, final_atom_mol_i, atoms_per_mol_i 
-     integer :: k, ind_k, init_atom_mol_k, final_atom_mol_k, atoms_per_mol_k!, temp
+     integer :: k, ind_k, init_atom_mol_k, final_atom_mol_k, atoms_per_mol_k, temp
      real(kind=dp), allocatable, dimension(:,:)          :: Atp, Btp
      real(kind=dp), allocatable                          :: PC_rvecs(:,:)
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE          :: pcoeffsrun 
      INTEGER, DIMENSION(:,:), ALLOCATABLE                :: bneighbour, aneighbour
      REAL(KIND=dp)                                       :: S 
+     REAL(KIND=dp), DIMENSION(:,:,:), ALLOCATABLE        :: nacv
       
 
      !ALLOCATE(PC_allrvecs(5,mol*atoms))
@@ -939,7 +942,13 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
      !atom list is the first dim
      ALLOCATE(aneighbour(0:size(phase_atomlist),0:atoms))
      ALLOCATE(bneighbour(0:size(phase_atomlist),0:atoms))
+     aneighbour = 0
+     bneighbour = 0
      ! END IF XXXX
+
+     !TEMP XXXX
+     ALLOCATE(nacv(3,SIZE(phase_ind), SIZE(phase_ind)*atoms))
+     nacv=0.0_dp
 
 print *, "NETER NEW SINGLE PHASE SUB"
      !ALLOCATE(coeffap(atoms))
@@ -1021,30 +1030,44 @@ print *, "NETER NEW SINGLE PHASE SUB"
                         if (k>i) then 
 
                            call calc_sab(Atp, phase_connlist2, &
-                               pcoeffsrun(1:atoms_per_mol_k, i), &
+                               pcoeffsrun(1:atoms_per_mol_i, i), &
                                S, Btp, phase_connlist2, &
                                pcoeffsrun(1:atoms_per_mol_k, k),&
-                     print_rvecs='yes', molA_index=i, molB_index=k)                           
+                               print_rvecs='yes', molA_index=i, molB_index=k)                           
 print *, "phase molecules", i, k
 print *, "IT'S COUPL", i, k, S
 
-!                      !IF MULTISTATE THEN 
-!                       call calc_dRSab(sh_env%Atp, phase_atomlist, &
-!                                    phase_connlist1, pcoeffsrun(1:atoms_per_mol_i,i,), phase_scoeffs, &
-!                       sh_env%nacv(1:3,orb*(k-1)+d,(i-1)*atoms+1:i*atoms), &
-!                       sh_env%nacv(1:3,orb*(i-1)+m,(k-1)*atoms+1:k*atoms), &
-!                       sh_env%Btp, sh_env%atomlist, sh_env%connlist1, &
-!                       sh_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3), &
-!                        !sh_env%scoeffs, sh_env%neighbourlist(k,i,:,:), &
-!                        !         sh_env%neighbourlist(i,k,:,:), dR, &
-!                        sh_env%scoeffs, sh_env%aneighbour(:,:), &
-!                                         sh_env%bneighbour(:,:), dR, &
-!                        do_random, sh_env)                         
-!
-!                      !END IF
-                        end if
+print *, "SEED", sh_env%do_random
+                          !IF MULTISTATE THEN 
+                           call calc_dRSab(Atp, phase_atomlist, &
+                           phase_connlist1, pcoeffsrun(1:atoms_per_mol_i,i), phase_scoeffs, &
+                           nacv(1:3, k,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i), &
+                           nacv(1:3, i,(k-1)*atoms_per_mol_k+1:k*atoms_per_mol_k), &
+                           Btp, phase_atomlist, phase_connlist1, pcoeffsrun(1:atoms_per_mol_k,k), &
+                            !sh_env%scoeffs, sh_env%neighbourlist(k,i,:,:), &
+                            !         sh_env%neighbourlist(i,k,:,:), dR, &
+                            phase_scoeffs, aneighbour(:,:), bneighbour(:,:), sh_env%dR, &
+                            sh_env%do_random, sh_env)                         
                          
+                          !END IF
+                         
+!open(20, file = 'nacv_multip_inter.dat', status = 'old',
+!position="append",action="write")
+write (*,*) "states", i, k
+write (*,*) "index acc", i, "from to", (k-1)*atoms+1, k*atoms
+write (*,*) "NAC vector components on the nuclei of the acceptor"
+do temp=(k-1)*atoms+1, k*atoms
+write (*,*) nacv(1, i,temp), nacv(2, i,temp), nacv(3, i,temp)
+end do
 
+write (*,*) "index donor", k, "from to", (i-1)*atoms+1, i*atoms
+write (*,*) "NAC vector components on the nuclei of the donor"
+do temp=(i-1)*atoms+1, i*atoms
+write (*,*) nacv(1, k,temp), nacv(2, k,temp), nacv(3, k ,temp)
+enddo
+!close(20)
+
+                       end if !over the upper diag
 
 !                   !only call overlap if neighbours list says so
 !                   if (sh_env%NN(i,k) == 1) then
@@ -1075,10 +1098,25 @@ print *, "IT'S COUPL", i, k, S
               ! end do
 
      end do !loop over i
+
+!PRINT OUT TEST
+OPEN (UNIT = 27, FILE = "nacv_formatted-newsub.dat", STATUS="NEW")
+
+do k=1, SIZE(phase_ind)
+   write(27,*) "state", k
+   do i=1,atoms*SIZE(phase_ind) !! HARDCODEC NUMBER OF ACTIVE ATOMS XXX
+     write(27,*)  nacv(1,k,i), nacv(2,k,i), nacv(3,k,i)
+  end do
+end do
+close (27)
+
+
      DEALLOCATE(PC_rvecs) 
      DEALLOCATE(Atp,Btp)
      DEALLOCATE(pcoeffsrun)
      DEALLOCATE(aneighbour,bneighbour)
+     !TEMP XXX
+     DEALLOCATE(nacv)
 
 
 END SUBROUTINE calc_aom_coup_nacv_single_phase
@@ -1455,7 +1493,7 @@ SUBROUTINE calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_rando
      routineP = moduleN//':'//routineN
 
      REAL(KIND=dp)                               :: S
-     integer                                     :: i, j, k, l, m, d, o, temp, ci
+     integer                                     :: i, j, k, l, m, d, o, temp
      real(kind=dp), allocatable                  :: PC_rvecs(:,:)
 
 
@@ -1589,6 +1627,7 @@ print *, "OFF-DIAGONAL"
                                              sh_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
                                              sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0, -scaling*S,dp)
 
+print *, "SEED", do_random
                                              call calc_dRSab(sh_env%Atp, sh_env%atomlist, sh_env%connlist1, &
                                              sh_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3), sh_env%scoeffs, &
                                              !nacv(1:3,orb*(k-1)+d,orb*(i-1)+m,(i-1)*atoms+1:i*atoms), &
@@ -1601,33 +1640,33 @@ print *, "OFF-DIAGONAL"
                                              sh_env%scoeffs, sh_env%aneighbour(:,:), sh_env%bneighbour(:,:), dR, &
                                              do_random, sh_env)
 
-open(20, file = 'nacv_multip.dat', status = 'old', position="append",action="write")
-write (20,*) "states", i, k
-write (20,*) "index acc", orb*(i-1)+m, "from to", (k-1)*atoms+1, k*atoms
-write (20,*) "NAC vector components on the nuclei of the acceptor"
+!open(20, file = 'nacv_multip.dat', status = 'old', position="append",action="write")
+write (*,*) "states", i, k
+write (*,*) "index acc", orb*(i-1)+m, "from to", (k-1)*atoms+1, k*atoms
+write (*,*) "NAC vector components on the nuclei of the acceptor"
 do temp=(k-1)*atoms+1, k*atoms
-write (20,*) sh_env%nacv(1,orb*(i-1)+m,temp), sh_env%nacv(2,orb*(i-1)+m,temp), sh_env%nacv(3,orb*(i-1)+m,temp)
+write (*,*) sh_env%nacv(1,orb*(i-1)+m,temp), sh_env%nacv(2,orb*(i-1)+m,temp), sh_env%nacv(3,orb*(i-1)+m,temp)
 end do
 
-write (20,*) "index donor", orb*(k-1)+d, "from to", (i-1)*atoms+1, i*atoms
-write (20,*) "NAC vector components on the nuclei of the donor"
+write (*,*) "index donor", orb*(k-1)+d, "from to", (i-1)*atoms+1, i*atoms
+write (*,*) "NAC vector components on the nuclei of the donor"
 do temp=(i-1)*atoms+1, i*atoms
-write (20,*) sh_env%nacv(1,orb*(k-1)+d,temp), sh_env%nacv(2,orb*(k-1)+d,temp), sh_env%nacv(3,orb*(k-1)+d,temp)
+write (*,*) sh_env%nacv(1,orb*(k-1)+d,temp), sh_env%nacv(2,orb*(k-1)+d,temp), sh_env%nacv(3,orb*(k-1)+d,temp)
 enddo 
-close(20)
+!close(20)
 
-                                            !TEST XXXX NACV TOT 
-                                             call calc_dRSab(sh_env%Atp, sh_env%atomlist, sh_env%connlist1, &
-                                             sh_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3), sh_env%scoeffs, &
-                                             sh_env%nacv_tot(1:3,orb*(k-1)+d,orb*(i-1)+m,(i-1)*atoms+1:i*atoms), &
-                                             sh_env%nacv_tot(1:3,orb*(i-1)+m,orb*(k-1)+d,(k-1)*atoms+1:k*atoms), &
-                                             !sh_env%nacv(1:3,orb*(k-1)+d,(i-1)*atoms+1:i*atoms), &
-                                             !sh_env%nacv(1:3,orb*(i-1)+m,(k-1)*atoms+1:k*atoms), &
-                                             sh_env%Btp, sh_env%atomlist, sh_env%connlist1, & 
-                                             sh_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3),&
-                                             !sh_env%scoeffs, sh_env%neighbourlist(k,i,:,:), sh_env%neighbourlist(i,k,:,:), dR, &
-                                             sh_env%scoeffs, sh_env%aneighbour(:,:), sh_env%bneighbour(:,:), dR, &
-                                             do_random, sh_env)
+                                           !!TEST XXXX NACV TOT 
+                                           ! call calc_dRSab(sh_env%Atp, sh_env%atomlist, sh_env%connlist1, &
+                                           ! sh_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3), sh_env%scoeffs, &
+                                           ! sh_env%nacv_tot(1:3,orb*(k-1)+d,orb*(i-1)+m,(i-1)*atoms+1:i*atoms), &
+                                           ! sh_env%nacv_tot(1:3,orb*(i-1)+m,orb*(k-1)+d,(k-1)*atoms+1:k*atoms), &
+                                           ! !sh_env%nacv(1:3,orb*(k-1)+d,(i-1)*atoms+1:i*atoms), &
+                                           ! !sh_env%nacv(1:3,orb*(i-1)+m,(k-1)*atoms+1:k*atoms), &
+                                           ! sh_env%Btp, sh_env%atomlist, sh_env%connlist1, & 
+                                           ! sh_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3),&
+                                           ! !sh_env%scoeffs, sh_env%neighbourlist(k,i,:,:), sh_env%neighbourlist(i,k,:,:), dR, &
+                                           ! sh_env%scoeffs, sh_env%aneighbour(:,:), sh_env%bneighbour(:,:), dR, &
+                                           ! do_random, sh_env)
 
 
                                         end do
@@ -1660,24 +1699,24 @@ OPEN (UNIT = 24, FILE = "nacv_formatted.dat", STATUS="NEW")
 
 do k=1, mol
    write(24,*) "state", k
-   do i=1,54 !! HARDCODEC NUMBER OF ACTIVE ATOMS XXX
+   do i=1,SIZE(sh_env%nacv,3) !! HARDCODEC NUMBER OF ACTIVE ATOMS XXX
      write(24,*)  sh_env%nacv(1,k,i), sh_env%nacv(2,k,i), sh_env%nacv(3,k,i)
   end do  
 end do
 close (24)
 
-!PRINT OUT TEST 
-OPEN (UNIT = 25, FILE = "nacv_formatted_total.dat", STATUS="NEW")
-
-do k=1, mol
-do i=1, mol
-   write(25,*) "state", k,i
-   do ci=1,54
-     write(25,*)  sh_env%nacv_tot(1,k,i, ci), sh_env%nacv_tot(2,k,i,ci), sh_env%nacv_tot(3,k,i, ci)
-  end do  
-end do
-end do
-close (25)
+!!PRINT OUT TEST 
+!OPEN (UNIT = 25, FILE = "nacv_formatted_total.dat", STATUS="NEW")
+!
+!do k=1, mol
+!do i=1, mol
+!   write(25,*) "state", k,i
+!   do ci=1,54
+!     write(25,*)  sh_env%nacv_tot(1,k,i, ci), sh_env%nacv_tot(2,k,i,ci), sh_env%nacv_tot(3,k,i, ci)
+!  end do  
+!end do
+!end do
+!close (25)
 END SUBROUTINE calc_aom_Xmatrix_elements_first_step
 
 
