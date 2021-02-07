@@ -586,15 +586,14 @@ SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_sect
 
 print *, "OUT sh_env%connlist1_d", sh_env%connlist1_d
  
-!  print *, "CALC DONOR PHASE STUFF"
-!  CALL calc_aom_coup_nacv_single_phase(sh_env, atoms_per_donor, sh_env%ext_elements_d, sh_env%pcoeffs_d, sh_env%scoeffs_d, &
-!                                          first_ind, sh_env%connlist1_d, sh_env%connlist2_d, sh_env%atomlist_d, &
-!                                          positions_com_tp, active_system_info)
-  print *, "CALC ACCEPTOR PHASE STUFF"
-  CALL calc_aom_coup_nacv_single_phase(sh_env, atoms_per_acceptor, sh_env%ext_elements_a, sh_env%pcoeffs_a, sh_env%scoeffs_a, &
-                                          second_ind, sh_env%connlist1_a, sh_env%connlist2_a, sh_env%atomlist_a, &
-                                          positions_com_tp, active_system_info)
-
+  print *, "CALC DONOR PHASE STUFF"
+  CALL calc_aom_coup_nacv_single_phase(sh_env, atoms_per_donor, sh_env%ext_elements_d, sh_env%pcoeffs_d, sh_env%scoeffs_d, &
+                                          first_ind, sh_env%connlist1_d, sh_env%connlist2_d, sh_env%atomlist_d, &
+                                          positions_com_tp, active_system_info, sh_env%nacv_dphase)
+!  print *, "CALC ACCEPTOR PHASE STUFF"
+!  CALL calc_aom_coup_nacv_single_phase(sh_env, atoms_per_acceptor, sh_env%ext_elements_a, sh_env%pcoeffs_a, sh_env%scoeffs_a, &
+!                                          second_ind, sh_env%connlist1_a, sh_env%connlist2_a, sh_env%atomlist_a, &
+!                                          positions_com_tp, active_system_info, sh_env%nacv_aphase)
 
 
    !> loop over states: not that it does not matter if donor molecules comes
@@ -839,18 +838,18 @@ print *, "IT'S HOLE COUPL", S
                          coeffbp, coeffbs, aneighbour, bneighbour, sh_env%dR, sh_env%do_random, sh_env)
 
 !open(20, file = 'nacv_multip.dat', status = 'old', position="append",action="write")
-write(20,*) "states", state1, state2
-write(20,*) "index acc", init_atom_mol_j, final_atom_mol_j
-write(20,*) 'NAC vector components on the nuclei of the acceptor'
+write(*,*) "states", state1, state2
+write(*,*) "index acc", init_atom_mol_j, final_atom_mol_j
+write(*,*) 'NAC vector components on the nuclei of the acceptor'
 do j=1,size(nacvb,2)
      !write(*,*) nacva(1,j),  nacva(2,j),  nacva(3,j)
-     write(20,*) nacvb(1,j),  nacvb(2,j),  nacvb(3,j)
+     write(*,*) nacvb(1,j),  nacvb(2,j),  nacvb(3,j)
 end do
 
-write(20,*) "index don", init_atom_mol_i, final_atom_mol_i
-write(20,*) 'NAC vector components on the nuclei of the donor'
+write(*,*) "index don", init_atom_mol_i, final_atom_mol_i
+write(*,*) 'NAC vector components on the nuclei of the donor'
 do j=1,size(nacva,2)
-     write(20,*) nacva(1,j),  nacva(2,j),  nacva(3,j)
+     write(*,*) nacva(1,j),  nacva(2,j),  nacva(3,j)
      !write(*,*) nacvb(1,j),  nacvb(2,j),  nacvb(3,j)
 end do
 !close(20)
@@ -897,7 +896,7 @@ END SUBROUTINE
 !**********************************************************************************
 SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeffs, phase_scoeffs, phase_ind, & 
                                            phase_connlist1, phase_connlist2, phase_atomlist, &
-                                           positions_com_tp, active_system_info)
+                                           positions_com_tp, active_system_info, nacv)
 
      TYPE(sh_env_type)                                   :: sh_env
      integer, intent(IN)                                 :: atoms
@@ -912,6 +911,7 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
      integer, dimension(:,:), POINTER, &
                                    INTENT(IN)            :: phase_connlist1, phase_connlist2
      INTEGER, DIMENSION(:), POINTER, INTENT(IN)          :: phase_atomlist
+     REAL(KIND=dp), DIMENSION(:,:,:), POINTER, INTENT(INOUT)  :: nacv    
   
    
      CHARACTER(len=*), PARAMETER             :: routineN ='calc_aom_coup_nacv_single_phase', &
@@ -924,7 +924,7 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE          :: pcoeffsrun 
      INTEGER, DIMENSION(:,:), ALLOCATABLE                :: bneighbour, aneighbour
      REAL(KIND=dp)                                       :: S 
-     REAL(KIND=dp), DIMENSION(:,:,:), ALLOCATABLE        :: nacv
+     !REAL(KIND=dp), DIMENSION(:,:,:), ALLOCATABLE        :: nacv
       
 
      !ALLOCATE(PC_allrvecs(5,mol*atoms))
@@ -938,8 +938,11 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
      !renormalized for each structure
      ALLOCATE(pcoeffsrun(atoms,SIZE(phase_ind))) 
 
-     !XXX IF MULTISTATE THEN
-     !atom list is the first dim
+     ! SG: both neighbour and nacv should be allocated alredy in
+     ! sh_initialization
+
+     !XXX IF MULTISTATE THEN 
+     !atom list is the first and second molecule of the dimer 
      ALLOCATE(aneighbour(0:size(phase_atomlist),0:atoms))
      ALLOCATE(bneighbour(0:size(phase_atomlist),0:atoms))
      aneighbour = 0
@@ -947,8 +950,8 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
      ! END IF XXXX
 
      !TEMP XXXX
-     ALLOCATE(nacv(3,SIZE(phase_ind), SIZE(phase_ind)*atoms))
-     nacv=0.0_dp
+     !ALLOCATE(nacv(3,SIZE(phase_ind), SIZE(phase_ind)*atoms))
+     !nacv=0.0_dp
 
 print *, "NETER NEW SINGLE PHASE SUB"
      !ALLOCATE(coeffap(atoms))
@@ -1023,7 +1026,7 @@ print *, "NETER NEW SINGLE PHASE SUB"
                                                                                 sh_env%minao)
                      !end if
 
-                    
+                   ! TO DO: optimize with neighbouring list 
                    !only call overlap if neighbours list says so
 !                   if (sh_env%NN(i,k) == 1) then
                         ! we only do the upper diagonal to save time
@@ -1069,25 +1072,6 @@ enddo
 
                        end if !over the upper diag
 
-!                   !only call overlap if neighbours list says so
-!                   if (sh_env%NN(i,k) == 1) then
-!                        !first the diagonals
-!                        if (i == k) then
-!                             CALL diagonal_aom_elem(i,k,orb,itimes,sh_env)
-!                        !now the off-diagonals                         
-!                        else ! ( i != k)
-!                             CALL off_diagonal_aom_elem(sh_env,i,k,orb,itimes, atoms, &
-!                                  dR, S, do_random, cbar, scaling)
-!                        end if !(i!=k)
-!                   else !(NN(i,k) == 1
-!                        do d=1,orb
-!                             do m=1,orb
-!                                  !fill in elements of non-overlapping pairs with 0
-!                                  sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0, 0.0D0,dp)
-!                             end do
-!                        end do
-!                   end if !(NN(i,k) == 1
-
                end do !loop over k
  
               ! call calc_sab_pete(Atp, phase_connlist2, PC_rvecs)
@@ -1099,16 +1083,16 @@ enddo
 
      end do !loop over i
 
-!PRINT OUT TEST
-OPEN (UNIT = 27, FILE = "nacv_formatted-newsub.dat", STATUS="NEW")
-
-do k=1, SIZE(phase_ind)
-   write(27,*) "state", k
-   do i=1,atoms*SIZE(phase_ind) !! HARDCODEC NUMBER OF ACTIVE ATOMS XXX
-     write(27,*)  nacv(1,k,i), nacv(2,k,i), nacv(3,k,i)
-  end do
-end do
-close (27)
+!!PRINT OUT TEST
+!OPEN (UNIT = 27, FILE = "nacv_formatted-newsub.dat", STATUS="NEW")
+!
+!do k=1, SIZE(phase_ind)
+!   write(27,*) "state", k
+!   do i=1,atoms*SIZE(phase_ind) !! HARDCODEC NUMBER OF ACTIVE ATOMS XXX
+!     write(27,*)  nacv(1,k,i), nacv(2,k,i), nacv(3,k,i)
+!  end do
+!end do
+!close (27)
 
 
      DEALLOCATE(PC_rvecs) 
@@ -1116,7 +1100,7 @@ close (27)
      DEALLOCATE(pcoeffsrun)
      DEALLOCATE(aneighbour,bneighbour)
      !TEMP XXX
-     DEALLOCATE(nacv)
+     !DEALLOCATE(nacv)
 
 
 END SUBROUTINE calc_aom_coup_nacv_single_phase
@@ -1695,15 +1679,15 @@ enddo
      DEALLOCATE(PC_rvecs)
 
 !PRINT OUT TEST 
-OPEN (UNIT = 24, FILE = "nacv_formatted.dat", STATUS="NEW")
+!OPEN (UNIT = 24, FILE = "nacv_formatted.dat", STATUS="NEW")
 
-do k=1, mol
-   write(24,*) "state", k
-   do i=1,SIZE(sh_env%nacv,3) !! HARDCODEC NUMBER OF ACTIVE ATOMS XXX
-     write(24,*)  sh_env%nacv(1,k,i), sh_env%nacv(2,k,i), sh_env%nacv(3,k,i)
-  end do  
-end do
-close (24)
+!do k=1, mol
+!   write(24,*) "state", k
+!   do i=1,SIZE(sh_env%nacv,3) !! HARDCODEC NUMBER OF ACTIVE ATOMS XXX
+!     write(24,*)  sh_env%nacv(1,k,i), sh_env%nacv(2,k,i), sh_env%nacv(3,k,i)
+!  end do  
+!end do
+!close (24)
 
 !!PRINT OUT TEST 
 !OPEN (UNIT = 25, FILE = "nacv_formatted_total.dat", STATUS="NEW")

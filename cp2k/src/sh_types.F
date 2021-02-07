@@ -144,6 +144,9 @@ END TYPE adiab_nace_env_type
      integer, dimension(:,:), POINTER         :: connlist1_d, connlist2_d, & ! AOM connectivities of individual mols
                                                  connlist1_a, connlist2_a
      integer, dimension(:), ALLOCATABLE       :: ext_elements_d, ext_elements_a ! atomic number
+     !integer, dimension(:,:), POINTER         :: bneighbour_d, aneighbour_d
+     !integer, dimension(:,:), POINTER         :: bneighbour_a, aneighbour_a
+     REAL(KIND=dp), DIMENSION(:,:,:), POINTER :: nacv_dphase, nacv_aphase   ! off-diagonal gradient of aom Hamilton.
 
 !> AOM arrays
      REAL(KIND = dp), DIMENSION(:,:), POINTER :: rm_t,&        ! position step min 1
@@ -166,7 +169,7 @@ END TYPE adiab_nace_env_type
                                                  !A and B are donor and acceptor coordinates at different times  
                                                  Btp, siteenergies
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER :: nacv! off-diagonal gradient of aom Hamilton.
-     REAL(KIND=dp), DIMENSION(:,:,:,:), POINTER :: nacv_tot! off-diagonal gradient of aom Hamilton.
+     !REAL(KIND=dp), DIMENSION(:,:,:,:), POINTER :: nacv_tot! off-diagonal gradient of aom Hamilton.
      REAL(KIND=dp), dimension(:,:), POINTER   :: Stt, Stmt, Sttm, Stmtm, &
                                                  Stptp, Sttp, Stpt
      !> multiple time step

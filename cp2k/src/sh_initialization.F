@@ -463,6 +463,8 @@ CONTAINS
              c_val=file_name_s_psigma_S_S)
      CALL section_vals_val_get(coupling_section,"PPI_S_S_FILE_NAME",&
              c_val=file_name_s_ppi_S_S)
+
+     !!! XXXX THE FOLLOWING TWO SHOULD BE PHASE SPECIFIC
      !> Scaling factor Hab = scaling*Sab_bar
      CALL section_vals_val_get(coupling_section,"SCALING_FACTOR",&
              r_val=sh_env%scaling)
@@ -500,7 +502,7 @@ CONTAINS
      CALL read_listcoeff(listcoeff, ext_elements_a, active_logical, &
                          scoefftot_a, pcoefftot_a, atoms_per_acceptor) !acceptor
 
-     !get the first mol of the donor and the first of the acceptor 
+     !get the first mol of the donor and the first of the acceptor phase 
      init_atom_mol_d = sh_env%full_system_info(1,donor_index(1)) !just get the first donor
      final_atom_mol_d = sh_env%full_system_info(2,donor_index(1))
      atoms_per_mol_d = (final_atom_mol_d-init_atom_mol_d)+1
@@ -521,18 +523,35 @@ CONTAINS
         CPABORT("DEGENERACY IS NOT IMPLEMENTED FOR MULTI-PHASE")
       ENDIF
 
-
+     !norbitals must be 1: we have not implemented degeneracy in the ffollowing
      mat = norbitals*nadiab !> Size of the vectorial space where the wavefunctions are projected
      act_atoms = COUNT(sh_env%ext_pres) !> Numbers of active atoms
 
+     !_d represents the donor phase and _a the acceptor phase
+     !allocate(sh_env%aneighbour_d(0:atoms_per_mol_d,0:atoms_per_mol_d))
+     !allocate(sh_env%bneighbour_d(0:atoms_per_mol_d,0:atoms_per_mol_d))
+     !allocate(sh_env%aneighbour_a(0:atoms_per_mol_a,0:atoms_per_mol_a))
+     !allocate(sh_env%bneighbour_a(0:atoms_per_mol_a,0:atoms_per_mol_a))
+
+     ALLOCATE(sh_env%nacv_dphase(3,mat, mat*atoms_per_mol_d))
+     ALLOCATE(sh_env%nacv_aphase(3,mat, mat*atoms_per_mol_a))
+     sh_env%nacv_dphase = 0.0_dp
+     sh_env%nacv_aphase = 0.0_dp
+
+     !!> crds is an AOM arrays (xyz, atoms, tm-t-tp) the third dimension
+     !!indicates what time the coordinates refer to
+     allocate(sh_env%crds(3,act_atoms,3))
+     ALLOCATE(sh_env%NN(mat, mat))
+     allocate(sh_env%siteenergies(3,mat))  !COMMENT_SG: First dimension is not usefull
+     sh_env%siteenergies = 0.0_dp
+
+  
      !mol = nadiab ! CHANGE_AC
      !sh_env%atoms_per_site = aom_atoms ! CHANGE_AC
      !c = nadiab*aom_atoms !> Numbers of active atoms
 
      !ALLOCATE(sh_env%elements(aom_atoms))
      !ALLOCATE(sh_env%connlist1(4,aom_atoms))
-     !allocate(sh_env%aneighbour(0:sh_env%atoms_per_site,0:sh_env%atoms_per_site))
-     !allocate(sh_env%bneighbour(0:sh_env%atoms_per_site,0:sh_env%atoms_per_site))
      !ALLOCATE(sh_env%pcoeffs(aom_atoms,norbitals))
      !ALLOCATE(sh_env%scoeffs(aom_atoms))
      !allocate(sh_env%pcoeffsrun(sh_env%atoms_per_site,mat,3)) !pcoeffsrun exists because the p-coefficients
@@ -566,12 +585,6 @@ CONTAINS
      !   ALLOCATE(sh_env%Stmtm(mat,mat))
      !end if
 
-     !!> crds is an AOM arrays (xyz, atoms, tm-t-tp) the third dimension
-     !!indicates what time the coordinates refer to
-     allocate(sh_env%crds(3,act_atoms,3))
-     ALLOCATE(sh_env%NN(mat, mat))
-     allocate(sh_env%siteenergies(3,mat))  !COMMENT_SG: First dimension is not usefull
-     sh_env%siteenergies = 0.0_dp
 
      !sh_env%At = 0.0_dp
      !sh_env%Atp = 0.0_dp
@@ -846,8 +859,8 @@ CONTAINS
      allocate(sh_env%Btm(4,sh_env%atoms_per_site))
      allocate(sh_env%siteenergies(3,mat))  !COMMENT_SG: First dimension is not usefull
      ALLOCATE(sh_env%nacv(3,mat, mat*aom_atoms))
-     ALLOCATE(sh_env%nacv_tot(3,mat, mat, c))    !TEST 
-     sh_env%nacv_tot = 0.0d0
+     !ALLOCATE(sh_env%nacv_tot(3,mat, mat, c))    !TEST 
+     !sh_env%nacv_tot = 0.0d0
      ALLOCATE(sh_env%rm_t(3, natom))
      ALLOCATE(sh_env%rm_tm(3, natom))
      ALLOCATE(sh_env%Stt(mat,mat))

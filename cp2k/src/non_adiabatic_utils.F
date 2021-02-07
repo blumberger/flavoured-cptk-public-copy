@@ -112,9 +112,10 @@ CONTAINS
 !> \note this is general for degeneracy and also for different num of atoms per mol
 !> \author AC [Edited SG]
 !**********************************************************************************
-SUBROUTINE calc_coms_and_nlist(mol, cutoff_sites, orb, crds, active_system_info, NN)
+SUBROUTINE calc_coms_and_nlist(cutoff_sites, orb, crds, active_system_info, NN)
 
-     INTEGER, INTENT(IN)                             :: mol, orb
+     !INTEGER, INTENT(IN)                             :: mol, orb
+     INTEGER, INTENT(IN)                             ::  orb
      REAL(KIND=dp), intent (IN)                      :: cutoff_sites
      REAL(KIND=dp), dimension(:,:,:), POINTER, &
                                       INTENT(IN)     :: crds !crds active atoms in COM ref
@@ -129,13 +130,13 @@ SUBROUTINE calc_coms_and_nlist(mol, cutoff_sites, orb, crds, active_system_info,
      REAL(KIND=dp)                                   :: dist
      REAL(KIND=dp), dimension(:,:), ALLOCATABLE      :: coms
   
-     allocate(coms(3,mol))
+     allocate(coms(3,SIZE(active_system_info,2)))
     
      !CALCULATE THE CENTER OF MASS
      !calculate CoMs at first timestep
      !coms(1 to 3,i) are the x, y and z coordinates of CoM of i
      coms = 0
-     do i=1,mol
+     do i=1,SIZE(active_system_info,2)
           !> counts the active atoms for each molecules to make it general
           atoms = (active_system_info(2,i) - active_system_info(1,i)) + 1
           do m=1,atoms
@@ -146,8 +147,8 @@ SUBROUTINE calc_coms_and_nlist(mol, cutoff_sites, orb, crds, active_system_info,
      end do
 
      !CONSTRUCT NEIGHBOURS LIST
-     do i=1,mol
-          do j=1,mol
+     do i=1,SIZE(active_system_info,2)
+          do j=1,SIZE(active_system_info,2)
                !> this is like a DOT_PRODUCT to calculate distance
                dist = ((coms(1,i) - coms(1,j))*(coms(1,i) &
                 - coms(1,j)) + (coms(2,i) - coms(2,j))*&
@@ -169,7 +170,7 @@ SUBROUTINE calc_coms_and_nlist(mol, cutoff_sites, orb, crds, active_system_info,
           end do
      end do
 
-do i=1,mol
+do i=1,SIZE(active_system_info,2)
 print *, "CONNECTIVITY", NN(i,:)
 end do
     deallocate(coms)

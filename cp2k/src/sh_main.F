@@ -281,7 +281,7 @@ CONTAINS
          enddo
 
          !> CALCULATE THE CENTER OF MASS AND CONSTRUCT NEIGHBOURS LIST
-         CALL calc_coms_and_nlist(mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, &
+         CALL calc_coms_and_nlist(sh_env%cutoff_sites, orb, crds=sh_env%crds, &
                                     active_system_info=sh_env%active_system_info, NN=sh_env%NN)
 
          ! Allocate neighbouring list just at the first step as Jacob suggested 
@@ -305,8 +305,20 @@ CONTAINS
      ELSE IF (sh_env%frozen_couplings_keyword) THEN 
          !> FROZEN COUPLINGS 
          CALL calc_frozen_H(sh_env, energies_tp, orb,positions_com_tp=positions_com_tp)
+
      ELSE IF (sh_env%multiphase_couplings_keyword) THEN 
          !> MULTI-PHASE COUPLINGS 
+         do coord=1,3
+            sh_env%crds(coord,:,1)   = 0.0D0 !time tm not used
+            sh_env%crds(coord,:,2)   = 0.0D0 !time t not used
+            sh_env%crds(coord,:,3)   = PACK(positions_com_tp(coord,:), sh_env%ext_pres)
+         enddo
+         
+         !> CALCULATE THE CENTER OF MASS AND CONSTRUCT NEIGHBOURS LIST
+         !this is needed to calculate the NN list
+         CALL calc_coms_and_nlist(sh_env%cutoff_sites, orb, crds=sh_env%crds, &
+                                    active_system_info=sh_env%active_system_info, NN=sh_env%NN)
+
          CALL calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, positions_com_tp)
 
      ELSE IF (sh_env%tresp_couplings_keyword) THEN 
@@ -319,7 +331,7 @@ CONTAINS
          
          !> CALCULATE THE CENTER OF MASS AND CONSTRUCT NEIGHBOURS LIST
          !this is needed to calculate the NN list
-         CALL calc_coms_and_nlist(mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, &
+         CALL calc_coms_and_nlist(sh_env%cutoff_sites, orb, crds=sh_env%crds, &
                                     active_system_info=sh_env%active_system_info, NN=sh_env%NN)
 
          CALL calc_tresp_coup(sh_env, energies_tp, orb, NN=sh_env%NN, positions_com_tp=positions_com_tp, &
@@ -782,7 +794,7 @@ print *, "ACTIVE STATE", active_state
 
 
          !> CALCULATE THE CENTER OF MASS AND CONSTRUCT (INTERMOLECULAR) NEIGHBOURS LIST
-         CALL calc_coms_and_nlist(mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, &
+         CALL calc_coms_and_nlist(sh_env%cutoff_sites, orb, crds=sh_env%crds, &
                                     active_system_info=sh_env%active_system_info, NN=sh_env%NN)
 
          !> CALCULATE THE HAMILTONIAN, THE STTP MATRIX AND THE NACV
@@ -804,6 +816,16 @@ print *, "ACTIVE STATE", active_state
 
      !> MULTI-PHASE COUPLINGS 
      ELSE IF (sh_env%multiphase_couplings_keyword) THEN 
+         do coord=1,3
+            sh_env%crds(coord,:,1) = 0.0D0 !time tm is not used 
+            sh_env%crds(coord,:,2) = 0.0D0 !time t is not used
+            sh_env%crds(coord,:,3) = PACK(positions_com_tp(coord,:), sh_env%ext_pres)
+         enddo
+
+         !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
+         CALL calc_coms_and_nlist(sh_env%cutoff_sites, orb, crds=sh_env%crds, &
+                                    active_system_info=sh_env%active_system_info, NN=sh_env%NN)
+
          CALL calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, positions_com_tp)
 
          !> TRESP COUPLINGS 
@@ -815,7 +837,7 @@ print *, "ACTIVE STATE", active_state
          enddo
 
          !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
-         CALL calc_coms_and_nlist(mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, &
+         CALL calc_coms_and_nlist(sh_env%cutoff_sites, orb, crds=sh_env%crds, &
                                     active_system_info=sh_env%active_system_info, NN=sh_env%NN)
 
          CALL calc_tresp_coup(sh_env, energies_tp, orb, NN=sh_env%NN, positions_com_tp=positions_com_tp, &
