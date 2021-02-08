@@ -541,7 +541,7 @@ CONTAINS
      !!> crds is an AOM arrays (xyz, atoms, tm-t-tp) the third dimension
      !!indicates what time the coordinates refer to
      allocate(sh_env%crds(3,act_atoms,3))
-     ALLOCATE(sh_env%NN(mat, mat))
+     ALLOCATE(sh_env%NN(SIZE(sh_env%index_active_mols), SIZE(sh_env%index_active_mols)))
      allocate(sh_env%siteenergies(3,mat))  !COMMENT_SG: First dimension is not usefull
      sh_env%siteenergies = 0.0_dp
 

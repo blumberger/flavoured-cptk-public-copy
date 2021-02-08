@@ -117,7 +117,7 @@ SUBROUTINE calc_coms_and_nlist(cutoff_sites, orb, crds, active_system_info, NN)
      !INTEGER, INTENT(IN)                             :: mol, orb
      INTEGER, INTENT(IN)                             ::  orb
      REAL(KIND=dp), intent (IN)                      :: cutoff_sites
-     REAL(KIND=dp), dimension(:,:,:), POINTER, &
+     REAL(KIND=dp), dimension(:,:), POINTER, &
                                       INTENT(IN)     :: crds !crds active atoms in COM ref
      INTEGER, DIMENSION(:,:), ALLOCATABLE, &
                                       INTENT(IN)     :: active_system_info
@@ -127,21 +127,27 @@ SUBROUTINE calc_coms_and_nlist(cutoff_sites, orb, crds, active_system_info, NN)
      routineP = moduleN//':'//routineN
 
      integer                                         :: i, j, m, d, atoms
+     integer                                         :: init_atom_mol_i,final_atom_mol_i
      REAL(KIND=dp)                                   :: dist
      REAL(KIND=dp), dimension(:,:), ALLOCATABLE      :: coms
   
      allocate(coms(3,SIZE(active_system_info,2)))
-    
+   
+
      !CALCULATE THE CENTER OF MASS
      !calculate CoMs at first timestep
      !coms(1 to 3,i) are the x, y and z coordinates of CoM of i
      coms = 0
      do i=1,SIZE(active_system_info,2)
           !> counts the active atoms for each molecules to make it general
+ 
+          init_atom_mol_i = active_system_info(1,i)
+          final_atom_mol_i = active_system_info(2,i)
           atoms = (active_system_info(2,i) - active_system_info(1,i)) + 1
-          do m=1,atoms
+          ! loop over atoms
+          do m=init_atom_mol_i, final_atom_mol_i
                do d=1,3
-                    coms(d,i) = coms(d,i) + (crds(d,(i-1)*atoms + m,3))/atoms
+                    coms(d,i) = coms(d,i) + (crds(d,m))/atoms
                end do
           end do
      end do
