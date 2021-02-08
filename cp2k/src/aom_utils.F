@@ -512,9 +512,11 @@ SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_sect
      REAL(KIND=dp), DIMENSION(:), ALLOCATABLE  :: coeffap, coeffbp
      REAL(KIND=dp), DIMENSION(:), ALLOCATABLE  :: coeffas, coeffbs
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE  :: nacva, nacvb
-     REAL(KIND=dp)                            :: S
+     REAL(KIND=dp)                            :: S, mol1, mol2
      INTEGER, DIMENSION(:,:), ALLOCATABLE      ::  bneighbour, aneighbour
-     integer                                   :: atoms_per_donor, atoms_per_acceptor
+     REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE  :: Sab_list_dphase
+     REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE  :: Sab_list_aphase
+     integer                                   :: atoms_per_donor, atoms_per_acceptor, temp, count_
 
 
      NULLIFY(site_energy_section,ct_block)
@@ -589,12 +591,20 @@ print *, "OUT sh_env%connlist1_d", sh_env%connlist1_d
   print *, "CALC DONOR PHASE STUFF"
   CALL calc_aom_coup_nacv_single_phase(sh_env, atoms_per_donor, sh_env%ext_elements_d, sh_env%pcoeffs_d, sh_env%scoeffs_d, &
                                           first_ind, sh_env%connlist1_d, sh_env%connlist2_d, sh_env%atomlist_d, &
-                                          positions_com_tp, active_system_info, sh_env%nacv_dphase)
-!  print *, "CALC ACCEPTOR PHASE STUFF"
-!  CALL calc_aom_coup_nacv_single_phase(sh_env, atoms_per_acceptor, sh_env%ext_elements_a, sh_env%pcoeffs_a, sh_env%scoeffs_a, &
-!                                          second_ind, sh_env%connlist1_a, sh_env%connlist2_a, sh_env%atomlist_a, &
-!                                          positions_com_tp, active_system_info, sh_env%nacv_aphase)
+                                          positions_com_tp, active_system_info, sh_env%nacv_dphase, Sab_list_dphase)
+  print *, "CALC ACCEPTOR PHASE STUFF"
+  CALL calc_aom_coup_nacv_single_phase(sh_env, atoms_per_acceptor, sh_env%ext_elements_a, sh_env%pcoeffs_a, sh_env%scoeffs_a, &
+                                          second_ind, sh_env%connlist1_a, sh_env%connlist2_a, sh_env%atomlist_a, &
+                                          positions_com_tp, active_system_info, sh_env%nacv_aphase, Sab_list_aphase)
 
+!TEMP XXX
+do temp=1, SIZE(Sab_list_dphase,2)
+print *, "Sab_list", Sab_list_dphase(:, temp)
+enddo
+
+do temp=1, SIZE(Sab_list_aphase,2)
+print *, "Sab_list", Sab_list_aphase(:, temp)
+enddo
 
    !> loop over states: not that it does not matter if donor molecules comes
    !after acceptor in the xyz or viceversa, or the molecules are DDDAAA or ADADA
@@ -610,6 +620,70 @@ print *, "OUT sh_env%connlist1_d", sh_env%connlist1_d
       end do
    end do
 
+   sh_env%H_tp(:,:) = cmplx(0.0D0, 0.0D0,dp)
+
+  !loop over states and fill-in the CT Hamiltonian
+  do state1=1, SIZE(CT_states_info(1,:))
+    !loop over upper diagonal
+       do state2=1, SIZE(CT_states_info(2,:)) 
+           !if connectivity allows XXXX
+           if (state2 >  state1) then
+               ! look at the acceptor couplings (the donor are the same)
+               if (CT_states_info(1,state1) .eq. CT_states_info(1,state2)) then 
+                   ! molecules interacting of the acceptor
+                   mol1 = CT_states_info(2,state1)
+                   mol2 = CT_states_info(2,state2)
+!print *, "states", state1, state2
+!print *, "STATE1",  CT_states_info(1,state1), CT_states_info(2,state1)
+!print *, "STATE2",  CT_states_info(1,state2), CT_states_info(2,state2)
+!print *, "intercating molecules", mol1, mol2
+                   do count_=1, SIZE(Sab_list_aphase,2) 
+                       if ((mol1 .eq. INT(Sab_list_aphase(1, count_))) .AND. (mol2 .eq. INT(Sab_list_aphase(2, count_)))) then 
+!print *, "Sab_list_aphase(3, count_)", Sab_list_aphase(3, count_)
+                          !Minus to be consistent with diago
+                          sh_env%H_tp(state1, state2) = cmplx(0.0D0, -sh_env%scaling*Sab_list_aphase(3, count_),dp) 
+                          EXIT
+                       end if
+                   end do 
+               ! look at the donor couplings (the acceptors are the same)
+               else if (CT_states_info(2,state1) .eq. CT_states_info(2,state2)) then 
+                   mol1 = CT_states_info(1,state1)
+                   mol2 = CT_states_info(1,state2)
+!print *, "states", state1, state2
+!print *, "STATE1",  CT_states_info(1,state1), CT_states_info(2,state1)
+!print *, "STATE2",  CT_states_info(1,state2), CT_states_info(2,state2)
+!print *, "intercating molecules", mol1, mol2
+                   do count_=1, SIZE(Sab_list_dphase,2) 
+                       if ((mol1 .eq. INT(Sab_list_dphase(1, count_))) .AND. (mol2 .eq. INT(Sab_list_dphase(2, count_)))) then 
+!print *, "Sab_list_aphase(3, count_)", Sab_list_dphase(3, count_)
+                          !Minus to be consistent with diago
+                          sh_env%H_tp(state1, state2) = cmplx(0.0D0, -sh_env%scaling*Sab_list_dphase(3, count_),dp) 
+                          EXIT
+                       end if
+                   end do 
+                
+               end if !state matching
+  
+           else !state
+                if (state2 .eq. state1) then
+                   !minus because we propagate -X
+                   sh_env%H_tp(state1, state2) = cmplx(0.0D0,(-energies_tp(state1)),dp) 
+                else 
+                   !simmetrization 
+                   sh_env%H_tp(state1, state2) = sh_env%H_tp(state2, state1)
+                end if 
+           end if
+        end do
+    end do
+          
+
+do state1=1, SIZE(sh_env%H_tp,1)
+   write (*,*) "H", -AIMAG(sh_env%H_tp(state1,:))
+end do
+!200 format(f8.6)
+
+print *, "START OTHER H"
+
    ! SG: It would be probably faster just to calculate couplings within the
    ! phases, store them (book-keeping) and the fill the H afterwards in a second
    ! loop. Even the normalization of the AOM coeff should be done once and then
@@ -624,7 +698,7 @@ print *, "OUT sh_env%connlist1_d", sh_env%connlist1_d
   do state1=1, SIZE(CT_states_info(1,:))
     !loop over upper diagonal
        do state2=1, SIZE(CT_states_info(2,:)) 
-print *, "states", state1, state2
+!print *, "states", state1, state2
            !if connectivity allows XXXX
            if (state2 >  state1) then 
 !print *, "STATE1",  CT_states_info(1,state1), CT_states_info(2,state1)
@@ -676,7 +750,7 @@ print *, "states", state1, state2
                              S, Btp, sh_env%connlist2_a, coeffbp)
 
                    sh_env%H_tp(state1, state2) = cmplx(0.0D0, -sh_env%scaling*S,dp) !Minus to be consistent with diago
-print *, "IT'S ELECTR COUPL", S
+!print *, "IT'S ELECTR COUPL", S
 
                    ALLOCATE(aneighbour(0:size(sh_env%atomlist_a),0:atoms_per_mol_i)) !atom list is the first dim
                    ALLOCATE(bneighbour(0:size(sh_env%atomlist_a),0:atoms_per_mol_j)) !atom list is the first dim
@@ -712,22 +786,22 @@ print *, "IT'S ELECTR COUPL", S
                          nacva, nacvb, Btp, sh_env%atomlist_a, sh_env%connlist1_a, &
                          coeffbp, coeffbs, aneighbour, bneighbour, sh_env%dR, sh_env%do_random, sh_env)
 
-!open(20, file = 'nacv_multip_ap.dat', status = 'old', position="append",action="write")
-write(20,*) "states", state1, state2
-write(20,*) "index acc", init_atom_mol_j, final_atom_mol_j
-write(20,*) 'NAC vector components on the nuclei of the acceptor'
-do j=1,size(nacvb,2)
-     !write(*,*) nacva(1,j),  nacva(2,j),  nacva(3,j)
-     write(20,*) nacvb(1,j),  nacvb(2,j),  nacvb(3,j)
-end do
-
-write(20,*) "index don", init_atom_mol_i, final_atom_mol_i
-write(20,*) 'NAC vector components on the nuclei of the donor'
-do j=1,size(nacva,2)
-     write(20,*) nacva(1,j),  nacva(2,j),  nacva(3,j)
-     !write(*,*) nacvb(1,j),  nacvb(2,j),  nacvb(3,j)
-end do
-!close(20)
+!!open(20, file = 'nacv_multip_ap.dat', status = 'old', position="append",action="write")
+!write(20,*) "states", state1, state2
+!write(20,*) "index acc", init_atom_mol_j, final_atom_mol_j
+!write(20,*) 'NAC vector components on the nuclei of the acceptor'
+!do j=1,size(nacvb,2)
+!     !write(*,*) nacva(1,j),  nacva(2,j),  nacva(3,j)
+!     write(20,*) nacvb(1,j),  nacvb(2,j),  nacvb(3,j)
+!end do
+!
+!write(20,*) "index don", init_atom_mol_i, final_atom_mol_i
+!write(20,*) 'NAC vector components on the nuclei of the donor'
+!do j=1,size(nacva,2)
+!     write(20,*) nacva(1,j),  nacva(2,j),  nacva(3,j)
+!     !write(*,*) nacvb(1,j),  nacvb(2,j),  nacvb(3,j)
+!end do
+!!close(20)
 
 
                    DEALLOCATE(aneighbour, bneighbour)
@@ -800,7 +874,7 @@ end do
                              S, Btp, sh_env%connlist2_d, coeffbp)
 
                    sh_env%H_tp(state1, state2) = cmplx(0.0D0, -sh_env%scaling*S,dp) !Minus consistent with diagonals
-print *, "IT'S HOLE COUPL", S
+!print *, "IT'S HOLE COUPL", S
   
                !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                    ALLOCATE(aneighbour(0:size(sh_env%atomlist_d),0:atoms_per_mol_i)) !atom list is the first dim
@@ -837,22 +911,22 @@ print *, "IT'S HOLE COUPL", S
                          nacva, nacvb, Btp, sh_env%atomlist_d, sh_env%connlist1_d, &
                          coeffbp, coeffbs, aneighbour, bneighbour, sh_env%dR, sh_env%do_random, sh_env)
 
-!open(20, file = 'nacv_multip.dat', status = 'old', position="append",action="write")
-write(*,*) "states", state1, state2
-write(*,*) "index acc", init_atom_mol_j, final_atom_mol_j
-write(*,*) 'NAC vector components on the nuclei of the acceptor'
-do j=1,size(nacvb,2)
-     !write(*,*) nacva(1,j),  nacva(2,j),  nacva(3,j)
-     write(*,*) nacvb(1,j),  nacvb(2,j),  nacvb(3,j)
-end do
-
-write(*,*) "index don", init_atom_mol_i, final_atom_mol_i
-write(*,*) 'NAC vector components on the nuclei of the donor'
-do j=1,size(nacva,2)
-     write(*,*) nacva(1,j),  nacva(2,j),  nacva(3,j)
-     !write(*,*) nacvb(1,j),  nacvb(2,j),  nacvb(3,j)
-end do
-!close(20)
+!!open(20, file = 'nacv_multip.dat', status = 'old', position="append",action="write")
+!write(*,*) "states", state1, state2
+!write(*,*) "index acc", init_atom_mol_j, final_atom_mol_j
+!write(*,*) 'NAC vector components on the nuclei of the acceptor'
+!do j=1,size(nacvb,2)
+!     !write(*,*) nacva(1,j),  nacva(2,j),  nacva(3,j)
+!     write(*,*) nacvb(1,j),  nacvb(2,j),  nacvb(3,j)
+!end do
+!
+!write(*,*) "index don", init_atom_mol_i, final_atom_mol_i
+!write(*,*) 'NAC vector components on the nuclei of the donor'
+!do j=1,size(nacva,2)
+!     write(*,*) nacva(1,j),  nacva(2,j),  nacva(3,j)
+!     !write(*,*) nacvb(1,j),  nacvb(2,j),  nacvb(3,j)
+!end do
+!!close(20)
 
 
                    DEALLOCATE(aneighbour, bneighbour)
@@ -863,7 +937,7 @@ end do
                    DEALLOCATE(coeffap, coeffbp)        
 
                else
-                   print *, "NOT INTERACTING"
+!                   print *, "NOT INTERACTING"
                end if
 !print *, "index don", init_atom_mol_i, final_atom_mol_i
 !print*, "index acc", init_atom_mol_j, final_atom_mol_j
@@ -880,13 +954,16 @@ end do
      end do
   end do
 
-!do state1=1, SIZE(sh_env%H_tp,1)
-!   print *, "H", -AIMAG(sh_env%H_tp(state1,:))
-!end do
+do state1=1, SIZE(sh_env%H_tp,1)
+   write (*,*) "H", -AIMAG(sh_env%H_tp(state1,:))
+end do
+!300 format(f8.6)
 
    DEALLOCATE(CT_states_info) 
    DEALLOCATE(first_ind)
    DEALLOCATE(second_ind)
+   DEALLOCATE(Sab_list_dphase)
+   DEALLOCATE(Sab_list_aphase)
 
 END SUBROUTINE
 
@@ -896,13 +973,13 @@ END SUBROUTINE
 !**********************************************************************************
 SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeffs, phase_scoeffs, phase_ind, & 
                                            phase_connlist1, phase_connlist2, phase_atomlist, &
-                                           positions_com_tp, active_system_info, nacv)
+                                           positions_com_tp, active_system_info, nacv, Sab_list)
 
      TYPE(sh_env_type)                                   :: sh_env
      integer, intent(IN)                                 :: atoms
      integer, dimension(:), ALLOCATABLE, INTENT(IN)      :: elements
      !integer, intent(in)                     :: mol!, orb
-     INTEGER, DIMENSION(:), ALLOCATABLE, INTENT(IN)      :: phase_ind
+     INTEGER, DIMENSION(:), ALLOCATABLE, INTENT(IN)      :: phase_ind !is active region-based
      INTEGER, DIMENSION(:,:), ALLOCATABLE, INTENT(IN)    :: active_system_info
      REAL(kind=dp), DIMENSION(:,:),POINTER, &
                                    INTENT(IN)            :: positions_com_tp
@@ -911,6 +988,8 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
      integer, dimension(:,:), POINTER, &
                                    INTENT(IN)            :: phase_connlist1, phase_connlist2
      INTEGER, DIMENSION(:), POINTER, INTENT(IN)          :: phase_atomlist
+     !INTEGER, DIMENSION(:,:), ALLOCATABLE, INTENT(OUT)   :: Interac_list 
+     REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT)    :: Sab_list
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER, INTENT(INOUT)  :: nacv    
   
    
@@ -918,12 +997,13 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
      routineP = moduleN//':'//routineN
 
      integer :: i, ind_i, init_atom_mol_i, final_atom_mol_i, atoms_per_mol_i 
-     integer :: k, ind_k, init_atom_mol_k, final_atom_mol_k, atoms_per_mol_k, temp
+     integer :: k, ind_k, init_atom_mol_k, final_atom_mol_k, atoms_per_mol_k!, temp
      real(kind=dp), allocatable, dimension(:,:)          :: Atp, Btp
      real(kind=dp), allocatable                          :: PC_rvecs(:,:)
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE          :: pcoeffsrun 
      INTEGER, DIMENSION(:,:), ALLOCATABLE                :: bneighbour, aneighbour
      REAL(KIND=dp)                                       :: S 
+     INTEGER                                             :: count_
      !REAL(KIND=dp), DIMENSION(:,:,:), ALLOCATABLE        :: nacv
       
 
@@ -953,10 +1033,27 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
      !ALLOCATE(nacv(3,SIZE(phase_ind), SIZE(phase_ind)*atoms))
      !nacv=0.0_dp
 
-print *, "NETER NEW SINGLE PHASE SUB"
-     !ALLOCATE(coeffap(atoms))
-     !ALLOCATE(coeffbp(atoms))
+print *, "ENTER NEW SINGLE PHASE SUB"
 
+     !variable storage of Sab (two molecules may get e.g. further apart and
+     !would not be stored if NN !=1) 
+     count_ = 0
+     do i=1,SIZE(phase_ind)     
+        do k=1, SIZE(phase_ind)
+              ! XXX TO ADD IF CONNECTIVITY THEN 
+!                   if (sh_env%NN(i,k) == 1) then
+           ! count only upper part
+           if (k>i) then
+              count_ = count_ + 1
+           end if
+        end do
+     end do 
+
+     ! XXX MUST BE DEALLOCATED SOMEWHERE XXX
+     ALLOCATE(Sab_list(3,count_))
+     !ALLOCATE(Interac_list(2,count_))
+
+     count_ = 0
      ! loop over the index of a single phase
      do i=1,SIZE(phase_ind)
                ind_i = phase_ind(i)
@@ -970,7 +1067,6 @@ print *, "NETER NEW SINGLE PHASE SUB"
                    CPABORT("There is a problem with the num. of atoms per mol")
                END IF
         
- 
                !create the array of all its atomic coordinates at tp
                !numerical factor converts from Angstroms into Bohr radii
                Atp(1,1:atoms_per_mol_i) = dble(elements) ! this is the donor of the pair
@@ -1031,16 +1127,17 @@ print *, "NETER NEW SINGLE PHASE SUB"
 !                   if (sh_env%NN(i,k) == 1) then
                         ! we only do the upper diagonal to save time
                         if (k>i) then 
-
+                           count_  = count_+1
                            call calc_sab(Atp, phase_connlist2, &
                                pcoeffsrun(1:atoms_per_mol_i, i), &
                                S, Btp, phase_connlist2, &
                                pcoeffsrun(1:atoms_per_mol_k, k),&
                                print_rvecs='yes', molA_index=i, molB_index=k)                           
-print *, "phase molecules", i, k
-print *, "IT'S COUPL", i, k, S
-
-print *, "SEED", sh_env%do_random
+print *, "IT'S COUPL", phase_ind(i), phase_ind(i), S
+                               Sab_list(1, count_) = dble(phase_ind(i))
+                               Sab_list(2, count_) = dble(phase_ind(k))
+                               Sab_list(3, count_) = dble(S)
+!print *, "SEED", sh_env%do_random
                           !IF MULTISTATE THEN 
                            call calc_dRSab(Atp, phase_atomlist, &
                            phase_connlist1, pcoeffsrun(1:atoms_per_mol_i,i), phase_scoeffs, &
@@ -1054,21 +1151,21 @@ print *, "SEED", sh_env%do_random
                          
                           !END IF
                          
-!open(20, file = 'nacv_multip_inter.dat', status = 'old',
-!position="append",action="write")
-write (*,*) "states", i, k
-write (*,*) "index acc", i, "from to", (k-1)*atoms+1, k*atoms
-write (*,*) "NAC vector components on the nuclei of the acceptor"
-do temp=(k-1)*atoms+1, k*atoms
-write (*,*) nacv(1, i,temp), nacv(2, i,temp), nacv(3, i,temp)
-end do
-
-write (*,*) "index donor", k, "from to", (i-1)*atoms+1, i*atoms
-write (*,*) "NAC vector components on the nuclei of the donor"
-do temp=(i-1)*atoms+1, i*atoms
-write (*,*) nacv(1, k,temp), nacv(2, k,temp), nacv(3, k ,temp)
-enddo
-!close(20)
+!!open(20, file = 'nacv_multip_inter.dat', status = 'old',
+!!position="append",action="write")
+!write (*,*) "states", i, k
+!write (*,*) "index acc", i, "from to", (k-1)*atoms+1, k*atoms
+!write (*,*) "NAC vector components on the nuclei of the acceptor"
+!do temp=(k-1)*atoms+1, k*atoms
+!write (*,*) nacv(1, i,temp), nacv(2, i,temp), nacv(3, i,temp)
+!end do
+!
+!write (*,*) "index donor", k, "from to", (i-1)*atoms+1, i*atoms
+!write (*,*) "NAC vector components on the nuclei of the donor"
+!do temp=(i-1)*atoms+1, i*atoms
+!write (*,*) nacv(1, k,temp), nacv(2, k,temp), nacv(3, k ,temp)
+!enddo
+!!close(20)
 
                        end if !over the upper diag
 
