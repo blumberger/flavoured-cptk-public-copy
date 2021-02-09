@@ -498,8 +498,8 @@ SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_sect
 
      INTEGER, DIMENSION(:,:), ALLOCATABLE      :: active_system_info
      INTEGER                                   :: state, total_states, state1, state2
-     INTEGER :: init_atom_mol_i, final_atom_mol_i, atoms_per_mol_i
-     INTEGER :: init_atom_mol_j, final_atom_mol_j, atoms_per_mol_j
+     !INTEGER :: init_atom_mol_i, final_atom_mol_i, atoms_per_mol_i
+     !INTEGER :: init_atom_mol_j, final_atom_mol_j, atoms_per_mol_j
      INTEGER                                   ::ind1, ind2
      INTEGER                                   :: nadiab, i, j!, temp
      !INTEGER                                   :: start_i,end_i,start_j,end_j
@@ -508,12 +508,12 @@ SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_sect
      INTEGER, DIMENSION(:), ALLOCATABLE        :: my_mol_index !this is the decomp index
      TYPE(section_vals_type), POINTER          :: site_energy_section, ct_block
      INTEGER, DIMENSION(:,:), ALLOCATABLE      :: CT_states_info
-     real(kind=dp), allocatable, dimension(:,:) :: Atp, Btp
-     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE  :: coeffap, coeffbp
-     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE  :: coeffas, coeffbs
-     REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE  :: nacva, nacvb
-     REAL(KIND=dp)                            :: S, mol1, mol2
-     INTEGER, DIMENSION(:,:), ALLOCATABLE      ::  bneighbour, aneighbour
+     !real(kind=dp), allocatable, dimension(:,:) :: Atp, Btp
+     !REAL(KIND=dp), DIMENSION(:), ALLOCATABLE  :: coeffap, coeffbp
+     !REAL(KIND=dp), DIMENSION(:), ALLOCATABLE  :: coeffas, coeffbs
+     !REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE  :: nacva, nacvb
+     REAL(KIND=dp)                            :: mol1, mol2
+     !INTEGER, DIMENSION(:,:), ALLOCATABLE      ::  bneighbour, aneighbour
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE  :: Sab_list_dphase
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE  :: Sab_list_aphase
      integer                                   :: atoms_per_donor, atoms_per_acceptor, temp, count_
@@ -586,7 +586,6 @@ SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_sect
    print *, "FIRST IND", first_ind
    print *, "SEC IND", second_ind
 
-print *, "OUT sh_env%connlist1_d", sh_env%connlist1_d
  
   print *, "CALC DONOR PHASE STUFF"
   CALL calc_aom_coup_nacv_single_phase(sh_env, atoms_per_donor, sh_env%ext_elements_d, sh_env%pcoeffs_d, sh_env%scoeffs_d, &
@@ -675,289 +674,289 @@ enddo
            end if
         end do
     end do
-          
+         
 
 do state1=1, SIZE(sh_env%H_tp,1)
    write (*,*) "H", -AIMAG(sh_env%H_tp(state1,:))
 end do
 !200 format(f8.6)
 
-print *, "START OTHER H"
-
-   ! SG: It would be probably faster just to calculate couplings within the
-   ! phases, store them (book-keeping) and the fill the H afterwards in a second
-   ! loop. Even the normalization of the AOM coeff should be done once and then
-   ! stored like in Jacob Hamiltonian.
-
-   sh_env%H_tp(:,:) = cmplx(0.0D0, 0.0D0,dp)
-
-!do state=1, SIZE(CT_states_info(1,:))
-!print *,  CT_states_info(1,state), CT_states_info(2,state)
-!enddo
-            
-  do state1=1, SIZE(CT_states_info(1,:))
-    !loop over upper diagonal
-       do state2=1, SIZE(CT_states_info(2,:)) 
-!print *, "states", state1, state2
-           !if connectivity allows XXXX
-           if (state2 >  state1) then 
-!print *, "STATE1",  CT_states_info(1,state1), CT_states_info(2,state1)
-!print *, "STATE2",  CT_states_info(1,state2), CT_states_info(2,state2)
-               if (CT_states_info(1,state1) .eq. CT_states_info(1,state2)) then 
-
-                   !> find index mol i (which is part of acceptor phase) of the pair
-                   init_atom_mol_i = active_system_info(1,CT_states_info(2,state1))
-                   final_atom_mol_i = active_system_info(2, CT_states_info(2,state1))
-                   atoms_per_mol_i = (final_atom_mol_i-init_atom_mol_i)+1
-           
-                   !> find index mol j (which is part of acceptor phase) of the pair
-                   init_atom_mol_j = active_system_info(1,CT_states_info(2,state2))
-                   final_atom_mol_j = active_system_info(2,CT_states_info(2,state2))
-                   atoms_per_mol_j = (final_atom_mol_j-init_atom_mol_j)+1
-!print *, "index don", init_atom_mol_i, final_atom_mol_i
-!print*, "index acc", init_atom_mol_j, final_atom_mol_j
-
-                    !! THIS CAN BE PUT IN ANOTHER SUBROUTINE      !!!!!!!!!!!!!!!!!!!!!!!!!!
-
-                   !> this allocation deallocation is maybe inefficient. Since
-                   !for a given phase molecules have the same number of atoms
-                   !the allocation could be done at the beginning
-                   ALLOCATE(Atp(4,atoms_per_mol_i))
-                   ALLOCATE(Btp(4,atoms_per_mol_j))                    
-                   ALLOCATE(coeffap(atoms_per_mol_i))
-                   ALLOCATE(coeffbp(atoms_per_mol_j))
-             
-                   Atp(1,1:atoms_per_mol_i) = dble(sh_env%ext_elements_a)
-                   Btp(1,1:atoms_per_mol_j) = dble(sh_env%ext_elements_a) 
-                   Atp(2:4,1:atoms_per_mol_i) = positions_com_tp(1:3, init_atom_mol_i:final_atom_mol_i)
-                   Btp(2:4,1:atoms_per_mol_j) = positions_com_tp(1:3, init_atom_mol_j:final_atom_mol_j)
-
-                   !Give donor phase coeffiecients to be normalized (note all
-                   !the coefficients could be normalizized only once in a single
-                   !loop)
-                   coeffap = sh_env%pcoeffs_a ! they are in-out of calc_sab
-                   coeffbp = sh_env%pcoeffs_a ! they are in-out of calc_sab
-                   !sh_env%connlist2_d is the same because i and j are the same
-                   !(donor phase)
-                   !connlistsa = sh_env%connlist2_a
-                   !connlistsd =  sh_env%connlist2_a
-                   !Normalisation of the coefficients without the s orbitals
-                   call calc_sab(Atp, sh_env%connlist2_a, coeffap)
-                   call calc_sab(Btp, sh_env%connlist2_a, coeffbp)
-
-                   !Calculate Sab
-                   call calc_sab(Atp, sh_env%connlist2_a, coeffap, & 
-                             S, Btp, sh_env%connlist2_a, coeffbp)
-
-                   sh_env%H_tp(state1, state2) = cmplx(0.0D0, -sh_env%scaling*S,dp) !Minus to be consistent with diago
-!print *, "IT'S ELECTR COUPL", S
-
-                   ALLOCATE(aneighbour(0:size(sh_env%atomlist_a),0:atoms_per_mol_i)) !atom list is the first dim
-                   ALLOCATE(bneighbour(0:size(sh_env%atomlist_a),0:atoms_per_mol_j)) !atom list is the first dim
-                   ALLOCATE(coeffas(atoms_per_mol_i))
-                   ALLOCATE(coeffbs(atoms_per_mol_j))
-                   ALLOCATE(nacva(3, atoms_per_mol_i))
-                   ALLOCATE(nacvb(3, atoms_per_mol_j))
-                   aneighbour = 0
-                   bneighbour = 0
-                   nacva = 0.0d0
-                   nacvb = 0.0d0
-
-
-                   call sab_screen_new(Atp, sh_env%atomlist_a, sh_env%connlist1_a, coeffap,&
-                         sh_env%atomlist_a, Btp, sh_env%atomlist_a, sh_env%connlist1_a, coeffbp,&
-                         aneighbour(:,1:atoms_per_mol_i), &
-                         bneighbour(:,1:atoms_per_mol_j), &
-                         sh_env%minao)
-
-!print *, "aneighbour"
-!do i=1,size(aneighbour,2)
-!    print*, aneighbour(:,i)
-!end do
-!print *, "bneighbour"
-!do i=1,size(bneighbour,2)
-!    print*, bneighbour(:,i)
-!end do
-                  
-                   coeffas = sh_env%scoeffs_a ! they are in-out of calc_dRSab
-                   coeffbs = sh_env%scoeffs_a ! they are in-out of calc_dRSab
-
-                   call calc_dRSab(Atp, sh_env%atomlist_a, sh_env%connlist1_a, coeffap, coeffas, &
-                         nacva, nacvb, Btp, sh_env%atomlist_a, sh_env%connlist1_a, &
-                         coeffbp, coeffbs, aneighbour, bneighbour, sh_env%dR, sh_env%do_random, sh_env)
-
-!!open(20, file = 'nacv_multip_ap.dat', status = 'old', position="append",action="write")
-!write(20,*) "states", state1, state2
-!write(20,*) "index acc", init_atom_mol_j, final_atom_mol_j
-!write(20,*) 'NAC vector components on the nuclei of the acceptor'
-!do j=1,size(nacvb,2)
-!     !write(*,*) nacva(1,j),  nacva(2,j),  nacva(3,j)
-!     write(20,*) nacvb(1,j),  nacvb(2,j),  nacvb(3,j)
-!end do
+!print *, "START OTHER H"
 !
-!write(20,*) "index don", init_atom_mol_i, final_atom_mol_i
-!write(20,*) 'NAC vector components on the nuclei of the donor'
-!do j=1,size(nacva,2)
-!     write(20,*) nacva(1,j),  nacva(2,j),  nacva(3,j)
-!     !write(*,*) nacvb(1,j),  nacvb(2,j),  nacvb(3,j)
-!end do
-!!close(20)
-
-
-                   DEALLOCATE(aneighbour, bneighbour)
-                   DEALLOCATE(coeffas, coeffbs)
-                   DEALLOCATE(nacva, nacvb)
-                   DEALLOCATE(Atp,Btp)        
-                   DEALLOCATE(coeffap, coeffbp)        
-                   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-               else if (CT_states_info(2,state1) .eq. CT_states_info(2,state2)) then 
-
-                   !> find index mol i (which is state i) of the pair
-                   init_atom_mol_i = active_system_info(1,CT_states_info(1,state1))
-                   final_atom_mol_i = active_system_info(2, CT_states_info(1,state1))
-                   atoms_per_mol_i = (final_atom_mol_i-init_atom_mol_i)+1
-           
-                   !> find index mol j (which is state j) of the pair
-                   init_atom_mol_j = active_system_info(1,CT_states_info(1,state2))
-                   final_atom_mol_j = active_system_info(2,CT_states_info(1,state2))
-                   atoms_per_mol_j = (final_atom_mol_j-init_atom_mol_j)+1
-!print *, "index don", init_atom_mol_i, final_atom_mol_i
-!print*, "index acc", init_atom_mol_j, final_atom_mol_j
-
-                    !! THIS CAN BE PUT IN ANOTHER SUBROUTINE      !!!!!!!!!!!!!!!!!!!!!!!!!!
-
-                   !> this allocation deallocation is maybe inefficient. Since
-                   !for a given phase molecules have the same number of atoms
-                   !the allocation could be done at the beginning
-                   ALLOCATE(Atp(4,atoms_per_mol_i))
-                   ALLOCATE(Btp(4,atoms_per_mol_j))                    
-                   ALLOCATE(coeffap(atoms_per_mol_i))
-                   ALLOCATE(coeffbp(atoms_per_mol_j))
-             
-                   Atp(1,1:atoms_per_mol_i) = dble(sh_env%ext_elements_d) !donor
-                   Btp(1,1:atoms_per_mol_j) = dble(sh_env%ext_elements_d) !donor
-                   Atp(2:4,1:atoms_per_mol_i) = positions_com_tp(1:3, init_atom_mol_i:final_atom_mol_i)
-                   Btp(2:4,1:atoms_per_mol_j) = positions_com_tp(1:3, init_atom_mol_j:final_atom_mol_j)
-
-                   !Give donor phase coeffiecients to be normalized (note all
-                   !the coefficients could be normalizized only once in a single
-                   !loop)
-                   coeffap = sh_env%pcoeffs_d ! they are in-out of calc_sab
-                   coeffbp = sh_env%pcoeffs_d ! they are in-out of calc_sab
-                   !sh_env%connlist2_d is the same because i and j are the same
-                   !(donor phase)
-                   !connlistsa = sh_env%connlist2_a
-                   !connlistsd =  sh_env%connlist2_a
-
-!do temp=1,SIZE(coeffap)
-!print *, "coeffap, coeffbp", coeffap(temp), coeffbp(temp)
-!enddo
-!do temp=1, SIZE(Atp,2)
-!print *, "xyza", Atp(1,temp), Atp(2,temp)
-!enddo
-!do temp=1, SIZE(Btp,2)
-!print *, "xyzb", Btp(1,temp), Btp(2,temp)
-!enddo
-
-                   !Normalisation of the coefficients without the s orbitals
-                   call calc_sab(Atp, sh_env%connlist2_d, coeffap) !donor
-                   call calc_sab(Btp, sh_env%connlist2_d, coeffbp) !donor
-
-!print *, "NORMALIZED"
-!do temp=1,SIZE(coeffap)
-!print *, "coeffap, coeffbp", coeffap(temp), coeffbp(temp)
-!enddo
-
-                   !Calculate Sab
-                   call calc_sab(Atp, sh_env%connlist2_d, coeffap, & 
-                             S, Btp, sh_env%connlist2_d, coeffbp)
-
-                   sh_env%H_tp(state1, state2) = cmplx(0.0D0, -sh_env%scaling*S,dp) !Minus consistent with diagonals
-!print *, "IT'S HOLE COUPL", S
-  
-               !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                   ALLOCATE(aneighbour(0:size(sh_env%atomlist_d),0:atoms_per_mol_i)) !atom list is the first dim
-                   ALLOCATE(bneighbour(0:size(sh_env%atomlist_d),0:atoms_per_mol_j)) !atom list is the first dim
-                   ALLOCATE(coeffas(atoms_per_mol_i))
-                   ALLOCATE(coeffbs(atoms_per_mol_j))
-                   ALLOCATE(nacva(3, atoms_per_mol_i))
-                   ALLOCATE(nacvb(3, atoms_per_mol_j))
-                   aneighbour = 0
-                   bneighbour = 0
-                   nacva = 0.0d0
-                   nacvb = 0.0d0
-
-
-                   call sab_screen_new(Atp, sh_env%atomlist_d, sh_env%connlist1_d, coeffap,&
-                         sh_env%atomlist_d, Btp, sh_env%atomlist_d, sh_env%connlist1_d, coeffbp,&
-                         aneighbour(:,1:atoms_per_mol_i), &
-                         bneighbour(:,1:atoms_per_mol_j), &
-                         sh_env%minao)
-
-!print *, "aneighbour"
-!do i=1,size(aneighbour,2)
-!    print*, aneighbour(:,i)
-!end do
-!print *, "bneighbour"
-!do i=1,size(bneighbour,2)
-!    print*, bneighbour(:,i)
-!end do
-                  
-                   coeffas = sh_env%scoeffs_d ! they are in-out of calc_dRSab
-                   coeffbs = sh_env%scoeffs_d ! they are in-out of calc_dRSab
-
-                   call calc_dRSab(Atp, sh_env%atomlist_d, sh_env%connlist1_d, coeffap, coeffas, &
-                         nacva, nacvb, Btp, sh_env%atomlist_d, sh_env%connlist1_d, &
-                         coeffbp, coeffbs, aneighbour, bneighbour, sh_env%dR, sh_env%do_random, sh_env)
-
-!!open(20, file = 'nacv_multip.dat', status = 'old', position="append",action="write")
-!write(*,*) "states", state1, state2
-!write(*,*) "index acc", init_atom_mol_j, final_atom_mol_j
-!write(*,*) 'NAC vector components on the nuclei of the acceptor'
-!do j=1,size(nacvb,2)
-!     !write(*,*) nacva(1,j),  nacva(2,j),  nacva(3,j)
-!     write(*,*) nacvb(1,j),  nacvb(2,j),  nacvb(3,j)
-!end do
+!   ! SG: It would be probably faster just to calculate couplings within the
+!   ! phases, store them (book-keeping) and the fill the H afterwards in a second
+!   ! loop. Even the normalization of the AOM coeff should be done once and then
+!   ! stored like in Jacob Hamiltonian.
 !
-!write(*,*) "index don", init_atom_mol_i, final_atom_mol_i
-!write(*,*) 'NAC vector components on the nuclei of the donor'
-!do j=1,size(nacva,2)
-!     write(*,*) nacva(1,j),  nacva(2,j),  nacva(3,j)
-!     !write(*,*) nacvb(1,j),  nacvb(2,j),  nacvb(3,j)
+!   sh_env%H_tp(:,:) = cmplx(0.0D0, 0.0D0,dp)
+!
+!!do state=1, SIZE(CT_states_info(1,:))
+!!print *,  CT_states_info(1,state), CT_states_info(2,state)
+!!enddo
+!            
+!  do state1=1, SIZE(CT_states_info(1,:))
+!    !loop over upper diagonal
+!       do state2=1, SIZE(CT_states_info(2,:)) 
+!!print *, "states", state1, state2
+!           !if connectivity allows XXXX
+!           if (state2 >  state1) then 
+!!print *, "STATE1",  CT_states_info(1,state1), CT_states_info(2,state1)
+!!print *, "STATE2",  CT_states_info(1,state2), CT_states_info(2,state2)
+!               if (CT_states_info(1,state1) .eq. CT_states_info(1,state2)) then 
+!
+!                   !> find index mol i (which is part of acceptor phase) of the pair
+!                   init_atom_mol_i = active_system_info(1,CT_states_info(2,state1))
+!                   final_atom_mol_i = active_system_info(2, CT_states_info(2,state1))
+!                   atoms_per_mol_i = (final_atom_mol_i-init_atom_mol_i)+1
+!           
+!                   !> find index mol j (which is part of acceptor phase) of the pair
+!                   init_atom_mol_j = active_system_info(1,CT_states_info(2,state2))
+!                   final_atom_mol_j = active_system_info(2,CT_states_info(2,state2))
+!                   atoms_per_mol_j = (final_atom_mol_j-init_atom_mol_j)+1
+!!print *, "index don", init_atom_mol_i, final_atom_mol_i
+!!print*, "index acc", init_atom_mol_j, final_atom_mol_j
+!
+!                    !! THIS CAN BE PUT IN ANOTHER SUBROUTINE      !!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+!                   !> this allocation deallocation is maybe inefficient. Since
+!                   !for a given phase molecules have the same number of atoms
+!                   !the allocation could be done at the beginning
+!                   ALLOCATE(Atp(4,atoms_per_mol_i))
+!                   ALLOCATE(Btp(4,atoms_per_mol_j))                    
+!                   ALLOCATE(coeffap(atoms_per_mol_i))
+!                   ALLOCATE(coeffbp(atoms_per_mol_j))
+!             
+!                   Atp(1,1:atoms_per_mol_i) = dble(sh_env%ext_elements_a)
+!                   Btp(1,1:atoms_per_mol_j) = dble(sh_env%ext_elements_a) 
+!                   Atp(2:4,1:atoms_per_mol_i) = positions_com_tp(1:3, init_atom_mol_i:final_atom_mol_i)
+!                   Btp(2:4,1:atoms_per_mol_j) = positions_com_tp(1:3, init_atom_mol_j:final_atom_mol_j)
+!
+!                   !Give donor phase coeffiecients to be normalized (note all
+!                   !the coefficients could be normalizized only once in a single
+!                   !loop)
+!                   coeffap = sh_env%pcoeffs_a ! they are in-out of calc_sab
+!                   coeffbp = sh_env%pcoeffs_a ! they are in-out of calc_sab
+!                   !sh_env%connlist2_d is the same because i and j are the same
+!                   !(donor phase)
+!                   !connlistsa = sh_env%connlist2_a
+!                   !connlistsd =  sh_env%connlist2_a
+!                   !Normalisation of the coefficients without the s orbitals
+!                   call calc_sab(Atp, sh_env%connlist2_a, coeffap)
+!                   call calc_sab(Btp, sh_env%connlist2_a, coeffbp)
+!
+!                   !Calculate Sab
+!                   call calc_sab(Atp, sh_env%connlist2_a, coeffap, & 
+!                             S, Btp, sh_env%connlist2_a, coeffbp)
+!
+!                   sh_env%H_tp(state1, state2) = cmplx(0.0D0, -sh_env%scaling*S,dp) !Minus to be consistent with diago
+!!print *, "IT'S ELECTR COUPL", S
+!
+!                   ALLOCATE(aneighbour(0:size(sh_env%atomlist_a),0:atoms_per_mol_i)) !atom list is the first dim
+!                   ALLOCATE(bneighbour(0:size(sh_env%atomlist_a),0:atoms_per_mol_j)) !atom list is the first dim
+!                   ALLOCATE(coeffas(atoms_per_mol_i))
+!                   ALLOCATE(coeffbs(atoms_per_mol_j))
+!                   ALLOCATE(nacva(3, atoms_per_mol_i))
+!                   ALLOCATE(nacvb(3, atoms_per_mol_j))
+!                   aneighbour = 0
+!                   bneighbour = 0
+!                   nacva = 0.0d0
+!                   nacvb = 0.0d0
+!
+!
+!                   call sab_screen_new(Atp, sh_env%atomlist_a, sh_env%connlist1_a, coeffap,&
+!                         sh_env%atomlist_a, Btp, sh_env%atomlist_a, sh_env%connlist1_a, coeffbp,&
+!                         aneighbour(:,1:atoms_per_mol_i), &
+!                         bneighbour(:,1:atoms_per_mol_j), &
+!                         sh_env%minao)
+!
+!!print *, "aneighbour"
+!!do i=1,size(aneighbour,2)
+!!    print*, aneighbour(:,i)
+!!end do
+!!print *, "bneighbour"
+!!do i=1,size(bneighbour,2)
+!!    print*, bneighbour(:,i)
+!!end do
+!                  
+!                   coeffas = sh_env%scoeffs_a ! they are in-out of calc_dRSab
+!                   coeffbs = sh_env%scoeffs_a ! they are in-out of calc_dRSab
+!
+!                   call calc_dRSab(Atp, sh_env%atomlist_a, sh_env%connlist1_a, coeffap, coeffas, &
+!                         nacva, nacvb, Btp, sh_env%atomlist_a, sh_env%connlist1_a, &
+!                         coeffbp, coeffbs, aneighbour, bneighbour, sh_env%dR, sh_env%do_random, sh_env)
+!
+!!!open(20, file = 'nacv_multip_ap.dat', status = 'old', position="append",action="write")
+!!write(20,*) "states", state1, state2
+!!write(20,*) "index acc", init_atom_mol_j, final_atom_mol_j
+!!write(20,*) 'NAC vector components on the nuclei of the acceptor'
+!!do j=1,size(nacvb,2)
+!!     !write(*,*) nacva(1,j),  nacva(2,j),  nacva(3,j)
+!!     write(20,*) nacvb(1,j),  nacvb(2,j),  nacvb(3,j)
+!!end do
+!!
+!!write(20,*) "index don", init_atom_mol_i, final_atom_mol_i
+!!write(20,*) 'NAC vector components on the nuclei of the donor'
+!!do j=1,size(nacva,2)
+!!     write(20,*) nacva(1,j),  nacva(2,j),  nacva(3,j)
+!!     !write(*,*) nacvb(1,j),  nacvb(2,j),  nacvb(3,j)
+!!end do
+!!!close(20)
+!
+!
+!                   DEALLOCATE(aneighbour, bneighbour)
+!                   DEALLOCATE(coeffas, coeffbs)
+!                   DEALLOCATE(nacva, nacvb)
+!                   DEALLOCATE(Atp,Btp)        
+!                   DEALLOCATE(coeffap, coeffbp)        
+!                   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+!               else if (CT_states_info(2,state1) .eq. CT_states_info(2,state2)) then 
+!
+!                   !> find index mol i (which is state i) of the pair
+!                   init_atom_mol_i = active_system_info(1,CT_states_info(1,state1))
+!                   final_atom_mol_i = active_system_info(2, CT_states_info(1,state1))
+!                   atoms_per_mol_i = (final_atom_mol_i-init_atom_mol_i)+1
+!           
+!                   !> find index mol j (which is state j) of the pair
+!                   init_atom_mol_j = active_system_info(1,CT_states_info(1,state2))
+!                   final_atom_mol_j = active_system_info(2,CT_states_info(1,state2))
+!                   atoms_per_mol_j = (final_atom_mol_j-init_atom_mol_j)+1
+!!print *, "index don", init_atom_mol_i, final_atom_mol_i
+!!print*, "index acc", init_atom_mol_j, final_atom_mol_j
+!
+!                    !! THIS CAN BE PUT IN ANOTHER SUBROUTINE      !!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+!                   !> this allocation deallocation is maybe inefficient. Since
+!                   !for a given phase molecules have the same number of atoms
+!                   !the allocation could be done at the beginning
+!                   ALLOCATE(Atp(4,atoms_per_mol_i))
+!                   ALLOCATE(Btp(4,atoms_per_mol_j))                    
+!                   ALLOCATE(coeffap(atoms_per_mol_i))
+!                   ALLOCATE(coeffbp(atoms_per_mol_j))
+!             
+!                   Atp(1,1:atoms_per_mol_i) = dble(sh_env%ext_elements_d) !donor
+!                   Btp(1,1:atoms_per_mol_j) = dble(sh_env%ext_elements_d) !donor
+!                   Atp(2:4,1:atoms_per_mol_i) = positions_com_tp(1:3, init_atom_mol_i:final_atom_mol_i)
+!                   Btp(2:4,1:atoms_per_mol_j) = positions_com_tp(1:3, init_atom_mol_j:final_atom_mol_j)
+!
+!                   !Give donor phase coeffiecients to be normalized (note all
+!                   !the coefficients could be normalizized only once in a single
+!                   !loop)
+!                   coeffap = sh_env%pcoeffs_d ! they are in-out of calc_sab
+!                   coeffbp = sh_env%pcoeffs_d ! they are in-out of calc_sab
+!                   !sh_env%connlist2_d is the same because i and j are the same
+!                   !(donor phase)
+!                   !connlistsa = sh_env%connlist2_a
+!                   !connlistsd =  sh_env%connlist2_a
+!
+!!do temp=1,SIZE(coeffap)
+!!print *, "coeffap, coeffbp", coeffap(temp), coeffbp(temp)
+!!enddo
+!!do temp=1, SIZE(Atp,2)
+!!print *, "xyza", Atp(1,temp), Atp(2,temp)
+!!enddo
+!!do temp=1, SIZE(Btp,2)
+!!print *, "xyzb", Btp(1,temp), Btp(2,temp)
+!!enddo
+!
+!                   !Normalisation of the coefficients without the s orbitals
+!                   call calc_sab(Atp, sh_env%connlist2_d, coeffap) !donor
+!                   call calc_sab(Btp, sh_env%connlist2_d, coeffbp) !donor
+!
+!!print *, "NORMALIZED"
+!!do temp=1,SIZE(coeffap)
+!!print *, "coeffap, coeffbp", coeffap(temp), coeffbp(temp)
+!!enddo
+!
+!                   !Calculate Sab
+!                   call calc_sab(Atp, sh_env%connlist2_d, coeffap, & 
+!                             S, Btp, sh_env%connlist2_d, coeffbp)
+!
+!                   sh_env%H_tp(state1, state2) = cmplx(0.0D0, -sh_env%scaling*S,dp) !Minus consistent with diagonals
+!!print *, "IT'S HOLE COUPL", S
+!  
+!               !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                   ALLOCATE(aneighbour(0:size(sh_env%atomlist_d),0:atoms_per_mol_i)) !atom list is the first dim
+!                   ALLOCATE(bneighbour(0:size(sh_env%atomlist_d),0:atoms_per_mol_j)) !atom list is the first dim
+!                   ALLOCATE(coeffas(atoms_per_mol_i))
+!                   ALLOCATE(coeffbs(atoms_per_mol_j))
+!                   ALLOCATE(nacva(3, atoms_per_mol_i))
+!                   ALLOCATE(nacvb(3, atoms_per_mol_j))
+!                   aneighbour = 0
+!                   bneighbour = 0
+!                   nacva = 0.0d0
+!                   nacvb = 0.0d0
+!
+!
+!                   call sab_screen_new(Atp, sh_env%atomlist_d, sh_env%connlist1_d, coeffap,&
+!                         sh_env%atomlist_d, Btp, sh_env%atomlist_d, sh_env%connlist1_d, coeffbp,&
+!                         aneighbour(:,1:atoms_per_mol_i), &
+!                         bneighbour(:,1:atoms_per_mol_j), &
+!                         sh_env%minao)
+!
+!!print *, "aneighbour"
+!!do i=1,size(aneighbour,2)
+!!    print*, aneighbour(:,i)
+!!end do
+!!print *, "bneighbour"
+!!do i=1,size(bneighbour,2)
+!!    print*, bneighbour(:,i)
+!!end do
+!                  
+!                   coeffas = sh_env%scoeffs_d ! they are in-out of calc_dRSab
+!                   coeffbs = sh_env%scoeffs_d ! they are in-out of calc_dRSab
+!
+!                   call calc_dRSab(Atp, sh_env%atomlist_d, sh_env%connlist1_d, coeffap, coeffas, &
+!                         nacva, nacvb, Btp, sh_env%atomlist_d, sh_env%connlist1_d, &
+!                         coeffbp, coeffbs, aneighbour, bneighbour, sh_env%dR, sh_env%do_random, sh_env)
+!
+!!!open(20, file = 'nacv_multip.dat', status = 'old', position="append",action="write")
+!!write(*,*) "states", state1, state2
+!!write(*,*) "index acc", init_atom_mol_j, final_atom_mol_j
+!!write(*,*) 'NAC vector components on the nuclei of the acceptor'
+!!do j=1,size(nacvb,2)
+!!     !write(*,*) nacva(1,j),  nacva(2,j),  nacva(3,j)
+!!     write(*,*) nacvb(1,j),  nacvb(2,j),  nacvb(3,j)
+!!end do
+!!
+!!write(*,*) "index don", init_atom_mol_i, final_atom_mol_i
+!!write(*,*) 'NAC vector components on the nuclei of the donor'
+!!do j=1,size(nacva,2)
+!!     write(*,*) nacva(1,j),  nacva(2,j),  nacva(3,j)
+!!     !write(*,*) nacvb(1,j),  nacvb(2,j),  nacvb(3,j)
+!!end do
+!!!close(20)
+!
+!
+!                   DEALLOCATE(aneighbour, bneighbour)
+!                   DEALLOCATE(coeffas, coeffbs)
+!                   DEALLOCATE(nacva, nacvb)
+!
+!                   DEALLOCATE(Atp,Btp)        
+!                   DEALLOCATE(coeffap, coeffbp)        
+!
+!               else
+!!                   print *, "NOT INTERACTING"
+!               end if
+!!print *, "index don", init_atom_mol_i, final_atom_mol_i
+!!print*, "index acc", init_atom_mol_j, final_atom_mol_j
+!           else 
+!                if (state2 .eq. state1) then
+!                   !minus because we propagate -X
+!                   sh_env%H_tp(state1, state2) = cmplx(0.0D0,(-energies_tp(state1)),dp) 
+!                else 
+!!print *, "LOWER PART"
+!                   sh_env%H_tp(state1, state2) = sh_env%H_tp(state2, state1)
+!                   
+!                end if 
+!           end if
+!     end do
+!  end do
+!
+!do state1=1, SIZE(sh_env%H_tp,1)
+!   write (*,*) "H", -AIMAG(sh_env%H_tp(state1,:))
 !end do
-!!close(20)
-
-
-                   DEALLOCATE(aneighbour, bneighbour)
-                   DEALLOCATE(coeffas, coeffbs)
-                   DEALLOCATE(nacva, nacvb)
-
-                   DEALLOCATE(Atp,Btp)        
-                   DEALLOCATE(coeffap, coeffbp)        
-
-               else
-!                   print *, "NOT INTERACTING"
-               end if
-!print *, "index don", init_atom_mol_i, final_atom_mol_i
-!print*, "index acc", init_atom_mol_j, final_atom_mol_j
-           else 
-                if (state2 .eq. state1) then
-                   !minus because we propagate -X
-                   sh_env%H_tp(state1, state2) = cmplx(0.0D0,(-energies_tp(state1)),dp) 
-                else 
-!print *, "LOWER PART"
-                   sh_env%H_tp(state1, state2) = sh_env%H_tp(state2, state1)
-                   
-                end if 
-           end if
-     end do
-  end do
-
-do state1=1, SIZE(sh_env%H_tp,1)
-   write (*,*) "H", -AIMAG(sh_env%H_tp(state1,:))
-end do
-!300 format(f8.6)
+!!300 format(f8.6)
 
    DEALLOCATE(CT_states_info) 
    DEALLOCATE(first_ind)
