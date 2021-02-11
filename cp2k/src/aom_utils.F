@@ -543,7 +543,6 @@ SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_sect
      ! some checks for the indeces are done in multi_block_energies_forces
      ! subroutine and could be repeated here   
      total_states = SIZE(donor_index)*SIZE(acceptor_index)
-     ALLOCATE(CT_states_info(2,total_states))
      IF (total_states .ne. nadiab) THEN
          CPABORT("NUMBER_DIABATIC_STATES DIFFERENT FROM N*N STATES")
      END IF
@@ -608,6 +607,7 @@ enddo
    !> loop over states: not that it does not matter if donor molecules comes
    !after acceptor in the xyz or viceversa, or the molecules are DDDAAA or ADADA
    !as the index of each molecule is referred to DECOMP file
+   ALLOCATE(CT_states_info(2,total_states))
    state = 0
    do i=1,SIZE(first_ind)
       ind1 = first_ind(i)

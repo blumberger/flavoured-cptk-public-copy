@@ -104,6 +104,7 @@ MODULE sh_main
                                              calc_coms_and_nlist,             &
                                              calc_tresp_coup,                 &
                                              !calc_tresp_coup_test,                 &
+                                             calcforces_smart_grad_multip,    &
                                              add_coulomb_energy_to_CT,        &
                                              calc_frozen_H,                   &
                                              calcforces_smart_grad,           &
@@ -310,7 +311,7 @@ CONTAINS
          !> MULTI-PHASE COUPLINGS 
          
          !> CALCULATE THE CENTER OF MASS AND CONSTRUCT NEIGHBOURS LIST
-         !this is needed to calculate the NN list
+         !this is needed to calculate the NN list (XXX not yet used)
          CALL calc_coms_and_nlist(sh_env%cutoff_sites, orb, crds=positions_com_tp, &
                                     active_system_info=sh_env%active_system_info, NN=sh_env%NN)
 
@@ -326,7 +327,6 @@ CONTAINS
 
          CALL calc_tresp_coup(sh_env, energies_tp, orb, NN=sh_env%NN, positions_com_tp=positions_com_tp, &
                              active_system_info=sh_env%active_system_info, tresp_charges=sh_env%tresp_charges)
-
 !TEST
          !CALL calc_tresp_coup_test(sh_env, energies_tp, orb, NN=sh_env%NN, positions_com_tp=positions_com_tp, &
          !                    active_system_info=sh_env%active_system_info, tresp_charges=sh_env%tresp_charges)
@@ -524,6 +524,13 @@ print *, "ACTIVE STATE", active_state
      ! MULTI-PHASE FORCES XXX
      ELSE IF (sh_env%multiphase_couplings_keyword) THEN
          IF (sh_env%multistate) THEN
+            ! we do not use convert_nacv here as the scaling
+            ! is directly done inside the routine
+            CALL calcforces_smart_grad_multip(adiab_section, instate=active_state, C=sh_env%C_tp, &
+                                        Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
+                                        ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
+                                        orb=orb, nacv_dphase=sh_env%nacv_dphase, nacv_aphase=sh_env%nacv_aphase, &
+                                        frozen_c=.TRUE. )
             !frozen Hamiltonian case and multi-phase (dimension of H larger than
             !number of active mols)
             CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=active_state, Fin=diagonal_F, &
@@ -808,6 +815,7 @@ print *, "ACTIVE STATE", active_state
      ELSE IF (sh_env%multiphase_couplings_keyword) THEN 
 
          !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
+         ! XXX the NN list is not yet employed for the speed-up
          CALL calc_coms_and_nlist(sh_env%cutoff_sites, orb, crds=positions_com_tp, &
                                     active_system_info=sh_env%active_system_info, NN=sh_env%NN)
 
