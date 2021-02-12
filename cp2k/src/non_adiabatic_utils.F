@@ -886,7 +886,9 @@ end subroutine calc_trsp_ab
 !         states. So this subrotine can handle the CT Hamiltonian with 
 !         (NdonorxNacceptor) states. However it cannot work with fluctuating 
 !         couplings becuase for now the off-diagonal forces are set to zero.
-!         Since couplings are frozen. 
+!         Since couplings are frozen.
+!  \note  Eventually this simplistic subroutine might be replaced by
+!         calcforces_smart_grad_multip
 !\author  SG
 !**********************************************************************************
 subroutine calcforces_frozenH(Hin, C, state, Fin, forces_adiab)
@@ -1035,7 +1037,8 @@ end subroutine calc_hop_nacv_frozen_H
 !> \author SG  
 !**********************************************************************************
 subroutine calcforces_smart_grad_multip(adiab_section, instate, C, Fin, forces_adiab, & 
-                  ext_pres, active_system_info, orb, nacv_dphase, nacv_aphase, frozen_c)
+                  ext_pres, active_system_info, orb, my_mol_index, scaling_C_donor, scaling_C_acceptor, &
+                  nacv_dphase, nacv_aphase, frozen_c)
 
         !per our full force expression derivation, this calculates the adiabatic forces
         !on each atom
@@ -1051,6 +1054,8 @@ subroutine calcforces_smart_grad_multip(adiab_section, instate, C, Fin, forces_a
         LOGICAL, OPTIONAL, INTENT(IN)                :: frozen_c
         REAL(KIND=dp), INTENT(in), DIMENSION(:,:,:)  :: nacv_dphase
         REAL(KIND=dp), INTENT(in), DIMENSION(:,:,:)  :: nacv_aphase
+        INTEGER, DIMENSION(:), ALLOCATABLE, INTENT(IN) :: my_mol_index
+        REAL(KIND = dp), INTENT(IN)                    ::  scaling_C_donor, scaling_C_acceptor
 
         CHARACTER(len=*), PARAMETER :: routineN ='calcforces_smart_grad_multip', &
                                routineP = moduleN//':'//routineN
@@ -1058,12 +1063,11 @@ subroutine calcforces_smart_grad_multip(adiab_section, instate, C, Fin, forces_a
         integer                                     :: i, j,  d!, m
         INTEGER                                     :: natom, nadiab
         INTEGER                                     :: num_mol, num_j, num_don, num_acc
-        REAL(KIND=dp)                               :: convert_grad_to_forces, scaling_C_donor, scaling_C_acceptor  
+        REAL(KIND=dp)                               :: convert_grad_to_forces
         LOGICAL                                     :: my_frozen_c, donor_phase, acceptor_phase
         INTEGER, DIMENSION(:), POINTER              :: donor_index, acceptor_index
         TYPE(section_vals_type), POINTER            :: site_energy_section, ct_block
-        INTEGER, DIMENSION(:), ALLOCATABLE        :: my_mol_index
-        INTEGER, DIMENSION(:,:), ALLOCATABLE      :: CT_states_info        
+        INTEGER, DIMENSION(:,:), ALLOCATABLE        :: CT_states_info        
         INTEGER                                   ::ind1, ind2, state, kalpha, num_molalpha, alpha, count_, k
         INTEGER, DIMENSION(:), ALLOCATABLE        :: first_ind, second_ind
         integer                                   :: atoms_per_donor, atoms_per_acceptor, total_states
@@ -1073,24 +1077,14 @@ subroutine calcforces_smart_grad_multip(adiab_section, instate, C, Fin, forces_a
 
         natom = SIZE(Fin,2)
 
-        !COMMENT_SG: This subroutine it will not work for degenerate states with
-        !multiple orbitals per site.
         !Note that Fin(d,j,i) is the array of diagonal forces and its dimension
                             !stops at the number of total force_evals
                             !considered. 
-        !The following subroutine may NOT work if orb !=1 (degeneracy). It needs
-        !testing.
-
-        ! Based on paper [Spencer16]: Spencer et al., J. Chem. Phys. 145, 064102 (2016)
-        ! Use Eq. (21) of paper [Spencer16]
-
+        !The following subroutine WILL NOT work if orb !=1 (degeneracy). 
 
         my_frozen_c = .FALSE.
         IF (PRESENT(frozen_c)) my_frozen_c = frozen_c
 
-        !IF (SIZE(active_system_info, 2) .ne. SIZE(Fin,3)) THEN
-        !    CPABORT("calcforces_smart_grad sub does not work with multi-state/multi-phase H")
-        !END IF 
        ! TOTAL number states
        CALL section_vals_val_get(adiab_section,"NUMBER_DIABATIC_STATES",&
                           i_val=nadiab)
@@ -1117,12 +1111,6 @@ subroutine calcforces_smart_grad_multip(adiab_section, instate, C, Fin, forces_a
        IF (orb .ne. 1) THEN
            CPABORT("DEGENERATE ORBITALS NOT IMPLEMENTED")
        END IF
-
-       !!WANGING XXXXXX HARDCODED  XXXXXX
-       !my_mol_index  = sh_env%index_active_mols
-       my_mol_index  = (/ 1, 2, 3, 4, 5, 6 /) !pass as input variable
-       scaling_C_donor = 1.0
-       scaling_C_acceptor = 1.0
 
        ALLOCATE(second_ind(SIZE(acceptor_index)))
        do i=1,SIZE(acceptor_index)
@@ -1171,9 +1159,9 @@ subroutine calcforces_smart_grad_multip(adiab_section, instate, C, Fin, forces_a
 
         do d=1,3                   ! sum of cartesian 
 print *, "DIMENSION", d
-           num_j = 0               ! active atom index
-           num_don = 0               ! active atom index
-           num_acc = 0               ! active atom index
+           num_j = 0               ! active atom index (not used)
+           num_don = 0               ! active atom donor
+           num_acc = 0               ! active atom acceptor 
            do j=1,natom            ! loop over all atoms
               forces_adiab(d,j) = 0.0D0
               donor_phase = .FALSE.
@@ -1188,7 +1176,7 @@ print *, "DIMENSION", d
                        EXIT 
                     END IF
                  end do
-                 num_j   = num_j + 1     !!! NOT GOOD FOR DOUBLE PHASE
+                 num_j   = num_j + 1     !not usefull num_j
                  !get atom numebr of donor anc acceptor
                  IF (ANY(first_ind==num_mol)) then
                      num_don = num_don + 1 
@@ -1203,22 +1191,16 @@ print *, "PHASE", num_don, num_acc, donor_phase, acceptor_phase
              
               !loop over all states for the diagonals
               do i=1,total_states 
-                   ! Diagonal term, it depends on the forces
-                   ! I assume that diagonal forces
-                   ! for two degenrate
-                   ! states are the same as for site energies
-                   !forces_adiab(d,j) = forces_adiab(d,j) + (abs(C(orb*(i-1)+m, orb*(instate-1)+m))**2)*Fin(d,j,i)
+                   ! Diagonal term, it depends on the two indeces basis
                    forces_adiab(d,j) = forces_adiab(d,j) +(abs(C(i,instate))**2)*Fin(d,j,i)
               end do
-print *, "DIAG CALCULATED"
              
               ! calculate off diagonal forces if
               ! couplings are not frozen
-              my_frozen_c = .FALSE.   !XXXXXX HARCODED XXXXX
               IF (.NOT. my_frozen_c) THEN
                  ! Of diagonal term, only for active atom j present in
                  ! molecule num_mol
-                 IF (ext_pres(j)) THEN
+                 IF (ext_pres(j)) THEN  !loop over active atoms
                         !IF (PRESENT(convert_nacv)) THEN
                         !   !> Forces in case of AOM formalism
                         !   convert_grad_to_forces = convert_nacv ! to convert the FOB NACV
@@ -1230,14 +1212,14 @@ print *, "DIAG CALCULATED"
                         !END IF
                   
                    IF (donor_phase) THEN 
-                    ! DONOR PHASE XXX
+                    ! DONOR PHASE 
                     DO k=1, SIZE(donor_index)  
                     !nmol to find XXX
-                      IF (k.ne.num_mol) THEN
+                      ind1 = first_ind(k)                      
+                      IF (ind1.ne.num_mol) THEN !first loop over donor mols
                         !get mol donor phase
-                        ind1 = first_ind(k)                      
 
-                        DO alpha=1,SIZE(acceptor_index)
+                        DO alpha=1,SIZE(acceptor_index) !second loop over acceptor mols
                            ind2 = second_ind(alpha)
  
                            !find the related CT index 
@@ -1245,7 +1227,6 @@ print *, "DIAG CALCULATED"
                               if ((ind1 .eq. CT_states_info(1,count_)) .AND. (ind2 .eq. CT_states_info(2,count_))) then 
                                   kalpha = CT_states_info(3, count_)
                               end if
-                              !! CHECK THIS XXXX IT DOES NOT WORK
                               if  ((num_mol .eq. CT_states_info(1,count_)) .AND. (ind2 .eq. CT_states_info(2,count_))) then
                                   num_molalpha = CT_states_info(3, count_)
                               end if
@@ -1258,7 +1239,7 @@ print *, "C(kalpha,instate))", C(kalpha,instate)
                                         
                            convert_grad_to_forces = -scaling_C_donor
                            forces_adiab(d,j) = forces_adiab(d,j) + &
-                              (C(num_molalpha,instate)*nacv_dphase(d, k, num_don)*C(kalpha,instate))*convert_grad_to_forces*2.0D0
+                              (nacv_dphase(d, k, num_don)*C(num_molalpha,instate)*C(kalpha,instate))*convert_grad_to_forces*2.0D0
                   
                             !forces_adiab(d,j) = forces_adiab(d,j) + &
                             !  (C(num_mol,instate)*nacv(d, i, num_j)*C(i,instate))*convert_grad_to_forces*2.0D0
@@ -1266,7 +1247,41 @@ print *, "C(kalpha,instate))", C(kalpha,instate)
                       ENDIF
                     END DO
                   ELSE IF (acceptor_phase) THEN     ! other phase
-print *, "TO DO ACCET"
+                    ! ACCEPTOR PHASE
+                    DO alpha=1, SIZE(acceptor_index)  
+                    !nmol to find
+                      ind2 = second_ind(alpha)                      
+                      IF (ind2 .ne.num_mol) THEN
+                        !get mol donor phase
+
+                        DO k=1,SIZE(donor_index)
+                           ind1 = first_ind(k)
+ 
+                           !find the related CT index 
+                           do count_=1, SIZE(CT_states_info,2)
+                              if ((ind1 .eq. CT_states_info(1,count_)) .AND. (ind2 .eq. CT_states_info(2,count_))) then 
+                                  kalpha = CT_states_info(3, count_)
+                              end if
+                              ! note the index investion wrt donor phase
+                              if  ((num_mol .eq. CT_states_info(2,count_)) .AND. (ind1 .eq. CT_states_info(1,count_))) then
+                                  ! this should be called knum_mol but I left the same variable name as before
+                                  num_molalpha = CT_states_info(3,count_) 
+                              end if
+                           end do
+print *, "ind1, ind2, kalpha", ind1, ind2, kalpha         
+print *, "ind1, num_mol, knum_mol",  ind1, num_mol, num_molalpha
+print *, "nacv_dphase(d, alpha, num_acc)", nacv_aphase(d, alpha, num_acc)
+print *, "C(num_molalpha,instate)", C(num_molalpha,instate) 
+print *, "C(kalpha,instate))", C(kalpha,instate)
+                                        
+                           convert_grad_to_forces = -scaling_C_acceptor
+                           forces_adiab(d,j) = forces_adiab(d,j) + &
+                              (nacv_aphase(d, alpha, num_acc)*C(num_molalpha,instate)*C(kalpha,instate))*& 
+                                                                                convert_grad_to_forces*2.0D0
+                  
+                        END DO 
+                      ENDIF
+                    END DO
                   END IF  
 
                  ENDIF ! active atoms

@@ -147,6 +147,7 @@ END TYPE adiab_nace_env_type
      !integer, dimension(:,:), POINTER         :: bneighbour_d, aneighbour_d
      !integer, dimension(:,:), POINTER         :: bneighbour_a, aneighbour_a
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER :: nacv_dphase, nacv_aphase   ! off-diagonal gradient of aom Hamilton.
+     REAL(KIND = dp)                          :: scaling_donor, scaling_acceptor
 
 !> AOM arrays
      REAL(KIND = dp), DIMENSION(:,:), POINTER :: rm_t,&        ! position step min 1
@@ -222,7 +223,7 @@ END TYPE adiab_nace_env_type
      REAL(KIND = dp), DIMENSION(:,:), POINTER :: forces_adiab, &     
                                                  forces_adiab_new
 !> index active molecules
-     INTEGER, DIMENSION(:), ALLOCATABLE           :: index_active_mols
+     INTEGER, DIMENSION(:), ALLOCATABLE       :: index_active_mols
 
 !> Use to store the present info in the future timestep
      REAL(KIND = dp), DIMENSION(:,:), POINTER     :: velocities_tp ! velocities step

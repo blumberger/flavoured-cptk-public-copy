@@ -681,6 +681,20 @@ CONTAINS
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
+    CALL keyword_create(keyword, name="SCALING_FACTOR_DONOR",&
+         description="Hab = C*Sab. This is the scaling C for the donor phase",&
+         usage="0.50D0*0.065190D0, HARTREE", type_of_var=real_t,&
+         unit_str="hartree")
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="SCALING_FACTOR_ACCEPTOR",&
+         description="Hab = C*Sab. This is the scaling C for the acceptor phase",&
+         usage="0.50D0*0.065190D0, HARTREE", type_of_var=real_t,&
+         unit_str="hartree")
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
     CALL keyword_create(keyword, name="CBAR",&
          description="Sab constant factor",&
          usage="0.5082 WITHOUT UNITS", type_of_var=real_t)

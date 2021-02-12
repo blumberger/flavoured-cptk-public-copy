@@ -466,11 +466,14 @@ CONTAINS
 
      !!! XXXX THE FOLLOWING TWO SHOULD BE PHASE SPECIFIC
      !> Scaling factor Hab = scaling*Sab_bar
-     CALL section_vals_val_get(coupling_section,"SCALING_FACTOR",&
-             r_val=sh_env%scaling)
-     !> cbar factor : Sab = cbar*Sab_bar
-     CALL section_vals_val_get(coupling_section,"CBAR",&
-             r_val=sh_env%cbar)
+     CALL section_vals_val_get(coupling_section,"SCALING_FACTOR_DONOR",&
+             r_val=sh_env%scaling_donor)
+     CALL section_vals_val_get(coupling_section,"SCALING_FACTOR_ACCEPTOR",&
+             r_val=sh_env%scaling_acceptor)
+          
+     !> cbar factor : Sab = cbar*Sab_bar is not used for multi-phase
+     !CALL section_vals_val_get(coupling_section,"CBAR",&
+     !        r_val=sh_env%cbar)
 
      !CALL section_vals_val_get(optimization_section,"RK_PROPAGATION", c_val=prop_wf_keyword) 
      !!> Multiple time step calculation of aom gradient
@@ -823,7 +826,8 @@ CONTAINS
      !> Scaling factor Hab = scaling*Sab_bar
      CALL section_vals_val_get(coupling_section,"SCALING_FACTOR",&
              r_val=sh_env%scaling)
-     !> cbar factor : Sab = cbar*Sab_bar
+     !> cbar factor : Sab = cbar*Sab_bar. cbar is only used for diabatic
+     !non-orthogonal nacv calculation (this nacv is negligible) 
      CALL section_vals_val_get(coupling_section,"CBAR",&
              r_val=sh_env%cbar)
      !> number of atoms per site (This array is not general for a double phase
