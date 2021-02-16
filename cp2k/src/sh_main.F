@@ -536,8 +536,8 @@ print *, "ACTIVE STATE", active_state
             !frozen Hamiltonian case and multi-phase (dimension of H larger than
             !number of active mols)
             !TEMP XXXXXXXXXXXX
-            CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=active_state, Fin=diagonal_F, &
-                                     forces_adiab=sh_env%forces_adiab)
+            !CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=active_state, Fin=diagonal_F, &
+            !                         forces_adiab=sh_env%forces_adiab)
          ELSE
              CPABORT("MULTI-STATE MUST BE TRUE")
          END IF
@@ -1030,8 +1030,8 @@ print *, "ACTIVE STATE", active_state
 
             !frozen Hamiltonian case and multi-phase (dimension of H larger than
             !number of active mols)
-            CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=sh_env%active_state, Fin=diagonal_F, &
-                                     forces_adiab=sh_env%forces_adiab)
+            !CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=sh_env%active_state, Fin=diagonal_F, &
+            !                         forces_adiab=sh_env%forces_adiab)
             IF (sh_env%attempt_hop) THEN
                       CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp),C=sh_env%C_tp, state=sh_env%new_state, Fin=diagonal_F, &
                                   forces_adiab=sh_env%forces_adiab_new)

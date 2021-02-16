@@ -177,9 +177,9 @@ SUBROUTINE calc_coms_and_nlist(cutoff_sites, orb, crds, active_system_info, NN)
           end do
      end do
 
-do i=1,SIZE(active_system_info,2)
-print *, "CONNECTIVITY", NN(i,:)
-end do
+!do i=1,SIZE(active_system_info,2)
+!print *, "CONNECTIVITY", NN(i,:)
+!end do
     deallocate(coms)
 END SUBROUTINE calc_coms_and_nlist
 
@@ -1103,7 +1103,7 @@ subroutine calcforces_smart_grad_multip(adiab_section, instate, C, Fin, forces_a
        CALL section_vals_val_get(ct_block,"N_ACCEPTOR_ATOMS",&
                 i_val=atoms_per_acceptor)
 
-
+       !few checks
        total_states = SIZE(donor_index)*SIZE(acceptor_index)
        IF (total_states .ne. nadiab) THEN
            CPABORT("NUMBER_DIABATIC_STATES DIFFERENT FROM N*N STATES")
@@ -1111,7 +1111,8 @@ subroutine calcforces_smart_grad_multip(adiab_section, instate, C, Fin, forces_a
        IF (orb .ne. 1) THEN
            CPABORT("DEGENERATE ORBITALS NOT IMPLEMENTED")
        END IF
-
+    
+       !get indeces of the active molecules acceptor and donor
        ALLOCATE(second_ind(SIZE(acceptor_index)))
        do i=1,SIZE(acceptor_index)
          do j=1,SIZE(my_mol_index)
@@ -1132,11 +1133,11 @@ subroutine calcforces_smart_grad_multip(adiab_section, instate, C, Fin, forces_a
          end do
        end do
 
-   print *, "DECOMP", my_mol_index
-   print *, "DONOR IND", donor_index
-   print *, "ACCEPTOR IND", acceptor_index
-   print *, "FIRST IND", first_ind
-   print *, "SEC IND", second_ind
+!   print *, "DECOMP", my_mol_index
+!   print *, "DONOR IND", donor_index
+!   print *, "ACCEPTOR IND", acceptor_index
+!   print *, "FIRST IND", first_ind
+!   print *, "SEC IND", second_ind
 
 
    !> loop over states: not that it does not matter if donor molecules comes
@@ -1158,7 +1159,7 @@ subroutine calcforces_smart_grad_multip(adiab_section, instate, C, Fin, forces_a
 
 
         do d=1,3                   ! sum of cartesian 
-print *, "DIMENSION", d
+!print *, "DIMENSION", d
            num_j = 0               ! active atom index (not used)
            num_don = 0               ! active atom donor
            num_acc = 0               ! active atom acceptor 
@@ -1185,8 +1186,8 @@ print *, "DIMENSION", d
                      num_acc = num_acc + 1 
                      acceptor_phase = .TRUE.
                  END IF
-print *, "atom,  num_mol, num_j", j, num_mol, num_j
-print *, "PHASE", num_don, num_acc, donor_phase, acceptor_phase
+!print *, "atom,  num_mol, num_j", j, num_mol, num_j
+!print *, "PHASE", num_don, num_acc, donor_phase, acceptor_phase
               ENDIF
              
               !loop over all states for the diagonals
@@ -1229,14 +1230,14 @@ print *, "PHASE", num_don, num_acc, donor_phase, acceptor_phase
                               end if
                               if  ((num_mol .eq. CT_states_info(1,count_)) .AND. (ind2 .eq. CT_states_info(2,count_))) then
                                   num_molalpha = CT_states_info(3, count_)
-                              end if
-                           end do
-print *, "ind1, ind2, kalpha", ind1, ind2, kalpha         
-print *, "num_mol, ind2, num_molalpha",  num_mol, ind2, num_molalpha
-print *, "nacv_dphase(d, k, num_don)", nacv_dphase(d, k, num_don)
-print *, "C(num_molalpha,instate)", C(num_molalpha,instate) 
-print *, "C(kalpha,instate))", C(kalpha,instate)
-                                        
+                             end if
+                          end do
+!print *, "ind1, ind2, kalpha", ind1, ind2, kalpha         
+!print *, "num_mol, ind2, num_molalpha",  num_mol, ind2, num_molalpha
+!print *, "nacv_dphase(d, k, num_don)", nacv_dphase(d, k, num_don)
+!print *, "C(num_molalpha,instate)", C(num_molalpha,instate) 
+!print *, "C(kalpha,instate))", C(kalpha,instate)
+                                       
                            convert_grad_to_forces = -scaling_C_donor
                            forces_adiab(d,j) = forces_adiab(d,j) + &
                               (nacv_dphase(d, k, num_don)*C(num_molalpha,instate)*C(kalpha,instate))*convert_grad_to_forces*2.0D0
@@ -1267,13 +1268,13 @@ print *, "C(kalpha,instate))", C(kalpha,instate)
                                   ! this should be called knum_mol but I left the same variable name as before
                                   num_molalpha = CT_states_info(3,count_) 
                               end if
-                           end do
-print *, "ind1, ind2, kalpha", ind1, ind2, kalpha         
-print *, "ind1, num_mol, knum_mol",  ind1, num_mol, num_molalpha
-print *, "nacv_dphase(d, alpha, num_acc)", nacv_aphase(d, alpha, num_acc)
-print *, "C(num_molalpha,instate)", C(num_molalpha,instate) 
-print *, "C(kalpha,instate))", C(kalpha,instate)
-                                        
+                          end do
+!print *, "ind1, ind2, kalpha", ind1, ind2, kalpha         
+!print *, "ind1, num_mol, knum_mol",  ind1, num_mol, num_molalpha
+!print *, "nacv_dphase(d, alpha, num_acc)", nacv_aphase(d, alpha, num_acc)
+!print *, "C(num_molalpha,instate)", C(num_molalpha,instate) 
+!print *, "C(kalpha,instate))", C(kalpha,instate)
+                                       
                            convert_grad_to_forces = -scaling_C_acceptor
                            forces_adiab(d,j) = forces_adiab(d,j) + &
                               (nacv_aphase(d, alpha, num_acc)*C(num_molalpha,instate)*C(kalpha,instate))*& 
