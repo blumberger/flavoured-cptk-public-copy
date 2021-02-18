@@ -148,6 +148,7 @@ END TYPE adiab_nace_env_type
      !integer, dimension(:,:), POINTER         :: bneighbour_a, aneighbour_a
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER :: nacv_dphase, nacv_aphase   ! off-diagonal gradient of aom Hamilton.
      REAL(KIND = dp)                          :: scaling_donor, scaling_acceptor
+     LOGICAL                                  :: freeze_multip_forces
 
 !> AOM arrays
      REAL(KIND = dp), DIMENSION(:,:), POINTER :: rm_t,&        ! position step min 1

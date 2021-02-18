@@ -292,13 +292,10 @@ CONTAINS
     CASE("MULTI-PHASE")
          !sh_env%aom_couplings_keyword = .TRUE.
          sh_env%multiphase_couplings_keyword = .TRUE.  
-         !if (sh_env%multistate) then
-         !   CPABORT("Multi-state forces not implemented")
-         !end if   
-         !CALL set_aom_env(nadiab, norbitals, natom,positions_tp,adiab_section,sh_env)
+         
+         !WARNING: hardcoded for testing (you can put it in input)
+         sh_env%freeze_multip_forces = .FALSE.
          CALL set_aom_env_multip(nadiab, norbitals, natom,positions_tp,adiab_section,sh_env)
-         !TEST
-         !CALL calc_multiphase_Xmatrix_elements(sh_env, adiab_section, active_system_info)
     !------------------------------------------------------------------------------------------
     CASE("FROZEN_COUPLINGS")
         ! Frozen coupling would have the possibility of using multi-state for
@@ -479,10 +476,6 @@ CONTAINS
      !!> Multiple time step calculation of aom gradient
      !CALL section_vals_val_get(coupling_section,"MULTIPLE_TIME_STEP",&
      !        i_val=sh_env%multiple_time_step)
-     !!> number of atoms per site (This array is not general for a double phase
-     !!with molecules with a different number of atoms per site)
-     !CALL section_vals_val_get(coupling_section,"NUMBER_AOM_ATOMS_PER_SITE",&
-     !    i_val=aom_atoms)
      
      ! passing N_DONOR_ATOMS and N_ACCEPTOR_ATOMS is not strictly useful since
      ! this info is alreadu in full_system_info or active_system_info 

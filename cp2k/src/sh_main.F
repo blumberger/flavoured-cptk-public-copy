@@ -524,7 +524,8 @@ print *, "ACTIVE STATE", active_state
      ! MULTI-PHASE FORCES XXX
      ELSE IF (sh_env%multiphase_couplings_keyword) THEN
          IF (sh_env%multistate) THEN
-            ! we do not use convert_nacv here as the scaling
+
+            !NOTE: we do not use convert_nacv here as the scaling
             ! is directly done inside the routine
             CALL calcforces_smart_grad_multip(adiab_section, instate=active_state, C=sh_env%C_tp, &
                                         Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
@@ -532,7 +533,7 @@ print *, "ACTIVE STATE", active_state
                                         orb=orb, my_mol_index=sh_env%index_active_mols, &
                                         scaling_C_donor=sh_env%scaling_donor, scaling_C_acceptor=sh_env%scaling_acceptor, &
                                         nacv_dphase=sh_env%nacv_dphase, nacv_aphase=sh_env%nacv_aphase, &
-                                        frozen_c=.FALSE. )
+                                        frozen_c=sh_env%freeze_multip_forces )
             !frozen Hamiltonian case and multi-phase (dimension of H larger than
             !number of active mols)
             !TEMP XXXXXXXXXXXX
@@ -1018,14 +1019,13 @@ print *, "ACTIVE STATE", active_state
      ! MULTI-PHASE FORCES
      ELSE IF (sh_env%multiphase_couplings_keyword) THEN
          IF (sh_env%multistate) THEN
-            !!! XXXXX PUT THIS ALSO AFTER sh_env%attempt_hop
             CALL calcforces_smart_grad_multip(adiab_section, instate=sh_env%active_state, C=sh_env%C_tp, &
                                         Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                                         ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
                                         orb=orb, my_mol_index=sh_env%index_active_mols, &
                                         scaling_C_donor=sh_env%scaling_donor, scaling_C_acceptor=sh_env%scaling_acceptor, &
                                         nacv_dphase=sh_env%nacv_dphase, nacv_aphase=sh_env%nacv_aphase, &
-                                        frozen_c=.FALSE. )
+                                        frozen_c=sh_env%freeze_multip_forces )
 
 
             !frozen Hamiltonian case and multi-phase (dimension of H larger than
@@ -1033,8 +1033,16 @@ print *, "ACTIVE STATE", active_state
             !CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=sh_env%active_state, Fin=diagonal_F, &
             !                         forces_adiab=sh_env%forces_adiab)
             IF (sh_env%attempt_hop) THEN
-                      CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp),C=sh_env%C_tp, state=sh_env%new_state, Fin=diagonal_F, &
-                                  forces_adiab=sh_env%forces_adiab_new)
+print *, "NE_STATE_FORCES"
+                      CALL calcforces_smart_grad_multip(adiab_section, instate=sh_env%new_state, C=sh_env%C_tp, &
+                                        Fin=diagonal_F, forces_adiab=sh_env%forces_adiab_new, &
+                                        ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
+                                        orb=orb, my_mol_index=sh_env%index_active_mols, &
+                                        scaling_C_donor=sh_env%scaling_donor, scaling_C_acceptor=sh_env%scaling_acceptor, &
+                                        nacv_dphase=sh_env%nacv_dphase, nacv_aphase=sh_env%nacv_aphase, &
+                                        frozen_c=sh_env%freeze_multip_forces )
+                      !CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp),C=sh_env%C_tp, state=sh_env%new_state, Fin=diagonal_F, &
+                      !            forces_adiab=sh_env%forces_adiab_new)
             END IF
          ELSE
              CPABORT("MULTI-STATE MUST BE TRUE")

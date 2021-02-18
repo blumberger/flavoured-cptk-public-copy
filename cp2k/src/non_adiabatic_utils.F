@@ -1969,7 +1969,8 @@ ENDIF
                  !> MULTI-PHASE  COUPLING CASE
                  ELSE IF ( force_env%mixed_env%sh_env%multiphase_couplings_keyword) THEN
                     IF (force_env%mixed_env%sh_env%multistate) THEN
-                        CALL calc_hop_nacv_frozen_H( force_env%mixed_env%sh_env, force_env%mixed_env%F, hop_nacv)
+                         CPABORT("NACV not implemented for multi-phase yet")
+                        !CALL calc_hop_nacv_frozen_H( force_env%mixed_env%sh_env, force_env%mixed_env%F, hop_nacv)
                     ELSE
                          CPABORT("MULTI-STATE MUST BE TRUE")
                     END IF
