@@ -1,0 +1,3021 @@
+ DBCSR| Multiplication driver                                               XSMM
+ DBCSR| Multrec recursion limit                                              512
+ DBCSR| Multiplication stack size                                           1000
+ DBCSR| Maximum elements for images                                    UNLIMITED
+ DBCSR| Randmat seed                                                    12341313
+ DBCSR| Multiplication size stacks                                             3
+
+
+  **** **** ******  **  PROGRAM STARTED AT               2021-02-12 16:43:36.159
+ ***** ** ***  *** **   PROGRAM STARTED ON               bulstake.phys.ucl.ac.uk
+ **    ****   ******    PROGRAM STARTED BY                             sgiannini
+ ***** **    ** ** **   PROGRAM PROCESS ID                                  3483
+  **** **  *******  **  PROGRAM STARTED IN /scratch/sgiannini/FOB-SH-REGTESTS_/3
+                                           3-XXX_code_extension_V2/run-fssh-3+3-
+                                           NAP-ANT-FRZ-COUP
+
+ CP2K| version string:                    CP2K version 4.0 (Development Version)
+ CP2K| source code revision number:                                  git:cfe3005
+ CP2K| cp2kflags: libint fftw3 libxc quip smm_dnn smm libxsmm libderiv_max_am1=5
+ CP2K|             libint_max_am=6
+ CP2K| is freely available from                            https://www.cp2k.org/
+ CP2K| Program compiled at                          Fri 12 Feb 16:41:38 GMT 2021
+ CP2K| Program compiled on                               bulstake.phys.ucl.ac.uk
+ CP2K| Program compiled for                                                local
+ CP2K| Data directory path           /scratch/sgiannini/flavoured-cptk/cp2k/data
+ CP2K| Input file name                                                   run.inp
+
+ GLOBAL| Force Environment number                                              1
+ GLOBAL| Basis set file name                                           POTENTIAL
+ GLOBAL| MM Potential file name                                     MM_POTENTIAL
+ GLOBAL| Coordinate file name                                       pos-init.xyz
+ GLOBAL| Force Environment number                                              2
+ GLOBAL| Basis set file name                                           POTENTIAL
+ GLOBAL| MM Potential file name                                     MM_POTENTIAL
+ GLOBAL| Coordinate file name                                       pos-init.xyz
+ GLOBAL| Force Environment number                                              3
+ GLOBAL| Basis set file name                                           POTENTIAL
+ GLOBAL| MM Potential file name                                     MM_POTENTIAL
+ GLOBAL| Coordinate file name                                       pos-init.xyz
+ GLOBAL| Force Environment number                                              4
+ GLOBAL| Basis set file name                                           POTENTIAL
+ GLOBAL| MM Potential file name                                     MM_POTENTIAL
+ GLOBAL| Coordinate file name                                       pos-init.xyz
+ GLOBAL| Force Environment number                                              5
+ GLOBAL| Basis set file name                                           POTENTIAL
+ GLOBAL| MM Potential file name                                     MM_POTENTIAL
+ GLOBAL| Coordinate file name                                       pos-init.xyz
+ GLOBAL| Force Environment number                                              6
+ GLOBAL| Basis set file name                                           POTENTIAL
+ GLOBAL| MM Potential file name                                     MM_POTENTIAL
+ GLOBAL| Coordinate file name                                       pos-init.xyz
+ GLOBAL| Force Environment number                                              7
+ GLOBAL| Basis set file name                                           POTENTIAL
+ GLOBAL| MM Potential file name                                     MM_POTENTIAL
+ GLOBAL| Coordinate file name                                       pos-init.xyz
+ GLOBAL| Force Environment number                                              8
+ GLOBAL| Basis set file name                                           POTENTIAL
+ GLOBAL| MM Potential file name                                     MM_POTENTIAL
+ GLOBAL| Coordinate file name                                       pos-init.xyz
+ GLOBAL| Force Environment number                                              9
+ GLOBAL| Basis set file name                                           POTENTIAL
+ GLOBAL| MM Potential file name                                     MM_POTENTIAL
+ GLOBAL| Coordinate file name                                       pos-init.xyz
+ GLOBAL| Force Environment number                                             10
+ GLOBAL| Basis set file name                                           POTENTIAL
+ GLOBAL| MM Potential file name                                     MM_POTENTIAL
+ GLOBAL| Coordinate file name                                       pos-init.xyz
+ GLOBAL| Method name                                                        CP2K
+ GLOBAL| Project name                                                        run
+ GLOBAL| Preferred FFT library                                             FFTW3
+ GLOBAL| Preferred diagonalization lib.                                       SL
+ GLOBAL| Run type                                                             MD
+ GLOBAL| All-to-all communication in single precision                          F
+ GLOBAL| FFTs using library dependent lengths                                  F
+ GLOBAL| Global print level                                                  LOW
+ GLOBAL| Total number of message passing processes                             1
+ GLOBAL| Number of threads for this process                                    1
+ GLOBAL| This output is from process                                           0
+ GLOBAL| CPU model name :  Intel(R) Xeon(R) CPU E5-2687W v4 @ 3.00GHz
+
+ MEMORY| system memory details [Kb]
+ MEMORY|                        rank 0           min           max       average
+ MEMORY| MemTotal             65894336      65894336      65894336      65894336
+ MEMORY| MemFree               3282624       3282624       3282624       3282624
+ MEMORY| Buffers                  9680          9680          9680          9680
+ MEMORY| Cached               50526168      50526168      50526168      50526168
+ MEMORY| Slab                  2054100       2054100       2054100       2054100
+ MEMORY| SReclaimable          1717764       1717764       1717764       1717764
+ MEMORY| MemLikelyFree        55536236      55536236      55536236      55536236
+
+ TOTAL NUMBER OF FORCE EVALS          10
+ NOTE:n_subforce_eval           9
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        1
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:         1
+ COLVARS|   ATOM:         2
+ COLVARS|   ATOM:         3
+ COLVARS|   ATOM:        10
+ COLVARS|   ATOM:        12
+ COLVARS|   ATOM:         5
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       -0.000913   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        2
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:         3
+ COLVARS|   ATOM:         4
+ COLVARS|   ATOM:        11
+ COLVARS|   ATOM:        14
+ COLVARS|   ATOM:        13
+ COLVARS|   ATOM:        10
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        0.000913    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        3
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        19
+ COLVARS|   ATOM:        20
+ COLVARS|   ATOM:        21
+ COLVARS|   ATOM:        28
+ COLVARS|   ATOM:        30
+ COLVARS|   ATOM:        23
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        9.447737   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        4
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        21
+ COLVARS|   ATOM:        22
+ COLVARS|   ATOM:        29
+ COLVARS|   ATOM:        32
+ COLVARS|   ATOM:        31
+ COLVARS|   ATOM:        28
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        9.449563    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        5
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        37
+ COLVARS|   ATOM:        38
+ COLVARS|   ATOM:        39
+ COLVARS|   ATOM:        46
+ COLVARS|   ATOM:        48
+ COLVARS|   ATOM:        41
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       18.896387   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        6
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        39
+ COLVARS|   ATOM:        40
+ COLVARS|   ATOM:        47
+ COLVARS|   ATOM:        50
+ COLVARS|   ATOM:        49
+ COLVARS|   ATOM:        46
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       18.898213    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        7
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        55
+ COLVARS|   ATOM:        56
+ COLVARS|   ATOM:        57
+ COLVARS|   ATOM:        59
+ COLVARS|   ATOM:        60
+ COLVARS|   ATOM:        61
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       28.351777   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        8
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        67
+ COLVARS|   ATOM:        70
+ COLVARS|   ATOM:        73
+ COLVARS|   ATOM:        75
+ COLVARS|   ATOM:        72
+ COLVARS|   ATOM:        69
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       28.340123    0.009071   -4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        9
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        79
+ COLVARS|   ATOM:        80
+ COLVARS|   ATOM:        81
+ COLVARS|   ATOM:        83
+ COLVARS|   ATOM:        84
+ COLVARS|   ATOM:        85
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       37.800427   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       10
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        91
+ COLVARS|   ATOM:        94
+ COLVARS|   ATOM:        97
+ COLVARS|   ATOM:        99
+ COLVARS|   ATOM:        96
+ COLVARS|   ATOM:        93
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       37.788773    0.009071   -4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       11
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:       103
+ COLVARS|   ATOM:       104
+ COLVARS|   ATOM:       105
+ COLVARS|   ATOM:       107
+ COLVARS|   ATOM:       108
+ COLVARS|   ATOM:       109
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       47.249077   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       12
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:       115
+ COLVARS|   ATOM:       118
+ COLVARS|   ATOM:       121
+ COLVARS|   ATOM:       123
+ COLVARS|   ATOM:       120
+ COLVARS|   ATOM:       117
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       47.237423    0.009071   -4.632012
+          ----------------------------------------------------------------------
+ RESTRAINT| Active restraint on COLLECTIVE section Nr.     1. K [a.u.]= 0.005000
+ RESTRAINT| Active restraint on COLLECTIVE section Nr.     2. K [a.u.]= 0.005000
+ RESTRAINT| Active restraint on COLLECTIVE section Nr.     3. K [a.u.]= 0.005000
+ RESTRAINT| Active restraint on COLLECTIVE section Nr.     4. K [a.u.]= 0.005000
+ RESTRAINT| Active restraint on COLLECTIVE section Nr.     5. K [a.u.]= 0.005000
+ RESTRAINT| Active restraint on COLLECTIVE section Nr.     6. K [a.u.]= 0.005000
+ RESTRAINT| Active restraint on COLLECTIVE section Nr.     7. K [a.u.]= 0.005000
+ RESTRAINT| Active restraint on COLLECTIVE section Nr.     8. K [a.u.]= 0.005000
+ RESTRAINT| Active restraint on COLLECTIVE section Nr.     9. K [a.u.]= 0.005000
+ RESTRAINT| Active restraint on COLLECTIVE section Nr.    10. K [a.u.]= 0.005000
+ RESTRAINT| Active restraint on COLLECTIVE section Nr.    11. K [a.u.]= 0.005000
+ RESTRAINT| Active restraint on COLLECTIVE section Nr.    12. K [a.u.]= 0.005000
+ DECOMP =  F
+ DECOMP =  F
+ DECOMP =  F
+ DECOMP =  F
+ DECOMP =  F
+ DECOMP =  F
+ DECOMP =  F
+ DECOMP =  F
+ DECOMP =  F
+
+ MD| Molecular Dynamics Protocol 
+ MD| Ensemble Type                                                           NVE
+ MD| Number of Time Steps                                                    100
+ MD| Time Step [fs]                                                         0.10
+ MD| Temperature [K]                                                      300.00
+ MD| Temperature tolerance [K]                                              0.00
+ MD| Constraints activated 
+ MD| Tolerance for shake                                              0.1000E-05
+ MD| Print MD information every                                        1 step(s)
+ MD| File type     Print frequency[steps]                             File names
+ MD| Coordinates          200                                      run-pos-1.xyz
+ MD| Velocities             1                                      run-vel-1.xyz
+ MD| Energies               1                                         run-1.ener
+ MD| Dump                 200                                      run-1.restart
+
+ ROT| Rotational Analysis Info 
+ ROT| Principal axes and moments of inertia in atomic units:
+ ROT|                                1                 2                 3
+ ROT| EIGENVALUES            0.147575647E+13   0.181552525E+13   0.188877237E+13
+ ROT|      X                     0.725938787      -0.685850174      -0.051209544
+ ROT|      Y                     0.080873612       0.011184228       0.996661614
+ ROT|      Z                     0.682987801       0.727656823      -0.063586246
+ ROT| Numer of Rotovibrational vectors:     6
+
+ Calculation of degrees of freedom
+                                                      Number of atoms:       248
+                                 Number of Intramolecular constraints:         0
+                                 Number of Intermolecular constraints:         0
+                                  Invariants(translation + rotations):         3
+                                                   Degrees of freedom:       741
+
+
+ Restraints Information
+                                  Number of Intramolecular restraints:         0
+                                  Number of Intermolecular restraints:        12
+
+ *** WARNING in motion/thermostat/thermostat_methods.F:280 :: Thermostat ***
+ *** for Particles has been defined but the ensemble provided does not   ***
+ *** support thermostat for Particles! Ignoring thermostat input.        ***
+
+ ************************** Velocities initialization **************************
+ Initial Temperature                                                    305.63 K
+ COM velocity:           -0.000016316743     -0.000003357485     -0.000008109364
+ *******************************************************************************
+
+ FIRST CALL: force_env_calc_energy_force
+ RESTART_KEY F
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.356789629198513
+
+ STEP NUMBER                  =            0
+ CPU TIME [s]                 =    0.0000000000000000        0.0000000000000000     
+
+ MD_ENERGIES| Initialization proceeding
+
+
+ ******************************** GO CP2K GO! **********************************
+ INITIAL POTENTIAL ENERGY[hartree]     =                      0.356789629199E+00
+ INITIAL KINETIC ENERGY[hartree]       =                      0.359660390230E+00
+ INITIAL TEMPERATURE[K]                =                                 306.536
+ INITIAL VOLUME[bohr^3]                =                      0.145764026995E+07
+ INITIAL CELL LNTHS[bohr]   =      0.1133836E+03   0.1133836E+03   0.1133836E+03
+ INITIAL CELL ANGLS[deg]    =      0.9000000E+02   0.9000000E+02   0.9000000E+02
+ ******************************** GO CP2K GO! **********************************
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.40295775276962964     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.357167485702914
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =            1
+ CPU TIME [s]                 =    6.3042474910616875E-002   6.3042474910616875E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                                1
+ TIME [fs]                    =                                         0.100000
+ CONSERVED QUANTITY [hartree] =                               0.716450175129E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.06                 0.06
+ ENERGY DRIFT PER ATOM [K]    =          0.198250836317E-03   0.000000000000E+00
+ POTENTIAL ENERGY[hartree]    =          0.357167485703E+00   0.357167485703E+00
+ KINETIC ENERGY [hartree]     =          0.359282689426E+00   0.359282689426E+00
+ TEMPERATURE [K]              =                     306.214              306.214
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.87679499489566293     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.357549080499443
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =            2
+ CPU TIME [s]                 =    1.7323249951004982E-002   4.0182862430810928E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                                2
+ TIME [fs]                    =                                         0.200000
+ CONSERVED QUANTITY [hartree] =                               0.716450367132E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.04
+ ENERGY DRIFT PER ATOM [K]    =          0.442725822837E-03   0.221362911419E-03
+ POTENTIAL ENERGY[hartree]    =          0.357549080499E+00   0.357358283101E+00
+ KINETIC ENERGY [hartree]     =          0.358901286632E+00   0.359091988029E+00
+ TEMPERATURE [K]              =                     305.889              306.052
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA   1.1292483505987695E-002
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.357931330742677
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =            3
+ CPU TIME [s]                 =    1.8506779335439205E-002   3.2957501399020352E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                                3
+ TIME [fs]                    =                                         0.300000
+ CONSERVED QUANTITY [hartree] =                               0.716450593354E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.03
+ ENERGY DRIFT PER ATOM [K]    =          0.730770652330E-03   0.391165491722E-03
+ POTENTIAL ENERGY[hartree]    =          0.357931330743E+00   0.357549298982E+00
+ KINETIC ENERGY [hartree]     =          0.358519262611E+00   0.358901079556E+00
+ TEMPERATURE [K]              =                     305.564              305.889
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.45678605768166020     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.358310615176443
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =            4
+ CPU TIME [s]                 =    1.8280243501067162E-002   2.9288186924532056E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                                4
+ TIME [fs]                    =                                         0.400000
+ CONSERVED QUANTITY [hartree] =                               0.716450850530E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.03
+ ENERGY DRIFT PER ATOM [K]    =          0.105822887858E-02   0.557931338438E-03
+ POTENTIAL ENERGY[hartree]    =          0.358310615176E+00   0.357739628030E+00
+ KINETIC ENERGY [hartree]     =          0.358140235353E+00   0.358710868506E+00
+ TEMPERATURE [K]              =                     305.241              305.727
+ *******************************************************************************
+
+ FOBSH| Reordering: for state           4 old index was           5 with overlap  0.99998384150194275      and former  -5.7465623597500643E-006
+ FOBSH| Reordering: for state           5 old index was           4 with overlap -0.99970417998011551      and former   5.7832831315122941E-006
+ FOBSH| New map:            1           2           3           5           4           6           7           8           9
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.67913879576625069     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.358682821317941
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =            5
+ CPU TIME [s]                 =    1.9162714481353760E-002   2.7263092435896398E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                                5
+ TIME [fs]                    =                                         0.500000
+ CONSERVED QUANTITY [hartree] =                               0.716451135566E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.03
+ ENERGY DRIFT PER ATOM [K]    =          0.142116106374E-02   0.730577283497E-03
+ POTENTIAL ENERGY[hartree]    =          0.358682821318E+00   0.357928266688E+00
+ KINETIC ENERGY [hartree]     =          0.357768314248E+00   0.358522357654E+00
+ TEMPERATURE [K]              =                     304.924              305.566
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.57378266294179348     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.359043396562062
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =            6
+ CPU TIME [s]                 =    1.7676184885203838E-002   2.5665274510780968E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                                6
+ TIME [fs]                    =                                         0.600000
+ CONSERVED QUANTITY [hartree] =                               0.716451444723E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.03
+ ENERGY DRIFT PER ATOM [K]    =          0.181480607589E-02   0.911282082230E-03
+ POTENTIAL ENERGY[hartree]    =          0.359043396562E+00   0.358114121667E+00
+ KINETIC ENERGY [hartree]     =          0.357408048161E+00   0.358336639405E+00
+ TEMPERATURE [K]              =                     304.616              305.408
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.23017586648384583     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.359387410203590
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =            7
+ CPU TIME [s]                 =    1.7023815773427486E-002   2.4430780405444757E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                                7
+ TIME [fs]                    =                                         0.700000
+ CONSERVED QUANTITY [hartree] =                               0.716451773836E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.223386096105E-02   0.110022192206E-02
+ POTENTIAL ENERGY[hartree]    =          0.359387410204E+00   0.358296020029E+00
+ KINETIC ENERGY [hartree]     =          0.357064363633E+00   0.358154885723E+00
+ TEMPERATURE [K]              =                     304.324              305.253
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.24338901010922021     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.359709620914820
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =            8
+ CPU TIME [s]                 =    1.6712288372218609E-002   2.3465968901291490E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                                8
+ TIME [fs]                    =                                         0.800000
+ CONSERVED QUANTITY [hartree] =                               0.716452118423E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.267261765979E-02   0.129677138928E-02
+ POTENTIAL ENERGY[hartree]    =          0.359709620915E+00   0.358472720140E+00
+ KINETIC ENERGY [hartree]     =          0.356742497508E+00   0.357978337196E+00
+ TEMPERATURE [K]              =                     304.049              305.103
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.69429726582342566     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.360004549154086
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =            9
+ CPU TIME [s]                 =    1.7928463406860828E-002   2.2850690513021413E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                                9
+ TIME [fs]                    =                                         0.900000
+ CONSERVED QUANTITY [hartree] =                               0.716452473657E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.312493207394E-02   0.149990035424E-02
+ POTENTIAL ENERGY[hartree]    =          0.360004549154E+00   0.358642923364E+00
+ KINETIC ENERGY [hartree]     =          0.356447924503E+00   0.357808291342E+00
+ TEMPERATURE [K]              =                     303.798              304.958
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.24446029841148811     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.360266554967394
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           10
+ CPU TIME [s]                 =    1.7927974462509155E-002   2.2358418907970190E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               10
+ TIME [fs]                    =                                         1.000000
+ CONSERVED QUANTITY [hartree] =                               0.716452834816E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.358479116892E-02   0.170838943571E-02
+ POTENTIAL ENERGY[hartree]    =          0.360266554967E+00   0.358805286524E+00
+ KINETIC ENERGY [hartree]     =          0.356186279849E+00   0.357646090192E+00
+ TEMPERATURE [K]              =                     303.575              304.819
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.88341993157550369     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.360489916559239
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           11
+ CPU TIME [s]                 =    1.8331130035221577E-002   2.1992301737720318E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               11
+ TIME [fs]                    =                                         1.100000
+ CONSERVED QUANTITY [hartree] =                               0.716453196757E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.404564489918E-02   0.192086720512E-02
+ POTENTIAL ENERGY[hartree]    =          0.360489916559E+00   0.358958434709E+00
+ KINETIC ENERGY [hartree]     =          0.355963280198E+00   0.357493107466E+00
+ TEMPERATURE [K]              =                     303.385              304.689
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.70270955124022139     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.360668911916401
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           12
+ CPU TIME [s]                 =    1.7483700066804886E-002   2.1616584931810696E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               12
+ TIME [fs]                    =                                         1.200000
+ CONSERVED QUANTITY [hartree] =                               0.716453555038E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.450183777228E-02   0.213594808571E-02
+ POTENTIAL ENERGY[hartree]    =          0.360668911916E+00   0.359100974476E+00
+ KINETIC ENERGY [hartree]     =          0.355784643121E+00   0.357350735437E+00
+ TEMPERATURE [K]              =                     303.233              304.568
+ *******************************************************************************
+
+ FOBSH| Reordering: for state           3 old index was           4 with overlap -0.99992928189860553      and former   3.0021232192906522E-006
+ FOBSH| Reordering: for state           4 old index was           3 with overlap -0.99985834557242093      and former   2.8736132523791134E-006
+ FOBSH| Reordering: for state           5 old index was           6 with overlap -0.99983033416319989      and former  -1.1831347339679163E-004
+ FOBSH| Reordering: for state           6 old index was           5 with overlap -0.99985777127809083      and former  -1.1894460899772102E-004
+ FOBSH| New map:            1           2           4           3           6           5           7           8           9
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.68900483551272329     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.360797898313748
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           13
+ CPU TIME [s]                 =    1.7582874745130539E-002   2.1306299532835301E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               13
+ TIME [fs]                    =                                         1.300000
+ CONSERVED QUANTITY [hartree] =                               0.716453904101E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.494629515214E-02   0.235212862928E-02
+ POTENTIAL ENERGY[hartree]    =          0.360797898314E+00   0.359231507079E+00
+ KINETIC ENERGY [hartree]     =          0.355656005787E+00   0.357220371618E+00
+ TEMPERATURE [K]              =                     303.123              304.457
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA   9.9979641101268446E-002
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.360871394177474
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           14
+ CPU TIME [s]                 =    1.7895874567329884E-002   2.1062697749584913E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               14
+ TIME [fs]                    =                                         1.400000
+ CONSERVED QUANTITY [hartree] =                               0.716454240002E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.537399285037E-02   0.256797607365E-02
+ POTENTIAL ENERGY[hartree]    =          0.360871394177E+00   0.359348641872E+00
+ KINETIC ENERGY [hartree]     =          0.355582845825E+00   0.357103405490E+00
+ TEMPERATURE [K]              =                     303.061              304.357
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.19250096125532873     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.360884147583750
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           15
+ CPU TIME [s]                 =    1.8017631024122238E-002   2.0859693301220734E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               15
+ TIME [fs]                    =                                         1.500000
+ CONSERVED QUANTITY [hartree] =                               0.716454556938E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.577754305823E-02   0.278194720595E-02
+ POTENTIAL ENERGY[hartree]    =          0.360884147584E+00   0.359451008919E+00
+ KINETIC ENERGY [hartree]     =          0.355570409355E+00   0.357001205747E+00
+ TEMPERATURE [K]              =                     303.050              304.270
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA   4.9835464070964730E-002
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.360831219157964
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           16
+ CPU TIME [s]                 =    1.8675668165087700E-002   2.0723191730212420E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               16
+ TIME [fs]                    =                                         1.600000
+ CONSERVED QUANTITY [hartree] =                               0.716454854260E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.615611818629E-02   0.299283289222E-02
+ POTENTIAL ENERGY[hartree]    =          0.360831219158E+00   0.359537272059E+00
+ KINETIC ENERGY [hartree]     =          0.355623635102E+00   0.356915107582E+00
+ TEMPERATURE [K]              =                     303.096              304.196
+ *******************************************************************************
+
+ FOBSH| Reordering: for state           7 old index was           8 with overlap  0.99980239416136729      and former   1.1080736400815890E-004
+ FOBSH| Reordering: for state           8 old index was           7 with overlap -0.99973342405958820      and former  -1.1170774825014516E-004
+ FOBSH| New map:            1           2           3           4           5           6           8           7           9
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA   3.8228227512787871E-002
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.360708036777402
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           17
+ CPU TIME [s]                 =    1.7414459027349949E-002   2.0528560394749922E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               17
+ TIME [fs]                    =                                         1.700000
+ CONSERVED QUANTITY [hartree] =                               0.716455127463E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.650398308461E-02   0.319937113883E-02
+ POTENTIAL ENERGY[hartree]    =          0.360708036777E+00   0.359606140572E+00
+ KINETIC ENERGY [hartree]     =          0.355747090685E+00   0.356846400706E+00
+ TEMPERATURE [K]              =                     303.201              304.138
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.74653680140144540     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.360510449626235
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           18
+ CPU TIME [s]                 =    1.7940427176654339E-002   2.0384775215966832E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               18
+ TIME [fs]                    =                                         1.800000
+ CONSERVED QUANTITY [hartree] =                               0.716455375446E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.681973660366E-02   0.340050255355E-02
+ POTENTIAL ENERGY[hartree]    =          0.360510449626E+00   0.359656379964E+00
+ KINETIC ENERGY [hartree]     =          0.355944925820E+00   0.356796318768E+00
+ TEMPERATURE [K]              =                     303.369              304.095
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.11879211215040632     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.360234773772646
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           19
+ CPU TIME [s]                 =    1.7175983637571335E-002   2.0215891448682858E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               19
+ TIME [fs]                    =                                         1.900000
+ CONSERVED QUANTITY [hartree] =                               0.716455594359E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.709847476027E-02   0.359513266969E-02
+ POTENTIAL ENERGY[hartree]    =          0.360234773773E+00   0.359686821743E+00
+ KINETIC ENERGY [hartree]     =          0.356220820586E+00   0.356766029390E+00
+ TEMPERATURE [K]              =                     303.605              304.069
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.47842942469597805     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.359877833430706
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           20
+ CPU TIME [s]                 =    1.7905315384268761E-002   2.0100362645462153E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               20
+ TIME [fs]                    =                                         2.000000
+ CONSERVED QUANTITY [hartree] =                               0.716455784357E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.734039674044E-02   0.378239587323E-02
+ POTENTIAL ENERGY[hartree]    =          0.359877833431E+00   0.359696372328E+00
+ KINETIC ENERGY [hartree]     =          0.356577950926E+00   0.356756625466E+00
+ TEMPERATURE [K]              =                     303.909              304.061
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA   7.2258783278480856E-002
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.359436976915470
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           21
+ CPU TIME [s]                 =    1.7794750630855560E-002   1.9990571597147552E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               21
+ TIME [fs]                    =                                         2.100000
+ CONSERVED QUANTITY [hartree] =                               0.716455945072E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.754503237714E-02   0.396156904008E-02
+ POTENTIAL ENERGY[hartree]    =          0.359436976915E+00   0.359684020165E+00
+ KINETIC ENERGY [hartree]     =          0.357018968156E+00   0.356769117975E+00
+ TEMPERATURE [K]              =                     304.285              304.072
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.88113644259897539     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.358910097011427
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           22
+ CPU TIME [s]                 =    1.8421302549540997E-002   1.9919241185892712E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               22
+ TIME [fs]                    =                                         2.200000
+ CONSERVED QUANTITY [hartree] =                               0.716456075819E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.771151127902E-02   0.413202096003E-02
+ POTENTIAL ENERGY[hartree]    =          0.358910097011E+00   0.359648841840E+00
+ KINETIC ENERGY [hartree]     =          0.357545978808E+00   0.356804429832E+00
+ TEMPERATURE [K]              =                     304.734              304.102
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.29980718585660093     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.358295650237936
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           23
+ CPU TIME [s]                 =    1.8057328648865223E-002   1.9838288466891518E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               23
+ TIME [fs]                    =                                         2.300000
+ CONSERVED QUANTITY [hartree] =                               0.716456174547E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.783721910673E-02   0.429311653163E-02
+ POTENTIAL ENERGY[hartree]    =          0.358295650238E+00   0.359590007423E+00
+ KINETIC ENERGY [hartree]     =          0.358160524309E+00   0.356863390461E+00
+ TEMPERATURE [K]              =                     305.258              304.152
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.79321635374543298     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.357592689256118
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           24
+ CPU TIME [s]                 =    1.7404274083673954E-002   1.9736871200924117E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               24
+ TIME [fs]                    =                                         2.400000
+ CONSERVED QUANTITY [hartree] =                               0.716456236731E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.791639721831E-02   0.444408656024E-02
+ POTENTIAL ENERGY[hartree]    =          0.357592689256E+00   0.359506785832E+00
+ KINETIC ENERGY [hartree]     =          0.358863547475E+00   0.356946730337E+00
+ TEMPERATURE [K]              =                     305.857              304.223
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.98969065278201740     
+ FOBSH| ATTEMPTED_HOP
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.356800931399114
+
+ FOBSH| Active state before the attempt to hop:           2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.359256514319039
+
+ FOBSH| Active state after the attempt to hop:           3
+ FOBSH| Possible trivial crossing
+ FOBSH| CASE5: successful hop and maybe a crossing, final overlap is :   2.1041395142414624E-003
+ FOBSH| We were localized on molecule           1
+ FOBSH| And now on molecule           3
+ Before,    After
+           2           3
+ ENTER integrator.F
+ STEP NUMBER                  =           25
+ CPU TIME [s]                 =    2.9756391420960426E-002   2.0137652009725570E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               25
+ TIME [fs]                    =                                         2.500000
+ CONSERVED QUANTITY [hartree] =                               0.716448794497E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.03                 0.02
+ ENERGY DRIFT PER ATOM [K]    =         -0.155968692853E-02   0.420393562069E-02
+ POTENTIAL ENERGY[hartree]    =          0.359256514319E+00   0.359496774972E+00
+ KINETIC ENERGY [hartree]     =          0.357192280178E+00   0.356956552330E+00
+ TEMPERATURE [K]              =                     304.433              304.232
+ *******************************************************************************
+
+ FOBSH| Put former active state           3 in new active state           3
+ RANDOM_NUMBER_HOPPING_PROBA  0.42585745537149505     
+ FOBSH| ACTIVE STATE =            3
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.358304746070573
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           26
+ CPU TIME [s]                 =    1.7817921005189419E-002   2.0048431586474180E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               26
+ TIME [fs]                    =                                         2.600000
+ CONSERVED QUANTITY [hartree] =                               0.716448330961E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =         -0.214989994343E-02   0.395955732976E-02
+ POTENTIAL ENERGY[hartree]    =          0.358304746071E+00   0.359450927706E+00
+ KINETIC ENERGY [hartree]     =          0.358143584890E+00   0.357002207429E+00
+ TEMPERATURE [K]              =                     305.243              304.271
+ *******************************************************************************
+
+ FOBSH| Put former active state           3 in new active state           3
+ RANDOM_NUMBER_HOPPING_PROBA   2.0814476145759936E-003
+ FOBSH| ATTEMPTED_HOP
+ FOBSH| ACTIVE STATE =            3
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.357290501041690
+
+ FOBSH| Active state before the attempt to hop:           3
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.352540420837229
+
+ FOBSH| Active state after the attempt to hop:           1
+ FOBSH| Possible trivial crossing
+ FOBSH| CASE5: successful hop and maybe a crossing, final overlap is :   3.8330245899233386E-004
+ FOBSH| We were localized on molecule           3
+ FOBSH| And now on molecule           1
+ Before,    After
+           3           1
+ ENTER integrator.F
+ STEP NUMBER                  =           27
+ CPU TIME [s]                 =    3.0234324745833874E-002   2.0425686888672686E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               27
+ TIME [fs]                    =                                         2.700000
+ CONSERVED QUANTITY [hartree] =                               0.716462224324E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.03                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.155403095396E-01   0.438847407827E-02
+ POTENTIAL ENERGY[hartree]    =          0.352540420837E+00   0.359194983008E+00
+ KINETIC ENERGY [hartree]     =          0.363921803487E+00   0.357258488764E+00
+ TEMPERATURE [K]              =                     310.168              304.489
+ *******************************************************************************
+
+ FOBSH| Put former active state           1 in new active state           1
+ RANDOM_NUMBER_HOPPING_PROBA  0.85366675247500767     
+ FOBSH| ACTIVE STATE =            1
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.351570735492745
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           28
+ CPU TIME [s]                 =    1.8126897513866425E-002   2.0343587268143892E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               28
+ TIME [fs]                    =                                         2.800000
+ CONSERVED QUANTITY [hartree] =                               0.716461920350E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.151532642063E-01   0.477293086856E-02
+ POTENTIAL ENERGY[hartree]    =          0.351570735493E+00   0.358922688453E+00
+ KINETIC ENERGY [hartree]     =          0.364891184858E+00   0.357531085053E+00
+ TEMPERATURE [K]              =                     310.994              304.721
+ *******************************************************************************
+
+ FOBSH| Reordering: for state           6 old index was           7 with overlap -0.99809528839564365      and former  -4.7703536392329324E-005
+ FOBSH| Reordering: for state           7 old index was           6 with overlap  0.99975712771999625      and former   4.7593057860551999E-005
+ FOBSH| New map:            1           2           3           4           5           7           6           8           9
+ FOBSH| Put former active state           1 in new active state           1
+ RANDOM_NUMBER_HOPPING_PROBA  0.51859806894054605     
+ FOBSH| ACTIVE STATE =            1
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.350535571852015
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           29
+ CPU TIME [s]                 =    1.6598114743828773E-002   2.0214433043167508E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               29
+ TIME [fs]                    =                                         2.900000
+ CONSERVED QUANTITY [hartree] =                               0.716461567637E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.147041591762E-01   0.511538701710E-02
+ POTENTIAL ENERGY[hartree]    =          0.350535571852E+00   0.358633477536E+00
+ KINETIC ENERGY [hartree]     =          0.365925995785E+00   0.357820564734E+00
+ TEMPERATURE [K]              =                     311.876              304.968
+ *******************************************************************************
+
+ FOBSH| Put former active state           1 in new active state           1
+ RANDOM_NUMBER_HOPPING_PROBA  0.61918162340060290     
+ FOBSH| ACTIVE STATE =            1
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.349440749339123
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           30
+ CPU TIME [s]                 =    1.8202598206698895E-002   2.0147371881951887E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               30
+ TIME [fs]                    =                                         3.000000
+ CONSERVED QUANTITY [hartree] =                               0.716461170219E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.141981337211E-01   0.541814524057E-02
+ POTENTIAL ENERGY[hartree]    =          0.349440749339E+00   0.358327053263E+00
+ KINETIC ENERGY [hartree]     =          0.367020420880E+00   0.358127226605E+00
+ TEMPERATURE [K]              =                     312.809              305.229
+ *******************************************************************************
+
+ FOBSH| Put former active state           1 in new active state           1
+ RANDOM_NUMBER_HOPPING_PROBA  0.89875203905171352     
+ FOBSH| ACTIVE STATE =            1
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.348292823940502
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           31
+ CPU TIME [s]                 =    1.9437897019088268E-002   2.0124485596053062E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               31
+ TIME [fs]                    =                                         3.100000
+ CONSERVED QUANTITY [hartree] =                               0.716460734733E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.136436348127E-01   0.568348361386E-02
+ POTENTIAL ENERGY[hartree]    =          0.348292823941E+00   0.358003368446E+00
+ KINETIC ENERGY [hartree]     =          0.368167910792E+00   0.358451119643E+00
+ TEMPERATURE [K]              =                     313.787              305.505
+ *******************************************************************************
+
+ FOBSH| Put former active state           1 in new active state           1
+ RANDOM_NUMBER_HOPPING_PROBA  0.84678761338159070     
+ FOBSH| ACTIVE STATE =            1
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.347099002150880
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           32
+ CPU TIME [s]                 =    1.9209828227758408E-002   2.0095902553293854E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               32
+ TIME [fs]                    =                                         3.200000
+ CONSERVED QUANTITY [hartree] =                               0.716460267522E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.130487427669E-01   0.591364796239E-02
+ POTENTIAL ENERGY[hartree]    =          0.347099002151E+00   0.357662606999E+00
+ KINETIC ENERGY [hartree]     =          0.369361265371E+00   0.358792061697E+00
+ TEMPERATURE [K]              =                     314.804              305.796
+ *******************************************************************************
+
+ FOBSH| Put former active state           1 in new active state           1
+ RANDOM_NUMBER_HOPPING_PROBA  0.73469143519546343     
+ FOBSH| ACTIVE STATE =            1
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.345867036928736
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           33
+ CPU TIME [s]                 =    1.8894003704190254E-002   2.0059481376048290E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               33
+ TIME [fs]                    =                                         3.300000
+ CONSERVED QUANTITY [hartree] =                               0.716459778872E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.124265522934E-01   0.611100869970E-02
+ POTENTIAL ENERGY[hartree]    =          0.345867036929E+00   0.357305165482E+00
+ KINETIC ENERGY [hartree]     =          0.370592741943E+00   0.359149658069E+00
+ TEMPERATURE [K]              =                     315.854              306.101
+ *******************************************************************************
+
+ FOBSH| Put former active state           1 in new active state           1
+ RANDOM_NUMBER_HOPPING_PROBA  0.66122600239119700     
+ FOBSH| ACTIVE STATE =            1
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.344605090878711
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           34
+ CPU TIME [s]                 =    1.7556574195623398E-002   1.9985866458976969E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               34
+ TIME [fs]                    =                                         3.400000
+ CONSERVED QUANTITY [hartree] =                               0.716459280329E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.117917653544E-01   0.627808977778E-02
+ POTENTIAL ENERGY[hartree]    =          0.344605090879E+00   0.356931633876E+00
+ KINETIC ENERGY [hartree]     =          0.371854189451E+00   0.359523320756E+00
+ TEMPERATURE [K]              =                     316.929              306.419
+ *******************************************************************************
+
+ FOBSH| Put former active state           1 in new active state           1
+ RANDOM_NUMBER_HOPPING_PROBA  0.17616093872149366     
+ FOBSH| ACTIVE STATE =            1
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.343321579277594
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           35
+ CPU TIME [s]                 =    1.8487342633306980E-002   1.9943051492529257E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               35
+ TIME [fs]                    =                                         3.500000
+ CONSERVED QUANTITY [hartree] =                               0.716458785185E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.111613050124E-01   0.641761021305E-02
+ POTENTIAL ENERGY[hartree]    =          0.343321579278E+00   0.356542775173E+00
+ KINETIC ENERGY [hartree]     =          0.373137205907E+00   0.359912288903E+00
+ TEMPERATURE [K]              =                     318.022              306.751
+ *******************************************************************************
+
+ FOBSH| Put former active state           1 in new active state           1
+ RANDOM_NUMBER_HOPPING_PROBA  0.42427100666062195     
+ FOBSH| ACTIVE STATE =            1
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.342024989486940
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           36
+ CPU TIME [s]                 =    2.0643342286348343E-002   1.9962504014579784E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               36
+ TIME [fs]                    =                                         3.600000
+ CONSERVED QUANTITY [hartree] =                               0.716458306219E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.105514453583E-01   0.653243896709E-02
+ POTENTIAL ENERGY[hartree]    =          0.342024989487E+00   0.356139503349E+00
+ KINETIC ENERGY [hartree]     =          0.374433316732E+00   0.360315650788E+00
+ TEMPERATURE [K]              =                     319.127              307.095
+ *******************************************************************************
+
+ FOBSH| Put former active state           1 in new active state           1
+ RANDOM_NUMBER_HOPPING_PROBA  0.31196465340644308     
+ FOBSH| ACTIVE STATE =            1
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.340723708061787
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           37
+ CPU TIME [s]                 =    1.9292636774480343E-002   1.9944399494577096E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               37
+ TIME [fs]                    =                                         3.700000
+ CONSERVED QUANTITY [hartree] =                               0.716457850261E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.997088074729E-02   0.662536982601E-02
+ POTENTIAL ENERGY[hartree]    =          0.340723708062E+00   0.355722860233E+00
+ KINETIC ENERGY [hartree]     =          0.375734142199E+00   0.360732366772E+00
+ TEMPERATURE [K]              =                     320.236              307.450
+ *******************************************************************************
+
+ FOBSH| Put former active state           1 in new active state           1
+ RANDOM_NUMBER_HOPPING_PROBA  0.77859353971375533     
+ FOBSH| ACTIVE STATE =            1
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.339425917531643
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           38
+ CPU TIME [s]                 =    1.8365359865128994E-002   1.9902845820117934E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               38
+ TIME [fs]                    =                                         3.800000
+ CONSERVED QUANTITY [hartree] =                               0.716457407090E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.940659817851E-02   0.669856004581E-02
+ POTENTIAL ENERGY[hartree]    =          0.339425917532E+00   0.355293993320E+00
+ KINETIC ENERGY [hartree]     =          0.377031489559E+00   0.361161291055E+00
+ TEMPERATURE [K]              =                     321.341              307.815
+ *******************************************************************************
+
+ FOBSH| Reordering: for state           6 old index was           7 with overlap  0.99692103187361747      and former   2.4955508213103466E-006
+ FOBSH| Reordering: for state           7 old index was           6 with overlap -0.99969235289009950      and former  -2.3911813349616148E-006
+ FOBSH| New map:            1           2           3           4           5           7           6           8           9
+ FOBSH| Put former active state           1 in new active state           1
+ RANDOM_NUMBER_HOPPING_PROBA  0.94514094539669269     
+ FOBSH| ATTEMPTED_HOP
+ FOBSH| ACTIVE STATE =            1
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.338139686617424
+
+ FOBSH| Active state before the attempt to hop:           1
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.339257710500889
+
+ FOBSH| Active state after the attempt to hop:           2
+ FOBSH| Possible trivial crossing
+ FOBSH| CASE5: successful hop and maybe a crossing, final overlap is :   5.7031397964770383E-003
+ FOBSH| We were localized on molecule           1
+ FOBSH| And now on molecule           1
+ ENTER integrator.F
+ STEP NUMBER                  =           39
+ CPU TIME [s]                 =    3.1275210902094841E-002   2.0194444924784009E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               39
+ TIME [fs]                    =                                         3.900000
+ CONSERVED QUANTITY [hartree] =                               0.716453640615E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.03                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.461080250221E-02   0.664502780111E-02
+ POTENTIAL ENERGY[hartree]    =          0.339257710501E+00   0.354882806581E+00
+ KINETIC ENERGY [hartree]     =          0.377195930114E+00   0.361572435647E+00
+ TEMPERATURE [K]              =                     321.482              308.166
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.38081516423485112     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.337968900031976
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           40
+ CPU TIME [s]                 =    1.8278083764016628E-002   2.0146535895764827E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               40
+ TIME [fs]                    =                                         4.000000
+ CONSERVED QUANTITY [hartree] =                               0.716452811433E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.355501724455E-02   0.656777753719E-02
+ POTENTIAL ENERGY[hartree]    =          0.337968900032E+00   0.354459958917E+00
+ KINETIC ENERGY [hartree]     =          0.378483911401E+00   0.361995222541E+00
+ TEMPERATURE [K]              =                     322.579              308.526
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.22335779398177313     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.336743248041545
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           41
+ CPU TIME [s]                 =    1.9490090198814869E-002   2.0130525025107513E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               41
+ TIME [fs]                    =                                         4.100000
+ CONSERVED QUANTITY [hartree] =                               0.716452171402E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.274007563426E-02   0.647441895419E-02
+ POTENTIAL ENERGY[hartree]    =          0.336743248042E+00   0.354027844018E+00
+ KINETIC ENERGY [hartree]     =          0.379708923360E+00   0.362427264024E+00
+ TEMPERATURE [K]              =                     323.623              308.894
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.44104408070844808     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.335590962654947
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           42
+ CPU TIME [s]                 =    1.9842174835503101E-002   2.0123659544402647E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               42
+ TIME [fs]                    =                                         4.200000
+ CONSERVED QUANTITY [hartree] =                               0.716451703101E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.214379451441E-02   0.637130884848E-02
+ POTENTIAL ENERGY[hartree]    =          0.335590962655E+00   0.353588870652E+00
+ KINETIC ENERGY [hartree]     =          0.380860740446E+00   0.362866156320E+00
+ TEMPERATURE [K]              =                     324.605              309.268
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.18696990234072780     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.334520077611563
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           43
+ CPU TIME [s]                 =    1.9455366767942905E-002   2.0108117851926840E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               43
+ TIME [fs]                    =                                         4.300000
+ CONSERVED QUANTITY [hartree] =                               0.716451336734E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.167730564769E-02   0.626214598335E-02
+ POTENTIAL ENERGY[hartree]    =          0.334520077612E+00   0.353145410349E+00
+ KINETIC ENERGY [hartree]     =          0.381931259123E+00   0.363309530804E+00
+ TEMPERATURE [K]              =                     325.517              309.646
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA   7.9731045892475538E-002
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.333537228161974
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           44
+ CPU TIME [s]                 =    1.7237305641174316E-002   2.0042872119864281E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               44
+ TIME [fs]                    =                                         4.400000
+ CONSERVED QUANTITY [hartree] =                               0.716451008258E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.125906221481E-02   0.614843953406E-02
+ POTENTIAL ENERGY[hartree]    =          0.333537228162E+00   0.352699769844E+00
+ KINETIC ENERGY [hartree]     =          0.382913780096E+00   0.363755081924E+00
+ TEMPERATURE [K]              =                     326.355              310.026
+ *******************************************************************************
+
+ FOBSH| Reordering: for state           7 old index was           8 with overlap  0.99869496540544511      and former   3.9023393967880778E-006
+ FOBSH| Reordering: for state           8 old index was           7 with overlap  0.99988928895871620      and former   3.0979332657803709E-006
+ FOBSH| New map:            1           2           3           4           5           6           8           7           9
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.49622006975435062     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.332648395453858
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           45
+ CPU TIME [s]                 =    1.7338930629193783E-002   1.9982784531182716E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               45
+ TIME [fs]                    =                                         4.500000
+ CONSERVED QUANTITY [hartree] =                               0.716450686879E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.849855400132E-03   0.603069321998E-02
+ POTENTIAL ENERGY[hartree]    =          0.332648395454E+00   0.352254183747E+00
+ KINETIC ENERGY [hartree]     =          0.383802291426E+00   0.364200575468E+00
+ TEMPERATURE [K]              =                     327.112              310.406
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.57467988658077473     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.331859275210189
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           46
+ CPU TIME [s]                 =    1.9309620372951031E-002   1.9968150527742895E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               46
+ TIME [fs]                    =                                         4.600000
+ CONSERVED QUANTITY [hartree] =                               0.716450369850E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.446187220168E-03   0.590929091563E-02
+ POTENTIAL ENERGY[hartree]    =          0.331859275210E+00   0.351810816170E+00
+ KINETIC ENERGY [hartree]     =          0.384591094640E+00   0.364643847624E+00
+ TEMPERATURE [K]              =                     327.784              310.783
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.51125998034655962     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.331175312696423
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           47
+ CPU TIME [s]                 =    1.9463337957859039E-002   1.9957409834766640E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               47
+ TIME [fs]                    =                                         4.700000
+ CONSERVED QUANTITY [hartree] =                               0.716450067277E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.609246024073E-04   0.578485758982E-02
+ POTENTIAL ENERGY[hartree]    =          0.331175312696E+00   0.351371762904E+00
+ KINETIC ENERGY [hartree]     =          0.385274754580E+00   0.365082803091E+00
+ TEMPERATURE [K]              =                     328.367              311.158
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.11334708579261644     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.330601571583723
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           48
+ CPU TIME [s]                 =    1.7829285003244877E-002   1.9913073900776602E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               48
+ TIME [fs]                    =                                         4.800000
+ CONSERVED QUANTITY [hartree] =                               0.716449792675E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =         -0.288721340310E-03   0.565832469544E-02
+ POTENTIAL ENERGY[hartree]    =          0.330601571584E+00   0.350939050585E+00
+ KINETIC ENERGY [hartree]     =          0.385848221091E+00   0.365515415966E+00
+ TEMPERATURE [K]              =                     328.856              311.526
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.59089340872732676     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.330142555760228
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           49
+ CPU TIME [s]                 =    1.7293302342295647E-002   1.9859609175093315E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               49
+ TIME [fs]                    =                                         4.900000
+ CONSERVED QUANTITY [hartree] =                               0.716449557900E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =         -0.587657265827E-03   0.553085567583E-02
+ POTENTIAL ENERGY[hartree]    =          0.330142555760E+00   0.350514632324E+00
+ KINETIC ENERGY [hartree]     =          0.386307002140E+00   0.365939734052E+00
+ TEMPERATURE [K]              =                     329.247              311.888
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.91886182108969872     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.329802043232358
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           50
+ CPU TIME [s]                 =    1.8989523872733116E-002   1.9842207469046112E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               50
+ TIME [fs]                    =                                         5.000000
+ CONSERVED QUANTITY [hartree] =                               0.716449373423E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =         -0.822548353439E-03   0.540378759524E-02
+ POTENTIAL ENERGY[hartree]    =          0.329802043232E+00   0.350100380542E+00
+ KINETIC ENERGY [hartree]     =          0.386647330191E+00   0.366353885974E+00
+ TEMPERATURE [K]              =                     329.537              312.241
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.85858758506044230     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.329582944569430
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           51
+ CPU TIME [s]                 =    1.9006668590009212E-002   1.9825824353770879E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               51
+ TIME [fs]                    =                                         5.100000
+ CONSERVED QUANTITY [hartree] =                               0.716449246743E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =         -0.983848317543E-03   0.527853983224E-02
+ POTENTIAL ENERGY[hartree]    =          0.329582944569E+00   0.349698077876E+00
+ KINETIC ENERGY [hartree]     =          0.386866302174E+00   0.366756090214E+00
+ TEMPERATURE [K]              =                     329.724              312.584
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.97003902349810056     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.329487191323546
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           52
+ CPU TIME [s]                 =    1.9089338369667530E-002   1.9811661161768891E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               52
+ TIME [fs]                    =                                         5.200000
+ CONSERVED QUANTITY [hartree] =                               0.716449182165E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =         -0.106607423177E-02   0.515652802332E-02
+ POTENTIAL ENERGY[hartree]    =          0.329487191324E+00   0.349309406980E+00
+ KINETIC ENERGY [hartree]     =          0.386961990842E+00   0.367144665226E+00
+ TEMPERATURE [K]              =                     329.805              312.915
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.98211489228529347     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.329515669853335
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           53
+ CPU TIME [s]                 =    1.7237870953977108E-002   1.9763099082376591E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               53
+ TIME [fs]                    =                                         5.300000
+ CONSERVED QUANTITY [hartree] =                               0.716449186687E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =         -0.106031664044E-02   0.503922906740E-02
+ POTENTIAL ENERGY[hartree]    =          0.329515669853E+00   0.348935940242E+00
+ KINETIC ENERGY [hartree]     =          0.386933516834E+00   0.367518039784E+00
+ TEMPERATURE [K]              =                     329.781              313.233
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.90157791611929583     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.329668157588339
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           54
+ CPU TIME [s]                 =    1.8155358731746674E-002   1.9733326112920481E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               54
+ TIME [fs]                    =                                         5.400000
+ CONSERVED QUANTITY [hartree] =                               0.716449261254E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =         -0.965371777250E-03   0.492803275546E-02
+ POTENTIAL ENERGY[hartree]    =          0.329668157588E+00   0.348579129452E+00
+ KINETIC ENERGY [hartree]     =          0.386781103666E+00   0.367874763189E+00
+ TEMPERATURE [K]              =                     329.651              313.537
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA   1.1035873623439512E-002
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.329943287069364
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           55
+ CPU TIME [s]                 =    1.6761005856096745E-002   1.9679283926432773E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               55
+ TIME [fs]                    =                                         5.500000
+ CONSERVED QUANTITY [hartree] =                               0.716449407978E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =         -0.778549921545E-03   0.482427670679E-02
+ POTENTIAL ENERGY[hartree]    =          0.329943287069E+00   0.348240295954E+00
+ KINETIC ENERGY [hartree]     =          0.386506120909E+00   0.368213515148E+00
+ TEMPERATURE [K]              =                     329.417              313.826
+ *******************************************************************************
+
+ FOBSH| Reordering: for state           3 old index was           4 with overlap -0.99994917243568637      and former  -4.0717602469459185E-007
+ FOBSH| Reordering: for state           4 old index was           3 with overlap -0.99997079020661139      and former  -4.0219366553863115E-007
+ FOBSH| New map:            1           2           4           3           5           6           7           8           9
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA   7.1273577591614836E-003
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.330338533207336
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           56
+ CPU TIME [s]                 =    1.8998267129063606E-002   1.9667122912194038E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               56
+ TIME [fs]                    =                                         5.600000
+ CONSERVED QUANTITY [hartree] =                               0.716449625023E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =         -0.502190519032E-03   0.472916122061E-02
+ POTENTIAL ENERGY[hartree]    =          0.330338533207E+00   0.347920621620E+00
+ KINETIC ENERGY [hartree]     =          0.386111091815E+00   0.368533114731E+00
+ TEMPERATURE [K]              =                     329.080              314.098
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.93035138596619682     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.330850223169354
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           57
+ CPU TIME [s]                 =    1.8796970136463642E-002   1.9651857074023331E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               57
+ TIME [fs]                    =                                         5.700000
+ CONSERVED QUANTITY [hartree] =                               0.716449912052E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =         -0.136720638981E-03   0.464379487220E-02
+ POTENTIAL ENERGY[hartree]    =          0.330850223169E+00   0.347621140945E+00
+ KINETIC ENERGY [hartree]     =          0.385599688883E+00   0.368832528313E+00
+ TEMPERATURE [K]              =                     328.644              314.353
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA   5.0709748302499682E-004
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.331473550746504
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           58
+ CPU TIME [s]                 =    1.8191475421190262E-002   1.9626678080008966E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               58
+ TIME [fs]                    =                                         5.800000
+ CONSERVED QUANTITY [hartree] =                               0.716450267316E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.315632348471E-03   0.456917138041E-02
+ POTENTIAL ENERGY[hartree]    =          0.331473550747E+00   0.347342734217E+00
+ KINETIC ENERGY [hartree]     =          0.384976716570E+00   0.369110876386E+00
+ TEMPERATURE [K]              =                     328.113              314.591
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.78637256649450726     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.332202614115437
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           59
+ CPU TIME [s]                 =    1.7796261236071587E-002   1.9595654065704946E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               59
+ TIME [fs]                    =                                         5.900000
+ CONSERVED QUANTITY [hartree] =                               0.716450687325E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.850422545309E-03   0.450614173914E-02
+ POTENTIAL ENERGY[hartree]    =          0.332202614115E+00   0.347086122012E+00
+ KINETIC ENERGY [hartree]     =          0.384248073209E+00   0.369367439044E+00
+ TEMPERATURE [K]              =                     327.492              314.809
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.52510913978859342     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.333030467184789
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           60
+ CPU TIME [s]                 =    1.7093467526137829E-002   1.9553950956712158E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               60
+ TIME [fs]                    =                                         6.000000
+ CONSERVED QUANTITY [hartree] =                               0.716451168506E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.146310386530E-02   0.445542444124E-02
+ POTENTIAL ENERGY[hartree]    =          0.333030467185E+00   0.346851861099E+00
+ KINETIC ENERGY [hartree]     =          0.383420701322E+00   0.369601660082E+00
+ TEMPERATURE [K]              =                     326.787              315.009
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.72732583696110509     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.333949178639707
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           61
+ CPU TIME [s]                 =    1.7438857816159725E-002   1.9519277298670316E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               61
+ TIME [fs]                    =                                         6.100000
+ CONSERVED QUANTITY [hartree] =                               0.716451705585E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.214695743249E-02   0.441758071979E-02
+ POTENTIAL ENERGY[hartree]    =          0.333949178640E+00   0.346640341714E+00
+ KINETIC ENERGY [hartree]     =          0.382502526945E+00   0.369813149703E+00
+ TEMPERATURE [K]              =                     326.004              315.189
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.85887945388605047     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.334949914096796
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           62
+ CPU TIME [s]                 =    1.8222940154373646E-002   1.9498368635052627E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               62
+ TIME [fs]                    =                                         6.200000
+ CONSERVED QUANTITY [hartree] =                               0.716452294384E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.289666719601E-02   0.439304985650E-02
+ POTENTIAL ENERGY[hartree]    =          0.334949914097E+00   0.346451786430E+00
+ KINETIC ENERGY [hartree]     =          0.381502380288E+00   0.370001685680E+00
+ TEMPERATURE [K]              =                     325.152              315.350
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.50763269690508050     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.336023016078759
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           63
+ CPU TIME [s]                 =    1.8285471014678478E-002   1.9479116291872083E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               63
+ TIME [fs]                    =                                         6.300000
+ CONSERVED QUANTITY [hartree] =                               0.716452927919E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.370333688893E-02   0.438210203162E-02
+ POTENTIAL ENERGY[hartree]    =          0.336023016079E+00   0.346286250393E+00
+ KINETIC ENERGY [hartree]     =          0.380429911840E+00   0.370167213080E+00
+ TEMPERATURE [K]              =                     324.238              315.491
+ *******************************************************************************
+
+ FOBSH| Reordering: for state           5 old index was           6 with overlap  0.99993312168219228      and former   2.3829449427968055E-005
+ FOBSH| Reordering: for state           6 old index was           5 with overlap  0.99992826275628532      and former   2.3703344291229186E-005
+ FOBSH| New map:            1           2           3           4           6           5           7           8           9
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.46119902467573931     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.337158110904688
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           64
+ CPU TIME [s]                 =    1.8609457649290562E-002   1.9465527875581746E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               64
+ TIME [fs]                    =                                         6.400000
+ CONSERVED QUANTITY [hartree] =                               0.716453600191E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.455933154344E-02   0.438487124274E-02
+ POTENTIAL ENERGY[hartree]    =          0.337158110905E+00   0.346143623213E+00
+ KINETIC ENERGY [hartree]     =          0.379295489287E+00   0.370309842395E+00
+ TEMPERATURE [K]              =                     323.271              315.613
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.95359905468034645     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.338344214783967
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           65
+ CPU TIME [s]                 =    1.7051449045538902E-002   1.9428388201273395E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               65
+ TIME [fs]                    =                                         6.500000
+ CONSERVED QUANTITY [hartree] =                               0.716454303782E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.545520234215E-02   0.440133787504E-02
+ POTENTIAL ENERGY[hartree]    =          0.338344214784E+00   0.346023632314E+00
+ KINETIC ENERGY [hartree]     =          0.378110088998E+00   0.370429846189E+00
+ TEMPERATURE [K]              =                     322.261              315.715
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.65189114552767913     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.339569842276591
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           66
+ CPU TIME [s]                 =    1.6961934044957161E-002   1.9391017683753453E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               66
+ TIME [fs]                    =                                         6.600000
+ CONSERVED QUANTITY [hartree] =                               0.716455030963E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.638111101997E-02   0.443133443784E-02
+ POTENTIAL ENERGY[hartree]    =          0.339569842277E+00   0.345925847617E+00
+ KINETIC ENERGY [hartree]     =          0.376885188686E+00   0.370527654409E+00
+ TEMPERATURE [K]              =                     321.217              315.798
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA   3.1725906207922032E-002
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.340823132504157
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           67
+ CPU TIME [s]                 =    1.7111068591475487E-002   1.9356988592823931E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               67
+ TIME [fs]                    =                                         6.700000
+ CONSERVED QUANTITY [hartree] =                               0.716455774192E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.732745304195E-02   0.447456008865E-02
+ POTENTIAL ENERGY[hartree]    =          0.340823132504E+00   0.345849687690E+00
+ KINETIC ENERGY [hartree]     =          0.375632641687E+00   0.370603848249E+00
+ TEMPERATURE [K]              =                     320.149              315.863
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.25823595717388187     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.342091974839152
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           68
+ CPU TIME [s]                 =    1.8361749127507210E-002   1.9342352718333979E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               68
+ TIME [fs]                    =                                         6.800000
+ CONSERVED QUANTITY [hartree] =                               0.716456525301E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.828382910664E-02   0.453057875068E-02
+ POTENTIAL ENERGY[hartree]    =          0.342091974839E+00   0.345794427206E+00
+ KINETIC ENERGY [hartree]     =          0.374364550462E+00   0.370659152693E+00
+ TEMPERATURE [K]              =                     319.068              315.910
+ *******************************************************************************
+
+ FOBSH| Reordering: for state           4 old index was           5 with overlap  0.99977900621572657      and former   1.4863905173594824E-006
+ FOBSH| Reordering: for state           5 old index was           4 with overlap  0.99999225473846243      and former   1.5005191182699913E-006
+ FOBSH| New map:            1           2           3           5           4           6           7           8           9
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.17752413310227444     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.343364139020662
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           69
+ CPU TIME [s]                 =    1.7880124039947987E-002   1.9321160998357369E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               69
+ TIME [fs]                    =                                         6.900000
+ CONSERVED QUANTITY [hartree] =                               0.716457275945E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.923961274678E-02   0.459882562019E-02
+ POTENTIAL ENERGY[hartree]    =          0.343364139021E+00   0.345759205639E+00
+ KINETIC ENERGY [hartree]     =          0.373093136924E+00   0.370694427827E+00
+ TEMPERATURE [K]              =                     317.985              315.940
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA   4.1620929179981649E-002
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.344627404838206
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           70
+ CPU TIME [s]                 =    1.7179016955196857E-002   1.9290558940597932E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               70
+ TIME [fs]                    =                                         7.000000
+ CONSERVED QUANTITY [hartree] =                               0.716458017381E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.101836720335E-01   0.467860914038E-02
+ POTENTIAL ENERGY[hartree]    =          0.344627404838E+00   0.345743037056E+00
+ KINETIC ENERGY [hartree]     =          0.371830612543E+00   0.370710659037E+00
+ TEMPERATURE [K]              =                     316.909              315.954
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.19998046210872386     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.345869701660473
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           71
+ CPU TIME [s]                 =    1.7664394341409206E-002   1.9267655213848798E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               71
+ TIME [fs]                    =                                         7.100000
+ CONSERVED QUANTITY [hartree] =                               0.716458743588E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.111083411369E-01   0.476916874596E-02
+ POTENTIAL ENERGY[hartree]    =          0.345869701660E+00   0.345744821064E+00
+ KINETIC ENERGY [hartree]     =          0.370589041928E+00   0.370708946120E+00
+ TEMPERATURE [K]              =                     315.851              315.953
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.57659556156300873     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.347079234307335
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           72
+ CPU TIME [s]                 =    1.6936028376221657E-002   1.9235271507770640E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               72
+ TIME [fs]                    =                                         7.200000
+ CONSERVED QUANTITY [hartree] =                               0.716459443819E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.119999336245E-01   0.486959603594E-02
+ POTENTIAL ENERGY[hartree]    =          0.347079234307E+00   0.345763354581E+00
+ KINETIC ENERGY [hartree]     =          0.369380209511E+00   0.370690491445E+00
+ TEMPERATURE [K]              =                     314.820              315.937
+ *******************************************************************************
+
+ FOBSH| Reordering: for state           5 old index was           6 with overlap  0.99929835885823992      and former   1.6516269690263670E-006
+ FOBSH| Reordering: for state           6 old index was           5 with overlap  0.99999458134176655      and former   1.5435635808650323E-006
+ FOBSH| New map:            1           2           3           4           6           5           7           8           9
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.94096842378411272     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.348244615749049
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           73
+ CPU TIME [s]                 =    1.7371036112308502E-002   1.9209734036599924E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               73
+ TIME [fs]                    =                                         7.300000
+ CONSERVED QUANTITY [hartree] =                               0.716460111429E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.128499915909E-01   0.497891652299E-02
+ POTENTIAL ENERGY[hartree]    =          0.348244615749E+00   0.345797344460E+00
+ KINETIC ENERGY [hartree]     =          0.368215495680E+00   0.370656587393E+00
+ TEMPERATURE [K]              =                     313.828              315.908
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.55433976121774653     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.349354986399064
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           74
+ CPU TIME [s]                 =    1.7456507310271263E-002   1.9186041783541431E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               74
+ TIME [fs]                    =                                         7.400000
+ CONSERVED QUANTITY [hartree] =                               0.716460739351E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.136495151425E-01   0.509608677461E-02
+ POTENTIAL ENERGY[hartree]    =          0.349354986399E+00   0.345845420703E+00
+ KINETIC ENERGY [hartree]     =          0.367105752952E+00   0.370608603144E+00
+ TEMPERATURE [K]              =                     312.882              315.867
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.33593510740308613     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.350400134660391
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           75
+ CPU TIME [s]                 =    1.8060896545648575E-002   1.9171039847036195E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               75
+ TIME [fs]                    =                                         7.500000
+ CONSERVED QUANTITY [hartree] =                               0.716461319627E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.143883717026E-01   0.521998390698E-02
+ POTENTIAL ENERGY[hartree]    =          0.350400134660E+00   0.345906150222E+00
+ KINETIC ENERGY [hartree]     =          0.366061184966E+00   0.370547970902E+00
+ TEMPERATURE [K]              =                     311.991              315.816
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.60387150049332350     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.351370612431968
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           76
+ CPU TIME [s]                 =    1.8159583210945129E-002   1.9157731207087629E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               76
+ TIME [fs]                    =                                         7.600000
+ CONSERVED QUANTITY [hartree] =                               0.716461846706E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.150594941922E-01   0.534945114758E-02
+ POTENTIAL ENERGY[hartree]    =          0.351370612432E+00   0.345978051041E+00
+ KINETIC ENERGY [hartree]     =          0.365091234274E+00   0.370476171736E+00
+ TEMPERATURE [K]              =                     311.165              315.754
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.26276310571812234     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.352257833610379
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           77
+ CPU TIME [s]                 =    1.7209647223353386E-002   1.9132431415091081E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               77
+ TIME [fs]                    =                                         7.700000
+ CONSERVED QUANTITY [hartree] =                               0.716462314294E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.156548666421E-01   0.548328771244E-02
+ POTENTIAL ENERGY[hartree]    =          0.352257833610E+00   0.346059606659E+00
+ KINETIC ENERGY [hartree]     =          0.364204480684E+00   0.370394721203E+00
+ TEMPERATURE [K]              =                     310.409              315.685
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA   1.0963885411733801E-002
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.353054170622716
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           78
+ CPU TIME [s]                 =    1.7407188192009926E-002   1.9110312912231066E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               78
+ TIME [fs]                    =                                         7.800000
+ CONSERVED QUANTITY [hartree] =                               0.716462717379E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.161681082131E-01   0.562027259066E-02
+ POTENTIAL ENERGY[hartree]    =          0.353054170623E+00   0.346149280556E+00
+ KINETIC ENERGY [hartree]     =          0.363408546756E+00   0.370305154863E+00
+ TEMPERATURE [K]              =                     309.731              315.609
+ *******************************************************************************
+
+ FOBSH| Reordering: for state           6 old index was           7 with overlap -0.99749955318522054      and former   2.3326107766776615E-006
+ FOBSH| Reordering: for state           7 old index was           6 with overlap -0.99999614984333696      and former   2.5257438516536093E-006
+ FOBSH| New map:            1           2           3           4           5           7           6           8           9
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.31666811505960490     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.353753037273198
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           79
+ CPU TIME [s]                 =    1.6865470446646214E-002   1.9081897184818598E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               79
+ TIME [fs]                    =                                         7.900000
+ CONSERVED QUANTITY [hartree] =                               0.716463051292E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.165932743947E-01   0.575917134767E-02
+ POTENTIAL ENERGY[hartree]    =          0.353753037273E+00   0.346245530641E+00
+ KINETIC ENERGY [hartree]     =          0.362710014018E+00   0.370209013840E+00
+ TEMPERATURE [K]              =                     309.135              315.527
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.14748433923272944     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.354348960633215
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           80
+ CPU TIME [s]                 =    1.7095569521188736E-002   1.9057068089023226E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               80
+ TIME [fs]                    =                                         8.000000
+ CONSERVED QUANTITY [hartree] =                               0.716463312060E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.169253064778E-01   0.589874803680E-02
+ POTENTIAL ENERGY[hartree]    =          0.354348960633E+00   0.346346823516E+00
+ KINETIC ENERGY [hartree]     =          0.362114351426E+00   0.370107830560E+00
+ TEMPERATURE [K]              =                     308.628              315.440
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.98350622052543202     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.354837643919911
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           81
+ CPU TIME [s]                 =    1.6984197311103344E-002   1.9031477091764955E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               81
+ TIME [fs]                    =                                         8.100000
+ CONSERVED QUANTITY [hartree] =                               0.716463496541E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.171602041111E-01   0.603777835870E-02
+ POTENTIAL ENERGY[hartree]    =          0.354837643920E+00   0.346451648459E+00
+ KINETIC ENERGY [hartree]     =          0.361625852621E+00   0.370003114783E+00
+ TEMPERATURE [K]              =                     308.211              315.351
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.66142876459685696     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.355216016685476
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           82
+ CPU TIME [s]                 =    1.8570330925285816E-002   1.9025853358027405E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               82
+ TIME [fs]                    =                                         8.200000
+ CONSERVED QUANTITY [hartree] =                               0.716463602264E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.172948196905E-01   0.617505935055E-02
+ POTENTIAL ENERGY[hartree]    =          0.355216016685E+00   0.346558530998E+00
+ KINETIC ENERGY [hartree]     =          0.361247585579E+00   0.369896340037E+00
+ TEMPERATURE [K]              =                     307.889              315.260
+ *******************************************************************************
+
+ FOBSH| Reordering: for state           4 old index was           5 with overlap  0.99833492776005828      and former  -5.3795161589482478E-004
+ FOBSH| Reordering: for state           5 old index was           4 with overlap -0.99833795614098142      and former   5.3797159481419621E-004
+ FOBSH| New map:            1           2           3           5           4           6           7           8           9
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.67933644058694598     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.355482274178162
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           83
+ CPU TIME [s]                 =    1.8472674302756786E-002   1.9019188550132581E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               83
+ TIME [fs]                    =                                         8.300000
+ CONSERVED QUANTITY [hartree] =                               0.716463626152E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.173252358196E-01   0.630939882608E-02
+ POTENTIAL ENERGY[hartree]    =          0.355482274178E+00   0.346666045976E+00
+ KINETIC ENERGY [hartree]     =          0.360981351974E+00   0.369788930542E+00
+ TEMPERATURE [K]              =                     307.662              315.169
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.83706114629952211     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.355635915279745
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           84
+ CPU TIME [s]                 =    1.7047293484210968E-002   1.8995713608871610E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               84
+ TIME [fs]                    =                                         8.400000
+ CONSERVED QUANTITY [hartree] =                               0.716463565453E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.172479487293E-01   0.643961965826E-02
+ POTENTIAL ENERGY[hartree]    =          0.355635915280E+00   0.346772830135E+00
+ KINETIC ENERGY [hartree]     =          0.360827650174E+00   0.369682248633E+00
+ TEMPERATURE [K]              =                     307.531              315.078
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.93866947927587951     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.355677779888930
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           85
+ CPU TIME [s]                 =    1.7261358909308910E-002   1.8975309435935579E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               85
+ TIME [fs]                    =                                         8.500000
+ CONSERVED QUANTITY [hartree] =                               0.716463414437E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.170556613662E-01   0.656451426659E-02
+ POTENTIAL ENERGY[hartree]    =          0.355677779889E+00   0.346877594249E+00
+ KINETIC ENERGY [hartree]     =          0.360785634548E+00   0.369577582585E+00
+ TEMPERATURE [K]              =                     307.495              314.988
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.19639144950765688     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.355610119824334
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           86
+ CPU TIME [s]                 =    1.6734153963625431E-002   1.8949249488583134E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               86
+ TIME [fs]                    =                                         8.600000
+ CONSERVED QUANTITY [hartree] =                               0.716463162827E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.167352908824E-01   0.668277911096E-02
+ POTENTIAL ENERGY[hartree]    =          0.355610119824E+00   0.346979135244E+00
+ KINETIC ENERGY [hartree]     =          0.360853043003E+00   0.369476134450E+00
+ TEMPERATURE [K]              =                     307.553              314.902
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.11171424953186976     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.355436745472955
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           87
+ CPU TIME [s]                 =    1.6197065822780132E-002   1.8917615193573902E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               87
+ TIME [fs]                    =                                         8.700000
+ CONSERVED QUANTITY [hartree] =                               0.716462780603E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.162486103207E-01   0.679273119383E-02
+ POTENTIAL ENERGY[hartree]    =          0.355436745473E+00   0.347076349155E+00
+ KINETIC ENERGY [hartree]     =          0.361026035130E+00   0.369379006872E+00
+ TEMPERATURE [K]              =                     307.700              314.819
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.77694847379002785     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.355163424928116
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           88
+ CPU TIME [s]                 =    1.5229862183332443E-002   1.8875708909366615E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               88
+ TIME [fs]                    =                                         8.800000
+ CONSERVED QUANTITY [hartree] =                               0.716462184544E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.154896583614E-01   0.689155991165E-02
+ POTENTIAL ENERGY[hartree]    =          0.355163424928E+00   0.347168247743E+00
+ KINETIC ENERGY [hartree]     =          0.361298759616E+00   0.369287185880E+00
+ TEMPERATURE [K]              =                     307.932              314.741
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.19028213517244072     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.354799039546168
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           89
+ CPU TIME [s]                 =    1.5560673549771309E-002   1.8838461321056554E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               89
+ TIME [fs]                    =                                         8.900000
+ CONSERVED QUANTITY [hartree] =                               0.716461117348E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.141308127910E-01   0.697289983164E-02
+ POTENTIAL ENERGY[hartree]    =          0.354799039546E+00   0.347253986977E+00
+ KINETIC ENERGY [hartree]     =          0.361662077801E+00   0.369201510508E+00
+ TEMPERATURE [K]              =                     308.242              314.668
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ RANDOM_NUMBER_HOPPING_PROBA  0.40485233306169638     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.354359101095565
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           90
+ CPU TIME [s]                 =    1.8026215024292469E-002   1.8829436362203619E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               90
+ TIME [fs]                    =                                         9.000000
+ CONSERVED QUANTITY [hartree] =                               0.716458866308E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.112645983849E-01   0.702058537112E-02
+ POTENTIAL ENERGY[hartree]    =          0.354359101096E+00   0.347332932690E+00
+ KINETIC ENERGY [hartree]     =          0.362099765213E+00   0.369122602227E+00
+ TEMPERATURE [K]              =                     308.615              314.601
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ FOBSH| *** WARNING: difference between exact flux and sum of Tully's proba is  0.13174980622950433      ***
+ RANDOM_NUMBER_HOPPING_PROBA  0.87138764752276032     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.353873356850803
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           91
+ CPU TIME [s]                 =    1.5395609661936760E-002   1.8791702002860029E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               91
+ TIME [fs]                    =                                         9.100000
+ CONSERVED QUANTITY [hartree] =                               0.716455609711E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.711802226184E-02   0.702165610618E-02
+ POTENTIAL ENERGY[hartree]    =          0.353873356851E+00   0.347404805483E+00
+ KINETIC ENERGY [hartree]     =          0.362582252860E+00   0.369050730256E+00
+ TEMPERATURE [K]              =                     309.026              314.539
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ FOBSH| *** WARNING: difference between exact flux and sum of Tully's proba is  0.33217110710456405      ***
+ RANDOM_NUMBER_HOPPING_PROBA  0.52482735648846490     
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.353375506337796
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           92
+ CPU TIME [s]                 =    1.6796967945992947E-002   1.8770020110937560E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               92
+ TIME [fs]                    =                                         9.200000
+ CONSERVED QUANTITY [hartree] =                               0.716456717458E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.852849994413E-02   0.703803484355E-02
+ POTENTIAL ENERGY[hartree]    =          0.353375506338E+00   0.347469704405E+00
+ KINETIC ENERGY [hartree]     =          0.363081211120E+00   0.368985844179E+00
+ TEMPERATURE [K]              =                     309.452              314.484
+ *******************************************************************************
+
+ FOBSH| Put former active state           2 in new active state           2
+ FOBSH| *** WARNING: difference between exact flux and sum of Tully's proba is  0.31165323641099524      ***
+ RANDOM_NUMBER_HOPPING_PROBA  0.11078305427051972     
+ FOBSH| ATTEMPTED_HOP
+ FOBSH| ACTIVE STATE =            2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.352860284783839
+
+ FOBSH| Active state before the attempt to hop:           2
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.352316438932034
+
+ FOBSH| Active state after the attempt to hop:           1
+ FOBSH| Possible trivial crossing
+ FOBSH| CASE5: successful hop and maybe a crossing, final overlap is :   3.3927196977086752E-002
+ FOBSH| We were localized on molecule           3
+ FOBSH| And now on molecule           1
+ Before,    After
+           2           1
+ ENTER integrator.F
+ STEP NUMBER                  =           93
+ CPU TIME [s]                 =    3.7634345702826977E-002   1.8972862321603039E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               93
+ TIME [fs]                    =                                         9.300000
+ CONSERVED QUANTITY [hartree] =                               0.716460361279E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.04                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.131681217830E-01   0.710394975688E-02
+ POTENTIAL ENERGY[hartree]    =          0.352316438932E+00   0.347521819830E+00
+ KINETIC ENERGY [hartree]     =          0.364143922347E+00   0.368933780503E+00
+ TEMPERATURE [K]              =                     310.357              314.440
+ *******************************************************************************
+
+ FOBSH| Put former active state           1 in new active state           1
+ RANDOM_NUMBER_HOPPING_PROBA  0.96769431519331828     
+ FOBSH| ACTIVE STATE =            1
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.351588940560613
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           94
+ CPU TIME [s]                 =    1.7837847582995892E-002   1.8960787696724241E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               94
+ TIME [fs]                    =                                         9.400000
+ CONSERVED QUANTITY [hartree] =                               0.716458869105E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.112681597124E-01   0.714824986279E-02
+ POTENTIAL ENERGY[hartree]    =          0.351588940561E+00   0.347565087072E+00
+ KINETIC ENERGY [hartree]     =          0.364869928545E+00   0.368890548035E+00
+ TEMPERATURE [K]              =                     310.976              314.403
+ *******************************************************************************
+
+ FOBSH| Put former active state           1 in new active state           1
+ RANDOM_NUMBER_HOPPING_PROBA  0.97333603968236049     
+ FOBSH| ACTIVE STATE =            1
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.350803932999645
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           95
+ CPU TIME [s]                 =    3.8565625436604023E-002   1.9167154409775605E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               95
+ TIME [fs]                    =                                         9.500000
+ CONSERVED QUANTITY [hartree] =                               0.716457872183E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.04                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.999879397443E-02   0.717825559028E-02
+ POTENTIAL ENERGY[hartree]    =          0.350803933000E+00   0.347599180187E+00
+ KINETIC ENERGY [hartree]     =          0.365653939183E+00   0.368856478469E+00
+ TEMPERATURE [K]              =                     311.644              314.374
+ *******************************************************************************
+
+ FOBSH| Put former active state           1 in new active state           1
+ RANDOM_NUMBER_HOPPING_PROBA  0.81599315342646472     
+ FOBSH| ACTIVE STATE =            1
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.349976168513030
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           96
+ CPU TIME [s]                 =    3.0781375244259834E-002   1.9288135876801480E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               96
+ TIME [fs]                    =                                         9.600000
+ CONSERVED QUANTITY [hartree] =                               0.716457053386E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.03                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.895623210440E-02   0.719677617897E-02
+ POTENTIAL ENERGY[hartree]    =          0.349976168513E+00   0.347623940482E+00
+ KINETIC ENERGY [hartree]     =          0.366480884873E+00   0.368831732702E+00
+ TEMPERATURE [K]              =                     312.349              314.353
+ *******************************************************************************
+
+ FOBSH| Put former active state           1 in new active state           1
+ RANDOM_NUMBER_HOPPING_PROBA  0.26657144945274608     
+ FOBSH| ACTIVE STATE =            1
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.349118165754400
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           97
+ CPU TIME [s]                 =    3.1036073341965675E-002   1.9409248634174307E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               97
+ TIME [fs]                    =                                         9.700000
+ CONSERVED QUANTITY [hartree] =                               0.716456304914E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.03                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.800321418944E-02   0.720508997289E-02
+ POTENTIAL ENERGY[hartree]    =          0.349118165754E+00   0.347639344866E+00
+ KINETIC ENERGY [hartree]     =          0.367338139160E+00   0.368816334830E+00
+ TEMPERATURE [K]              =                     313.080              314.340
+ *******************************************************************************
+
+ FOBSH| Put former active state           1 in new active state           1
+ RANDOM_NUMBER_HOPPING_PROBA   4.4128220802794667E-002
+ FOBSH| ACTIVE STATE =            1
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.348241587630064
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           98
+ CPU TIME [s]                 =    4.1563685052096844E-002   1.9635314311908209E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               98
+ TIME [fs]                    =                                         9.800000
+ CONSERVED QUANTITY [hartree] =                               0.716455592013E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.04                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.709548824133E-02   0.720397158788E-02
+ POTENTIAL ENERGY[hartree]    =          0.348241587630E+00   0.347645490200E+00
+ KINETIC ENERGY [hartree]     =          0.368214004383E+00   0.368810188601E+00
+ TEMPERATURE [K]              =                     313.826              314.334
+ *******************************************************************************
+
+ FOBSH| Put former active state           1 in new active state           1
+ RANDOM_NUMBER_HOPPING_PROBA  0.91853772640597253     
+ FOBSH| ACTIVE STATE =            1
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.347357662125217
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =           99
+ CPU TIME [s]                 =    1.5636784955859184E-002   1.9594925126493575E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                               99
+ TIME [fs]                    =                                         9.900000
+ CONSERVED QUANTITY [hartree] =                               0.716454904650E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.622027863441E-02   0.719403529542E-02
+ POTENTIAL ENERGY[hartree]    =          0.347357662125E+00   0.347642582846E+00
+ KINETIC ENERGY [hartree]     =          0.369097242525E+00   0.368813088136E+00
+ TEMPERATURE [K]              =                     314.579              314.337
+ *******************************************************************************
+
+ FOBSH| Put former active state           1 in new active state           1
+ RANDOM_NUMBER_HOPPING_PROBA  0.43168507232109438     
+ FOBSH| ACTIVE STATE =            1
+
+ ENERGY| Total FORCE_EVAL ( MIXED ) energy (a.u.):             0.346477274747531
+
+ FOBSH| CASE1: no hop and no trivial crossing
+ ENTER integrator.F
+ STEP NUMBER                  =          100
+ CPU TIME [s]                 =    1.5590098686516285E-002   1.9554876862093801E-002
+
+ *******************************************************************************
+ ENSEMBLE TYPE                =                                              NVE
+ STEP NUMBER                  =                                              100
+ TIME [fs]                    =                                        10.000000
+ CONSERVED QUANTITY [hartree] =                               0.716454244343E+00
+
+                                              INSTANTANEOUS             AVERAGES
+ CPU TIME [s]                 =                        0.02                 0.02
+ ENERGY DRIFT PER ATOM [K]    =          0.537952008754E-02   0.717589014334E-02
+ POTENTIAL ENERGY[hartree]    =          0.346477274748E+00   0.347630929765E+00
+ KINETIC ENERGY [hartree]     =          0.369976969596E+00   0.368824726950E+00
+ TEMPERATURE [K]              =                     315.329              314.347
+ *******************************************************************************
+
+
+ -------------------------------------------------------------------------------
+ -                                                                             -
+ -                                DBCSR STATISTICS                             -
+ -                                                                             -
+ -------------------------------------------------------------------------------
+ COUNTER                                    TOTAL       BLAS       SMM       ACC
+ flops total                                    0       0.0%      0.0%      0.0%
+ flops max/rank                                 0       0.0%      0.0%      0.0%
+ matmuls inhomo. stacks                         0       0.0%      0.0%      0.0%
+ matmuls total                                  0       0.0%      0.0%      0.0%
+ number of processed stacks                     0       0.0%      0.0%      0.0%
+ average stack size                                     0.0       0.0       0.0
+ marketing flops                     0.000000E+00
+ -------------------------------------------------------------------------------
+
+ MEMORY| Estimated peak process memory [MiB]                                 103
+
+ -------------------------------------------------------------------------------
+ -                                                                             -
+ -                           R E F E R E N C E S                               -
+ -                                                                             -
+ -------------------------------------------------------------------------------
+ 
+ CP2K version 4.0 (Development Version), the CP2K developers group (2015).
+ CP2K is freely available from https://www.cp2k.org/ .
+
+ Borstnik, U; VandeVondele, J; Weber, V; Hutter, J. 
+ PARALLEL COMPUTING, 40 (5-6), 47-58 (2014). 
+ Sparse matrix multiplication: The distributed block-compressed sparse
+ row library.
+ http://dx.doi.org/10.1016/j.parco.2014.03.012
+
+
+ Hutter, J; Iannuzzi, M; Schiffmann, F; VandeVondele, J. 
+ WILEY INTERDISCIPLINARY REVIEWS-COMPUTATIONAL MOLECULAR SCIENCE, 4 (1), 15-25 (2014). 
+ CP2K: atomistic simulations of condensed matter systems.
+ http://dx.doi.org/10.1002/wcms.1159
+
+
+ Frigo, M; Johnson, SG. 
+ PROCEEDINGS OF THE IEEE, 93 (2), 216-231 (2005). 
+ The design and implementation of FFTW3.
+ http://dx.doi.org/10.1109/JPROC.2004.840301
+
+
+ -------------------------------------------------------------------------------
+ -                                                                             -
+ -                                T I M I N G                                  -
+ -                                                                             -
+ -------------------------------------------------------------------------------
+ SUBROUTINE                       CALLS  ASD         SELF TIME        TOTAL TIME
+                                MAXIMUM       AVERAGE  MAXIMUM  AVERAGE  MAXIMUM
+ CP2K                                 1  1.0    0.065    0.065   56.754   56.754
+ topology_control                    10  4.0    0.024    0.024   52.164   52.164
+ connectivity_control                10  5.0    0.083    0.083   51.744   51.744
+ read_topology_psf                 1280  6.0   25.674   25.674   51.654   51.654
+ fist_create_force_env                9  2.0    0.000    0.000   47.553   47.553
+ fist_init                            9  3.0    0.031    0.031   47.553   47.553
+ parser_read_line                 26737  6.8    0.402    0.402   27.896   27.896
+ parser_read_line_low              1371  7.9   27.452   27.452   27.494   27.494
+ mixed_create_force_env               1  2.0    0.001    0.001    7.041    7.041
+ mixed_init                           1  3.0    0.000    0.000    7.040    7.040
+ force_field_control                  9  4.0    0.002    0.002    2.384    2.384
+ read_force_field_charmm              9  5.0    0.632    0.632    2.327    2.327
+ qs_mol_dyn_low                       1  2.0    0.017    0.017    2.025    2.025
+ velocity_verlet                    100  3.0    0.409    0.409    1.485    1.485
+ -------------------------------------------------------------------------------
+
+ The number of warnings for this run is : 1
+ 
+ -------------------------------------------------------------------------------
+  **** **** ******  **  PROGRAM ENDED AT                 2021-02-12 16:44:34.174
+ ***** ** ***  *** **   PROGRAM RAN ON                   bulstake.phys.ucl.ac.uk
+ **    ****   ******    PROGRAM RAN BY                                 sgiannini
+ ***** **    ** ** **   PROGRAM PROCESS ID                                  3483
+  **** **  *******  **  PROGRAM STOPPED IN /scratch/sgiannini/FOB-SH-REGTESTS_/3
+                                           3-XXX_code_extension_V2/run-fssh-3+3-
+                                           NAP-ANT-FRZ-COUP

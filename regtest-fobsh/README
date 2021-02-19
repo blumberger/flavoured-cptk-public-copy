@@ -1,0 +1,69 @@
+############################### SOME INFO ################################################################
+
+Inside each folder XX-cmt-commit-number-branch, you will find various inputs with lots of different keywords to check the quality of the code at different points. 
+Each new commit implemented should PASS all the reg-test unless the physics of the problem requires a new-baseline.
+XX is just the numbering, commit is the commit from git-hub (unique for each code version), branch is the branch name under development
+
+IMPORTANT: before starting a new-regtest **copy** the folder to be regtested to a new folder and compare the old folder (previous code version, also called OLD_GLOBAL_DIRECTORY) with the new folder (NEW_GLOBAL_DIRECTORY).
+
+to check version of the code against previous version use:
+** python regtest_code.py NtoN NEW_GLOBAL_DIRECTORY OLD_GLOBAL_DIRECTORY
+
+NOTE: the regtest_code.py prints the comparison at screen. It also has some other features including the possibility of generating an html file with the difference between two files highlighted
+
+NOTE: when you want to regtest something copy one of the GLOBAL_DIR (with the desired input) and DO NOT OVERWRITE the directories that are already present here.
+
+some useful commands (CAREFULL):
+  rm run-fssh-*/run-*  ---- remove all the output file in order to then rerun the trajs
+  rm run-fssh-*/run.log  ---- remove all the output file in order to then rerun the trajs
+  find ./ -type f -exec sed -i 's/topologies/topologies_mixed/g' {} \; --replace all the entries string1 with string2
+
+
+INTRUCTION TO FOLLOW:
+Some example instructions with 2 examples GLOBAL_DIRECTORIES:
+    cp -r 25-ext2-c93237d451b8b38_code_extension_V2 26-RENAMETHIS_code_extension_V2.1
+
+    cd 26-RENAMETHIS_code_extension_V2.1
+    rm run-fssh-*/run-*
+    rm run-fssh-*/run.log
+    ./loop_and_run.sh (this run all the runs inside GLOBAL_DIRECTORIES).
+    cd ../
+    !final regtests 
+    python regtest_code.py NtoN 26-RENAMETHIS_code_extension_V2.1 25-ext2-c93237d451b8b38_code_extension_V2
+
+
+
+
+######################################   COMMIT CHECKED SUMMARY  ##################################################
+
+01-cmt_c0687312b0b5c_mem_issue_solver_V2 *** VS *** 00-cmt_9025c974_restart_file_branch --- PASSED (with difference due to new-baseline)
+02-cmt_06e77366259ce_mem_issue_solver_V2.1 *** VS *** 01-cmt_c0687312b0b5c_mem_issue_solver_V2 --- PASSED
+03-ext-cmt-06e77366259ce_mem_issue_solver_V2.1 *** VS *** 02-cmt_06e77366259ce_mem_issue_solver_V2.1 --- PASSED
+04-ext-cmt-6bc563a3d5c1_speedup_RK4 *** VS *** 03-ext-cmt-06e77366259ce_mem_issue_solver_V2.1 --- PASSED
+05-ext2-cmt-369bba5ef9e0db5c_code_extension_V0 *** VS *** 04-ext-cmt-6bc563a3d5c1_speedup_RK4 --- PASSED (just different inputs)
+06-ext2-cmt-a34016e18c3857d_FRZ_COUP_code_extension_V0 *** VS *** 05-ext2-cmt-369bba5ef9e0db5c_code_extension_V0 --- PASSED
+07-ext2-cmt-2fbf3e13ecd6a4_code_extension_V0 *** VS *** 06-ext2-cmt-a34016e18c3857d_FRZ_COUP_code_extension_V0 --- PASSED (just some differences in the inputs)
+08-ext2-cmt-2d11f324eb757a_GRAD_code_extension_V0 *** VS *** 07-ext2-cmt-2fbf3e13ecd6a4_code_extension_V0 --- PASSED (Minor differences in the run-sh.log)
+09-ext2-cmt-49cac7d1369c932ae9fb_code_extension_V0 *** VS *** 08-ext2-cmt-2d11f324eb757a_GRAD_code_extension_V0 --- PASSED
+10-ext2-cmt-6af3c4f119de3d1fb094dbb_code_extension_V0 *** VS *** 09-ext2-cmt-49cac7d1369c932ae9fb_code_extension_V0 --- PASSED
+11-ext2-cmt-2bb72646a16479ef31372be79_code_extension_V0 *** VS *** 10-ext2-cmt-97693b4_code_extension_V0 --- PASSED (here a bug with DLI was fixed: the orthogonal diabatic NACE are still calculated at time T instead of Tp. This needs to be fixed. 
+
+12-ext2-47fa7d4694c61513d43256_code_extension_V0 ! NEW BASELINE: A long standing bug regarding the time consistency of the orthogonal diabatic NACE has been fixed. Note that the difference with the other regtest directories is very small as the diabatic NACE are always small. So the physics will not be affected. 
+
+### code_extension_V1: started new branch to finish TRESP implementation
+
+14-ext2-0a764dc752ddb_code_extension_V1 *** VS *** 13-ext2-12-f9e99f8e33fb25_code_extension_V0 --- PASSED (changed one input)
+
+15-ext2-37bc9c321fc11dfc785d4a16_code_extension_V1 NEW BASELINE: for TRESP, a bug in the forces sign has been fixed, this changes just TRESP code 
+
+16-ext2-deba63d291ad1ee0_code_extension_V1 *** VS *** 15-ext2-37bc9c321fc11dfc785d4a16_code_extension_V1 --- PASSED
+
+#### code_extension_V2: started new branch to implement CT Block and Coulomb potential
+17-ext2-1fa9c67fd5f3a_code_extension_V2 *** VS *** 16-ext2-deba63d291ad1ee0_code_extension_V1 --- PASSED
+18-ext2-5693ed7675b17376b_code_extension_V2 *** VS *** 17-ext2-1fa9c67fd5f3a_code_extension_V2 --- PASSED (difference in inputs)
+19-ext2-e97a76c4543ba5b9_code_extension_V2 *** VS *** 18-ext2-5693ed7675b17376b_code_extension_V2 --- PASSED
+20-ext2-138f29f7bcc49d_code_extension_V2 *** VS *** 19-ext2-e97a76c4543ba5b9_code_extension_V2 --- PASSED  (new Inputs introduced)
+21-ext2-52421e84c1fc91ddb7_code_extension_V2 *** VS *** 20-ext2-138f29f7bcc49d_code_extension_V2 --- PASSED
+25-ext2-c93237d451b8b38_code_extension_V2 *** VS *** 21-ext2-52421e84c1fc91ddb7_code_extension_V2 --- PASSED (input changed for some trajs)
+26-801e70d8eae6cc_code_extension_V2 *** VS *** 25-ext2-c93237d451b8b38_code_extension_V2 --- PASSED
+31-3649ac37_code_extension_V2 *** VS *** 28-118b6fb6acbd_code_extension_V2 --- PASSED

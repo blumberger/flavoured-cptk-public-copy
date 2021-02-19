@@ -1,0 +1,1989 @@
+
+
+                      ************* ******** ***********   
+                     ************* **********************  
+                     ****     **** ****      ***********   
+                     ******** ****  *******     ****       
+                     *******  ****   *******   ****        
+                     ****     ****       ****  ****        
+                     ****     **** **********  ****        
+                      ****     **** ********    ****       
+                     FRONTIERS IN SIMULATION TECHNOLOGY    
+                                                           
+                        C.J. Mundy, S. Balasubramanian,    
+                     Ken Bagchi, J. Hutter, Ari Seitsonen  
+                      IFW Kuo, T. Laino, J. VandeVondele   
+                                 Version 1.0               
+
+                                                           
+
+ EWALD|                                                                 not used
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        1
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:         1
+ COLVARS|   ATOM:         2
+ COLVARS|   ATOM:         3
+ COLVARS|   ATOM:        10
+ COLVARS|   ATOM:        12
+ COLVARS|   ATOM:         5
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       -0.000913   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        2
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:         3
+ COLVARS|   ATOM:         4
+ COLVARS|   ATOM:        11
+ COLVARS|   ATOM:        14
+ COLVARS|   ATOM:        13
+ COLVARS|   ATOM:        10
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        0.000913    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        3
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        19
+ COLVARS|   ATOM:        20
+ COLVARS|   ATOM:        21
+ COLVARS|   ATOM:        28
+ COLVARS|   ATOM:        30
+ COLVARS|   ATOM:        23
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        9.447737   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        4
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        21
+ COLVARS|   ATOM:        22
+ COLVARS|   ATOM:        29
+ COLVARS|   ATOM:        32
+ COLVARS|   ATOM:        31
+ COLVARS|   ATOM:        28
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        9.449563    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        5
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        37
+ COLVARS|   ATOM:        38
+ COLVARS|   ATOM:        39
+ COLVARS|   ATOM:        46
+ COLVARS|   ATOM:        48
+ COLVARS|   ATOM:        41
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       18.896387   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        6
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        39
+ COLVARS|   ATOM:        40
+ COLVARS|   ATOM:        47
+ COLVARS|   ATOM:        50
+ COLVARS|   ATOM:        49
+ COLVARS|   ATOM:        46
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       18.898213    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        7
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        55
+ COLVARS|   ATOM:        56
+ COLVARS|   ATOM:        57
+ COLVARS|   ATOM:        59
+ COLVARS|   ATOM:        60
+ COLVARS|   ATOM:        61
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       28.351777   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        8
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        67
+ COLVARS|   ATOM:        70
+ COLVARS|   ATOM:        73
+ COLVARS|   ATOM:        75
+ COLVARS|   ATOM:        72
+ COLVARS|   ATOM:        69
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       28.340123    0.009071   -4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        9
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        79
+ COLVARS|   ATOM:        80
+ COLVARS|   ATOM:        81
+ COLVARS|   ATOM:        83
+ COLVARS|   ATOM:        84
+ COLVARS|   ATOM:        85
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       37.800427   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       10
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        91
+ COLVARS|   ATOM:        94
+ COLVARS|   ATOM:        97
+ COLVARS|   ATOM:        99
+ COLVARS|   ATOM:        96
+ COLVARS|   ATOM:        93
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       37.788773    0.009071   -4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       11
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:       103
+ COLVARS|   ATOM:       104
+ COLVARS|   ATOM:       105
+ COLVARS|   ATOM:       107
+ COLVARS|   ATOM:       108
+ COLVARS|   ATOM:       109
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       47.249077   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       12
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:       115
+ COLVARS|   ATOM:       118
+ COLVARS|   ATOM:       121
+ COLVARS|   ATOM:       123
+ COLVARS|   ATOM:       120
+ COLVARS|   ATOM:       117
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       47.237423    0.009071   -4.632012
+          ----------------------------------------------------------------------
+
+ FORCEFIELD| WARNING: A non Critical ForceField parameter is missing! CP2K GOES!
+ FORCEFIELD| Non critical parameters are:Urey-Bradley,Torsions,Impropers, Opbends and 1-4
+ FORCEFIELD| All missing parameters will not contribute to the potential energy!
+ FORCEFIELD| Activate the print key FF_INFO to have a list of missing parameters
+
+ CHARGE_INFO| Total Charge of the Classical System:                     0.000000
+
+ SPLINE_INFO| Generating 55 splines for NONBONDED14 interactions 
+              Due to 10 different atomic kinds
+  ...5  ...10  ...15  ...20  ...25  ...30  ...35  ...40  ...45  ...50  ...55
+
+ SPLINE_INFO| Number of unique splines computed:            6
+ SPLINE_INFO| Done
+
+ SPLINE_INFO| Generating 55 splines for NONBONDED interactions 
+              Due to 10 different atomic kinds
+  ...5  ...10  ...15  ...20  ...25  ...30  ...35  ...40  ...45  ...50  ...55
+
+ SPLINE_INFO| Number of unique splines computed:            6
+ SPLINE_INFO| Done
+
+
+                      ************* ******** ***********   
+                     ************* **********************  
+                     ****     **** ****      ***********   
+                     ******** ****  *******     ****       
+                     *******  ****   *******   ****        
+                     ****     ****       ****  ****        
+                     ****     **** **********  ****        
+                      ****     **** ********    ****       
+                     FRONTIERS IN SIMULATION TECHNOLOGY    
+                                                           
+                        C.J. Mundy, S. Balasubramanian,    
+                     Ken Bagchi, J. Hutter, Ari Seitsonen  
+                      IFW Kuo, T. Laino, J. VandeVondele   
+                                 Version 1.0               
+
+                                                           
+
+ EWALD|                                                                 not used
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        1
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:         1
+ COLVARS|   ATOM:         2
+ COLVARS|   ATOM:         3
+ COLVARS|   ATOM:        10
+ COLVARS|   ATOM:        12
+ COLVARS|   ATOM:         5
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       -0.000913   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        2
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:         3
+ COLVARS|   ATOM:         4
+ COLVARS|   ATOM:        11
+ COLVARS|   ATOM:        14
+ COLVARS|   ATOM:        13
+ COLVARS|   ATOM:        10
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        0.000913    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        3
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        19
+ COLVARS|   ATOM:        20
+ COLVARS|   ATOM:        21
+ COLVARS|   ATOM:        28
+ COLVARS|   ATOM:        30
+ COLVARS|   ATOM:        23
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        9.447737   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        4
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        21
+ COLVARS|   ATOM:        22
+ COLVARS|   ATOM:        29
+ COLVARS|   ATOM:        32
+ COLVARS|   ATOM:        31
+ COLVARS|   ATOM:        28
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        9.449563    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        5
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        37
+ COLVARS|   ATOM:        38
+ COLVARS|   ATOM:        39
+ COLVARS|   ATOM:        46
+ COLVARS|   ATOM:        48
+ COLVARS|   ATOM:        41
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       18.896387   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        6
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        39
+ COLVARS|   ATOM:        40
+ COLVARS|   ATOM:        47
+ COLVARS|   ATOM:        50
+ COLVARS|   ATOM:        49
+ COLVARS|   ATOM:        46
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       18.898213    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        7
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        55
+ COLVARS|   ATOM:        56
+ COLVARS|   ATOM:        57
+ COLVARS|   ATOM:        59
+ COLVARS|   ATOM:        60
+ COLVARS|   ATOM:        61
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       28.351777   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        8
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        67
+ COLVARS|   ATOM:        70
+ COLVARS|   ATOM:        73
+ COLVARS|   ATOM:        75
+ COLVARS|   ATOM:        72
+ COLVARS|   ATOM:        69
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       28.340123    0.009071   -4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        9
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        79
+ COLVARS|   ATOM:        80
+ COLVARS|   ATOM:        81
+ COLVARS|   ATOM:        83
+ COLVARS|   ATOM:        84
+ COLVARS|   ATOM:        85
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       37.800427   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       10
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        91
+ COLVARS|   ATOM:        94
+ COLVARS|   ATOM:        97
+ COLVARS|   ATOM:        99
+ COLVARS|   ATOM:        96
+ COLVARS|   ATOM:        93
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       37.788773    0.009071   -4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       11
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:       103
+ COLVARS|   ATOM:       104
+ COLVARS|   ATOM:       105
+ COLVARS|   ATOM:       107
+ COLVARS|   ATOM:       108
+ COLVARS|   ATOM:       109
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       47.249077   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       12
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:       115
+ COLVARS|   ATOM:       118
+ COLVARS|   ATOM:       121
+ COLVARS|   ATOM:       123
+ COLVARS|   ATOM:       120
+ COLVARS|   ATOM:       117
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       47.237423    0.009071   -4.632012
+          ----------------------------------------------------------------------
+
+ FORCEFIELD| WARNING: A non Critical ForceField parameter is missing! CP2K GOES!
+ FORCEFIELD| Non critical parameters are:Urey-Bradley,Torsions,Impropers, Opbends and 1-4
+ FORCEFIELD| All missing parameters will not contribute to the potential energy!
+ FORCEFIELD| Activate the print key FF_INFO to have a list of missing parameters
+
+ CHARGE_INFO| Total Charge of the Classical System:                     0.000000
+
+ SPLINE_INFO| Generating 55 splines for NONBONDED14 interactions 
+              Due to 10 different atomic kinds
+  ...5  ...10  ...15  ...20  ...25  ...30  ...35  ...40  ...45  ...50  ...55
+
+ SPLINE_INFO| Number of unique splines computed:            6
+ SPLINE_INFO| Done
+
+ SPLINE_INFO| Generating 55 splines for NONBONDED interactions 
+              Due to 10 different atomic kinds
+  ...5  ...10  ...15  ...20  ...25  ...30  ...35  ...40  ...45  ...50  ...55
+
+ SPLINE_INFO| Number of unique splines computed:            6
+ SPLINE_INFO| Done
+
+
+                      ************* ******** ***********   
+                     ************* **********************  
+                     ****     **** ****      ***********   
+                     ******** ****  *******     ****       
+                     *******  ****   *******   ****        
+                     ****     ****       ****  ****        
+                     ****     **** **********  ****        
+                      ****     **** ********    ****       
+                     FRONTIERS IN SIMULATION TECHNOLOGY    
+                                                           
+                        C.J. Mundy, S. Balasubramanian,    
+                     Ken Bagchi, J. Hutter, Ari Seitsonen  
+                      IFW Kuo, T. Laino, J. VandeVondele   
+                                 Version 1.0               
+
+                                                           
+
+ EWALD|                                                                 not used
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        1
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:         1
+ COLVARS|   ATOM:         2
+ COLVARS|   ATOM:         3
+ COLVARS|   ATOM:        10
+ COLVARS|   ATOM:        12
+ COLVARS|   ATOM:         5
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       -0.000913   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        2
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:         3
+ COLVARS|   ATOM:         4
+ COLVARS|   ATOM:        11
+ COLVARS|   ATOM:        14
+ COLVARS|   ATOM:        13
+ COLVARS|   ATOM:        10
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        0.000913    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        3
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        19
+ COLVARS|   ATOM:        20
+ COLVARS|   ATOM:        21
+ COLVARS|   ATOM:        28
+ COLVARS|   ATOM:        30
+ COLVARS|   ATOM:        23
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        9.447737   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        4
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        21
+ COLVARS|   ATOM:        22
+ COLVARS|   ATOM:        29
+ COLVARS|   ATOM:        32
+ COLVARS|   ATOM:        31
+ COLVARS|   ATOM:        28
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        9.449563    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        5
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        37
+ COLVARS|   ATOM:        38
+ COLVARS|   ATOM:        39
+ COLVARS|   ATOM:        46
+ COLVARS|   ATOM:        48
+ COLVARS|   ATOM:        41
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       18.896387   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        6
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        39
+ COLVARS|   ATOM:        40
+ COLVARS|   ATOM:        47
+ COLVARS|   ATOM:        50
+ COLVARS|   ATOM:        49
+ COLVARS|   ATOM:        46
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       18.898213    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        7
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        55
+ COLVARS|   ATOM:        56
+ COLVARS|   ATOM:        57
+ COLVARS|   ATOM:        59
+ COLVARS|   ATOM:        60
+ COLVARS|   ATOM:        61
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       28.351777   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        8
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        67
+ COLVARS|   ATOM:        70
+ COLVARS|   ATOM:        73
+ COLVARS|   ATOM:        75
+ COLVARS|   ATOM:        72
+ COLVARS|   ATOM:        69
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       28.340123    0.009071   -4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        9
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        79
+ COLVARS|   ATOM:        80
+ COLVARS|   ATOM:        81
+ COLVARS|   ATOM:        83
+ COLVARS|   ATOM:        84
+ COLVARS|   ATOM:        85
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       37.800427   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       10
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        91
+ COLVARS|   ATOM:        94
+ COLVARS|   ATOM:        97
+ COLVARS|   ATOM:        99
+ COLVARS|   ATOM:        96
+ COLVARS|   ATOM:        93
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       37.788773    0.009071   -4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       11
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:       103
+ COLVARS|   ATOM:       104
+ COLVARS|   ATOM:       105
+ COLVARS|   ATOM:       107
+ COLVARS|   ATOM:       108
+ COLVARS|   ATOM:       109
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       47.249077   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       12
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:       115
+ COLVARS|   ATOM:       118
+ COLVARS|   ATOM:       121
+ COLVARS|   ATOM:       123
+ COLVARS|   ATOM:       120
+ COLVARS|   ATOM:       117
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       47.237423    0.009071   -4.632012
+          ----------------------------------------------------------------------
+
+ FORCEFIELD| WARNING: A non Critical ForceField parameter is missing! CP2K GOES!
+ FORCEFIELD| Non critical parameters are:Urey-Bradley,Torsions,Impropers, Opbends and 1-4
+ FORCEFIELD| All missing parameters will not contribute to the potential energy!
+ FORCEFIELD| Activate the print key FF_INFO to have a list of missing parameters
+
+ CHARGE_INFO| Total Charge of the Classical System:                     0.000000
+
+ SPLINE_INFO| Generating 55 splines for NONBONDED14 interactions 
+              Due to 10 different atomic kinds
+  ...5  ...10  ...15  ...20  ...25  ...30  ...35  ...40  ...45  ...50  ...55
+
+ SPLINE_INFO| Number of unique splines computed:            6
+ SPLINE_INFO| Done
+
+ SPLINE_INFO| Generating 55 splines for NONBONDED interactions 
+              Due to 10 different atomic kinds
+  ...5  ...10  ...15  ...20  ...25  ...30  ...35  ...40  ...45  ...50  ...55
+
+ SPLINE_INFO| Number of unique splines computed:            6
+ SPLINE_INFO| Done
+
+
+                      ************* ******** ***********   
+                     ************* **********************  
+                     ****     **** ****      ***********   
+                     ******** ****  *******     ****       
+                     *******  ****   *******   ****        
+                     ****     ****       ****  ****        
+                     ****     **** **********  ****        
+                      ****     **** ********    ****       
+                     FRONTIERS IN SIMULATION TECHNOLOGY    
+                                                           
+                        C.J. Mundy, S. Balasubramanian,    
+                     Ken Bagchi, J. Hutter, Ari Seitsonen  
+                      IFW Kuo, T. Laino, J. VandeVondele   
+                                 Version 1.0               
+
+                                                           
+
+ EWALD|                                                                 not used
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        1
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:         1
+ COLVARS|   ATOM:         2
+ COLVARS|   ATOM:         3
+ COLVARS|   ATOM:        10
+ COLVARS|   ATOM:        12
+ COLVARS|   ATOM:         5
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       -0.000913   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        2
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:         3
+ COLVARS|   ATOM:         4
+ COLVARS|   ATOM:        11
+ COLVARS|   ATOM:        14
+ COLVARS|   ATOM:        13
+ COLVARS|   ATOM:        10
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        0.000913    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        3
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        19
+ COLVARS|   ATOM:        20
+ COLVARS|   ATOM:        21
+ COLVARS|   ATOM:        28
+ COLVARS|   ATOM:        30
+ COLVARS|   ATOM:        23
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        9.447737   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        4
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        21
+ COLVARS|   ATOM:        22
+ COLVARS|   ATOM:        29
+ COLVARS|   ATOM:        32
+ COLVARS|   ATOM:        31
+ COLVARS|   ATOM:        28
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        9.449563    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        5
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        37
+ COLVARS|   ATOM:        38
+ COLVARS|   ATOM:        39
+ COLVARS|   ATOM:        46
+ COLVARS|   ATOM:        48
+ COLVARS|   ATOM:        41
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       18.896387   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        6
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        39
+ COLVARS|   ATOM:        40
+ COLVARS|   ATOM:        47
+ COLVARS|   ATOM:        50
+ COLVARS|   ATOM:        49
+ COLVARS|   ATOM:        46
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       18.898213    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        7
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        55
+ COLVARS|   ATOM:        56
+ COLVARS|   ATOM:        57
+ COLVARS|   ATOM:        59
+ COLVARS|   ATOM:        60
+ COLVARS|   ATOM:        61
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       28.351777   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        8
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        67
+ COLVARS|   ATOM:        70
+ COLVARS|   ATOM:        73
+ COLVARS|   ATOM:        75
+ COLVARS|   ATOM:        72
+ COLVARS|   ATOM:        69
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       28.340123    0.009071   -4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        9
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        79
+ COLVARS|   ATOM:        80
+ COLVARS|   ATOM:        81
+ COLVARS|   ATOM:        83
+ COLVARS|   ATOM:        84
+ COLVARS|   ATOM:        85
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       37.800427   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       10
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        91
+ COLVARS|   ATOM:        94
+ COLVARS|   ATOM:        97
+ COLVARS|   ATOM:        99
+ COLVARS|   ATOM:        96
+ COLVARS|   ATOM:        93
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       37.788773    0.009071   -4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       11
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:       103
+ COLVARS|   ATOM:       104
+ COLVARS|   ATOM:       105
+ COLVARS|   ATOM:       107
+ COLVARS|   ATOM:       108
+ COLVARS|   ATOM:       109
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       47.249077   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       12
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:       115
+ COLVARS|   ATOM:       118
+ COLVARS|   ATOM:       121
+ COLVARS|   ATOM:       123
+ COLVARS|   ATOM:       120
+ COLVARS|   ATOM:       117
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       47.237423    0.009071   -4.632012
+          ----------------------------------------------------------------------
+
+ FORCEFIELD| WARNING: A non Critical ForceField parameter is missing! CP2K GOES!
+ FORCEFIELD| Non critical parameters are:Urey-Bradley,Torsions,Impropers, Opbends and 1-4
+ FORCEFIELD| All missing parameters will not contribute to the potential energy!
+ FORCEFIELD| Activate the print key FF_INFO to have a list of missing parameters
+
+ CHARGE_INFO| Total Charge of the Classical System:                     0.000000
+
+ SPLINE_INFO| Generating 55 splines for NONBONDED14 interactions 
+              Due to 10 different atomic kinds
+  ...5  ...10  ...15  ...20  ...25  ...30  ...35  ...40  ...45  ...50  ...55
+
+ SPLINE_INFO| Number of unique splines computed:            6
+ SPLINE_INFO| Done
+
+ SPLINE_INFO| Generating 55 splines for NONBONDED interactions 
+              Due to 10 different atomic kinds
+  ...5  ...10  ...15  ...20  ...25  ...30  ...35  ...40  ...45  ...50  ...55
+
+ SPLINE_INFO| Number of unique splines computed:            6
+ SPLINE_INFO| Done
+
+
+                      ************* ******** ***********   
+                     ************* **********************  
+                     ****     **** ****      ***********   
+                     ******** ****  *******     ****       
+                     *******  ****   *******   ****        
+                     ****     ****       ****  ****        
+                     ****     **** **********  ****        
+                      ****     **** ********    ****       
+                     FRONTIERS IN SIMULATION TECHNOLOGY    
+                                                           
+                        C.J. Mundy, S. Balasubramanian,    
+                     Ken Bagchi, J. Hutter, Ari Seitsonen  
+                      IFW Kuo, T. Laino, J. VandeVondele   
+                                 Version 1.0               
+
+                                                           
+
+ EWALD|                                                                 not used
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        1
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:         1
+ COLVARS|   ATOM:         2
+ COLVARS|   ATOM:         3
+ COLVARS|   ATOM:        10
+ COLVARS|   ATOM:        12
+ COLVARS|   ATOM:         5
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       -0.000913   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        2
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:         3
+ COLVARS|   ATOM:         4
+ COLVARS|   ATOM:        11
+ COLVARS|   ATOM:        14
+ COLVARS|   ATOM:        13
+ COLVARS|   ATOM:        10
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        0.000913    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        3
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        19
+ COLVARS|   ATOM:        20
+ COLVARS|   ATOM:        21
+ COLVARS|   ATOM:        28
+ COLVARS|   ATOM:        30
+ COLVARS|   ATOM:        23
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        9.447737   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        4
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        21
+ COLVARS|   ATOM:        22
+ COLVARS|   ATOM:        29
+ COLVARS|   ATOM:        32
+ COLVARS|   ATOM:        31
+ COLVARS|   ATOM:        28
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        9.449563    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        5
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        37
+ COLVARS|   ATOM:        38
+ COLVARS|   ATOM:        39
+ COLVARS|   ATOM:        46
+ COLVARS|   ATOM:        48
+ COLVARS|   ATOM:        41
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       18.896387   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        6
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        39
+ COLVARS|   ATOM:        40
+ COLVARS|   ATOM:        47
+ COLVARS|   ATOM:        50
+ COLVARS|   ATOM:        49
+ COLVARS|   ATOM:        46
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       18.898213    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        7
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        55
+ COLVARS|   ATOM:        56
+ COLVARS|   ATOM:        57
+ COLVARS|   ATOM:        59
+ COLVARS|   ATOM:        60
+ COLVARS|   ATOM:        61
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       28.351777   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        8
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        67
+ COLVARS|   ATOM:        70
+ COLVARS|   ATOM:        73
+ COLVARS|   ATOM:        75
+ COLVARS|   ATOM:        72
+ COLVARS|   ATOM:        69
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       28.340123    0.009071   -4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        9
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        79
+ COLVARS|   ATOM:        80
+ COLVARS|   ATOM:        81
+ COLVARS|   ATOM:        83
+ COLVARS|   ATOM:        84
+ COLVARS|   ATOM:        85
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       37.800427   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       10
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        91
+ COLVARS|   ATOM:        94
+ COLVARS|   ATOM:        97
+ COLVARS|   ATOM:        99
+ COLVARS|   ATOM:        96
+ COLVARS|   ATOM:        93
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       37.788773    0.009071   -4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       11
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:       103
+ COLVARS|   ATOM:       104
+ COLVARS|   ATOM:       105
+ COLVARS|   ATOM:       107
+ COLVARS|   ATOM:       108
+ COLVARS|   ATOM:       109
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       47.249077   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       12
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:       115
+ COLVARS|   ATOM:       118
+ COLVARS|   ATOM:       121
+ COLVARS|   ATOM:       123
+ COLVARS|   ATOM:       120
+ COLVARS|   ATOM:       117
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       47.237423    0.009071   -4.632012
+          ----------------------------------------------------------------------
+
+ FORCEFIELD| WARNING: A non Critical ForceField parameter is missing! CP2K GOES!
+ FORCEFIELD| Non critical parameters are:Urey-Bradley,Torsions,Impropers, Opbends and 1-4
+ FORCEFIELD| All missing parameters will not contribute to the potential energy!
+ FORCEFIELD| Activate the print key FF_INFO to have a list of missing parameters
+
+ CHARGE_INFO| Total Charge of the Classical System:                     0.000000
+
+ SPLINE_INFO| Generating 55 splines for NONBONDED14 interactions 
+              Due to 10 different atomic kinds
+  ...5  ...10  ...15  ...20  ...25  ...30  ...35  ...40  ...45  ...50  ...55
+
+ SPLINE_INFO| Number of unique splines computed:            6
+ SPLINE_INFO| Done
+
+ SPLINE_INFO| Generating 55 splines for NONBONDED interactions 
+              Due to 10 different atomic kinds
+  ...5  ...10  ...15  ...20  ...25  ...30  ...35  ...40  ...45  ...50  ...55
+
+ SPLINE_INFO| Number of unique splines computed:            6
+ SPLINE_INFO| Done
+
+
+                      ************* ******** ***********   
+                     ************* **********************  
+                     ****     **** ****      ***********   
+                     ******** ****  *******     ****       
+                     *******  ****   *******   ****        
+                     ****     ****       ****  ****        
+                     ****     **** **********  ****        
+                      ****     **** ********    ****       
+                     FRONTIERS IN SIMULATION TECHNOLOGY    
+                                                           
+                        C.J. Mundy, S. Balasubramanian,    
+                     Ken Bagchi, J. Hutter, Ari Seitsonen  
+                      IFW Kuo, T. Laino, J. VandeVondele   
+                                 Version 1.0               
+
+                                                           
+
+ EWALD|                                                                 not used
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        1
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:         1
+ COLVARS|   ATOM:         2
+ COLVARS|   ATOM:         3
+ COLVARS|   ATOM:        10
+ COLVARS|   ATOM:        12
+ COLVARS|   ATOM:         5
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       -0.000913   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        2
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:         3
+ COLVARS|   ATOM:         4
+ COLVARS|   ATOM:        11
+ COLVARS|   ATOM:        14
+ COLVARS|   ATOM:        13
+ COLVARS|   ATOM:        10
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        0.000913    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        3
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        19
+ COLVARS|   ATOM:        20
+ COLVARS|   ATOM:        21
+ COLVARS|   ATOM:        28
+ COLVARS|   ATOM:        30
+ COLVARS|   ATOM:        23
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        9.447737   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        4
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        21
+ COLVARS|   ATOM:        22
+ COLVARS|   ATOM:        29
+ COLVARS|   ATOM:        32
+ COLVARS|   ATOM:        31
+ COLVARS|   ATOM:        28
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        9.449563    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        5
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        37
+ COLVARS|   ATOM:        38
+ COLVARS|   ATOM:        39
+ COLVARS|   ATOM:        46
+ COLVARS|   ATOM:        48
+ COLVARS|   ATOM:        41
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       18.896387   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        6
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        39
+ COLVARS|   ATOM:        40
+ COLVARS|   ATOM:        47
+ COLVARS|   ATOM:        50
+ COLVARS|   ATOM:        49
+ COLVARS|   ATOM:        46
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       18.898213    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        7
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        55
+ COLVARS|   ATOM:        56
+ COLVARS|   ATOM:        57
+ COLVARS|   ATOM:        59
+ COLVARS|   ATOM:        60
+ COLVARS|   ATOM:        61
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       28.351777   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        8
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        67
+ COLVARS|   ATOM:        70
+ COLVARS|   ATOM:        73
+ COLVARS|   ATOM:        75
+ COLVARS|   ATOM:        72
+ COLVARS|   ATOM:        69
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       28.340123    0.009071   -4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        9
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        79
+ COLVARS|   ATOM:        80
+ COLVARS|   ATOM:        81
+ COLVARS|   ATOM:        83
+ COLVARS|   ATOM:        84
+ COLVARS|   ATOM:        85
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       37.800427   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       10
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        91
+ COLVARS|   ATOM:        94
+ COLVARS|   ATOM:        97
+ COLVARS|   ATOM:        99
+ COLVARS|   ATOM:        96
+ COLVARS|   ATOM:        93
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       37.788773    0.009071   -4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       11
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:       103
+ COLVARS|   ATOM:       104
+ COLVARS|   ATOM:       105
+ COLVARS|   ATOM:       107
+ COLVARS|   ATOM:       108
+ COLVARS|   ATOM:       109
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       47.249077   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       12
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:       115
+ COLVARS|   ATOM:       118
+ COLVARS|   ATOM:       121
+ COLVARS|   ATOM:       123
+ COLVARS|   ATOM:       120
+ COLVARS|   ATOM:       117
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       47.237423    0.009071   -4.632012
+          ----------------------------------------------------------------------
+
+ FORCEFIELD| WARNING: A non Critical ForceField parameter is missing! CP2K GOES!
+ FORCEFIELD| Non critical parameters are:Urey-Bradley,Torsions,Impropers, Opbends and 1-4
+ FORCEFIELD| All missing parameters will not contribute to the potential energy!
+ FORCEFIELD| Activate the print key FF_INFO to have a list of missing parameters
+
+ CHARGE_INFO| Total Charge of the Classical System:                     0.000000
+
+ SPLINE_INFO| Generating 55 splines for NONBONDED14 interactions 
+              Due to 10 different atomic kinds
+  ...5  ...10  ...15  ...20  ...25  ...30  ...35  ...40  ...45  ...50  ...55
+
+ SPLINE_INFO| Number of unique splines computed:            6
+ SPLINE_INFO| Done
+
+ SPLINE_INFO| Generating 55 splines for NONBONDED interactions 
+              Due to 10 different atomic kinds
+  ...5  ...10  ...15  ...20  ...25  ...30  ...35  ...40  ...45  ...50  ...55
+
+ SPLINE_INFO| Number of unique splines computed:            6
+ SPLINE_INFO| Done
+
+
+                      ************* ******** ***********   
+                     ************* **********************  
+                     ****     **** ****      ***********   
+                     ******** ****  *******     ****       
+                     *******  ****   *******   ****        
+                     ****     ****       ****  ****        
+                     ****     **** **********  ****        
+                      ****     **** ********    ****       
+                     FRONTIERS IN SIMULATION TECHNOLOGY    
+                                                           
+                        C.J. Mundy, S. Balasubramanian,    
+                     Ken Bagchi, J. Hutter, Ari Seitsonen  
+                      IFW Kuo, T. Laino, J. VandeVondele   
+                                 Version 1.0               
+
+                                                           
+
+ EWALD|                                                                 not used
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        1
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:         1
+ COLVARS|   ATOM:         2
+ COLVARS|   ATOM:         3
+ COLVARS|   ATOM:        10
+ COLVARS|   ATOM:        12
+ COLVARS|   ATOM:         5
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       -0.000913   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        2
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:         3
+ COLVARS|   ATOM:         4
+ COLVARS|   ATOM:        11
+ COLVARS|   ATOM:        14
+ COLVARS|   ATOM:        13
+ COLVARS|   ATOM:        10
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        0.000913    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        3
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        19
+ COLVARS|   ATOM:        20
+ COLVARS|   ATOM:        21
+ COLVARS|   ATOM:        28
+ COLVARS|   ATOM:        30
+ COLVARS|   ATOM:        23
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        9.447737   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        4
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        21
+ COLVARS|   ATOM:        22
+ COLVARS|   ATOM:        29
+ COLVARS|   ATOM:        32
+ COLVARS|   ATOM:        31
+ COLVARS|   ATOM:        28
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        9.449563    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        5
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        37
+ COLVARS|   ATOM:        38
+ COLVARS|   ATOM:        39
+ COLVARS|   ATOM:        46
+ COLVARS|   ATOM:        48
+ COLVARS|   ATOM:        41
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       18.896387   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        6
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        39
+ COLVARS|   ATOM:        40
+ COLVARS|   ATOM:        47
+ COLVARS|   ATOM:        50
+ COLVARS|   ATOM:        49
+ COLVARS|   ATOM:        46
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       18.898213    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        7
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        55
+ COLVARS|   ATOM:        56
+ COLVARS|   ATOM:        57
+ COLVARS|   ATOM:        59
+ COLVARS|   ATOM:        60
+ COLVARS|   ATOM:        61
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       28.351777   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        8
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        67
+ COLVARS|   ATOM:        70
+ COLVARS|   ATOM:        73
+ COLVARS|   ATOM:        75
+ COLVARS|   ATOM:        72
+ COLVARS|   ATOM:        69
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       28.340123    0.009071   -4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        9
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        79
+ COLVARS|   ATOM:        80
+ COLVARS|   ATOM:        81
+ COLVARS|   ATOM:        83
+ COLVARS|   ATOM:        84
+ COLVARS|   ATOM:        85
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       37.800427   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       10
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        91
+ COLVARS|   ATOM:        94
+ COLVARS|   ATOM:        97
+ COLVARS|   ATOM:        99
+ COLVARS|   ATOM:        96
+ COLVARS|   ATOM:        93
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       37.788773    0.009071   -4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       11
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:       103
+ COLVARS|   ATOM:       104
+ COLVARS|   ATOM:       105
+ COLVARS|   ATOM:       107
+ COLVARS|   ATOM:       108
+ COLVARS|   ATOM:       109
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       47.249077   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       12
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:       115
+ COLVARS|   ATOM:       118
+ COLVARS|   ATOM:       121
+ COLVARS|   ATOM:       123
+ COLVARS|   ATOM:       120
+ COLVARS|   ATOM:       117
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       47.237423    0.009071   -4.632012
+          ----------------------------------------------------------------------
+
+ FORCEFIELD| WARNING: A non Critical ForceField parameter is missing! CP2K GOES!
+ FORCEFIELD| Non critical parameters are:Urey-Bradley,Torsions,Impropers, Opbends and 1-4
+ FORCEFIELD| All missing parameters will not contribute to the potential energy!
+ FORCEFIELD| Activate the print key FF_INFO to have a list of missing parameters
+
+ CHARGE_INFO| Total Charge of the Classical System:                     0.000000
+
+ SPLINE_INFO| Generating 55 splines for NONBONDED14 interactions 
+              Due to 10 different atomic kinds
+  ...5  ...10  ...15  ...20  ...25  ...30  ...35  ...40  ...45  ...50  ...55
+
+ SPLINE_INFO| Number of unique splines computed:            6
+ SPLINE_INFO| Done
+
+ SPLINE_INFO| Generating 55 splines for NONBONDED interactions 
+              Due to 10 different atomic kinds
+  ...5  ...10  ...15  ...20  ...25  ...30  ...35  ...40  ...45  ...50  ...55
+
+ SPLINE_INFO| Number of unique splines computed:            6
+ SPLINE_INFO| Done
+
+
+                      ************* ******** ***********   
+                     ************* **********************  
+                     ****     **** ****      ***********   
+                     ******** ****  *******     ****       
+                     *******  ****   *******   ****        
+                     ****     ****       ****  ****        
+                     ****     **** **********  ****        
+                      ****     **** ********    ****       
+                     FRONTIERS IN SIMULATION TECHNOLOGY    
+                                                           
+                        C.J. Mundy, S. Balasubramanian,    
+                     Ken Bagchi, J. Hutter, Ari Seitsonen  
+                      IFW Kuo, T. Laino, J. VandeVondele   
+                                 Version 1.0               
+
+                                                           
+
+ EWALD|                                                                 not used
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        1
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:         1
+ COLVARS|   ATOM:         2
+ COLVARS|   ATOM:         3
+ COLVARS|   ATOM:        10
+ COLVARS|   ATOM:        12
+ COLVARS|   ATOM:         5
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       -0.000913   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        2
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:         3
+ COLVARS|   ATOM:         4
+ COLVARS|   ATOM:        11
+ COLVARS|   ATOM:        14
+ COLVARS|   ATOM:        13
+ COLVARS|   ATOM:        10
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        0.000913    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        3
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        19
+ COLVARS|   ATOM:        20
+ COLVARS|   ATOM:        21
+ COLVARS|   ATOM:        28
+ COLVARS|   ATOM:        30
+ COLVARS|   ATOM:        23
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        9.447737   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        4
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        21
+ COLVARS|   ATOM:        22
+ COLVARS|   ATOM:        29
+ COLVARS|   ATOM:        32
+ COLVARS|   ATOM:        31
+ COLVARS|   ATOM:        28
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        9.449563    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        5
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        37
+ COLVARS|   ATOM:        38
+ COLVARS|   ATOM:        39
+ COLVARS|   ATOM:        46
+ COLVARS|   ATOM:        48
+ COLVARS|   ATOM:        41
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       18.896387   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        6
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        39
+ COLVARS|   ATOM:        40
+ COLVARS|   ATOM:        47
+ COLVARS|   ATOM:        50
+ COLVARS|   ATOM:        49
+ COLVARS|   ATOM:        46
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       18.898213    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        7
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        55
+ COLVARS|   ATOM:        56
+ COLVARS|   ATOM:        57
+ COLVARS|   ATOM:        59
+ COLVARS|   ATOM:        60
+ COLVARS|   ATOM:        61
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       28.351777   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        8
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        67
+ COLVARS|   ATOM:        70
+ COLVARS|   ATOM:        73
+ COLVARS|   ATOM:        75
+ COLVARS|   ATOM:        72
+ COLVARS|   ATOM:        69
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       28.340123    0.009071   -4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        9
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        79
+ COLVARS|   ATOM:        80
+ COLVARS|   ATOM:        81
+ COLVARS|   ATOM:        83
+ COLVARS|   ATOM:        84
+ COLVARS|   ATOM:        85
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       37.800427   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       10
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        91
+ COLVARS|   ATOM:        94
+ COLVARS|   ATOM:        97
+ COLVARS|   ATOM:        99
+ COLVARS|   ATOM:        96
+ COLVARS|   ATOM:        93
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       37.788773    0.009071   -4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       11
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:       103
+ COLVARS|   ATOM:       104
+ COLVARS|   ATOM:       105
+ COLVARS|   ATOM:       107
+ COLVARS|   ATOM:       108
+ COLVARS|   ATOM:       109
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       47.249077   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       12
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:       115
+ COLVARS|   ATOM:       118
+ COLVARS|   ATOM:       121
+ COLVARS|   ATOM:       123
+ COLVARS|   ATOM:       120
+ COLVARS|   ATOM:       117
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       47.237423    0.009071   -4.632012
+          ----------------------------------------------------------------------
+
+ FORCEFIELD| WARNING: A non Critical ForceField parameter is missing! CP2K GOES!
+ FORCEFIELD| Non critical parameters are:Urey-Bradley,Torsions,Impropers, Opbends and 1-4
+ FORCEFIELD| All missing parameters will not contribute to the potential energy!
+ FORCEFIELD| Activate the print key FF_INFO to have a list of missing parameters
+
+ CHARGE_INFO| Total Charge of the Classical System:                     0.000000
+
+ SPLINE_INFO| Generating 55 splines for NONBONDED14 interactions 
+              Due to 10 different atomic kinds
+  ...5  ...10  ...15  ...20  ...25  ...30  ...35  ...40  ...45  ...50  ...55
+
+ SPLINE_INFO| Number of unique splines computed:            6
+ SPLINE_INFO| Done
+
+ SPLINE_INFO| Generating 55 splines for NONBONDED interactions 
+              Due to 10 different atomic kinds
+  ...5  ...10  ...15  ...20  ...25  ...30  ...35  ...40  ...45  ...50  ...55
+
+ SPLINE_INFO| Number of unique splines computed:            6
+ SPLINE_INFO| Done
+
+
+                      ************* ******** ***********   
+                     ************* **********************  
+                     ****     **** ****      ***********   
+                     ******** ****  *******     ****       
+                     *******  ****   *******   ****        
+                     ****     ****       ****  ****        
+                     ****     **** **********  ****        
+                      ****     **** ********    ****       
+                     FRONTIERS IN SIMULATION TECHNOLOGY    
+                                                           
+                        C.J. Mundy, S. Balasubramanian,    
+                     Ken Bagchi, J. Hutter, Ari Seitsonen  
+                      IFW Kuo, T. Laino, J. VandeVondele   
+                                 Version 1.0               
+
+                                                           
+
+ EWALD|                                                                 not used
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        1
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:         1
+ COLVARS|   ATOM:         2
+ COLVARS|   ATOM:         3
+ COLVARS|   ATOM:        10
+ COLVARS|   ATOM:        12
+ COLVARS|   ATOM:         5
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       -0.000913   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        2
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:         3
+ COLVARS|   ATOM:         4
+ COLVARS|   ATOM:        11
+ COLVARS|   ATOM:        14
+ COLVARS|   ATOM:        13
+ COLVARS|   ATOM:        10
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        0.000913    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        3
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        19
+ COLVARS|   ATOM:        20
+ COLVARS|   ATOM:        21
+ COLVARS|   ATOM:        28
+ COLVARS|   ATOM:        30
+ COLVARS|   ATOM:        23
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        9.447737   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        4
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        21
+ COLVARS|   ATOM:        22
+ COLVARS|   ATOM:        29
+ COLVARS|   ATOM:        32
+ COLVARS|   ATOM:        31
+ COLVARS|   ATOM:        28
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        9.449563    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        5
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        37
+ COLVARS|   ATOM:        38
+ COLVARS|   ATOM:        39
+ COLVARS|   ATOM:        46
+ COLVARS|   ATOM:        48
+ COLVARS|   ATOM:        41
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       18.896387   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        6
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        39
+ COLVARS|   ATOM:        40
+ COLVARS|   ATOM:        47
+ COLVARS|   ATOM:        50
+ COLVARS|   ATOM:        49
+ COLVARS|   ATOM:        46
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       18.898213    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        7
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        55
+ COLVARS|   ATOM:        56
+ COLVARS|   ATOM:        57
+ COLVARS|   ATOM:        59
+ COLVARS|   ATOM:        60
+ COLVARS|   ATOM:        61
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       28.351777   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        8
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        67
+ COLVARS|   ATOM:        70
+ COLVARS|   ATOM:        73
+ COLVARS|   ATOM:        75
+ COLVARS|   ATOM:        72
+ COLVARS|   ATOM:        69
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       28.340123    0.009071   -4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        9
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        79
+ COLVARS|   ATOM:        80
+ COLVARS|   ATOM:        81
+ COLVARS|   ATOM:        83
+ COLVARS|   ATOM:        84
+ COLVARS|   ATOM:        85
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       37.800427   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       10
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        91
+ COLVARS|   ATOM:        94
+ COLVARS|   ATOM:        97
+ COLVARS|   ATOM:        99
+ COLVARS|   ATOM:        96
+ COLVARS|   ATOM:        93
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       37.788773    0.009071   -4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       11
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:       103
+ COLVARS|   ATOM:       104
+ COLVARS|   ATOM:       105
+ COLVARS|   ATOM:       107
+ COLVARS|   ATOM:       108
+ COLVARS|   ATOM:       109
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       47.249077   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       12
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:       115
+ COLVARS|   ATOM:       118
+ COLVARS|   ATOM:       121
+ COLVARS|   ATOM:       123
+ COLVARS|   ATOM:       120
+ COLVARS|   ATOM:       117
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       47.237423    0.009071   -4.632012
+          ----------------------------------------------------------------------
+
+ FORCEFIELD| WARNING: A non Critical ForceField parameter is missing! CP2K GOES!
+ FORCEFIELD| Non critical parameters are:Urey-Bradley,Torsions,Impropers, Opbends and 1-4
+ FORCEFIELD| All missing parameters will not contribute to the potential energy!
+ FORCEFIELD| Activate the print key FF_INFO to have a list of missing parameters
+
+ CHARGE_INFO| Total Charge of the Classical System:                     0.000000
+
+ SPLINE_INFO| Generating 55 splines for NONBONDED14 interactions 
+              Due to 10 different atomic kinds
+  ...5  ...10  ...15  ...20  ...25  ...30  ...35  ...40  ...45  ...50  ...55
+
+ SPLINE_INFO| Number of unique splines computed:            6
+ SPLINE_INFO| Done
+
+ SPLINE_INFO| Generating 55 splines for NONBONDED interactions 
+              Due to 10 different atomic kinds
+  ...5  ...10  ...15  ...20  ...25  ...30  ...35  ...40  ...45  ...50  ...55
+
+ SPLINE_INFO| Number of unique splines computed:            6
+ SPLINE_INFO| Done

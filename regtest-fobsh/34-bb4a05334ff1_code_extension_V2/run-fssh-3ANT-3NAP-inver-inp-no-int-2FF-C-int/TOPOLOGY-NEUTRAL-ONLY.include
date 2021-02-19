@@ -1,0 +1,67 @@
+
+            &CELL
+                        ABC                   60.0    60.0    60.0
+                        PERIODIC  XYZ
+                &END CELL
+
+
+                &KIND CP
+                        ELEMENT C
+                &END KIND
+                &KIND H
+                        ELEMENT H
+                &END KIND
+                &KIND CN
+                        ELEMENT C
+                &END KIND
+
+                &KIND Ne
+                        ELEMENT Ne
+                &END KIND
+
+                &TOPOLOGY
+                        COORD_FILE_FORMAT XYZ
+                        COORD_FILE_NAME   pos-init.xyz
+                        NUMBER_OF_ATOMS                   248
+                        CONN_FILE_FORMAT  MOL_SET
+                        &MOL_SET
+
+                            &MOLECULE
+                                NMOL              2 
+                                CONN_FILE_NAME    ./../topologies_mixed/Ne.psf
+                                CONN_FILE_FORMAT  UPSF
+                            &END MOLECULE
+
+            
+                &MOLECULE
+                    NMOL              3
+                    CONN_FILE_NAME    ./../topologies_mixed/ANTHRACENE_NEUTRAL_NO_CHARGE_SAM.psf
+                    CONN_FILE_FORMAT  UPSF
+               &END MOLECULE
+
+                &MOLECULE
+                    NMOL              3
+                    CONN_FILE_NAME    ./../topologies_mixed/NAPHTA04_NEUTRAL_NO_CHARGE_SAM.psf
+                    CONN_FILE_FORMAT  UPSF
+               &END MOLECULE
+            
+            
+    
+
+                            &MOLECULE
+                                NMOL              120 
+                                CONN_FILE_NAME    ./../topologies_mixed/Ne.psf
+                                CONN_FILE_FORMAT  UPSF
+                            &END MOLECULE
+                            
+                        &END MOL_SET
+                        &DUMP_PSF
+                                &EACH
+                                   MD          1000
+                                &END EACH
+                                FILENAME ./input
+                        &END DUMP_PSF
+                &END TOPOLOGY
+
+
+            

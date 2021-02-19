@@ -1,0 +1,110 @@
+PSF
+
+         1 !NTITLE
+
+
+        70 !NATOM
+         1   RUBB     1        RUBB     C1       CA    0.000000       12.0100           
+         2   RUBB     1        RUBB     C2       CP    0.000000       12.0100           
+         3   RUBB     1        RUBB     C3       CA    0.000000       12.0100           
+         4   RUBB     1        RUBB     C4       CA    0.000000       12.0100           
+         5   RUBB     1        RUBB     C5       CA    0.000000       12.0100           
+         6   RUBB     1        RUBB     C6       CP    0.000000       12.0100           
+         7   RUBB     1        RUBB     C7       CA    0.000000       12.0100           
+         8   RUBB     1        RUBB     C8       CA    0.000000       12.0100           
+         9   RUBB     1        RUBB     C9       CA    0.000000       12.0100           
+        10   RUBB     1        RUBB     C10      CA    0.000000       12.0100           
+        11   RUBB     1        RUBB     C11      CA    0.000000       12.0100           
+        12   RUBB     1        RUBB     H1       HA    0.000000        1.0080           
+        13   RUBB     1        RUBB     H2       HA    0.000000        1.0080           
+        14   RUBB     1        RUBB     H3       HA    0.000000        1.0080           
+        15   RUBB     1        RUBB     H4       HA    0.000000        1.0080           
+        16   RUBB     1        RUBB     H5       HA    0.000000        1.0080           
+        17   RUBB     1        RUBB     H6       HA    0.000000        1.0080           
+        18   RUBB     1        RUBB     H7       HA    0.000000        1.0080           
+        19   RUBB     1        RUBB     C1H      CA    0.000000       12.0100           
+        20   RUBB     1        RUBB     C2H      CP    0.000000       12.0100           
+        21   RUBB     1        RUBB     C3H      CA    0.000000       12.0100           
+        22   RUBB     1        RUBB     C3A      CA    0.000000       12.0100           
+        23   RUBB     1        RUBB     C2A      CP    0.000000       12.0100           
+        24   RUBB     1        RUBB     C3I      CA    0.000000       12.0100           
+        25   RUBB     1        RUBB     C2I      CP    0.000000       12.0100           
+        26   RUBB     1        RUBB     C6I      CP    0.000000       12.0100           
+        27   RUBB     1        RUBB     C7I      CA    0.000000       12.0100           
+        28   RUBB     1        RUBB     C8I      CA    0.000000       12.0100           
+        29   RUBB     1        RUBB     C9I      CA    0.000000       12.0100           
+        30   RUBB     1        RUBB     C10I     CA    0.000000       12.0100           
+        31   RUBB     1        RUBB     C11I     CA    0.000000       12.0100           
+        32   RUBB     1        RUBB     H7I      HA    0.000000        1.0080           
+        33   RUBB     1        RUBB     H6I      HA    0.000000        1.0080           
+        34   RUBB     1        RUBB     H5I      HA    0.000000        1.0080           
+        35   RUBB     1        RUBB     H4I      HA    0.000000        1.0080           
+        36   RUBB     1        RUBB     H3I      HA    0.000000        1.0080           
+        37   RUBB     1        RUBB     C4I      CA    0.000000       12.0100           
+        38   RUBB     1        RUBB     C5I      CA    0.000000       12.0100           
+        39   RUBB     1        RUBB     H2I      HA    0.000000        1.0080           
+        40   RUBB     1        RUBB     H1I      HA    0.000000        1.0080           
+        41   RUBB     1        RUBB     C6A      CP    0.000000       12.0100           
+        42   RUBB     1        RUBB     C7A      CA    0.000000       12.0100           
+        43   RUBB     1        RUBB     C8A      CA    0.000000       12.0100           
+        44   RUBB     1        RUBB     C9A      CA    0.000000       12.0100           
+        45   RUBB     1        RUBB     C10A     CA    0.000000       12.0100           
+        46   RUBB     1        RUBB     C11A     CA    0.000000       12.0100           
+        47   RUBB     1        RUBB     H7A      HA    0.000000        1.0080           
+        48   RUBB     1        RUBB     H6A      HA    0.000000        1.0080           
+        49   RUBB     1        RUBB     H5A      HA    0.000000        1.0080           
+        50   RUBB     1        RUBB     H4A      HA    0.000000        1.0080           
+        51   RUBB     1        RUBB     H3A      HA    0.000000        1.0080           
+        52   RUBB     1        RUBB     C4A      CA    0.000000       12.0100           
+        53   RUBB     1        RUBB     C5A      CA    0.000000       12.0100           
+        54   RUBB     1        RUBB     C5H      CA    0.000000       12.0100           
+        55   RUBB     1        RUBB     C4H      CA    0.000000       12.0100           
+        56   RUBB     1        RUBB     H1H      HA    0.000000        1.0080           
+        57   RUBB     1        RUBB     H2H      HA    0.000000        1.0080           
+        58   RUBB     1        RUBB     H2A      HA    0.000000        1.0080           
+        59   RUBB     1        RUBB     H1A      HA    0.000000        1.0080           
+        60   RUBB     1        RUBB     C6H      CP    0.000000       12.0100           
+        61   RUBB     1        RUBB     C7H      CA    0.000000       12.0100           
+        62   RUBB     1        RUBB     C8H      CA    0.000000       12.0100           
+        63   RUBB     1        RUBB     C9H      CA    0.000000       12.0100           
+        64   RUBB     1        RUBB     C10H     CA    0.000000       12.0100           
+        65   RUBB     1        RUBB     C11H     CA    0.000000       12.0100           
+        66   RUBB     1        RUBB     H7H      HA    0.000000        1.0080           
+        67   RUBB     1        RUBB     H6H      HA    0.000000        1.0080           
+        68   RUBB     1        RUBB     H5H      HA    0.000000        1.0080           
+        69   RUBB     1        RUBB     H4H      HA    0.000000        1.0080           
+        70   RUBB     1        RUBB     H3H      HA    0.000000        1.0080           
+
+        0 !NBOND: bonds
+
+       0 !NTHETA: angles
+
+       0 !NPHI: dihedrals
+        0 !NIMPHI: impropers
+
+         0 !NDON: donors
+
+
+         0 !NACC: acceptors
+
+
+         0 !NNB
+
+         0         0         0         0         0         0         0         0
+         0         0         0         0         0         0         0         0
+         0         0         0         0         0         0         0         0
+         0         0         0         0         0         0         0         0
+         0         0         0         0         0         0         0         0
+         0         0         0         0         0         0         0         0
+         0         0         0         0         0         0         0         0
+         0         0         0         0         0         0         0         0
+         0         0         0         0         0         0
+
+         1         0 !NGRP NST2
+         0         1         0
+
+
+         0         0 !NUMLP NUMLPH
+
+         0 !NCRTERM: cross-terms
+

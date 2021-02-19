@@ -1,0 +1,3681 @@
+LET'S START. 
+Adiabatic Initial Population = 
+   1         0.0063066240
+   2         0.0143186714
+   3         0.7297483386
+   4         0.0185436299
+   5         0.2062323261
+   6         0.0245952081
+   7         0.0002312308
+   8         0.0000239712
+Initial Random Number =         0.6795103406
+First Adiabatic State =        3
+  
+   i = 1, time =                0.100 (fs)
+   Exact sum of fluxes =         0.0079054826
+   Approximate sum of fluxes =         0.0113347693
+   Minimum adiab. energy difference =         0.0005095051
+   Sum of probability =         0.0211572631
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9788427369
+   4         0.0002927485
+   5         0.0191798877
+   6         0.0016801110
+   7         0.0000034432
+   8         0.0000010726
+   Random number =         0.0591472702
+NO HOP!
+Final state   =        3
+  
+   i = 2, time =                0.200 (fs)
+   Exact sum of fluxes =         0.0173665943
+   Approximate sum of fluxes =         0.0186793461
+   Minimum adiab. energy difference =         0.0006827643
+   Sum of probability =         0.0222310593
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9777689407
+   4         0.0002475443
+   5         0.0202551893
+   6         0.0017205338
+   7         0.0000064306
+   8         0.0000013613
+   Random number =         0.0600288018
+NO HOP!
+Final state   =        3
+  
+   i = 3, time =                0.300 (fs)
+   Exact sum of fluxes =         0.0206369577
+   Approximate sum of fluxes =         0.0216140368
+   Minimum adiab. energy difference =         0.0008519331
+   Sum of probability =         0.0233514682
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9766485318
+   4         0.0000696331
+   5         0.0215537413
+   6         0.0017185416
+   7         0.0000079536
+   8         0.0000015987
+   Random number =         0.0737575251
+NO HOP!
+Final state   =        3
+  
+   i = 4, time =                0.400 (fs)
+   Exact sum of fluxes =         0.0225598967
+   Approximate sum of fluxes =         0.0234933686
+   Minimum adiab. energy difference =         0.0010162001
+   Sum of probability =         0.0245774557
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9754225443
+   4         0.0000000000
+   5         0.0228705058
+   6         0.0016960882
+   7         0.0000090092
+   8         0.0000018525
+   Random number =         0.8085495828
+NO HOP!
+Final state   =        3
+  
+   i = 5, time =                0.500 (fs)
+   Exact sum of fluxes =         0.0240776691
+   Approximate sum of fluxes =         0.0250289334
+   Minimum adiab. energy difference =         0.0011750866
+   Sum of probability =         0.0257017104
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9742982896
+   4         0.0003054660
+   5         0.0237256948
+   6         0.0016585787
+   7         0.0000098543
+   8         0.0000021166
+   Random number =         0.8329145040
+NO HOP!
+Final state   =        3
+  
+   i = 6, time =                0.600 (fs)
+   Exact sum of fluxes =         0.0254399588
+   Approximate sum of fluxes =         0.0263878299
+   Minimum adiab. energy difference =         0.0013283082
+   Sum of probability =         0.0268692664
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9731307336
+   4         0.0022009047
+   5         0.0230431666
+   6         0.0016121209
+   7         0.0000106691
+   8         0.0000024050
+   Random number =         0.1816433921
+NO HOP!
+Final state   =        3
+  
+   i = 7, time =                0.700 (fs)
+   Exact sum of fluxes =         0.0267619221
+   Approximate sum of fluxes =         0.0277218775
+   Minimum adiab. energy difference =         0.0014756106
+   Sum of probability =         0.0280858197
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9719141803
+   4         0.0062162419
+   5         0.0202978385
+   6         0.0015574788
+   7         0.0000115188
+   8         0.0000027416
+   Random number =         0.0151056240
+NO HOP!
+Final state   =        3
+  
+   i = 8, time =                0.800 (fs)
+   Exact sum of fluxes =         0.0280717097
+   Approximate sum of fluxes =         0.0291027947
+   Minimum adiab. energy difference =         0.0016167836
+   Sum of probability =         0.0293897759
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9706102241
+   4         0.0110057979
+   5         0.0168692793
+   6         0.0014990662
+   7         0.0000124916
+   8         0.0000031410
+   Random number =         0.2468719039
+NO HOP!
+Final state   =        3
+  
+   i = 9, time =                0.900 (fs)
+   Exact sum of fluxes =         0.0294005773
+   Approximate sum of fluxes =         0.0304933256
+   Minimum adiab. energy difference =         0.0017516479
+   Sum of probability =         0.0307266512
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9692733488
+   4         0.0151222308
+   5         0.0141501828
+   6         0.0014370286
+   7         0.0000136157
+   8         0.0000035933
+   Random number =         0.8336512352
+NO HOP!
+Final state   =        3
+  
+   i = 10, time =                1.000 (fs)
+   Exact sum of fluxes =         0.0307670697
+   Approximate sum of fluxes =         0.0319072147
+   Minimum adiab. energy difference =         0.0018799994
+   Sum of probability =         0.0321014778
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9678985222
+   4         0.0183564189
+   5         0.0123515859
+   6         0.0013744209
+   7         0.0000149475
+   8         0.0000041046
+   Random number =         0.4739930845
+NO HOP!
+Final state   =        3
+  
+   i = 11, time =                1.100 (fs)
+   Exact sum of fluxes =         0.0321748923
+   Approximate sum of fluxes =         0.0333662907
+   Minimum adiab. energy difference =         0.0019941875
+   Sum of probability =         0.0323402102
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9676597898
+   4         0.0198060944
+   5         0.0112013321
+   6         0.0013114595
+   7         0.0000165951
+   8         0.0000047291
+   Random number =         0.2741656064
+NO HOP!
+Final state   =        3
+  
+   i = 12, time =                1.200 (fs)
+   Exact sum of fluxes =         0.0336364316
+   Approximate sum of fluxes =         0.0348890046
+   Minimum adiab. energy difference =         0.0019907380
+   Sum of probability =         0.0337794437
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9662205563
+   4         0.0220502562
+   5         0.0104554431
+   6         0.0012496603
+   7         0.0000186352
+   8         0.0000054489
+   Random number =         0.4540503017
+NO HOP!
+Final state   =        3
+  
+   i = 13, time =                1.300 (fs)
+   Exact sum of fluxes =         0.0351620033
+   Approximate sum of fluxes =         0.0364868541
+   Minimum adiab. energy difference =         0.0019903225
+   Sum of probability =         0.0352882292
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9647117708
+   4         0.0241201075
+   5         0.0099521604
+   6         0.0011886474
+   7         0.0000210895
+   8         0.0000062244
+   Random number =         0.5421999967
+NO HOP!
+Final state   =        3
+  
+   i = 14, time =                1.400 (fs)
+   Exact sum of fluxes =         0.0367487524
+   Approximate sum of fluxes =         0.0381551216
+   Minimum adiab. energy difference =         0.0019931122
+   Sum of probability =         0.0368617521
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9631382479
+   4         0.0260858177
+   5         0.0096141937
+   6         0.0011302288
+   7         0.0000243505
+   8         0.0000071613
+   Random number =         0.7853072454
+NO HOP!
+Final state   =        3
+  
+   i = 15, time =                1.500 (fs)
+   Exact sum of fluxes =         0.0384068535
+   Approximate sum of fluxes =         0.0399048748
+   Minimum adiab. energy difference =         0.0019991578
+   Sum of probability =         0.0385100081
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9614899919
+   4         0.0280269105
+   5         0.0093730922
+   6         0.0010733673
+   7         0.0000284866
+   8         0.0000081514
+   Random number =         0.3509130080
+NO HOP!
+Final state   =        3
+  
+   i = 16, time =                1.600 (fs)
+   Exact sum of fluxes =         0.0401353314
+   Approximate sum of fluxes =         0.0417345444
+   Minimum adiab. energy difference =         0.0020085614
+   Sum of probability =         0.0402311410
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9597688590
+   4         0.0299669278
+   5         0.0092031956
+   6         0.0010179655
+   7         0.0000339035
+   8         0.0000091486
+   Random number =         0.5127729784
+NO HOP!
+Final state   =        3
+  
+   i = 17, time =                1.700 (fs)
+   Exact sum of fluxes =         0.0419293843
+   Approximate sum of fluxes =         0.0436388892
+   Minimum adiab. energy difference =         0.0020213733
+   Sum of probability =         0.0420199861
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9579800139
+   4         0.0319189111
+   5         0.0090857397
+   6         0.0009639487
+   7         0.0000412531
+   8         0.0000101336
+   Random number =         0.5667291288
+NO HOP!
+Final state   =        3
+  
+   i = 18, time =                1.800 (fs)
+   Exact sum of fluxes =         0.0437887124
+   Approximate sum of fluxes =         0.0456180427
+   Minimum adiab. energy difference =         0.0020376903
+   Sum of probability =         0.0438761140
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9561238860
+   4         0.0339000284
+   5         0.0090039148
+   6         0.0009100052
+   7         0.0000512805
+   8         0.0000108852
+   Random number =         0.0417010120
+NO HOP!
+Final state   =        3
+  
+   i = 19, time =                1.900 (fs)
+   Exact sum of fluxes =         0.0456974812
+   Approximate sum of fluxes =         0.0476550314
+   Minimum adiab. energy difference =         0.0020576778
+   Sum of probability =         0.0457832656
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9542167344
+   4         0.0358938769
+   5         0.0089575593
+   6         0.0008555506
+   7         0.0000651440
+   8         0.0000111348
+   Random number =         0.2308744169
+NO HOP!
+Final state   =        3
+  
+   i = 20, time =                2.000 (fs)
+   Exact sum of fluxes =         0.0476578584
+   Approximate sum of fluxes =         0.0497527607
+   Minimum adiab. energy difference =         0.0020813714
+   Sum of probability =         0.0477439331
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9522560669
+   4         0.0379072186
+   5         0.0089432474
+   6         0.0007981721
+   7         0.0000845663
+   8         0.0000107287
+   Random number =         0.1081877871
+NO HOP!
+Final state   =        3
+  
+   i = 21, time =                2.100 (fs)
+   Exact sum of fluxes =         0.0496377559
+   Approximate sum of fluxes =         0.0518765525
+   Minimum adiab. energy difference =         0.0021089835
+   Sum of probability =         0.0497254167
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9502745833
+   4         0.0398988378
+   5         0.0089690751
+   6         0.0007365220
+   7         0.0001115214
+   8         0.0000094604
+   Random number =         0.2232476737
+NO HOP!
+Final state   =        3
+  
+   i = 22, time =                2.200 (fs)
+   Exact sum of fluxes =         0.0516272118
+   Approximate sum of fluxes =         0.0540159210
+   Minimum adiab. energy difference =         0.0021406482
+   Sum of probability =         0.0517184676
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9482815324
+   4         0.0418483283
+   5         0.0090471365
+   6         0.0006670862
+   7         0.0001484237
+   8         0.0000074929
+   Random number =         0.5397096330
+NO HOP!
+Final state   =        3
+  
+   i = 23, time =                2.300 (fs)
+   Exact sum of fluxes =         0.0536034889
+   Approximate sum of fluxes =         0.0561464805
+   Minimum adiab. energy difference =         0.0021765221
+   Sum of probability =         0.0536993644
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9463006356
+   4         0.0437142306
+   5         0.0091947480
+   6         0.0005864751
+   7         0.0001986408
+   8         0.0000052700
+   Random number =         0.0374555103
+NO HOP!
+Final state   =        3
+  
+   i = 24, time =                2.400 (fs)
+   Exact sum of fluxes =         0.0555252938
+   Approximate sum of fluxes =         0.0582231096
+   Minimum adiab. energy difference =         0.0022167907
+   Sum of probability =         0.0556278862
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9443721138
+   4         0.0454118739
+   5         0.0094563603
+   6         0.0004924209
+   7         0.0002640243
+   8         0.0000032067
+   Random number =         0.5059913146
+NO HOP!
+Final state   =        3
+  
+   i = 25, time =                2.500 (fs)
+   Exact sum of fluxes =         0.0573919520
+   Approximate sum of fluxes =         0.0602464770
+   Minimum adiab. energy difference =         0.0022615560
+   Sum of probability =         0.0575029974
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9424970026
+   4         0.0469113971
+   5         0.0098621689
+   6         0.0003832633
+   7         0.0003445120
+   8         0.0000016561
+   Random number =         0.9766635539
+   ATTEMPT between old_state =        3 and new_state =        4
+TRY ENERGY CONSERVATION WITH ISOTROPIC RESCALING: PASSED!
+   Kinetic energy   (Ha) =         0.3708268972
+TRY ENERGY CONSERVATION WITH NACV-ORIENTED RESCALING:
+   Energy old state (Ha) =         2.4567354476
+   Energy new state (Ha) =         2.4589970036
+   Energy diff (Ha) =         0.0022615560
+   A-term   =         0.0105829207
+   B-term   =         0.0042918779
+   NACV kinetic energy (Ha)  =         0.0004351402
+   Discriminant   =        -0.0000773153
+REJECTED HOP!
+METHOD OF REVERSING: ALWAYS                                                                          
+   Product NACV*Momentum =        93.4528334014
+   Product NACV*Old forces =         0.6271278452
+   Product NACV*New forces =        -0.3993065133
+REVERSAL OF VELOCITIES!
+Final state   =        3
+  
+   i = 26, time =                2.600 (fs)
+   Exact sum of fluxes =        -0.0572291062
+   Approximate sum of fluxes =        -0.0545314478
+   Minimum adiab. energy difference =         0.0022311933
+   Sum of probability =         0.0000258433
+   Probability = 
+   1         0.0000258433
+   2         0.0000000000
+   3         0.9999741567
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.1284058070
+NO HOP!
+Final state   =        3
+  
+   i = 27, time =                2.700 (fs)
+   Exact sum of fluxes =        -0.0547667696
+   Approximate sum of fluxes =        -0.0522754407
+   Minimum adiab. energy difference =         0.0022036022
+   Sum of probability =         0.0000228899
+   Probability = 
+   1         0.0000207912
+   2         0.0000000000
+   3         0.9999771101
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000020987
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.8071081247
+NO HOP!
+Final state   =        3
+  
+   i = 28, time =                2.800 (fs)
+   Exact sum of fluxes =        -0.0522168473
+   Approximate sum of fluxes =        -0.0499216736
+   Minimum adiab. energy difference =         0.0021792955
+   Sum of probability =         0.0000208700
+   Probability = 
+   1         0.0000166701
+   2         0.0000000000
+   3         0.9999791300
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000042000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.3634871413
+NO HOP!
+Final state   =        3
+  
+   i = 29, time =                2.900 (fs)
+   Exact sum of fluxes =        -0.0495908562
+   Approximate sum of fluxes =        -0.0474874329
+   Minimum adiab. energy difference =         0.0021583845
+   Sum of probability =         0.0000160273
+   Probability = 
+   1         0.0000135023
+   2         0.0000000000
+   3         0.9999839727
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000024808
+   7         0.0000000000
+   8         0.0000000442
+   Random number =         0.8552237872
+NO HOP!
+Final state   =        3
+  
+   i = 30, time =                3.000 (fs)
+   Exact sum of fluxes =        -0.0469235712
+   Approximate sum of fluxes =        -0.0450061289
+   Minimum adiab. energy difference =         0.0021407245
+   Sum of probability =         0.0000161548
+   Probability = 
+   1         0.0000110967
+   2         0.0000000000
+   3         0.9999838452
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000049040
+   8         0.0000001541
+   Random number =         0.6703472965
+NO HOP!
+Final state   =        3
+  
+   i = 31, time =                3.100 (fs)
+   Exact sum of fluxes =        -0.0442553671
+   Approximate sum of fluxes =        -0.0425145726
+   Minimum adiab. energy difference =         0.0021264866
+   Sum of probability =         0.0000202539
+   Probability = 
+   1         0.0000097545
+   2         0.0000000000
+   3         0.9999797461
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000102464
+   8         0.0000002531
+   Random number =         0.9519441093
+NO HOP!
+Final state   =        3
+  
+   i = 32, time =                3.200 (fs)
+   Exact sum of fluxes =        -0.0416059582
+   Approximate sum of fluxes =        -0.0400306393
+   Minimum adiab. energy difference =         0.0021152890
+   Sum of probability =         0.0000259170
+   Probability = 
+   1         0.0000089301
+   2         0.0000000000
+   3         0.9999740830
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000166227
+   8         0.0000003642
+   Random number =         0.4030336651
+NO HOP!
+Final state   =        3
+  
+   i = 33, time =                3.300 (fs)
+   Exact sum of fluxes =        -0.0389971173
+   Approximate sum of fluxes =        -0.0375696425
+   Minimum adiab. energy difference =         0.0021067871
+   Sum of probability =         0.0000303342
+   Probability = 
+   1         0.0000087212
+   2         0.0000000000
+   3         0.9999696658
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000211445
+   8         0.0000004686
+   Random number =         0.0639906913
+NO HOP!
+Final state   =        3
+  
+   i = 34, time =                3.400 (fs)
+   Exact sum of fluxes =        -0.0364622268
+   Approximate sum of fluxes =        -0.0351432284
+   Minimum adiab. energy difference =         0.0021003565
+   Sum of probability =         0.0000341493
+   Probability = 
+   1         0.0000089623
+   2         0.0000000000
+   3         0.9999658507
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000246061
+   8         0.0000005808
+   Random number =         0.4424038711
+NO HOP!
+Final state   =        3
+  
+   i = 35, time =                3.500 (fs)
+   Exact sum of fluxes =        -0.0340011195
+   Approximate sum of fluxes =        -0.0326014957
+   Minimum adiab. energy difference =         0.0020937414
+   Sum of probability =         0.0000384414
+   Probability = 
+   1         0.0000105023
+   2         0.0000004035
+   3         0.9999615586
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000268451
+   8         0.0000006905
+   Random number =         0.3705383274
+NO HOP!
+Final state   =        3
+  
+   i = 36, time =                3.600 (fs)
+   Exact sum of fluxes =        -0.0316434582
+   Approximate sum of fluxes =        -0.0277653294
+   Minimum adiab. energy difference =         0.0020683453
+   Sum of probability =         0.0000425723
+   Probability = 
+   1         0.0000121420
+   2         0.0000012918
+   3         0.9999574277
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000283422
+   8         0.0000007963
+   Random number =         0.7910923228
+NO HOP!
+Final state   =        3
+  
+   i = 37, time =                3.700 (fs)
+   Exact sum of fluxes =        -0.0293869366
+   Approximate sum of fluxes =        -0.0263953739
+   Minimum adiab. energy difference =         0.0019819433
+   Sum of probability =         0.0000487456
+   Probability = 
+   1         0.0000148051
+   2         0.0000022307
+   3         0.9999512544
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000018764
+   7         0.0000289268
+   8         0.0000009066
+   Random number =         0.0918277102
+NO HOP!
+Final state   =        3
+  
+   i = 38, time =                3.800 (fs)
+   Exact sum of fluxes =        -0.0272414131
+   Approximate sum of fluxes =        -0.0262702546
+   Minimum adiab. energy difference =         0.0018741831
+   Sum of probability =         0.0000565540
+   Probability = 
+   1         0.0000185669
+   2         0.0000032435
+   3         0.9999434460
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000046599
+   7         0.0000290721
+   8         0.0000010114
+   Random number =         0.9327895530
+NO HOP!
+Final state   =        3
+  
+   i = 39, time =                3.900 (fs)
+   Exact sum of fluxes =        -0.0252104045
+   Approximate sum of fluxes =        -0.0244868993
+   Minimum adiab. energy difference =         0.0017602738
+   Sum of probability =         0.0000643111
+   Probability = 
+   1         0.0000234520
+   2         0.0000043738
+   3         0.9999356889
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000066672
+   7         0.0000286982
+   8         0.0000011199
+   Random number =         0.6689587527
+NO HOP!
+Final state   =        3
+  
+   i = 40, time =                4.000 (fs)
+   Exact sum of fluxes =        -0.0232910292
+   Approximate sum of fluxes =        -0.0226838664
+   Minimum adiab. energy difference =         0.0016433331
+   Sum of probability =         0.0000729646
+   Probability = 
+   1         0.0000300791
+   2         0.0000056866
+   3         0.9999270354
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000079424
+   7         0.0000280299
+   8         0.0000012266
+   Random number =         0.0704956699
+NO HOP!
+Final state   =        3
+  
+   i = 41, time =                4.100 (fs)
+   Exact sum of fluxes =        -0.0214847923
+   Approximate sum of fluxes =        -0.0209633175
+   Minimum adiab. energy difference =         0.0015248682
+   Sum of probability =         0.0000823120
+   Probability = 
+   1         0.0000384487
+   2         0.0000072394
+   3         0.9999176880
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000083716
+   7         0.0000269185
+   8         0.0000013338
+   Random number =         0.4483789306
+NO HOP!
+Final state   =        3
+  
+   i = 42, time =                4.200 (fs)
+   Exact sum of fluxes =        -0.0197827395
+   Approximate sum of fluxes =        -0.0193319820
+   Minimum adiab. energy difference =         0.0014059452
+   Sum of probability =         0.0000948716
+   Probability = 
+   1         0.0000502325
+   2         0.0000091277
+   3         0.9999051284
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000083685
+   7         0.0000256978
+   8         0.0000014452
+   Random number =         0.5319948221
+NO HOP!
+Final state   =        3
+  
+   i = 43, time =                4.300 (fs)
+   Exact sum of fluxes =        -0.0181761872
+   Approximate sum of fluxes =        -0.0177857347
+   Minimum adiab. energy difference =         0.0012873241
+   Sum of probability =         0.0001111483
+   Probability = 
+   1         0.0000661593
+   2         0.0000115052
+   3         0.9998888517
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000077775
+   7         0.0000241538
+   8         0.0000015525
+   Random number =         0.5773072085
+NO HOP!
+Final state   =        3
+  
+   i = 44, time =                4.400 (fs)
+   Exact sum of fluxes =        -0.0166651186
+   Approximate sum of fluxes =        -0.0163259963
+   Minimum adiab. energy difference =         0.0011695426
+   Sum of probability =         0.0001336318
+   Probability = 
+   1         0.0000879267
+   2         0.0000145193
+   3         0.9998663682
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000069758
+   7         0.0000225389
+   8         0.0000016712
+   Random number =         0.0169284336
+NO HOP!
+Final state   =        3
+  
+   i = 45, time =                4.500 (fs)
+   Exact sum of fluxes =        -0.0152298120
+   Approximate sum of fluxes =        -0.0149346671
+   Minimum adiab. energy difference =         0.0010530538
+   Sum of probability =         0.0001655535
+   Probability = 
+   1         0.0001185090
+   2         0.0000184601
+   3         0.9998344465
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000059858
+   7         0.0000208086
+   8         0.0000017899
+   Random number =         0.1314493614
+NO HOP!
+Final state   =        3
+  
+   i = 46, time =                4.600 (fs)
+   Exact sum of fluxes =        -0.0138545158
+   Approximate sum of fluxes =        -0.0135962225
+   Minimum adiab. energy difference =         0.0009381925
+   Sum of probability =         0.0002120908
+   Probability = 
+   1         0.0001625544
+   2         0.0000237227
+   3         0.9997879092
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000049259
+   7         0.0000189720
+   8         0.0000019158
+   Random number =         0.0665299620
+NO HOP!
+Final state   =        3
+  
+   i = 47, time =                4.700 (fs)
+   Exact sum of fluxes =        -0.0125178201
+   Approximate sum of fluxes =        -0.0122891906
+   Minimum adiab. energy difference =         0.0008252132
+   Sum of probability =         0.0002807525
+   Probability = 
+   1         0.0002268995
+   2         0.0000309501
+   3         0.9997192475
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000038247
+   7         0.0000170358
+   8         0.0000020424
+   Random number =         0.1362452245
+NO HOP!
+Final state   =        3
+  
+   i = 48, time =                4.800 (fs)
+   Exact sum of fluxes =        -0.0111786600
+   Approximate sum of fluxes =        -0.0109713615
+   Minimum adiab. energy difference =         0.0007143368
+   Sum of probability =         0.0004404655
+   Probability = 
+   1         0.0003246413
+   2         0.0000411149
+   3         0.9995595345
+   4         0.0000547427
+   5         0.0000000000
+   6         0.0000027765
+   7         0.0000150193
+   8         0.0000021708
+   Random number =         0.5337343875
+NO HOP!
+Final state   =        3
+  
+   i = 49, time =                4.900 (fs)
+   Exact sum of fluxes =        -0.0097800966
+   Approximate sum of fluxes =        -0.0095815729
+   Minimum adiab. energy difference =         0.0006057098
+   Sum of probability =         0.0007529959
+   Probability = 
+   1         0.0004778636
+   2         0.0000558191
+   3         0.9992470041
+   4         0.0002022179
+   5         0.0000000000
+   6         0.0000018401
+   7         0.0000129552
+   8         0.0000023001
+   Random number =         0.2987630479
+NO HOP!
+Final state   =        3
+  
+   i = 50, time =                5.000 (fs)
+   Exact sum of fluxes =        -0.0081989358
+   Approximate sum of fluxes =        -0.0079864833
+   Minimum adiab. energy difference =         0.0004994945
+   Sum of probability =         0.0012705600
+   Probability = 
+   1         0.0007288419
+   2         0.0000779192
+   3         0.9987294400
+   4         0.0004494998
+   5         0.0000000000
+   6         0.0000010394
+   7         0.0000108371
+   8         0.0000024227
+   Random number =         0.4330569774
+NO HOP!
+Final state   =        3
+  
+   i = 51, time =                5.100 (fs)
+   Exact sum of fluxes =        -0.0061641615
+   Approximate sum of fluxes =        -0.0058811554
+   Minimum adiab. energy difference =         0.0003958098
+   Sum of probability =         0.0022390368
+   Probability = 
+   1         0.0011656686
+   2         0.0001125013
+   3         0.9977609632
+   4         0.0009493019
+   5         0.0000000000
+   6         0.0000004096
+   7         0.0000086282
+   8         0.0000025272
+   Random number =         0.0836854068
+NO HOP!
+Final state   =        3
+  
+   i = 52, time =                5.200 (fs)
+   Exact sum of fluxes =        -0.0029231143
+   Approximate sum of fluxes =        -0.0023841471
+   Minimum adiab. energy difference =         0.0002948570
+   Sum of probability =         0.0043617254
+   Probability = 
+   1         0.0019845136
+   2         0.0001699535
+   3         0.9956382746
+   4         0.0021984792
+   5         0.0000000000
+   6         0.0000000038
+   7         0.0000061905
+   8         0.0000025847
+   Random number =         0.5160883794
+NO HOP!
+Final state   =        3
+  
+   i = 53, time =                5.300 (fs)
+   Exact sum of fluxes =         0.0044775492
+   Approximate sum of fluxes =         0.0062143292
+   Minimum adiab. energy difference =         0.0001970582
+   Sum of probability =         0.0105190580
+   Probability = 
+   1         0.0036879479
+   2         0.0002749039
+   3         0.9894809420
+   4         0.0065504613
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000031928
+   8         0.0000025520
+   Random number =         0.5679079066
+NO HOP!
+Final state   =        3
+  
+   i = 54, time =                5.400 (fs)
+   Exact sum of fluxes =         0.0379853486
+   Approximate sum of fluxes =         0.0513876840
+   Minimum adiab. energy difference =         0.0001047821
+   Sum of probability =         0.0425221870
+   Probability = 
+   1         0.0076838564
+   2         0.0005947930
+   3         0.9574778130
+   4         0.0342402448
+   5         0.0000000000
+   6         0.0000010023
+   7         0.0000000000
+   8         0.0000022904
+   Random number =         0.4059075260
+NO HOP!
+Final state   =        3
+  
+   i = 55, time =                5.500 (fs)
+   Exact sum of fluxes =         0.4935332451
+   Approximate sum of fluxes =         1.1336801407
+   Minimum adiab. energy difference =         0.0000483419
+   Sum of probability =         0.4973959663
+   Probability = 
+   1         0.0000000000
+   2         0.0222880807
+   3         0.5026040337
+   4         0.4750969124
+   5         0.0000000000
+   6         0.0000104593
+   7         0.0000000000
+   8         0.0000005139
+   Random number =         0.2849361781
+NO HOP!
+Final state   =        3
+  
+   i = 56, time =                5.600 (fs)
+   Exact sum of fluxes =         0.8143570071
+   Approximate sum of fluxes =         2.7404101459
+   Minimum adiab. energy difference =         0.0001228109
+   Sum of probability =         0.8749850573
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.1250149427
+   4         0.8749233025
+   5         0.0000000000
+   6         0.0000617548
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.8571249361
+   ATTEMPT between old_state =        3 and new_state =        4
+TRY ENERGY CONSERVATION WITH ISOTROPIC RESCALING: PASSED!
+   Kinetic energy   (Ha) =         0.4290542207
+TRY ENERGY CONSERVATION WITH NACV-ORIENTED RESCALING:
+   Energy old state (Ha) =         2.1581776060
+   Energy new state (Ha) =         2.1583004169
+   Energy diff (Ha) =         0.0001228109
+   A-term   =         1.0446535140
+   B-term   =        -0.0275003481
+   NACV kinetic energy (Ha)  =         0.0001809856
+   Discriminant   =         0.0002430899
+SUCCESSFUL HOP!
+   Directional rescale factor  =         0.0056999800
+   Momentum change  =         0.0000604320       -0.0001136598        0.0001499088
+Final state   =        4
+  
+   i = 57, time =                5.700 (fs)
+   Exact sum of fluxes =         0.8474617438
+   Approximate sum of fluxes =         3.7386231618
+   Minimum adiab. energy difference =         0.0002108986
+   Sum of probability =         0.8621266101
+   Probability = 
+   1         0.0122858637
+   2         0.0000000000
+   3         0.7610460776
+   4         0.1378733899
+   5         0.0887380555
+   6         0.0000000000
+   7         0.0000476688
+   8         0.0000089445
+   Random number =         0.2381563626
+   ATTEMPT between old_state =        4 and new_state =        3
+TRY ENERGY CONSERVATION WITH ISOTROPIC RESCALING: PASSED!
+   Kinetic energy   (Ha) =         0.4342860639
+TRY ENERGY CONSERVATION WITH NACV-ORIENTED RESCALING:
+   Energy old state (Ha) =         2.1336974518
+   Energy new state (Ha) =         2.1334865532
+   Energy diff (Ha) =        -0.0002108986
+   A-term   =         0.8241336577
+   B-term   =        -0.1722269590
+   NACV kinetic energy (Ha)  =         0.0089979717
+   Discriminant   =         0.0303573601
+SUCCESSFUL HOP!
+   Directional rescale factor  =        -0.0012174467
+   Momentum change  =         0.0000043963        0.0000086044        0.0000026853
+Final state   =        3
+  
+   i = 58, time =                5.800 (fs)
+   Exact sum of fluxes =        -0.1147672811
+   Approximate sum of fluxes =         0.0210888994
+   Minimum adiab. energy difference =         0.0001694236
+   Sum of probability =         0.0175748188
+   Probability = 
+   1         0.0065855249
+   2         0.0000000000
+   3         0.9824251812
+   4         0.0109890402
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000002538
+   Random number =         0.2330424898
+NO HOP!
+Final state   =        3
+  
+   i = 59, time =                5.900 (fs)
+   Exact sum of fluxes =         0.2545108327
+   Approximate sum of fluxes =         0.4223144883
+   Minimum adiab. energy difference =         0.0000887840
+   Sum of probability =         0.2730207378
+   Probability = 
+   1         0.0013316014
+   2         0.2486216742
+   3         0.7269792622
+   4         0.0230664485
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000004087
+   8         0.0000006051
+   Random number =         0.2007416866
+   ATTEMPT between old_state =        3 and new_state =        2
+TRY ENERGY CONSERVATION WITH ISOTROPIC RESCALING: PASSED!
+   Kinetic energy   (Ha) =         0.4442560019
+TRY ENERGY CONSERVATION WITH NACV-ORIENTED RESCALING:
+   Energy old state (Ha) =         2.0915463466
+   Energy new state (Ha) =         2.0914575626
+   Energy diff (Ha) =        -0.0000887840
+   A-term   =         6.5665190403
+   B-term   =         0.1976171484
+   NACV kinetic energy (Ha)  =         0.0014868052
+   Discriminant   =         0.0413845457
+SUCCESSFUL HOP!
+   Directional rescale factor  =         0.0004427590
+   Momentum change  =         0.0000106119       -0.0000084010        0.0000015422
+Final state   =        2
+  
+   i = 60, time =                6.000 (fs)
+   Exact sum of fluxes =        -2.2123449421
+   Approximate sum of fluxes =        -0.4000150970
+   Minimum adiab. energy difference =         0.0001566155
+   Sum of probability =         0.0097930792
+   Probability = 
+   1         0.0012525590
+   2         0.9902069208
+   3         0.0000000000
+   4         0.0085268022
+   5         0.0000000000
+   6         0.0000104473
+   7         0.0000016630
+   8         0.0000016076
+   Random number =         0.9387695969
+NO HOP!
+Final state   =        2
+  
+   i = 61, time =                6.100 (fs)
+   Exact sum of fluxes =        -0.0727864797
+   Approximate sum of fluxes =        -0.0462203308
+   Minimum adiab. energy difference =         0.0003199682
+   Sum of probability =         0.0080345650
+   Probability = 
+   1         0.0002148042
+   2         0.9919654350
+   3         0.0000000000
+   4         0.0078180694
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000012718
+   8         0.0000004196
+   Random number =         0.2018007331
+NO HOP!
+Final state   =        2
+  
+   i = 62, time =                6.200 (fs)
+   Exact sum of fluxes =        -0.0151561820
+   Approximate sum of fluxes =        -0.0119764046
+   Minimum adiab. energy difference =         0.0004899017
+   Sum of probability =         0.0049439148
+   Probability = 
+   1         0.0000000000
+   2         0.9950560852
+   3         0.0000000000
+   4         0.0049430430
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000008718
+   8         0.0000000000
+   Random number =         0.4655338190
+NO HOP!
+Final state   =        2
+  
+   i = 63, time =                6.300 (fs)
+   Exact sum of fluxes =        -0.0074438055
+   Approximate sum of fluxes =        -0.0063913011
+   Minimum adiab. energy difference =         0.0005481753
+   Sum of probability =         0.0025417400
+   Probability = 
+   1         0.0000000000
+   2         0.9974582600
+   3         0.0000000000
+   4         0.0025410871
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000006529
+   8         0.0000000000
+   Random number =         0.2915596919
+NO HOP!
+Final state   =        2
+  
+   i = 64, time =                6.400 (fs)
+   Exact sum of fluxes =        -0.0053759335
+   Approximate sum of fluxes =        -0.0048843031
+   Minimum adiab. energy difference =         0.0006036225
+   Sum of probability =         0.0007287378
+   Probability = 
+   1         0.0000000000
+   2         0.9992712622
+   3         0.0000000000
+   4         0.0007282152
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000005226
+   8         0.0000000000
+   Random number =         0.2670456652
+NO HOP!
+Final state   =        2
+  
+   i = 65, time =                6.500 (fs)
+   Exact sum of fluxes =        -0.0046190988
+   Approximate sum of fluxes =        -0.0043596501
+   Minimum adiab. energy difference =         0.0006564333
+   Sum of probability =         0.0000004509
+   Probability = 
+   1         0.0000000000
+   2         0.9999995491
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000004509
+   8         0.0000000000
+   Random number =         0.0470082459
+NO HOP!
+Final state   =        2
+  
+   i = 66, time =                6.600 (fs)
+   Exact sum of fluxes =        -0.0042850961
+   Approximate sum of fluxes =        -0.0041387951
+   Minimum adiab. energy difference =         0.0007066884
+   Sum of probability =         0.0000004030
+   Probability = 
+   1         0.0000000000
+   2         0.9999995970
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000004030
+   8         0.0000000000
+   Random number =         0.4476798761
+NO HOP!
+Final state   =        2
+  
+   i = 67, time =                6.700 (fs)
+   Exact sum of fluxes =        -0.0041275210
+   Approximate sum of fluxes =        -0.0040423723
+   Minimum adiab. energy difference =         0.0007544422
+   Sum of probability =         0.0000003318
+   Probability = 
+   1         0.0000000000
+   2         0.9999996682
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000003318
+   8         0.0000000000
+   Random number =         0.6157692326
+NO HOP!
+Final state   =        2
+  
+   i = 68, time =                6.800 (fs)
+   Exact sum of fluxes =        -0.0040586776
+   Approximate sum of fluxes =        -0.0040081899
+   Minimum adiab. energy difference =         0.0007997434
+   Sum of probability =         0.0000000808
+   Probability = 
+   1         0.0000000000
+   2         0.9999999192
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000808
+   8         0.0000000000
+   Random number =         0.3098846726
+NO HOP!
+Final state   =        2
+  
+   i = 69, time =                6.900 (fs)
+   Exact sum of fluxes =        -0.0040399292
+   Approximate sum of fluxes =        -0.0039845515
+   Minimum adiab. energy difference =         0.0008426217
+   Sum of probability =         0.0000000000
+   Probability = 
+   1         0.0000000000
+   2         1.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.6126678843
+NO HOP!
+Final state   =        2
+  
+   i = 70, time =                7.000 (fs)
+   Exact sum of fluxes =        -0.0040579610
+   Approximate sum of fluxes =        -0.0040872501
+   Minimum adiab. energy difference =         0.0008831157
+   Sum of probability =         0.0000265152
+   Probability = 
+   1         0.0000265152
+   2         0.9999734848
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.8206673597
+NO HOP!
+Final state   =        2
+  
+   i = 71, time =                7.100 (fs)
+   Exact sum of fluxes =        -0.0041007125
+   Approximate sum of fluxes =        -0.0041333166
+   Minimum adiab. energy difference =         0.0009212565
+   Sum of probability =         0.0000308366
+   Probability = 
+   1         0.0000308366
+   2         0.9999691634
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.8136213257
+NO HOP!
+Final state   =        2
+  
+   i = 72, time =                7.200 (fs)
+   Exact sum of fluxes =        -0.0041655540
+   Approximate sum of fluxes =        -0.0041927643
+   Minimum adiab. energy difference =         0.0009570670
+   Sum of probability =         0.0000264895
+   Probability = 
+   1         0.0000262237
+   2         0.9999735105
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000002658
+   Random number =         0.2045917082
+NO HOP!
+Final state   =        2
+  
+   i = 73, time =                7.300 (fs)
+   Exact sum of fluxes =        -0.0042421292
+   Approximate sum of fluxes =        -0.0042504753
+   Minimum adiab. energy difference =         0.0009905501
+   Sum of probability =         0.0000079755
+   Probability = 
+   1         0.0000079755
+   2         0.9999920245
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.2427157798
+NO HOP!
+Final state   =        2
+  
+   i = 74, time =                7.400 (fs)
+   Exact sum of fluxes =        -0.0043352811
+   Approximate sum of fluxes =        -0.0043014070
+   Minimum adiab. energy difference =         0.0010217306
+   Sum of probability =         0.0000319705
+   Probability = 
+   1         0.0000000000
+   2         0.9999680295
+   3         0.0000000000
+   4         0.0000319705
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.5682518650
+NO HOP!
+Final state   =        2
+  
+   i = 75, time =                7.500 (fs)
+   Exact sum of fluxes =        -0.0044374767
+   Approximate sum of fluxes =        -0.0043874298
+   Minimum adiab. energy difference =         0.0010506130
+   Sum of probability =         0.0000261224
+   Probability = 
+   1         0.0000000000
+   2         0.9999738776
+   3         0.0000000000
+   4         0.0000261224
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.9968330584
+NO HOP!
+Final state   =        2
+  
+   i = 76, time =                7.600 (fs)
+   Exact sum of fluxes =        -0.0045489225
+   Approximate sum of fluxes =        -0.0044917350
+   Minimum adiab. energy difference =         0.0010772002
+   Sum of probability =         0.0000179990
+   Probability = 
+   1         0.0000000000
+   2         0.9999820010
+   3         0.0000000000
+   4         0.0000179990
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.8772504573
+NO HOP!
+Final state   =        2
+  
+   i = 77, time =                7.700 (fs)
+   Exact sum of fluxes =        -0.0046598868
+   Approximate sum of fluxes =        -0.0045950151
+   Minimum adiab. energy difference =         0.0011014709
+   Sum of probability =         0.0000119260
+   Probability = 
+   1         0.0000000000
+   2         0.9999880740
+   3         0.0000000000
+   4         0.0000119260
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.1555909092
+NO HOP!
+Final state   =        2
+  
+   i = 78, time =                7.800 (fs)
+   Exact sum of fluxes =        -0.0047745133
+   Approximate sum of fluxes =        -0.0047035525
+   Minimum adiab. energy difference =         0.0011234204
+   Sum of probability =         0.0000077070
+   Probability = 
+   1         0.0000000000
+   2         0.9999922930
+   3         0.0000000000
+   4         0.0000077070
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.1667176391
+NO HOP!
+Final state   =        2
+  
+   i = 79, time =                7.900 (fs)
+   Exact sum of fluxes =        -0.0048873369
+   Approximate sum of fluxes =        -0.0048108198
+   Minimum adiab. energy difference =         0.0011430319
+   Sum of probability =         0.0000048762
+   Probability = 
+   1         0.0000000000
+   2         0.9999951238
+   3         0.0000000000
+   4         0.0000048762
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.6363616316
+NO HOP!
+Final state   =        2
+  
+   i = 80, time =                8.000 (fs)
+   Exact sum of fluxes =        -0.0049955932
+   Approximate sum of fluxes =        -0.0049135881
+   Minimum adiab. energy difference =         0.0011602712
+   Sum of probability =         0.0000082972
+   Probability = 
+   1         0.0000000000
+   2         0.9999917028
+   3         0.0000000000
+   4         0.0000029768
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000053205
+   Random number =         0.6945498545
+NO HOP!
+Final state   =        2
+  
+   i = 81, time =                8.100 (fs)
+   Exact sum of fluxes =        -0.0050901070
+   Approximate sum of fluxes =        -0.0050026866
+   Minimum adiab. energy difference =         0.0011750841
+   Sum of probability =         0.0000236189
+   Probability = 
+   1         0.0000000000
+   2         0.9999763811
+   3         0.0000000000
+   4         0.0000016985
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000219203
+   Random number =         0.6944167010
+NO HOP!
+Final state   =        2
+  
+   i = 82, time =                8.200 (fs)
+   Exact sum of fluxes =        -0.0051804912
+   Approximate sum of fluxes =        -0.0050873842
+   Minimum adiab. energy difference =         0.0011874568
+   Sum of probability =         0.0000376025
+   Probability = 
+   1         0.0000000000
+   2         0.9999623975
+   3         0.0000000000
+   4         0.0000008664
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000367360
+   Random number =         0.7262091120
+NO HOP!
+Final state   =        2
+  
+   i = 83, time =                8.300 (fs)
+   Exact sum of fluxes =        -0.0052508409
+   Approximate sum of fluxes =        -0.0051521145
+   Minimum adiab. energy difference =         0.0011973163
+   Sum of probability =         0.0000503998
+   Probability = 
+   1         0.0000000000
+   2         0.9999496002
+   3         0.0000000000
+   4         0.0000003308
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000500690
+   Random number =         0.9579493290
+NO HOP!
+Final state   =        2
+  
+   i = 84, time =                8.400 (fs)
+   Exact sum of fluxes =        -0.0053049354
+   Approximate sum of fluxes =        -0.0052005270
+   Minimum adiab. energy difference =         0.0012046046
+   Sum of probability =         0.0000630389
+   Probability = 
+   1         0.0000000000
+   2         0.9999369611
+   3         0.0000000000
+   4         0.0000000094
+   5         0.0000000018
+   6         0.0000000000
+   7         0.0000009287
+   8         0.0000620990
+   Random number =         0.7589679339
+NO HOP!
+Final state   =        2
+  
+   i = 85, time =                8.500 (fs)
+   Exact sum of fluxes =        -0.0053397058
+   Approximate sum of fluxes =        -0.0052297016
+   Minimum adiab. energy difference =         0.0012092589
+   Sum of probability =         0.0000750247
+   Probability = 
+   1         0.0000000000
+   2         0.9999249753
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000499
+   6         0.0000000000
+   7         0.0000020067
+   8         0.0000729681
+   Random number =         0.0899930992
+NO HOP!
+Final state   =        2
+  
+   i = 86, time =                8.600 (fs)
+   Exact sum of fluxes =        -0.0053482341
+   Approximate sum of fluxes =        -0.0052327156
+   Minimum adiab. energy difference =         0.0012111914
+   Sum of probability =         0.0000858309
+   Probability = 
+   1         0.0000000000
+   2         0.9999141691
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000923
+   6         0.0000000000
+   7         0.0000028975
+   8         0.0000828412
+   Random number =         0.7077502904
+NO HOP!
+Final state   =        2
+  
+   i = 87, time =                8.700 (fs)
+   Exact sum of fluxes =        -0.0053350043
+   Approximate sum of fluxes =        -0.0052141472
+   Minimum adiab. energy difference =         0.0012103371
+   Sum of probability =         0.0000958032
+   Probability = 
+   1         0.0000000000
+   2         0.9999041968
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000001487
+   6         0.0000000000
+   7         0.0000038168
+   8         0.0000918378
+   Random number =         0.2598255072
+NO HOP!
+Final state   =        2
+  
+   i = 88, time =                8.800 (fs)
+   Exact sum of fluxes =        -0.0052949595
+   Approximate sum of fluxes =        -0.0051690464
+   Minimum adiab. energy difference =         0.0012066042
+   Sum of probability =         0.0001047795
+   Probability = 
+   1         0.0000000000
+   2         0.9998952205
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000002177
+   6         0.0000000000
+   7         0.0000046247
+   8         0.0000999371
+   Random number =         0.0974537787
+NO HOP!
+Final state   =        2
+  
+   i = 89, time =                8.900 (fs)
+   Exact sum of fluxes =        -0.0052248643
+   Approximate sum of fluxes =        -0.0050943403
+   Minimum adiab. energy difference =         0.0011998886
+   Sum of probability =         0.0001130453
+   Probability = 
+   1         0.0000000000
+   2         0.9998869547
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000003186
+   6         0.0000000000
+   7         0.0000054359
+   8         0.0001072908
+   Random number =         0.1611824433
+NO HOP!
+Final state   =        2
+  
+   i = 90, time =                9.000 (fs)
+   Exact sum of fluxes =        -0.0051277197
+   Approximate sum of fluxes =        -0.0049929807
+   Minimum adiab. energy difference =         0.0011900991
+   Sum of probability =         0.0001205413
+   Probability = 
+   1         0.0000000000
+   2         0.9998794587
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000004349
+   6         0.0000001396
+   7         0.0000061058
+   8         0.0001138610
+   Random number =         0.4375585031
+NO HOP!
+Final state   =        2
+  
+   i = 91, time =                9.100 (fs)
+   Exact sum of fluxes =        -0.0050025730
+   Approximate sum of fluxes =        -0.0048641197
+   Minimum adiab. energy difference =         0.0011771392
+   Sum of probability =         0.0001273631
+   Probability = 
+   1         0.0000000000
+   2         0.9998726369
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000005469
+   6         0.0000004336
+   7         0.0000067780
+   8         0.0001196046
+   Random number =         0.3239376446
+NO HOP!
+Final state   =        2
+  
+   i = 92, time =                9.200 (fs)
+   Exact sum of fluxes =        -0.0048523309
+   Approximate sum of fluxes =        -0.0047106010
+   Minimum adiab. energy difference =         0.0011609244
+   Sum of probability =         0.0001334945
+   Probability = 
+   1         0.0000000000
+   2         0.9998665055
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000006250
+   6         0.0000007969
+   7         0.0000073677
+   8         0.0001247050
+   Random number =         0.5133224285
+NO HOP!
+Final state   =        2
+  
+   i = 93, time =                9.300 (fs)
+   Exact sum of fluxes =        -0.0046708236
+   Approximate sum of fluxes =        -0.0045266163
+   Minimum adiab. energy difference =         0.0011413204
+   Sum of probability =         0.0001387715
+   Probability = 
+   1         0.0000000000
+   2         0.9998612285
+   3         0.0000000000
+   4         0.0000000078
+   5         0.0000006601
+   6         0.0000012425
+   7         0.0000078403
+   8         0.0001290209
+   Random number =         0.5078716729
+NO HOP!
+Final state   =        2
+  
+   i = 94, time =                9.400 (fs)
+   Exact sum of fluxes =        -0.0044651639
+   Approximate sum of fluxes =        -0.0043190641
+   Minimum adiab. energy difference =         0.0011182355
+   Sum of probability =         0.0001432586
+   Probability = 
+   1         0.0000000000
+   2         0.9998567414
+   3         0.0000000000
+   4         0.0000000493
+   5         0.0000006706
+   6         0.0000017725
+   7         0.0000082803
+   8         0.0001324859
+   Random number =         0.9870074727
+NO HOP!
+Final state   =        2
+  
+   i = 95, time =                9.500 (fs)
+   Exact sum of fluxes =        -0.0042375801
+   Approximate sum of fluxes =        -0.0040901442
+   Minimum adiab. energy difference =         0.0010915698
+   Sum of probability =         0.0001470632
+   Probability = 
+   1         0.0000000000
+   2         0.9998529368
+   3         0.0000000000
+   4         0.0000000887
+   5         0.0000006378
+   6         0.0000024043
+   7         0.0000085767
+   8         0.0001353556
+   Random number =         0.9970585104
+NO HOP!
+Final state   =        2
+  
+   i = 96, time =                9.600 (fs)
+   Exact sum of fluxes =        -0.0039892538
+   Approximate sum of fluxes =        -0.0038411216
+   Minimum adiab. energy difference =         0.0010612280
+   Sum of probability =         0.0001501176
+   Probability = 
+   1         0.0000000000
+   2         0.9998498824
+   3         0.0000000000
+   4         0.0000001267
+   5         0.0000005869
+   6         0.0000031264
+   7         0.0000088141
+   8         0.0001374634
+   Random number =         0.4100933525
+NO HOP!
+Final state   =        2
+  
+   i = 97, time =                9.700 (fs)
+   Exact sum of fluxes =        -0.0037232926
+   Approximate sum of fluxes =        -0.0035750673
+   Minimum adiab. energy difference =         0.0010271086
+   Sum of probability =         0.0001521598
+   Probability = 
+   1         0.0000000000
+   2         0.9998478402
+   3         0.0000000000
+   4         0.0000001643
+   5         0.0000005216
+   6         0.0000039318
+   7         0.0000089295
+   8         0.0001386126
+   Random number =         0.1104237300
+NO HOP!
+Final state   =        2
+  
+   i = 98, time =                9.800 (fs)
+   Exact sum of fluxes =        -0.0034432104
+   Approximate sum of fluxes =        -0.0032954305
+   Minimum adiab. energy difference =         0.0009891379
+   Sum of probability =         0.0001535441
+   Probability = 
+   1         0.0000000000
+   2         0.9998464559
+   3         0.0000000000
+   4         0.0000002031
+   5         0.0000004596
+   6         0.0000048114
+   7         0.0000089553
+   8         0.0001391147
+   Random number =         0.7101869678
+NO HOP!
+Final state   =        2
+  
+   i = 99, time =                9.900 (fs)
+   Exact sum of fluxes =        -0.0031509581
+   Approximate sum of fluxes =        -0.0030041978
+   Minimum adiab. energy difference =         0.0009472193
+   Sum of probability =         0.0001540133
+   Probability = 
+   1         0.0000000000
+   2         0.9998459867
+   3         0.0000000000
+   4         0.0000002434
+   5         0.0000004043
+   6         0.0000057544
+   7         0.0000088423
+   8         0.0001387689
+   Random number =         0.7190800478
+NO HOP!
+Final state   =        2
+  
+   i = 100, time =               10.000 (fs)
+   Exact sum of fluxes =        -0.0028498743
+   Approximate sum of fluxes =        -0.0027046370
+   Minimum adiab. energy difference =         0.0009012741
+   Sum of probability =         0.0001538888
+   Probability = 
+   1         0.0000000000
+   2         0.9998461112
+   3         0.0000000000
+   4         0.0000002867
+   5         0.0000003648
+   6         0.0000067704
+   7         0.0000086328
+   8         0.0001378340
+   Random number =         0.9810541389
+NO HOP!
+Final state   =        2
+  
+   i = 101, time =               10.100 (fs)
+   Exact sum of fluxes =        -0.0025442902
+   Approximate sum of fluxes =        -0.0024010157
+   Minimum adiab. energy difference =         0.0008512347
+   Sum of probability =         0.0001524300
+   Probability = 
+   1         0.0000000000
+   2         0.9998475700
+   3         0.0000000000
+   4         0.0000003349
+   5         0.0000003403
+   6         0.0000078365
+   7         0.0000082890
+   8         0.0001356294
+   Random number =         0.0420128083
+NO HOP!
+Final state   =        2
+  
+   i = 102, time =               10.200 (fs)
+   Exact sum of fluxes =        -0.0022373531
+   Approximate sum of fluxes =        -0.0020962568
+   Minimum adiab. energy difference =         0.0007970556
+   Sum of probability =         0.0001508157
+   Probability = 
+   1         0.0000000000
+   2         0.9998491843
+   3         0.0000000000
+   4         0.0000003895
+   5         0.0000003340
+   6         0.0000089838
+   7         0.0000078678
+   8         0.0001332406
+   Random number =         0.2367709247
+NO HOP!
+Final state   =        2
+  
+   i = 103, time =               10.300 (fs)
+   Exact sum of fluxes =        -0.0019295498
+   Approximate sum of fluxes =        -0.0017910470
+   Minimum adiab. energy difference =         0.0007386716
+   Sum of probability =         0.0001480024
+   Probability = 
+   1         0.0000000000
+   2         0.9998519976
+   3         0.0000000000
+   4         0.0000004510
+   5         0.0000003397
+   6         0.0000101513
+   7         0.0000073132
+   8         0.0001297472
+   Random number =         0.7288290706
+NO HOP!
+Final state   =        2
+  
+   i = 104, time =               10.400 (fs)
+   Exact sum of fluxes =        -0.0016252394
+   Approximate sum of fluxes =        -0.0014893851
+   Minimum adiab. energy difference =         0.0006760570
+   Sum of probability =         0.0001446404
+   Probability = 
+   1         0.0000000000
+   2         0.9998553596
+   3         0.0000000000
+   4         0.0000005257
+   5         0.0000003657
+   6         0.0000113894
+   7         0.0000067151
+   8         0.0001256445
+   Random number =         0.3382046757
+NO HOP!
+Final state   =        2
+  
+   i = 105, time =               10.500 (fs)
+   Exact sum of fluxes =        -0.0013239890
+   Approximate sum of fluxes =        -0.0011908155
+   Minimum adiab. energy difference =         0.0006091680
+   Sum of probability =         0.0001406710
+   Probability = 
+   1         0.0000000000
+   2         0.9998593290
+   3         0.0000000000
+   4         0.0000006140
+   5         0.0000004061
+   6         0.0000126347
+   7         0.0000060452
+   8         0.0001209711
+   Random number =         0.9721589832
+NO HOP!
+Final state   =        2
+  
+   i = 106, time =               10.600 (fs)
+   Exact sum of fluxes =        -0.0010273173
+   Approximate sum of fluxes =        -0.0008964828
+   Minimum adiab. energy difference =         0.0005380076
+   Sum of probability =         0.0001360624
+   Probability = 
+   1         0.0000000000
+   2         0.9998639376
+   3         0.0000000000
+   4         0.0000007253
+   5         0.0000004647
+   6         0.0000138964
+   7         0.0000053499
+   8         0.0001156261
+   Random number =         0.0825049971
+NO HOP!
+Final state   =        2
+  
+   i = 107, time =               10.700 (fs)
+   Exact sum of fluxes =        -0.0007303377
+   Approximate sum of fluxes =        -0.0006008845
+   Minimum adiab. energy difference =         0.0004625549
+   Sum of probability =         0.0001307865
+   Probability = 
+   1         0.0000000000
+   2         0.9998692135
+   3         0.0000000000
+   4         0.0000008650
+   5         0.0000005426
+   6         0.0000151363
+   7         0.0000046455
+   8         0.0001095972
+   Random number =         0.3361316358
+NO HOP!
+Final state   =        2
+  
+   i = 108, time =               10.800 (fs)
+   Exact sum of fluxes =        -0.0004228044
+   Approximate sum of fluxes =        -0.0002918800
+   Minimum adiab. energy difference =         0.0003828157
+   Sum of probability =         0.0001251358
+   Probability = 
+   1         0.0000000000
+   2         0.9998748642
+   3         0.0000000000
+   4         0.0000010462
+   5         0.0000006406
+   6         0.0000163224
+   7         0.0000039543
+   8         0.0001031722
+   Random number =         0.3581901240
+NO HOP!
+Final state   =        2
+  
+   i = 109, time =               10.900 (fs)
+   Exact sum of fluxes =        -0.0000669818
+   Approximate sum of fluxes =         0.0000755121
+   Minimum adiab. energy difference =         0.0002988209
+   Sum of probability =         0.0002167695
+   Probability = 
+   1         0.0000976547
+   2         0.9997832305
+   3         0.0000000000
+   4         0.0000012857
+   5         0.0000007664
+   6         0.0000174734
+   7         0.0000033090
+   8         0.0000962803
+   Random number =         0.0846693883
+NO HOP!
+Final state   =        2
+  
+   i = 110, time =               11.000 (fs)
+   Exact sum of fluxes =         0.0004942654
+   Approximate sum of fluxes =         0.0006967811
+   Minimum adiab. energy difference =         0.0002106395
+   Sum of probability =         0.0005397994
+   Probability = 
+   1         0.0004269599
+   2         0.9994602006
+   3         0.0000000000
+   4         0.0000016003
+   5         0.0000009170
+   6         0.0000185410
+   7         0.0000027115
+   8         0.0000890697
+   Random number =         0.7590975824
+NO HOP!
+Final state   =        2
+  
+   i = 111, time =               11.100 (fs)
+   Exact sum of fluxes =         0.0024364900
+   Approximate sum of fluxes =         0.0031605095
+   Minimum adiab. energy difference =         0.0001184389
+   Sum of probability =         0.0024364900
+   Probability = 
+   1         0.0021516229
+   2         0.9975635100
+   3         0.0001786734
+   4         0.0000019345
+   5         0.0000010803
+   6         0.0000194400
+   7         0.0000021642
+   8         0.0000815748
+   Random number =         0.5412394769
+NO HOP!
+Final state   =        2
+  
+   i = 112, time =               11.200 (fs)
+   Exact sum of fluxes =         0.0754421642
+   Approximate sum of fluxes =         0.1306300147
+   Minimum adiab. energy difference =         0.0000248433
+   Sum of probability =         0.0754421642
+   Probability = 
+   1         0.0749486352
+   2         0.9245578358
+   3         0.0003962256
+   4         0.0000000642
+   5         0.0000010588
+   6         0.0000194838
+   7         0.0000016207
+   8         0.0000750759
+   Random number =         0.8540506611
+NO HOP!
+Final state   =        2
+  
+   i = 113, time =               11.300 (fs)
+   Exact sum of fluxes =         0.9929203245
+   Approximate sum of fluxes =        23.0527200605
+   Minimum adiab. energy difference =         0.0000800653
+   Sum of probability =         0.9931207436
+   Probability = 
+   1         0.9891481118
+   2         0.0068792564
+   3         0.0035113518
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000521279
+   7         0.0000025675
+   8         0.0004065847
+   Random number =         0.7456132795
+   ATTEMPT between old_state =        2 and new_state =        1
+TRY ENERGY CONSERVATION WITH ISOTROPIC RESCALING: PASSED!
+   Kinetic energy   (Ha) =         0.3899000879
+TRY ENERGY CONSERVATION WITH NACV-ORIENTED RESCALING:
+   Energy old state (Ha) =         2.3234208695
+   Energy new state (Ha) =         2.3233408042
+   Energy diff (Ha) =        -0.0000800653
+   A-term   =         0.3590033439
+   B-term   =         0.0241384227
+   NACV kinetic energy (Ha)  =         0.0004057507
+   Discriminant   =         0.0006976383
+SUCCESSFUL HOP!
+   Directional rescale factor  =         0.0031676887
+   Momentum change  =        -0.0000519262        0.0000388023        0.0000326434
+Final state   =        1
+  
+   i = 114, time =               11.400 (fs)
+   Exact sum of fluxes =        -0.0047081031
+   Approximate sum of fluxes =        -0.0023069402
+   Minimum adiab. energy difference =         0.0001868849
+   Sum of probability =         0.0008577106
+   Probability = 
+   1         0.9991422894
+   2         0.0000000000
+   3         0.0007570744
+   4         0.0000147050
+   5         0.0000023507
+   6         0.0000237897
+   7         0.0000010379
+   8         0.0000587529
+   Random number =         0.9850330045
+NO HOP!
+Final state   =        1
+  
+   i = 115, time =               11.500 (fs)
+   Exact sum of fluxes =         0.0002178447
+   Approximate sum of fluxes =         0.0004898827
+   Minimum adiab. energy difference =         0.0002981395
+   Sum of probability =         0.0010173160
+   Probability = 
+   1         0.9989826840
+   2         0.0000000000
+   3         0.0009060792
+   4         0.0000323969
+   5         0.0000027482
+   6         0.0000244500
+   7         0.0000007299
+   8         0.0000509118
+   Random number =         0.1781868669
+NO HOP!
+Final state   =        1
+  
+   i = 116, time =               11.600 (fs)
+   Exact sum of fluxes =         0.0008642657
+   Approximate sum of fluxes =         0.0009729801
+   Minimum adiab. energy difference =         0.0004133781
+   Sum of probability =         0.0011426285
+   Probability = 
+   1         0.9988573715
+   2         0.0000000000
+   3         0.0009142973
+   4         0.0001557625
+   5         0.0000033276
+   6         0.0000253667
+   7         0.0000004859
+   8         0.0000433885
+   Random number =         0.9768025189
+NO HOP!
+Final state   =        1
+  
+   i = 117, time =               11.700 (fs)
+   Exact sum of fluxes =         0.0011236158
+   Approximate sum of fluxes =         0.0010521667
+   Minimum adiab. energy difference =         0.0005324755
+   Sum of probability =         0.0011244581
+   Probability = 
+   1         0.9988755419
+   2         0.0000000000
+   3         0.0002767364
+   4         0.0007809618
+   5         0.0000040733
+   6         0.0000263828
+   7         0.0000002893
+   8         0.0000360144
+   Random number =         0.2377660248
+NO HOP!
+Final state   =        1
+  
+   i = 118, time =               11.800 (fs)
+   Exact sum of fluxes =         0.0012922727
+   Approximate sum of fluxes =         0.0013646414
+   Minimum adiab. energy difference =         0.0006552823
+   Sum of probability =         0.0014005461
+   Probability = 
+   1         0.9985994539
+   2         0.0000000000
+   3         0.0000525931
+   4         0.0012862424
+   5         0.0000050098
+   6         0.0000274919
+   7         0.0000001318
+   8         0.0000290772
+   Random number =         0.7330451625
+NO HOP!
+Final state   =        1
+  
+   i = 119, time =               11.900 (fs)
+   Exact sum of fluxes =         0.0014224429
+   Approximate sum of fluxes =         0.0015077673
+   Minimum adiab. energy difference =         0.0007817106
+   Sum of probability =         0.0015274753
+   Probability = 
+   1         0.9984725247
+   2         0.0000000000
+   3         0.0000164735
+   4         0.0014536229
+   5         0.0000061952
+   6         0.0000286982
+   7         0.0000000076
+   8         0.0000224780
+   Random number =         0.0242087825
+NO HOP!
+Final state   =        1
+  
+   i = 120, time =               12.000 (fs)
+   Exact sum of fluxes =         0.0015312450
+   Approximate sum of fluxes =         0.0016142914
+   Minimum adiab. energy difference =         0.0009116241
+   Sum of probability =         0.0016258974
+   Probability = 
+   1         0.9983741026
+   2         0.0000000000
+   3         0.0000079981
+   4         0.0015637400
+   5         0.0000076929
+   6         0.0000300080
+   7         0.0000000000
+   8         0.0000164584
+   Random number =         0.5386073487
+NO HOP!
+Final state   =        1
+  
+   i = 121, time =               12.100 (fs)
+   Exact sum of fluxes =         0.0016257438
+   Approximate sum of fluxes =         0.0017057957
+   Minimum adiab. energy difference =         0.0010449004
+   Sum of probability =         0.0017129614
+   Probability = 
+   1         0.9982870386
+   2         0.0000000000
+   3         0.0000047781
+   4         0.0016560956
+   5         0.0000096037
+   6         0.0000314845
+   7         0.0000000000
+   8         0.0000109995
+   Random number =         0.6223414735
+NO HOP!
+Final state   =        1
+  
+   i = 122, time =               12.200 (fs)
+   Exact sum of fluxes =         0.0017069104
+   Approximate sum of fluxes =         0.0017839547
+   Minimum adiab. energy difference =         0.0011814125
+   Sum of probability =         0.0017885621
+   Probability = 
+   1         0.9982114379
+   2         0.0000000000
+   3         0.0000032150
+   4         0.0017339839
+   5         0.0000120635
+   6         0.0000331170
+   7         0.0000000000
+   8         0.0000061827
+   Random number =         0.8159841850
+NO HOP!
+Final state   =        1
+  
+   i = 123, time =               12.300 (fs)
+   Exact sum of fluxes =         0.0017776147
+   Approximate sum of fluxes =         0.0018517372
+   Minimum adiab. energy difference =         0.0013210188
+   Sum of probability =         0.0018547306
+   Probability = 
+   1         0.9981452694
+   2         0.0000000000
+   3         0.0000023456
+   4         0.0018001303
+   5         0.0000152397
+   6         0.0000349451
+   7         0.0000000000
+   8         0.0000020699
+   Random number =         0.3635286204
+NO HOP!
+Final state   =        1
+  
+   i = 124, time =               12.400 (fs)
+   Exact sum of fluxes =         0.0018385636
+   Approximate sum of fluxes =         0.0019098453
+   Minimum adiab. energy difference =         0.0014635687
+   Sum of probability =         0.0019131399
+   Probability = 
+   1         0.9980868601
+   2         0.0000000000
+   3         0.0000018095
+   4         0.0018548912
+   5         0.0000194197
+   6         0.0000370194
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.3003287512
+NO HOP!
+Final state   =        1
+  
+   i = 125, time =               12.500 (fs)
+   Exact sum of fluxes =         0.0018890935
+   Approximate sum of fluxes =         0.0019575053
+   Minimum adiab. energy difference =         0.0016089394
+   Sum of probability =         0.0019627189
+   Probability = 
+   1         0.9980372811
+   2         0.0000000000
+   3         0.0000014582
+   4         0.0018970502
+   5         0.0000249138
+   6         0.0000392968
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.9850446882
+NO HOP!
+Final state   =        1
+  
+   i = 126, time =               12.600 (fs)
+   Exact sum of fluxes =         0.0019328929
+   Approximate sum of fluxes =         0.0019985294
+   Minimum adiab. energy difference =         0.0017569555
+   Sum of probability =         0.0020050769
+   Probability = 
+   1         0.9979949231
+   2         0.0000000000
+   3         0.0000012155
+   4         0.0019295612
+   5         0.0000323647
+   6         0.0000419355
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.1212335080
+NO HOP!
+Final state   =        1
+  
+   i = 127, time =               12.700 (fs)
+   Exact sum of fluxes =         0.0019696003
+   Approximate sum of fluxes =         0.0020324797
+   Minimum adiab. energy difference =         0.0019074619
+   Sum of probability =         0.0020396764
+   Probability = 
+   1         0.9979603236
+   2         0.0000000000
+   3         0.0000010421
+   4         0.0019512469
+   5         0.0000424900
+   6         0.0000448973
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.6945623370
+NO HOP!
+Final state   =        1
+  
+   i = 128, time =               12.800 (fs)
+   Exact sum of fluxes =         0.0019973530
+   Approximate sum of fluxes =         0.0020573719
+   Minimum adiab. energy difference =         0.0020603035
+   Sum of probability =         0.0020645290
+   Probability = 
+   1         0.9979354710
+   2         0.0000000000
+   3         0.0000009123
+   4         0.0019588315
+   5         0.0000565645
+   6         0.0000482207
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.3309478275
+NO HOP!
+Final state   =        1
+  
+   i = 129, time =               12.900 (fs)
+   Exact sum of fluxes =         0.0020185247
+   Approximate sum of fluxes =         0.0020758325
+   Minimum adiab. energy difference =         0.0022153138
+   Sum of probability =         0.0020821804
+   Probability = 
+   1         0.9979178196
+   2         0.0000000000
+   3         0.0000007828
+   4         0.0019485305
+   5         0.0000795517
+   6         0.0000533154
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.9393907402
+NO HOP!
+Final state   =        1
+  
+   i = 130, time =               13.000 (fs)
+   Exact sum of fluxes =         0.0020355826
+   Approximate sum of fluxes =         0.0020897329
+   Minimum adiab. energy difference =         0.0023723171
+   Sum of probability =         0.0020944783
+   Probability = 
+   1         0.9979055217
+   2         0.0000000000
+   3         0.0000007368
+   4         0.0019321815
+   5         0.0001052836
+   6         0.0000562764
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.3311488935
+NO HOP!
+Final state   =        1
+  
+   i = 131, time =               13.100 (fs)
+   Exact sum of fluxes =         0.0020456089
+   Approximate sum of fluxes =         0.0020965702
+   Minimum adiab. energy difference =         0.0025311422
+   Sum of probability =         0.0020990957
+   Probability = 
+   1         0.9979009043
+   2         0.0000000000
+   3         0.0000006764
+   4         0.0018895935
+   5         0.0001477181
+   6         0.0000611078
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.3137944532
+NO HOP!
+Final state   =        1
+  
+   i = 132, time =               13.200 (fs)
+   Exact sum of fluxes =         0.0020504109
+   Approximate sum of fluxes =         0.0020978839
+   Minimum adiab. energy difference =         0.0026916048
+   Sum of probability =         0.0020975065
+   Probability = 
+   1         0.9979024935
+   2         0.0000000000
+   3         0.0000006272
+   4         0.0018191052
+   5         0.0002111204
+   6         0.0000665811
+   7         0.0000000243
+   8         0.0000000485
+   Random number =         0.5656526479
+NO HOP!
+Final state   =        1
+  
+   i = 133, time =               13.300 (fs)
+   Exact sum of fluxes =         0.0020490280
+   Approximate sum of fluxes =         0.0020925293
+   Minimum adiab. energy difference =         0.0028535456
+   Sum of probability =         0.0020921000
+   Probability = 
+   1         0.9979079000
+   2         0.0000000000
+   3         0.0000005861
+   4         0.0017095861
+   5         0.0003056023
+   6         0.0000727026
+   7         0.0000001085
+   8         0.0000035145
+   Random number =         0.5141889267
+NO HOP!
+Final state   =        1
+  
+   i = 134, time =               13.400 (fs)
+   Exact sum of fluxes =         0.0020448776
+   Approximate sum of fluxes =         0.0020839975
+   Minimum adiab. energy difference =         0.0030167486
+   Sum of probability =         0.0020835317
+   Probability = 
+   1         0.9979164683
+   2         0.0000000000
+   3         0.0000005529
+   4         0.0015522848
+   5         0.0004432095
+   6         0.0000797388
+   7         0.0000002060
+   8         0.0000075398
+   Random number =         0.7389557435
+NO HOP!
+Final state   =        1
+  
+   i = 135, time =               13.500 (fs)
+   Exact sum of fluxes =         0.0020333209
+   Approximate sum of fluxes =         0.0020679752
+   Minimum adiab. energy difference =         0.0031810561
+   Sum of probability =         0.0020674750
+   Probability = 
+   1         0.9979325250
+   2         0.0000000000
+   3         0.0000005225
+   4         0.0013398568
+   5         0.0006271497
+   6         0.0000875672
+   7         0.0000003178
+   8         0.0000120610
+   Random number =         0.2676092232
+NO HOP!
+Final state   =        1
+  
+   i = 136, time =               13.600 (fs)
+   Exact sum of fluxes =         0.0020201719
+   Approximate sum of fluxes =         0.0020514843
+   Minimum adiab. energy difference =         0.0033462500
+   Sum of probability =         0.0020509576
+   Probability = 
+   1         0.9979490424
+   2         0.0000000000
+   3         0.0000004980
+   4         0.0010935870
+   5         0.0008429694
+   6         0.0000965325
+   7         0.0000004467
+   8         0.0000169240
+   Random number =         0.9390835740
+NO HOP!
+Final state   =        1
+  
+   i = 137, time =               13.700 (fs)
+   Exact sum of fluxes =         0.0020009701
+   Approximate sum of fluxes =         0.0020307383
+   Minimum adiab. energy difference =         0.0035121424
+   Sum of probability =         0.0020301848
+   Probability = 
+   1         0.9979698152
+   2         0.0000000000
+   3         0.0000004744
+   4         0.0008478749
+   5         0.0010524158
+   6         0.0001065689
+   7         0.0000005952
+   8         0.0000222556
+   Random number =         0.3099154724
+NO HOP!
+Final state   =        1
+  
+   i = 138, time =               13.800 (fs)
+   Exact sum of fluxes =         0.0019780354
+   Approximate sum of fluxes =         0.0020073579
+   Minimum adiab. energy difference =         0.0036785338
+   Sum of probability =         0.0020067796
+   Probability = 
+   1         0.9979932204
+   2         0.0000000000
+   3         0.0000004531
+   4         0.0006392695
+   5         0.0012206939
+   6         0.0001179095
+   7         0.0000007673
+   8         0.0000276862
+   Random number =         0.9741060027
+NO HOP!
+Final state   =        1
+  
+   i = 139, time =               13.900 (fs)
+   Exact sum of fluxes =         0.0019511393
+   Approximate sum of fluxes =         0.0019798832
+   Minimum adiab. energy difference =         0.0038452207
+   Sum of probability =         0.0019792774
+   Probability = 
+   1         0.9980207226
+   2         0.0000000000
+   3         0.0000004325
+   4         0.0004803310
+   5         0.0013335996
+   6         0.0001306822
+   7         0.0000009683
+   8         0.0000332639
+   Random number =         0.9440448746
+NO HOP!
+Final state   =        1
+  
+   i = 140, time =               14.000 (fs)
+   Exact sum of fluxes =         0.0019224018
+   Approximate sum of fluxes =         0.0019499465
+   Minimum adiab. energy difference =         0.0040119722
+   Sum of probability =         0.0019493196
+   Probability = 
+   1         0.9980506804
+   2         0.0000000000
+   3         0.0000004153
+   4         0.0003663617
+   5         0.0013973734
+   6         0.0001451692
+   7         0.0000012054
+   8         0.0000387947
+   Random number =         0.4305197186
+NO HOP!
+Final state   =        1
+  
+   i = 141, time =               14.100 (fs)
+   Exact sum of fluxes =         0.0018885627
+   Approximate sum of fluxes =         0.0019143194
+   Minimum adiab. energy difference =         0.0041785872
+   Sum of probability =         0.0019136622
+   Probability = 
+   1         0.9980863378
+   2         0.0000000000
+   3         0.0000003951
+   4         0.0002851394
+   5         0.0014210510
+   6         0.0001613316
+   7         0.0000014876
+   8         0.0000442575
+   Random number =         0.1584040541
+NO HOP!
+Final state   =        1
+  
+   i = 142, time =               14.200 (fs)
+   Exact sum of fluxes =         0.0018505394
+   Approximate sum of fluxes =         0.0018741150
+   Minimum adiab. energy difference =         0.0043448212
+   Sum of probability =         0.0018734314
+   Probability = 
+   1         0.9981265686
+   2         0.0000000000
+   3         0.0000003768
+   4         0.0002270349
+   5         0.0014153766
+   6         0.0001792740
+   7         0.0000018251
+   8         0.0000495441
+   Random number =         0.6818243283
+NO HOP!
+Final state   =        1
+  
+   i = 143, time =               14.300 (fs)
+   Exact sum of fluxes =         0.0018105081
+   Approximate sum of fluxes =         0.0018317272
+   Minimum adiab. energy difference =         0.0045104422
+   Sum of probability =         0.0018310029
+   Probability = 
+   1         0.9981689971
+   2         0.0000000000
+   3         0.0000003549
+   4         0.0001847445
+   5         0.0013899009
+   6         0.0001993595
+   7         0.0000022390
+   8         0.0000544041
+   Random number =         0.1392437608
+NO HOP!
+Final state   =        1
+  
+   i = 144, time =               14.400 (fs)
+   Exact sum of fluxes =         0.0017678051
+   Approximate sum of fluxes =         0.0017865685
+   Minimum adiab. energy difference =         0.0046752087
+   Sum of probability =         0.0017858069
+   Probability = 
+   1         0.9982141931
+   2         0.0000000000
+   3         0.0000003342
+   4         0.0001532362
+   5         0.0013490828
+   6         0.0002215416
+   7         0.0000027508
+   8         0.0000588613
+   Random number =         0.2089138367
+NO HOP!
+Final state   =        1
+  
+   i = 145, time =               14.500 (fs)
+   Exact sum of fluxes =         0.0017217561
+   Approximate sum of fluxes =         0.0017380178
+   Minimum adiab. energy difference =         0.0048388547
+   Sum of probability =         0.0017372187
+   Probability = 
+   1         0.9982627813
+   2         0.0000000000
+   3         0.0000003132
+   4         0.0001291250
+   5         0.0012959544
+   6         0.0002457406
+   7         0.0000033955
+   8         0.0000626900
+   Random number =         0.8483907400
+NO HOP!
+Final state   =        1
+  
+   i = 146, time =               14.600 (fs)
+   Exact sum of fluxes =         0.0016732058
+   Approximate sum of fluxes =         0.0016869645
+   Minimum adiab. energy difference =         0.0050010979
+   Sum of probability =         0.0016861149
+   Probability = 
+   1         0.9983138851
+   2         0.0000000000
+   3         0.0000002885
+   4         0.0001103027
+   5         0.0012336242
+   6         0.0002718849
+   7         0.0000042235
+   8         0.0000657911
+   Random number =         0.7982642567
+NO HOP!
+Final state   =        1
+  
+   i = 147, time =               14.700 (fs)
+   Exact sum of fluxes =         0.0016214672
+   Approximate sum of fluxes =         0.0016327309
+   Minimum adiab. energy difference =         0.0051616455
+   Sum of probability =         0.0016318229
+   Probability = 
+   1         0.9983681771
+   2         0.0000000000
+   3         0.0000002603
+   4         0.0000952011
+   5         0.0011634313
+   6         0.0002994938
+   7         0.0000053112
+   8         0.0000681252
+   Random number =         0.8567787535
+NO HOP!
+Final state   =        1
+  
+   i = 148, time =               14.800 (fs)
+   Exact sum of fluxes =         0.0015678803
+   Approximate sum of fluxes =         0.0015766898
+   Minimum adiab. energy difference =         0.0053202182
+   Sum of probability =         0.0015757236
+   Probability = 
+   1         0.9984242764
+   2         0.0000000000
+   3         0.0000002321
+   4         0.0000829861
+   5         0.0010880151
+   6         0.0003283372
+   7         0.0000067822
+   8         0.0000693710
+   Random number =         0.6092955907
+NO HOP!
+Final state   =        1
+  
+   i = 149, time =               14.900 (fs)
+   Exact sum of fluxes =         0.0015111540
+   Approximate sum of fluxes =         0.0015175319
+   Minimum adiab. energy difference =         0.0054764690
+   Sum of probability =         0.0015165011
+   Probability = 
+   1         0.9984834989
+   2         0.0000000000
+   3         0.0000002014
+   4         0.0000728533
+   5         0.0010078646
+   6         0.0003571745
+   7         0.0000088201
+   8         0.0000695872
+   Random number =         0.2375216720
+NO HOP!
+Final state   =        1
+  
+   i = 150, time =               15.000 (fs)
+   Exact sum of fluxes =         0.0014531227
+   Approximate sum of fluxes =         0.0014571126
+   Minimum adiab. energy difference =         0.0056300753
+   Sum of probability =         0.0014559952
+   Probability = 
+   1         0.9985440048
+   2         0.0000000000
+   3         0.0000001650
+   4         0.0000644058
+   5         0.0009257859
+   6         0.0003853235
+   7         0.0000117602
+   8         0.0000685548
+   Random number =         0.9078938723
+NO HOP!
+Final state   =        1
+  
+   i = 151, time =               15.100 (fs)
+   Exact sum of fluxes =         0.0013935434
+   Approximate sum of fluxes =         0.0013951774
+   Minimum adiab. energy difference =         0.0057806550
+   Sum of probability =         0.0013939754
+   Probability = 
+   1         0.9986060246
+   2         0.0000000000
+   3         0.0000001286
+   4         0.0000572107
+   5         0.0008431448
+   6         0.0004112255
+   7         0.0000161840
+   8         0.0000660818
+   Random number =         0.4471003069
+NO HOP!
+Final state   =        1
+  
+   i = 152, time =               15.200 (fs)
+   Exact sum of fluxes =         0.0013316542
+   Approximate sum of fluxes =         0.0013309348
+   Minimum adiab. energy difference =         0.0059278522
+   Sum of probability =         0.0013316542
+   Probability = 
+   1         0.9986683458
+   2         0.0000020082
+   3         0.0000000926
+   4         0.0000510052
+   5         0.0007608100
+   6         0.0004325098
+   7         0.0000231490
+   8         0.0000620794
+   Random number =         0.9921965851
+NO HOP!
+Final state   =        1
+  
+   i = 153, time =               15.300 (fs)
+   Exact sum of fluxes =         0.0012695134
+   Approximate sum of fluxes =         0.0012664115
+   Minimum adiab. energy difference =         0.0060712502
+   Sum of probability =         0.0012695134
+   Probability = 
+   1         0.9987304866
+   2         0.0000045071
+   3         0.0000000531
+   4         0.0000456461
+   5         0.0006814968
+   6         0.0004467438
+   7         0.0000347738
+   8         0.0000562927
+   Random number =         0.4544869802
+NO HOP!
+Final state   =        1
+  
+   i = 154, time =               15.400 (fs)
+   Exact sum of fluxes =         0.0012046173
+   Approximate sum of fluxes =         0.0011990325
+   Minimum adiab. energy difference =         0.0062104554
+   Sum of probability =         0.0012046628
+   Probability = 
+   1         0.9987953372
+   2         0.0000076267
+   3         0.0000000000
+   4         0.0000402386
+   5         0.0006049896
+   6         0.0004481060
+   7         0.0000551718
+   8         0.0000485302
+   Random number =         0.0845863716
+NO HOP!
+Final state   =        1
+  
+   i = 155, time =               15.500 (fs)
+   Exact sum of fluxes =         0.0011389748
+   Approximate sum of fluxes =         0.0011304314
+   Minimum adiab. energy difference =         0.0063450389
+   Sum of probability =         0.0011389762
+   Probability = 
+   1         0.9988610238
+   2         0.0000101758
+   3         0.0000000000
+   4         0.0000367202
+   5         0.0005330611
+   6         0.0004283170
+   7         0.0000920751
+   8         0.0000386270
+   Random number =         0.9326603224
+NO HOP!
+Final state   =        1
+  
+   i = 156, time =               15.600 (fs)
+   Exact sum of fluxes =         0.0010728530
+   Approximate sum of fluxes =         0.0010607949
+   Minimum adiab. energy difference =         0.0064745832
+   Sum of probability =         0.0010728530
+   Probability = 
+   1         0.9989271470
+   2         0.0000138431
+   3         0.0000000007
+   4         0.0000329238
+   5         0.0004667468
+   6         0.0003771210
+   7         0.0001560282
+   8         0.0000261894
+   Random number =         0.5640502075
+NO HOP!
+Final state   =        1
+  
+   i = 157, time =               15.700 (fs)
+   Exact sum of fluxes =         0.0010057981
+   Approximate sum of fluxes =         0.0009902673
+   Minimum adiab. energy difference =         0.0065986453
+   Sum of probability =         0.0010057981
+   Probability = 
+   1         0.9989942019
+   2         0.0000174610
+   3         0.0000000603
+   4         0.0000294779
+   5         0.0004057850
+   6         0.0002954702
+   7         0.0002465461
+   8         0.0000109976
+   Random number =         0.5603916211
+NO HOP!
+Final state   =        1
+  
+   i = 158, time =               15.800 (fs)
+   Exact sum of fluxes =         0.0009383377
+   Approximate sum of fluxes =         0.0009206204
+   Minimum adiab. energy difference =         0.0067167830
+   Sum of probability =         0.0009456333
+   Probability = 
+   1         0.9990543667
+   2         0.0000198049
+   3         0.0000002471
+   4         0.0000262394
+   5         0.0003503435
+   6         0.0002109481
+   7         0.0003380504
+   8         0.0000000000
+   Random number =         0.3206984628
+NO HOP!
+Final state   =        1
+  
+   i = 159, time =               15.900 (fs)
+   Exact sum of fluxes =         0.0008727232
+   Approximate sum of fluxes =         0.0008528094
+   Minimum adiab. energy difference =         0.0068285281
+   Sum of probability =         0.0009015798
+   Probability = 
+   1         0.9990984202
+   2         0.0000221985
+   3         0.0000007369
+   4         0.0000229890
+   5         0.0003006231
+   6         0.0001500361
+   7         0.0004049962
+   8         0.0000000000
+   Random number =         0.1044244426
+NO HOP!
+Final state   =        1
+  
+   i = 160, time =               16.000 (fs)
+   Exact sum of fluxes =         0.0008036366
+   Approximate sum of fluxes =         0.0007799953
+   Minimum adiab. energy difference =         0.0069334216
+   Sum of probability =         0.0008571673
+   Probability = 
+   1         0.9991428327
+   2         0.0000261068
+   3         0.0000018431
+   4         0.0000191917
+   5         0.0002533593
+   6         0.0001151100
+   7         0.0004415564
+   8         0.0000000000
+   Random number =         0.2416557412
+NO HOP!
+Final state   =        1
+  
+   i = 161, time =               16.100 (fs)
+   Exact sum of fluxes =         0.0007384181
+   Approximate sum of fluxes =         0.0007093471
+   Minimum adiab. energy difference =         0.0070309489
+   Sum of probability =         0.0008182139
+   Probability = 
+   1         0.9991817861
+   2         0.0000317591
+   3         0.0000039048
+   4         0.0000148608
+   5         0.0002086119
+   6         0.0001016621
+   7         0.0004574153
+   8         0.0000000000
+   Random number =         0.8472992329
+NO HOP!
+Final state   =        1
+  
+   i = 162, time =               16.200 (fs)
+   Exact sum of fluxes =         0.0006711174
+   Approximate sum of fluxes =         0.0006352964
+   Minimum adiab. energy difference =         0.0071205903
+   Sum of probability =         0.0007756101
+   Probability = 
+   1         0.9992243899
+   2         0.0000387295
+   3         0.0000062796
+   4         0.0000103230
+   5         0.0001583729
+   6         0.0001080960
+   7         0.0004538091
+   8         0.0000000000
+   Random number =         0.2556238138
+NO HOP!
+Final state   =        1
+  
+   i = 163, time =               16.300 (fs)
+   Exact sum of fluxes =         0.0006059888
+   Approximate sum of fluxes =         0.0005622842
+   Minimum adiab. energy difference =         0.0072016984
+   Sum of probability =         0.0007263584
+   Probability = 
+   1         0.9992736416
+   2         0.0000468286
+   3         0.0000077836
+   4         0.0000070052
+   5         0.0000915040
+   6         0.0001429469
+   7         0.0004302902
+   8         0.0000000000
+   Random number =         0.9170420817
+NO HOP!
+Final state   =        1
+  
+   i = 164, time =               16.400 (fs)
+   Exact sum of fluxes =         0.0005416419
+   Approximate sum of fluxes =         0.0004899705
+   Minimum adiab. energy difference =         0.0072736451
+   Sum of probability =         0.0006617586
+   Probability = 
+   1         0.9993382414
+   2         0.0000550321
+   3         0.0000081021
+   4         0.0000049853
+   5         0.0000240758
+   6         0.0001882686
+   7         0.0003812947
+   8         0.0000000000
+   Random number =         0.9949178267
+NO HOP!
+Final state   =        1
+  
+   i = 165, time =               16.500 (fs)
+   Exact sum of fluxes =         0.0004783318
+   Approximate sum of fluxes =         0.0004215754
+   Minimum adiab. energy difference =         0.0073357319
+   Sum of probability =         0.0005811351
+   Probability = 
+   1         0.9994188649
+   2         0.0000603455
+   3         0.0000076902
+   4         0.0000038990
+   5         0.0000002726
+   6         0.0002083836
+   7         0.0003005442
+   8         0.0000000000
+   Random number =         0.8577859370
+NO HOP!
+Final state   =        1
+  
+   i = 166, time =               16.600 (fs)
+   Exact sum of fluxes =         0.0004170206
+   Approximate sum of fluxes =         0.0003319828
+   Minimum adiab. energy difference =         0.0073872481
+   Sum of probability =         0.0004947747
+   Probability = 
+   1         0.9995052253
+   2         0.0000888647
+   3         0.0000069600
+   4         0.0000033329
+   5         0.0000000000
+   6         0.0002580364
+   7         0.0001375807
+   8         0.0000000000
+   Random number =         0.8797527945
+NO HOP!
+Final state   =        1
+  
+   i = 167, time =               16.700 (fs)
+   Exact sum of fluxes =         0.0003559085
+   Approximate sum of fluxes =         0.0001025828
+   Minimum adiab. energy difference =         0.0074276327
+   Sum of probability =         0.0005807911
+   Probability = 
+   1         0.9994192089
+   2         0.0002573506
+   3         0.0000061073
+   4         0.0000031027
+   5         0.0000016968
+   6         0.0003125337
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.0058488923
+NO HOP!
+Final state   =        1
+  
+   i = 168, time =               16.800 (fs)
+   Exact sum of fluxes =         0.0002966742
+   Approximate sum of fluxes =         0.0002093381
+   Minimum adiab. energy difference =         0.0074565216
+   Sum of probability =         0.0003656110
+   Probability = 
+   1         0.9996343890
+   2         0.0000915229
+   3         0.0000052744
+   4         0.0000031219
+   5         0.0000099145
+   6         0.0002557773
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.9616380474
+NO HOP!
+Final state   =        1
+  
+   i = 169, time =               16.900 (fs)
+   Exact sum of fluxes =         0.0002406599
+   Approximate sum of fluxes =         0.0001881806
+   Minimum adiab. energy difference =         0.0074738667
+   Sum of probability =         0.0002628677
+   Probability = 
+   1         0.9997371323
+   2         0.0000568384
+   3         0.0000045813
+   4         0.0000034050
+   5         0.0000608699
+   6         0.0001213557
+   7         0.0000158175
+   8         0.0000000000
+   Random number =         0.9452424221
+NO HOP!
+Final state   =        1
+  
+   i = 170, time =               17.000 (fs)
+   Exact sum of fluxes =         0.0001842999
+   Approximate sum of fluxes =         0.0001421222
+   Minimum adiab. energy difference =         0.0074800280
+   Sum of probability =         0.0002015064
+   Probability = 
+   1         0.9997984936
+   2         0.0000466183
+   3         0.0000039673
+   4         0.0000039933
+   5         0.0001082963
+   6         0.0000163041
+   7         0.0000223270
+   8         0.0000000000
+   Random number =         0.2461993462
+NO HOP!
+Final state   =        1
+  
+   i = 171, time =               17.100 (fs)
+   Exact sum of fluxes =         0.0001318217
+   Approximate sum of fluxes =         0.0001033852
+   Minimum adiab. energy difference =         0.0074757578
+   Sum of probability =         0.0001465360
+   Probability = 
+   1         0.9998534640
+   2         0.0000329849
+   3         0.0000035438
+   4         0.0000051582
+   5         0.0000824843
+   6         0.0000011983
+   7         0.0000211667
+   8         0.0000000000
+   Random number =         0.8790091395
+NO HOP!
+Final state   =        1
+  
+   i = 172, time =               17.200 (fs)
+   Exact sum of fluxes =         0.0000805754
+   Approximate sum of fluxes =         0.0000549621
+   Minimum adiab. energy difference =         0.0074621118
+   Sum of probability =         0.0000955518
+   Probability = 
+   1         0.9999044482
+   2         0.0000302647
+   3         0.0000032531
+   4         0.0000075415
+   5         0.0000369025
+   6         0.0000000000
+   7         0.0000175900
+   8         0.0000000000
+   Random number =         0.0585603847
+NO HOP!
+Final state   =        1
+  
+   i = 173, time =               17.300 (fs)
+   Exact sum of fluxes =         0.0000314406
+   Approximate sum of fluxes =         0.0000046392
+   Minimum adiab. energy difference =         0.0074402597
+   Sum of probability =         0.0000624322
+   Probability = 
+   1         0.9999375678
+   2         0.0000316259
+   3         0.0000031264
+   4         0.0000141044
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000135755
+   8         0.0000000000
+   Random number =         0.5468747201
+NO HOP!
+Final state   =        1
+  
+   i = 174, time =               17.400 (fs)
+   Exact sum of fluxes =        -0.0000161899
+   Approximate sum of fluxes =        -0.0000666617
+   Minimum adiab. energy difference =         0.0074114391
+   Sum of probability =         0.0000781416
+   Probability = 
+   1         0.9999218584
+   2         0.0000555700
+   3         0.0000031491
+   4         0.0000098445
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000095780
+   8         0.0000000000
+   Random number =         0.8376652340
+NO HOP!
+Final state   =        1
+  
+   i = 175, time =               17.500 (fs)
+   Exact sum of fluxes =        -0.0000614110
+   Approximate sum of fluxes =        -0.0000951057
+   Minimum adiab. energy difference =         0.0073767899
+   Sum of probability =         0.0000487358
+   Probability = 
+   1         0.9999512642
+   2         0.0000392033
+   3         0.0000033761
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000061564
+   8         0.0000000000
+   Random number =         0.2649033866
+NO HOP!
+Final state   =        1
+  
+   i = 176, time =               17.600 (fs)
+   Exact sum of fluxes =        -0.0001048743
+   Approximate sum of fluxes =        -0.0001239844
+   Minimum adiab. energy difference =         0.0073373678
+   Sum of probability =         0.0000324215
+   Probability = 
+   1         0.9999675785
+   2         0.0000253129
+   3         0.0000038958
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000032128
+   8         0.0000000000
+   Random number =         0.1007278268
+NO HOP!
+Final state   =        1
+  
+   i = 177, time =               17.700 (fs)
+   Exact sum of fluxes =        -0.0001466260
+   Approximate sum of fluxes =        -0.0001627803
+   Minimum adiab. energy difference =         0.0072940212
+   Sum of probability =         0.0000293451
+   Probability = 
+   1         0.9999706549
+   2         0.0000233802
+   3         0.0000050064
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000983
+   7         0.0000008602
+   8         0.0000000000
+   Random number =         0.0568380830
+NO HOP!
+Final state   =        1
+  
+   i = 178, time =               17.800 (fs)
+   Exact sum of fluxes =        -0.0001931984
+   Approximate sum of fluxes =        -0.0002096987
+   Minimum adiab. energy difference =         0.0072475191
+   Sum of probability =         0.0000269644
+   Probability = 
+   1         0.9999730356
+   2         0.0000195179
+   3         0.0000074465
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.0413669819
+NO HOP!
+Final state   =        1
+  
+   i = 179, time =               17.900 (fs)
+   Exact sum of fluxes =        -0.0002324981
+   Approximate sum of fluxes =        -0.0002069233
+   Minimum adiab. energy difference =         0.0071984382
+   Sum of probability =         0.0000037935
+   Probability = 
+   1         0.9999962065
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000037935
+   Random number =         0.0410145546
+NO HOP!
+Final state   =        1
+  
+   i = 180, time =               18.000 (fs)
+   Exact sum of fluxes =        -0.0002627046
+   Approximate sum of fluxes =        -0.0002775105
+   Minimum adiab. energy difference =         0.0071472446
+   Sum of probability =         0.0000430683
+   Probability = 
+   1         0.9999569317
+   2         0.0000289740
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000140943
+   Random number =         0.5391240691
+NO HOP!
+Final state   =        1
+  
+   i = 181, time =               18.100 (fs)
+   Exact sum of fluxes =        -0.0002990851
+   Approximate sum of fluxes =        -0.0003096627
+   Minimum adiab. energy difference =         0.0070942545
+   Sum of probability =         0.0000565538
+   Probability = 
+   1         0.9999434462
+   2         0.0000297824
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000267713
+   Random number =         0.4855172811
+NO HOP!
+Final state   =        1
+  
+   i = 182, time =               18.200 (fs)
+   Exact sum of fluxes =        -0.0003346083
+   Approximate sum of fluxes =        -0.0003450588
+   Minimum adiab. energy difference =         0.0070395254
+   Sum of probability =         0.0000798190
+   Probability = 
+   1         0.9999201810
+   2         0.0000380138
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000418052
+   Random number =         0.5406849958
+NO HOP!
+Final state   =        1
+  
+   i = 183, time =               18.300 (fs)
+   Exact sum of fluxes =        -0.0003698351
+   Approximate sum of fluxes =        -0.0003841283
+   Minimum adiab. energy difference =         0.0069825005
+   Sum of probability =         0.0001161897
+   Probability = 
+   1         0.9998838103
+   2         0.0000570255
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000591642
+   Random number =         0.5730146198
+NO HOP!
+Final state   =        1
+  
+   i = 184, time =               18.400 (fs)
+   Exact sum of fluxes =        -0.0004047294
+   Approximate sum of fluxes =        -0.0004405759
+   Minimum adiab. energy difference =         0.0069189414
+   Sum of probability =         0.0001895709
+   Probability = 
+   1         0.9998104291
+   2         0.0001097543
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000009338
+   8         0.0000788827
+   Random number =         0.6623537314
+NO HOP!
+Final state   =        1
+  
+   i = 185, time =               18.500 (fs)
+   Exact sum of fluxes =        -0.0004393876
+   Approximate sum of fluxes =        -0.0005634841
+   Minimum adiab. energy difference =         0.0067875325
+   Sum of probability =         0.0001591724
+   Probability = 
+   1         0.9998408276
+   2         0.0000547619
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000031880
+   8         0.0001012225
+   Random number =         0.1729031240
+NO HOP!
+Final state   =        1
+  
+   i = 186, time =               18.600 (fs)
+   Exact sum of fluxes =        -0.0004751794
+   Approximate sum of fluxes =        -0.0005691423
+   Minimum adiab. energy difference =         0.0064992693
+   Sum of probability =         0.0001309037
+   Probability = 
+   1         0.9998690963
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000059223
+   8         0.0001249814
+   Random number =         0.0913887727
+NO HOP!
+Final state   =        1
+  
+   i = 187, time =               18.700 (fs)
+   Exact sum of fluxes =        -0.0005109145
+   Approximate sum of fluxes =        -0.0005306661
+   Minimum adiab. energy difference =         0.0061906552
+   Sum of probability =         0.0001604354
+   Probability = 
+   1         0.9998395646
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000091587
+   8         0.0001512767
+   Random number =         0.4372582789
+NO HOP!
+Final state   =        1
+  
+   i = 188, time =               18.800 (fs)
+   Exact sum of fluxes =        -0.0005476684
+   Approximate sum of fluxes =        -0.0005499081
+   Minimum adiab. energy difference =         0.0058824160
+   Sum of probability =         0.0001929650
+   Probability = 
+   1         0.9998070350
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000020
+   5         0.0000000000
+   6         0.0000010118
+   7         0.0000127400
+   8         0.0001792111
+   Random number =         0.4615534449
+NO HOP!
+Final state   =        1
+  
+   i = 189, time =               18.900 (fs)
+   Exact sum of fluxes =        -0.0005850084
+   Approximate sum of fluxes =        -0.0005787273
+   Minimum adiab. energy difference =         0.0055769016
+   Sum of probability =         0.0002282546
+   Probability = 
+   1         0.9997717454
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000030930
+   7         0.0000161871
+   8         0.0002089745
+   Random number =         0.7842377620
+NO HOP!
+Final state   =        1
+  
+   i = 190, time =               19.000 (fs)
+   Exact sum of fluxes =        -0.0006227363
+   Approximate sum of fluxes =        -0.0006094350
+   Minimum adiab. energy difference =         0.0052748792
+   Sum of probability =         0.0002662096
+   Probability = 
+   1         0.9997337904
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000173598
+   7         0.0000085775
+   8         0.0002402723
+   Random number =         0.8018186446
+NO HOP!
+Final state   =        1
+  
+   i = 191, time =               19.100 (fs)
+   Exact sum of fluxes =        -0.0006611867
+   Approximate sum of fluxes =        -0.0006421030
+   Minimum adiab. energy difference =         0.0049767827
+   Sum of probability =         0.0003043417
+   Probability = 
+   1         0.9996956583
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000001334
+   6         0.0000319137
+   7         0.0000001967
+   8         0.0002720980
+   Random number =         0.8219547735
+NO HOP!
+Final state   =        1
+  
+   i = 192, time =               19.200 (fs)
+   Exact sum of fluxes =        -0.0006981035
+   Approximate sum of fluxes =        -0.0006714396
+   Minimum adiab. energy difference =         0.0046829459
+   Sum of probability =         0.0003453723
+   Probability = 
+   1         0.9996546277
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000002887
+   6         0.0000367855
+   7         0.0000033645
+   8         0.0003049336
+   Random number =         0.4779871636
+NO HOP!
+Final state   =        1
+  
+   i = 193, time =               19.300 (fs)
+   Exact sum of fluxes =        -0.0007303783
+   Approximate sum of fluxes =        -0.0006948577
+   Minimum adiab. energy difference =         0.0043936815
+   Sum of probability =         0.0003891344
+   Probability = 
+   1         0.9996108656
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000004443
+   6         0.0000428539
+   7         0.0000062020
+   8         0.0003396342
+   Random number =         0.1906821287
+NO HOP!
+Final state   =        1
+  
+   i = 194, time =               19.400 (fs)
+   Exact sum of fluxes =        -0.0007566920
+   Approximate sum of fluxes =        -0.0007096773
+   Minimum adiab. energy difference =         0.0041092765
+   Sum of probability =         0.0004335200
+   Probability = 
+   1         0.9995664800
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000005983
+   6         0.0000497131
+   7         0.0000096880
+   8         0.0003735207
+   Random number =         0.0390195104
+NO HOP!
+Final state   =        1
+  
+   i = 195, time =               19.500 (fs)
+   Exact sum of fluxes =        -0.0007701418
+   Approximate sum of fluxes =        -0.0007079412
+   Minimum adiab. energy difference =         0.0038300343
+   Sum of probability =         0.0004793429
+   Probability = 
+   1         0.9995206571
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000007510
+   6         0.0000571988
+   7         0.0000143762
+   8         0.0004070169
+   Random number =         0.2096178985
+NO HOP!
+Final state   =        1
+  
+   i = 196, time =               19.600 (fs)
+   Exact sum of fluxes =        -0.0007610389
+   Approximate sum of fluxes =        -0.0006783226
+   Minimum adiab. energy difference =         0.0035562848
+   Sum of probability =         0.0005267752
+   Probability = 
+   1         0.9994732248
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000009028
+   6         0.0000652771
+   7         0.0000209848
+   8         0.0004396105
+   Random number =         0.2581467451
+NO HOP!
+Final state   =        1
+  
+   i = 197, time =               19.700 (fs)
+   Exact sum of fluxes =        -0.0007142109
+   Approximate sum of fluxes =        -0.0006032448
+   Minimum adiab. energy difference =         0.0032883857
+   Sum of probability =         0.0005754383
+   Probability = 
+   1         0.9994245617
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000010533
+   6         0.0000739567
+   7         0.0000306578
+   8         0.0004697704
+   Random number =         0.7186627082
+NO HOP!
+Final state   =        1
+  
+   i = 198, time =               19.800 (fs)
+   Exact sum of fluxes =        -0.0006057977
+   Approximate sum of fluxes =        -0.0004550707
+   Minimum adiab. energy difference =         0.0030267616
+   Sum of probability =         0.0006245169
+   Probability = 
+   1         0.9993754831
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000011998
+   6         0.0000830096
+   7         0.0000451924
+   8         0.0004951151
+   Random number =         0.4049325362
+NO HOP!
+Final state   =        1
+  
+   i = 199, time =               19.900 (fs)
+   Exact sum of fluxes =        -0.0003947041
+   Approximate sum of fluxes =        -0.0001868274
+   Minimum adiab. energy difference =         0.0027719138
+   Sum of probability =         0.0006748007
+   Probability = 
+   1         0.9993251993
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000013389
+   6         0.0000926913
+   7         0.0000676950
+   8         0.0005130755
+   Random number =         0.3997988932
+NO HOP!
+Final state   =        1
+  
+   i = 200, time =               20.000 (fs)
+   Exact sum of fluxes =        -0.0000153526
+   Approximate sum of fluxes =         0.0002766314
+   Minimum adiab. energy difference =         0.0025244745
+   Sum of probability =         0.0007253959
+   Probability = 
+   1         0.9992746041
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000014650
+   6         0.0001026912
+   7         0.0001032992
+   8         0.0005179403
+   Random number =         0.6163657441
+NO HOP!
+Final state   =        1
+  
