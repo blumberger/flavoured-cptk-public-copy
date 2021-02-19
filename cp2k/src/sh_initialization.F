@@ -578,7 +578,6 @@ CONTAINS
 
   END SUBROUTINE set_aom_env_multip
 
-  
 
 ! *****************************************************************************
 !> \brief This allocates aom_env variables. One could in principle put these

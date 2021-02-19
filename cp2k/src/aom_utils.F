@@ -483,7 +483,16 @@ END FUNCTION NORM2
 
 
 !**********************************************************************************
-!> \brief 
+!> \brief This constructs the Hamiltonian (for NOW) for a CT double phase system. 
+!         With fluctuating couplings.
+!         In future this subroutine will be extended to include XT Block and to
+!         construct a general XT-CT Block where the couplings are all
+!         fluctuating 
+!> \note I left some "XXX" note to point out that few small optimizations would
+!         still be possible.
+!         FOr example, the implementation of the
+!         MULTISTEP feature would still be possible here, but I did not have
+!         time to finish this speed-up feature. 
 !> \author SG 
 !**********************************************************************************
 SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, positions_com_tp)
@@ -497,27 +506,27 @@ SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_sect
      CHARACTER(len=*), PARAMETER               :: routineN ='calc_multiphase_Xmatrix_elements', &
      routineP = moduleN//':'//routineN
 
-     !INTEGER, DIMENSION(:,:), ALLOCATABLE      :: active_system_info
      INTEGER                                   :: state, total_states, state1, state2
-     !INTEGER :: init_atom_mol_i, final_atom_mol_i, atoms_per_mol_i
-     !INTEGER :: init_atom_mol_j, final_atom_mol_j, atoms_per_mol_j
      INTEGER                                   ::ind1, ind2
      INTEGER                                   :: nadiab, i, j!, temp
-     !INTEGER                                   :: start_i,end_i,start_j,end_j
      INTEGER, DIMENSION(:), POINTER            :: donor_index, acceptor_index
      INTEGER, DIMENSION(:), ALLOCATABLE        :: first_ind, second_ind
-     !INTEGER, DIMENSION(:), ALLOCATABLE        :: my_mol_index !this is the decomp index
      TYPE(section_vals_type), POINTER          :: site_energy_section, ct_block
      INTEGER, DIMENSION(:,:), ALLOCATABLE      :: CT_states_info
+     REAL(KIND=dp)                            :: mol1, mol2
+     REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE  :: Sab_list_dphase
+     REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE  :: Sab_list_aphase
+     integer                                   :: atoms_per_donor, atoms_per_acceptor, count_
      !real(kind=dp), allocatable, dimension(:,:) :: Atp, Btp
      !REAL(KIND=dp), DIMENSION(:), ALLOCATABLE  :: coeffap, coeffbp
      !REAL(KIND=dp), DIMENSION(:), ALLOCATABLE  :: coeffas, coeffbs
      !REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE  :: nacva, nacvb
-     REAL(KIND=dp)                            :: mol1, mol2
+     !INTEGER :: init_atom_mol_i, final_atom_mol_i, atoms_per_mol_i
+     !INTEGER :: init_atom_mol_j, final_atom_mol_j, atoms_per_mol_j
      !INTEGER, DIMENSION(:,:), ALLOCATABLE      ::  bneighbour, aneighbour
-     REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE  :: Sab_list_dphase
-     REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE  :: Sab_list_aphase
-     integer                                   :: atoms_per_donor, atoms_per_acceptor, count_
+     !INTEGER, DIMENSION(:), ALLOCATABLE        :: my_mol_index !this is the decomp index
+     !INTEGER                                   :: start_i,end_i,start_j,end_j
+     !INTEGER, DIMENSION(:,:), ALLOCATABLE      :: active_system_info
 
 
      NULLIFY(site_energy_section,ct_block)
@@ -573,12 +582,6 @@ SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_sect
        end do
      end do     
     
-!print *, "DECOMP", sh_env%index_active_mols
-!print *, "DONOR IND", donor_index
-!print *, "ACCEPTOR IND", acceptor_index
-!print *, "FIRST IND", first_ind
-!print *, "SEC IND", second_ind
-
  
 !print *, "CALC DONOR PHASE STUFF"
   CALL calc_aom_coup_nacv_single_phase(sh_env, atoms_per_donor, sh_env%ext_elements_d, sh_env%pcoeffs_d, sh_env%scoeffs_d, &
@@ -589,7 +592,14 @@ SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_sect
                                           second_ind, sh_env%connlist1_a, sh_env%connlist2_a, sh_env%atomlist_a, &
                                           positions_com_tp, sh_env%active_system_info, sh_env%nacv_aphase, Sab_list_aphase)
 
-!!TEMP XXX
+!!TEST
+!print *, "SIZE 1", SIZE(sh_env%NN,1)
+!print *, "SIZE 2", SIZE(sh_env%NN,2)
+!do i=1, SIZE(sh_env%NN,1)
+!   print *, sh_env%NN(i,:) 
+!end do
+
+!!TEST
 !do temp=1, SIZE(Sab_list_dphase,2)
 !print *, "Sab_list", Sab_list_dphase(:, temp)
 !enddo
@@ -633,6 +643,8 @@ SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_sect
       end do
    end do
 
+
+
    sh_env%H_tp(:,:) = cmplx(0.0D0, 0.0D0,dp)
 
   !loop over states and fill-in the CT Hamiltonian with book-kept couplings
@@ -652,7 +664,7 @@ SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_sect
 !print *, "intercating molecules", mol1, mol2
                    do count_=1, SIZE(Sab_list_aphase,2) 
                        if ((mol1 .eq. INT(Sab_list_aphase(1, count_))) .AND. (mol2 .eq. INT(Sab_list_aphase(2, count_)))) then 
-!print *, "Sab_list_aphase(3, count_)", Sab_list_aphase(3, count_)
+
                           !Minus to be consistent with diagonal elements
                           sh_env%H_tp(state1, state2) = cmplx(0.0D0, -sh_env%scaling_acceptor*Sab_list_aphase(3, count_),dp) 
                           EXIT
@@ -668,7 +680,7 @@ SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_sect
 !print *, "intercating molecules", mol1, mol2
                    do count_=1, SIZE(Sab_list_dphase,2) 
                        if ((mol1 .eq. INT(Sab_list_dphase(1, count_))) .AND. (mol2 .eq. INT(Sab_list_dphase(2, count_)))) then 
-!print *, "Sab_list_aphase(3, count_)", Sab_list_dphase(3, count_)
+
                           !Minus to be consistent with diagonal elements
                           sh_env%H_tp(state1, state2) = cmplx(0.0D0, -sh_env%scaling_donor*Sab_list_dphase(3, count_),dp) 
                           EXIT
@@ -978,11 +990,19 @@ SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_sect
    DEALLOCATE(Sab_list_dphase)
    DEALLOCATE(Sab_list_aphase)
 
-END SUBROUTINE
+END SUBROUTINE calc_multiphase_Xmatrix_elements
 
 
 !**********************************************************************************
-!> \brief 
+!> \brief This subroutine calculates the AOM couplings and the non-orthogonal
+!         diabatic nacv for each phase of the system. It uses Gajdos AOM
+!         subrotines for the calculation. 
+!> \note I left some "XXX" note to point out that few small optimizations would
+!         still be possible.
+!         FOr example, the implementation of the
+!         MULTISTEP feature would still be possible here, but I did not have
+!         time to finish this speed-up feature. 
+!> \author SG 
 !**********************************************************************************
 SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeffs, phase_scoeffs, phase_ind, & 
                                            phase_connlist1, phase_connlist2, phase_atomlist, &
@@ -1001,7 +1021,6 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
      integer, dimension(:,:), POINTER, &
                                    INTENT(IN)            :: phase_connlist1, phase_connlist2
      INTEGER, DIMENSION(:), POINTER, INTENT(IN)          :: phase_atomlist
-     !INTEGER, DIMENSION(:,:), ALLOCATABLE, INTENT(OUT)   :: Interac_list 
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT)    :: Sab_list
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER, INTENT(INOUT)  :: nacv    
   
@@ -1012,12 +1031,11 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
      integer :: i, ind_i, init_atom_mol_i, final_atom_mol_i, atoms_per_mol_i 
      integer :: k, ind_k, init_atom_mol_k, final_atom_mol_k, atoms_per_mol_k!, temp
      real(kind=dp), allocatable, dimension(:,:)          :: Atp, Btp
-     !real(kind=dp), allocatable                          :: PC_rvecs(:,:)
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE          :: pcoeffsrun 
      INTEGER, DIMENSION(:,:), ALLOCATABLE                :: bneighbour, aneighbour
      REAL(KIND=dp)                                       :: S 
      INTEGER                                             :: count_
-     !REAL(KIND=dp), DIMENSION(:,:,:), ALLOCATABLE        :: nacv
+     !real(kind=dp), allocatable                          :: PC_rvecs(:,:)
       
 
      !ALLOCATE(PC_allrvecs(5,mol*atoms))
@@ -1041,10 +1059,12 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
      bneighbour = 0
      ! END IF XXXX
 
-print *, "ENTER NEW SINGLE PHASE SUB"
+!print *, "ENTER NEW SINGLE PHASE SUB"
 
-     !variable storage of Sab (two molecules may get e.g. further apart and
-     !would not be stored if NN !=1) 
+     !IDEA to possibly further developed in calc_multiphase_Xmatrix_elements
+     !to reduce memory storage of the zeros:
+     ! variable storage of Sab (two molecules may get e.g. further apart and
+     ! would not be stored if NN !=1) 
      count_ = 0
      do i=1,SIZE(phase_ind)     
         do k=1, SIZE(phase_ind)
@@ -1089,8 +1109,6 @@ print *, "ENTER NEW SINGLE PHASE SUB"
                     final_atom_mol_k = active_system_info(2, ind_k)
                     atoms_per_mol_k = (final_atom_mol_k-init_atom_mol_k)+1
 
-!print *, "index don", init_atom_mol_i, final_atom_mol_i
-!print*, "index acc", init_atom_mol_k, final_atom_mol_k
 
                     IF (atoms_per_mol_i .ne. atoms_per_mol_k) THEN
                        CPABORT("This works only for molecules within a given phase")
@@ -1100,15 +1118,6 @@ print *, "ENTER NEW SINGLE PHASE SUB"
                     !number of atoms is still the same as before)
                     Btp(1,1:atoms_per_mol_k) = dble(elements)
                     Btp(2:4,1:atoms_per_mol_k) = positions_com_tp(1:3, init_atom_mol_k:final_atom_mol_k)
-!do temp=1,SIZE(coeffap)
-!print *, "coeffap, coeffbp", coeffap(temp), coeffbp(temp)
-!enddo
-!do temp=1, SIZE(Atp,2)
-!print *, "xyza", Atp(1,temp), Atp(2,temp)
-!enddo
-!do temp=1, SIZE(Btp,2)
-!print *, "xyzb", Btp(1,temp), Btp(2,temp)
-!enddo
 
                     ! the AOM coefficient must be normalized according to the
                     ! given geometry. Since all teh molecules are the same the
@@ -1130,33 +1139,36 @@ print *, "ENTER NEW SINGLE PHASE SUB"
                                                                                 sh_env%minao)
                      !end if
 
-                   ! TO DO: optimize with neighbouring list 
                    !only call overlap if neighbours list says so
-!                   if (sh_env%NN(i,k) == 1) then
+                   ! if (sh_env%NN(phase_ind(i),phase_ind(k)) == 1) then 
                         ! we only do the upper diagonal to save time
                         if (k>i) then 
                            count_  = count_+1
+                           !calculate overlap Sab 
                            call calc_sab(Atp, phase_connlist2, &
                                pcoeffsrun(1:atoms_per_mol_i, i), &
                                S, Btp, phase_connlist2, &
                                pcoeffsrun(1:atoms_per_mol_k, k),&
                                print_rvecs='yes', molA_index=i, molB_index=k)                           
-!print *, "IT'S COUPL", phase_ind(i), phase_ind(i), S
+
+!print *, "IT'S COUPL", phase_ind(i), phase_ind(k), S
+                               !store Sab
                                Sab_list(1, count_) = dble(phase_ind(i))
                                Sab_list(2, count_) = dble(phase_ind(k))
-                               Sab_list(3, count_) = dble(S)
-!print *, "SEED", sh_env%do_random
-                          !IF MULTISTATE THEN 
-                           call calc_dRSab(Atp, phase_atomlist, &
-                           phase_connlist1, pcoeffsrun(1:atoms_per_mol_i,i), phase_scoeffs, &
-                           nacv(1:3, k,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i), &
-                           nacv(1:3, i,(k-1)*atoms_per_mol_k+1:k*atoms_per_mol_k), &
-                           Btp, phase_atomlist, phase_connlist1, pcoeffsrun(1:atoms_per_mol_k,k), &
-                            !sh_env%scoeffs, sh_env%neighbourlist(k,i,:,:), &
-                            !         sh_env%neighbourlist(i,k,:,:), dR, &
-                            phase_scoeffs, aneighbour(:,:), bneighbour(:,:), sh_env%dR, &
-                            sh_env%do_random, sh_env)                         
+                               Sab_list(3, count_) = S
+
                          
+                          !IF MULTISTATE THEN  XXXX
+                            !calculate gradients
+                            call calc_dRSab(Atp, phase_atomlist, &
+                               phase_connlist1, pcoeffsrun(1:atoms_per_mol_i,i), phase_scoeffs, &
+                               nacv(1:3, k,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i), &
+                               nacv(1:3, i,(k-1)*atoms_per_mol_k+1:k*atoms_per_mol_k), &
+                               Btp, phase_atomlist, phase_connlist1, pcoeffsrun(1:atoms_per_mol_k,k), &
+                                !sh_env%scoeffs, sh_env%neighbourlist(k,i,:,:), &
+                                !         sh_env%neighbourlist(i,k,:,:), dR, &
+                               phase_scoeffs, aneighbour(:,:), bneighbour(:,:), sh_env%dR, &
+                               sh_env%do_random, sh_env)                         
                           !END IF
                          
 !!open(20, file = 'nacv_multip_inter.dat', status = 'old',
@@ -1176,7 +1188,12 @@ print *, "ENTER NEW SINGLE PHASE SUB"
 !!close(20)
 
                        end if !over the upper diag
-
+                   ! molecules are not connected
+                  !else !(sh_env%NN(phase_ind(i),phase_ind(k)) != 1) 
+                  !    Sab_list(1, count_) = dble(phase_ind(i))
+                  !    Sab_list(2, count_) = dble(phase_ind(k))
+                  !    Sab_list(3, count_) = 0.0D0
+                  !end if
                end do !loop over k
  
               ! call calc_sab_pete(Atp, phase_connlist2, PC_rvecs)
@@ -1672,26 +1689,6 @@ SUBROUTINE calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_rando
                                              sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = sh_env%H_tp(orb*(k-1)+m,orb*(i-1)+d)
                                              sh_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = sh_env%Stptp(orb*(k-1)+m,orb*(i-1)+d)
                      
-                             !call calc_sab(sh_env%Atp, sh_env%connlist2, &
-                             !                             sh_env%pcoeffsrun(1:atoms,orb*(i-1)+d,3),&
-                             !                             S, sh_env%Btp, sh_env%connlist2, & 
-                             !                             sh_env%pcoeffsrun(1:atoms,orb*(k-1)+m,3))
-                             !                sh_env%Stptp(orb*(i-1)+d,orb*(k-1)+m) = cbar*S
-                             !                sh_env%H_tp(orb*(i-1)+d,orb*(k-1)+m)  = cmplx(0.0D0, -scaling*S,dp)
-
-                                           ! call calc_dRSab(sh_env%Atp, sh_env%atomlist, sh_env%connlist1, &
-                                           ! sh_env%pcoeffsrun(1:atoms,orb*(k-1)+d,3), sh_env%scoeffs, &
-                                           ! sh_env%nacv_tot(1:3,orb*(i-1)+d,orb*(k-1)+m,(i-1)*atoms+1:i*atoms), &
-                                           ! sh_env%nacv_tot(1:3,orb*(k-1)+m,orb*(i-1)+d,(k-1)*atoms+1:k*atoms), &
-                                           ! !sh_env%nacv(1:3,orb*(k-1)+d,(i-1)*atoms+1:i*atoms), &
-                                           ! !sh_env%nacv(1:3,orb*(i-1)+m,(k-1)*atoms+1:k*atoms), &
-                                           ! sh_env%Btp, sh_env%atomlist, sh_env%connlist1, & 
-                                           ! sh_env%pcoeffsrun(1:atoms,orb*(i-1)+m,3),&
-                                           ! !sh_env%scoeffs, sh_env%neighbourlist(k,i,:,:), sh_env%neighbourlist(i,k,:,:), dR, &
-                                           ! sh_env%scoeffs, sh_env%aneighbour(:,:), sh_env%bneighbour(:,:), dR, &
-                                           ! do_random, sh_env)
-                                           !
-
                                         end do
                                    end do
                               else
