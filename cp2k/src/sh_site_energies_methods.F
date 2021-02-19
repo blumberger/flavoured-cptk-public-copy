@@ -857,7 +857,6 @@ END SUBROUTINE ct_block_energies_forces
               last_atom, aoi!, test
 
    NULLIFY( my_energies)
-!SAM COMMENT: MAYBE FIND A BETTER WAY TO ALLOCATE THIS
    ALLOCATE(my_energies(SIZE(energies_1_mol_list(1,:))))
   !> WARNING: here we assume that all force evals have the same number of atoms
   natom = SIZE(global_forces(1)%forces(:,:), 2)

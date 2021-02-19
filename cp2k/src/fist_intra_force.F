@@ -157,9 +157,6 @@ CONTAINS
 IF (PRESENT(pot_1_mol_list)) THEN
     CALL section_vals_val_get(ener_decomp_section, "INDEX_MOL_DECOMP",& !CHANGE SAM
                                   i_vals=my_mol_index)
-!DELETE ME
-!print *, "NOW_I_PRINT_my_mol_index ", my_mol_index
-!print *, "NEW_FORCE_EVA"
 END IF
 
     pot_bond =  0.0_dp
@@ -171,11 +168,6 @@ END IF
     pot_shell =  0.0_dp
 !CHANGE S/M
     IF (PRESENT(pot_1_mol_list))  pot_1_mol_list(:) = 0.0_dp
-!!DELETE ME
-!        IF (PRESENT(pot_1_mol_list)) THEN
-!print *, "pot_1_mol_list"
-!    END IF
-!END CHANGE
     unit_conv = cp_unit_from_cp2k(1.0_dp, "angstrom")
 
     atener = atprop_env%energy
@@ -183,33 +175,15 @@ END IF
     atstress = atprop_env%stress
     IF (atstress) pv_a => atprop_env%atstress
     
- !   store = .FALSE. 
-!SAM COMMENT: probably cout_mol is not useful, already i = ... is counting the
-!molecular index
     count_mol = 0 !not needed we could just use i
     nkind = SIZE ( molecule_kind_set )
     MOL: DO ikind = 1, nkind
-!print *, "nkind", nkind
        nmol_per_kind = local_molecules % n_el ( ikind )
-!print *, "nmol_per_kind", nmol_per_kind
        DO imol = 1, nmol_per_kind
           i = local_molecules % list ( ikind ) % array ( imol )
           molecule => molecule_set ( i )
           molecule_kind => molecule % molecule_kind
           count_mol = count_mol + 1
-!print *, "i index", i
-!print *, "COUNT", count_mol
-!print *, "MOL_COUNTER", count_mol
-
-!          DO idx =1, SIZE(my_mol_index)
-!             IF (idx==count_mol) THEN
-!                store = .TRUE.
-!print *, "TRUE_STORE"
-!             ELSE 
-!                store = .FALSE.
-!print *, "FALSE STORE"
-!             END IF
-!          END DO
 
           CALL get_molecule_kind ( molecule_kind, nbend = nbends, nbond = nbonds,  &
                                    nimpr = nimptors, nub = nub, ntorsion = ntorsions, &
@@ -654,26 +628,11 @@ END IF
 
 
           IF (PRESENT(pot_1_mol_list)) THEN
-!print*, "count_mol", count_mol 
              DO idx=1, SIZE(my_mol_index)
-                !> we need to start from my_mol_index(idx)+1 becuase the atoms
-                !position is zero-based in accordange with AOM.coeff whereas the energy here starts from 1
                  IF (my_mol_index(idx) .eq. count_mol) THEN
-!print *, "MOL_INDEX _TO GET", my_mol_index(idx)
-!print *, "forces_particle_set", particle_set ( my_mol_index(idx) +1 )% f 
-!   print *, "idx and count", my_mol_index(idx), count_mol
-!  print *, "particle_set (idx ) % r", particle_set (my_mol_index(idx)*18) % r *unit_conv
-!   print *, "pot_bond_1_mol", count_mol, pot_bond_1_mol
-!   print *, "pot_shell_1_mol", count_mol, pot_shell_1_mol
-!   print *, "pot_urey_bradley_1_mol", count_mol, pot_urey_bradley_1_mol
-!   print *, "pot_bend_1_mol", count_mol, pot_bend_1_mol
-!   print *, "pot_torsion_1_mol", count_mol, pot_torsion_1_mol
-!   print *, "pot_imp_torsion_1_mol", count_mol, pot_imp_torsion_1_mol
-!   print *, "pot_opbend_1_mol", count_mol, pot_opbend_1_mol
                     pot_1_mol_list(idx) = pot_bond_1_mol + pot_shell_1_mol + &
                        pot_urey_bradley_1_mol + pot_bend_1_mol + pot_torsion_1_mol + &
                        pot_imp_torsion_1_mol + pot_opbend_1_mol
-!print *, "pot_1_mol_list(idx)", pot_1_mol_list(idx)
                  END IF
              END DO
           END IF
@@ -681,10 +640,6 @@ END IF
        END DO
     END DO MOL
 
-!!DELETE ME
-!        IF (PRESENT(pot_1_mol_list)) THEN
-!print *, "pot_1_mol_list", SUM(pot_1_mol_list)
-!                 END IF
 
 
     CALL timestop(handle)

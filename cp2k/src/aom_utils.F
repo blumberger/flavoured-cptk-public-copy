@@ -653,7 +653,7 @@ SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_sect
                    do count_=1, SIZE(Sab_list_aphase,2) 
                        if ((mol1 .eq. INT(Sab_list_aphase(1, count_))) .AND. (mol2 .eq. INT(Sab_list_aphase(2, count_)))) then 
 !print *, "Sab_list_aphase(3, count_)", Sab_list_aphase(3, count_)
-                          !Minus to be consistent with diago
+                          !Minus to be consistent with diagonal elements
                           sh_env%H_tp(state1, state2) = cmplx(0.0D0, -sh_env%scaling_acceptor*Sab_list_aphase(3, count_),dp) 
                           EXIT
                        end if
@@ -669,7 +669,7 @@ SUBROUTINE calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_sect
                    do count_=1, SIZE(Sab_list_dphase,2) 
                        if ((mol1 .eq. INT(Sab_list_dphase(1, count_))) .AND. (mol2 .eq. INT(Sab_list_dphase(2, count_)))) then 
 !print *, "Sab_list_aphase(3, count_)", Sab_list_dphase(3, count_)
-                          !Minus to be consistent with diago
+                          !Minus to be consistent with diagonal elements
                           sh_env%H_tp(state1, state2) = cmplx(0.0D0, -sh_env%scaling_donor*Sab_list_dphase(3, count_),dp) 
                           EXIT
                        end if
@@ -1663,7 +1663,7 @@ SUBROUTINE calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_rando
                               end do
 
                          !now the off-diagonals                         
-                         else ! ( i == k)
+                         else ! ( i != k)
                               !symmetric matrices
                               !no sense calling calc_sab twice as often as you need to
                               if (k < i) then
@@ -1759,7 +1759,7 @@ SUBROUTINE calc_aom_Xmatrix_elements_first_step(sh_env, atoms, mol, dR, do_rando
                                         end do
                                    end do
                               endif 
-                         end if !(i==k)
+                         end if !(i!=k)
                     else !(NN(i,k) == 1
                          do d=1,orb
                               do m=1,orb

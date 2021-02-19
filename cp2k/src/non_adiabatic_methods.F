@@ -9,7 +9,7 @@
 ! *****************************************************************************
 !> \brief Interface for the adiabatic force calculations
 !> \par History
-!> \authors AC and SG
+!> \authors AC [Edited SG]
 ! *****************************************************************************
 
 
@@ -157,8 +157,6 @@ CONTAINS
 
     CALL get_subsys_map_index(mapping_section, natom, 1, nforce_eval, map_index)
 
-    !> COMMENT_SG: this bit is not completely general becuase it assumes that all the
-    !following arrays have the same number of orbitals per site 
     CALL section_vals_val_get(adiab_section,"NUMBER_DIABATIC_STATES",&
          i_val=nadiab)
     CALL section_vals_val_get(adiab_section,"NUMBER_ORBITALS",&
@@ -167,11 +165,11 @@ CONTAINS
     itimes => my_itimes
     DO iparticle = 1, natom
        jparticle = map_index(iparticle)
-       !SG: the positions that enter the following subroutines are the position
+       !the positions that enter the following subroutines are the position
        !updated after the first half VV. Meaning thy refer to time t+dt 
        positions_tp(:,jparticle)   = particles_mix%els(jparticle)%r(:)
        IF (my_itimes.eq.0) THEN
-            !SG: This velocities are half-time velocities and are stored here
+            !This velocities are half-time velocities and are stored here
             !just to estimated the positions of the atoms at t-2dt
             !(sh_env%rm_tm) in case of AOM and to estimate adiab nacv_first_ts
             !(deprecated)

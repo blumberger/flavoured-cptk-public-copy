@@ -229,8 +229,8 @@ END SUBROUTINE calc_coms_and_nlist
 
      !> COMMENT_SG: Tresp charegs array should be generalized for multiple molecules
      !and phases
-     !> COMMENT_SG: This is the only NON general bit of the whole subroutine. It
-     !assumes just one type of charges
+     !> COMMENT_SG: This is the only NOT general bit of the whole subroutine. It
+     !assumes just one type of charges (it can be easily generalized)
      !#########  WARNING ##############################################
      ALLOCATE(charges1(SIZE(tresp_charges)))
      ALLOCATE(charges2(SIZE(tresp_charges)))
@@ -369,8 +369,6 @@ END SUBROUTINE calc_coms_and_nlist
 
 
 
-! COMMENT_SG this subroutine is just a replication of the one below, you should
-! merge them together
 !**********************************************************************************
 !> \brief calculates coulomb interaction gradients ( this could be TRESP or ESP
 !        charges. 
@@ -732,12 +730,14 @@ end subroutine calc_trsp_ab
 !**********************************************************************************
 !> \brief This subroutine is used only when there are more non-degenerate states
 !         than the number of active molecules and the loop is over number of
-!         states. So this subrotine can handle the CT Hamiltonian with 
-!         (NdonorxNacceptor) states. However it cannot work with fluctuating 
+!         states. So this subrotine can handle the XT-CT Hamiltonian with 
+!         (NdonorxNacceptor+N) states. However it cannot work with fluctuating 
 !         couplings becuase for now the off-diagonal forces are set to zero.
 !         Since couplings are frozen.
 !  \note  Eventually this simplistic subroutine might be replaced by
-!         calcforces_smart_grad_multip
+!         calcforces_smart_grad_multip and it will be a subfeature when
+!         frozen_c=.TRUE., but for the moment it was kept like this because
+!         calcforces_smart_grad_multip cannot yet handle XT-CT but just CT
 !\author  SG
 !**********************************************************************************
 subroutine calcforces_frozenH(Hin, C, state, Fin, forces_adiab)
@@ -780,10 +780,16 @@ end subroutine calcforces_frozenH
 !**********************************************************************************
 !> \brief This subroutine is used only when there are more non-degenerate states
 !         than the number of active molecules and the loop is over number of
-!         states. So this subrotine can handle the CT Hamiltonian with 
-!         (NdonorxNacceptor) states. However it cannot work with fluctuating 
+!         states. It is just a repetition of calcforces_frozenH (they could be
+!         merged together)
+!         This subrotine can handle the XT-CT Hamiltonian with 
+!         (NdonorxNacceptor+N) states. However it cannot work with fluctuating 
 !         couplings becuase for now the off-diagonal forces are set to zero.
 !         Since couplings are frozen. 
+!  \note  Eventually this simplistic subroutine might be replaced by
+!         calc_hop_nacv_approx_multip and it will be a subfeature when
+!         frozen_c=.TRUE., but for the moment it was kept like this because
+!         calc_hop_nacv_approx_multip cannot yet handle XT-CT but just CT
 !\author  SG
 !**********************************************************************************
 subroutine calc_hop_nacv_frozen_H(sh_env, diagonal_F, hop_nacv, ext_old_state, ext_new_state)
@@ -808,13 +814,10 @@ subroutine calc_hop_nacv_frozen_H(sh_env, diagonal_F, hop_nacv, ext_old_state, e
 
         mat    = SIZE(sh_env%H_tp, 1)
         natom  = SIZE(diagonal_F, 2)
-        !nadiab = SIZE(diagonal_F, 3)
-        !atoms  = SIZE(sh_env%connlist1, 2)
 
 
         allocate(C(mat,mat))
         allocate(F_1(3,natom))
-        !allocate(F_11(3,natom))
         allocate(hop_nacv(3, natom)) 
 
         C = sh_env%C_tp
@@ -849,26 +852,10 @@ subroutine calc_hop_nacv_frozen_H(sh_env, diagonal_F, hop_nacv, ext_old_state, e
            !num_j = 0  ! Active atom index
            do j=1,natom ! Sum over all the atoms
               F_1(d,j) = 0.0D0
-              !F_11(d,j) = 0.0D0
-              !IF (ext_pres(j)) THEN
-              !   num_j   = num_j + 1                  ! Update the active atom index
-              !   num_mol = int((num_j-1)/atoms) + 1   ! Update the molecular index
-              !   ! WARNING: we suppose that all molecules have the same
-              !   ! number of atoms
-              !ENDIF
               do i=1,mat
                  !F_1(d,j) = F_1(d,j) + C(i,old_state)*DH(i,i,j,d)*C(i,new_state)*diff_energy
                  ! Diagonal term, it depends on the forces
                  F_1(d,j) = F_1(d,j) + C(i,old_state)*diagonal_F(d,j,i)*C(i,new_state)*diff_energy
-                 !IF (ext_pres(j)) THEN
-                 !   IF (i.ne.num_mol) THEN
-                 !     ! Of diagonal term, only for active atom j present in
-                 !     ! molecule num_mol
-                 !     F_11(d,j) = F_11(d,j) + diff_energy * convert_nacv*sh_env%nacv(d, i, num_j) * (&
-                 !                             C(num_mol, new_state) * C(i, old_state) +   &
-                 !                             C(num_mol, old_state) * C(i,new_state) )
-                 !   ENDIF
-                 !ENDIF
               ENDDO
            ENDDO
         ENDDO 

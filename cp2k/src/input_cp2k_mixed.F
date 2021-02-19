@@ -696,7 +696,7 @@ CONTAINS
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="CBAR",&
-         description="Sab constant factor",&
+         description="Sab constant factor (Not used for fast porpagation)",&
          usage="0.5082 WITHOUT UNITS", type_of_var=real_t)
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)

@@ -303,12 +303,12 @@ CONTAINS
          sh_env%nacv = sh_env%cbar*sh_env%nacv
          !> convert nacv using the true overlap 
          !-----------------------------------------------------------------------------
+     !> FROZEN COUPLINGS 
      ELSE IF (sh_env%frozen_couplings_keyword) THEN 
-         !> FROZEN COUPLINGS 
          CALL calc_frozen_H(sh_env, energies_tp, orb,positions_com_tp=positions_com_tp)
 
+     !> MULTI-PHASE COUPLINGS 
      ELSE IF (sh_env%multiphase_couplings_keyword) THEN 
-         !> MULTI-PHASE COUPLINGS 
          
          !> CALCULATE THE CENTER OF MASS AND CONSTRUCT NEIGHBOURS LIST
          !this is needed to calculate the NN list (XXX not yet used)
@@ -425,7 +425,7 @@ CONTAINS
              ALLOCATE(sh_print_env%pop_init(SIZE(sh_env%C_tp(:,active_state))))
              !all pop is initialized in the active state, this is a hack to
              !correct the printing
-             sh_print_env%initrandom      = 0.0D0 ! COMMENT_SG: hack for regtests
+             sh_print_env%initrandom      = 0.0D0 ! COMMENT: hack for regtests
              sh_print_env%pop_init(:)      = 0.0D0
              sh_print_env%pop_init(active_state)  = 1.0D0
              CALL adiab_print_sh_info(sh_print_env, keyword = 'START')
@@ -514,6 +514,7 @@ print *, "ACTIVE STATE", active_state
             !number of active mols)
             CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=active_state, Fin=diagonal_F, &
                                   forces_adiab=sh_env%forces_adiab)
+
         ELSE 
             call calcforces_smart_grad(state=active_state, C=sh_env%C_tp, &
                                         Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
@@ -521,7 +522,7 @@ print *, "ACTIVE STATE", active_state
                                         orb=orb, frozen_c=.TRUE.)
         END IF
 
-     ! MULTI-PHASE FORCES XXX
+     ! MULTI-PHASE FORCES
      ELSE IF (sh_env%multiphase_couplings_keyword) THEN
          IF (sh_env%multistate) THEN
 
@@ -534,7 +535,7 @@ print *, "ACTIVE STATE", active_state
                                         scaling_C_donor=sh_env%scaling_donor, scaling_C_acceptor=sh_env%scaling_acceptor, &
                                         nacv_dphase=sh_env%nacv_dphase, nacv_aphase=sh_env%nacv_aphase, &
                                         forces_adiab=sh_env%forces_adiab, &
-                                        frozen_c=sh_env%freeze_multip_forces )
+                                        frozen_c=.FALSE. )
             !frozen Hamiltonian case and multi-phase (dimension of H larger than
             !number of active mols)
             !TEMP XXXXXXXXXXXX
@@ -669,7 +670,7 @@ print *, "ACTIVE STATE", active_state
 
 !**********************************************************************************
 !> \brief  This construct the Hamiltonian, propagate the electronic equation of
-!motion and defines if a hop is attempted or not and calculate forces.
+!motion and defines if a hop is attempted or not, and calculates forces.
 !> authors AC and SG
 !> edited 02/02/20
 !**********************************************************************************
@@ -742,11 +743,6 @@ print *, "ACTIVE STATE", active_state
      decoherence_section => section_vals_get_subs_vals(adiab_section,"DECOHERENCE")
      e_conservation_section => section_vals_get_subs_vals(adiab_section,"ENERGY_CONSERVATION")
      
-     !COMMENT SG: the following keyword could be removed since new nace are
-     !better
-     !> uses chunked nace (improved) subroutines as default 
-     !CALL section_vals_val_get(optimization_section, "DO_SPEEDUP_NACE", l_val=do_nace_speedup)
-
      CALL section_vals_val_get(adiab_section,"ELECTRONIC_PARTIAL_STEP",&
                                i_val=ELsteps)
      !> Instantaneous decoherence related threshold criteria 
@@ -1027,7 +1023,7 @@ print *, "ACTIVE STATE", active_state
                                         scaling_C_donor=sh_env%scaling_donor, scaling_C_acceptor=sh_env%scaling_acceptor, &
                                         nacv_dphase=sh_env%nacv_dphase, nacv_aphase=sh_env%nacv_aphase, &
                                         forces_adiab=sh_env%forces_adiab, &
-                                        frozen_c=sh_env%freeze_multip_forces )
+                                        frozen_c=.FALSE. )
 
 
             !frozen Hamiltonian case and multi-phase (dimension of H larger than
@@ -1035,7 +1031,6 @@ print *, "ACTIVE STATE", active_state
             !CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=sh_env%active_state, Fin=diagonal_F, &
             !                         forces_adiab=sh_env%forces_adiab)
             IF (sh_env%attempt_hop) THEN
-print *, "NE_STATE_FORCES"
                       CALL calcforces_smart_grad_multip(adiab_section, instate=sh_env%new_state, C=sh_env%C_tp, &
                                         Fin=diagonal_F,  &
                                         ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
@@ -1043,7 +1038,7 @@ print *, "NE_STATE_FORCES"
                                         scaling_C_donor=sh_env%scaling_donor, scaling_C_acceptor=sh_env%scaling_acceptor, &
                                         nacv_dphase=sh_env%nacv_dphase, nacv_aphase=sh_env%nacv_aphase, &
                                         forces_adiab=sh_env%forces_adiab_new, &
-                                        frozen_c=sh_env%freeze_multip_forces )
+                                        frozen_c=.FALSE. )
                       !CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp),C=sh_env%C_tp, state=sh_env%new_state, Fin=diagonal_F, &
                       !            forces_adiab=sh_env%forces_adiab_new)
             END IF

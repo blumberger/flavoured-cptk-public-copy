@@ -232,30 +232,24 @@ CONTAINS
 
 atoms_active_region = 0
 IF (ALLOCATED(thermo%pot_list)) THEN
-   CALL section_vals_val_get(ener_decomp_section, "INDEX_MOL_DECOMP",& !CHANGE SAM
+   CALL section_vals_val_get(ener_decomp_section, "INDEX_MOL_DECOMP",& !CHANGE SG
                              i_vals=my_mol_index)
-!print *, "INDEX_MOL_DECOMP", my_mol_index
    !TEST LOOP
        nkind = SIZE ( molecule_kind_set )
        MOL: DO ikind = 1, nkind
           nmol_per_kind = local_molecules % n_el ( ikind )
           DO imol = 1, nmol_per_kind
               i = local_molecules % list ( ikind ) % array ( imol )
-   !print *, "i", i
               molecule => molecule_set ( i )
               molecule_kind => molecule % molecule_kind
               IF (ANY(my_mol_index==i)) THEN
-   !print *, "TRUE", i
                  CALL get_molecule ( molecule, first_atom=first_atom, last_atom=last_atom )
                  atoms_active_region =  atoms_active_region + (last_atom - first_atom + 1)
               END IF
           END DO
        END DO MOL
-   !print *, "atoms_active_region", atoms_active_region 
    CALL section_vals_val_get(ener_decomp_section, "NUM_ACTIVE_ATOMS", &
                              i_val=act_atoms)
-!print *, "act_atoms", act_atoms
-!print *, "atoms_active_region", atoms_active_region
    IF (act_atoms /= atoms_active_region) THEN
       CPABORT("num_act_atoms incorrect")
    END IF
@@ -263,17 +257,11 @@ ALLOCATE(forces_intra_aoi(3, atoms_active_region))
 END IF
 
 
-!  NULLIFY(particle_set_intra)
-!  CALL allocate_particle_set_intra(particle_set_intra,atoms_active_region)
-       
-!END TEST
-
 
     natoms = SIZE(particle_set)
     nlocal_particles = 0
     nparticle_kind = SIZE(atomic_kind_set)
     DO ikind = 1, nparticle_kind
-!print *, "local_particles%n_el(ikind)", local_particles%n_el(ikind)
        nlocal_particles = nlocal_particles + local_particles%n_el(ikind)
     ENDDO
 
@@ -630,7 +618,6 @@ END IF
        END IF
     ENDIF
 
-!PRINT *, "THERMO%POT_LIST ALLOCATED = ", ALLOCATED(thermo%pot_list)
 
 IF (ALLOCATED(thermo%pot_list)) THEN
 !TEST: store the forces that we need
@@ -649,11 +636,6 @@ IF (ALLOCATED(thermo%pot_list)) THEN
                   forces_intra_aoi(1, count_idx) = particle_set(aoi)%f(1)
                   forces_intra_aoi(2, count_idx) = particle_set(aoi)%f(2)
                   forces_intra_aoi(3, count_idx) = particle_set(aoi)%f(3)
-!print *, "TEST_NEEDED_FORCES"!, particle_set(aoi)%f(:) 
-!WRITE(*,'(3f15.9)')(particle_set(aoi)%f(j),j=1,3) 
-!print *, "STORED"
-!WRITE(*,'(3f15.9)')(forces_intra_aoi(j,count_idx),j=1,3) 
-!print *, "forces_intra_aoi", count_idx, forces_intra_aoi(:, count_idx)         
               END DO
            END IF
        END DO
@@ -663,14 +645,6 @@ IF (ALLOCATED(thermo%pot_list)) THEN
     CALL fist_env_set(fist_env=fist_env, intra_forces=forces_intra_aoi)
 
 END IF
-
-!print *, "forces_intra_aoi", forces_intra_aoi
-
-!CALL fist_env_get(fist_env=fist_env, intra_forces=intra_forces)
-
-!print *, "GET_FORCES_FROM_ENV", intra_forces
-
-!WRITE(*,'(3f15.9)')((particle_set(i)%f(j),j=1,3), i = 1, SIZE(particle_set))
 
 IF(iw>0)THEN
 WRITE(iw,'(A)')" FIST:: TOSTORE"
@@ -705,14 +679,6 @@ END IF
     ! add up all the potential energies
     thermo%pot = pot_nonbond + pot_bond + pot_bend + pot_torsion + pot_opbend + &
          pot_imptors + pot_urey_bradley + pot_manybody + pot_shell
-
-!print *, "TOTAL_ENERGY_TO_COMPARE", pot_bond + pot_bend + pot_torsion + pot_opbend + &
-!              pot_imptors + pot_urey_bradley + pot_manybody + pot_shell   
-
-!print *, "LJ contribution", pot_nonbond
-!print *, "TOTAL_ENERGY_NEW_POT_LIST",  SUM(thermo%pot_list) 
-
-!print *, "thermo%pot", thermo%pot
 
     CALL mp_sum(thermo%pot, para_env%group)
     IF(shell_present)THEN

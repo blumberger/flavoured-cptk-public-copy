@@ -133,9 +133,10 @@ CONTAINS
          r_val=MDtimestep)
      sh_env%deltat = MDtimestep !> MD time step
 
-     ! COMMENT_SG: mol and mat would need to be looked into carefully to see if
+     ! COMMENT: mol and mat would need to be looked into carefully to see if
      ! they make sense for norbitals != 1 (namenly, degeneracy would probably
-     ! not work with the current implementation).
+     ! not work with the current CODE).
+
      mol = nadiab ! CHANGE_AC !> number of adiabatic states considered
      mat = norbitals*nadiab !> Size of the vectorial space where the wavefunctions are projected
      sh_env%natom = natom ! total number of atoms for a given force eval
@@ -150,11 +151,6 @@ CONTAINS
      sh_env%diabatic_nace_tp = 0.0_dp
  
      ALLOCATE(sh_env%velocities_tp(3, natom))
-     !> the following arrays are allocated in adiabaticity
-     !ALLOCATE(sh_env%C_t(mat,mat))
-     !ALLOCATE(sh_env%C_tp(mat,mat))
-     !ALLOCATE(sh_env%E_t(mat))
-     !ALLOCATE(sh_env%E_tp(mat))
      ALLOCATE(sh_env%H_t(mat,mat))
      ALLOCATE(sh_env%H_tp(mat,mat))
      !> wavefunction in the diabatic basis
@@ -192,7 +188,6 @@ CONTAINS
      sh_env%active_system_info = active_system_info
      sh_env%ext_pres = ext_pres
  
-
      sh_env%do_deco = .FALSE.
      decoherence_section => section_vals_get_subs_vals(adiab_section,"DECOHERENCE")
      CALL section_vals_val_get(decoherence_section,"DECOHERENCE_CORRECTIONS",c_val=deco_keyword)
@@ -226,35 +221,6 @@ CONTAINS
          CALL section_vals_list_get(wf_restart_section,"_DEFAULT_KEYWORD_",list=listdiabcoeff) !Read them in the input files
          CALL read_listdiabcoeff(listdiabcoeff, norbitals, nadiab, ctin=sh_env%readcoeff) !Transform them in the complex ctin
      end if
-
-
-!    !> create the list of active molecules if not present in DECOMP and the
-!    !array of active atoms: ext_pres, which is use for kinetic energy
-!    !calculation of the active subsystem.
-!    if (PRESENT(my_mol_index)) then
-!       ALLOCATE(sh_env%index_active_mols(mol))
-!       sh_env%index_active_mols = my_mol_index
-!    else if (.NOT. PRESENT(my_mol_index)) then 
-!        !no need to allocate section_vals_val_get does that for us
-!        CALL section_vals_val_get(adiab_section,"INDEX_ACTIVE_MOLS",&
-!                i_vals=sh_env%index_active_mols)
-!    end if
-!    print *, "FOB_SH| INDEX ACTIVE MOLS:", sh_env%index_active_mols
-!    CALL create_ext_press_list(molecule_kind_set, local_molecules, molecule_set, natom, &
-!                                      sh_env%index_active_mols, sh_env%ext_pres, & 
-!                                   sh_env%active_system_info, full_system_info=sh_env%full_system_info)
-    !> sh_env%ext_pres will be overwritten in AOM case becuase active molecules
-    !may still have inactive atoms (this feature is used for further speed-up)
-
-    !sh_env%total_active_atoms = COUNT(sh_env%ext_pres)
-    !print *, "FOB_SH| EXT PRESS:", sh_env%ext_pres
-    !print *, "TOT ACTIVE ATOMS", COUNT(sh_env%ext_pres)
-
-    !print *, "active sys info", sh_env%active_system_info(1, :)
-    !print *, "active sys info", sh_env%active_system_info(2, :)
-
-    !print *, "full sys info", sh_env%full_system_info(1, :)
-    !print *, "full sys info", sh_env%full_system_info(2, :)
 
     ! Tell the program if you want a multi-state Hamiltonian: meaning an
     ! Hamiltonian like the CT one, where the number of states is different from
@@ -314,9 +280,6 @@ CONTAINS
                 i_val=ninteractions)
            CALL section_vals_list_get(frozen_coupling_section,"_DEFAULT_KEYWORD_",list=frz_couplings_list) !Read list tresp from input
            CALL read_list_frz_couplings(ninteractions, frz_couplings_list, sh_env%frz_coup_connectivity, sh_env%frz_couplings) 
-!print *, "frz_couplings", sh_env%frz_coup_connectivity(:,1)
-!print *, "frz_couplings", sh_env%frz_coup_connectivity(:,2)
-!print *, "sh_env%frz_couplings", sh_env%frz_couplings
         ELSE
            CALL section_vals_val_get(frozen_coupling_section,"FIRST_OFF_DIAGONALS_VAL",&
              r_val=sh_env%first_off_d_Hab)
@@ -356,9 +319,6 @@ CONTAINS
         !c = nadiab*sh_env%atoms_per_site !> Numbers of active atoms per mol 
         allocate(sh_env%crds(3,COUNT(sh_env%ext_pres),3))  !> crds active atoms
         ALLOCATE(sh_env%NN(mat, mat))
-        !COMMENT_SG: COUNT(sh_env%ext_pres) is the total number of active atoms,
-        !note that I did not use mat*active_atoms_per_mol to be more general for
-        !multi-phase
         ALLOCATE(sh_env%grad_tresp(3,mat, COUNT(sh_env%ext_pres)))
 !TEST
         !ALLOCATE(sh_env%test_grad_tresp(3,mat, mat, COUNT(sh_env%ext_pres)))
@@ -372,8 +332,11 @@ CONTAINS
   END SUBROUTINE create_sh_env
 
 ! *****************************************************************************
-!> \brief This allocates aom_env variables. One could in principle put these
-!          variables in a separate derive type structure
+!> \brief This allocates aom_env variables for a Multi-phase Hamiltonian. 
+!          One could in principle put these
+!          variables in a separate derive type structure instead of sh_env
+!  \Note this subroutine will NOT work for orb !=1 (namenly multiple orbitals
+!        per molecule) 
 !> \author  SG 
 !> \date XX/XX/21
 ! *****************************************************************************
@@ -461,24 +424,19 @@ CONTAINS
      CALL section_vals_val_get(coupling_section,"PPI_S_S_FILE_NAME",&
              c_val=file_name_s_ppi_S_S)
 
-     !!! XXXX THE FOLLOWING TWO SHOULD BE PHASE SPECIFIC
      !> Scaling factor Hab = scaling*Sab_bar
      CALL section_vals_val_get(coupling_section,"SCALING_FACTOR_DONOR",&
              r_val=sh_env%scaling_donor)
      CALL section_vals_val_get(coupling_section,"SCALING_FACTOR_ACCEPTOR",&
              r_val=sh_env%scaling_acceptor)
           
-     !> cbar factor : Sab = cbar*Sab_bar is not used for multi-phase
-     !CALL section_vals_val_get(coupling_section,"CBAR",&
-     !        r_val=sh_env%cbar)
-
      !CALL section_vals_val_get(optimization_section,"RK_PROPAGATION", c_val=prop_wf_keyword) 
      !!> Multiple time step calculation of aom gradient
      !CALL section_vals_val_get(coupling_section,"MULTIPLE_TIME_STEP",&
      !        i_val=sh_env%multiple_time_step)
      
      ! passing N_DONOR_ATOMS and N_ACCEPTOR_ATOMS is not strictly useful since
-     ! this info is alreadu in full_system_info or active_system_info 
+     ! this info is already in full_system_info or active_system_info 
      CALL section_vals_val_get(ct_block,"N_DONOR_ATOMS",&
               i_val=atoms_per_donor) 
      CALL section_vals_val_get(ct_block,"N_ACCEPTOR_ATOMS",&
@@ -536,64 +494,10 @@ CONTAINS
 
      !!> crds is an AOM arrays (xyz, atoms, tm-t-tp) the third dimension
      !!indicates what time the coordinates refer to
-     allocate(sh_env%crds(3,act_atoms,3))
+     !allocate(sh_env%crds(3,act_atoms,3))
      ALLOCATE(sh_env%NN(SIZE(sh_env%index_active_mols), SIZE(sh_env%index_active_mols)))
      allocate(sh_env%siteenergies(3,mat))  !COMMENT_SG: First dimension is not usefull
      sh_env%siteenergies = 0.0_dp
-
-  
-     !mol = nadiab ! CHANGE_AC
-     !sh_env%atoms_per_site = aom_atoms ! CHANGE_AC
-     !c = nadiab*aom_atoms !> Numbers of active atoms
-
-     !ALLOCATE(sh_env%elements(aom_atoms))
-     !ALLOCATE(sh_env%connlist1(4,aom_atoms))
-     !ALLOCATE(sh_env%pcoeffs(aom_atoms,norbitals))
-     !ALLOCATE(sh_env%scoeffs(aom_atoms))
-     !allocate(sh_env%pcoeffsrun(sh_env%atoms_per_site,mat,3)) !pcoeffsrun exists because the p-coefficients
-     !                                          !need to be renormalised for each structure
-     !!first column is now atomic number of atom (e.g. 6 for carbon)
-     !!Naming convention: At = A(t), Atp = A(t+1), Atm = A(t-1), etc
-     !allocate(sh_env%At(4,sh_env%atoms_per_site))
-     !allocate(sh_env%Atp(4,sh_env%atoms_per_site))
-     !allocate(sh_env%Atm(4,sh_env%atoms_per_site))
-     !allocate(sh_env%Bt(4,sh_env%atoms_per_site))
-     !allocate(sh_env%Btp(4,sh_env%atoms_per_site))
-     !allocate(sh_env%Btm(4,sh_env%atoms_per_site))
-     !ALLOCATE(sh_env%nacv(3,mat, mat*aom_atoms))
-     !!ALLOCATE(sh_env%nacv(3,mat, act_atoms)) !degeneracy is not considered
-     !ALLOCATE(sh_env%rm_t(3, natom))
-     !ALLOCATE(sh_env%rm_tm(3, natom))
-     !ALLOCATE(sh_env%Stt(mat,mat))
-     !ALLOCATE(sh_env%Stptp(mat,mat))
-     !if (prop_wf_keyword .ne. "DIABATIC_RK_FAST") then
-     !!> in case DIABATIC_RK_FAST diabatic nace are never calculated, neither in
-     !!> the
-     !!> propagate_wf nor in the adiabatic nace calculation for the hopping
-     !!> probability
-     !!> so that all the Sttp and co matrices are also not used, no point in
-     !!> allocate them
-     !   print *, "FOB-SH: ALLOCATION OF S MATRICES"
-     !   ALLOCATE(sh_env%Sttp(mat,mat))
-     !   ALLOCATE(sh_env%Stpt(mat,mat))
-     !   ALLOCATE(sh_env%Stmt(mat,mat))
-     !   ALLOCATE(sh_env%Sttm(mat,mat))
-     !   ALLOCATE(sh_env%Stmtm(mat,mat))
-     !end if
-
-
-     !sh_env%At = 0.0_dp
-     !sh_env%Atp = 0.0_dp
-     !sh_env%Atm = 0.0_dp
-     !sh_env%Bt  = 0.0_dp
-     !sh_env%Btp = 0.0_dp
-     !sh_env%Btm = 0.0_dp
-     !sh_env%nacv = 0.0_dp
-     !!> these arrays are data for the diabatic nacv calculation
-     !!> they help efficiency by telling the program which atoms are connected
-     !!> and thus which pairs to carry out the calculation for
-     !sh_env%aneighbour = 0
-     !sh_env%bneighbour = 0
 
      ! OZ: add extra arguments...
      CALL build_s_tables(file_name_s_psigma, file_name_s_ppi,&
@@ -601,24 +505,6 @@ CONTAINS
                          file_name_s_psigma_S_S, file_name_s_ppi_S_S)
      
      !> READ THE AOM COEFFICIENT DONOR
-     ! SG: The loop over norbitals is an attempt to make the code work in case
-     ! of degenerate orbitals per site (NB: in general throughout the code the
-     ! degeneracy is untested and NOT well implemented (since Jacob first version))
-
-! XXXX DEGENERACY IS NOT IMPLEMENTED AT ALL
-
-!     ALLOCATE(sh_env%pcoeffs_d(atoms_per_donor,norbitals))
-!     ALLOCATE(sh_env%scoeffs_d(atoms_per_donor))
-!     do i=1,atoms_per_donor
-!          do j=1,norbitals
-!                sh_env%pcoeffs_d(i,j) = pcoefftot_d(i) ! assume the degenerate states are all the same orbital
-!          end do
-!          sh_env%scoeffs_d(i) = scoefftot_d(i) ! assume never degenerate  
-!     end do
-! print *, "sh_env%pcoeffs_d", sh_env%pcoeffs_d
-! print *, "sh_env%scoeffs_d", sh_env%scoeffs_d
-
-
      !> CONSTRUCT THE CONNLIST 
      ! SG: strange way to proceed to get the connectivity of one molecule (which
      ! is then assumed to be the same for all molecules) 
@@ -634,7 +520,7 @@ CONTAINS
      ALLOCATE(sh_env%connlist1_d(4,atoms_per_donor))
 
      ! SG: this line again assume same number of atoms for each molecule and it
-     ! assumes all molecules have the same connlist1 connlist2
+     ! assumes all molecules have the same connlist1 connlist2 for agiven phase
      ALLOCATE(Atp_loc(4,atoms_per_donor)) !temp array
      Atp_loc(1,1:atoms_per_donor) = dble(ext_elements_d)
      Atp_loc(2:4,1:atoms_per_donor) = positions_tp(1:3,init_atom_mol_d:final_atom_mol_d)
@@ -642,16 +528,6 @@ CONTAINS
      !connectivities with and without considering the zeors
      call connect_list2(Atp_loc(2:4,:), sh_env%atomlist_d, sh_env%connlist1_d, sh_env%connlist2_d, sh_env%cutoff_connect)
      
-!print *, "Atp_loc(1,:)", Atp_loc(2,:)
-!do i=1,atoms_per_donor
-!print *, "sh_env%connlist1", sh_env%connlist1_d(:,i)
-!enddo
-!
-!print *, "--------"
-!do i=1,size(sh_env%atomlist_d)
-!print *, "sh_env%connlist2", sh_env%connlist2_d(:,i)
-!enddo
-
      ! coefficients donor phase
      ALLOCATE(sh_env%pcoeffs_d(atoms_per_donor))
      ALLOCATE (sh_env%scoeffs_d(atoms_per_donor))
@@ -666,26 +542,7 @@ CONTAINS
      DEALLOCATE(Atp_loc)
 
      !> READ THE AOM COEFFICIENT ACCEPTOR PHASE! 
-     ! SG: The loop over norbitals is an attempt to make the code work in case
-     ! of degenerate orbitals per site (NB: in general throughout the code the
-     ! degeneracy is untested and NOT well implemented (since Jacob first version))
-
-! XXXX DEGENERACY IS NOT IMPLEMENTED AT ALL
-!     ALLOCATE(sh_env%pcoeffs_a(atoms_per_acceptor,norbitals))
-!     ALLOCATE(sh_env%scoeffs_a(atoms_per_acceptor))
-!     do i=1,atoms_per_acceptor
-!          do j=1,norbitals
-!                sh_env%pcoeffs_a(i,j) = pcoefftot_a(i) ! assume the degenerate states are all the same orbital
-!          end do
-!          sh_env%scoeffs_a(i) = scoefftot_a(i) ! assume never degenerate  
-!     end do
-! print *, "sh_env%pcoeffs_a", sh_env%pcoeffs_a
-! print *, "sh_env%scoeffs_a", sh_env%scoeffs_a
-
      !> CONSTRUCT THE CONNLIST 
-     ! SG: strange way to proceed to get the connectivity of one molecule (which
-     ! is then assumed to be the same for all molecules) 
-     !we fill out the connlist arrays before calculating the nacv
      allocate(submask(atoms_per_acceptor))   !temp array
      submask =.NOT.((scoefftot_a.eq.0).AND.(pcoefftot_a.eq.0)) !Only select atoms with orbitals
 
@@ -705,16 +562,6 @@ CONTAINS
      !connectivities with and without considering the zeors
      call connect_list2(Atp_loc(2:4,:), sh_env%atomlist_a, sh_env%connlist1_a, sh_env%connlist2_a, sh_env%cutoff_connect)
      
-!!print *, "Atp_loc(1,:)", Atp_loc(2,:)
-!do i=1,atoms_per_acceptor
-!print *, "sh_env%connlist1", sh_env%connlist1_a(:,i)
-!enddo
-!
-!print *, "--------"
-!do i=1,size(sh_env%atomlist_a)
-!print *, "sh_env%connlist2", sh_env%connlist2_a(:,i)
-!enddo
- 
      ! coefficients acceptor phase
      ALLOCATE(sh_env%pcoeffs_a(atoms_per_acceptor))
      ALLOCATE (sh_env%scoeffs_a(atoms_per_acceptor))
@@ -736,7 +583,7 @@ CONTAINS
 ! *****************************************************************************
 !> \brief This allocates aom_env variables. One could in principle put these
 !          variables in a separate derive type structure
-!> \author  SG 
+!> \author Edited SG from JS implementation
 !> \date 02/02/20
 ! *****************************************************************************
   SUBROUTINE set_aom_env(nadiab,  norbitals, natom, &
@@ -954,14 +801,6 @@ CONTAINS
      !output: sh_env%connlist1, sh_env%connlist2
      call connect_list2(Atp_loc(2:4,:), sh_env%atomlist, sh_env%connlist1, sh_env%connlist2, sh_env%cutoff_connect)
      
-
-!do i=1,aom_atoms
-!print *, "sh_env%connlist1", sh_env%connlist1(:,i)
-!enddo
-!
-!do i=1,size(sh_env%atomlist)
-!print *, "sh_env%connlist2", sh_env%connlist2(:,i)
-!enddo
 
      DEALLOCATE(atomlist_mask) 
      DEALLOCATE(submask) 

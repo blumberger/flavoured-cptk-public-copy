@@ -159,9 +159,6 @@ END TYPE adiab_nace_env_type
                                                                !only if MTS=1
      integer, dimension(:,:), POINTER         :: connlist1, connlist2, & ! AOM neighbouring
                                                  bneighbour, aneighbour
-                       !> bneighbour, aneighbour arrays are data for the diabatic nacv calculation
-                       !> they help efficiency by telling the program which atoms are connected
-                       !> and thus which pairs to carry out the calculation for
      REAL(KIND=dp), DIMENSION(:,:), POINTER   :: pcoeffs ! aom coeffs for single phase H
      REAL(KIND=dp), DIMENSION(:), POINTER     :: scoeffs ! aom coeffs for single phase H
      REAL(KIND = dp)                          :: scaling, cbar, minao !For AOM calculations
