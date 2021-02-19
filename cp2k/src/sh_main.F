@@ -104,10 +104,10 @@ MODULE sh_main
                                              calc_coms_and_nlist,             &
                                              calc_tresp_coup,                 &
                                              !calc_tresp_coup_test,                 &
-                                             calcforces_smart_grad_multip,    &
                                              add_coulomb_energy_to_CT,        &
                                              calc_frozen_H,                   &
                                              calcforces_smart_grad,           &
+                                             calcforces_smart_grad_multip,    &
                                              !calcforces_smart_grad_test,           &
                                              calcforces_frozenH,              &
                                              diab_to_adiab,                   & 
@@ -528,11 +528,12 @@ print *, "ACTIVE STATE", active_state
             !NOTE: we do not use convert_nacv here as the scaling
             ! is directly done inside the routine
             CALL calcforces_smart_grad_multip(adiab_section, instate=active_state, C=sh_env%C_tp, &
-                                        Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
+                                        Fin=diagonal_F,  &
                                         ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
                                         orb=orb, my_mol_index=sh_env%index_active_mols, &
                                         scaling_C_donor=sh_env%scaling_donor, scaling_C_acceptor=sh_env%scaling_acceptor, &
                                         nacv_dphase=sh_env%nacv_dphase, nacv_aphase=sh_env%nacv_aphase, &
+                                        forces_adiab=sh_env%forces_adiab, &
                                         frozen_c=sh_env%freeze_multip_forces )
             !frozen Hamiltonian case and multi-phase (dimension of H larger than
             !number of active mols)
@@ -1020,11 +1021,12 @@ print *, "ACTIVE STATE", active_state
      ELSE IF (sh_env%multiphase_couplings_keyword) THEN
          IF (sh_env%multistate) THEN
             CALL calcforces_smart_grad_multip(adiab_section, instate=sh_env%active_state, C=sh_env%C_tp, &
-                                        Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
+                                        Fin=diagonal_F, &
                                         ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
                                         orb=orb, my_mol_index=sh_env%index_active_mols, &
                                         scaling_C_donor=sh_env%scaling_donor, scaling_C_acceptor=sh_env%scaling_acceptor, &
                                         nacv_dphase=sh_env%nacv_dphase, nacv_aphase=sh_env%nacv_aphase, &
+                                        forces_adiab=sh_env%forces_adiab, &
                                         frozen_c=sh_env%freeze_multip_forces )
 
 
@@ -1035,11 +1037,12 @@ print *, "ACTIVE STATE", active_state
             IF (sh_env%attempt_hop) THEN
 print *, "NE_STATE_FORCES"
                       CALL calcforces_smart_grad_multip(adiab_section, instate=sh_env%new_state, C=sh_env%C_tp, &
-                                        Fin=diagonal_F, forces_adiab=sh_env%forces_adiab_new, &
+                                        Fin=diagonal_F,  &
                                         ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
                                         orb=orb, my_mol_index=sh_env%index_active_mols, &
                                         scaling_C_donor=sh_env%scaling_donor, scaling_C_acceptor=sh_env%scaling_acceptor, &
                                         nacv_dphase=sh_env%nacv_dphase, nacv_aphase=sh_env%nacv_aphase, &
+                                        forces_adiab=sh_env%forces_adiab_new, &
                                         frozen_c=sh_env%freeze_multip_forces )
                       !CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp),C=sh_env%C_tp, state=sh_env%new_state, Fin=diagonal_F, &
                       !            forces_adiab=sh_env%forces_adiab_new)
