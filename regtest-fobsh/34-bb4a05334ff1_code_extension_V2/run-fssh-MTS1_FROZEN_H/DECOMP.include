@@ -1,6 +1,0 @@
-
-           &ENERGY_DECOMP
-              INDEX_MOL_DECOMP 2  4  12  13  14  15  23  25
-              NUM_ACTIVE_ATOMS 144
-           &END ENERGY_DECOMP
-                
