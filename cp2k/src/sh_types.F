@@ -137,6 +137,19 @@ END TYPE adiab_nace_env_type
 !> \edited 02/02/20
 !***************************************************************************************
    TYPE sh_env_type
+!> AOM arrays specific for donor acceptor MULTIPHASE
+     REAL(KIND=dp), DIMENSION(:), POINTER     :: pcoeffs_d, pcoeffs_a
+     REAL(KIND=dp), DIMENSION(:), POINTER     :: scoeffs_d, scoeffs_a
+     INTEGER, DIMENSION(:), POINTER           :: atomlist_d, atomlist_a !List atoms with orbitals
+     integer, dimension(:,:), POINTER         :: connlist1_d, connlist2_d, & ! AOM connectivities of individual mols
+                                                 connlist1_a, connlist2_a
+     integer, dimension(:), ALLOCATABLE       :: ext_elements_d, ext_elements_a ! atomic number
+     !integer, dimension(:,:), POINTER         :: bneighbour_d, aneighbour_d
+     !integer, dimension(:,:), POINTER         :: bneighbour_a, aneighbour_a
+     REAL(KIND=dp), DIMENSION(:,:,:), POINTER :: nacv_dphase, nacv_aphase   ! off-diagonal gradient of aom Hamilton.
+     REAL(KIND = dp)                          :: scaling_donor, scaling_acceptor
+     LOGICAL                                  :: freeze_multip_forces
+
 !> AOM arrays
      REAL(KIND = dp), DIMENSION(:,:), POINTER :: rm_t,&        ! position step min 1
                                                  rm_tm       ! position step min 2
@@ -146,14 +159,16 @@ END TYPE adiab_nace_env_type
                                                                !only if MTS=1
      integer, dimension(:,:), POINTER         :: connlist1, connlist2, & ! AOM neighbouring
                                                  bneighbour, aneighbour
-     REAL(KIND=dp), DIMENSION(:,:), POINTER   :: pcoeffs ! aom coeffs
-     REAL(KIND=dp), DIMENSION(:), POINTER     :: scoeffs
+     REAL(KIND=dp), DIMENSION(:,:), POINTER   :: pcoeffs ! aom coeffs for single phase H
+     REAL(KIND=dp), DIMENSION(:), POINTER     :: scoeffs ! aom coeffs for single phase H
      REAL(KIND = dp)                          :: scaling, cbar, minao !For AOM calculations
      !> Calculate at each timestep
-     REAL(KIND=dp), dimension(:,:,:), POINTER :: pcoeffsrun
-     REAL(KIND=dp), dimension(:,:), POINTER   :: At, Atm, Atp, Bt, Btm, & 
+     REAL(KIND=dp), dimension(:,:,:), POINTER :: pcoeffsrun ! normalized AOM coefficients
+     REAL(KIND=dp), dimension(:,:), POINTER   :: At, Atm, Atp, Bt, Btm, &
+                                                 !A and B are donor and acceptor coordinates at different times  
                                                  Btp, siteenergies
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER :: nacv! off-diagonal gradient of aom Hamilton.
+     !REAL(KIND=dp), DIMENSION(:,:,:,:), POINTER :: nacv_tot! off-diagonal gradient of aom Hamilton.
      REAL(KIND=dp), dimension(:,:), POINTER   :: Stt, Stmt, Sttm, Stmtm, &
                                                  Stptp, Sttp, Stpt
      !> multiple time step
@@ -170,9 +185,10 @@ END TYPE adiab_nace_env_type
      LOGICAL                                  ::  Gaussian_charges
 
 !> BORDERLINE used for AOM and some other couplings mainly TRESP
-     LOGICAL, DIMENSION(:), POINTER           :: ext_pres
+     LOGICAL, DIMENSION(:), POINTER           :: ext_pres !T or F array 
+                                                          !indicating active atoms
      REAL(KIND=dp), dimension(:,:,:), POINTER :: crds !crds active atoms in COM reference frames
-     INTEGER, DIMENSION(:,:), POINTER         :: NN   !neighbrouring list
+     INTEGER, DIMENSION(:,:), POINTER         :: NN   !intermolacular neighbrouring list
      integer                                  :: atoms_per_site !Number of atoms per site
 
 !> FROZEN_COUPLINGS section 
@@ -185,6 +201,7 @@ END TYPE adiab_nace_env_type
 !> Couplings section possibilities
      LOGICAL                                  :: aom_couplings_keyword, frozen_couplings_keyword 
      LOGICAL                                  :: tresp_couplings_keyword 
+     LOGICAL                                  :: multiphase_couplings_keyword 
  
      INTEGER, DIMENSION(:,:), ALLOCATABLE     :: full_system_info  
      INTEGER, DIMENSION(:,:), ALLOCATABLE     :: active_system_info  
@@ -204,7 +221,7 @@ END TYPE adiab_nace_env_type
      REAL(KIND = dp), DIMENSION(:,:), POINTER :: forces_adiab, &     
                                                  forces_adiab_new
 !> index active molecules
-!     INTEGER, DIMENSION(:), ALLOCATABLE           :: index_active_mols
+     INTEGER, DIMENSION(:), ALLOCATABLE       :: index_active_mols
 
 !> Use to store the present info in the future timestep
      REAL(KIND = dp), DIMENSION(:,:), POINTER     :: velocities_tp ! velocities step

@@ -1,0 +1,803 @@
+LET'S START. 
+First Adiabatic State =        1
+  
+   i = 1, time =                0.100 (fs)
+Final state   =        1
+  
+  
+   i = 2, time =                0.200 (fs)
+Final state   =        1
+  
+  
+   i = 3, time =                0.300 (fs)
+Final state   =        1
+  
+  
+   i = 4, time =                0.400 (fs)
+Final state   =        1
+  
+  
+   i = 5, time =                0.500 (fs)
+Final state   =        1
+  
+  
+   i = 6, time =                0.600 (fs)
+Final state   =        1
+  
+  
+   i = 7, time =                0.700 (fs)
+Final state   =        1
+  
+  
+   i = 8, time =                0.800 (fs)
+Final state   =        1
+  
+  
+   i = 9, time =                0.900 (fs)
+Final state   =        1
+  
+  
+   i = 10, time =                1.000 (fs)
+Final state   =        1
+  
+  
+   i = 11, time =                1.100 (fs)
+Final state   =        1
+  
+  
+   i = 12, time =                1.200 (fs)
+Final state   =        1
+  
+  
+   i = 13, time =                1.300 (fs)
+Final state   =        1
+  
+  
+   i = 14, time =                1.400 (fs)
+Final state   =        1
+  
+  
+   i = 15, time =                1.500 (fs)
+Final state   =        1
+  
+  
+   i = 16, time =                1.600 (fs)
+Final state   =        1
+  
+  
+   i = 17, time =                1.700 (fs)
+Final state   =        1
+  
+  
+   i = 18, time =                1.800 (fs)
+Final state   =        1
+  
+  
+   i = 19, time =                1.900 (fs)
+Final state   =        1
+  
+  
+   i = 20, time =                2.000 (fs)
+Final state   =        1
+  
+  
+   i = 21, time =                2.100 (fs)
+Final state   =        1
+  
+  
+   i = 22, time =                2.200 (fs)
+Final state   =        1
+  
+  
+   i = 23, time =                2.300 (fs)
+Final state   =        1
+  
+  
+   i = 24, time =                2.400 (fs)
+Final state   =        1
+  
+  
+   i = 25, time =                2.500 (fs)
+Final state   =        1
+  
+  
+   i = 26, time =                2.600 (fs)
+Final state   =        1
+  
+  
+   i = 27, time =                2.700 (fs)
+Final state   =        1
+  
+  
+   i = 28, time =                2.800 (fs)
+Final state   =        1
+  
+  
+   i = 29, time =                2.900 (fs)
+Final state   =        1
+  
+  
+   i = 30, time =                3.000 (fs)
+Final state   =        1
+  
+  
+   i = 31, time =                3.100 (fs)
+Final state   =        1
+  
+  
+   i = 32, time =                3.200 (fs)
+Final state   =        1
+  
+  
+   i = 33, time =                3.300 (fs)
+Final state   =        1
+  
+  
+   i = 34, time =                3.400 (fs)
+Final state   =        1
+  
+  
+   i = 35, time =                3.500 (fs)
+Final state   =        1
+  
+  
+   i = 36, time =                3.600 (fs)
+Final state   =        1
+  
+  
+   i = 37, time =                3.700 (fs)
+Final state   =        1
+  
+  
+   i = 38, time =                3.800 (fs)
+Final state   =        1
+  
+  
+   i = 39, time =                3.900 (fs)
+Final state   =        1
+  
+  
+   i = 40, time =                4.000 (fs)
+Final state   =        1
+  
+  
+   i = 41, time =                4.100 (fs)
+Final state   =        1
+  
+  
+   i = 42, time =                4.200 (fs)
+Final state   =        1
+  
+  
+   i = 43, time =                4.300 (fs)
+Final state   =        1
+  
+  
+   i = 44, time =                4.400 (fs)
+Final state   =        1
+  
+  
+   i = 45, time =                4.500 (fs)
+Final state   =        1
+  
+  
+   i = 46, time =                4.600 (fs)
+Final state   =        1
+  
+  
+   i = 47, time =                4.700 (fs)
+Final state   =        1
+  
+  
+   i = 48, time =                4.800 (fs)
+Final state   =        1
+  
+  
+   i = 49, time =                4.900 (fs)
+Final state   =        1
+  
+  
+   i = 50, time =                5.000 (fs)
+Final state   =        1
+  
+  
+   i = 51, time =                5.100 (fs)
+Final state   =        1
+  
+  
+   i = 52, time =                5.200 (fs)
+Final state   =        1
+  
+  
+   i = 53, time =                5.300 (fs)
+Final state   =        1
+  
+  
+   i = 54, time =                5.400 (fs)
+Final state   =        1
+  
+  
+   i = 55, time =                5.500 (fs)
+Final state   =        1
+  
+  
+   i = 56, time =                5.600 (fs)
+Final state   =        1
+  
+  
+   i = 57, time =                5.700 (fs)
+Final state   =        1
+  
+  
+   i = 58, time =                5.800 (fs)
+Final state   =        1
+  
+  
+   i = 59, time =                5.900 (fs)
+Final state   =        1
+  
+  
+   i = 60, time =                6.000 (fs)
+Final state   =        1
+  
+  
+   i = 61, time =                6.100 (fs)
+Final state   =        1
+  
+  
+   i = 62, time =                6.200 (fs)
+Final state   =        1
+  
+  
+   i = 63, time =                6.300 (fs)
+Final state   =        1
+  
+  
+   i = 64, time =                6.400 (fs)
+Final state   =        1
+  
+  
+   i = 65, time =                6.500 (fs)
+Final state   =        1
+  
+  
+   i = 66, time =                6.600 (fs)
+Final state   =        1
+  
+  
+   i = 67, time =                6.700 (fs)
+Final state   =        1
+  
+  
+   i = 68, time =                6.800 (fs)
+Final state   =        1
+  
+  
+   i = 69, time =                6.900 (fs)
+Final state   =        1
+  
+  
+   i = 70, time =                7.000 (fs)
+Final state   =        1
+  
+  
+   i = 71, time =                7.100 (fs)
+Final state   =        1
+  
+  
+   i = 72, time =                7.200 (fs)
+Final state   =        1
+  
+  
+   i = 73, time =                7.300 (fs)
+Final state   =        1
+  
+  
+   i = 74, time =                7.400 (fs)
+Final state   =        1
+  
+  
+   i = 75, time =                7.500 (fs)
+Final state   =        1
+  
+  
+   i = 76, time =                7.600 (fs)
+Final state   =        1
+  
+  
+   i = 77, time =                7.700 (fs)
+Final state   =        1
+  
+  
+   i = 78, time =                7.800 (fs)
+Final state   =        1
+  
+  
+   i = 79, time =                7.900 (fs)
+Final state   =        1
+  
+  
+   i = 80, time =                8.000 (fs)
+Final state   =        1
+  
+  
+   i = 81, time =                8.100 (fs)
+Final state   =        1
+  
+  
+   i = 82, time =                8.200 (fs)
+Final state   =        1
+  
+  
+   i = 83, time =                8.300 (fs)
+Final state   =        1
+  
+  
+   i = 84, time =                8.400 (fs)
+Final state   =        1
+  
+  
+   i = 85, time =                8.500 (fs)
+Final state   =        1
+  
+  
+   i = 86, time =                8.600 (fs)
+Final state   =        1
+  
+  
+   i = 87, time =                8.700 (fs)
+Final state   =        1
+  
+  
+   i = 88, time =                8.800 (fs)
+Final state   =        1
+  
+  
+   i = 89, time =                8.900 (fs)
+Final state   =        1
+  
+  
+   i = 90, time =                9.000 (fs)
+Final state   =        1
+  
+  
+   i = 91, time =                9.100 (fs)
+Final state   =        1
+  
+  
+   i = 92, time =                9.200 (fs)
+Final state   =        1
+  
+  
+   i = 93, time =                9.300 (fs)
+Final state   =        1
+  
+  
+   i = 94, time =                9.400 (fs)
+Final state   =        1
+  
+  
+   i = 95, time =                9.500 (fs)
+Final state   =        1
+  
+  
+   i = 96, time =                9.600 (fs)
+Final state   =        1
+  
+  
+   i = 97, time =                9.700 (fs)
+Final state   =        1
+  
+  
+   i = 98, time =                9.800 (fs)
+Final state   =        1
+  
+  
+   i = 99, time =                9.900 (fs)
+Final state   =        1
+  
+  
+   i = 100, time =               10.000 (fs)
+Final state   =        1
+  
+  
+   i = 101, time =               10.100 (fs)
+Final state   =        1
+  
+  
+   i = 102, time =               10.200 (fs)
+Final state   =        1
+  
+  
+   i = 103, time =               10.300 (fs)
+Final state   =        1
+  
+  
+   i = 104, time =               10.400 (fs)
+Final state   =        1
+  
+  
+   i = 105, time =               10.500 (fs)
+Final state   =        1
+  
+  
+   i = 106, time =               10.600 (fs)
+Final state   =        1
+  
+  
+   i = 107, time =               10.700 (fs)
+Final state   =        1
+  
+  
+   i = 108, time =               10.800 (fs)
+Final state   =        1
+  
+  
+   i = 109, time =               10.900 (fs)
+Final state   =        1
+  
+  
+   i = 110, time =               11.000 (fs)
+Final state   =        1
+  
+  
+   i = 111, time =               11.100 (fs)
+Final state   =        1
+  
+  
+   i = 112, time =               11.200 (fs)
+Final state   =        1
+  
+  
+   i = 113, time =               11.300 (fs)
+Final state   =        1
+  
+  
+   i = 114, time =               11.400 (fs)
+Final state   =        1
+  
+  
+   i = 115, time =               11.500 (fs)
+Final state   =        1
+  
+  
+   i = 116, time =               11.600 (fs)
+Final state   =        1
+  
+  
+   i = 117, time =               11.700 (fs)
+Final state   =        1
+  
+  
+   i = 118, time =               11.800 (fs)
+Final state   =        1
+  
+  
+   i = 119, time =               11.900 (fs)
+Final state   =        1
+  
+  
+   i = 120, time =               12.000 (fs)
+Final state   =        1
+  
+  
+   i = 121, time =               12.100 (fs)
+Final state   =        1
+  
+  
+   i = 122, time =               12.200 (fs)
+Final state   =        2
+  
+  
+   i = 123, time =               12.300 (fs)
+Final state   =        2
+  
+  
+   i = 124, time =               12.400 (fs)
+Final state   =        2
+  
+  
+   i = 125, time =               12.500 (fs)
+Final state   =        2
+  
+  
+   i = 126, time =               12.600 (fs)
+Final state   =        2
+  
+  
+   i = 127, time =               12.700 (fs)
+Final state   =        2
+  
+  
+   i = 128, time =               12.800 (fs)
+Final state   =        2
+  
+  
+   i = 129, time =               12.900 (fs)
+Final state   =        2
+  
+  
+   i = 130, time =               13.000 (fs)
+Final state   =        2
+  
+  
+   i = 131, time =               13.100 (fs)
+Final state   =        2
+  
+  
+   i = 132, time =               13.200 (fs)
+Final state   =        2
+  
+  
+   i = 133, time =               13.300 (fs)
+Final state   =        2
+  
+  
+   i = 134, time =               13.400 (fs)
+Final state   =        2
+  
+  
+   i = 135, time =               13.500 (fs)
+Final state   =        2
+  
+  
+   i = 136, time =               13.600 (fs)
+Final state   =        2
+  
+  
+   i = 137, time =               13.700 (fs)
+Final state   =        2
+  
+  
+   i = 138, time =               13.800 (fs)
+Final state   =        2
+  
+  
+   i = 139, time =               13.900 (fs)
+Final state   =        2
+  
+  
+   i = 140, time =               14.000 (fs)
+Final state   =        1
+  
+  
+   i = 141, time =               14.100 (fs)
+Final state   =        1
+  
+  
+   i = 142, time =               14.200 (fs)
+Final state   =        1
+  
+  
+   i = 143, time =               14.300 (fs)
+Final state   =        1
+  
+  
+   i = 144, time =               14.400 (fs)
+Final state   =        1
+  
+  
+   i = 145, time =               14.500 (fs)
+Final state   =        1
+  
+  
+   i = 146, time =               14.600 (fs)
+Final state   =        1
+  
+  
+   i = 147, time =               14.700 (fs)
+Final state   =        1
+  
+  
+   i = 148, time =               14.800 (fs)
+Final state   =        1
+  
+  
+   i = 149, time =               14.900 (fs)
+Final state   =        1
+  
+  
+   i = 150, time =               15.000 (fs)
+Final state   =        1
+  
+  
+   i = 151, time =               15.100 (fs)
+Final state   =        1
+  
+  
+   i = 152, time =               15.200 (fs)
+Final state   =        1
+  
+  
+   i = 153, time =               15.300 (fs)
+Final state   =        1
+  
+  
+   i = 154, time =               15.400 (fs)
+Final state   =        1
+  
+  
+   i = 155, time =               15.500 (fs)
+Final state   =        1
+  
+  
+   i = 156, time =               15.600 (fs)
+Final state   =        1
+  
+  
+   i = 157, time =               15.700 (fs)
+Final state   =        1
+  
+  
+   i = 158, time =               15.800 (fs)
+Final state   =        1
+  
+  
+   i = 159, time =               15.900 (fs)
+Final state   =        1
+  
+  
+   i = 160, time =               16.000 (fs)
+Final state   =        1
+  
+  
+   i = 161, time =               16.100 (fs)
+Final state   =        1
+  
+  
+   i = 162, time =               16.200 (fs)
+Final state   =        1
+  
+  
+   i = 163, time =               16.300 (fs)
+Final state   =        1
+  
+  
+   i = 164, time =               16.400 (fs)
+Final state   =        1
+  
+  
+   i = 165, time =               16.500 (fs)
+Final state   =        1
+  
+  
+   i = 166, time =               16.600 (fs)
+Final state   =        1
+  
+  
+   i = 167, time =               16.700 (fs)
+Final state   =        1
+  
+  
+   i = 168, time =               16.800 (fs)
+Final state   =        1
+  
+  
+   i = 169, time =               16.900 (fs)
+Final state   =        1
+  
+  
+   i = 170, time =               17.000 (fs)
+Final state   =        1
+  
+  
+   i = 171, time =               17.100 (fs)
+Final state   =        1
+  
+  
+   i = 172, time =               17.200 (fs)
+Final state   =        1
+  
+  
+   i = 173, time =               17.300 (fs)
+Final state   =        1
+  
+  
+   i = 174, time =               17.400 (fs)
+Final state   =        1
+  
+  
+   i = 175, time =               17.500 (fs)
+Final state   =        1
+  
+  
+   i = 176, time =               17.600 (fs)
+Final state   =        1
+  
+  
+   i = 177, time =               17.700 (fs)
+Final state   =        1
+  
+  
+   i = 178, time =               17.800 (fs)
+Final state   =        1
+  
+  
+   i = 179, time =               17.900 (fs)
+Final state   =        1
+  
+  
+   i = 180, time =               18.000 (fs)
+Final state   =        1
+  
+  
+   i = 181, time =               18.100 (fs)
+Final state   =        1
+  
+  
+   i = 182, time =               18.200 (fs)
+Final state   =        1
+  
+  
+   i = 183, time =               18.300 (fs)
+Final state   =        1
+  
+  
+   i = 184, time =               18.400 (fs)
+Final state   =        1
+  
+  
+   i = 185, time =               18.500 (fs)
+Final state   =        1
+  
+  
+   i = 186, time =               18.600 (fs)
+Final state   =        1
+  
+  
+   i = 187, time =               18.700 (fs)
+Final state   =        1
+  
+  
+   i = 188, time =               18.800 (fs)
+Final state   =        1
+  
+  
+   i = 189, time =               18.900 (fs)
+Final state   =        1
+  
+  
+   i = 190, time =               19.000 (fs)
+Final state   =        1
+  
+  
+   i = 191, time =               19.100 (fs)
+Final state   =        1
+  
+  
+   i = 192, time =               19.200 (fs)
+Final state   =        1
+  
+  
+   i = 193, time =               19.300 (fs)
+Final state   =        1
+  
+  
+   i = 194, time =               19.400 (fs)
+Final state   =        1
+  
+  
+   i = 195, time =               19.500 (fs)
+Final state   =        1
+  
+  
+   i = 196, time =               19.600 (fs)
+Final state   =        1
+  
+  
+   i = 197, time =               19.700 (fs)
+Final state   =        1
+  
+  
+   i = 198, time =               19.800 (fs)
+Final state   =        1
+  
+  
+   i = 199, time =               19.900 (fs)
+Final state   =        1
+  
+  
+   i = 200, time =               20.000 (fs)
+Final state   =        1
+  
+  

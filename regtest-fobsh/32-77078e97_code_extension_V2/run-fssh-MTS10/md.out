@@ -1,0 +1,2 @@
+ERROR on proc 0: Cannot open input script lammps_nvt_nve.in (../lammps.cpp:329)
+Last command: (unknown)

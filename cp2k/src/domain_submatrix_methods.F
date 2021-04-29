@@ -1386,7 +1386,7 @@ CONTAINS
       handle, iBlock, icol, idomain, iNode, irow_subm, ldesc, myNode, &
       nblkcols_tot, nblkrows_tot, ndomains, ndomains2, nNodes, &
       recv_size2_total, recv_size_total, row, rowsize, send_size2_total, &
-      send_size_total, smroff, start_data, unit_nr
+      send_size_total, smroff, start_data, unit_nr, idomain_tmp
     INTEGER, ALLOCATABLE, DIMENSION(:) :: offset2_block, offset_block, &
       recv_data2, recv_offset2_cpu, recv_offset_cpu, recv_size2_cpu, &
       recv_size_cpu, send_data2, send_offset2_cpu, send_offset_cpu, &
@@ -1467,13 +1467,15 @@ CONTAINS
              ENDIF
 
              transp=.FALSE.
+
+             idomain_tmp = idomain
              CALL cp_dbcsr_get_stored_coordinates(distr_pattern,&
-                     row, idomain, dest_node)
+                     row, idomain_tmp, dest_node)
              
              send_descriptor(1,dest_node+1)=send_descriptor(1,dest_node+1)+1
              send_descriptor(2,dest_node+1)=send_descriptor(2,dest_node+1)+&
-                submatrix(idomain)%size_brow(irow_subm)*&
-                submatrix(idomain)%size_bcol(1)
+                submatrix(idomain_tmp)%size_brow(irow_subm)*&
+                submatrix(idomain_tmp)%size_bcol(1)
 
           ENDDO ! loop over submatrix blocks
 
@@ -1551,8 +1553,9 @@ CONTAINS
              colsize = submatrix(idomain)%size_bcol(1)
 
              transp=.FALSE.
+             idomain_tmp = idomain
              CALL cp_dbcsr_get_stored_coordinates(distr_pattern,&
-                     row, idomain, dest_node)
+                     row, idomain_tmp, dest_node)
             
              ! place the data appropriately
              col_offset=0
@@ -1561,7 +1564,7 @@ CONTAINS
                            offset_block(dest_node+1)+&
                            col_offset
                 send_data(start_data+1:start_data+rowsize)=&
-                   submatrix(idomain)%mdata(smroff+1:smroff+rowsize,icol)
+                   submatrix(idomain_tmp)%mdata(smroff+1:smroff+rowsize,icol)
                 col_offset=col_offset+rowsize
              ENDDO
              offset_block(dest_node+1)=offset_block(dest_node+1)+&

@@ -116,7 +116,9 @@ CONTAINS
 
  !CHANGE MATT
    CALL keyword_create(keyword, name="DO_DECOMP",&
-                       description="Number of decompositions for the energy and forces.",&
+                       description="Whether to apply addition-subtraction scheme."//&
+                       "This keyword is part of FIST method. When True, each"//&
+                       "energy term in the given FORCE_EVAL is decomposed in molecular contributions." ,&
                        usage="NUM_DECOMP {logical}",&
                        default_l_val=.FALSE., lone_keyword_l_val=.False.)
    CALL section_add_keyword(section,keyword)
@@ -190,7 +192,7 @@ CONTAINS
     NULLIFY(section, keyword)
     CALL section_create(section,name="ENERGY_DECOMP",&
          description="Section controlling the decomposition of energies for"//&
-         " individual molecules in fist.",&
+         " individual molecules in FIST and addition-subtraction scheme",&
          n_keywords=2, n_subsections=0, repeats=.FALSE.)
 
     CALL keyword_create(keyword, name="NUM_ACTIVE_ATOMS", &
@@ -201,8 +203,8 @@ CONTAINS
     CALL keyword_release(keyword)
 
     CALL keyword_create(keyword, name="INDEX_MOL_DECOMP",&
-         description='Specify the index of the molecules we want to get the'//&
-                     ' intramolecular energy of.', &
+         description='Specify the index -ordering referred to xyz (or topology) file-'//&
+                     ' of the molecules part of the active region', &
          usage="INDEX_MOL_DECOMP <INTEGER> .. <INTEGER>", &
          type_of_var=integer_t,  n_var=-1, default_i_vals=(/1/))
     CALL section_add_keyword(section,keyword)

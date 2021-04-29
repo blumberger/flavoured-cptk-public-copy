@@ -1,0 +1,9 @@
+
+#File necessary to have inside this folder: p2k_input.xsl  create_docs.sh saxon-he-10.3.jar
+# java must be available e.g. https://linuxize.com/post/install-java-on-ubuntu-18-04/
+
+### create the html using Matt script:
+   rm -r Docs 
+  ./create_docs.sh /path_to_cp2k/cp2k.sopt
+
+### this will generate Docs folder where the CP2K_Documentation.html can be found, then open it in your favourite browser

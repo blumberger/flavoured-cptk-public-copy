@@ -1,0 +1,133 @@
+
+   &COLLECTIVE
+           COLVAR 1
+           TARGET [angstrom] 0.0
+           &RESTRAINT
+                   K 0.005
+           &END RESTRAINT
+           INTERMOLECULAR
+   &END COLLECTIVE
+
+
+   
+   &COLLECTIVE
+           COLVAR 2
+           TARGET [angstrom] 0.0
+           &RESTRAINT
+                   K 0.005
+           &END RESTRAINT
+           INTERMOLECULAR
+   &END COLLECTIVE
+
+
+   
+   &COLLECTIVE
+           COLVAR 3
+           TARGET [angstrom] 0.0
+           &RESTRAINT
+                   K 0.005
+           &END RESTRAINT
+           INTERMOLECULAR
+   &END COLLECTIVE
+
+
+   
+   &COLLECTIVE
+           COLVAR 4
+           TARGET [angstrom] 0.0
+           &RESTRAINT
+                   K 0.005
+           &END RESTRAINT
+           INTERMOLECULAR
+   &END COLLECTIVE
+
+
+   
+   &COLLECTIVE
+           COLVAR 5
+           TARGET [angstrom] 0.0
+           &RESTRAINT
+                   K 0.005
+           &END RESTRAINT
+           INTERMOLECULAR
+   &END COLLECTIVE
+
+
+   
+   &COLLECTIVE
+           COLVAR 6
+           TARGET [angstrom] 0.0
+           &RESTRAINT
+                   K 0.005
+           &END RESTRAINT
+           INTERMOLECULAR
+   &END COLLECTIVE
+
+
+   
+   &COLLECTIVE
+           COLVAR 7
+           TARGET [angstrom] 0.0
+           &RESTRAINT
+                   K 0.005
+           &END RESTRAINT
+           INTERMOLECULAR
+   &END COLLECTIVE
+
+
+   
+   &COLLECTIVE
+           COLVAR 8
+           TARGET [angstrom] 0.0
+           &RESTRAINT
+                   K 0.005
+           &END RESTRAINT
+           INTERMOLECULAR
+   &END COLLECTIVE
+
+
+   
+   &COLLECTIVE
+           COLVAR 9
+           TARGET [angstrom] 0.0
+           &RESTRAINT
+                   K 0.005
+           &END RESTRAINT
+           INTERMOLECULAR
+   &END COLLECTIVE
+
+
+   
+   &COLLECTIVE
+           COLVAR 10
+           TARGET [angstrom] 0.0
+           &RESTRAINT
+                   K 0.005
+           &END RESTRAINT
+           INTERMOLECULAR
+   &END COLLECTIVE
+
+
+   
+   &COLLECTIVE
+           COLVAR 11
+           TARGET [angstrom] 0.0
+           &RESTRAINT
+                   K 0.005
+           &END RESTRAINT
+           INTERMOLECULAR
+   &END COLLECTIVE
+
+
+   
+   &COLLECTIVE
+           COLVAR 12
+           TARGET [angstrom] 0.0
+           &RESTRAINT
+                   K 0.005
+           &END RESTRAINT
+           INTERMOLECULAR
+   &END COLLECTIVE
+
+
+   

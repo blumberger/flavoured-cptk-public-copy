@@ -18,7 +18,7 @@
 ! \brief below a very OLD comment of Jacob (who was the PhD first to write the code) 
 !  the code has hugely changed since then:
 !
-!>   jacob: OLD comment 
+!>   jacob: OLD comment (still somewhat relevant) 
 !    propagate_namd_all_steps_full_degen
 !
 !    This program is designed to propagate a single excess electronic charge
@@ -50,6 +50,7 @@ MODULE sh_main
      USE aom_utils,                    ONLY: makeX,                     &
                                              calc_hop_nacv_aom,         &
                                              adiabaticity,              &
+                                             calc_multiphase_Xmatrix_elements, &
                                              calc_aom_Xmatrix_elements_first_step, & 
                                              calc_aom_Xmatrix_elements, &
                                              make_adiabX,               &
@@ -106,6 +107,7 @@ MODULE sh_main
                                              add_coulomb_energy_to_CT,        &
                                              calc_frozen_H,                   &
                                              calcforces_smart_grad,           &
+                                             calcforces_smart_grad_multip,    &
                                              !calcforces_smart_grad_test,           &
                                              calcforces_frozenH,              &
                                              diab_to_adiab,                   & 
@@ -204,7 +206,8 @@ CONTAINS
      TYPE(section_vals_type), POINTER               :: coupling_section
      CHARACTER(LEN=default_string_length)           :: coupling_keyword
      REAL(KIND=dp)                                  :: convert_nacv
-     !INTEGER                                        :: i
+     INTEGER                                        :: i
+     COMPLEX(KIND=dp), dimension(:), allocatable    :: ctotal
 
      NULLIFY(positions_com_tp, velocities_com_tp)
      NULLIFY(logger)
@@ -279,7 +282,7 @@ CONTAINS
          enddo
 
          !> CALCULATE THE CENTER OF MASS AND CONSTRUCT NEIGHBOURS LIST
-         CALL calc_coms_and_nlist(mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, &
+         CALL calc_coms_and_nlist(sh_env%cutoff_sites, orb, crds=positions_com_tp, &
                                     active_system_info=sh_env%active_system_info, NN=sh_env%NN)
 
          ! Allocate neighbouring list just at the first step as Jacob suggested 
@@ -297,33 +300,36 @@ CONTAINS
          CALL calc_aom_Xmatrix_elements_first_step(sh_env, sh_env%atoms_per_site, mol, sh_env%dR, sh_env%do_random, sh_env%cbar, &
                           sh_env%scaling, PC_allrvecs, orb, sh_env%minao)
 
-         !> CONVERT NACV AND CALCULATE EIGENPROPERTIES 
-         !> THESE ASSOCIATIONS ARE NEEDED FOR THE NACV CALC
          sh_env%nacv = sh_env%cbar*sh_env%nacv
+         !> convert nacv using the true overlap 
          !-----------------------------------------------------------------------------
+     !> FROZEN COUPLINGS 
      ELSE IF (sh_env%frozen_couplings_keyword) THEN 
-         !> FROZEN COUPLINGS 
          CALL calc_frozen_H(sh_env, energies_tp, orb,positions_com_tp=positions_com_tp)
+
+     !> MULTI-PHASE COUPLINGS 
+     ELSE IF (sh_env%multiphase_couplings_keyword) THEN 
+         
+         !> CALCULATE THE CENTER OF MASS AND CONSTRUCT NEIGHBOURS LIST
+         !this is needed to calculate the NN list (XXX not yet used)
+         CALL calc_coms_and_nlist(sh_env%cutoff_sites, orb, crds=positions_com_tp, &
+                                    active_system_info=sh_env%active_system_info, NN=sh_env%NN)
+
+         CALL calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, positions_com_tp)
 
      ELSE IF (sh_env%tresp_couplings_keyword) THEN 
          !> TRESP COUPLINGS
-         do coord=1,3
-            sh_env%crds(coord,:,1)   = 0.0D0 !time tm not used
-            sh_env%crds(coord,:,2)   = 0.0D0 !time t not used
-            sh_env%crds(coord,:,3)   = PACK(positions_com_tp(coord,:), sh_env%ext_pres)
-         enddo
          
          !> CALCULATE THE CENTER OF MASS AND CONSTRUCT NEIGHBOURS LIST
          !this is needed to calculate the NN list
-         CALL calc_coms_and_nlist(mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, &
+         CALL calc_coms_and_nlist(sh_env%cutoff_sites, orb, crds=positions_com_tp, &
                                     active_system_info=sh_env%active_system_info, NN=sh_env%NN)
 
          CALL calc_tresp_coup(sh_env, energies_tp, orb, NN=sh_env%NN, positions_com_tp=positions_com_tp, &
                              active_system_info=sh_env%active_system_info, tresp_charges=sh_env%tresp_charges)
-
-!TO REMOVE
-!         CALL calc_tresp_coup_test(sh_env, energies_tp, orb, NN=sh_env%NN, positions_com_tp=positions_com_tp, &
-!                             active_system_info=sh_env%active_system_info, tresp_charges=sh_env%tresp_charges)
+!TEST
+         !CALL calc_tresp_coup_test(sh_env, energies_tp, orb, NN=sh_env%NN, positions_com_tp=positions_com_tp, &
+         !                    active_system_info=sh_env%active_system_info, tresp_charges=sh_env%tresp_charges)
      ELSE
          !> In a possible extension one should add here 
          CPABORT("Another coupling method to constrcut H should be chosen")
@@ -419,7 +425,7 @@ CONTAINS
              ALLOCATE(sh_print_env%pop_init(SIZE(sh_env%C_tp(:,active_state))))
              !all pop is initialized in the active state, this is a hack to
              !correct the printing
-             sh_print_env%initrandom      = 0.0D0 ! COMMENT_SG: hack for regtests
+             sh_print_env%initrandom      = 0.0D0 ! COMMENT: hack for regtests
              sh_print_env%pop_init(:)      = 0.0D0
              sh_print_env%pop_init(active_state)  = 1.0D0
              CALL adiab_print_sh_info(sh_print_env, keyword = 'START')
@@ -450,7 +456,9 @@ CONTAINS
 
          allocate(adiab_c(mat)) 
          allocate(adiab_pop(mat))
+         allocate(ctotal(mat))
 
+print *, "ACTIVE STATE", active_state
          !> print info in the output only if we do not restart the file
          if (.NOT. sh_env%restart_key) then
              !NB: this subroutine is wasted computational work if adiab_pop is not
@@ -464,7 +472,13 @@ CONTAINS
                                   nadiab,norbitals,itimes,deltatMD, times)
              end if 
              CALL adiab_print_coeff(adiab_section, ctin,nadiab, norbitals,itimes, deltatMD, times)
-             CALL adiab_print_pop(adiab_section, abs(ctin),nadiab,norbitals,itimes,deltatMD, times)
+             !the name adiab_print_pop is misleading (adiab_print_pop refers to
+             !the diabatic population), for timestep > 0, the latter is printed
+             !from the propagation modules.
+             do i=1,mat
+                ctotal(i) = conjg(ctin(i))*ctin(i)
+             end do
+             CALL adiab_print_pop(adiab_section, abs(ctotal),nadiab,norbitals,itimes,deltatMD, times)
              CALL adiab_print_matrix_density(adiab_section, ctin, nadiab,norbitals,itimes, &
                                         deltatMD, times)
          end if
@@ -500,12 +514,36 @@ CONTAINS
             !number of active mols)
             CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=active_state, Fin=diagonal_F, &
                                   forces_adiab=sh_env%forces_adiab)
+
         ELSE 
             call calcforces_smart_grad(state=active_state, C=sh_env%C_tp, &
                                         Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                                         ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
                                         orb=orb, frozen_c=.TRUE.)
         END IF
+
+     ! MULTI-PHASE FORCES
+     ELSE IF (sh_env%multiphase_couplings_keyword) THEN
+         IF (sh_env%multistate) THEN
+
+            !NOTE: we do not use convert_nacv here as the scaling
+            ! is directly done inside the routine
+            CALL calcforces_smart_grad_multip(adiab_section, instate=active_state, C=sh_env%C_tp, &
+                                        Fin=diagonal_F,  &
+                                        ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
+                                        orb=orb, my_mol_index=sh_env%index_active_mols, &
+                                        scaling_C_donor=sh_env%scaling_donor, scaling_C_acceptor=sh_env%scaling_acceptor, &
+                                        nacv_dphase=sh_env%nacv_dphase, nacv_aphase=sh_env%nacv_aphase, &
+                                        forces_adiab=sh_env%forces_adiab, &
+                                        frozen_c=.FALSE. )
+            !frozen Hamiltonian case and multi-phase (dimension of H larger than
+            !number of active mols)
+            !TEMP XXXXXXXXXXXX
+            !CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=active_state, Fin=diagonal_F, &
+            !                         forces_adiab=sh_env%forces_adiab)
+         ELSE
+             CPABORT("MULTI-STATE MUST BE TRUE")
+         END IF
 
      ELSE IF (sh_env%tresp_couplings_keyword) THEN 
         !frozen Hamiltonian case
@@ -517,7 +555,7 @@ CONTAINS
                                         orb=orb, nacv=sh_env%grad_tresp)
       
 !!!TEST TO REMOVE
-!OPEN (UNIT = 21, FILE = "FORCES_formatted.dat")
+!OPEN (UNIT = 21, FILE = "FORCES_formatted.dat", position="append",action="write")
 !
 !do i=1,SIZE(sh_env%forces_adiab,2) !atoms
 !     write(21,*) "atom", i, sh_env%forces_adiab(:,i)
@@ -530,12 +568,14 @@ CONTAINS
 !                                        orb=orb, full_grad=sh_env%test_grad_tresp)
 !       
 !!!TEST TO REMOVE
-!OPEN (UNIT = 21, FILE = "FORCES_formatted_FULL.dat")
+!OPEN (UNIT = 27, FILE = "FORCES_formatted_FULL.dat", position="append",action="write")
 !
 !do i=1,SIZE(sh_env%forces_adiab,2) !atoms
-!     write(21,*) "atom", i, sh_env%forces_adiab(:,i)
+!     write(27,*) "atom", i, sh_env%forces_adiab(:,i)
 !end do
-!close (21) 
+!close (27) 
+
+
      ELSE
          !> In a possible extension one should add here 
          CPABORT("Another way to calculate adiabatic forces should be developed")
@@ -583,7 +623,7 @@ CONTAINS
     !> DEALLOCATE
     deallocate(ctin)
     deallocate(exact_forces)
-    deallocate(site_energies, couplings, adiab_c, adiab_pop)
+    deallocate(site_energies, couplings, adiab_c, adiab_pop, ctotal)
     DEALLOCATE(positions_com_tp)
     DEALLOCATE(velocities_com_tp)
 
@@ -630,7 +670,7 @@ CONTAINS
 
 !**********************************************************************************
 !> \brief  This construct the Hamiltonian, propagate the electronic equation of
-!motion and defines if a hop is attempted or not.
+!motion and defines if a hop is attempted or not, and calculates forces.
 !> authors AC and SG
 !> edited 02/02/20
 !**********************************************************************************
@@ -667,7 +707,7 @@ CONTAINS
      integer                                        :: mol,  mat, orb
      REAL(KIND=dp)                                  :: deltatMD, deltatE
      INTEGER, dimension(:), allocatable             :: class_forbidden_hop_tp
-     LOGICAL                                        :: do_nace_speedup
+     !LOGICAL                                        :: do_nace_speedup
      INTEGER                                        :: ELsteps   
      REAL(KIND=dp)                                  :: times 
      REAL(KIND=dp)                                  :: decohere_criterion
@@ -685,7 +725,7 @@ CONTAINS
      TYPE(cp_logger_type), POINTER                  :: logger
      INTEGER                                        :: unit_nr
      REAL(KIND=dp)                                  :: convert_nacv
-!     INTEGER                                        :: i, k
+     !INTEGER                                        :: i
      
      NULLIFY(logger)
      NULLIFY(optimization_section)
@@ -703,11 +743,6 @@ CONTAINS
      decoherence_section => section_vals_get_subs_vals(adiab_section,"DECOHERENCE")
      e_conservation_section => section_vals_get_subs_vals(adiab_section,"ENERGY_CONSERVATION")
      
-     !COMMENT SG: the following keyword could be removed since new nace are
-     !better
-     !> uses chunked nace (improved) subroutines as default 
-     CALL section_vals_val_get(optimization_section, "DO_SPEEDUP_NACE", l_val=do_nace_speedup)
-
      CALL section_vals_val_get(adiab_section,"ELECTRONIC_PARTIAL_STEP",&
                                i_val=ELsteps)
      !> Instantaneous decoherence related threshold criteria 
@@ -756,8 +791,8 @@ CONTAINS
          enddo
 
 
-         !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
-         CALL calc_coms_and_nlist(mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, &
+         !> CALCULATE THE CENTER OF MASS AND CONSTRUCT (INTERMOLECULAR) NEIGHBOURS LIST
+         CALL calc_coms_and_nlist(sh_env%cutoff_sites, orb, crds=positions_com_tp , &
                                     active_system_info=sh_env%active_system_info, NN=sh_env%NN)
 
          !> CALCULATE THE HAMILTONIAN, THE STTP MATRIX AND THE NACV
@@ -773,20 +808,24 @@ CONTAINS
          !sh_env%nacv = 0.0D0
          !print *, "NACV tp", sh_env%nacv(1,:,:)
          !-----------------------------------------------------------------------------
+     !> FROZEN COUPLINGS 
      ELSE IF (sh_env%frozen_couplings_keyword) THEN
-         !> FROZEN COUPLINGS 
          CALL calc_frozen_H(sh_env, energies_tp, orb,positions_com_tp=positions_com_tp)
 
-     ELSE IF (sh_env%tresp_couplings_keyword) THEN
-         !> TRESP COUPLINGS 
-         do coord=1,3
-            sh_env%crds(coord,:,1) = 0.0D0 !time tm is not used 
-            sh_env%crds(coord,:,2) = 0.0D0 !time t is not used
-            sh_env%crds(coord,:,3) = PACK(positions_com_tp(coord,:), sh_env%ext_pres)
-         enddo
+     !> MULTI-PHASE COUPLINGS 
+     ELSE IF (sh_env%multiphase_couplings_keyword) THEN 
 
          !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
-         CALL calc_coms_and_nlist(mol, sh_env%cutoff_sites, orb, crds=sh_env%crds, &
+         ! XXX the NN list is not yet employed for the speed-up
+         CALL calc_coms_and_nlist(sh_env%cutoff_sites, orb, crds=positions_com_tp, &
+                                    active_system_info=sh_env%active_system_info, NN=sh_env%NN)
+
+         CALL calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, positions_com_tp)
+
+         !> TRESP COUPLINGS 
+     ELSE IF (sh_env%tresp_couplings_keyword) THEN
+         !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
+         CALL calc_coms_and_nlist(sh_env%cutoff_sites, orb, crds=positions_com_tp, &
                                     active_system_info=sh_env%active_system_info, NN=sh_env%NN)
 
          CALL calc_tresp_coup(sh_env, energies_tp, orb, NN=sh_env%NN, positions_com_tp=positions_com_tp, &
@@ -839,19 +878,19 @@ CONTAINS
         end if
      end if
 
+     !> ADIABATIC NACE and REORDERING
      !> Calculate the overlap between C_tp and C_t, reorder state if required,
      !> calculate the adiabatic nace [and diabatic nace at (t)]
-     IF (do_nace_speedup) THEN
+     !IF (do_nace_speedup) THEN
         CALL calc_adiab_nace(sh_env, adiab_section)
-     ELSE
-        CALL calc_adiab_nace_old(sh_env, adiab_section)
-     END IF
+     !ELSE
+     !   CALL calc_adiab_nace_old(sh_env, adiab_section)
+     !END IF
 
-     
+     !> PROPAGATE THE ELECTRON FOR ONE MOLECULAR TIMESTEP
+     !>the CHARGE CARRIER WF is called sh_env%ctin
      IF (sh_env%aom_couplings_keyword) THEN
          !------------------  AOM section    ---------------------------------------------
-         !> PROPAGATE THE ELECTRON FOR ONE MOLECULAR TIMESTEP
-         !>the CHARGE CARRIER WF is called sh_env%ctin
          sh_env%HS_propagation = .FALSE.
          CALL section_vals_val_get(optimization_section,"RK_PROPAGATION", c_val=prop_wf_keyword)
          SELECT CASE(prop_wf_keyword)                                 
@@ -933,10 +972,10 @@ CONTAINS
      END IF 
 
 
+     !> CALCULATE THE FORCES ON THE ACTIVE STATE, WHATEVER THE RESULT OF THE SURFACE
+     !HOP ROUTINE IS. 
      IF (sh_env%aom_couplings_keyword) THEN
          !------------------  AOM section    --------------------------------------------------------
-         !CALCULATE THE FORCES IN THE ACTIVE STATE, WHATEVER THE RESULT OF THE SURFACE
-         !HOP ROUTINE IS. 
          convert_nacv = -sh_env%scaling/sh_env%cbar
          call calcforces_smart_grad(state=sh_env%active_state, C=sh_env%C_tp, &
                                Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
@@ -954,6 +993,8 @@ CONTAINS
          ! --------------------------------------------------------------------------------------------------
      ELSE IF (sh_env%frozen_couplings_keyword) THEN
          IF (sh_env%multistate) THEN
+            !frozen Hamiltonian case and multi-phase (dimension of H larger than
+            !number of active mols)
             CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=sh_env%active_state, Fin=diagonal_F, &
                                      forces_adiab=sh_env%forces_adiab)
             IF (sh_env%attempt_hop) THEN
@@ -972,6 +1013,38 @@ CONTAINS
                                     frozen_c=.TRUE.)
             ENDIF
          END IF
+     ! MULTI-PHASE FORCES
+     ELSE IF (sh_env%multiphase_couplings_keyword) THEN
+         IF (sh_env%multistate) THEN
+            CALL calcforces_smart_grad_multip(adiab_section, instate=sh_env%active_state, C=sh_env%C_tp, &
+                                        Fin=diagonal_F, &
+                                        ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
+                                        orb=orb, my_mol_index=sh_env%index_active_mols, &
+                                        scaling_C_donor=sh_env%scaling_donor, scaling_C_acceptor=sh_env%scaling_acceptor, &
+                                        nacv_dphase=sh_env%nacv_dphase, nacv_aphase=sh_env%nacv_aphase, &
+                                        forces_adiab=sh_env%forces_adiab, &
+                                        frozen_c=.FALSE. )
+
+
+            !frozen Hamiltonian case and multi-phase (dimension of H larger than
+            !number of active mols)
+            !CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=sh_env%active_state, Fin=diagonal_F, &
+            !                         forces_adiab=sh_env%forces_adiab)
+            IF (sh_env%attempt_hop) THEN
+                      CALL calcforces_smart_grad_multip(adiab_section, instate=sh_env%new_state, C=sh_env%C_tp, &
+                                        Fin=diagonal_F,  &
+                                        ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
+                                        orb=orb, my_mol_index=sh_env%index_active_mols, &
+                                        scaling_C_donor=sh_env%scaling_donor, scaling_C_acceptor=sh_env%scaling_acceptor, &
+                                        nacv_dphase=sh_env%nacv_dphase, nacv_aphase=sh_env%nacv_aphase, &
+                                        forces_adiab=sh_env%forces_adiab_new, &
+                                        frozen_c=.FALSE. )
+                      !CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp),C=sh_env%C_tp, state=sh_env%new_state, Fin=diagonal_F, &
+                      !            forces_adiab=sh_env%forces_adiab_new)
+            END IF
+         ELSE
+             CPABORT("MULTI-STATE MUST BE TRUE")
+         END IF
 
      ELSE IF (sh_env%tresp_couplings_keyword) THEN
         !CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=sh_env%active_state, Fin=diagonal_F, &
@@ -984,6 +1057,26 @@ CONTAINS
                                Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                                ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, orb=orb, &
                                         nacv=sh_env%grad_tresp)
+
+!!!TEST TO REMOVE
+!OPEN (UNIT = 21, FILE = "FORCES_formatted.dat", position="append",action="write")
+!
+!do i=1,SIZE(sh_env%forces_adiab,2) !atoms
+!     write(21,*) "atom", i, sh_env%forces_adiab(:,i)
+!end do
+!close (21) 
+!        call calcforces_smart_grad_test(state=sh_env%active_state, C=sh_env%C_tp, &
+!                                        Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
+!                                        ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
+!                                        orb=orb, full_grad=sh_env%test_grad_tresp)
+!       
+!!!TEST TO REMOVE
+!OPEN (UNIT = 27, FILE = "FORCES_formatted_FULL.dat", position="append",action="write")
+!
+!do i=1,SIZE(sh_env%forces_adiab,2) !atoms
+!     write(27,*) "atom", i, sh_env%forces_adiab(:,i)
+!end do
+!close (27) 
          IF (sh_env%attempt_hop) THEN
              call calcforces_smart_grad(state=sh_env%new_state, C=sh_env%C_tp, &
                                   Fin=diagonal_F, forces_adiab=sh_env%forces_adiab_new, &
@@ -997,7 +1090,7 @@ CONTAINS
      END IF
      
 
-     !> PRINT
+     !> PRINT STUFF 
      CALL adiab_print_hamiltonian(adiab_section, -AIMAG(sh_env%H_tp), nadiab,norbitals,itimes, deltatMD)
      CALL adiab_print_pseudo_hamiltonian(adiab_section, -AIMAG(sh_env%H_tp), nadiab,norbitals,itimes, deltatMD)
 

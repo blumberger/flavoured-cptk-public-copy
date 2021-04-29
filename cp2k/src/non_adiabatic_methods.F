@@ -9,7 +9,7 @@
 ! *****************************************************************************
 !> \brief Interface for the adiabatic force calculations
 !> \par History
-!> \authors AC and SG
+!> \authors AC [Edited SG]
 ! *****************************************************************************
 
 
@@ -96,7 +96,7 @@ CONTAINS
     TYPE(mixed_environment_type),  &
       POINTER                                :: mixed_env
     INTEGER, POINTER                         :: my_itimes
-    CHARACTER(LEN=default_string_length)     :: method_keyword
+    CHARACTER(LEN=default_string_length)     :: method_keyword !is actually adiab_keyword
     REAL(KIND=dp), INTENT(OUT)               :: final_energy
     TYPE(atomic_kind_list_type), POINTER     :: atomic_kinds
     TYPE(distribution_1d_type), POINTER      :: local_particles
@@ -126,7 +126,7 @@ CONTAINS
     LOGICAL                                  :: my_bo_keyword
     LOGICAL                                  :: my_test_keyword
 
-    !COMMENT_SG: sh_env is already part of mix_env structure but it is also an
+    !COMMENT: sh_env is already part of mix_env structure but it is also an
     !enviroment on his own (a local structure), that is why below you will find a line where
     !mixed_env%sh_env=sh_env, namely sh_env is passed back to mixed_env%sh_env
     !this is probably not a very good way of doing things and it might lead to
@@ -138,7 +138,6 @@ CONTAINS
     !whereas sh_env is a local structure it exists only at the time step it is created.
 
 
-    !natom = SIZE(global_forces(1)%forces,2)
     !> WARNING: we assume all force evals have the same number of atoms, this is
     !probably always the case
     natom = SIZE(mixed_env%F(1,:,1))
@@ -156,15 +155,8 @@ CONTAINS
        my_test_keyword = .TRUE. 
     ENDIF
 
-    !> Find the method to calculate the off-diagonal elements
-    !CALL section_vals_val_get(adiab_section,"METHOD_COUPLING",c_val=coupling_keyword)
     CALL get_subsys_map_index(mapping_section, natom, 1, nforce_eval, map_index)
-    !> Choose the method to calculate the off-diagonal elements
 
-    !> COMMENT_SG: this bit is not general becuase it assumes that all the
-    !following arrays have the same number of atoms per site and orbitals
-    !per site 
-    !> Get the coupling section and all the information 
     CALL section_vals_val_get(adiab_section,"NUMBER_DIABATIC_STATES",&
          i_val=nadiab)
     CALL section_vals_val_get(adiab_section,"NUMBER_ORBITALS",&
@@ -173,11 +165,11 @@ CONTAINS
     itimes => my_itimes
     DO iparticle = 1, natom
        jparticle = map_index(iparticle)
-       !SG: the positions that enter the following subroutines are the position
+       !the positions that enter the following subroutines are the position
        !updated after the first half VV. Meaning thy refer to time t+dt 
        positions_tp(:,jparticle)   = particles_mix%els(jparticle)%r(:)
        IF (my_itimes.eq.0) THEN
-            !SG: This velocities are half-time velocities and are stored here
+            !This velocities are half-time velocities and are stored here
             !just to estimated the positions of the atoms at t-2dt
             !(sh_env%rm_tm) in case of AOM and to estimate adiab nacv_first_ts
             !(deprecated)
@@ -188,7 +180,7 @@ CONTAINS
     IF (my_itimes.eq.0) THEN
        !> This 0th step is executed at the very beginning of the simulation, when
        !qs_mol_dyn_low subroutine calls force_env_calc_energy_force for the
-       !first time and this calls in turn the present subroutinbe
+       !first time and this calls in turn the present subroutine
    
        CALL create_sh_env(nadiab, norbitals, natom, &
                            positions_tp, adiab_section, & 
@@ -202,15 +194,15 @@ CONTAINS
                  local_particles, my_test_keyword, method_keyword, diagonal_F=mixed_env%F)
     ELSE
        !> Get the information for the previous timesteps
-       !!!!!!!!!!!!!!!!!!!!!!TO BE MODIFIED!!!!!!!!!!!!!!!!!!!!!!!!!
+       ! WARNING:
        !!! this is a dangerous step one should use an interface
-       !subroutine to do that!!!!!!!!!!!
+       !subroutine to do that!!!
        sh_env = mixed_env%sh_env            
        !> Velocities are taken directly from the integrator after the first half
        !of the VV. So in general during **electronic** propagation the only
        !available velocities are at t+dt/2 (half-time velocities). The reason is
-       !that in general they are never used for the **electronic** propagation.
-       !Except in the case of EFH. 
+       !that in general velocities are never used for the **electronic** propagation.
+       !Except in the case of EFH (never used for production run). 
        IF (sh_env%successful_hop) THEN
           sh_env%forces_adiab = sh_env%forces_adiab_new
           sh_env%futur_decohere = .TRUE.
@@ -239,9 +231,6 @@ CONTAINS
     !takes for each variable just as much as the memory it takes to allocate
     !the variable only once.
     mixed_env%sh_env=sh_env
-    !CASE DEFAULT
-    !    CPABORT("There is no method to calculate the coupling")
-    !END SELECT
 
 
     !> IMPORTANT : GIVE BACK THE FORCES TO FIST

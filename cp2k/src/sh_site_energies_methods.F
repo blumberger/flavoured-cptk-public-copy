@@ -214,7 +214,7 @@ SUBROUTINE multi_block_energies_forces(adiab_section,energies_1_mol_list, energi
    INTEGER, DIMENSION(:,:), ALLOCATABLE      :: intra_forces_info
    INTEGER, DIMENSION(:), ALLOCATABLE        :: first_ind, second_ind, exc_ind
    INTEGER                                   :: count_
-   INTEGER, DIMENSION(:), INTENT(IN)         :: my_mol_index !CHANGE SAM
+   INTEGER, DIMENSION(:), INTENT(IN)         :: my_mol_index !this is the decomp index
  
    NULLIFY(site_energy_section,ct_block, fe_block)
    NULLIFY( my_energies)
@@ -281,7 +281,7 @@ SUBROUTINE multi_block_energies_forces(adiab_section,energies_1_mol_list, energi
    !allocate and deallocate this big array at every step. NOTE that this array is
    !now never deallocated and just deallocated by the compiler at the very end.
    !One should probably write a subroutine that deallocate all allocatable just
-   !this at the very end of cp2k
+   !at the very end of cp2k
     if(my_itimes .eq. 0) then
        ALLOCATE(mixed_env%F(3,natom,nadiab))
     end if
@@ -496,7 +496,7 @@ END SUBROUTINE multi_block_energies_forces
 
 ! *****************************************************************************
 ! THE multi_block_energies_forces is more general so this subroutine is
-! DEPRECATED
+! DEPRECATED. It is kept below for testing purposes if necessary!
 !> \brief This subroutine does the addition and subtraction scheme for the CT
 !         states  
 !> \note This subroutine gives non-degenerate site_energies (degeneracy may be
@@ -857,7 +857,6 @@ END SUBROUTINE ct_block_energies_forces
               last_atom, aoi!, test
 
    NULLIFY( my_energies)
-!SAM COMMENT: MAYBE FIND A BETTER WAY TO ALLOCATE THIS
    ALLOCATE(my_energies(SIZE(energies_1_mol_list(1,:))))
   !> WARNING: here we assume that all force evals have the same number of atoms
   natom = SIZE(global_forces(1)%forces(:,:), 2)
