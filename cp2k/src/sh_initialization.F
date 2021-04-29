@@ -376,6 +376,9 @@ CONTAINS
      LOGICAL, DIMENSION(:), ALLOCATABLE             :: submask
      INTEGER                                        :: init_atom_mol_d, final_atom_mol_d, atoms_per_mol_d
      INTEGER                                        :: init_atom_mol_a, final_atom_mol_a, atoms_per_mol_a
+     CHARACTER(LEN=default_string_length)           :: STO_input_string
+     REAL(KIND=dp)                                  :: STO_rmin,STO_rmax,STO_dr
+     INTEGER                                        :: STO_debug
 
      NULLIFY(listcoeff)
      NULLIFY(optimization_section)
@@ -411,21 +414,33 @@ CONTAINS
      CALL section_vals_val_get(coupling_section,"RANDOM_DERIVATIVE", l_val=sh_env%do_random)
 
      !> Create the overlap look-up table for the AOM coupling calculation
-     CALL section_vals_val_get(coupling_section,"PSIGMA_FILE_NAME",&
-             c_val=file_name_s_psigma)
-     CALL section_vals_val_get(coupling_section,"PPI_FILE_NAME",&
-             c_val=file_name_s_ppi)
-     ! OZ: C-S and S-S
-     CALL section_vals_val_get(coupling_section,"PSIGMA_C_S_FILE_NAME",&
-             c_val=file_name_s_psigma_C_S)
-     CALL section_vals_val_get(coupling_section,"PPI_C_S_FILE_NAME",&
-             c_val=file_name_s_ppi_C_S)
-     CALL section_vals_val_get(coupling_section,"PSIGMA_S_S_FILE_NAME",&
-             c_val=file_name_s_psigma_S_S)
-     CALL section_vals_val_get(coupling_section,"PPI_S_S_FILE_NAME",&
-             c_val=file_name_s_ppi_S_S)
+     !CALL section_vals_val_get(coupling_section,"PSIGMA_FILE_NAME",&
+     !        c_val=file_name_s_psigma)
+     !CALL section_vals_val_get(coupling_section,"PPI_FILE_NAME",&
+     !        c_val=file_name_s_ppi)
+     !! OZ: C-S and S-S
+     !CALL section_vals_val_get(coupling_section,"PSIGMA_C_S_FILE_NAME",&
+     !        c_val=file_name_s_psigma_C_S)
+     !CALL section_vals_val_get(coupling_section,"PPI_C_S_FILE_NAME",&
+     !        c_val=file_name_s_ppi_C_S)
+     !CALL section_vals_val_get(coupling_section,"PSIGMA_S_S_FILE_NAME",&
+     !        c_val=file_name_s_psigma_S_S)
+     !CALL section_vals_val_get(coupling_section,"PPI_S_S_FILE_NAME",&
+     !        c_val=file_name_s_ppi_S_S)
 
-     !> Scaling factor Hab = scaling*Sab_bar
+     CALL section_vals_val_get(coupling_section,"STO_EXPONENTS",&
+             c_val=STO_input_string)
+     CALL section_vals_val_get(coupling_section,"STO_RMIN",&
+             r_val=STO_rmin)
+     CALL section_vals_val_get(coupling_section,"STO_RMAX",&
+             r_val=STO_rmax)
+     CALL section_vals_val_get(coupling_section,"STO_DR",&
+             r_val=STO_dr)
+     CALL section_vals_val_get(coupling_section,"STO_DEBUG",&
+             i_val=STO_debug)
+
+
+     !!> Scaling factor Hab = scaling*Sab_bar
      CALL section_vals_val_get(coupling_section,"SCALING_FACTOR_DONOR",&
              r_val=sh_env%scaling_donor)
      CALL section_vals_val_get(coupling_section,"SCALING_FACTOR_ACCEPTOR",&
@@ -500,6 +515,9 @@ CONTAINS
      allocate(sh_env%siteenergies(3,mat))  !COMMENT_SG: First dimension is not usefull
      sh_env%siteenergies = 0.0_dp
 
+     ! OZ: add extra arguments...
+     CALL STO_initialize_splines(STO_input_string,STO_rmin,STO_rmax,STO_dr,&
+                                 STO_debug)
      ! OZ: add extra arguments...
      !CALL build_s_tables(file_name_s_psigma, file_name_s_ppi,&
      !                    file_name_s_psigma_C_S, file_name_s_ppi_C_S,&
