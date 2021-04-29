@@ -501,9 +501,9 @@ CONTAINS
      sh_env%siteenergies = 0.0_dp
 
      ! OZ: add extra arguments...
-     CALL build_s_tables(file_name_s_psigma, file_name_s_ppi,&
-                         file_name_s_psigma_C_S, file_name_s_ppi_C_S,&
-                         file_name_s_psigma_S_S, file_name_s_ppi_S_S)
+     !CALL build_s_tables(file_name_s_psigma, file_name_s_ppi,&
+     !                    file_name_s_psigma_C_S, file_name_s_ppi_C_S,&
+     !                    file_name_s_psigma_S_S, file_name_s_ppi_S_S)
      
      !> READ THE AOM COEFFICIENT DONOR
      !> CONSTRUCT THE CONNLIST 

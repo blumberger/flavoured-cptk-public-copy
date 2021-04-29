@@ -835,12 +835,6 @@ CONTAINS
          usage="STO_DEBUG <value>",&
          default_i_val=0,    &
          type_of_var=integer_t)
-
-    CALL keyword_create(keyword, name="_DEFAULT_KEYWORD_",&
-         description="HOMO or LUMO preparametrized AOM coefficients in the format:"//&
-         "<p><tt>ATOMIC_KIND  LIST NO HOMOS HOMOP</tt></p>",&
-         repeats=.TRUE., usage="{{String} {Int} {Int} {Real} {Real}}",&
-         type_of_var=lchar_t)
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
