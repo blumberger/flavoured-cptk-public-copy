@@ -1,0 +1,68 @@
+PSF
+
+         1 !NTITLE
+
+
+        32 !NATOM
+         1   PERY      1     PERY         C1       CA    0.000000       12.0100           
+         2   PERY      1     PERY         C2       CA    0.000000       12.0100           
+         3   PERY      1     PERY         C3       CA    0.000000       12.0100           
+         4   PERY      1     PERY         C4       CA    0.000000       12.0100           
+         5   PERY      1     PERY         C5       CA    0.000000       12.0100           
+         6   PERY      1     PERY         C6       CA    0.000000       12.0100           
+         7   PERY      1     PERY         C7       CA    0.000000       12.0100           
+         8   PERY      1     PERY         C8       CA    0.000000       12.0100           
+         9   PERY      1     PERY         C9       CA    0.000000       12.0100           
+        10   PERY      1     PERY         C10      CA    0.000000       12.0100           
+        11   PERY      1     PERY         C11      CA    0.000000       12.0100           
+        12   PERY      1     PERY         C12      CA    0.000000       12.0100           
+        13   PERY      1     PERY         C13      CA    0.000000       12.0100           
+        14   PERY      1     PERY         C14      CA    0.000000       12.0100           
+        15   PERY      1     PERY         C15      CA    0.000000       12.0100           
+        16   PERY      1     PERY         C16      CA    0.000000       12.0100           
+        17   PERY      1     PERY         C17      CA    0.000000       12.0100           
+        18   PERY      1     PERY         C18      CA    0.000000       12.0100           
+        19   PERY      1     PERY         C19      CA    0.000000       12.0100           
+        20   PERY      1     PERY         C20      CA    0.000000       12.0100           
+        21   PERY      1     PERY         H1       HA    0.000000        1.0080           
+        22   PERY      1     PERY         H2       HA    0.000000        1.0080           
+        23   PERY      1     PERY         H3       HA    0.000000        1.0080           
+        24   PERY      1     PERY         H4       HA    0.000000        1.0080           
+        25   PERY      1     PERY         H5       HA    0.000000        1.0080           
+        26   PERY      1     PERY         H6       HA    0.000000        1.0080           
+        27   PERY      1     PERY         H7       HA    0.000000        1.0080           
+        28   PERY      1     PERY         H8       HA    0.000000        1.0080           
+        29   PERY      1     PERY         H9       HA    0.000000        1.0080           
+        30   PERY      1     PERY         H10      HA    0.000000        1.0080           
+        31   PERY      1     PERY         H11      HA    0.000000        1.0080           
+        32   PERY      1     PERY         H12      HA    0.000000        1.0080           
+
+        0 !NBOND: bonds
+
+        0 !NTHETA: angles
+
+        0 !NPHI: dihedrals
+
+        0 !NIMPHI: impropers
+
+         0 !NDON: donors
+
+
+         0 !NACC: acceptors
+
+
+         0 !NNB
+
+         0         0         0         0         0         0         0         0
+         0         0         0         0         0         0         0         0
+         0         0         0         0         0         0         0         0
+         0         0         0         0         0         0         0         0
+
+         1         0 !NGRP NST2
+         0         1         0
+
+
+         0         0 !NUMLP NUMLPH
+
+         0 !NCRTERM: cross-terms
+

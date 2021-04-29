@@ -1,0 +1,1005 @@
+Adiab. Energies (hartree);  nadiab =       3
+ i = 0, time =                0.000 (fs)
+   1         7.2352078046
+   2         7.3007488761
+   3         7.3644469617
+Adiab. Energies (hartree);  nadiab =       3
+ i = 1, time =                0.100 (fs)
+   1         7.3823327240
+   2         7.4478496088
+   3         7.5115897176
+Adiab. Energies (hartree);  nadiab =       3
+ i = 2, time =                0.200 (fs)
+   1         7.4910087958
+   2         7.5564682000
+   3         7.6202808786
+Adiab. Energies (hartree);  nadiab =       3
+ i = 3, time =                0.300 (fs)
+   1         7.5598886187
+   2         7.6254068689
+   3         7.6893081835
+Adiab. Energies (hartree);  nadiab =       3
+ i = 4, time =                0.400 (fs)
+   1         7.5883590492
+   2         7.6539213378
+   3         7.7178982142
+Adiab. Energies (hartree);  nadiab =       3
+ i = 5, time =                0.500 (fs)
+   1         7.5762438626
+   2         7.6418535968
+   3         7.7059055382
+Adiab. Energies (hartree);  nadiab =       3
+ i = 6, time =                0.600 (fs)
+   1         7.5239328520
+   2         7.5895948269
+   3         7.6537222183
+Adiab. Energies (hartree);  nadiab =       3
+ i = 7, time =                0.700 (fs)
+   1         7.4323607192
+   2         7.4980794818
+   3         7.5622825811
+Adiab. Energies (hartree);  nadiab =       3
+ i = 8, time =                0.800 (fs)
+   1         7.3029907159
+   2         7.3687702302
+   3         7.4330489902
+Adiab. Energies (hartree);  nadiab =       3
+ i = 9, time =                0.900 (fs)
+   1         7.1377916318
+   2         7.2036352138
+   3         7.2679892692
+Adiab. Energies (hartree);  nadiab =       3
+ i = 10, time =                1.000 (fs)
+   1         6.9392081198
+   2         7.0051184591
+   3         7.0695471595
+Adiab. Energies (hartree);  nadiab =       3
+ i = 11, time =                1.100 (fs)
+   1         6.7101242313
+   2         6.7761034485
+   3         6.8406059088
+Adiab. Energies (hartree);  nadiab =       3
+ i = 12, time =                1.200 (fs)
+   1         6.4538211789
+   2         6.5198709006
+   3         6.5844460551
+Adiab. Energies (hartree);  nadiab =       3
+ i = 13, time =                1.300 (fs)
+   1         6.1739298710
+   2         6.2400513122
+   3         6.3046979689
+Adiab. Energies (hartree);  nadiab =       3
+ i = 14, time =                1.400 (fs)
+   1         5.8743788936
+   2         5.9405729408
+   3         6.0052898318
+Adiab. Energies (hartree);  nadiab =       3
+ i = 15, time =                1.500 (fs)
+   1         5.5593390208
+   2         5.6256063110
+   3         5.6903921363
+Adiab. Energies (hartree);  nadiab =       3
+ i = 16, time =                1.600 (fs)
+   1         5.2331646758
+   2         5.2995056675
+   3         5.3643591322
+Adiab. Energies (hartree);  nadiab =       3
+ i = 17, time =                1.700 (fs)
+   1         4.9003334457
+   2         4.9667484791
+   3         5.0316683218
+Adiab. Energies (hartree);  nadiab =       3
+ i = 18, time =                1.800 (fs)
+   1         4.5653844903
+   2         4.6318738353
+   3         4.6968588485
+Adiab. Energies (hartree);  nadiab =       3
+ i = 19, time =                1.900 (fs)
+   1         4.2328567506
+   2         4.2994206413
+   3         4.3644696840
+Adiab. Energies (hartree);  nadiab =       3
+ i = 20, time =                2.000 (fs)
+   1         3.9072277250
+   2         3.9738663819
+   3         4.0389783848
+Adiab. Energies (hartree);  nadiab =       3
+ i = 21, time =                2.100 (fs)
+   1         3.5928534970
+   2         3.6595671377
+   3         3.7247411027
+Adiab. Energies (hartree);  nadiab =       3
+ i = 22, time =                2.200 (fs)
+   1         3.2939110290
+   2         3.3606998689
+   3         3.4259348640
+Adiab. Energies (hartree);  nadiab =       3
+ i = 23, time =                2.300 (fs)
+   1         3.0143434288
+   2         3.0812076753
+   3         3.1465028264
+Adiab. Energies (hartree);  nadiab =       3
+ i = 24, time =                2.400 (fs)
+   1         2.7578088235
+   2         2.8247486634
+   3         2.8901031438
+Adiab. Energies (hartree);  nadiab =       3
+ i = 25, time =                2.500 (fs)
+   1         2.5276331495
+   2         2.5946487344
+   3         2.6600617533
+Adiab. Energies (hartree);  nadiab =       3
+ i = 26, time =                2.600 (fs)
+   1         2.3267678247
+   2         2.3938592710
+   3         2.4593300996
+Adiab. Energies (hartree);  nadiab =       3
+ i = 27, time =                2.700 (fs)
+   1         2.1577527772
+   2         2.2249201000
+   3         2.2904479514
+Adiab. Energies (hartree);  nadiab =       3
+ i = 28, time =                2.800 (fs)
+   1         2.0226848368
+   2         2.0899279857
+   3         2.1555121157
+Adiab. Energies (hartree);  nadiab =       3
+ i = 29, time =                2.900 (fs)
+   1         1.9231931302
+   2         1.9905119602
+   3         2.0561516236
+Adiab. Energies (hartree);  nadiab =       3
+ i = 30, time =                3.000 (fs)
+   1         1.8604197510
+   2         1.9278140137
+   3         1.9935084592
+Adiab. Energies (hartree);  nadiab =       3
+ i = 31, time =                3.100 (fs)
+   1         1.8350075908
+   2         1.9024769284
+   3         1.9682253952
+Adiab. Energies (hartree);  nadiab =       3
+ i = 32, time =                3.200 (fs)
+   1         1.8470943799
+   2         1.9146383228
+   3         1.9804400386
+Adiab. Energies (hartree);  nadiab =       3
+ i = 33, time =                3.300 (fs)
+   1         1.8963138779
+   2         1.9639318452
+   3         2.0297860263
+Adiab. Energies (hartree);  nadiab =       3
+ i = 34, time =                3.400 (fs)
+   1         1.9818032234
+   2         2.0494945262
+   3         2.1154003786
+Adiab. Energies (hartree);  nadiab =       3
+ i = 35, time =                3.500 (fs)
+   1         2.1022173999
+   2         2.1699812476
+   3         2.2359379690
+Adiab. Energies (hartree);  nadiab =       3
+ i = 36, time =                3.600 (fs)
+   1         2.2557496022
+   2         2.3235851098
+   3         2.3895918924
+Adiab. Energies (hartree);  nadiab =       3
+ i = 37, time =                3.700 (fs)
+   1         2.4401577459
+   2         2.5080639440
+   3         2.5741199782
+Adiab. Energies (hartree);  nadiab =       3
+ i = 38, time =                3.800 (fs)
+   1         2.6527962818
+   2         2.7207721408
+   3         2.7868766045
+Adiab. Energies (hartree);  nadiab =       3
+ i = 39, time =                3.900 (fs)
+   1         2.8906535473
+   2         2.9586977492
+   3         3.0248500533
+Adiab. Energies (hartree);  nadiab =       3
+ i = 40, time =                4.000 (fs)
+   1         3.1503934301
+   2         3.2185050167
+   3         3.2847041677
+Adiab. Energies (hartree);  nadiab =       3
+ i = 41, time =                4.100 (fs)
+   1         3.4284019432
+   2         3.4965797191
+   3         3.5628249358
+Adiab. Energies (hartree);  nadiab =       3
+ i = 42, time =                4.200 (fs)
+   1         3.7208362878
+   2         3.7890790312
+   3         3.8553695480
+Adiab. Energies (hartree);  nadiab =       3
+ i = 43, time =                4.300 (fs)
+   1         4.0236772287
+   2         4.0919837005
+   3         4.1583187651
+Adiab. Energies (hartree);  nadiab =       3
+ i = 44, time =                4.400 (fs)
+   1         4.3327836084
+   2         4.4011525705
+   3         4.4675314606
+Adiab. Energies (hartree);  nadiab =       3
+ i = 45, time =                4.500 (fs)
+   1         4.6439480899
+   2         4.7123783092
+   3         4.7788003198
+Adiab. Energies (hartree);  nadiab =       3
+ i = 46, time =                4.600 (fs)
+   1         4.9529536810
+   2         5.0214439421
+   3         5.0879083915
+Adiab. Energies (hartree);  nadiab =       3
+ i = 47, time =                4.700 (fs)
+   1         5.2556300432
+   2         5.3241791580
+   3         5.3906853887
+Adiab. Energies (hartree);  nadiab =       3
+ i = 48, time =                4.800 (fs)
+   1         5.5479089601
+   2         5.6165157767
+   3         5.6830631559
+Adiab. Energies (hartree);  nadiab =       3
+ i = 49, time =                4.900 (fs)
+   1         5.8258783286
+   2         5.8945417400
+   3         5.9611296595
+Adiab. Energies (hartree);  nadiab =       3
+ i = 50, time =                5.000 (fs)
+   1         6.0858338167
+   2         6.1545527681
+   3         6.2211806447
+Adiab. Energies (hartree);  nadiab =       3
+ i = 51, time =                5.100 (fs)
+   1         6.3243275408
+   2         6.3931010373
+   3         6.4597683113
+Adiab. Energies (hartree);  nadiab =       3
+ i = 52, time =                5.200 (fs)
+   1         6.5382131186
+   2         6.6070402312
+   3         6.6737463667
+Adiab. Energies (hartree);  nadiab =       3
+ i = 53, time =                5.300 (fs)
+   1         6.7246867142
+   2         6.7935662996
+   3         6.8603110719
+Adiab. Energies (hartree);  nadiab =       3
+ i = 54, time =                5.400 (fs)
+   1         6.8813228935
+   2         6.9502544503
+   3         7.0170370871
+Adiab. Energies (hartree);  nadiab =       3
+ i = 55, time =                5.500 (fs)
+   1         7.0061061471
+   2         7.0750889776
+   3         7.1419090078
+Adiab. Energies (hartree);  nadiab =       3
+ i = 56, time =                5.600 (fs)
+   1         7.0974560350
+   2         7.1664895274
+   3         7.2333464995
+Adiab. Energies (hartree);  nadiab =       3
+ i = 57, time =                5.700 (fs)
+   1         7.1542468598
+   2         7.2233304917
+   3         7.2902239729
+Adiab. Energies (hartree);  nadiab =       3
+ i = 58, time =                5.800 (fs)
+   1         7.1758211081
+   2         7.2449544489
+   3         7.3118840243
+Adiab. Energies (hartree);  nadiab =       3
+ i = 59, time =                5.900 (fs)
+   1         7.1619966309
+   2         7.2311793246
+   3         7.2981445611
+Adiab. Energies (hartree);  nadiab =       3
+ i = 60, time =                6.000 (fs)
+   1         7.1130672923
+   2         7.1822991857
+   3         7.2492998514
+Adiab. Energies (hartree);  nadiab =       3
+ i = 61, time =                6.100 (fs)
+   1         7.0297979986
+   2         7.0990788815
+   3         7.1661144921
+Adiab. Energies (hartree);  nadiab =       3
+ i = 62, time =                6.200 (fs)
+   1         6.9134122167
+   2         6.9827420432
+   3         7.0498122459
+Adiab. Energies (hartree);  nadiab =       3
+ i = 63, time =                6.300 (fs)
+   1         6.7655746045
+   2         6.8349534265
+   3         6.9020578819
+Adiab. Energies (hartree);  nadiab =       3
+ i = 64, time =                6.400 (fs)
+   1         6.5883671285
+   2         6.6577950940
+   3         6.7249334763
+Adiab. Energies (hartree);  nadiab =       3
+ i = 65, time =                6.500 (fs)
+   1         6.3842600097
+   2         6.4537373623
+   3         6.5209093580
+Adiab. Energies (hartree);  nadiab =       3
+ i = 66, time =                6.600 (fs)
+   1         6.1560774596
+   2         6.2256045366
+   3         6.2928098446
+Adiab. Energies (hartree);  nadiab =       3
+ i = 67, time =                6.700 (fs)
+   1         5.9069588139
+   2         5.9765360416
+   3         6.0437743749
+Adiab. Energies (hartree);  nadiab =       3
+ i = 68, time =                6.800 (fs)
+   1         5.6403157158
+   2         5.7099436138
+   3         5.7772146923
+Adiab. Energies (hartree);  nadiab =       3
+ i = 69, time =                6.900 (fs)
+   1         5.3597855805
+   2         5.4294647515
+   3         5.4967683090
+Adiab. Energies (hartree);  nadiab =       3
+ i = 70, time =                7.000 (fs)
+   1         5.0691823328
+   2         5.1389134392
+   3         5.2062492431
+Adiab. Energies (hartree);  nadiab =       3
+ i = 71, time =                7.100 (fs)
+   1         4.7724449154
+   2         4.8422287420
+   3         4.9095965260
+Adiab. Energies (hartree);  nadiab =       3
+ i = 72, time =                7.200 (fs)
+   1         4.4735842565
+   2         4.5434216403
+   3         4.6108211728
+Adiab. Energies (hartree);  nadiab =       3
+ i = 73, time =                7.300 (fs)
+   1         4.1766294191
+   2         4.2465212644
+   3         4.3139523225
+Adiab. Energies (hartree);  nadiab =       3
+ i = 74, time =                7.400 (fs)
+   1         3.8855736735
+   2         3.9555209492
+   3         4.0229833225
+Adiab. Energies (hartree);  nadiab =       3
+ i = 75, time =                7.500 (fs)
+   1         3.6043212040
+   2         3.6743249380
+   3         3.7418184274
+Adiab. Energies (hartree);  nadiab =       3
+ i = 76, time =                7.600 (fs)
+   1         3.3366350205
+   2         3.4066964340
+   3         3.4742210318
+Adiab. Energies (hartree);  nadiab =       3
+ i = 77, time =                7.700 (fs)
+   1         3.0860876584
+   2         3.1562077416
+   3         3.2237630893
+Adiab. Energies (hartree);  nadiab =       3
+ i = 78, time =                7.800 (fs)
+   1         2.8560128285
+   2         2.9261927524
+   3         2.9937786859
+Adiab. Energies (hartree);  nadiab =       3
+ i = 79, time =                7.900 (fs)
+   1         2.6494622097
+   2         2.7197031819
+   3         2.7873195487
+Adiab. Energies (hartree);  nadiab =       3
+ i = 80, time =                8.000 (fs)
+   1         2.4691652239
+   2         2.5394684822
+   3         2.6071151423
+Adiab. Energies (hartree);  nadiab =       3
+ i = 81, time =                8.100 (fs)
+   1         2.3174933595
+   2         2.3878601659
+   3         2.4555369918
+Adiab. Energies (hartree);  nadiab =       3
+ i = 82, time =                8.200 (fs)
+   1         2.1964295402
+   2         2.2668611753
+   3         2.3345680519
+Adiab. Energies (hartree);  nadiab =       3
+ i = 83, time =                8.300 (fs)
+   1         2.1075425621
+   2         2.1780403186
+   3         2.2457771441
+Adiab. Energies (hartree);  nadiab =       3
+ i = 84, time =                8.400 (fs)
+   1         2.0519675061
+   2         2.1225326833
+   3         2.1902993690
+Adiab. Energies (hartree);  nadiab =       3
+ i = 85, time =                8.500 (fs)
+   1         2.0303919046
+   2         2.1010252972
+   3         2.1688222782
+Adiab. Energies (hartree);  nadiab =       3
+ i = 86, time =                8.600 (fs)
+   1         2.0430470107
+   2         2.1137504156
+   3         2.1815771222
+Adiab. Energies (hartree);  nadiab =       3
+ i = 87, time =                8.700 (fs)
+   1         2.0897073787
+   2         2.1604820793
+   3         2.2283384635
+Adiab. Energies (hartree);  nadiab =       3
+ i = 88, time =                8.800 (fs)
+   1         2.1696946930
+   2         2.2405419434
+   3         2.3084279584
+Adiab. Energies (hartree);  nadiab =       3
+ i = 89, time =                8.900 (fs)
+   1         2.2818884277
+   2         2.3528094854
+   3         2.4207251244
+Adiab. Energies (hartree);  nadiab =       3
+ i = 90, time =                9.000 (fs)
+   1         2.4247421478
+   2         2.4957382304
+   3         2.5636834878
+Adiab. Energies (hartree);  nadiab =       3
+ i = 91, time =                9.100 (fs)
+   1         2.5963060859
+   2         2.6673783787
+   3         2.7353532634
+Adiab. Energies (hartree);  nadiab =       3
+ i = 92, time =                9.200 (fs)
+   1         2.7942547811
+   2         2.8654044323
+   3         2.9334089675
+Adiab. Energies (hartree);  nadiab =       3
+ i = 93, time =                9.300 (fs)
+   1         3.0159195497
+   2         3.0871476653
+   3         3.1551818889
+Adiab. Energies (hartree);  nadiab =       3
+ i = 94, time =                9.400 (fs)
+   1         3.2583254540
+   2         3.3296330941
+   3         3.3976970584
+Adiab. Energies (hartree);  nadiab =       3
+ i = 95, time =                9.500 (fs)
+   1         3.5182322893
+   2         3.5896204635
+   3         3.6577142352
+Adiab. Energies (hartree);  nadiab =       3
+ i = 96, time =                9.600 (fs)
+   1         3.7921792265
+   2         3.8636488898
+   3         3.9317725501
+Adiab. Energies (hartree);  nadiab =       3
+ i = 97, time =                9.700 (fs)
+   1         4.0765320848
+   2         4.1480841345
+   3         4.2162377787
+Adiab. Energies (hartree);  nadiab =       3
+ i = 98, time =                9.800 (fs)
+   1         4.3675327617
+   2         4.4391680333
+   3         4.5073517712
+Adiab. Energies (hartree);  nadiab =       3
+ i = 99, time =                9.900 (fs)
+   1         4.6613499740
+   2         4.7330692386
+   3         4.8012831937
+Adiab. Energies (hartree);  nadiab =       3
+ i = 100, time =               10.000 (fs)
+   1         4.9541304607
+   2         5.0259345377
+   3         5.0941789423
+Adiab. Energies (hartree);  nadiab =       3
+ i = 101, time =               10.100 (fs)
+   1         5.2420511658
+   2         5.3139405729
+   3         5.3822154817
+Adiab. Energies (hartree);  nadiab =       3
+ i = 102, time =               10.200 (fs)
+   1         5.5213589021
+   2         5.5933344567
+   3         5.6616403617
+Adiab. Energies (hartree);  nadiab =       3
+ i = 103, time =               10.300 (fs)
+   1         5.7884404951
+   2         5.8605037715
+   3         5.9288403366
+Adiab. Energies (hartree);  nadiab =       3
+ i = 104, time =               10.400 (fs)
+   1         6.0398613904
+   2         6.1120122076
+   3         6.1803808155
+Adiab. Energies (hartree);  nadiab =       3
+ i = 105, time =               10.500 (fs)
+   1         6.2724086931
+   2         6.3446476235
+   3         6.4130488273
+Adiab. Energies (hartree);  nadiab =       3
+ i = 106, time =               10.600 (fs)
+   1         6.4831340183
+   2         6.5554615499
+   3         6.6238959211
+Adiab. Energies (hartree);  nadiab =       3
+ i = 107, time =               10.700 (fs)
+   1         6.6693909430
+   2         6.7418074784
+   3         6.8102756059
+Adiab. Energies (hartree);  nadiab =       3
+ i = 108, time =               10.800 (fs)
+   1         6.8288686948
+   2         6.9013745510
+   3         6.9698770402
+Adiab. Energies (hartree);  nadiab =       3
+ i = 109, time =               10.900 (fs)
+   1         6.9596210733
+   2         7.0322164809
+   3         7.1007539531
+Adiab. Energies (hartree);  nadiab =       3
+ i = 110, time =               11.000 (fs)
+   1         7.0600902403
+   2         7.1327753437
+   3         7.2013484349
+Adiab. Energies (hartree);  nadiab =       3
+ i = 111, time =               11.100 (fs)
+   1         7.1291253159
+   2         7.2019001739
+   3         7.2705095340
+Adiab. Energies (hartree);  nadiab =       3
+ i = 112, time =               11.200 (fs)
+   1         7.1659953286
+   2         7.2388598287
+   3         7.3075060629
+Adiab. Energies (hartree);  nadiab =       3
+ i = 113, time =               11.300 (fs)
+   1         7.1703961641
+   2         7.2433502803
+   3         7.3120341224
+Adiab. Energies (hartree);  nadiab =       3
+ i = 114, time =               11.400 (fs)
+   1         7.1424524153
+   2         7.2154959527
+   3         7.2842180898
+Adiab. Energies (hartree);  nadiab =       3
+ i = 115, time =               11.500 (fs)
+   1         7.0827128094
+   2         7.1558454910
+   3         7.2246066210
+Adiab. Energies (hartree);  nadiab =       3
+ i = 116, time =               11.600 (fs)
+   1         6.9921401650
+   2         7.0653616329
+   3         7.1341624641
+Adiab. Energies (hartree);  nadiab =       3
+ i = 117, time =               11.700 (fs)
+   1         6.8720958885
+   2         6.9454057055
+   3         7.0142469555
+Adiab. Energies (hartree);  nadiab =       3
+ i = 118, time =               11.800 (fs)
+   1         6.7243192464
+   2         6.7977168981
+   3         6.8665992939
+Adiab. Energies (hartree);  nadiab =       3
+ i = 119, time =               11.900 (fs)
+   1         6.5509015214
+   2         6.6243864180
+   3         6.6933106949
+Adiab. Energies (hartree);  nadiab =       3
+ i = 120, time =               12.000 (fs)
+   1         6.3542556611
+   2         6.4278271399
+   3         6.4967940413
+Adiab. Energies (hartree);  nadiab =       3
+ i = 121, time =               12.100 (fs)
+   1         6.1370818941
+   2         6.2107392215
+   3         6.2797494988
+Adiab. Energies (hartree);  nadiab =       3
+ i = 122, time =               12.200 (fs)
+   1         5.9023296344
+   2         5.9760720083
+   3         6.0451264204
+Adiab. Energies (hartree);  nadiab =       3
+ i = 123, time =               12.300 (fs)
+   1         5.6531564966
+   2         5.7269830495
+   3         5.7960823623
+Adiab. Energies (hartree);  nadiab =       3
+ i = 124, time =               12.400 (fs)
+   1         5.3928848772
+   2         5.4667942818
+   3         5.5359396732
+Adiab. Energies (hartree);  nadiab =       3
+ i = 125, time =               12.500 (fs)
+   1         5.1249561226
+   2         5.1989477856
+   3         5.2681396307
+Adiab. Energies (hartree);  nadiab =       3
+ i = 126, time =               12.600 (fs)
+   1         4.8528847981
+   2         4.9269576712
+   3         4.9961967578
+Adiab. Energies (hartree);  nadiab =       3
+ i = 127, time =               12.700 (fs)
+   1         4.5802109367
+   2         4.6543639175
+   3         4.7236510406
+Adiab. Energies (hartree);  nadiab =       3
+ i = 128, time =               12.800 (fs)
+   1         4.3104532452
+   2         4.3846851799
+   3         4.4540211421
+Adiab. Energies (hartree);  nadiab =       3
+ i = 129, time =               12.900 (fs)
+   1         4.0470626016
+   2         4.1213722882
+   3         4.1907579001
+Adiab. Energies (hartree);  nadiab =       3
+ i = 130, time =               13.000 (fs)
+   1         3.7933771954
+   2         3.8677633870
+   3         3.9371994672
+Adiab. Energies (hartree);  nadiab =       3
+ i = 131, time =               13.100 (fs)
+   1         3.5525795268
+   2         3.6270409344
+   3         3.6965283103
+Adiab. Energies (hartree);  nadiab =       3
+ i = 132, time =               13.200 (fs)
+   1         3.3276558186
+   2         3.4021911147
+   3         3.4717306230
+Adiab. Energies (hartree);  nadiab =       3
+ i = 133, time =               13.300 (fs)
+   1         3.1213586623
+   2         3.1959656622
+   3         3.2655589879
+Adiab. Energies (hartree);  nadiab =       3
+ i = 134, time =               13.400 (fs)
+   1         2.9361717853
+   2         3.0108499162
+   3         3.0804970769
+Adiab. Energies (hartree);  nadiab =       3
+ i = 135, time =               13.500 (fs)
+   1         2.7742813573
+   2         2.8490291950
+   3         2.9187310589
+Adiab. Energies (hartree);  nadiab =       3
+ i = 136, time =               13.600 (fs)
+   1         2.6375489902
+   2         2.7123650846
+   3         2.7821225319
+Adiab. Energies (hartree);  nadiab =       3
+ i = 137, time =               13.700 (fs)
+   1         2.5274905896
+   2         2.6023734678
+   3         2.6721873919
+Adiab. Energies (hartree);  nadiab =       3
+ i = 138, time =               13.800 (fs)
+   1         2.4452594548
+   2         2.5202076246
+   3         2.5900789323
+Adiab. Energies (hartree);  nadiab =       3
+ i = 139, time =               13.900 (fs)
+   1         2.3916343324
+   2         2.4666462853
+   3         2.5365758984
+Adiab. Energies (hartree);  nadiab =       3
+ i = 140, time =               14.000 (fs)
+   1         2.3670127909
+   2         2.4420870052
+   3         2.5120758612
+Adiab. Energies (hartree);  nadiab =       3
+ i = 141, time =               14.100 (fs)
+   1         2.3714092001
+   2         2.4465441440
+   3         2.5165931970
+Adiab. Energies (hartree);  nadiab =       3
+ i = 142, time =               14.200 (fs)
+   1         2.4044583575
+   2         2.4796524923
+   3         2.5497627144
+Adiab. Energies (hartree);  nadiab =       3
+ i = 143, time =               14.300 (fs)
+   1         2.4654235621
+   2         2.5406753453
+   3         2.6108477272
+Adiab. Energies (hartree);  nadiab =       3
+ i = 144, time =               14.400 (fs)
+   1         2.5532097328
+   2         2.6285176212
+   3         2.6987531738
+Adiab. Energies (hartree);  nadiab =       3
+ i = 145, time =               14.500 (fs)
+   1         2.6663809180
+   2         2.7417435708
+   3         2.8120433119
+Adiab. Energies (hartree);  nadiab =       3
+ i = 146, time =               14.600 (fs)
+   1         2.8031825746
+   2         2.8785982568
+   3         2.9489632555
+Adiab. Energies (hartree);  nadiab =       3
+ i = 147, time =               14.700 (fs)
+   1         2.9615665977
+   2         3.0370337972
+   3         3.1074651395
+Adiab. Energies (hartree);  nadiab =       3
+ i = 148, time =               14.800 (fs)
+   1         3.1392216956
+   2         3.2147388829
+   3         3.2852376634
+Adiab. Energies (hartree);  nadiab =       3
+ i = 149, time =               14.900 (fs)
+   1         3.3336055318
+   2         3.4091711633
+   3         3.4797384862
+Adiab. Energies (hartree);  nadiab =       3
+ i = 150, time =               15.000 (fs)
+   1         3.5419802157
+   2         3.6175928546
+   3         3.6882299014
+Adiab. Energies (hartree);  nadiab =       3
+ i = 151, time =               15.100 (fs)
+   1         3.7614500819
+   2         3.8371082698
+   3         3.9078162268
+Adiab. Energies (hartree);  nadiab =       3
+ i = 152, time =               15.200 (fs)
+   1         3.9890009155
+   2         4.0647032204
+   3         4.1354833052
+Adiab. Energies (hartree);  nadiab =       3
+ i = 153, time =               15.300 (fs)
+   1         4.2215405034
+   2         4.2972855239
+   3         4.3681389873
+Adiab. Energies (hartree);  nadiab =       3
+ i = 154, time =               15.400 (fs)
+   1         4.4559397713
+   2         4.5317261413
+   3         4.6026542701
+Adiab. Energies (hartree);  nadiab =       3
+ i = 155, time =               15.500 (fs)
+   1         4.6890741311
+   2         4.7649005249
+   3         4.8359046444
+Adiab. Energies (hartree);  nadiab =       3
+ i = 156, time =               15.600 (fs)
+   1         4.9178644008
+   2         4.9937295630
+   3         5.0648110156
+Adiab. Energies (hartree);  nadiab =       3
+ i = 157, time =               15.700 (fs)
+   1         5.1393165949
+   2         5.2152192746
+   3         5.2863794974
+Adiab. Energies (hartree);  nadiab =       3
+ i = 158, time =               15.800 (fs)
+   1         5.3505603112
+   2         5.4264993419
+   3         5.4977397973
+Adiab. Energies (hartree);  nadiab =       3
+ i = 159, time =               15.900 (fs)
+   1         5.5488852783
+   2         5.6248595614
+   3         5.6961817674
+Adiab. Energies (hartree);  nadiab =       3
+ i = 160, time =               16.000 (fs)
+   1         5.7317753096
+   2         5.8077838247
+   3         5.8791893604
+Adiab. Energies (hartree);  nadiab =       3
+ i = 161, time =               16.100 (fs)
+   1         5.8969395164
+   2         5.9729813664
+   3         6.0444719011
+Adiab. Energies (hartree);  nadiab =       3
+ i = 162, time =               16.200 (fs)
+   1         6.0423403274
+   2         6.1184146451
+   3         6.1899918811
+Adiab. Energies (hartree);  nadiab =       3
+ i = 163, time =               16.300 (fs)
+   1         6.1662178022
+   2         6.2423238692
+   3         6.3139896161
+Adiab. Energies (hartree);  nadiab =       3
+ i = 164, time =               16.400 (fs)
+   1         6.2671102587
+   2         6.3432474837
+   3         6.4150036462
+Adiab. Energies (hartree);  nadiab =       3
+ i = 165, time =               16.500 (fs)
+   1         6.3438706127
+   2         6.4200385451
+   3         6.4918871330
+Adiab. Energies (hartree);  nadiab =       3
+ i = 166, time =               16.600 (fs)
+   1         6.3956786943
+   2         6.4718770375
+   3         6.5438201749
+Adiab. Energies (hartree);  nadiab =       3
+ i = 167, time =               16.700 (fs)
+   1         6.4220490058
+   2         6.4982776281
+   3         6.5703175607
+Adiab. Energies (hartree);  nadiab =       3
+ i = 168, time =               16.800 (fs)
+   1         6.4228340816
+   2         6.4990930217
+   3         6.5712321213
+Adiab. Energies (hartree);  nadiab =       3
+ i = 169, time =               16.900 (fs)
+   1         6.3982234017
+   2         6.4745128680
+   3         6.5467536300
+Adiab. Energies (hartree);  nadiab =       3
+ i = 170, time =               17.000 (fs)
+   1         6.3487379322
+   2         6.4250582906
+   3         6.4974033241
+Adiab. Energies (hartree);  nadiab =       3
+ i = 171, time =               17.100 (fs)
+   1         6.2752204921
+   2         6.3515722408
+   3         6.4240242470
+Adiab. Energies (hartree);  nadiab =       3
+ i = 172, time =               17.200 (fs)
+   1         6.1788217954
+   2         6.2552055232
+   3         6.3277672609
+Adiab. Energies (hartree);  nadiab =       3
+ i = 173, time =               17.300 (fs)
+   1         6.0609826697
+   2         6.1373989982
+   3         6.2100732360
+Adiab. Energies (hartree);  nadiab =       3
+ i = 174, time =               17.400 (fs)
+   1         5.9234126949
+   2         5.9998622067
+   3         6.0726516627
+Adiab. Energies (hartree);  nadiab =       3
+ i = 175, time =               17.500 (fs)
+   1         5.7680655030
+   2         5.8445486627
+   3         5.9174559375
+Adiab. Energies (hartree);  nadiab =       3
+ i = 176, time =               17.600 (fs)
+   1         5.5971110492
+   2         5.6736281251
+   3         5.7466556346
+Adiab. Energies (hartree);  nadiab =       3
+ i = 177, time =               17.700 (fs)
+   1         5.4129054808
+   2         5.4894564802
+   3         5.5626063968
+Adiab. Energies (hartree);  nadiab =       3
+ i = 178, time =               17.800 (fs)
+   1         5.2179586911
+   2         5.2945433162
+   3         5.3678175265
+Adiab. Energies (hartree);  nadiab =       3
+ i = 179, time =               17.900 (fs)
+   1         5.0149002704
+   2         5.0915179033
+   3         5.1649179874
+Adiab. Energies (hartree);  nadiab =       3
+ i = 180, time =               18.000 (fs)
+   1         4.8064440831
+   2         4.8830937948
+   3         4.9566210254
+Adiab. Energies (hartree);  nadiab =       3
+ i = 181, time =               18.100 (fs)
+   1         4.5953521869
+   2         4.6720327889
+   3         4.7456881639
+Adiab. Energies (hartree);  nadiab =       3
+ i = 182, time =               18.200 (fs)
+   1         4.3843986555
+   2         4.4611087380
+   3         4.5348930036
+Adiab. Energies (hartree);  nadiab =       3
+ i = 183, time =               18.300 (fs)
+   1         4.1763332637
+   2         4.2530712642
+   3         4.3269849632
+Adiab. Energies (hartree);  nadiab =       3
+ i = 184, time =               18.400 (fs)
+   1         3.9738463093
+   2         4.0506105603
+   3         4.1246540637
+Adiab. Energies (hartree);  nadiab =       3
+ i = 185, time =               18.500 (fs)
+   1         3.7795340846
+   2         3.8563237261
+   3         3.9304964908
+Adiab. Energies (hartree);  nadiab =       3
+ i = 186, time =               18.600 (fs)
+   1         3.5958673060
+   2         3.6726798532
+   3         3.7469828783
+Adiab. Energies (hartree);  nadiab =       3
+ i = 187, time =               18.700 (fs)
+   1         3.4251587822
+   2         3.5019926120
+   3         3.5764260185
+Adiab. Energies (hartree);  nadiab =       3
+ i = 188, time =               18.800 (fs)
+   1         3.2695364354
+   2         3.3463900018
+   3         3.4209538715
+Adiab. Energies (hartree);  nadiab =       3
+ i = 189, time =               18.900 (fs)
+   1         3.1309175870
+   2         3.2077894393
+   3         3.2824838269
+Adiab. Energies (hartree);  nadiab =       3
+ i = 190, time =               19.000 (fs)
+   1         3.0109863496
+   2         3.0878751435
+   3         3.1627000838
+Adiab. Energies (hartree);  nadiab =       3
+ i = 191, time =               19.100 (fs)
+   1         2.9111745463
+   2         2.9880790495
+   3         3.0630345601
+Adiab. Energies (hartree);  nadiab =       3
+ i = 192, time =               19.200 (fs)
+   1         2.8326460781
+   2         2.9095651719
+   3         2.9846512531
+Adiab. Energies (hartree);  nadiab =       3
+ i = 193, time =               19.300 (fs)
+   1         2.7762847386
+   2         2.8532174167
+   3         2.9284340491
+Adiab. Energies (hartree);  nadiab =       3
+ i = 194, time =               19.400 (fs)
+   1         2.7426858492
+   2         2.8196312149
+   3         2.8949783558
+Adiab. Energies (hartree);  nadiab =       3
+ i = 195, time =               19.500 (fs)
+   1         2.7321516204
+   2         2.8091088820
+   3         2.8845864610
+Adiab. Energies (hartree);  nadiab =       3
+ i = 196, time =               19.600 (fs)
+   1         2.7446904188
+   2         2.8216588857
+   3         2.8972667996
+Adiab. Energies (hartree);  nadiab =       3
+ i = 197, time =               19.700 (fs)
+   1         2.7800197890
+   2         2.8569988662
+   3         2.9327369744
+Adiab. Energies (hartree);  nadiab =       3
+ i = 198, time =               19.800 (fs)
+   1         2.8375728784
+   2         2.9145620620
+   3         2.9904301814
+Adiab. Energies (hartree);  nadiab =       3
+ i = 199, time =               19.900 (fs)
+   1         2.9165082420
+   2         2.9935071143
+   3         3.0695050148
+Adiab. Energies (hartree);  nadiab =       3
+ i = 200, time =               20.000 (fs)
+   1         3.0157229828
+   2         3.0927312077
+   3         3.1688586082
