@@ -336,6 +336,7 @@ CONTAINS
        CALL force_env_get(force_env, potential_energy=e_pot)
        WRITE(output_unit,'(/,T2,"ENERGY| Total FORCE_EVAL ( ",A," ) energy (a.u.): ",T55,F26.15,/)')&
             ADJUSTR(TRIM(use_prog_name(force_env%in_use))),e_pot
+
     END IF
     CALL cp_print_key_finished_output(output_unit,logger,force_env%force_env_section,&
                                       "PRINT%PROGRAM_RUN_INFO")
@@ -898,7 +899,6 @@ CONTAINS
     NULLIFY(atomic_kinds, local_particles, molecule_set, molecule_kind_set, local_molecules)
 !> End CHANGE_AC and SG
 
-
     logger => cp_get_default_logger()
     CPASSERT(ASSOCIATED(force_env))
     ! Get infos about the mixed subsys
@@ -1258,6 +1258,9 @@ CONTAINS
                                                        mixed_env, my_itimes)
                    CASE("CT-FE")   
                       fe_block_keyword  = .True.
+                      IF (nforce_eval .ne. 3) THEN
+                         CPABORT("TRY FORCE_EVAL_ORDER 1..4 FOR CT-FE BLOCK_TYPE")
+                      ENDIF
                       cr_block_keyword  = .False.
                       CALL multi_block_energies_forces(adiab_section,energies_1_mol_list, energies, &
                                     intra_forces_global, global_forces, my_energies, &

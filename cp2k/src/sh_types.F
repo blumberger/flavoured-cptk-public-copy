@@ -147,7 +147,18 @@ END TYPE adiab_nace_env_type
      !integer, dimension(:,:), POINTER         :: bneighbour_d, aneighbour_d
      !integer, dimension(:,:), POINTER         :: bneighbour_a, aneighbour_a
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER :: nacv_dphase, nacv_aphase   ! off-diagonal gradient of aom Hamilton.
-     REAL(KIND = dp)                          :: scaling_donor, scaling_acceptor
+
+!WTP_change: atomlist_fe/ct, connlist1/2_fe/ct, ext_elements_fe/ct, nacv_ct/fe, scaling_fect
+     REAL(KIND=dp), DIMENSION(:,:,:), POINTER :: nacv_fe, nacv_ct
+     REAL(KIND=dp), DIMENSION(:), POINTER     :: pcoeffs_fe, pcoeffs_ct
+     REAL(KIND=dp), DIMENSION(:), POINTER     :: scoeffs_fe, scoeffs_ct
+     INTEGER, DIMENSION(:), POINTER           :: atomlist_fe, atomlist_ct !should be able to get rid of
+     integer, dimension(:,:), POINTER         :: connlist1_fe, connlist2_fe, & !AOM connectivities of individual mols
+                                                 connlist1_ct, connlist2_ct
+     integer, dimension(:), ALLOCATABLE       :: ext_elements_fe, ext_elements_ct ! atomic number
+     REAL(KIND = dp)                          :: scaling_donor, scaling_acceptor, scaling_fect
+     LOGICAL                                  :: fe_donor  !True: donor is FE, False: acceptor is FE
+
      LOGICAL                                  :: freeze_multip_forces
 
 !> AOM arrays
@@ -188,8 +199,11 @@ END TYPE adiab_nace_env_type
      LOGICAL, DIMENSION(:), POINTER           :: ext_pres !T or F array 
                                                           !indicating active atoms
      REAL(KIND=dp), dimension(:,:,:), POINTER :: crds !crds active atoms in COM reference frames
+!WTP_comment: where the NN values be given? --> allocate at sh_init.F, given in
+!calc_coms_and_nlist in non_adiabatic_util.F
      INTEGER, DIMENSION(:,:), POINTER         :: NN   !intermolacular neighbrouring list
      integer                                  :: atoms_per_site !Number of atoms per site
+     REAL(KIND=dp)                            :: cutoff_sites_fe
 
 !> FROZEN_COUPLINGS section 
      REAL(KIND = dp)                          :: first_off_d_Hab
@@ -202,6 +216,8 @@ END TYPE adiab_nace_env_type
      LOGICAL                                  :: aom_couplings_keyword, frozen_couplings_keyword 
      LOGICAL                                  :: tresp_couplings_keyword 
      LOGICAL                                  :: multiphase_couplings_keyword 
+!WTP_change
+     LOGICAL                                  :: multifect_couplings_keyword 
  
      INTEGER, DIMENSION(:,:), ALLOCATABLE     :: full_system_info  
      INTEGER, DIMENSION(:,:), ALLOCATABLE     :: active_system_info  
