@@ -132,7 +132,6 @@ IMPLICIT NONE
              calc_hop_nacv_aom,                    &
              adiabaticity,                         &
              calc_multiphase_Xmatrix_elements,     &
-!WTP_change
              calc_fect_Xmatrix_elements,           &
              !!calc_tresp_coup_fect,                 &
              !!calc_trsp_ab,                         &
@@ -1006,7 +1005,7 @@ END SUBROUTINE calc_multiphase_Xmatrix_elements
 !**********************************************************************************
 SUBROUTINE calc_fect_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, positions_com_tp)
      TYPE(sh_env_type)                         :: sh_env
-     REAL(kind=dp), DIMENSION(:),  POINTER     :: energies_tp !WTP_comment: my_energies
+     REAL(kind=dp), DIMENSION(:),  POINTER     :: energies_tp 
      TYPE(section_vals_type), POINTER          :: adiab_section
      INTEGER                                   :: orb ! state space dimension including degeneracy
      REAL(kind=dp), DIMENSION(:,:),POINTER, &
@@ -1016,7 +1015,6 @@ SUBROUTINE calc_fect_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, p
      routineP = moduleN//':'//routineN
 
      INTEGER                                   :: state, total_states, state1, state2 !, state3, state4
-!WTP_change: for ct and fe blocks, total_states = total_ct_states + total_fe_states
      INTEGER                                   :: total_CT_states, total_FE_states
      INTEGER                                   ::ind1, ind2
      INTEGER                                   :: nadiab, i, j!, temp
@@ -1027,7 +1025,6 @@ SUBROUTINE calc_fect_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, p
      REAL(KIND=dp)                            :: mol1, mol2
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE  :: Sab_list_dphase
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE  :: Sab_list_aphase
-!WTP_change:
      INTEGER, DIMENSION(:), ALLOCATABLE        :: fe_ind, ct_ind
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE  :: Sab_list_fect
      integer                                   :: atoms_per_donor, atoms_per_acceptor, count_
@@ -1074,7 +1071,6 @@ SUBROUTINE calc_fect_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, p
        end do
      end do
 
-!!WTP_change: 
      IF (sh_env%fe_donor) THEN
          ALLOCATE(fe_ind(SIZE(donor_index)))
          fe_ind = first_ind
@@ -1091,7 +1087,7 @@ SUBROUTINE calc_fect_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, p
          atoms_per_ct = atoms_per_donor
      END IF
 
-!WTP_change: state counts + Sanity checks 
+     !> state counts + Sanity checks 
      total_CT_states = SIZE(donor_index)*SIZE(acceptor_index)  !this CT means CT block
      total_FE_states = SIZE(fe_ind) !this FE means FE block
      total_states = total_CT_states + total_FE_states 
@@ -1114,7 +1110,7 @@ SUBROUTINE calc_fect_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, p
                                           second_ind, sh_env%connlist1_a, sh_env%connlist2_a, sh_env%atomlist_a, &
                                           positions_com_tp, sh_env%active_system_info, sh_env%nacv_aphase, Sab_list_aphase)
 
-!WTP_change
+  !> X-SH coupling: the Sab_list_fect as well as nacv
   CALL calc_aom_coup_nacv_fect(sh_env, atoms_per_fe,sh_env%ext_elements_fe, sh_env%pcoeffs_fe, sh_env%scoeffs_fe, &
                                           fe_ind, sh_env%connlist1_fe,sh_env%connlist2_fe, sh_env%atomlist_fe, &
                                           positions_com_tp,sh_env%active_system_info, sh_env%nacv_fe, Sab_list_fect, &
@@ -1122,20 +1118,17 @@ SUBROUTINE calc_fect_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, p
                                           ct_ind, sh_env%connlist1_ct,sh_env%connlist2_ct, sh_env%atomlist_ct, &
                                           sh_env%nacv_ct)
 
-!WTP_change: testing point for H elements
-!!  CPABORT("WTP is doing a test...")
 !WTP_comment: the Sab_list_fect as well as nacv should be tested here...
 
    !> loop over states: note that it does not matter if donor molecules comes
    !after acceptor in the xyz or viceversa, or the molecules are DDDAAA or ADADA
    !as the index of each molecule is referred to DECOMP file
 
-!WTP_change: total_states --> total_CT_states
    ALLOCATE(CT_states_info(2,total_CT_states))
    state = 0
-   do i=1,SIZE(first_ind) !WTP_comment: donor index
+   do i=1,SIZE(first_ind) 
       ind1 = first_ind(i)
-      do j=1,SIZE(second_ind) !WTP_comment: acceptor index
+      do j=1,SIZE(second_ind) 
          ind2 = second_ind(j)
          state = state + 1
          CT_states_info(1,state) = ind1
@@ -1146,10 +1139,10 @@ SUBROUTINE calc_fect_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, p
    sh_env%H_tp(:,:) = cmplx(0.0D0, 0.0D0,dp)
 
   !loop over states and fill-in the CT Hamiltonian with book-kept couplings
-!WTP_comment: CT block of H
-  do state1=1, SIZE(CT_states_info(1,:))  !WTP_comment: SIZE(xxx) = N_D*N_A = total_CT_states
+  !> CT block of H
+  do state1=1, SIZE(CT_states_info(1,:))  !> SIZE(xxx) = N_D*N_A = total_CT_states
     !loop over upper diagonal
-       do state2=1, SIZE(CT_states_info(2,:)) !WTP_comment: SIZE(xxx) = N_D*N_A = total_CT_states
+       do state2=1, SIZE(CT_states_info(2,:)) !> SIZE(xxx) = N_D*N_A = total_CT_states
            !if connectivity allows XXXX
            if (state2 >  state1) then  
                ! look at the acceptor couplings (the donor are the same)
@@ -1185,7 +1178,7 @@ SUBROUTINE calc_fect_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, p
 
                end if !state matching
 
-!WTP_comment: diagonal H (siteE from FF)
+           !> diagonal H (siteE from FF)
 !WTP_comment: the indexes in energies_tp --> related to DECOMP, first_ind, second_ind, ... 
            else !state
                 if (state2 .eq. state1) then
@@ -1199,7 +1192,7 @@ SUBROUTINE calc_fect_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, p
         end do
     end do
 
-!WTP_change: do-loop for the FE-CT block
+  !> do-loop for the FE-CT block
   count_ = 0
   IF (sh_env%fe_donor) THEN !FE_IS DONOR
     do state1=1, total_FE_states  
@@ -1207,7 +1200,7 @@ SUBROUTINE calc_fect_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, p
         count_ = count_ + 1  
         sh_env%H_tp(total_CT_states+state1, (state1-1)*SIZE(ct_ind)+state2) = &
                            cmplx(0.0D0, -sh_env%scaling_fect*Sab_list_fect(3, count_),dp) 
-!WTP_comment: another half of H...
+  !> another half of H...
         sh_env%H_tp((state1-1)*SIZE(ct_ind)+state2, total_CT_states+state1) = & 
         sh_env%H_tp(total_CT_states+state1, (state1-1)*SIZE(ct_ind)+state2)
       end do
@@ -1218,7 +1211,7 @@ SUBROUTINE calc_fect_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, p
         count_ = count_ + 1  
         sh_env%H_tp(total_CT_states+state1, (state2-1)*SIZE(ct_ind)+state1) = &
                            cmplx(0.0D0, -sh_env%scaling_fect*Sab_list_fect(3, count_),dp)
-!WTP_comment: another of half H...
+  !> another of half H...
         sh_env%H_tp((state2-1)*SIZE(ct_ind)+state1, total_CT_states+state1) = &
         sh_env%H_tp(total_CT_states+state1, (state2-1)*SIZE(ct_ind)+state1)
       end do
@@ -1285,11 +1278,7 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
      !ALLOCATE(PC_allrvecs(5,mol*atoms))
      !ALLOCATE(PC_rvecs(3,atoms))
 
-!WTP_comment: atoms--> atoms_per_donor
-!WTP_comment: for sh_initialization.F, Atp_loc(1,:) for atoms with AOM coeff
-!WTP_comment: Atp_loc(2:4,:) for positions_tp...
      ALLOCATE(Atp(4,atoms))
-!WTP_comment: Btp
      ALLOCATE(Btp(4,atoms))
      !similar array to AOM single phase H but without the third dimension (here
      !is just tp). Also pcoeffsrun exists because AOM coeffiient need to be
@@ -1301,7 +1290,6 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
 
      !XXX IF MULTISTATE THEN 
      !atom list is the first and second molecule of the dimer 
-!WTP_comment: for donor, (8, 14) in dimension where 8 is the C with AOM coeff
      ALLOCATE(aneighbour(0:size(phase_atomlist),0:atoms))
      ALLOCATE(bneighbour(0:size(phase_atomlist),0:atoms))
      aneighbour = 0
@@ -1315,7 +1303,6 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
      ! variable storage of Sab (two molecules may get e.g. further apart and
      ! would not be stored if NN !=1) 
      count_ = 0
-!WTP_comment: for donor, phase_ind = first_ind (1..10)
      do i=1,SIZE(phase_ind)     
         do k=1, SIZE(phase_ind)
               ! XXX TO ADD IF CONNECTIVITY THEN 
@@ -1328,8 +1315,6 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
      end do 
 
      ! Must be deallocated in the mother subroutine
-!WTP_comment: Sab create for all possible pairs in a phase...
-!WTP_comment:  calc. couplings for all the pairs??? or screening???
      ALLOCATE(Sab_list(3,count_))
      !ALLOCATE(Interac_list(2,count_))
 
@@ -1351,7 +1336,6 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
         
                !create the array of all its atomic coordinates at tp
                !numerical factor converts from Angstroms into Bohr radii
-!WTP_comment: Atp(1,:) for the elements --> ex. 6 6 6 6 6 1 1 1 1 ...
                Atp(1,1:atoms_per_mol_i) = dble(elements) ! this is the donor of the pair
                Atp(2:4,1:atoms_per_mol_i) = positions_com_tp(1:3,init_atom_mol_i:final_atom_mol_i)
 
@@ -1381,7 +1365,7 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
                     ! geometry is taken for all the molecules from the second
                     ! loop k=1,mol when the first loop is fixed
 
-!WTP_comment: calc_sab with three variables --> normalization... 
+!> calc_sab with three variables --> normalization... 
                     if (i == 1) then
                          pcoeffsrun(1:atoms_per_mol_k,k) = phase_pcoeffs(1:atoms_per_mol_k)
                          call calc_sab(Btp, phase_connlist2, pcoeffsrun(:,k))
@@ -1391,7 +1375,6 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
                     !if (mod(itimes-1, sh_env%multiple_time_step) .eq. 0 & 
                     !      .and. sh_env%multiple_time_step .ne. 1) then 
 
-!WTP_comment: sab_screen_new?? sh_env%minao (a minimun AO threshold? when this is given?)
                            call sab_screen_new(Atp, phase_atomlist, &
                             phase_connlist1, pcoeffsrun(:,i),&
                            & phase_atomlist, Btp, phase_atomlist, &
@@ -1422,18 +1405,15 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
                           !IF MULTISTATE THEN  XXXX
                             !calculate gradients
 
-!WTP_comment: the random number in calc_dRSab is called many
-!many times... --> b/c there're many CT states...
-
-                            call calc_dRSab(Atp, phase_atomlist, &
-                               phase_connlist1, pcoeffsrun(1:atoms_per_mol_i,i), phase_scoeffs, &
-                               nacv(1:3, k,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i), &
-                               nacv(1:3, i,(k-1)*atoms_per_mol_k+1:k*atoms_per_mol_k), &
-                               Btp, phase_atomlist, phase_connlist1, pcoeffsrun(1:atoms_per_mol_k,k), &
+                            call calc_dRSab(Atp, phase_atomlist, & !!
+                               phase_connlist1, pcoeffsrun(1:atoms_per_mol_i,i), phase_scoeffs, & !!
+                              nacv(1:3, k,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i), & !!
+                               nacv(1:3, i,(k-1)*atoms_per_mol_k+1:k*atoms_per_mol_k), & !!
+                               Btp, phase_atomlist, phase_connlist1, pcoeffsrun(1:atoms_per_mol_k,k), & !!
                                 !sh_env%scoeffs, sh_env%neighbourlist(k,i,:,:), &
                                 !         sh_env%neighbourlist(i,k,:,:), dR, &
-                               phase_scoeffs, aneighbour(:,:), bneighbour(:,:), sh_env%dR, &
-                               sh_env%do_random, sh_env)                         
+                               phase_scoeffs, aneighbour(:,:), bneighbour(:,:), sh_env%dR, & !!
+                               sh_env%do_random, sh_env)                         !!
                           !END IF
 
 !WTP_change: debug..                         
@@ -1451,6 +1431,24 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
 !    write (20,*) nacv(1, k,temp), nacv(2, k,temp), nacv(3, k ,temp)
 !  enddo
 !close(20)
+
+!WTP_change: debug..                         
+!open(22, file = 'nacv_multip_inter.dat', status = 'old',
+!position="append",action="write")
+!  write (22,*) "states", i, k
+!  write (22,*) "index acc", i, "from to", (k-1)*atoms+1, k*atoms
+!  write (22,*) "NAC vector components on the nuclei of the acceptor"
+!  do temp=(k-1)*atoms+1, k*atoms
+!    write (22,*) nacv(1, i,temp), nacv(2, i,temp), nacv(3, i,temp)
+!  end do
+
+!  write (22,*) "index donor", k, "from to", (i-1)*atoms+1, i*atoms
+!  write (22,*) "NAC vector components on the nuclei of the donor"
+!  do temp=(i-1)*atoms+1, i*atoms
+!    write (22,*) nacv(1, k,temp), nacv(2, k,temp), nacv(3, k ,temp)
+!  enddo
+!close(22)
+
 
                        end if !over the upper diag
                    ! molecules are not connected
@@ -1486,7 +1484,7 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
      DEALLOCATE(Atp,Btp)
      DEALLOCATE(pcoeffsrun)
      DEALLOCATE(aneighbour,bneighbour)
-
+     !DEALLOCATE(Sab_list) !WTP_MEM
 
 END SUBROUTINE calc_aom_coup_nacv_single_phase
 
@@ -1504,27 +1502,23 @@ SUBROUTINE calc_aom_coup_nacv_fect(sh_env, atoms_fe, elements_fe, fe_pcoeffs,fe_
                                            ct_connlist1, ct_connlist2, ct_atomlist, nacv_ct)
 
      TYPE(sh_env_type)                                   :: sh_env
-!WTP_change: atoms --> atoms_fe, atoms_ct
      integer, intent(IN)                                 :: atoms_fe, atoms_ct !,atoms_fe
 !!     integer, dimension(:), ALLOCATABLE, INTENT(IN)      :: elements
      integer, dimension(:), ALLOCATABLE, INTENT(IN)      :: elements_fe , elements_ct
      !integer, intent(in)                     :: mol!, orb
 !!     INTEGER, DIMENSION(:), ALLOCATABLE, INTENT(IN)      :: phase_ind !is active region-based
-!WTP_change:
      INTEGER, DIMENSION(:), ALLOCATABLE, INTENT(IN)      :: ct_ind ,fe_ind !WTP_change 
      INTEGER, DIMENSION(:,:), ALLOCATABLE, INTENT(IN)    :: active_system_info
      REAL(kind=dp), DIMENSION(:,:),POINTER, &
                                    INTENT(IN)            :: positions_com_tp
      REAL(KIND=dp), DIMENSION(:), POINTER, &
                                    INTENT(IN)            :: fe_pcoeffs, fe_scoeffs
-!WTP_change:
      REAL(KIND=dp), DIMENSION(:), POINTER, &
                                    INTENT(IN)            :: ct_pcoeffs,ct_scoeffs
 !!     integer, dimension(:,:), POINTER, &
 !!                                   INTENT(IN)            :: phase_connlist1, phase_connlist2
 !!     INTEGER, DIMENSION(:), POINTER, INTENT(IN)          :: phase_atomlist
      INTEGER, DIMENSION(:), POINTER, INTENT(IN)          :: fe_atomlist, ct_atomlist
-!WTP_change: added... still need for fe phase...
      integer, dimension(:,:), POINTER, &
                                    INTENT(IN)            :: fe_connlist1, fe_connlist2
      integer, dimension(:,:), POINTER, &
@@ -1533,7 +1527,7 @@ SUBROUTINE calc_aom_coup_nacv_fect(sh_env, atoms_fe, elements_fe, fe_pcoeffs,fe_
 
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT)    :: Sab_list
 
-!WTP_change: nacv --> nacv_fe=<k-alpha|gradK>, nacv_ct=<K|gradk-alpha>
+!> nacv --> nacv_fe=<k-alpha|gradK>, nacv_ct=<K|gradk-alpha>
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER, INTENT(INOUT)  :: nacv_fe, nacv_ct
 
 
@@ -1553,14 +1547,11 @@ SUBROUTINE calc_aom_coup_nacv_fect(sh_env, atoms_fe, elements_fe, fe_pcoeffs,fe_
      !ALLOCATE(PC_allrvecs(5,mol*atoms))
      !ALLOCATE(PC_rvecs(3,atoms))
 
-!WTP_change: atoms --> atoms_fe/ct 
      ALLOCATE(Atp(4,atoms_fe))
      ALLOCATE(Btp(4,atoms_ct))
      !similar array to AOM single phase H but without the third dimension (here
      !is just tp). Also pcoeffsrun exists because AOM coeffiient need to be
      !renormalized for each structure
-!WTP_comment: sceff prob. is not used.. all 0 anyways..
-!WTP_comment: for fe mol_i, its p-orb coeff (normalized) --> pcoeffsrun_fe(:,mol_i) 
      ALLOCATE(pcoeffsrun_fe(atoms_fe,SIZE(fe_ind)))
      ALLOCATE(pcoeffsrun_ct(atoms_ct,SIZE(ct_ind)))
 
@@ -1569,11 +1560,17 @@ SUBROUTINE calc_aom_coup_nacv_fect(sh_env, atoms_fe, elements_fe, fe_pcoeffs,fe_
 
      !XXX IF MULTISTATE THEN 
      !atom list is the first and second molecule of the dimer 
-!WTP_comment: dim of fe_atomlist = 8, atoms_fe =18
-     ALLOCATE(aneighbour(0:size(fe_atomlist),0:atoms_fe))
-     ALLOCATE(bneighbour(0:size(ct_atomlist),0:atoms_ct))
+
+! WTP_comment: abneighbour, used in dRSab. 
+     ALLOCATE(aneighbour(0:size(ct_atomlist),0:atoms_fe)) 
+     ALLOCATE(bneighbour(0:size(fe_atomlist),0:atoms_ct))
      aneighbour = 0
      bneighbour = 0
+
+!print *, " aneighbour(:,0): ", size(aneighbour(:,0))
+!print *, " aneighbour(0,:): ", size(aneighbour(0,:))
+!print *, " bneighbour(:,0): ", size(bneighbour(:,0))
+!print *, " bneighbour(0,:): ", size(bneighbour(0,:))
 
 !print *, "ENTER NEW SINGLE PHASE SUB"
 
@@ -1582,15 +1579,15 @@ SUBROUTINE calc_aom_coup_nacv_fect(sh_env, atoms_fe, elements_fe, fe_pcoeffs,fe_
      ! variable storage of Sab (two molecules may get e.g. further apart and
      ! would not be stored if NN !=1)
  
-     count_ = SIZE(fe_ind)*SIZE(ct_ind)  !WTP_comment: N_FE*N_A (or N_D...)
+     count_ = SIZE(fe_ind)*SIZE(ct_ind)  
      ! Must be deallocated in the mother subroutine
-!WTP_comment: why 3 --> first two dim for indexes, third dim for S..
+!> first two dim for indexes, third dim for S..
      ALLOCATE(Sab_list(3,count_))
      !ALLOCATE(Interac_list(2,count_))
 
      count_ = 0
      ! loop over the index of a single phase
-!WTP_comment: start looping over i=fe_ind, k=ct_ind (= first_ind/second_ind)
+!> start looping over i=fe_ind, k=ct_ind (= first_ind/second_ind)
      do i=1,SIZE(fe_ind)
                ind_i = fe_ind(i)
 
@@ -1610,7 +1607,7 @@ SUBROUTINE calc_aom_coup_nacv_fect(sh_env, atoms_fe, elements_fe, fe_pcoeffs,fe_
                Atp(1,1:atoms_per_mol_i) = dble(elements_fe) ! this is the donor of the pair
                Atp(2:4,1:atoms_per_mol_i) = positions_com_tp(1:3,init_atom_mol_i:final_atom_mol_i)
 
-!WTP_change: re-normalized pcoeff fe, pcoeff ct is done in k loop
+!> re-normalized pcoeff fe, pcoeff ct is done in k loop
                pcoeffsrun_fe(1:atoms_per_mol_i,i) = fe_pcoeffs(1:atoms_per_mol_i)
                call calc_sab(Atp, fe_connlist2, pcoeffsrun_fe(:,i))               
 
@@ -1639,7 +1636,7 @@ SUBROUTINE calc_aom_coup_nacv_fect(sh_env, atoms_fe, elements_fe, fe_pcoeffs,fe_
                     ! geometry is taken for all the molecules from the second
                     ! loop k=1,mol when the first loop is fixed
 
-!!WTP_change: renormalize pcoeff ct here... 
+!> renormalize pcoeff ct here... 
                     IF (i == 1) THEN
                          pcoeffsrun_ct(1:atoms_per_mol_k,k) = ct_pcoeffs(1:atoms_per_mol_k)
                          call calc_sab(Btp, ct_connlist2, pcoeffsrun_ct(:,k))
@@ -1649,13 +1646,12 @@ SUBROUTINE calc_aom_coup_nacv_fect(sh_env, atoms_fe, elements_fe, fe_pcoeffs,fe_
                     !if (mod(itimes-1, sh_env%multiple_time_step) .eq. 0 & 
                     !      .and. sh_env%multiple_time_step .ne. 1) then 
 
-!WTP_comment: best to understand what are a/bneighbour??? minao???
-!WTP_comment: the indexes for a/bneighbour and atoms_per_mol_i/k need double check 
+!WTP_comment: a/bneighbour generated here
                     call sab_screen_new(Atp, fe_atomlist, &
                                         fe_connlist1, pcoeffsrun_fe(:,i),&
-                                        & fe_atomlist, Btp, ct_atomlist, &
+                                        fe_atomlist, Btp, ct_atomlist, &
                                         ct_connlist1, pcoeffsrun_ct(:,k),&
-                                        & aneighbour(:,1:atoms_per_mol_k), bneighbour(:,1:atoms_per_mol_i), &
+                                        aneighbour(:,1:atoms_per_mol_i), bneighbour(:,1:atoms_per_mol_k), &
                                         sh_env%minao)
                      !end if
 
@@ -1663,8 +1659,20 @@ SUBROUTINE calc_aom_coup_nacv_fect(sh_env, atoms_fe, elements_fe, fe_pcoeffs,fe_
                    ! if (sh_env%NN(phase_ind(i),phase_ind(k)) == 1) then 
                         ! we only do the upper diagonal to save time
 
-!!                        if (k>i) then
-!!WTP_change: not just k>i --> b/c we use fe_ind and ct_ind
+!WTP_TEST: print abneighbour
+!!open(22, file = 'aneighbour.log', status = 'old', position="append",action="write")
+!!  write (22,*) "states", i, k
+!!  do temp= 0, atoms_per_mol_i 
+!!    write (22,*) "atoms: ", temp, aneighbour(:,temp) 
+!!  end do
+!!close(22)
+
+!!open(23, file = 'bneighbour.log', status = 'old', position="append",action="write")
+!!  write (23,*) "states", i, k
+!!  do temp= 0, atoms_per_mol_k
+!!    write (23,*) "atoms: ", temp, bneighbour(:,temp) 
+!!  end do
+!!close(23)
  
                            count_  = count_+1
                            !calculate overlap Sab 
@@ -1675,7 +1683,7 @@ SUBROUTINE calc_aom_coup_nacv_fect(sh_env, atoms_fe, elements_fe, fe_pcoeffs,fe_
                                print_rvecs='yes', molA_index=i, molB_index=k)
 
                            !store Sab
-!WTP_comment: Sab_list(1/2, )  are real (molecular) indexes
+!> Sab_list(1/2, )  are real (molecular) indexes
                            Sab_list(1, count_) = dble(fe_ind(i))
                            Sab_list(2, count_) = dble(ct_ind(k))
                            Sab_list(3, count_) = S
@@ -1685,57 +1693,49 @@ SUBROUTINE calc_aom_coup_nacv_fect(sh_env, atoms_fe, elements_fe, fe_pcoeffs,fe_
                           !IF MULTISTATE THEN  XXXX
                             !calculate gradients
 
-!WTP_change: debug...
-!open(22, file= 'navc_parameters.dat', status= 'old', position= 'append', action='write')
-!  write(22,*) 
-!close(22)
-
-!!!WTP_change: deal with calc_dRSab
-
-!WTP_change: debug
-!WTP_2022: check dRSab!!
+!WTP_TEST: print overlap 
 !open(26, file= 'dRSab-variables.dat', status= 'old', position= 'append', action='write')
 !  write(26,*) "count_: ", count_
 !  write(26,*) "S: ", S
 !close(26)
 
-                            call calc_dRSab(Atp, fe_atomlist, &
-                               fe_connlist1, pcoeffsrun_fe(1:atoms_per_mol_i,i), fe_scoeffs, &
-                               nacv_fe(1:3,k,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i), &
-                               nacv_ct(1:3,i,(k-1)*atoms_per_mol_k+1:k*atoms_per_mol_k), &
-                               Btp, ct_atomlist, ct_connlist1, pcoeffsrun_ct(1:atoms_per_mol_k,k), &
+!> deal with calc_dRSab
+
+                            call calc_dRSab(Atp, fe_atomlist, & !!
+                               fe_connlist1, pcoeffsrun_fe(1:atoms_per_mol_i,i), fe_scoeffs, & !!
+                               nacv_fe(1:3,k,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i), & !!
+                               nacv_ct(1:3,i,(k-1)*atoms_per_mol_k+1:k*atoms_per_mol_k), & !!
+                               Btp, ct_atomlist, ct_connlist1, pcoeffsrun_ct(1:atoms_per_mol_k,k), & !!
                                 !sh_env%scoeffs, sh_env%neighbourlist(k,i,:,:),
                                 !&
                                 !         sh_env%neighbourlist(i,k,:,:), dR, &
-                               ct_scoeffs, aneighbour(:,:), bneighbour(:,:), sh_env%dR, &
-                               sh_env%do_random, sh_env)
+                               ct_scoeffs, aneighbour(:,:), bneighbour(:,:), sh_env%dR, & !!
+                               sh_env%do_random, sh_env) !!
+
 
 !WTP_2022: check dRSab values!!
 !!open(26, file= 'dRSab-variables.dat', status= 'old', position= 'append', action='write')
 !!  write(26,*) "count_: ", count_
 !!close(26)
 
-!WTP_change: debug
+!WTP_TEST: print ... 
 !open(21, file = 'nacv_fect_inter.dat', status = 'old', position="append",action="write")
 !  write (21,*) "states", i, k
 !  write (21,*) "atoms_ct", atoms_ct
 !  write (21,*) "index acc", i, "from to", (k-1)*atoms_ct+1, k*atoms_ct
-!  write (21,*) "NAC vector components on the nuclei of the acceptor"
+!  write (21,*) "NAC vector components on the nuclei of the donor"
 !  do temp=(k-1)*atoms_ct+1, k*atoms_ct
 !    write (21,*) nacv_ct(1, i,temp), nacv_ct(2, i,temp), nacv_ct(3, i,temp)
 !  end do
 
 !  write (21,*) "index donor", k, "from to", (i-1)*atoms_fe+1, i*atoms_fe
 !  write (21,*) "atoms_fe", atoms_fe
-!  write (21,*) "NAC vector components on the nuclei of the donor"
+!  write (21,*) "NAC vector components on the nuclei of the acceptor"
 !  do temp=(i-1)*atoms_fe+1, i*atoms_fe
 !    write (21,*) nacv_fe(1, k,temp), nacv_fe(2, k,temp), nacv_fe(3, k ,temp)
 !  enddo
 !close(21)
 
-
-!!WTP_change: not just for k>i...
-!!                       end if !over the upper diag
                end do !loop over k
 
      end do !loop over i
@@ -1745,7 +1745,7 @@ SUBROUTINE calc_aom_coup_nacv_fect(sh_env, atoms_fe, elements_fe, fe_pcoeffs,fe_
      DEALLOCATE(pcoeffsrun_fe)
      DEALLOCATE(pcoeffsrun_ct)
      DEALLOCATE(aneighbour,bneighbour)
-
+     !DEALLOCATE(Sab_list) !WTP_MEM
 
 END SUBROUTINE calc_aom_coup_nacv_fect
 

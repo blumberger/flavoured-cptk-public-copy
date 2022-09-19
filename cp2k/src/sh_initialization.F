@@ -242,9 +242,11 @@ CONTAINS
     sh_env%aom_couplings_keyword = .FALSE.
     sh_env%frozen_couplings_keyword = .FALSE.
     sh_env%tresp_couplings_keyword = .FALSE.
-    sh_env%Gaussian_charges = .FALSE.
+
+    !WTP_for_X-SH: !! .TRUE.
+    sh_env%Gaussian_charges = .TRUE.
+
     sh_env%multiphase_couplings_keyword = .FALSE.
-    !WTP_change
     sh_env%multifect_couplings_keyword = .FALSE.
 
     SELECT CASE(coupling_keyword)
@@ -265,21 +267,13 @@ CONTAINS
          sh_env%freeze_multip_forces = .FALSE.
          CALL set_aom_env_multip(nadiab, norbitals, natom,positions_tp,adiab_section,sh_env)
     !------------------------------------------------------------------------------------------
-    !WTP_change
     CASE("MULTI-FECT")
          sh_env%multifect_couplings_keyword = .TRUE.
 
-!aom_env...
-!temp::::
          sh_env%freeze_multip_forces = .FALSE.  !??? do I need this
 
-!WTP_comment: FE block (TRESP) is also intialized in the following subroutine
+         !> FE block (TRESP) is also intialized in the following subroutine
          CALL set_aom_env_fect(nadiab, norbitals, natom,positions_tp,adiab_section,sh_env)
-
-!WTP_comment: do the following TRESP part in set_aom_env_fect section...
-!!        sh_env%tresp_couplings_keyword = .TRUE.  
-        !sh_env%frozen_couplings_keyword = .TRUE.  !test
-        !sh_env%first_off_d_Hab = -0.0011024789     !test
 
     !------------------------------------------------------------------------------------------
     CASE("FROZEN_COUPLINGS")
@@ -468,7 +462,6 @@ CONTAINS
 
 
      !> READ THE AOM COEFFICIENT of DONOR and ACCEPTOR
-!WTP_comment: here, read in the xxx_AOM_xxx.include files for donors/acceptors
      CALL section_vals_list_get(coupling_section,"_DEFAULT_KEYWORD_",list=listcoeff) !Read them in the input files
      !Transform them into four arrays. In this case external presence is not read anymore.
      CALL read_listcoeff(listcoeff, ext_elements_d, active_logical, &
@@ -598,7 +591,7 @@ CONTAINS
 
   END SUBROUTINE set_aom_env_multip
 
-!WTP_change: for X-SH
+  !> for X-SH
   SUBROUTINE set_aom_env_fect(nadiab,  norbitals, natom, &
                                   positions_tp,     &
                                   adiab_section,    &
@@ -615,16 +608,13 @@ CONTAINS
 
      REAL(KIND=dp), DIMENSION(:), ALLOCATABLE       :: pcoefftot_d, scoefftot_d, &
                                                        pcoefftot_a, scoefftot_a
-!WTP_change:
      REAL(KIND=dp), DIMENSION(:), ALLOCATABLE       :: pcoefftot_fe, scoefftot_fe, &
                                                        pcoefftot_ct, scoefftot_ct
 !     TYPE(section_vals_type), POINTER               :: optimization_section
      integer                                        :: mat, i !,act_atoms
      integer, dimension(:), ALLOCATABLE             :: ext_elements_d, ext_elements_a
-!WTP_change:
      integer, dimension(:), ALLOCATABLE             :: ext_elements_fe, ext_elements_ct
      integer, dimension(:), ALLOCATABLE             :: ext_elements
-!WTP_change:
      CHARACTER(LEN=default_string_length)           :: fe_keyword
 
 
@@ -637,14 +627,11 @@ CONTAINS
      CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_C_S,file_name_s_ppi_C_S
      CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_S_S,file_name_s_ppi_S_S
      TYPE(section_vals_type), POINTER               :: coupling_section, site_energy_section, ct_block
-     TYPE(section_vals_type), POINTER               :: fe_block, fect_block !WTP_change
+     TYPE(section_vals_type), POINTER               :: fe_block, fect_block 
      !INTEGER                                        :: aom_atoms, mol
      integer                                        :: atoms_per_donor, atoms_per_acceptor
-!WTP_change: maybe we don't need these...
+     !>WTP_comment: maybe we don't need these...
      integer                                        :: atoms_per_fe, atoms_per_ct
-     INTEGER, DIMENSION(:), POINTER                 :: ct_index, fe_index
-!WTP_change: end (maybe get rid of these...)
-!WTP_change: TRESP
      TYPE(section_vals_type), POINTER               :: tresp_coupling_section
 
      INTEGER, DIMENSION(:), POINTER                 :: donor_index, acceptor_index
@@ -656,26 +643,19 @@ CONTAINS
      INTEGER                                        :: init_atom_mol_ct, final_atom_mol_ct, atoms_per_mol_ct
 
      NULLIFY(listcoeff)
-!     NULLIFY(optimization_section) !WTP_change: comment out
      NULLIFY(coupling_section)
      NULLIFY(site_energy_section, ct_block)
-!WTP_change:
      NULLIFY(site_energy_section, fe_block)
      NULLIFY(site_energy_section, fect_block)
 
-!WTP_comment: here, to get the section name/
      coupling_section => section_vals_get_subs_vals(adiab_section, "AOM")
-!WTP_change: comment out...
-!     optimization_section => section_vals_get_subs_vals(adiab_section,"OPTIMIZATION")
 
      site_energy_section => section_vals_get_subs_vals(adiab_section,"METHOD_SITE_ENERGIES")
      !get CT block for donor and acceptor
      ct_block => section_vals_get_subs_vals(site_energy_section,"CT_BLOCK")
-!WTP_change: 
      fe_block => section_vals_get_subs_vals(site_energy_section,"FE_BLOCK")
      fect_block => section_vals_get_subs_vals(site_energy_section,"FE_CT_BLOCK")
 
-!WTP_comment: coupling_section::
      !> Initialize input parameters: 
      !> cutoff to define the neighborough list
      CALL section_vals_val_get(coupling_section,"CUT_OFF_CONNECTIVITY",&
@@ -684,7 +664,6 @@ CONTAINS
      CALL section_vals_val_get(coupling_section,"CUT_OFF_BETWEEN_SITES",&
              r_val=sh_env%cutoff_sites)
      !> minao is an atomic overlap cutoff
-!WTP_comment: ATOMIC_OVERLAP_CUTOFF 1e-17 in AOM section
      CALL section_vals_val_get(coupling_section,"ATOMIC_OVERLAP_CUTOFF",&
              r_val=sh_env%minao)
      !> dR is the increment for the gradient finite difference calculation
@@ -695,7 +674,8 @@ CONTAINS
      CALL section_vals_val_get(coupling_section,"ANALYTICS", l_val=sh_env%analytics)
      !> This remove bias coming from the finite difference calculation of the
       !> gradients of the Hamiltonian from AOM
-!WTP_comment:: RANDOM_DERIVATIVE card not exists in the input...
+
+     !WTP_comment:: RANDOM_DERIVATIVE card not exists in the input...
      CALL section_vals_val_get(coupling_section,"RANDOM_DERIVATIVE", l_val=sh_env%do_random)
 
      !> Create the overlap look-up table for the AOM coupling calculation
@@ -718,7 +698,6 @@ CONTAINS
              r_val=sh_env%scaling_donor)
      CALL section_vals_val_get(coupling_section,"SCALING_FACTOR_ACCEPTOR",&
              r_val=sh_env%scaling_acceptor)
-!WTP_change
      CALL section_vals_val_get(coupling_section,"SCALING_FACTOR_FECT",&
              r_val=sh_env%scaling_fect)
 
@@ -740,7 +719,7 @@ CONTAINS
      CALL section_vals_val_get(ct_block,"INDEX_ACCEPTOR_MOLS",&
                 i_vals=acceptor_index)
 
-!WTP_chagne: FE_CT_BLOCK subsection...
+     !> X-SH: FE_CT_BLOCK subsection...
      CALL section_vals_val_get(fect_block,"FE_IS", c_val=fe_keyword)
 
      SELECT CASE(fe_keyword)
@@ -748,23 +727,14 @@ CONTAINS
          sh_env%fe_donor = .TRUE.
          atoms_per_fe = atoms_per_donor
          atoms_per_ct = atoms_per_acceptor
-         ALLOCATE(fe_index(SIZE(donor_index)))  
-         fe_index = donor_index
-         ALLOCATE(ct_index(SIZE(acceptor_index)))
-         ct_index = acceptor_index
      CASE("ACCEPTOR")
          sh_env%fe_donor = .FALSE.
          atoms_per_fe = atoms_per_acceptor
          atoms_per_ct = atoms_per_donor
-         ALLOCATE(fe_index(SIZE(acceptor_index)))
-         fe_index = acceptor_index
-         ALLOCATE(ct_index(SIZE(donor_index)))
-         ct_index = donor_index
      END SELECT
 
      !> READ THE AOM COEFFICIENT of DONOR and ACCEPTOR
-!WTP_comment: here, read in the xxx_AOM_xxx.include files 
-!WTP_comment: everything (for FECT, 4 AOM include files) be read in listcoeff,
+!WTP_comment: everything (for X-SH, 4 AOM include files) be read in listcoeff,
 !then read by read_listcoeff subroutine. This makes sanity check for input
 !difficult. Thus, need to make sure 4 AOM files in the order: 1. DONOR 2.
 !ACCEPTOR 3. FE 4 CT
@@ -775,12 +745,11 @@ CONTAINS
                          scoefftot_d, pcoefftot_d, atoms_per_donor) !donor
      CALL read_listcoeff(listcoeff, ext_elements_a, active_logical, &
                          scoefftot_a, pcoefftot_a, atoms_per_acceptor) !acceptor
-!WTP_change: AOM for FE-CT 
+     !> AOM for X-SH
      CALL read_listcoeff(listcoeff, ext_elements_fe, active_logical, &
                          scoefftot_fe, pcoefftot_fe, atoms_per_fe) !FE:: donor/acceptor
      CALL read_listcoeff(listcoeff, ext_elements_ct, active_logical, &
                          scoefftot_ct, pcoefftot_ct, atoms_per_ct) !CT:: donor/acceptor
-!WTP_comment: ext_elements_fe 6 6 6 6 1 1 ... (atomic numbers...)
 
      !get the first mol of the donor and the first of the acceptor phase 
      init_atom_mol_d = sh_env%full_system_info(1,donor_index(1)) !just get the first donor
@@ -791,7 +760,6 @@ CONTAINS
      final_atom_mol_a = sh_env%full_system_info(2,acceptor_index(1))
      atoms_per_mol_a = (final_atom_mol_a-init_atom_mol_a)+1
 
-!WTP_change:
      SELECT CASE(fe_keyword)
      CASE("DONOR")
         init_atom_mol_fe = init_atom_mol_d
@@ -824,21 +792,18 @@ CONTAINS
      !norbitals must be 1: we have not implemented degeneracy in the ffollowing
      mat = norbitals*nadiab !> Size of the vectorial space where the wavefunctions are projected
 
-!WTP_comment: 420 atoms = D atoms + A atoms...
-!     act_atoms = COUNT(sh_env%ext_pres) !> Numbers of active atoms
-
-!WTP_change: TRESP relavant 
+     !> TRESP relavant 
      NULLIFY(tresp_coupling_section)
      NULLIFY(list_tresp)
      tresp_coupling_section => section_vals_get_subs_vals(adiab_section, "TRESP_COUPLINGS")
      !> READ TRESP CHARGES TEST
      CALL section_vals_list_get(tresp_coupling_section,"_DEFAULT_KEYWORD_",list=list_tresp)!Read list tresp from input
-!WTP_change: CUT_OFF_BETWEEN_SITES --> CUT_OFF_BETWEEN_FE_SITES (avoid duplicate from CT site)
      CALL section_vals_val_get(tresp_coupling_section,"CUT_OFF_BETWEEN_FE_SITES",&
           r_val=sh_env%cutoff_sites_fe)
      !> determine if the TRESP are taken from Gaussian code and divide by
      ! sqrt(2) if that's the case (see Multiwfn.pdf for explanation)
-!WTP_comment: do I need this???
+
+!>WTP_comment: maybe check gaussian_charges... 
 !!     CALL section_vals_val_get(tresp_coupling_section,"TRESP_FROM_GAUSSIAN",&
 !!          l_val=sh_env%Gaussian_charges)
      !### COMMENT_SG: not general for multiphase: but it could be easily
@@ -856,13 +821,7 @@ CONTAINS
      !this would need to be generalized
                    !for multiple molecule kind so that the coupling
                    !calculation is general for any num atoms per molecule
-!WTP_comment: active_logical?? 
      CALL read_list_tresp(sh_env%atoms_per_site, list_tresp, ext_elements, active_logical, sh_env%tresp_charges)
-
-!WTP_change: debug
-!     WRITE(*,*) 'ext_elements: ', ext_elements
-!     WRITE(*,*) 'tresp_charges: ', sh_env%tresp_charges
-!WTP_change: end debug
 
      !> active_logical is not necessary since inactive atoms will anyway have
      !0
@@ -870,13 +829,12 @@ CONTAINS
 
      !c = nadiab*sh_env%atoms_per_site !> Numbers of active atoms per mol 
 
-!WTP_change: comment out NN/grad_tresp. deal with them differently in X-SH 
-!WTP_change: sh_env%crds seems not in use...
+!WTP_comment: comment out NN/grad_tresp. deal with them differently in X-SH 
 !!     allocate(sh_env%crds(3,COUNT(sh_env%ext_pres),3))  !> crds active atoms
 !!     ALLOCATE(sh_env%NN(mat, mat))
 !!     ALLOCATE(sh_env%grad_tresp(3,mat, COUNT(sh_env%ext_pres)))
 
-!WTP_change: nacv_fe=<CT|grad_I XT>, nacv_ct=<XT|grad_I CT> 
+     !WTP_comment: nacv_fe=<CT|grad_I XT>, nacv_ct=<XT|grad_I CT> 
      IF (sh_env%fe_donor) THEN
        ALLOCATE(sh_env%NN(SIZE(donor_index),SIZE(donor_index)))
        ALLOCATE(sh_env%grad_tresp(3,SIZE(donor_index), SIZE(donor_index)*atoms_per_donor))
@@ -889,7 +847,6 @@ CONTAINS
        ALLOCATE(sh_env%nacv_ct(3,SIZE(acceptor_index), SIZE(donor_index)*atoms_per_donor ))
      END IF
 
-!WTP_change: the dim for nacv_d/aphase and nacv_fe/ct should not have mat...
      ALLOCATE(sh_env%nacv_dphase(3,SIZE(donor_index)*SIZE(acceptor_index), &
                                              SIZE(donor_index)*SIZE(acceptor_index)*atoms_per_mol_d))
      ALLOCATE(sh_env%nacv_aphase(3,SIZE(donor_index)*SIZE(acceptor_index), &
@@ -898,17 +855,15 @@ CONTAINS
      sh_env%nacv_aphase = 0.0_dp
      sh_env%nacv_fe = 0.0_dp
      sh_env%nacv_ct = 0.0_dp
+     sh_env%grad_tresp = 0.0_dp 
 
      !!> crds is an AOM arrays (xyz, atoms, tm-t-tp) the third dimension
      !!indicates what time the coordinates refer to
      !allocate(sh_env%crds(3,act_atoms,3))
 
 !WTP_comment: NN seems not used in the CT part, so..
-!WTP_change: --> NN comment out from CT part and only allocate for FE part...
+!WTP_comment: --> NN comment out from CT part and only allocate for FE part...
 !!     ALLOCATE(sh_env%NN(SIZE(sh_env%index_active_mols), SIZE(sh_env%index_active_mols)))
-!WTP_change: debug
-!!     WRITE(*,*) 'NN1 allocated again...: ', SIZE(sh_env%NN,1)
-!WTP_change: debug end
 
      allocate(sh_env%siteenergies(3,mat))  !COMMENT_SG: First dimension is not usefull
      sh_env%siteenergies = 0.0_dp
@@ -989,7 +944,6 @@ CONTAINS
      DEALLOCATE(scoefftot_a)
      DEALLOCATE(pcoefftot_a)
 
-!WTP_change:
      !> READ THE AOM COEFFICIENT ACCEPTOR PHASE! 
      !> CONSTRUCT THE CONNLIST 
      allocate(submask(atoms_per_fe))   !temp array
@@ -1031,7 +985,7 @@ CONTAINS
      DEALLOCATE(scoefftot_fe)
      DEALLOCATE(pcoefftot_fe)
 
-!WTP_comment: then CT part
+     !WTP_comment: then CT part
      allocate(submask(atoms_per_ct))   !temp array
      submask =.NOT.((scoefftot_ct.eq.0).AND.(pcoefftot_ct.eq.0)) !Only select atoms with orbitals
 

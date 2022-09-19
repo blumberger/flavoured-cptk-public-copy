@@ -208,9 +208,10 @@ SUBROUTINE multi_block_energies_forces(adiab_section,energies_1_mol_list, energi
    INTEGER                                   :: i,j, ind1, ind2!, indfirst,indsec
    INTEGER                                   :: start_i,end_i,start_j,end_j,atoms
    TYPE(section_vals_type), POINTER          :: site_energy_section
-   TYPE(section_vals_type), POINTER          :: ct_block, fect_block  !WTP_change: fect_block
-   CHARACTER(LEN=default_string_length)           :: fe_keyword  !WTP_change
-   INTEGER, DIMENSION(:), POINTER            :: donor_index, acceptor_index, exc_index
+   TYPE(section_vals_type), POINTER          :: ct_block, fect_block  
+   CHARACTER(LEN=default_string_length)           :: fe_keyword  
+   INTEGER, DIMENSION(:), POINTER            :: donor_index, acceptor_index !, exc_index
+   INTEGER, DIMENSION(:), allocatable            :: exc_index
    INTEGER                                   :: total_states, state,nadiab, natom
    INTEGER, DIMENSION(:,:), ALLOCATABLE      :: intra_forces_info
    INTEGER, DIMENSION(:), ALLOCATABLE        :: first_ind, second_ind, exc_ind
@@ -231,7 +232,6 @@ SUBROUTINE multi_block_energies_forces(adiab_section,energies_1_mol_list, energi
    CALL section_vals_val_get(ct_block,"INDEX_ACCEPTOR_MOLS",&
                         i_vals=acceptor_index)
 
-!WTP_change:
    ind1 = donor_index(1) 
    do i=2,SIZE(donor_index)
       if (donor_index(i) .le. ind1) THEN 
@@ -300,13 +300,6 @@ SUBROUTINE multi_block_energies_forces(adiab_section,energies_1_mol_list, energi
      end do 
    end do
    
-!   print *, "DECOMP", my_mol_index
-!   print *, "DONOR IND", donor_index
-!   print *, "ACCEPTOR IND", acceptor_index
-!   print *, "FIRST IND", first_ind
-!   print *, "SEC IND", second_ind
-
-!WTP_change: get exc_index directly from donor or acceptor indexes...
     if (fe_block_keyword) then 
         fect_block => section_vals_get_subs_vals(site_energy_section,"FE_CT_BLOCK")
         CALL section_vals_val_get(fect_block,"FE_IS", c_val=fe_keyword)
@@ -361,13 +354,6 @@ SUBROUTINE multi_block_energies_forces(adiab_section,energies_1_mol_list, energi
          my_energies(state) = energies(1) + &
                   energies_1_mol_list(2,ind1) - energies_1_mol_list(1,ind1) + & 
                   energies_1_mol_list(2,ind2) - energies_1_mol_list(1,ind2)  
-
-!WTP_change: debug
-!         IF (MOD(state,10) == 0) THEN
-!           WRITE(*,*) 'CT energies 2: ', energies_1_mol_list(2,ind1)
-!           WRITE(*,*) 'CT energies 1: ', energies_1_mol_list(1,ind1)
-!         END IF
-!print *, "ENER:", my_energies(state)
 
          !> we allocate diagonal forces array. All the atoms for a give state i
          !get the value of the neutral force_field that contains: intra +
@@ -508,6 +494,7 @@ SUBROUTINE multi_block_energies_forces(adiab_section,energies_1_mol_list, energi
    DEALLOCATE(intra_forces_info)
    DEALLOCATE(first_ind)
    DEALLOCATE(second_ind)
+   DEALLOCATE(exc_index) 
 
 END SUBROUTINE multi_block_energies_forces
 

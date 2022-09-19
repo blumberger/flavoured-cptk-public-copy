@@ -77,7 +77,6 @@ MODULE non_adiabatic_utils
                   calc_coms_and_nlist_fect_fe,     &
                   calc_tresp_coup,                 &
                   !calc_tresp_coup_test,                 &
-                  !WTP_change:
                   calc_tresp_coup_fect,            &
                   calc_frozen_H,                   &
                   calcforces_smart_grad,           &
@@ -158,7 +157,6 @@ SUBROUTINE calc_coms_and_nlist(cutoff_sites, orb, crds, active_system_info, NN)
      end do
 
      !CONSTRUCT NEIGHBOURS LIST
-!WTP_comment: NN list constructed here... 
      do i=1,SIZE(active_system_info,2)
           do j=1,SIZE(active_system_info,2)
                !> this is like a DOT_PRODUCT to calculate distance
@@ -188,7 +186,6 @@ SUBROUTINE calc_coms_and_nlist(cutoff_sites, orb, crds, active_system_info, NN)
     deallocate(coms)
 END SUBROUTINE calc_coms_and_nlist
 
-!WTP_change: NN only used for FE block in fect calculations...
 SUBROUTINE calc_coms_and_nlist_fect_fe(sh_env, cutoff_sites, orb, crds, adiab_section, NN)
 
      !INTEGER, INTENT(IN)                             :: mol, orb
@@ -207,7 +204,6 @@ SUBROUTINE calc_coms_and_nlist_fect_fe(sh_env, cutoff_sites, orb, crds, adiab_se
      REAL(KIND=dp)                                   :: dist
      REAL(KIND=dp), dimension(:,:), ALLOCATABLE      :: coms
 
-!WTP_change: for getting FE molecules info
      TYPE(sh_env_type)                               :: sh_env
      TYPE(section_vals_type), POINTER               :: adiab_section
      TYPE(section_vals_type), POINTER               :: ct_block
@@ -227,13 +223,11 @@ SUBROUTINE calc_coms_and_nlist_fect_fe(sh_env, cutoff_sites, orb, crds, adiab_se
      END IF
 
      allocate(coms(3,SIZE(fe_ind)))
-!WTP_comment: coms(3, #of_mol)   
 
      !CALCULATE THE CENTER OF MASS
      !calculate CoMs at first timestep
      !coms(1 to 3,i) are the x, y and z coordinates of CoM of i
      coms = 0
-!WTP_comment: do 1 to #of_mol...
      do i=1,SIZE(fe_ind)
           !> counts the active atoms for each molecules to make it general
 
@@ -243,26 +237,20 @@ SUBROUTINE calc_coms_and_nlist_fect_fe(sh_env, cutoff_sites, orb, crds, adiab_se
           ! loop over atoms
           do m=init_atom_mol_i, final_atom_mol_i
                do d=1,3
-!WTP_comment: not COM??? --> no mass.. just center???
                     coms(d,i) = coms(d,i) + (crds(d,m))/atoms
                end do
           end do
      end do
-!WTP_comment: coms? --> coms(3,i) is the ith mol's center coord...
 
      !CONSTRUCT NEIGHBOURS LIST
-!WTP_comment: NN list constructed here...
-     do i=1,SIZE(fe_ind) !WTP_comment: do i=1 to #ofMol...
+     do i=1,SIZE(fe_ind) 
           do j=1,SIZE(fe_ind)
                !> this is like a DOT_PRODUCT to calculate distance
-!WTP_comment: dist --> sq of distance between mol_i and mol_j...
                dist = ((coms(1,i) - coms(1,j))*(coms(1,i) &
                 - coms(1,j)) + (coms(2,i) - coms(2,j))*&
                &(coms(2,i) - coms(2,j)) + (coms(3,i) &
                 - coms(3,j))*(coms(3,i) - coms(3,j)))
                if (dist < cutoff_sites*cutoff_sites) then
-!WTP_comment: now d and m can only be 1..., so here construct NN(i,j) for mol_i
-!and mol_j...
                     do d=1,orb
                          do m=1,orb
                               NN(orb*(i-1)+d,orb*(j-1)+m) = 1
@@ -278,9 +266,6 @@ SUBROUTINE calc_coms_and_nlist_fect_fe(sh_env, cutoff_sites, orb, crds, adiab_se
           end do
      end do
 
-!do i=1,SIZE(active_system_info,2)
-!print *, "CONNECTIVITY", NN(i,:)
-!end do
     deallocate(coms)
 END SUBROUTINE calc_coms_and_nlist_fect_fe
 
@@ -478,7 +463,7 @@ END SUBROUTINE calc_coms_and_nlist_fect_fe
   subroutine calc_tresp_coup_fect(sh_env, energies_tp, orb, positions_com_tp, adiab_section)
 
      TYPE(sh_env_type)                               :: sh_env
-     REAL(kind=dp), DIMENSION(:),  POINTER           :: energies_tp !WTP_comment: my_energies
+     REAL(kind=dp), DIMENSION(:),  POINTER           :: energies_tp 
      integer, intent(in)                             :: orb
      REAL(KIND=dp), DIMENSION(:), ALLOCATABLE        :: tresp_charges  !tresp charges taken from input file, they refer 
                                                                        !to a single mol and should be extended
@@ -502,7 +487,7 @@ END SUBROUTINE calc_coms_and_nlist_fect_fe
      TYPE(section_vals_type), POINTER               :: adiab_section
      TYPE(section_vals_type), POINTER               :: ct_block
      TYPE(section_vals_type), POINTER               :: site_energy_section
-     INTEGER, DIMENSION(:), POINTER                 :: fe_ind
+     INTEGER, DIMENSION(:), allocatable                 :: fe_ind
      INTEGER, DIMENSION(:), POINTER                 :: donor_ind, acceptor_ind
      INTEGER                                        :: total_CT_states
 
@@ -545,7 +530,6 @@ END SUBROUTINE calc_coms_and_nlist_fect_fe
 
      sh_env%grad_tresp = 0.0D0
 
-!WTP_change: SIZE(energies_tp) --> SIZE(fe_ind)
      do i=1,SIZE(fe_ind) 
         do k=1,SIZE(fe_ind)
            ! do calculation only for molecules within cut-off radious. 
@@ -556,10 +540,8 @@ END SUBROUTINE calc_coms_and_nlist_fect_fe
                  !since you may want to include multiple orbital per state, you
                  !should loop over orbitals
                  do d=1,orb
-!WTP_change: add total_CT_states
                     sh_env%H_tp(orb*(i-1)+d+total_CT_states,orb*(k-1)+d+total_CT_states) = &
                                cmplx(0.0D0,(-energies_tp(i+total_CT_states)),dp)
-!minus because we propagate -X
                  end do
               else
                  !loop over upper diagonal
@@ -569,7 +551,7 @@ END SUBROUTINE calc_coms_and_nlist_fect_fe
                           !> find coordinates mol 1 of the pair
 !WTP_change: sh_env%active_system_info(1,i) -->
 !or sh_env%full_system_info(1,fe_ind(i))... active vs full difference??
-!WTP_buggy:
+!WTP_comment: since use active might be buggy...
                           init_atom_mol_i = sh_env%active_system_info(1,fe_ind(i))
                           final_atom_mol_i = sh_env%active_system_info(2,fe_ind(i))
                           atoms_per_mol_i = (final_atom_mol_i-init_atom_mol_i)+1
@@ -640,6 +622,7 @@ END SUBROUTINE calc_coms_and_nlist_fect_fe
      end do
 
     DEALLOCATE(charges1,charges2)
+    DEALLOCATE(fe_ind) 
 
   end subroutine  calc_tresp_coup_fect
 
@@ -1730,18 +1713,14 @@ subroutine calc_hop_nacv_approx_fect(adiab_section, instate, C, Fin, &
         LOGICAL, dimension(:), INTENT(IN)           :: ext_pres
         INTEGER, DIMENSION(:,:), ALLOCATABLE, &
                                       INTENT(IN)     :: full_system_info
-        !REAL(KIND=dp), intent(in), OPTIONAL          :: convert_nacv
         REAL(KIND=dp), INTENT(in), DIMENSION(:,:,:)  :: nacv_dphase
         REAL(KIND=dp), INTENT(in), DIMENSION(:,:,:)  :: nacv_aphase
-!WTP_change:
         REAL(KIND=dp), INTENT(in), DIMENSION(:,:,:)  :: nacv_fe
         REAL(KIND=dp), INTENT(in), DIMENSION(:,:,:)  :: nacv_ct
         REAL(KIND=dp), INTENT(in), DIMENSION(:,:,:)  :: nacv !for tresp
         REAL(KIND = dp), INTENT(IN)                    ::  scaling_C_fect
         REAL(KIND = dp), INTENT(IN)                  :: scaling_C_donor, scaling_C_acceptor
         INTEGER, DIMENSION(:), ALLOCATABLE, INTENT(IN) :: my_mol_index
-        !REAL(KIND=dp), dimension(:,:), POINTER, &
-        !                               OPTIONAL      :: forces_adiab
         REAL(KIND=dp), DIMENSION(:), ALLOCATABLE, &
                              INTENT(IN), OPTIONAL    :: E_tp
         LOGICAL, OPTIONAL, INTENT(IN)                :: frozen_c
@@ -1756,16 +1735,11 @@ subroutine calc_hop_nacv_approx_fect(adiab_section, instate, C, Fin, &
         integer                                     :: i, j, d, k!, m
         INTEGER                                     :: natom, nadiab
         INTEGER                                     :: num_mol, num_don, num_acc
-!        REAL(KIND=dp)                               :: convert_grad_to_forces
         LOGICAL                                     :: my_frozen_c, donor_phase, acceptor_phase
         INTEGER, DIMENSION(:), POINTER              :: donor_index, acceptor_index
         TYPE(section_vals_type), POINTER            :: site_energy_section, ct_block, fect_block
      CHARACTER(LEN=default_string_length)           :: fe_keyword
         LOGICAL, dimension(:), ALLOCATABLE          :: ext_pres_fe
-!        INTEGER, DIMENSION(:,:), ALLOCATABLE        :: CT_states_info
-!        INTEGER                                     :: ind1, ind2, state, kalpha, num_molalpha, alpha, count_, k
-!        INTEGER, DIMENSION(:), ALLOCATABLE          :: first_ind, second_ind
-!        integer                                     :: atoms_per_donor, atoms_per_acceptor, total_states
         INTEGER                                     :: old_state, new_state
         REAL(KIND=dp)                               :: E_old_state, E_new_state, diff_energy
         REAL(KIND=dp), dimension(:,:), allocatable  :: F_1
@@ -1776,7 +1750,7 @@ subroutine calc_hop_nacv_approx_fect(adiab_section, instate, C, Fin, &
 
         !NB: The following subroutine WILL NOT work if orb !=1 (degeneracy). 
 
-        NULLIFY(site_energy_section,ct_block)
+        NULLIFY(site_energy_section,ct_block,fect_block) 
 
         !Note that Fin(d,j,i) is the array of diagonal forces and its dimension
                             !stops at the number of total force_evals
@@ -1820,30 +1794,19 @@ subroutine calc_hop_nacv_approx_fect(adiab_section, instate, C, Fin, &
        CALL section_vals_val_get(ct_block,"INDEX_ACCEPTOR_MOLS",&
                           i_vals=acceptor_index)
 
-       ! not stricly necessary as this info is already elsewhere
-!       CALL section_vals_val_get(ct_block,"N_DONOR_ATOMS",&
-!                i_val=atoms_per_donor)
-!       CALL section_vals_val_get(ct_block,"N_ACCEPTOR_ATOMS",&
-!                i_val=atoms_per_acceptor)
-
-!WTP_change:
        fect_block => section_vals_get_subs_vals(site_energy_section,"FE_CT_BLOCK")
        CALL section_vals_val_get(fect_block,"FE_IS", c_val=fe_keyword)
 
-
-!WTP_change: ext_pres_fe...
     ALLOCATE(ext_pres_fe(natom))
     ext_pres_fe(:) = .FALSE.
 
     SELECT CASE (fe_keyword)
     CASE("DONOR")
-!WTP_change: better ways for fee_ind/ctt_ind? 
+!WTP_comment: better ways for fee_ind/ctt_ind? 
          ALLOCATE(fee_ind(SIZE(donor_index)))
          fee_ind = donor_index
          ALLOCATE(ctt_ind(SIZE(acceptor_index)))
          ctt_ind = acceptor_index
-!         atoms_per_fe = atoms_per_donor
-!         atoms_per_ct = atoms_per_acceptor
 
          do i=1, SIZE(full_system_info(1,:))
              IF (ANY(donor_index==i)) then
@@ -1856,13 +1819,10 @@ subroutine calc_hop_nacv_approx_fect(adiab_section, instate, C, Fin, &
          end do
 
     CASE("ACCEPTOR")
-!WTP_change:
          ALLOCATE(ctt_ind(SIZE(donor_index)))
          ctt_ind = donor_index
          ALLOCATE(fee_ind(SIZE(acceptor_index)))
          fee_ind = acceptor_index
-!         atoms_per_ct = atoms_per_donor
-!         atoms_per_fe = atoms_per_acceptor
 
          do i=1, SIZE(full_system_info(1,:))
              IF (ANY(acceptor_index==i)) then
@@ -1876,7 +1836,6 @@ subroutine calc_hop_nacv_approx_fect(adiab_section, instate, C, Fin, &
 
     END SELECT
 
-!WTP_change: total_states --> total_CT_states...
        total_CT_states = SIZE(donor_index)*SIZE(acceptor_index)
        total_FE_states = SIZE(fee_ind)
        total_states = total_CT_states + total_FE_states
@@ -1888,10 +1847,9 @@ subroutine calc_hop_nacv_approx_fect(adiab_section, instate, C, Fin, &
            CPABORT("DEGENERATE ORBITALS NOT IMPLEMENTED")
        END IF
 
-!WTP_change: paste from forces
         SELECT CASE (fe_keyword)
         CASE("DONOR")   !FE_IS DONOR
-!WTP_comment: atom belongs to Donor
+            !> atom belongs to Donor
             do d=1,3
                num_don = 0
                num_acc = 0
@@ -1900,13 +1858,13 @@ subroutine calc_hop_nacv_approx_fect(adiab_section, instate, C, Fin, &
                   donor_phase = .FALSE.
                   acceptor_phase = .FALSE.
 
-                  !WTP_change: diagonal forces from CT and FE blocks
+                  !> diagonal forces from CT and FE blocks
                   do i=1,total_states
                     F_1(d,j) = F_1(d,j) + (C(i,new_state)*Fin(d,j,i)*C(i,old_state))*diff_energy 
                   end do
 
                   IF (my_frozen_c) THEN
-                    CYCLE !WTP_comment: frozen coupling only need diag F
+                    CYCLE !> frozen coupling only need diag F
                   END IF
 
                   IF (ext_pres(j)) THEN
@@ -1933,7 +1891,7 @@ subroutine calc_hop_nacv_approx_fect(adiab_section, instate, C, Fin, &
                           EXIT
                         ENDIF
                       end do
-                    !ELSE !drop exception, is this possible??
+                    !ELSE !drop exception?
                     !  print *, "the molecule is neither donor nor acceptor: ",
                     !  i
                     !  CPABORT("ACTIVE MOL NEITHER D NOR A")
@@ -1944,10 +1902,10 @@ subroutine calc_hop_nacv_approx_fect(adiab_section, instate, C, Fin, &
                   IF (donor_phase) THEN !(FE_IS D), I is D
                       do i= 1, SIZE(fee_ind) !DONOR here
 
-                          !WTP_change: from FE block (off-diag)
+                          !> from FE block (off-diag)
                           IF (i .ne. n_I) THEN
                             F_1(d,j) = F_1(d,j) + &
-                                      nacv(d,i,num_don)*diff_energy* &
+                                      nacv(d,i,num_don)*diff_energy*(-1.0D0)* &
                                       (C(n_I+total_CT_states,new_state)*C(i+total_CT_states,old_state) + &
                                        C(n_I+total_CT_states,old_state)*C(i+total_CT_states,new_state))
                           ENDIF
@@ -1956,16 +1914,14 @@ subroutine calc_hop_nacv_approx_fect(adiab_section, instate, C, Fin, &
 
                             IF (i .ne. n_I) THEN
 
-                              !WTP_comment: from CT block (off-diag)
+                              !> from CT block (off-diag)
                               F_1(d,j) = F_1(d,j) + &
                                 nacv_dphase(d,i,num_don)*diff_energy*(-scaling_C_donor)* &
                                 (C(k+(i-1)*SIZE(ctt_ind),new_state)*C(k+(n_I-1)*SIZE(ctt_ind),old_state) + &
                                 C(k+(i-1)*SIZE(ctt_ind),old_state)*C(k+(n_I-1)*SIZE(ctt_ind),new_state))
-                              !WTP_comment: check? num_don, C indexes..
-                              !WTP_comment: i-index is k, k-index is alpha in
-                              !equations
+                              !WTP_comment: i-index is k, k-index is alpha in equations
 
-                            ELSE !WTP_comment: add FECT contribution here
+                            ELSE !> add FECT contribution here
                               F_1(d,j) = F_1(d,j) + &
                                 nacv_fe(d,k,num_don)*(-scaling_C_fect)*diff_energy* &
                                 (C(k+(n_I-1)*SIZE(ctt_ind),new_state)*C(n_I+total_CT_states,old_state) + &
@@ -1976,7 +1932,7 @@ subroutine calc_hop_nacv_approx_fect(adiab_section, instate, C, Fin, &
                   ELSE !(FE_IS D), I is A
                       do i= 1, SIZE(fee_ind)
 
-                          !WTP_comment: FECT contribution
+                          !> FECT contribution
                           F_1(d,j) = F_1(d,j) + &
                             nacv_ct(d,i,num_acc)*(-scaling_C_fect)*diff_energy* &
                             (C(i+total_CT_states,new_state)*C((i-1)*SIZE(ctt_ind)+n_I,old_state) + &
@@ -1984,7 +1940,7 @@ subroutine calc_hop_nacv_approx_fect(adiab_section, instate, C, Fin, &
 
                           do k=1, SIZE(ctt_ind)
 
-                            !WTP_comment: CT block (off-diag)
+                            !> CT block (off-diag)
                             IF (k .ne. n_I) THEN
                               F_1(d,j) = F_1(d,j) + &
                                 nacv_aphase(d,k,num_acc)*(-scaling_C_acceptor)*diff_energy* &
@@ -2007,13 +1963,13 @@ subroutine calc_hop_nacv_approx_fect(adiab_section, instate, C, Fin, &
                   donor_phase = .FALSE.
                   acceptor_phase = .FALSE.
 
-                  !WTP_change: diagonal forces from CT and FE blocks
+                  !> diagonal forces from CT and FE blocks
                   do i=1,total_states
                     F_1(d,j) = F_1(d,j) + (C(i,new_state)*Fin(d,j,i)*C(i,old_state))*diff_energy 
                   end do
 
                   IF (my_frozen_c) THEN
-                    CYCLE !WTP_comment: frozen coupling only need diag F
+                    CYCLE !> frozen coupling only need diag F
                   END IF
 
                   IF (ext_pres(j)) THEN
@@ -2040,7 +1996,7 @@ subroutine calc_hop_nacv_approx_fect(adiab_section, instate, C, Fin, &
                           EXIT
                         ENDIF
                       end do
-                    !ELSE !drop exception, is this possible??
+                    !ELSE !drop exception??
                     !  print *, "the molecule is neither donor nor acceptor: ",
                     !  i
                     !  CPABORT("ACTIVE MOL NEITHER D NOR A")
@@ -2051,7 +2007,7 @@ subroutine calc_hop_nacv_approx_fect(adiab_section, instate, C, Fin, &
                   IF (donor_phase) THEN
                     do i= 1, SIZE(fee_ind) !now, acceptor
 
-                          !WTP_comment: FECT contribution
+                          !> FECT contribution
                           F_1(d,j) = F_1(d,j) + &
                             nacv_ct(d,i,num_don)*(-scaling_C_fect)*diff_energy* &
                             (C(i+total_CT_states,new_state)*C((n_I-1)*SIZE(fee_ind)+i,old_state) + &
@@ -2061,14 +2017,12 @@ subroutine calc_hop_nacv_approx_fect(adiab_section, instate, C, Fin, &
 
                             IF (k .ne. n_I) THEN
 
-                              !WTP_comment: from CT block (off-diag)
+                              !> from CT block (off-diag)
                               F_1(d,j) = F_1(d,j) + &
                                 nacv_dphase(d,k,num_don)*diff_energy*(-scaling_C_donor)* &
                                 (C(i+(k-1)*SIZE(fee_ind),new_state)*C(i+(n_I-1)*SIZE(fee_ind),old_state) + &
                                 C(i+(k-1)*SIZE(fee_ind),old_state)*C(i+(n_I-1)*SIZE(fee_ind),new_state))
-                              !WTP_comment: check? num_don, C indexes..
-                              !WTP_comment: i-index is alpha, k-index is k in
-                              !equations
+                              !WTP_comment: i-index is alpha, k-index is k in equations
                             END IF
                       ENDDO
                     ENDDO
@@ -2077,7 +2031,7 @@ subroutine calc_hop_nacv_approx_fect(adiab_section, instate, C, Fin, &
 
                       IF (i .ne. n_I) THEN
                         F_1(d,j) = F_1(d,j) + &
-                               nacv(d,i,num_acc)*diff_energy* &
+                               nacv(d,i,num_acc)*diff_energy*(-1.0D0)* &
                                (C(n_I+total_CT_states,new_state)*C(i+total_CT_states,old_state) + &
                                C(n_I+total_CT_states,old_state)*C(i+total_CT_states,new_state))
                       END IF
@@ -2086,14 +2040,12 @@ subroutine calc_hop_nacv_approx_fect(adiab_section, instate, C, Fin, &
 
                             IF (i .ne. n_I) THEN
 
-                              !WTP_comment: from CT block (off-diag)
+                              !> from CT block (off-diag)
                               F_1(d,j) = F_1(d,j) + &
                                 nacv_aphase(d,i,num_acc)*diff_energy*(-scaling_C_acceptor)* &
                                 (C(i+(k-1)*SIZE(fee_ind),new_state)*C(n_I+(k-1)*SIZE(fee_ind),old_state) + &
                                 C(i+(k-1)*SIZE(fee_ind),old_state)*C(n_I+(k-1)*SIZE(fee_ind),new_state))
-                              !WTP_comment: check? num_don, C indexes..
-                              !WTP_comment: i-index is k, k-index is alpha in
-                              !equations
+                              !WTP_comment: i-index is k, k-index is alpha in equations
 
                             ELSE
                               F_1(d,j) = F_1(d,j) + &
@@ -2274,12 +2226,10 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
         LOGICAL, dimension(:), INTENT(IN)           :: ext_pres
         INTEGER, DIMENSION(:,:), ALLOCATABLE, &
                                       INTENT(IN)     :: full_system_info
-!WTP_change:
         LOGICAL, dimension(:), ALLOCATABLE          :: ext_pres_fe
         !REAL(KIND=dp), intent(in), OPTIONAL          :: convert_nacv
         LOGICAL, OPTIONAL, INTENT(IN)                :: frozen_c
         REAL(KIND=dp), INTENT(in), DIMENSION(:,:,:)  :: nacv_dphase
-!WTP_change:
         REAL(KIND=dp), INTENT(in), DIMENSION(:,:,:)  :: nacv_aphase
         REAL(KIND=dp), INTENT(in), DIMENSION(:,:,:)  :: nacv_fe
         REAL(KIND=dp), INTENT(in), DIMENSION(:,:,:)  :: nacv_ct
@@ -2293,41 +2243,20 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
                                routineP = moduleN//':'//routineN
 
         integer                                     :: i, j, d, k 
-!WTP_change:
         INTEGER                                     ::  first_atom, last_atom !,natom_fe 
-!WTP_change: fe_start for FE block forces...
         INTEGER                                     :: natom, nadiab
         INTEGER                                     :: num_mol, num_don, num_acc 
-!        REAL(KIND=dp)                               :: convert_grad_to_forces
         LOGICAL                                     :: my_frozen_c, donor_phase, acceptor_phase
         INTEGER, DIMENSION(:), POINTER              :: donor_index, acceptor_index
-!WTP_change: add fect_block
         TYPE(section_vals_type), POINTER            :: site_energy_section, ct_block, fect_block
      CHARACTER(LEN=default_string_length)           :: fe_keyword
-!        INTEGER, DIMENSION(:,:), ALLOCATABLE        :: CT_states_info
-!        INTEGER                                   :: state, count_
-!WTP_change: 
         INTEGER                                   :: n_I
-!        INTEGER, DIMENSION(:), ALLOCATABLE        :: first_ind, second_ind
-!WTP_change:
-!     INTEGER, DIMENSION(:), ALLOCATABLE        :: fe_ind, ct_ind
-!WTP_change: temparory.. can be replace by above and delete later..
      INTEGER, DIMENSION(:), ALLOCATABLE        :: fee_ind, ctt_ind 
-!        integer                                   :: atoms_per_donor, atoms_per_acceptor
-!        integer                                   :: atoms_per_fe, atoms_per_ct
-!, total_states
         integer                                   :: total_CT_states, total_FE_states, total_states
 
-        NULLIFY(site_energy_section,ct_block)
+        NULLIFY(site_energy_section,ct_block,fect_block) 
 
         natom = SIZE(Fin,2)
-!WTP_comment: Fin --> mixed_env%F(3, natom, nadiab) --> grad_I (H_kk) -->
-!diagonal parts from F.F.
-!WTP_comment: natom for all the atoms including inactive 
-        !Note that Fin(d,j,i) is the array of diagonal forces and its dimension
-                            !stops at the number of total force_evals
-                            !considered. 
-        !The following subroutine WILL NOT work if orb !=1 (degeneracy). 
 
         my_frozen_c = .FALSE.
         IF (PRESENT(frozen_c)) my_frozen_c = frozen_c
@@ -2344,56 +2273,22 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
        CALL section_vals_val_get(ct_block,"INDEX_ACCEPTOR_MOLS",&
                           i_vals=acceptor_index)
 
-!WTP_change:
      fect_block => section_vals_get_subs_vals(site_energy_section,"FE_CT_BLOCK")
      CALL section_vals_val_get(fect_block,"FE_IS", c_val=fe_keyword)
 
        !get indeces of the active molecules acceptor and donor
-!WTP_change: get rid of first_ind, second_ind 
-!       ALLOCATE(second_ind(SIZE(acceptor_index)))
-!       do i=1,SIZE(acceptor_index)
-!         do j=1,SIZE(my_mol_index)
-!             if (acceptor_index(i) .eq. my_mol_index(j)) then
-!                second_ind(i) = j
-!                EXIT
-!             end if
-!         end do
-!       end do
 
-!       ALLOCATE(first_ind(SIZE(donor_index)))
-!       do i=1,SIZE(donor_index)
-!         do j=1,SIZE(my_mol_index)
-!             if (donor_index(i) .eq. my_mol_index(j)) then
-!                first_ind(i) = j
-!                EXIT
-!             end if
-!         end do
-!       end do
-
-!WTP_change: ext_pres_fe...
     ALLOCATE(ext_pres_fe(natom))
     ext_pres_fe(:) = .FALSE.
 
-!WTP_change: debug
-    !print *, "Full size=", SIZE(sh_env%full_system_info(1,:))
-!    do i=1, SIZE(donor_index(:))
-!      print *, "i=", i
-!      print *, "donor_index(i):", donor_index(i)
-!    end do
-!    do i=1, SIZE(first_ind(:))
-!      print *, "i=", i
-!      print *, "first_ind(i):", first_ind(i)
-!    end do
-
     SELECT CASE (fe_keyword)
     CASE("DONOR")
-!WTP_change: fee_ind, ctt_ind 
          ALLOCATE(fee_ind(SIZE(donor_index)))
          fee_ind = donor_index
          ALLOCATE(ctt_ind(SIZE(acceptor_index)))
          ctt_ind = acceptor_index
 
-!WTP_change: active (buggy) --> full 
+         !WTP_comment: active (buggy!?) --> full 
          do i=1, SIZE(full_system_info(1,:))
              IF (ANY(donor_index==i)) then
                  first_atom = full_system_info(1,i)
@@ -2405,7 +2300,6 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
          end do
 
     CASE("ACCEPTOR")
-!WTP_change: fee_ind, ctt_ind 
          ALLOCATE(ctt_ind(SIZE(donor_index)))
          ctt_ind = donor_index
          ALLOCATE(fee_ind(SIZE(acceptor_index)))
@@ -2423,7 +2317,6 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
 
     END SELECT
 
-!WTP_change: total_states --> total_CT_states...
        total_CT_states = SIZE(donor_index)*SIZE(acceptor_index)
        total_FE_states = SIZE(fee_ind)
        total_states = total_CT_states + total_FE_states
@@ -2435,29 +2328,11 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
            CPABORT("DEGENERATE ORBITALS NOT IMPLEMENTED")
        END IF
 
-   !> loop over states: not that it does not matter if donor molecules comes
-   !after acceptor in the xyz or viceversa, or the molecules are DDDAAA or ADADA
-   !as the index of each molecule is referred to DECOMP file
-!WTP_change: not used now... 
-   !ALLOCATE(CT_states_info(3,total_CT_states))
-   !state = 0
-   !do i=1,SIZE(first_ind)
-   !   ind1 = first_ind(i)
-   !   do j=1,SIZE(second_ind)
-   !      ind2 = second_ind(j)
-   !      state = state + 1
-   !      CT_states_info(1,state) = ind1
-   !      CT_states_info(2,state) = ind2
-   !      CT_states_info(3,state) = state
-   !   end do
-   !end do
-
 !WTP_comment: nacv_fe = <phi_ct | grad phi_fe>
 !WTP_comment: nacv_ct = <phi_fe | grad phi_ct>
-!WTP_change: eq22-26 for the forces...
+!WTP_comment: eq22-26 for the forces...
         SELECT CASE (fe_keyword)
         CASE("DONOR")   !FE_IS DONOR
-!WTP_comment: atom belongs to Donor
             do d=1,3 
                num_don = 0
                num_acc = 0                        
@@ -2466,13 +2341,13 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
                   donor_phase = .FALSE.
                   acceptor_phase = .FALSE.
 
-                  !WTP_change: diagonal forces from CT and FE blocks
+                  !> diagonal forces from CT and FE blocks
                   do i=1,total_states
                     forces_adiab(d,j) = forces_adiab(d,j) + (abs(C(i,instate))**2)*Fin(d,j,i) 
                   end do
 
                   IF (my_frozen_c) THEN 
-                    CYCLE !WTP_comment: frozen coupling only need diag F
+                    CYCLE !> frozen coupling only need diag F
                   END IF
 
                   IF (ext_pres(j)) THEN
@@ -2499,7 +2374,7 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
                           EXIT
                         ENDIF
                       end do
-                    !ELSE !drop exception, is this possible??
+                    !ELSE !drop exception??
                     !  print *, "the molecule is neither donor nor acceptor: ", i
                     !  CPABORT("ACTIVE MOL NEITHER D NOR A")
                     END IF
@@ -2509,10 +2384,10 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
                   IF (donor_phase) THEN !(FE_IS D), I is D
                       do i= 1, SIZE(fee_ind) !DONOR here
 
-                          !WTP_change: from FE block (off-diag)
+                          !> from FE block (off-diag)
                           IF (i .ne. n_I) THEN
                             forces_adiab(d,j) = forces_adiab(d,j) + &
-                                      nacv(d,i,num_don)*2.0D0* &
+                                      nacv(d,i,num_don)*(-2.0D0)* &
                                       C(n_I+total_CT_states,instate)*C(i+total_CT_states,instate)
                           ENDIF
 
@@ -2520,13 +2395,13 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
 
                             IF (i .ne. n_I) THEN
  
-                              !WTP_comment: from CT block (off-diag)
+                              !> from CT block (off-diag)
                               forces_adiab(d,j) = forces_adiab(d,j) + &
                                 nacv_dphase(d,i,num_don)*2.0D0*(-scaling_C_donor)* &
                                 C(k+(i-1)*SIZE(ctt_ind),instate)*C(k+(n_I-1)*SIZE(ctt_ind),instate)
                               !WTP_comment: i-index is k, k-index is alpha in equations
 
-                            ELSE !WTP_comment: add FECT contribution here
+                            ELSE !> FECT contribution here
                               forces_adiab(d,j) = forces_adiab(d,j) + &
                                 nacv_fe(d,k,num_don)*(-scaling_C_fect)*2.0D0* &
                                 C(k+(n_I-1)*SIZE(ctt_ind),instate)*C(n_I+total_CT_states,instate)
@@ -2536,7 +2411,7 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
                   ELSE !(FE_IS D), I is A
                       do i= 1, SIZE(fee_ind)
 
-                          !WTP_comment: FECT contribution
+                          !> FECT contribution
                           forces_adiab(d,j) = forces_adiab(d,j) + &
                             nacv_ct(d,i,num_acc)* &
                             C(i+total_CT_states,instate)*C((i-1)*SIZE(ctt_ind)+n_I,instate)* &
@@ -2544,7 +2419,7 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
 
                           do k=1, SIZE(ctt_ind)
 
-                            !WTP_comment: CT block (off-diag)
+                            !> CT block (off-diag)
                             IF (k .ne. n_I) THEN
                               forces_adiab(d,j) = forces_adiab(d,j) + &
                                 nacv_aphase(d,k,num_acc)*(-scaling_C_acceptor)*2.0D0* &
@@ -2566,13 +2441,13 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
                   donor_phase = .FALSE.
                   acceptor_phase = .FALSE.
 
-                  !WTP_change: diagonal forces from CT and FE blocks
+                  !> diagonal forces from CT and FE blocks
                   do i=1,total_states
                     forces_adiab(d,j) = forces_adiab(d,j) + (abs(C(i,instate))**2)*Fin(d,j,i)
                   end do
 
                   IF (my_frozen_c) THEN
-                    CYCLE !WTP_comment: frozen coupling only need diag F
+                    CYCLE !> frozen coupling only need diag F
                   END IF
 
                   IF (ext_pres(j)) THEN
@@ -2599,7 +2474,7 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
                           EXIT
                         ENDIF
                       end do
-                    !ELSE !drop exception, is this possible??
+                    !ELSE !drop exception?
                     !  print *, "the molecule is neither donor nor acceptor: ",
                     !  i
                     !  CPABORT("ACTIVE MOL NEITHER D NOR A")
@@ -2610,7 +2485,7 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
                   IF (donor_phase) THEN
                     do i= 1, SIZE(fee_ind) !now, acceptor
 
-                          !WTP_comment: FECT contribution
+                          !> FECT contribution
                           forces_adiab(d,j) = forces_adiab(d,j) + &
                             nacv_ct(d,i,num_don)* &
                             C(i+total_CT_states,instate)*C((n_I-1)*SIZE(fee_ind)+i,instate)* &
@@ -2620,7 +2495,7 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
 
                             IF (k .ne. n_I) THEN
 
-                              !WTP_comment: from CT block (off-diag)
+                              !> from CT block (off-diag)
                               forces_adiab(d,j) = forces_adiab(d,j) + &
                                 nacv_dphase(d,k,num_don)*2.0D0*(-scaling_C_donor)* &
                                 C(i+(k-1)*SIZE(fee_ind),instate)*C(i+(n_I-1)*SIZE(fee_ind),instate)
@@ -2633,7 +2508,7 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
 
                       IF (i .ne. n_I) THEN
                         forces_adiab(d,j) = forces_adiab(d,j) + &
-                               nacv(d,i,num_acc)*2.0D0* &
+                               nacv(d,i,num_acc)*(-2.0D0)* & 
                                C(n_I+total_CT_states,instate)*C(i+total_CT_states,instate)
                       END IF
 
@@ -2641,7 +2516,7 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
 
                             IF (i .ne. n_I) THEN
 
-                              !WTP_comment: from CT block (off-diag)
+                              !> from CT block (off-diag)
                               forces_adiab(d,j) = forces_adiab(d,j) + &
                                 nacv_aphase(d,i,num_acc)*2.0D0*(-scaling_C_acceptor)* &
                                 C(i+(k-1)*SIZE(fee_ind),instate)*C(n_I+(k-1)*SIZE(fee_ind),instate)
@@ -2661,13 +2536,9 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
 
         END SELECT
 
-!   DEALLOCATE(CT_states_info)
-!   DEALLOCATE(first_ind)
-!   DEALLOCATE(second_ind)
-!   DEALLOCATE(fe_ind)
-!   DEALLOCATE(ct_ind)
    DEALLOCATE(fee_ind)
    DEALLOCATE(ctt_ind)
+   DEALLOCATE(ext_pres_fe) 
 
 end subroutine calcforces_smart_grad_fect
 
@@ -2916,7 +2787,7 @@ subroutine modified_surfacehop(C1, C2, deltat, &
         COMPLEX(KIND=dp), dimension(:), allocatable :: ak, akttm
         INTEGER        :: state_min 
         REAL(KIND=dp), dimension(:), ALLOCATABLE :: enerdiff
- 
+
         ! mol should be called "mat" according to the convension used so far,
         ! because "mat" is compatible with degenerate orbitals
         mol = size(sh_env%H_tp,1)
@@ -3024,6 +2895,7 @@ subroutine modified_surfacehop(C1, C2, deltat, &
                         sumg = sumg + g(i)
                 end if
         end do
+
         sh_print_env%sumflux   = sumg
         err = abs(sumg - ex_prob)
         IF (err.gt.0.1) THEN
@@ -3073,10 +2945,10 @@ subroutine modified_surfacehop(C1, C2, deltat, &
         !   print *, "AC_TRIVIAL", g_before(i), g_after(i), g_renorm(i)
         !enddo
 
-
-        hop = next_random_number(sh_env%rng_stream)
+       hop = next_random_number(sh_env%rng_stream)
 
         print *, "RANDOM_NUMBER_HOPPING_PROBA", hop
+
         sh_print_env%hop       = hop
         sh_print_env%old_state = sh_env%active_state
         !and see if this random number causes a surface hop
@@ -3389,7 +3261,7 @@ ENDIF
                     END IF
                  ELSE IF (force_env%mixed_env%sh_env%multifect_couplings_keyword) THEN
                     IF (force_env%mixed_env%sh_env%multistate) THEN
-!WTP_change: adiabatic NACV for X-SH
+                 !> adiabatic NACV for X-SH
                        ! CALL calc_hop_nacv_frozen_H( force_env%mixed_env%sh_env, force_env%mixed_env%F, hop_nacv)
                        CALL calc_hop_nacv_approx_fect(adiab_section, &
                                        instate=force_env%mixed_env%sh_env%active_state, &
@@ -3639,7 +3511,7 @@ ENDIF
         REAL(kind=dp), INTENT(IN)                :: kinetic_energy_qsys
         REAL(kind=dp), INTENT(OUT)               :: rescale_factor
 
-        CHARACTER(len=*), PARAMETER :: routineN = 'simple_vel_resc_qys', &
+        CHARACTER(len=*), PARAMETER :: routineN = 'simple_vel_resc_qsys', &
         routineP = moduleN//':'//routineN
 
         REAL(kind=dp)                            :: mass
@@ -3661,6 +3533,7 @@ ENDIF
                  end if
               END DO
            END DO
+
    END SUBROUTINE simple_vel_resc_qsys
 
 !**********************************************************************************

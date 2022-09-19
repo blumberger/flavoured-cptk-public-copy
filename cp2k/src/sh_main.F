@@ -51,7 +51,6 @@ MODULE sh_main
                                              calc_hop_nacv_aom,         &
                                              adiabaticity,              &
                                              calc_multiphase_Xmatrix_elements, &
-                                             !WTP_change
                                              calc_fect_Xmatrix_elements, &
                                              calc_aom_Xmatrix_elements_first_step, & 
                                              calc_aom_Xmatrix_elements, &
@@ -107,7 +106,6 @@ MODULE sh_main
                                              calc_coms_and_nlist_fect_fe,     &
                                              calc_tresp_coup,                 &
                                              !calc_tresp_coup_test,                 &
-                                             !WTP_change:
                                              calc_tresp_coup_fect,            & 
                                              add_coulomb_energy_to_CT,        &
                                              calc_frozen_H,                   &
@@ -323,18 +321,11 @@ CONTAINS
 
          CALL calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, positions_com_tp)
 
-     !WTP_change
      ELSE IF (sh_env%multifect_couplings_keyword) THEN
 
-!WTP_change: comment out for CT and FECT blocks
-!!         CALL calc_coms_and_nlist(sh_env%cutoff_sites_fe, orb,crds=positions_com_tp, &
-!!                                    active_system_info=sh_env%active_system_info, NN=sh_env%NN)
-
-!WTP_change: nlist only for FE block
          CALL calc_coms_and_nlist_fect_fe(sh_env, sh_env%cutoff_sites_fe, orb, positions_com_tp, &
                                     adiab_section, sh_env%NN)
 
-!WTP_comment: do the calc_tresp_coup inside following subroutine...
          CALL calc_fect_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, positions_com_tp)
 
          CALL calc_tresp_coup_fect(sh_env, energies_tp, orb, positions_com_tp, adiab_section) 
@@ -568,7 +559,7 @@ print *, "ACTIVE STATE", active_state
              CPABORT("MULTI-STATE MUST BE TRUE")
          END IF
 
-!WTP_change: FE-CT forces
+     !> X-SH forces
      ELSE IF (sh_env%multifect_couplings_keyword) THEN
         IF (sh_env%multistate) THEN
 
@@ -579,7 +570,6 @@ print *, "ACTIVE STATE", active_state
                                         scaling_C_donor=sh_env%scaling_donor, scaling_C_acceptor=sh_env%scaling_acceptor, &
                                         nacv_dphase=sh_env%nacv_dphase, nacv_aphase=sh_env%nacv_aphase, &
                                         forces_adiab=sh_env%forces_adiab, frozen_c=.FALSE., &
-!WTP_change:
                                         nacv=sh_env%grad_tresp, scaling_C_fect=sh_env%scaling_fect, &
                                         nacv_fe=sh_env%nacv_fe, nacv_ct=sh_env%nacv_ct)
 
@@ -864,11 +854,8 @@ print *, "ACTIVE STATE", active_state
 
          CALL calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, positions_com_tp)
 
-!WTP_change: FE-CT section... 
+     !> X-SH 
      ELSE IF (sh_env%multifect_couplings_keyword) THEN
-!WTP_change: use calc_coms_and_nlist_fect_fe, and calc_tresp_coup_fect
-!         CALL calc_coms_and_nlist(sh_env%cutoff_sites, orb,crds=positions_com_tp, &
-!                                    active_system_info=sh_env%active_system_info, NN=sh_env%NN)
 
          CALL calc_coms_and_nlist_fect_fe(sh_env, sh_env%cutoff_sites_fe, orb, positions_com_tp, &
                                     adiab_section, sh_env%NN)
@@ -1100,7 +1087,7 @@ print *, "ACTIVE STATE", active_state
              CPABORT("MULTI-STATE MUST BE TRUE")
          END IF
 
-!WTP_change: forces for fect
+     !> forces for X-SH
      ELSE IF (sh_env%multifect_couplings_keyword) THEN
          IF (sh_env%multistate) THEN
             CALL calcforces_smart_grad_fect(adiab_section, instate=sh_env%active_state, C=sh_env%C_tp, &
@@ -1110,7 +1097,6 @@ print *, "ACTIVE STATE", active_state
                                         scaling_C_donor=sh_env%scaling_donor, scaling_C_acceptor=sh_env%scaling_acceptor, &
                                         nacv_dphase=sh_env%nacv_dphase, nacv_aphase=sh_env%nacv_aphase, &
                                         forces_adiab=sh_env%forces_adiab, frozen_c=.FALSE., &
-!WTP_change:
                                         nacv=sh_env%grad_tresp, scaling_C_fect=sh_env%scaling_fect, &
                                         nacv_fe=sh_env%nacv_fe, nacv_ct=sh_env%nacv_ct)
 
@@ -1119,6 +1105,7 @@ print *, "ACTIVE STATE", active_state
             !CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp,
             !state=sh_env%active_state, Fin=diagonal_F, &
             !                         forces_adiab=sh_env%forces_adiab)
+
             IF (sh_env%attempt_hop) THEN
                       CALL calcforces_smart_grad_fect(adiab_section, instate=sh_env%new_state, C=sh_env%C_tp, &
                                         Fin=diagonal_F,  &
@@ -1127,7 +1114,6 @@ print *, "ACTIVE STATE", active_state
                                         scaling_C_donor=sh_env%scaling_donor, scaling_C_acceptor=sh_env%scaling_acceptor, &
                                         nacv_dphase=sh_env%nacv_dphase, nacv_aphase=sh_env%nacv_aphase, &
                                         forces_adiab=sh_env%forces_adiab_new, frozen_c=.FALSE., &
-!WTP_change:
                                         nacv=sh_env%grad_tresp, scaling_C_fect=sh_env%scaling_fect, &
                                         nacv_fe=sh_env%nacv_fe, nacv_ct=sh_env%nacv_ct)
             ENDIF

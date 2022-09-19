@@ -546,7 +546,6 @@ CONTAINS
 
     CALL section_release(sub3section)
 
-!WTP_change: 
     NULLIFY(sub3section)
     CALL section_create(sub3section,name="FE_CT_BLOCK",&
          description="Defines the FE_CT Block,"//&
@@ -572,8 +571,6 @@ CONTAINS
          usage="1", type_of_var=integer_t)
     CALL section_add_keyword(sub3section,keyword)
     CALL keyword_release(keyword)
-
-!WTP_change: end
 
    CALL section_release(sub3section)
 
@@ -732,14 +729,13 @@ CONTAINS
          unit_str="hartree")
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
-!WTP_change: 
+
     CALL keyword_create(keyword, name="SCALING_FACTOR_FECT",&
          description="Hab = C*Sab. This is the scaling C for the FE-CT coupling",&
          usage="0.50D0*0.065190D0, HARTREE", type_of_var=real_t,&
          unit_str="hartree")
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
-!WTP_change: end
 
     CALL keyword_create(keyword, name="CBAR",&
          description="Sab constant factor (Not used for fast porpagation)",&

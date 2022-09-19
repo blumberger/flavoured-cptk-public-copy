@@ -1708,13 +1708,11 @@ deallocate(prervecsa)
 
       ! OZ: augmented the slaters matrix - added sulfur sigma and pi mu
       ! coeffs
-!WTP_comment: slaters! how to read??
       slaters(:,1)=(/0.0D0, 0.0D0, 3.0D0, 0.9560D0, 1.2881D0, 1.100D0, 1.9237D0,2.2458D0,&
                      0.0D0, 0.0D0, 0.0D0, 0.0000D0, 0.0000D0, 0.000D0, 0.0000D0,2.1223D0/)
       slaters(:,2)=(/0.0D0, 0.0D0, 0.0D0, 0.0000D0, 1.2107D0, 1.000D0, 1.6000D0,2.2266D0,&
                      0.0D0, 0.0D0, 0.0D0, 0.0000D0, 0.0000D0, 0.000D0, 0.0000D0,1.8273D0/)
 
-!WTP_comment: for donor, size(connlistal,2)=18, size(prexyza,2)=18,size(linecol)=8
       allocate(coeffap(size(connlistal,2)),stat=stat_err)
       allocate(xyza(4, size(connlistal,2)),stat=stat_err)
       allocate(expcoeffa(3,size(prexyzb,2)),stat=stat_err)
