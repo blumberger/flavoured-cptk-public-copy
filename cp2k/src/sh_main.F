@@ -51,6 +51,7 @@ MODULE sh_main
                                              calc_hop_nacv_aom,         &
                                              adiabaticity,              &
                                              calc_multiphase_Xmatrix_elements, &
+                                             calc_fect_Xmatrix_elements, &
                                              calc_aom_Xmatrix_elements_first_step, & 
                                              calc_aom_Xmatrix_elements, &
                                              make_adiabX,               &
@@ -102,13 +103,16 @@ MODULE sh_main
 
      USE non_adiabatic_utils,          ONLY: decohere_wf,                     &
                                              calc_coms_and_nlist,             &
+                                             calc_coms_and_nlist_fect_fe,     &
                                              calc_tresp_coup,                 &
                                              !calc_tresp_coup_test,                 &
+                                             calc_tresp_coup_fect,            & 
                                              add_coulomb_energy_to_CT,        &
                                              calc_frozen_H,                   &
                                              calcforces_smart_grad,           &
                                              calcforces_smart_grad_multip,    &
                                              !calcforces_smart_grad_test,           &
+                                             calcforces_smart_grad_fect,      &
                                              calcforces_frozenH,              &
                                              diab_to_adiab,                   & 
                                              surf_hop_type,                   &
@@ -317,11 +321,22 @@ CONTAINS
 
          CALL calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, positions_com_tp)
 
+     ELSE IF (sh_env%multifect_couplings_keyword) THEN
+
+         CALL calc_coms_and_nlist_fect_fe(sh_env, sh_env%cutoff_sites_fe, orb, positions_com_tp, &
+                                    adiab_section, sh_env%NN)
+
+         CALL calc_fect_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, positions_com_tp)
+
+         CALL calc_tresp_coup_fect(sh_env, energies_tp, orb, positions_com_tp, adiab_section) 
+
+
      ELSE IF (sh_env%tresp_couplings_keyword) THEN 
          !> TRESP COUPLINGS
          
          !> CALCULATE THE CENTER OF MASS AND CONSTRUCT NEIGHBOURS LIST
          !this is needed to calculate the NN list
+
          CALL calc_coms_and_nlist(sh_env%cutoff_sites, orb, crds=positions_com_tp, &
                                     active_system_info=sh_env%active_system_info, NN=sh_env%NN)
 
@@ -489,7 +504,6 @@ print *, "ACTIVE STATE", active_state
          IF ((new_state).EQ.0) new_state = mat
      ENDIF 
 
-
      !> ######## FORCES CALCULATION   ###########################################################
      print*, "FOBSH| ACTIVE STATE = ", active_state
      IF (sh_env%aom_couplings_keyword) THEN
@@ -544,6 +558,24 @@ print *, "ACTIVE STATE", active_state
          ELSE
              CPABORT("MULTI-STATE MUST BE TRUE")
          END IF
+
+     !> X-SH forces
+     ELSE IF (sh_env%multifect_couplings_keyword) THEN
+        IF (sh_env%multistate) THEN
+
+            CALL calcforces_smart_grad_fect(adiab_section, instate=active_state, C=sh_env%C_tp, &
+                                        Fin=diagonal_F,  &
+                                        ext_pres=sh_env%ext_pres, full_system_info=sh_env%full_system_info, &
+                                        orb=orb, my_mol_index=sh_env%index_active_mols, &
+                                        scaling_C_donor=sh_env%scaling_donor, scaling_C_acceptor=sh_env%scaling_acceptor, &
+                                        nacv_dphase=sh_env%nacv_dphase, nacv_aphase=sh_env%nacv_aphase, &
+                                        forces_adiab=sh_env%forces_adiab, frozen_c=.FALSE., &
+                                        nacv=sh_env%grad_tresp, scaling_C_fect=sh_env%scaling_fect, &
+                                        nacv_fe=sh_env%nacv_fe, nacv_ct=sh_env%nacv_ct)
+
+        ELSE
+             CPABORT("MULTI-STATE MUST BE TRUE")
+        END IF
 
      ELSE IF (sh_env%tresp_couplings_keyword) THEN 
         !frozen Hamiltonian case
@@ -822,6 +854,16 @@ print *, "ACTIVE STATE", active_state
 
          CALL calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, positions_com_tp)
 
+     !> X-SH 
+     ELSE IF (sh_env%multifect_couplings_keyword) THEN
+
+         CALL calc_coms_and_nlist_fect_fe(sh_env, sh_env%cutoff_sites_fe, orb, positions_com_tp, &
+                                    adiab_section, sh_env%NN)
+
+         CALL calc_fect_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, positions_com_tp)
+
+         CALL calc_tresp_coup_fect(sh_env, energies_tp, orb, positions_com_tp, adiab_section)
+
          !> TRESP COUPLINGS 
      ELSE IF (sh_env%tresp_couplings_keyword) THEN
          !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
@@ -971,7 +1013,6 @@ print *, "ACTIVE STATE", active_state
           CALL adiab_print_sh_info(sh_print_env, keyword = 'BOMD')
      END IF 
 
-
      !> CALCULATE THE FORCES ON THE ACTIVE STATE, WHATEVER THE RESULT OF THE SURFACE
      !HOP ROUTINE IS. 
      IF (sh_env%aom_couplings_keyword) THEN
@@ -1046,6 +1087,41 @@ print *, "ACTIVE STATE", active_state
              CPABORT("MULTI-STATE MUST BE TRUE")
          END IF
 
+     !> forces for X-SH
+     ELSE IF (sh_env%multifect_couplings_keyword) THEN
+         IF (sh_env%multistate) THEN
+            CALL calcforces_smart_grad_fect(adiab_section, instate=sh_env%active_state, C=sh_env%C_tp, &
+                                        Fin=diagonal_F, &
+                                        ext_pres=sh_env%ext_pres, full_system_info=sh_env%full_system_info, &
+                                        orb=orb, my_mol_index=sh_env%index_active_mols, &
+                                        scaling_C_donor=sh_env%scaling_donor, scaling_C_acceptor=sh_env%scaling_acceptor, &
+                                        nacv_dphase=sh_env%nacv_dphase, nacv_aphase=sh_env%nacv_aphase, &
+                                        forces_adiab=sh_env%forces_adiab, frozen_c=.FALSE., &
+                                        nacv=sh_env%grad_tresp, scaling_C_fect=sh_env%scaling_fect, &
+                                        nacv_fe=sh_env%nacv_fe, nacv_ct=sh_env%nacv_ct)
+
+            !frozen Hamiltonian case and multi-phase (dimension of H larger than
+            !number of active mols)
+            !CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp,
+            !state=sh_env%active_state, Fin=diagonal_F, &
+            !                         forces_adiab=sh_env%forces_adiab)
+
+            IF (sh_env%attempt_hop) THEN
+                      CALL calcforces_smart_grad_fect(adiab_section, instate=sh_env%new_state, C=sh_env%C_tp, &
+                                        Fin=diagonal_F,  &
+                                        ext_pres=sh_env%ext_pres, full_system_info=sh_env%full_system_info, &
+                                        orb=orb, my_mol_index=sh_env%index_active_mols, &
+                                        scaling_C_donor=sh_env%scaling_donor, scaling_C_acceptor=sh_env%scaling_acceptor, &
+                                        nacv_dphase=sh_env%nacv_dphase, nacv_aphase=sh_env%nacv_aphase, &
+                                        forces_adiab=sh_env%forces_adiab_new, frozen_c=.FALSE., &
+                                        nacv=sh_env%grad_tresp, scaling_C_fect=sh_env%scaling_fect, &
+                                        nacv_fe=sh_env%nacv_fe, nacv_ct=sh_env%nacv_ct)
+            ENDIF
+
+         ELSE
+             CPABORT("MULTI-STATE MUST BE TRUE")
+         END IF
+
      ELSE IF (sh_env%tresp_couplings_keyword) THEN
         !CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=sh_env%active_state, Fin=diagonal_F, &
         !                          forces_adiab=sh_env%forces_adiab)
@@ -1057,7 +1133,7 @@ print *, "ACTIVE STATE", active_state
                                Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
                                ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, orb=orb, &
                                         nacv=sh_env%grad_tresp)
-
+     
 !!!TEST TO REMOVE
 !OPEN (UNIT = 21, FILE = "FORCES_formatted.dat", position="append",action="write")
 !

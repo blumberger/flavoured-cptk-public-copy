@@ -1958,12 +1958,11 @@ deallocate(prervecsa)
       REAL(KIND=dp), dimension(:,:), allocatable :: xyzadr, xyzbdr
       REAL(KIND=dp) :: sabRDRR, sabRR  
       integer :: stat_err, natoma, natomb
-      integer :: i, j, k, z, f
+      integer :: i, j, k, z, f !, temp
       !CHANGE_AC 170504
       REAL(KIND=dp) :: random, signed
       LOGICAL, INTENT(IN)          :: do_random
       TYPE(sh_env_type)                 :: sh_env
-
 
       natoma=size(xyza,2)
       natomb=size(xyzb,2)
@@ -1991,13 +1990,13 @@ deallocate(prervecsa)
 
 !     Normalising coefficients and initialising atomic overlap matrix for wavefunction 
 !     normalisation 
-
       call calc_sab_turbo(xyza, atomlista, connlistal, coeffap, rvecsa, sarrayn, atomlista)
 
 !     Calculating Sab(R,R) and initialising p_pi directions and atomic overlap matrix sarrayo
       call calc_sab_turbo2(xyza, atomlista, connlistal, coeffap, rvecsa,&
                                  sarrayo, atomlista, aneighbour(:,2:(size(aneighbour,2))),&
                      sabRR, xyzb, atomlistb, connlistbl, coeffbp, rvecsb)
+
 
 !     Looping all over the structure 
       do i=1,size(connlistal, 2)
@@ -2025,6 +2024,8 @@ deallocate(prervecsa)
                  !CALL create_rng_stream(rng_stream, "nacva")
                  random = next_random_number(sh_env%rng_stream)
                  !CALL delete_rng_stream(rng_stream)
+
+
                  if (random < 0.5) then
                     signed = -1
                  else
@@ -2097,6 +2098,8 @@ deallocate(prervecsa)
                  !CALL create_rng_stream(rng_stream, "nacvb")
                  random = next_random_number(sh_env%rng_stream)
                  !CALL delete_rng_stream(rng_stream)
+
+
                  if (random < 0.5) then
                     signed = -1
                  else
@@ -2119,15 +2122,17 @@ deallocate(prervecsa)
                                   sabRDRR, xyza, atomlista, connlistal,coeffap, rvecsa)
  
               nacvb(j,i)=(sabRDRR-sabRR)/(signed*dR)
+          
           end do
 
           deallocate(linecol)
       end do
 
       deallocate(sarrayo, sarrayodr, sarrayndr, sarrayn, coeffapdr, coeffbpdr)
+
       deallocate(xyzbdr, xyzadr, rvecsadr, rvecsbdr, rvecsa, rvecsb)
 
-  end subroutine
+  end subroutine calc_dRSab
 
   subroutine neighbouratoms(screenlist, neighbour)
 !     Sums up screenlist creating a neighbourlist where the

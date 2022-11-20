@@ -208,17 +208,18 @@ SUBROUTINE multi_block_energies_forces(adiab_section,energies_1_mol_list, energi
    INTEGER                                   :: i,j, ind1, ind2!, indfirst,indsec
    INTEGER                                   :: start_i,end_i,start_j,end_j,atoms
    TYPE(section_vals_type), POINTER          :: site_energy_section
-   TYPE(section_vals_type), POINTER          :: ct_block, fe_block
-   INTEGER, DIMENSION(:), POINTER            :: donor_index, acceptor_index, exc_index
+   TYPE(section_vals_type), POINTER          :: ct_block, fect_block  
+   CHARACTER(LEN=default_string_length)           :: fe_keyword  
+   INTEGER, DIMENSION(:), POINTER            :: donor_index, acceptor_index !, exc_index
+   INTEGER, DIMENSION(:), allocatable            :: exc_index
    INTEGER                                   :: total_states, state,nadiab, natom
    INTEGER, DIMENSION(:,:), ALLOCATABLE      :: intra_forces_info
    INTEGER, DIMENSION(:), ALLOCATABLE        :: first_ind, second_ind, exc_ind
    INTEGER                                   :: count_
    INTEGER, DIMENSION(:), INTENT(IN)         :: my_mol_index !this is the decomp index
- 
-   NULLIFY(site_energy_section,ct_block, fe_block)
+
+   NULLIFY(site_energy_section,ct_block, fect_block)
    NULLIFY( my_energies)
- 
    ! TOTAL number states
    CALL section_vals_val_get(adiab_section,"NUMBER_DIABATIC_STATES",&
                         i_val=nadiab)
@@ -230,35 +231,6 @@ SUBROUTINE multi_block_energies_forces(adiab_section,energies_1_mol_list, energi
                         i_vals=donor_index)
    CALL section_vals_val_get(ct_block,"INDEX_ACCEPTOR_MOLS",&
                         i_vals=acceptor_index)
-
-   if (fe_block_keyword) then 
-       fe_block => section_vals_get_subs_vals(site_energy_section,"FE_BLOCK")
-       CALL section_vals_val_get(fe_block,"INDEX_EXC_MOLS",&
-                        i_vals=exc_index)
-       ind1 = exc_index(1) 
-       do i=2,SIZE(exc_index)
-          if (exc_index(i) .le. ind1) THEN 
-            CPABORT("EXC mol must be ascending")
-          end if
-       end do
-   end if 
-
-   if ((fe_block_keyword) .and. (cr_block_keyword)) then
-      !> some checks  N*N+N+1 is the total number of states
-      total_states = SIZE(donor_index)*SIZE(acceptor_index) + SIZE(exc_index) +1
-   else if ((.not. fe_block_keyword) .and. (cr_block_keyword)) then 
-      !> some checks  N*N+1 is the total number of states
-      total_states = SIZE(donor_index)*SIZE(acceptor_index) +1
-   else if ((fe_block_keyword) .and. (.not. cr_block_keyword)) then
-      !> some checks  N*N+N+1 is the total number of states
-      total_states = SIZE(donor_index)*SIZE(acceptor_index) + SIZE(exc_index)
-    else 
-      total_states = SIZE(donor_index)*SIZE(acceptor_index)
-   end if
-   
-   IF (total_states .ne. nadiab) THEN 
-         CPABORT("NUMBER_DIABATIC_STATES different from total n states")
-   END IF
 
    ind1 = donor_index(1) 
    do i=2,SIZE(donor_index)
@@ -328,11 +300,43 @@ SUBROUTINE multi_block_energies_forces(adiab_section,energies_1_mol_list, energi
      end do 
    end do
    
-!   print *, "DECOMP", my_mol_index
-!   print *, "DONOR IND", donor_index
-!   print *, "ACCEPTOR IND", acceptor_index
-!   print *, "FIRST IND", first_ind
-!   print *, "SEC IND", second_ind
+    if (fe_block_keyword) then 
+        fect_block => section_vals_get_subs_vals(site_energy_section,"FE_CT_BLOCK")
+        CALL section_vals_val_get(fect_block,"FE_IS", c_val=fe_keyword)
+
+        SELECT CASE (fe_keyword)
+        CASE("DONOR")
+            ALLOCATE(exc_index(SIZE(donor_index)))
+            exc_index = donor_index
+        CASE("ACCEPTOR")
+            ALLOCATE(exc_index(SIZE(acceptor_index)))
+            exc_index = acceptor_index
+        END SELECT
+        ind1 = exc_index(1) 
+        do i=2,SIZE(exc_index)
+            if (exc_index(i) .le. ind1) THEN 
+                CPABORT("EXC mol must be ascending")
+            end if
+        end do
+    end if 
+
+   if ((fe_block_keyword) .and. (cr_block_keyword)) then
+      !> some checks  N*N+N+1 is the total number of states
+      total_states = SIZE(donor_index)*SIZE(acceptor_index) + SIZE(exc_index) +1
+   else if ((.not. fe_block_keyword) .and. (cr_block_keyword)) then 
+      !> some checks  N*N+1 is the total number of states
+      total_states = SIZE(donor_index)*SIZE(acceptor_index) +1
+   else if ((fe_block_keyword) .and. (.not. cr_block_keyword)) then
+      !> some checks  N*N+N+1 is the total number of states
+      total_states = SIZE(donor_index)*SIZE(acceptor_index) + SIZE(exc_index)
+   else 
+      total_states = SIZE(donor_index)*SIZE(acceptor_index)
+   end if
+
+   IF (total_states .ne. nadiab) THEN 
+         CPABORT("NUMBER_DIABATIC_STATES different from total n states")
+   END IF
+
 
    !> loop over states: not that it does not matter if donor molecules comes
    !after acceptor in the xyz or viceversa, or the molecules are DDDAAA or ADADA
@@ -344,12 +348,12 @@ SUBROUTINE multi_block_energies_forces(adiab_section,energies_1_mol_list, energi
          ind2 = second_ind(j)
          state = state + 1
 !print *, "STATES", ind1,ind2
+!print *, "STATES:", state
          !> we create site energies from the 2 force_evals sections: the first
          !neutral, the second charged (with donor and acc Froce-fields).
          my_energies(state) = energies(1) + &
                   energies_1_mol_list(2,ind1) - energies_1_mol_list(1,ind1) + & 
                   energies_1_mol_list(2,ind2) - energies_1_mol_list(1,ind2)  
-!print *, "ENER:", my_energies(state)
 
          !> we allocate diagonal forces array. All the atoms for a give state i
          !get the value of the neutral force_field that contains: intra +
@@ -409,7 +413,6 @@ SUBROUTINE multi_block_energies_forces(adiab_section,energies_1_mol_list, energi
 
       end do
    end do
-
   !> THE FE BLOCK (always after the CT Block)
   IF (fe_block_keyword) THEN
       !exc_ind  is in the 1,2,3..  base (active mol base) to be consisent with
@@ -444,7 +447,7 @@ SUBROUTINE multi_block_energies_forces(adiab_section,energies_1_mol_list, energi
          !> we create site energies from the 2 force_evals sections: the first
          !neutral, the second charge and the THIRD excited.
          my_energies(i) = energies(1) + energies_1_mol_list(3,ind1) - energies_1_mol_list(1,ind1)
-   
+
          !> we allocate diagonal forces array. All the atoms for a give state i
          !assume the value of the neutral force_field that contains: intra +
          !nonbonded interactions
@@ -478,7 +481,7 @@ SUBROUTINE multi_block_energies_forces(adiab_section,energies_1_mol_list, energi
       END DO
       DEALLOCATE(exc_ind)
    END IF
-   
+
   !> THE CR BLOCK (always after the last Block)
    if (cr_block_keyword) then
       ! in case CR is present
@@ -491,6 +494,7 @@ SUBROUTINE multi_block_energies_forces(adiab_section,energies_1_mol_list, energi
    DEALLOCATE(intra_forces_info)
    DEALLOCATE(first_ind)
    DEALLOCATE(second_ind)
+   DEALLOCATE(exc_index) 
 
 END SUBROUTINE multi_block_energies_forces
 

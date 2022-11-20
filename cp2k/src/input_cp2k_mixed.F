@@ -544,6 +544,34 @@ CONTAINS
     CALL section_add_keyword(sub3section,keyword)
     CALL keyword_release(keyword)
 
+    CALL section_release(sub3section)
+
+    NULLIFY(sub3section)
+    CALL section_create(sub3section,name="FE_CT_BLOCK",&
+         description="Defines the FE_CT Block,"//&
+                     "and the interactions",&
+         n_keywords=1, n_subsections=0, repeats=.FALSE.)
+    CALL section_add_subsection(sub2section,sub3section)
+
+    CALL keyword_create(keyword, name="FE_IS",&
+         description="Defines the FE phase as donor or acceptor.",&
+         usage="FE_IS DONOR or ACCEPTOR", type_of_var=char_t)
+    CALL section_add_keyword(sub3section,keyword)
+    CALL keyword_release(keyword)
+
+!WTP_comment: maybe not useful anymore?
+    CALL keyword_create(keyword, name="N_CT_ATOMS",&
+         description="Number of atoms per site",&
+         usage="1", type_of_var=integer_t)
+    CALL section_add_keyword(sub3section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="N_FE_ATOMS",&
+         description="Number of atoms per site",&
+         usage="1", type_of_var=integer_t)
+    CALL section_add_keyword(sub3section,keyword)
+    CALL keyword_release(keyword)
+
    CALL section_release(sub3section)
 
 
@@ -634,6 +662,13 @@ CONTAINS
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
+    CALL keyword_create(keyword, name="CUT_OFF_BETWEEN_FE_SITES",&
+         description="Cut-off distance over which excitonic couplings are set to zero.",&
+         usage="20.0D0", type_of_var=real_t, &
+         unit_str="angstrom")
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
     CALL keyword_create(keyword, name="_DEFAULT_KEYWORD_",&
          description="The TRESP charges in the format:"//&
          "<p><tt>ATOMIC_KIND  LIST NO TRESP</tt></p>",&
@@ -690,6 +725,13 @@ CONTAINS
 
     CALL keyword_create(keyword, name="SCALING_FACTOR_ACCEPTOR",&
          description="Hab = C*Sab. This is the scaling C for the acceptor phase",&
+         usage="0.50D0*0.065190D0, HARTREE", type_of_var=real_t,&
+         unit_str="hartree")
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="SCALING_FACTOR_FECT",&
+         description="Hab = C*Sab. This is the scaling C for the FE-CT coupling",&
          usage="0.50D0*0.065190D0, HARTREE", type_of_var=real_t,&
          unit_str="hartree")
     CALL section_add_keyword(sub2section,keyword)
