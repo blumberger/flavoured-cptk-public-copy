@@ -282,7 +282,6 @@ CONTAINS
                calculate_forces,energy_consistency,linres=linres_run,&
                require_consistent_energy_force=require_consistent_energy_force)
        CASE ( use_mixed_force )
-          
           CALL mixed_energy_forces(force_env,calculate_forces, my_itimes) !CHANGE_AC
        CASE default
           CPABORT("")
@@ -1221,7 +1220,7 @@ CONTAINS
 !print *, "active sys info", active_system_info(2, :)
 !print *, "full sys info", full_system_info(1, :)
 !print *, "full sys info", full_system_info(2, :)
-              
+
            IF (ALLOCATED(thermo%pot_list)) THEN
            !Enter this part only if the active atoms DECOMP has been constructed,
            !otherwise you MUST provide N FORCE_EVALS one for each site energy
@@ -1247,7 +1246,7 @@ CONTAINS
                       CALL multi_block_energies_forces(adiab_section,energies_1_mol_list, energies, &
                                     intra_forces_global, global_forces, my_energies, &
                                     active_system_info, mixed_env, my_itimes, my_mol_index, &
-                                                    fe_block_keyword, cr_block_keyword)
+                                    fe_block_keyword, cr_block_keyword) 
 
 
                    CASE("FE")  ! this could be used also for just hole or electron like done so far 
@@ -1265,21 +1264,21 @@ CONTAINS
                       CALL multi_block_energies_forces(adiab_section,energies_1_mol_list, energies, &
                                     intra_forces_global, global_forces, my_energies, &
                                     active_system_info, mixed_env, my_itimes, my_mol_index, &
-                                                    fe_block_keyword, cr_block_keyword)
+                                    fe_block_keyword, cr_block_keyword) 
                    CASE("CT-FE-CR")
                       fe_block_keyword  = .True.
                       cr_block_keyword  = .True.
                       CALL multi_block_energies_forces(adiab_section,energies_1_mol_list, energies, &
                                     intra_forces_global, global_forces, my_energies, &
                                     active_system_info, mixed_env, my_itimes, my_mol_index, &
-                                                    fe_block_keyword, cr_block_keyword)
+                                    fe_block_keyword, cr_block_keyword) 
                    CASE("CT-CR")
                       fe_block_keyword  = .False.
                       cr_block_keyword  = .True.
                       CALL multi_block_energies_forces(adiab_section,energies_1_mol_list, energies, &
                                     intra_forces_global, global_forces, my_energies, &
                                     active_system_info, mixed_env, my_itimes, my_mol_index, &
-                                                    fe_block_keyword, cr_block_keyword)
+                                    fe_block_keyword, cr_block_keyword) 
                    CASE DEFAULT
                       CPABORT("Site energy construction not specified")
                    END SELECT

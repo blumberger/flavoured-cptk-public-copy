@@ -185,7 +185,7 @@ end subroutine create_ext_press_list
 SUBROUTINE multi_block_energies_forces(adiab_section,energies_1_mol_list, energies, &
                                     intra_forces_global, global_forces, my_energies, &
                                     active_system_info, mixed_env, my_itimes, my_mol_index, &
-                                    fe_block_keyword, cr_block_keyword)
+                                    fe_block_keyword, cr_block_keyword) 
 
    TYPE(section_vals_type), POINTER          :: adiab_section
    TYPE(mixed_environment_type), &
@@ -300,7 +300,7 @@ SUBROUTINE multi_block_energies_forces(adiab_section,energies_1_mol_list, energi
      end do 
    end do
    
-    if (fe_block_keyword) then 
+    if (fe_block_keyword) then
         fect_block => section_vals_get_subs_vals(site_energy_section,"FE_CT_BLOCK")
         CALL section_vals_val_get(fect_block,"FE_IS", c_val=fe_keyword)
 
@@ -494,7 +494,9 @@ SUBROUTINE multi_block_energies_forces(adiab_section,energies_1_mol_list, energi
    DEALLOCATE(intra_forces_info)
    DEALLOCATE(first_ind)
    DEALLOCATE(second_ind)
-   DEALLOCATE(exc_index) 
+   if (fe_block_keyword) then
+       DEALLOCATE(exc_index) 
+   end if
 
 END SUBROUTINE multi_block_energies_forces
 

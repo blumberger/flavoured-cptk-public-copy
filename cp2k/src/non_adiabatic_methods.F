@@ -185,12 +185,13 @@ CONTAINS
        CALL create_sh_env(nadiab, norbitals, natom, &
                            positions_tp, adiab_section, & 
                            sh_env, my_mol_index, ext_pres, active_system_info, full_system_info)
-            
+  
        CALL propagate_namd_first_step(nadiab, norbitals,     &
                  positions_tp, velocities_tp, energies_tp, sh_env, itimes, &
                    adiab_section,& 
                  my_bo_keyword, atomic_kinds, &
                  local_particles, my_test_keyword, method_keyword, diagonal_F=mixed_env%F)
+
     ELSE
        !> Get the information for the previous timesteps
        ! WARNING:

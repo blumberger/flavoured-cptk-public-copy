@@ -1405,6 +1405,8 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
                           !IF MULTISTATE THEN  XXXX
                             !calculate gradients
 
+!WTP_TEST_XT: !!
+
                             call calc_dRSab(Atp, phase_atomlist, & !!
                                phase_connlist1, pcoeffsrun(1:atoms_per_mol_i,i), phase_scoeffs, & !!
                               nacv(1:3, k,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i), & !!
@@ -1415,6 +1417,7 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
                                phase_scoeffs, aneighbour(:,:), bneighbour(:,:), sh_env%dR, & !!
                                sh_env%do_random, sh_env)                         !!
                           !END IF
+!WTP_TEST_XT: End
 
 !WTP_change: debug..                         
 !open(20, file = 'nacv_multip_inter.dat', status = 'old', position="append",action="write")
@@ -1700,6 +1703,7 @@ SUBROUTINE calc_aom_coup_nacv_fect(sh_env, atoms_fe, elements_fe, fe_pcoeffs,fe_
 !close(26)
 
 !> deal with calc_dRSab
+!WTP_TEST_CT2: !! (also, WTP_TEST_XT)
 
                             call calc_dRSab(Atp, fe_atomlist, & !!
                                fe_connlist1, pcoeffsrun_fe(1:atoms_per_mol_i,i), fe_scoeffs, & !!
@@ -1712,6 +1716,7 @@ SUBROUTINE calc_aom_coup_nacv_fect(sh_env, atoms_fe, elements_fe, fe_pcoeffs,fe_
                                ct_scoeffs, aneighbour(:,:), bneighbour(:,:), sh_env%dR, & !!
                                sh_env%do_random, sh_env) !!
 
+!WTP_TEST_CT2: End (also, WTP_TEST_XT)
 
 !WTP_2022: check dRSab values!!
 !!open(26, file= 'dRSab-variables.dat', status= 'old', position= 'append', action='write')

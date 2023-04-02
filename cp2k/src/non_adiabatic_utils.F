@@ -1922,6 +1922,7 @@ subroutine calc_hop_nacv_approx_fect(adiab_section, instate, C, Fin, &
                               !WTP_comment: i-index is k, k-index is alpha in equations
 
                             ELSE !> add FECT contribution here
+!WTP_TEST_Edrift: !!
                               F_1(d,j) = F_1(d,j) + &
                                 nacv_fe(d,k,num_don)*(-scaling_C_fect)*diff_energy* &
                                 (C(k+(n_I-1)*SIZE(ctt_ind),new_state)*C(n_I+total_CT_states,old_state) + &
@@ -1933,6 +1934,7 @@ subroutine calc_hop_nacv_approx_fect(adiab_section, instate, C, Fin, &
                       do i= 1, SIZE(fee_ind)
 
                           !> FECT contribution
+!WTP_TEST_Edrift: !!
                           F_1(d,j) = F_1(d,j) + &
                             nacv_ct(d,i,num_acc)*(-scaling_C_fect)*diff_energy* &
                             (C(i+total_CT_states,new_state)*C((i-1)*SIZE(ctt_ind)+n_I,old_state) + &
@@ -2008,6 +2010,7 @@ subroutine calc_hop_nacv_approx_fect(adiab_section, instate, C, Fin, &
                     do i= 1, SIZE(fee_ind) !now, acceptor
 
                           !> FECT contribution
+!WTP_TEST_Edrift: !!
                           F_1(d,j) = F_1(d,j) + &
                             nacv_ct(d,i,num_don)*(-scaling_C_fect)*diff_energy* &
                             (C(i+total_CT_states,new_state)*C((n_I-1)*SIZE(fee_ind)+i,old_state) + &
@@ -2048,6 +2051,7 @@ subroutine calc_hop_nacv_approx_fect(adiab_section, instate, C, Fin, &
                               !WTP_comment: i-index is k, k-index is alpha in equations
 
                             ELSE
+!WTP_TEST_Edrift: !!
                               F_1(d,j) = F_1(d,j) + &
                                 nacv_fe(d,k,num_acc)*(-scaling_C_fect)*diff_energy* &
                                 (C(n_I+(k-1)*SIZE(fee_ind),new_state)*C(n_I+total_CT_states,old_state) + &
@@ -2402,6 +2406,7 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
                               !WTP_comment: i-index is k, k-index is alpha in equations
 
                             ELSE !> FECT contribution here
+!WTP_TEST_Edrift: !!
                               forces_adiab(d,j) = forces_adiab(d,j) + &
                                 nacv_fe(d,k,num_don)*(-scaling_C_fect)*2.0D0* &
                                 C(k+(n_I-1)*SIZE(ctt_ind),instate)*C(n_I+total_CT_states,instate)
@@ -2412,6 +2417,7 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
                       do i= 1, SIZE(fee_ind)
 
                           !> FECT contribution
+!WTP_TEST_Edrift: !!
                           forces_adiab(d,j) = forces_adiab(d,j) + &
                             nacv_ct(d,i,num_acc)* &
                             C(i+total_CT_states,instate)*C((i-1)*SIZE(ctt_ind)+n_I,instate)* &
@@ -2486,6 +2492,7 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
                     do i= 1, SIZE(fee_ind) !now, acceptor
 
                           !> FECT contribution
+!WTP_TEST_Edrift: !!
                           forces_adiab(d,j) = forces_adiab(d,j) + &
                             nacv_ct(d,i,num_don)* &
                             C(i+total_CT_states,instate)*C((n_I-1)*SIZE(fee_ind)+i,instate)* &
@@ -2523,6 +2530,7 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
                               !WTP_comment: i-index is k, k-index is alpha in equations
 
                             ELSE
+!WTP_TEST_Edrift: !!
                               forces_adiab(d,j) = forces_adiab(d,j) + &
                                 nacv_fe(d,k,num_acc)*(-scaling_C_fect)*2.0D0* &
                                 C(n_I+(k-1)*SIZE(fee_ind),instate)*C(n_I+total_CT_states,instate)
@@ -5141,6 +5149,7 @@ END SUBROUTINE classically_forbidden_hops
       my_H_tp = sh_env%H_tp
       if (offset) then
          do i = 1, mat
+            !WTP_TEST_XT: 1 --> 101 (when test XT block)
             my_H_t(i,i) = my_H_t(i,i) - sh_env%H_t(1,1)
             my_H_tp(i,i) = my_H_tp(i,i) - sh_env%H_tp(1,1)
          enddo

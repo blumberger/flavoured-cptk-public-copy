@@ -245,7 +245,8 @@ CONTAINS
     sh_env%tresp_couplings_keyword = .FALSE.
 
     !WTP_for_X-SH: !! .TRUE.
-    sh_env%Gaussian_charges = .TRUE.
+    !!sh_env%Gaussian_charges = .FALSE. !!
+    sh_env%Gaussian_charges = .TRUE. !for X-SH should be True..
 
     sh_env%multiphase_couplings_keyword = .FALSE.
     sh_env%multifect_couplings_keyword = .FALSE.
@@ -379,8 +380,8 @@ CONTAINS
      CHARACTER(LEN=default_string_length)           :: file_name_s_psigma, file_name_s_ppi!,&
                                                        !prop_wf_keyword
      ! OZ: extra strings for C-S and S-S SAB calc
-     CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_C_S,file_name_s_ppi_C_S
-     CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_S_S,file_name_s_ppi_S_S
+!     CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_C_S,file_name_s_ppi_C_S
+!     CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_S_S,file_name_s_ppi_S_S
      TYPE(section_vals_type), POINTER               :: coupling_section, site_energy_section, ct_block
      !INTEGER                                        :: aom_atoms, mol
      integer                                        :: atoms_per_donor, atoms_per_acceptor
@@ -610,7 +611,7 @@ CONTAINS
 
   END SUBROUTINE set_aom_env_multip
 
-  !> for X-SH
+  !> for X-SH: WTP_merge may require some changes here...
   SUBROUTINE set_aom_env_fect(nadiab,  norbitals, natom, &
                                   positions_tp,     &
                                   adiab_section,    &
@@ -643,8 +644,9 @@ CONTAINS
      CHARACTER(LEN=default_string_length)           :: file_name_s_psigma, file_name_s_ppi!,&
                                                        !prop_wf_keyword
      ! OZ: extra strings for C-S and S-S SAB calc
-     CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_C_S,file_name_s_ppi_C_S
-     CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_S_S,file_name_s_ppi_S_S
+!WTP_merge: 
+!     CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_C_S,file_name_s_ppi_C_S
+!     CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_S_S,file_name_s_ppi_S_S
      TYPE(section_vals_type), POINTER               :: coupling_section, site_energy_section, ct_block
      TYPE(section_vals_type), POINTER               :: fe_block, fect_block 
      !INTEGER                                        :: aom_atoms, mol
@@ -660,6 +662,9 @@ CONTAINS
      INTEGER                                        :: init_atom_mol_a, final_atom_mol_a, atoms_per_mol_a
      INTEGER                                        :: init_atom_mol_fe, final_atom_mol_fe, atoms_per_mol_fe
      INTEGER                                        :: init_atom_mol_ct, final_atom_mol_ct, atoms_per_mol_ct
+     CHARACTER(LEN=default_string_length)           :: STO_input_string
+     REAL(KIND=dp)                                  :: STO_rmin,STO_rmax,STO_dr
+     INTEGER                                        :: STO_debug
 
      NULLIFY(listcoeff)
      NULLIFY(coupling_section)
@@ -697,20 +702,32 @@ CONTAINS
      !WTP_comment:: RANDOM_DERIVATIVE card not exists in the input...
      CALL section_vals_val_get(coupling_section,"RANDOM_DERIVATIVE", l_val=sh_env%do_random)
 
+!WTP_merge: no longer requires look-up tables...
      !> Create the overlap look-up table for the AOM coupling calculation
-     CALL section_vals_val_get(coupling_section,"PSIGMA_FILE_NAME",&
-             c_val=file_name_s_psigma)
-     CALL section_vals_val_get(coupling_section,"PPI_FILE_NAME",&
-             c_val=file_name_s_ppi)
+!!     CALL section_vals_val_get(coupling_section,"PSIGMA_FILE_NAME",&
+!!             c_val=file_name_s_psigma)
+!!     CALL section_vals_val_get(coupling_section,"PPI_FILE_NAME",&
+!!             c_val=file_name_s_ppi)
      ! OZ: C-S and S-S
-     CALL section_vals_val_get(coupling_section,"PSIGMA_C_S_FILE_NAME",&
-             c_val=file_name_s_psigma_C_S)
-     CALL section_vals_val_get(coupling_section,"PPI_C_S_FILE_NAME",&
-             c_val=file_name_s_ppi_C_S)
-     CALL section_vals_val_get(coupling_section,"PSIGMA_S_S_FILE_NAME",&
-             c_val=file_name_s_psigma_S_S)
-     CALL section_vals_val_get(coupling_section,"PPI_S_S_FILE_NAME",&
-             c_val=file_name_s_ppi_S_S)
+!!     CALL section_vals_val_get(coupling_section,"PSIGMA_C_S_FILE_NAME",&
+!!             c_val=file_name_s_psigma_C_S)
+!!     CALL section_vals_val_get(coupling_section,"PPI_C_S_FILE_NAME",&
+!!             c_val=file_name_s_ppi_C_S)
+!!     CALL section_vals_val_get(coupling_section,"PSIGMA_S_S_FILE_NAME",&
+!!             c_val=file_name_s_psigma_S_S)
+!!     CALL section_vals_val_get(coupling_section,"PPI_S_S_FILE_NAME",&
+!!             c_val=file_name_s_ppi_S_S)
+     CALL section_vals_val_get(coupling_section,"STO_EXPONENTS",&
+             c_val=STO_input_string)
+!WTP_merge: STO_EXPONENTS is required input; the rest STO_* have default
+     CALL section_vals_val_get(coupling_section,"STO_RMIN",&
+             r_val=STO_rmin)
+     CALL section_vals_val_get(coupling_section,"STO_RMAX",&
+             r_val=STO_rmax)
+     CALL section_vals_val_get(coupling_section,"STO_DR",&
+             r_val=STO_dr)
+     CALL section_vals_val_get(coupling_section,"STO_DEBUG",&
+             i_val=STO_debug)
 
      !> Scaling factor Hab = scaling*Sab_bar
      CALL section_vals_val_get(coupling_section,"SCALING_FACTOR_DONOR",&
@@ -888,9 +905,13 @@ CONTAINS
      sh_env%siteenergies = 0.0_dp
 
      ! OZ: add extra arguments...
-     CALL build_s_tables(file_name_s_psigma, file_name_s_ppi,&
-                         file_name_s_psigma_C_S, file_name_s_ppi_C_S,&
-                         file_name_s_psigma_S_S, file_name_s_ppi_S_S)
+!!     CALL build_s_tables(file_name_s_psigma, file_name_s_ppi,&
+!!                         file_name_s_psigma_C_S, file_name_s_ppi_C_S,&
+!!                         file_name_s_psigma_S_S, file_name_s_ppi_S_S)
+!!WTP_merge: now use spline... 
+     ! OZ: add extra arguments...
+     CALL STO_initialize_splines(STO_input_string,STO_rmin,STO_rmax,STO_dr,&
+                                 STO_debug)
 
      !> READ THE AOM COEFFICIENT DONOR
      !> CONSTRUCT THE CONNLIST 
@@ -987,9 +1008,10 @@ CONTAINS
      !connectivities with and without considering the zeors
      call connect_list2(Atp_loc(2:4,:), sh_env%atomlist_fe, sh_env%connlist1_fe, sh_env%connlist2_fe, sh_env%cutoff_connect)
 
-     !WRITE(*,*) 'connlist1_fe: ', sh_env%connlist1_fe
-     !WRITE(*,*) 'connlist1_fe: ', sh_env%connlist1_fe(1,:)
-     !WRITE(*,*) 'connlist2_fe: ', sh_env%connlist2_fe
+     !WTP_TEST
+!     WRITE(*,*) 'connlist1_fe: ', sh_env%connlist1_fe
+!     WRITE(*,*) 'connlist1_fe: ', sh_env%connlist1_fe(1,:)
+!     WRITE(*,*) 'connlist2_fe: ', sh_env%connlist2_fe
 
      ! coefficients acceptor phase
      ALLOCATE(sh_env%pcoeffs_fe(atoms_per_fe))
@@ -1024,6 +1046,11 @@ CONTAINS
      !output: sh_env%connlist1, sh_env%connlist2, which are the intramoleculat
      !connectivities with and without considering the zeors
      call connect_list2(Atp_loc(2:4,:), sh_env%atomlist_ct, sh_env%connlist1_ct, sh_env%connlist2_ct, sh_env%cutoff_connect)
+
+     !WTP_TEST:
+!     WRITE(*,*) 'connlist1_ct: ', sh_env%connlist1_ct
+!     WRITE(*,*) 'connlist1_ct: ', sh_env%connlist1_ct(1,:)
+!     WRITE(*,*) 'connlist2_ct: ', sh_env%connlist2_ct
 
      ! coefficients acceptor phase
      ALLOCATE(sh_env%pcoeffs_ct(atoms_per_ct))
@@ -1072,8 +1099,8 @@ CONTAINS
      CHARACTER(LEN=default_string_length)           :: file_name_s_psigma, file_name_s_ppi,&
                                                        prop_wf_keyword
      ! OZ: extra strings for C-S and S-S SAB calc
-     CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_C_S,file_name_s_ppi_C_S
-     CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_S_S,file_name_s_ppi_S_S
+!     CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_C_S,file_name_s_ppi_C_S
+!     CHARACTER(LEN=default_string_length)           :: file_name_s_psigma_S_S,file_name_s_ppi_S_S
      TYPE(section_vals_type), POINTER               :: coupling_section
      INTEGER                                        :: aom_atoms
      CHARACTER(LEN=default_string_length)           :: STO_input_string
