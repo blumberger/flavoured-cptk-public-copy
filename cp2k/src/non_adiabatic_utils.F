@@ -231,8 +231,11 @@ SUBROUTINE calc_coms_and_nlist_fect_fe(sh_env, cutoff_sites, orb, crds, adiab_se
      do i=1,SIZE(fe_ind)
           !> counts the active atoms for each molecules to make it general
 
+!WTP_4.2_Debug: double check: active_system_info --> full_system_info, ok or not???
           init_atom_mol_i = sh_env%full_system_info(1,fe_ind(i))
           final_atom_mol_i = sh_env%full_system_info(2,fe_ind(i))
+          !init_atom_mol_i = sh_env%active_system_info(1,fe_ind(i))
+          !final_atom_mol_i = sh_env%active_system_info(2,fe_ind(i))
           atoms = (final_atom_mol_i - init_atom_mol_i) + 1
           ! loop over atoms
           do m=init_atom_mol_i, final_atom_mol_i
@@ -552,13 +555,19 @@ END SUBROUTINE calc_coms_and_nlist_fect_fe
 !WTP_change: sh_env%active_system_info(1,i) -->
 !or sh_env%full_system_info(1,fe_ind(i))... active vs full difference??
 !WTP_comment: since use active might be buggy...
-                          init_atom_mol_i = sh_env%active_system_info(1,fe_ind(i))
-                          final_atom_mol_i = sh_env%active_system_info(2,fe_ind(i))
+!WTP_4.2_Debug: change active --> full
+                          init_atom_mol_i = sh_env%full_system_info(1,fe_ind(i))
+                          final_atom_mol_i = sh_env%full_system_info(2,fe_ind(i))
+                          !init_atom_mol_i = sh_env%active_system_info(1,fe_ind(i))
+                          !final_atom_mol_i = sh_env%active_system_info(2,fe_ind(i))
                           atoms_per_mol_i = (final_atom_mol_i-init_atom_mol_i)+1
 
                           !> find coordinates mol 2 of the pair
-                          init_atom_mol_k = sh_env%active_system_info(1,fe_ind(k))
-                          final_atom_mol_k = sh_env%active_system_info(2,fe_ind(k))
+!WTP_4.2_Debug: change active --> full
+                          init_atom_mol_k = sh_env%full_system_info(1,fe_ind(k))
+                          final_atom_mol_k = sh_env%full_system_info(2,fe_ind(k))
+                          !init_atom_mol_k = sh_env%active_system_info(1,fe_ind(k))
+                          !final_atom_mol_k = sh_env%active_system_info(2,fe_ind(k))
                           atoms_per_mol_k = (final_atom_mol_k-init_atom_mol_k)+1
 
                           !> this allocation deallocation is maybe inefficient
@@ -1796,6 +1805,7 @@ subroutine calc_hop_nacv_approx_fect(adiab_section, instate, C, Fin, &
 
        fect_block => section_vals_get_subs_vals(site_energy_section,"FE_CT_BLOCK")
        CALL section_vals_val_get(fect_block,"FE_IS", c_val=fe_keyword)
+       !CALL section_vals_val_get(fect_block,"E_OFFSET", r_val=e_offset)
 
     ALLOCATE(ext_pres_fe(natom))
     ext_pres_fe(:) = .FALSE.

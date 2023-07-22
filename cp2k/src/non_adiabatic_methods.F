@@ -185,6 +185,8 @@ CONTAINS
        CALL create_sh_env(nadiab, norbitals, natom, &
                            positions_tp, adiab_section, & 
                            sh_env, my_mol_index, ext_pres, active_system_info, full_system_info)
+
+       print *, "WTP_4.2_Debug1"
   
        CALL propagate_namd_first_step(nadiab, norbitals,     &
                  positions_tp, velocities_tp, energies_tp, sh_env, itimes, &

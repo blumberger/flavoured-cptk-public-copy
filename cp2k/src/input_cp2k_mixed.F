@@ -559,18 +559,25 @@ CONTAINS
     CALL section_add_keyword(sub3section,keyword)
     CALL keyword_release(keyword)
 
-!WTP_comment: maybe not useful anymore?
-    CALL keyword_create(keyword, name="N_CT_ATOMS",&
-         description="Number of atoms per site",&
-         usage="1", type_of_var=integer_t)
+!WTP_4.2
+    CALL keyword_create(keyword, name="E_OFFSET",&
+         description="E_FE(R_gs) - E_CT(R_gs)",&
+         usage="E_OFFSET <REAL>", type_of_var=char_t)
     CALL section_add_keyword(sub3section,keyword)
     CALL keyword_release(keyword)
 
-    CALL keyword_create(keyword, name="N_FE_ATOMS",&
-         description="Number of atoms per site",&
-         usage="1", type_of_var=integer_t)
-    CALL section_add_keyword(sub3section,keyword)
-    CALL keyword_release(keyword)
+!WTP_comment: maybe not useful anymore?
+!    CALL keyword_create(keyword, name="N_CT_ATOMS",&
+!         description="Number of atoms per site",&
+!         usage="1", type_of_var=integer_t)
+!    CALL section_add_keyword(sub3section,keyword)
+!    CALL keyword_release(keyword)
+
+!    CALL keyword_create(keyword, name="N_FE_ATOMS",&
+!         description="Number of atoms per site",&
+!         usage="1", type_of_var=integer_t)
+!    CALL section_add_keyword(sub3section,keyword)
+!    CALL keyword_release(keyword)
 
    CALL section_release(sub3section)
 

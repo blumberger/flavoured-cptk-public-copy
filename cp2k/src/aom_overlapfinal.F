@@ -814,7 +814,8 @@ end function
                 connectlist(j,i) = k
             end if
          end do
-
+!WTP_4.2_Debug:
+         print *, "j= ", j
          !sp2 carbons, N in pyrrole
          if(j .eq. 4) then
 
@@ -859,8 +860,23 @@ end function
       integer :: i,j,k,l
       REAL(KIND=dp) :: distvec(3), DNRM2
 
+      !WTP_4.2_Debug: 
+      integer :: temp1_k(5), dd(1) !temp1_jlk(5,3), temp2_jik(5,3) !given 5 dim for testing
+      REAL(KIND=dp) :: DIS1(5) !, DIS2(6)
+      integer :: xx
+      temp1_k = 0
+      !temp1_jlkD = 0
+      !temp2_jikD = 0
+      !Debug End
+
       connectlist1=0
       connectlist2=0
+
+      !WTP_4.2_Debug:
+      !print *, "xyz: and size(1,:), size(:,1)", xyz(:,:), size(xyz(1,:)), size(xyz(:,1))
+      !print *, "atomlist: and size", atomlist(:), size(atomlist(:))
+      !print *, "cutoff_connect: ", cutoff_connect
+      !print *, "atomlist: ", atomlist
 
       do i=1,size(atomlist)
          j=1
@@ -868,16 +884,60 @@ end function
          connectlist1(1,l)=atomlist(i)
          connectlist2(1,i)=atomlist(i)
 
+         !WTP_4.2_Debug: note: how to deal with j>4 situation?
          do k=1,size(xyz,2)
             distvec=xyz(:,atomlist(i)) - xyz(:,k)
 !           Current nearest neighbour cutoff is 3.00 a. u.
             !if (atomlist(i) .ne. k .and. DNRM2(3,distvec,1) < 3.5D0) then
             if (atomlist(i) .ne. k .and. DNRM2(3,distvec,1) < cutoff_connect) then
                                j = j + 1
+
+                               !WTP_4.2_Debug: add if statement
+!!                               if (j<5) then
                                connectlist1(j,l) = k
                                connectlist2(j,i) = k
+!!                               end if
+                               !WTP: End if statement
+
+                               !WTP_4.2_Debug: add temp lists
+!!                               temp1_k(j) = k 
+!!                               DIS1(j) = DNRM2(3,distvec,1)
+
             end if
          end do
+
+!WTP_4.2_Debug:
+         print *, "Debug: "
+         print *, "j= ", j
+         
+         !WTP_4.2_Debug:
+!!         if(j>4) then
+!!             dd = MAXLOC(DIS1)
+!!             j = j-1 
+   
+!!             if(dd(1)==5) then
+             
+!!             elseif(dd(1)==4) then
+!!                 connectlist1(4,l) = temp1_k(5)
+!!                 connectlist2(4,i) = temp1_k(5)
+
+!!             elseif(dd(1)==3) then
+!!                 connectlist1(3,l) = temp1_k(4)
+!!                 connectlist2(3,i) = temp1_k(4)
+!!                 connectlist1(4,l) = temp1_k(5)
+!!                 connectlist2(4,i) = temp1_k(5)
+
+!!             elseif(dd(1)==2) then  
+!!                 connectlist1(2,l) = temp1_k(3)
+!!                 connectlist2(2,i) = temp1_k(3)
+!!                 connectlist1(3,l) = temp1_k(4)
+!!                 connectlist2(3,i) = temp1_k(4)
+!!                 connectlist1(4,l) = temp1_k(5)
+!!                 connectlist2(4,i) = temp1_k(5)
+                 
+!!             end if
+!!         end if
+         !WTP_4.2_Debug: End Debug
 
          !sp2 carbons, N in pyrrole
          if(j .eq. 4) then

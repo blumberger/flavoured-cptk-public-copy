@@ -157,6 +157,7 @@ END TYPE adiab_nace_env_type
      integer, dimension(:), ALLOCATABLE       :: ext_elements_fe, ext_elements_ct ! atomic number
      REAL(KIND = dp)                          :: scaling_donor, scaling_acceptor, scaling_fect
      LOGICAL                                  :: fe_donor  !True: donor is FE, False: acceptor is FE
+     REAL(KIND = dp)                          :: e_offset  !WTP_4.2: E_FE(R_gs) - E_CT(R_gs)
 
      LOGICAL                                  :: freeze_multip_forces
 

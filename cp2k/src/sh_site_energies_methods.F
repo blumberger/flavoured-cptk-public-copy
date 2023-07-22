@@ -446,7 +446,8 @@ SUBROUTINE multi_block_energies_forces(adiab_section,energies_1_mol_list, energi
    !print *, "FE STATE", ind1
          !> we create site energies from the 2 force_evals sections: the first
          !neutral, the second charge and the THIRD excited.
-         my_energies(i) = energies(1) + energies_1_mol_list(3,ind1) - energies_1_mol_list(1,ind1)
+         my_energies(i) = energies(1) + energies_1_mol_list(3,ind1) - energies_1_mol_list(1,ind1) !+ sh_env%e_offset
+         !>WTP_4.2: double check sh_env%e_offset term!! 1) default = 0.0 2) input value correctly passed here
 
          !> we allocate diagonal forces array. All the atoms for a give state i
          !assume the value of the neutral force_field that contains: intra +
@@ -483,6 +484,7 @@ SUBROUTINE multi_block_energies_forces(adiab_section,energies_1_mol_list, energi
    END IF
 
   !> THE CR BLOCK (always after the last Block)
+  !> WTP_4.2: double check...
    if (cr_block_keyword) then
       ! in case CR is present
       total_states = nadiab

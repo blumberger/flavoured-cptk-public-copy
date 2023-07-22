@@ -273,10 +273,8 @@ CONTAINS
          sh_env%multifect_couplings_keyword = .TRUE.
 
          sh_env%freeze_multip_forces = .FALSE.  !??? do I need this
-
          !> FE block (TRESP) is also intialized in the following subroutine
          CALL set_aom_env_fect(nadiab, norbitals, natom,positions_tp,adiab_section,sh_env)
-
     !------------------------------------------------------------------------------------------
     CASE("FROZEN_COUPLINGS")
         ! Frozen coupling would have the possibility of using multi-state for
@@ -636,7 +634,7 @@ CONTAINS
      integer, dimension(:), ALLOCATABLE             :: ext_elements_fe, ext_elements_ct
      integer, dimension(:), ALLOCATABLE             :: ext_elements
      CHARACTER(LEN=default_string_length)           :: fe_keyword
-
+     REAL(KIND=dp)                                  :: e_offset !WTP_4.2
 
      LOGICAL, dimension(:), POINTER                 :: active_logical
      TYPE(cp_sll_val_type), POINTER                 :: listcoeff, list_tresp
@@ -768,12 +766,18 @@ CONTAINS
          atoms_per_fe = atoms_per_acceptor
          atoms_per_ct = atoms_per_donor
      END SELECT
+     !WTP_4.2_Debug:
+     print *, "Debug0"
+     !>WTP_4.2: Energy offset between FE and CT states
+!     CALL section_vals_val_get(fect_block,"E_OFFSET", r_val=sh_env%e_offset) !WTP_4.2: double check
 
      !> READ THE AOM COEFFICIENT of DONOR and ACCEPTOR
 !WTP_comment: everything (for X-SH, 4 AOM include files) be read in listcoeff,
 !then read by read_listcoeff subroutine. This makes sanity check for input
 !difficult. Thus, need to make sure 4 AOM files in the order: 1. DONOR 2.
 !ACCEPTOR 3. FE 4 CT
+!> WTP_4.2: and 5 6 for CR!!
+
      CALL section_vals_list_get(coupling_section,"_DEFAULT_KEYWORD_",list=listcoeff) !Read them in the input files
      !Transform them into four arrays. In this case external presence is not
      !read anymore.
@@ -786,6 +790,9 @@ CONTAINS
                          scoefftot_fe, pcoefftot_fe, atoms_per_fe) !FE:: donor/acceptor
      CALL read_listcoeff(listcoeff, ext_elements_ct, active_logical, &
                          scoefftot_ct, pcoefftot_ct, atoms_per_ct) !CT:: donor/acceptor
+     !>WTP_4.2: add 2 orbs. for CR here!!
+     !>maybe with a if(CR) statement???
+     !> ....
 
      !get the first mol of the donor and the first of the acceptor phase 
      init_atom_mol_d = sh_env%full_system_info(1,donor_index(1)) !just get the first donor
@@ -935,7 +942,14 @@ CONTAINS
      Atp_loc(2:4,1:atoms_per_donor) = positions_tp(1:3,init_atom_mol_d:final_atom_mol_d)
      !output: sh_env%connlist1, sh_env%connlist2, which are the intramoleculat
      !connectivities with and without considering the zeors
+     !WTP_4.2_Debug:
+!     print *, "WTP_Debug1: "
      call connect_list2(Atp_loc(2:4,:), sh_env%atomlist_d, sh_env%connlist1_d, sh_env%connlist2_d, sh_env%cutoff_connect)
+!     print *, "WTP_Debug2: "
+!     print *, "size(connlist1(1,:)) and size(connlist1(:,1))", size(sh_env%connlist1_d(1,:)), size(sh_env%connlist1_d(:,1))
+!     print *, "size(connlist2(1,:)) and size(connlist2(:,1))", size(sh_env%connlist2_d(1,:)), size(sh_env%connlist2_d(:,1))
+!     print *, "connlist1: ", sh_env%connlist1_d
+!     print *, "connlist2: ", sh_env%connlist2_d 
 
      ! coefficients donor phase
      ALLOCATE(sh_env%pcoeffs_d(atoms_per_donor))
