@@ -1,0 +1,3470 @@
+LET'S START. 
+Adiabatic Initial Population = 
+   1         0.0063068545
+   2         0.0143167668
+   3         0.7297536367
+   4         0.0185442494
+   5         0.2062291994
+   6         0.0245941115
+   7         0.0002312128
+   8         0.0000239690
+Initial Random Number =         0.6795103406
+First Adiabatic State =        3
+  
+   i = 1, time =                0.100 (fs)
+   Exact sum of fluxes =         0.0079092548
+   Approximate sum of fluxes =         0.0113000507
+   Sum of probability =         0.0211192534
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9788807466
+   4         0.0001373318
+   5         0.0193560308
+   6         0.0016233833
+   7         0.0000015578
+   8         0.0000009496
+   Random number =         0.0591472702
+NO HOP!
+Final state   =        3
+  
+   i = 2, time =                0.200 (fs)
+   Exact sum of fluxes =         0.0173663788
+   Approximate sum of fluxes =         0.0186283811
+   Sum of probability =         0.0221796016
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9778203984
+   4         0.0001270062
+   5         0.0203661209
+   6         0.0016796697
+   7         0.0000055086
+   8         0.0000012962
+   Random number =         0.0600288018
+NO HOP!
+Final state   =        3
+  
+   i = 3, time =                0.300 (fs)
+   Exact sum of fluxes =         0.0206377807
+   Approximate sum of fluxes =         0.0215391728
+   Sum of probability =         0.0233195733
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9766804267
+   4         0.0000000000
+   5         0.0216277413
+   6         0.0016828549
+   7         0.0000074145
+   8         0.0000015626
+   Random number =         0.0737575251
+NO HOP!
+Final state   =        3
+  
+   i = 4, time =                0.400 (fs)
+   Exact sum of fluxes =         0.0225622603
+   Approximate sum of fluxes =         0.0233926472
+   Sum of probability =         0.0245455307
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9754544693
+   4         0.0000000000
+   5         0.0228737982
+   6         0.0016612868
+   7         0.0000086268
+   8         0.0000018190
+   Random number =         0.8085495828
+NO HOP!
+Final state   =        3
+  
+   i = 5, time =                0.500 (fs)
+   Exact sum of fluxes =         0.0240750990
+   Approximate sum of fluxes =         0.0249097065
+   Sum of probability =         0.0255837591
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9744162409
+   4         0.0004458948
+   5         0.0235016213
+   6         0.0016245734
+   7         0.0000095783
+   8         0.0000020914
+   Random number =         0.8329145040
+NO HOP!
+Final state   =        3
+  
+   i = 6, time =                0.600 (fs)
+   Exact sum of fluxes =         0.0254418075
+   Approximate sum of fluxes =         0.0263073782
+   Sum of probability =         0.0267898816
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9732101184
+   4         0.0028703274
+   5         0.0223290814
+   6         0.0015776218
+   7         0.0000104564
+   8         0.0000023946
+   Random number =         0.1816433921
+NO HOP!
+Final state   =        3
+  
+   i = 7, time =                0.700 (fs)
+   Exact sum of fluxes =         0.0267594655
+   Approximate sum of fluxes =         0.0276685711
+   Sum of probability =         0.0280339307
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9719660693
+   4         0.0073819558
+   5         0.0191141863
+   6         0.0015236847
+   7         0.0000113636
+   8         0.0000027402
+   Random number =         0.0151056240
+NO HOP!
+Final state   =        3
+  
+   i = 8, time =                0.800 (fs)
+   Exact sum of fluxes =         0.0280716843
+   Approximate sum of fluxes =         0.0290321434
+   Sum of probability =         0.0293203227
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9706796773
+   4         0.0121101191
+   5         0.0157294654
+   6         0.0014652285
+   7         0.0000123706
+   8         0.0000031391
+   Random number =         0.2468719039
+NO HOP!
+Final state   =        3
+  
+   i = 9, time =                0.900 (fs)
+   Exact sum of fluxes =         0.0294021765
+   Approximate sum of fluxes =         0.0304202139
+   Sum of probability =         0.0306546363
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9693453637
+   4         0.0159189524
+   5         0.0133143288
+   6         0.0014042147
+   7         0.0000135382
+   8         0.0000036023
+   Random number =         0.8336512352
+NO HOP!
+Final state   =        3
+  
+   i = 10, time =                1.000 (fs)
+   Exact sum of fluxes =         0.0307662383
+   Approximate sum of fluxes =         0.0318477213
+   Sum of probability =         0.0320431359
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9679568641
+   4         0.0189139047
+   5         0.0117679627
+   6         0.0013421975
+   7         0.0000149298
+   8         0.0000041412
+   Random number =         0.4739930845
+NO HOP!
+Final state   =        3
+  
+   i = 11, time =                1.100 (fs)
+   Exact sum of fluxes =         0.0321751048
+   Approximate sum of fluxes =         0.0333260888
+   Sum of probability =         0.0334923589
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9665076411
+   4         0.0214114502
+   5         0.0107791552
+   6         0.0012803652
+   7         0.0000166209
+   8         0.0000047673
+   Random number =         0.2741656064
+NO HOP!
+Final state   =        3
+  
+   i = 12, time =                1.200 (fs)
+   Exact sum of fluxes =         0.0336375822
+   Approximate sum of fluxes =         0.0348645652
+   Sum of probability =         0.0350086366
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9649913634
+   4         0.0236346189
+   5         0.0101302502
+   6         0.0012195672
+   7         0.0000187098
+   8         0.0000054906
+   Random number =         0.4540503017
+NO HOP!
+Final state   =        3
+  
+   i = 13, time =                1.300 (fs)
+   Exact sum of fluxes =         0.0351606405
+   Approximate sum of fluxes =         0.0364706756
+   Sum of probability =         0.0365976655
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9634023345
+   4         0.0257175429
+   5         0.0096921338
+   6         0.0011603409
+   7         0.0000213308
+   8         0.0000063171
+   Random number =         0.5421999967
+NO HOP!
+Final state   =        3
+  
+   i = 14, time =                1.400 (fs)
+   Exact sum of fluxes =         0.0367494361
+   Approximate sum of fluxes =         0.0381501536
+   Sum of probability =         0.0382639870
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9617360130
+   4         0.0277401046
+   5         0.0093890280
+   6         0.0011029363
+   7         0.0000246745
+   8         0.0000072436
+   Random number =         0.7853072454
+NO HOP!
+Final state   =        3
+  
+   i = 15, time =                1.500 (fs)
+   Exact sum of fluxes =         0.0384071213
+   Approximate sum of fluxes =         0.0399066807
+   Sum of probability =         0.0400104810
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9599895190
+   4         0.0297503496
+   5         0.0091755285
+   6         0.0010473368
+   7         0.0000290176
+   8         0.0000082485
+   Random number =         0.3509130080
+NO HOP!
+Final state   =        3
+  
+   i = 16, time =                1.600 (fs)
+   Exact sum of fluxes =         0.0401345133
+   Approximate sum of fluxes =         0.0417414885
+   Sum of probability =         0.0418378286
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9581621714
+   4         0.0317764934
+   5         0.0090240223
+   6         0.0009932671
+   7         0.0000347686
+   8         0.0000092771
+   Random number =         0.5127729784
+NO HOP!
+Final state   =        3
+  
+   i = 17, time =                1.700 (fs)
+   Exact sum of fluxes =         0.0419297427
+   Approximate sum of fluxes =         0.0436529405
+   Sum of probability =         0.0437440105
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9562559895
+   4         0.0338330919
+   5         0.0089179775
+   6         0.0009401855
+   7         0.0000425339
+   8         0.0000102216
+   Random number =         0.5667291288
+NO HOP!
+Final state   =        3
+  
+   i = 18, time =                1.800 (fs)
+   Exact sum of fluxes =         0.0437878622
+   Approximate sum of fluxes =         0.0456360655
+   Sum of probability =         0.0457237909
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9542762091
+   4         0.0359240673
+   5         0.0088483696
+   6         0.0008872470
+   7         0.0000532053
+   8         0.0000109017
+   Random number =         0.0417010120
+NO HOP!
+Final state   =        3
+  
+   i = 19, time =                1.900 (fs)
+   Exact sum of fluxes =         0.0457005148
+   Approximate sum of fluxes =         0.0476821493
+   Sum of probability =         0.0477682775
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9522317225
+   4         0.0380440571
+   5         0.0088118637
+   6         0.0008332313
+   7         0.0000680567
+   8         0.0000110687
+   Random number =         0.2308744169
+NO HOP!
+Final state   =        3
+  
+   i = 20, time =                2.000 (fs)
+   Exact sum of fluxes =         0.0476557218
+   Approximate sum of fluxes =         0.0497784484
+   Sum of probability =         0.0498646159
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9501353841
+   4         0.0401787929
+   5         0.0088101036
+   6         0.0007764287
+   7         0.0000888153
+   8         0.0000104755
+   Random number =         0.1081877871
+NO HOP!
+Final state   =        3
+  
+   i = 21, time =                2.100 (fs)
+   Exact sum of fluxes =         0.0496377075
+   Approximate sum of fluxes =         0.0519079390
+   Sum of probability =         0.0519957266
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9480042734
+   4         0.0423046769
+   5         0.0088498457
+   6         0.0007144942
+   7         0.0001176758
+   8         0.0000090340
+   Random number =         0.2232476737
+NO HOP!
+Final state   =        3
+  
+   i = 22, time =                2.200 (fs)
+   Exact sum of fluxes =         0.0516269653
+   Approximate sum of fluxes =         0.0540493282
+   Sum of probability =         0.0541403097
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9458596903
+   4         0.0443876383
+   5         0.0089440767
+   6         0.0006443543
+   7         0.0001572784
+   8         0.0000069620
+   Random number =         0.5397096330
+NO HOP!
+Final state   =        3
+  
+   i = 23, time =                2.300 (fs)
+   Exact sum of fluxes =         0.0536004091
+   Approximate sum of fluxes =         0.0561771630
+   Sum of probability =         0.0562729514
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9437270486
+   4         0.0463806467
+   5         0.0091145649
+   6         0.0005624481
+   7         0.0002105672
+   8         0.0000047245
+   Random number =         0.0374555103
+NO HOP!
+Final state   =        3
+  
+   i = 24, time =                2.400 (fs)
+   Exact sum of fluxes =         0.0555316979
+   Approximate sum of fluxes =         0.0582621410
+   Sum of probability =         0.0583644351
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9416355649
+   4         0.0482187418
+   5         0.0093970809
+   6         0.0004659785
+   7         0.0002798618
+   8         0.0000027721
+   Random number =         0.5059913146
+NO HOP!
+Final state   =        3
+  
+   i = 25, time =                2.500 (fs)
+   Exact sum of fluxes =         0.0573918677
+   Approximate sum of fluxes =         0.0602717783
+   Sum of probability =         0.0603824126
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9396175874
+   4         0.0498088110
+   5         0.0098521984
+   6         0.0003560091
+   7         0.0003640554
+   8         0.0000013387
+   Random number =         0.9766635539
+   ATTEMPT between old_state =        3 and new_state =        4
+TRY ENERGY CONSERVATION WITH ISOTROPIC RESCALING:
+   Energy old state  (Ha)  =         2.4567354660
+   Energy new state  (Ha)  =         2.4589969913
+   Kinetic energy    (Ha)  =         2.4017070066
+   Energy difference (Ha)  =         2.3994454812
+SUCCESSFUL HOP!
+   Isotropic rescale factor  =         0.9995290729
+Final state   =        4
+  
+   i = 26, time =                2.600 (fs)
+   Exact sum of fluxes =        -0.0201158023
+   Approximate sum of fluxes =        -0.0193509382
+   Sum of probability =         0.0041742677
+   Probability = 
+   1         0.0000219493
+   2         0.0000056933
+   3         0.0000000000
+   4         0.9958257323
+   5         0.0035324490
+   6         0.0006141761
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.1284058070
+NO HOP!
+Final state   =        4
+  
+   i = 27, time =                2.700 (fs)
+   Exact sum of fluxes =        -0.0088538463
+   Approximate sum of fluxes =        -0.0081163504
+   Sum of probability =         0.0133590156
+   Probability = 
+   1         0.0000251286
+   2         0.0000047203
+   3         0.0000000000
+   4         0.9866409844
+   5         0.0127144997
+   6         0.0006146669
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.8071081247
+NO HOP!
+Final state   =        4
+  
+   i = 28, time =                2.800 (fs)
+   Exact sum of fluxes =         0.0091439704
+   Approximate sum of fluxes =         0.0107211315
+   Sum of probability =         0.0303357125
+   Probability = 
+   1         0.0000278238
+   2         0.0000039615
+   3         0.0000000000
+   4         0.9696642875
+   5         0.0297967513
+   6         0.0005071758
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.3634871413
+NO HOP!
+Final state   =        4
+  
+   i = 29, time =                2.900 (fs)
+   Exact sum of fluxes =         0.0451487477
+   Approximate sum of fluxes =         0.0513216985
+   Sum of probability =         0.0693781863
+   Probability = 
+   1         0.0000302456
+   2         0.0000034036
+   3         0.0000000000
+   4         0.9306218137
+   5         0.0690859840
+   6         0.0002572771
+   7         0.0000000000
+   8         0.0000012760
+   Random number =         0.8552237872
+NO HOP!
+Final state   =        4
+  
+   i = 30, time =                3.000 (fs)
+   Exact sum of fluxes =         0.1342939053
+   Approximate sum of fluxes =         0.1665074808
+   Sum of probability =         0.1838871566
+   Probability = 
+   1         0.0000331310
+   2         0.0000030389
+   3         0.0000000000
+   4         0.8161128434
+   5         0.1838446073
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000063794
+   Random number =         0.6703472965
+NO HOP!
+Final state   =        4
+  
+   i = 31, time =                3.100 (fs)
+   Exact sum of fluxes =         0.3524221447
+   Approximate sum of fluxes =         0.5449238931
+   Sum of probability =         0.5644788588
+   Probability = 
+   1         0.0000389125
+   2         0.0000032518
+   3         0.0000000000
+   4         0.4355211412
+   5         0.5644204910
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000162034
+   Random number =         0.9519441093
+   ATTEMPT between old_state =        4 and new_state =        5
+TRY ENERGY CONSERVATION WITH ISOTROPIC RESCALING:
+   Energy old state  (Ha)  =         2.5751285930
+   Energy new state  (Ha)  =         2.5752492722
+   Kinetic energy    (Ha)  =         2.2834357826
+   Energy difference (Ha)  =         2.2833151035
+SUCCESSFUL HOP!
+   Isotropic rescale factor  =         0.9999735747
+Final state   =        5
+  
+   i = 32, time =                3.200 (fs)
+   Exact sum of fluxes =        -0.4675321558
+   Approximate sum of fluxes =        -0.2590120853
+   Sum of probability =         0.0039110234
+   Probability = 
+   1         0.0000298374
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.9960889766
+   6         0.0026415698
+   7         0.0012396163
+   8         0.0000000000
+   Random number =         0.4030336651
+NO HOP!
+Final state   =        5
+  
+   i = 33, time =                3.300 (fs)
+   Exact sum of fluxes =        -0.1433333553
+   Approximate sum of fluxes =        -0.0920142796
+   Sum of probability =         0.0029229982
+   Probability = 
+   1         0.0000327666
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.9970770018
+   6         0.0022857380
+   7         0.0006044936
+   8         0.0000000000
+   Random number =         0.0639906913
+NO HOP!
+Final state   =        5
+  
+   i = 34, time =                3.400 (fs)
+   Exact sum of fluxes =        -0.0439408300
+   Approximate sum of fluxes =        -0.0323022091
+   Sum of probability =         0.0019183182
+   Probability = 
+   1         0.0000336358
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.9980816818
+   6         0.0016543433
+   7         0.0002303391
+   8         0.0000000000
+   Random number =         0.4424038711
+NO HOP!
+Final state   =        5
+  
+   i = 35, time =                3.500 (fs)
+   Exact sum of fluxes =        -0.0188988867
+   Approximate sum of fluxes =        -0.0154795782
+   Sum of probability =         0.0012176015
+   Probability = 
+   1         0.0000334701
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.9987823985
+   6         0.0011356795
+   7         0.0000484519
+   8         0.0000000000
+   Random number =         0.3705383274
+NO HOP!
+Final state   =        5
+  
+   i = 36, time =                3.600 (fs)
+   Exact sum of fluxes =        -0.0112723755
+   Approximate sum of fluxes =        -0.0099986893
+   Sum of probability =         0.0007705032
+   Probability = 
+   1         0.0000329317
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.9992294968
+   6         0.0007375716
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.7910923228
+NO HOP!
+Final state   =        5
+  
+   i = 37, time =                3.700 (fs)
+   Exact sum of fluxes =        -0.0083189180
+   Approximate sum of fluxes =        -0.0077439983
+   Sum of probability =         0.0004637321
+   Probability = 
+   1         0.0000322041
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.9995362679
+   6         0.0004315281
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.0918277102
+NO HOP!
+Final state   =        5
+  
+   i = 38, time =                3.800 (fs)
+   Exact sum of fluxes =        -0.0068493676
+   Approximate sum of fluxes =        -0.0065434204
+   Sum of probability =         0.0002309941
+   Probability = 
+   1         0.0000313780
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.9997690059
+   6         0.0001996161
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.9327895530
+NO HOP!
+Final state   =        5
+  
+   i = 39, time =                3.900 (fs)
+   Exact sum of fluxes =        -0.0059207791
+   Approximate sum of fluxes =        -0.0057328816
+   Sum of probability =         0.0000596834
+   Probability = 
+   1         0.0000305387
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.9999403166
+   6         0.0000291448
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.6689587527
+NO HOP!
+Final state   =        5
+  
+   i = 40, time =                4.000 (fs)
+   Exact sum of fluxes =        -0.0052143192
+   Approximate sum of fluxes =        -0.0050844644
+   Sum of probability =         0.0000297845
+   Probability = 
+   1         0.0000297845
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.9999702155
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.0704956699
+NO HOP!
+Final state   =        5
+  
+   i = 41, time =                4.100 (fs)
+   Exact sum of fluxes =        -0.0046107893
+   Approximate sum of fluxes =        -0.0045127124
+   Sum of probability =         0.0000641797
+   Probability = 
+   1         0.0000292310
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000349487
+   5         0.9999358203
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.4483789306
+NO HOP!
+Final state   =        5
+  
+   i = 42, time =                4.200 (fs)
+   Exact sum of fluxes =        -0.0040619634
+   Approximate sum of fluxes =        -0.0039831849
+   Sum of probability =         0.0000746645
+   Probability = 
+   1         0.0000290101
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000456544
+   5         0.9999253355
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.5319948221
+NO HOP!
+Final state   =        5
+  
+   i = 43, time =                4.300 (fs)
+   Exact sum of fluxes =        -0.0035466860
+   Approximate sum of fluxes =        -0.0034807542
+   Sum of probability =         0.0000751181
+   Probability = 
+   1         0.0000292618
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000458563
+   5         0.9999248819
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.5773072085
+NO HOP!
+Final state   =        5
+  
+   i = 44, time =                4.400 (fs)
+   Exact sum of fluxes =        -0.0030544074
+   Approximate sum of fluxes =        -0.0029976080
+   Sum of probability =         0.0000720724
+   Probability = 
+   1         0.0000301129
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000419594
+   5         0.9999279276
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.0169284336
+NO HOP!
+Final state   =        5
+  
+   i = 45, time =                4.500 (fs)
+   Exact sum of fluxes =        -0.0025784725
+   Approximate sum of fluxes =        -0.0025283210
+   Sum of probability =         0.0000684108
+   Probability = 
+   1         0.0000316280
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000367828
+   5         0.9999315892
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.1314493614
+NO HOP!
+Final state   =        5
+  
+   i = 46, time =                4.600 (fs)
+   Exact sum of fluxes =        -0.0021131286
+   Approximate sum of fluxes =        -0.0020676180
+   Sum of probability =         0.0000652498
+   Probability = 
+   1         0.0000337014
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000315484
+   5         0.9999347502
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.0665299620
+NO HOP!
+Final state   =        5
+  
+   i = 47, time =                4.700 (fs)
+   Exact sum of fluxes =        -0.0016519765
+   Approximate sum of fluxes =        -0.0016091489
+   Sum of probability =         0.0000625838
+   Probability = 
+   1         0.0000358285
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000267553
+   5         0.9999374162
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.1362452245
+NO HOP!
+Final state   =        5
+  
+   i = 48, time =                4.800 (fs)
+   Exact sum of fluxes =        -0.0011869198
+   Approximate sum of fluxes =        -0.0011445588
+   Sum of probability =         0.0000591948
+   Probability = 
+   1         0.0000366161
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000225786
+   5         0.9999408052
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.5337343875
+NO HOP!
+Final state   =        5
+  
+   i = 49, time =                4.900 (fs)
+   Exact sum of fluxes =        -0.0007071104
+   Approximate sum of fluxes =        -0.0006624388
+   Sum of probability =         0.0000517866
+   Probability = 
+   1         0.0000327238
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000190628
+   5         0.9999482134
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.2987630479
+NO HOP!
+Final state   =        5
+  
+   i = 50, time =                5.000 (fs)
+   Exact sum of fluxes =        -0.0001975473
+   Approximate sum of fluxes =        -0.0001468359
+   Sum of probability =         0.0000925611
+   Probability = 
+   1         0.0000165218
+   2         0.0000000000
+   3         0.0000598082
+   4         0.0000162311
+   5         0.9999074389
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.4330569774
+NO HOP!
+Final state   =        5
+  
+   i = 51, time =                5.100 (fs)
+   Exact sum of fluxes =         0.0003630843
+   Approximate sum of fluxes =         0.0004251100
+   Sum of probability =         0.0006632408
+   Probability = 
+   1         0.0000000000
+   2         0.0000007690
+   3         0.0006482733
+   4         0.0000141985
+   5         0.9993367592
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.0836854068
+NO HOP!
+Final state   =        5
+  
+   i = 52, time =                5.200 (fs)
+   Exact sum of fluxes =         0.0010059615
+   Approximate sum of fluxes =         0.0010870972
+   Sum of probability =         0.0014119791
+   Probability = 
+   1         0.0000000000
+   2         0.0000067181
+   3         0.0013918072
+   4         0.0000134538
+   5         0.9985880209
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.5160883794
+NO HOP!
+Final state   =        5
+  
+   i = 53, time =                5.300 (fs)
+   Exact sum of fluxes =         0.0017781384
+   Approximate sum of fluxes =         0.0018903884
+   Sum of probability =         0.0024577878
+   Probability = 
+   1         0.0000000000
+   2         0.0000208859
+   3         0.0024207391
+   4         0.0000161628
+   5         0.9975422122
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.5679079066
+NO HOP!
+Final state   =        5
+  
+   i = 54, time =                5.400 (fs)
+   Exact sum of fluxes =         0.0027530760
+   Approximate sum of fluxes =         0.0029156973
+   Sum of probability =         0.0040289684
+   Probability = 
+   1         0.0000000000
+   2         0.0000372467
+   3         0.0039540743
+   4         0.0000376475
+   5         0.9959710316
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.4059075260
+NO HOP!
+Final state   =        5
+  
+   i = 55, time =                5.500 (fs)
+   Exact sum of fluxes =         0.0040496854
+   Approximate sum of fluxes =         0.0042949226
+   Sum of probability =         0.0063038671
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0048772572
+   4         0.0014266099
+   5         0.9936961329
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.2849361781
+NO HOP!
+Final state   =        5
+  
+   i = 56, time =                5.600 (fs)
+   Exact sum of fluxes =         0.0058679415
+   Approximate sum of fluxes =         0.0062523620
+   Sum of probability =         0.0091131784
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0091131784
+   5         0.9908868216
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.8571249361
+NO HOP!
+Final state   =        5
+  
+   i = 57, time =                5.700 (fs)
+   Exact sum of fluxes =         0.0085578115
+   Approximate sum of fluxes =         0.0091859319
+   Sum of probability =         0.0120930585
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0120930585
+   5         0.9879069415
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.2381563626
+NO HOP!
+Final state   =        5
+  
+   i = 58, time =                5.800 (fs)
+   Exact sum of fluxes =         0.0127568002
+   Approximate sum of fluxes =         0.0138332922
+   Sum of probability =         0.0163548854
+   Probability = 
+   1         0.0000000000
+   2         0.0000037230
+   3         0.0000000000
+   4         0.0163511625
+   5         0.9836451146
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.2330424898
+NO HOP!
+Final state   =        5
+  
+   i = 59, time =                5.900 (fs)
+   Exact sum of fluxes =         0.0196687106
+   Approximate sum of fluxes =         0.0216209242
+   Sum of probability =         0.0237308536
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0237263478
+   5         0.9762691464
+   6         0.0000000000
+   7         0.0000045058
+   8         0.0000000000
+   Random number =         0.2007416866
+NO HOP!
+Final state   =        5
+  
+   i = 60, time =                6.000 (fs)
+   Exact sum of fluxes =         0.0316132165
+   Approximate sum of fluxes =         0.0353943176
+   Sum of probability =         0.0372077414
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0371760871
+   5         0.9627922586
+   6         0.0000103821
+   7         0.0000212722
+   8         0.0000000000
+   Random number =         0.9387695969
+NO HOP!
+Final state   =        5
+  
+   i = 61, time =                6.100 (fs)
+   Exact sum of fluxes =         0.0529459486
+   Approximate sum of fluxes =         0.0607979186
+   Sum of probability =         0.0624442522
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0623613704
+   5         0.9375557478
+   6         0.0000351606
+   7         0.0000425922
+   8         0.0000051290
+   Random number =         0.2018007331
+NO HOP!
+Final state   =        5
+  
+   i = 62, time =                6.200 (fs)
+   Exact sum of fluxes =         0.0906429524
+   Approximate sum of fluxes =         0.1078292266
+   Sum of probability =         0.1094674281
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0000111132
+   4         0.1092776427
+   5         0.8905325719
+   6         0.0000824102
+   7         0.0000729715
+   8         0.0000232905
+   Random number =         0.4655338190
+NO HOP!
+Final state   =        5
+  
+   i = 63, time =                6.300 (fs)
+   Exact sum of fluxes =         0.1503722443
+   Approximate sum of fluxes =         0.1873828250
+   Sum of probability =         0.1891840607
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0000208147
+   4         0.1887919998
+   5         0.8108159393
+   6         0.0001898072
+   7         0.0001223917
+   8         0.0000590472
+   Random number =         0.2915596919
+NO HOP!
+Final state   =        5
+  
+   i = 64, time =                6.400 (fs)
+   Exact sum of fluxes =         0.2220724943
+   Approximate sum of fluxes =         0.2902669435
+   Sum of probability =         0.2924068442
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0000262543
+   4         0.2915635328
+   5         0.7075931558
+   6         0.0004739986
+   7         0.0002115225
+   8         0.0001315359
+   Random number =         0.2670456652
+   ATTEMPT between old_state =        5 and new_state =        4
+TRY ENERGY CONSERVATION WITH ISOTROPIC RESCALING:
+   Energy old state  (Ha)  =         2.0442425130
+   Energy new state  (Ha)  =         2.0429112391
+   Kinetic energy    (Ha)  =         2.8139355179
+   Energy difference (Ha)  =         2.8152667918
+SUCCESSFUL HOP!
+   Isotropic rescale factor  =         1.0002365222
+Final state   =        4
+  
+   i = 65, time =                6.500 (fs)
+   Exact sum of fluxes =        -0.2790773313
+   Approximate sum of fluxes =        -0.2107757473
+   Sum of probability =         0.0087470229
+   Probability = 
+   1         0.0000150485
+   2         0.0084901119
+   3         0.0002418624
+   4         0.9912529771
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.0470082459
+NO HOP!
+Final state   =        4
+  
+   i = 66, time =                6.600 (fs)
+   Exact sum of fluxes =        -0.1650946758
+   Approximate sum of fluxes =        -0.1328985721
+   Sum of probability =         0.0069186089
+   Probability = 
+   1         0.0000064029
+   2         0.0066812331
+   3         0.0002309728
+   4         0.9930813911
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.4476798761
+NO HOP!
+Final state   =        4
+  
+   i = 67, time =                6.700 (fs)
+   Exact sum of fluxes =        -0.0932273440
+   Approximate sum of fluxes =        -0.0790354788
+   Sum of probability =         0.0060445331
+   Probability = 
+   1         0.0000026316
+   2         0.0057873678
+   3         0.0002545337
+   4         0.9939554669
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.6157692326
+NO HOP!
+Final state   =        4
+  
+   i = 68, time =                6.800 (fs)
+   Exact sum of fluxes =        -0.0531595358
+   Approximate sum of fluxes =        -0.0466694297
+   Sum of probability =         0.0057338132
+   Probability = 
+   1         0.0000008308
+   2         0.0054206042
+   3         0.0003123782
+   4         0.9942661868
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.3098846726
+NO HOP!
+Final state   =        4
+  
+   i = 69, time =                6.900 (fs)
+   Exact sum of fluxes =        -0.0309324433
+   Approximate sum of fluxes =        -0.0277222802
+   Sum of probability =         0.0057983284
+   Probability = 
+   1         0.0000000000
+   2         0.0053781655
+   3         0.0004201629
+   4         0.9942016716
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.6126678843
+NO HOP!
+Final state   =        4
+  
+   i = 70, time =                7.000 (fs)
+   Exact sum of fluxes =        -0.0179678788
+   Approximate sum of fluxes =        -0.0162228149
+   Sum of probability =         0.0061745931
+   Probability = 
+   1         0.0000000000
+   2         0.0055550103
+   3         0.0006195829
+   4         0.9938254069
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.8206673597
+NO HOP!
+Final state   =        4
+  
+   i = 71, time =                7.100 (fs)
+   Exact sum of fluxes =        -0.0097482702
+   Approximate sum of fluxes =        -0.0086760898
+   Sum of probability =         0.0069160509
+   Probability = 
+   1         0.0000000000
+   2         0.0058987649
+   3         0.0010172860
+   4         0.9930839491
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.8136213257
+NO HOP!
+Final state   =        4
+  
+   i = 72, time =                7.200 (fs)
+   Exact sum of fluxes =        -0.0037629511
+   Approximate sum of fluxes =        -0.0029402108
+   Sum of probability =         0.0083135047
+   Probability = 
+   1         0.0000000000
+   2         0.0063860761
+   3         0.0019274286
+   4         0.9916864953
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.2045917082
+NO HOP!
+Final state   =        4
+  
+   i = 73, time =                7.300 (fs)
+   Exact sum of fluxes =         0.0021243368
+   Approximate sum of fluxes =         0.0031715014
+   Sum of probability =         0.0115532143
+   Probability = 
+   1         0.0000000000
+   2         0.0070115931
+   3         0.0045416212
+   4         0.9884467857
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.2427157798
+NO HOP!
+Final state   =        4
+  
+   i = 74, time =                7.400 (fs)
+   Exact sum of fluxes =         0.0138435035
+   Approximate sum of fluxes =         0.0172568090
+   Sum of probability =         0.0236884126
+   Probability = 
+   1         0.0000000000
+   2         0.0077937876
+   3         0.0158946249
+   4         0.9763115874
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.5682518650
+NO HOP!
+Final state   =        4
+  
+   i = 75, time =                7.500 (fs)
+   Exact sum of fluxes =         0.0997575719
+   Approximate sum of fluxes =         0.1487079694
+   Sum of probability =         0.1539732594
+   Probability = 
+   1         0.0000000000
+   2         0.0090385826
+   3         0.1449346768
+   4         0.8460267406
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.9968330584
+NO HOP!
+Final state   =        4
+  
+   i = 76, time =                7.600 (fs)
+   Exact sum of fluxes =         0.8360113833
+   Approximate sum of fluxes =         3.5898593038
+   Sum of probability =         3.5999791539
+   RE-NORMALIZATION!
+   Probability = 
+   1         0.0000000000
+   2         0.0062611054
+   3         0.9937388946
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.8772504573
+   ATTEMPT between old_state =        4 and new_state =        3
+TRY ENERGY CONSERVATION WITH ISOTROPIC RESCALING:
+   Energy old state  (Ha)  =         2.2751438263
+   Energy new state  (Ha)  =         2.2750168121
+   Kinetic energy    (Ha)  =         2.5831740180
+   Energy difference (Ha)  =         2.5833010322
+SUCCESSFUL HOP!
+   Isotropic rescale factor  =         1.0000245846
+Final state   =        3
+  
+   i = 77, time =                7.700 (fs)
+   Exact sum of fluxes =        -0.1355840999
+   Approximate sum of fluxes =        -0.0648900464
+   Sum of probability =         0.0106101473
+   Probability = 
+   1         0.0000012685
+   2         0.0105467470
+   3         0.9893898527
+   4         0.0000000000
+   5         0.0000297736
+   6         0.0000323582
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.1555909092
+NO HOP!
+Final state   =        3
+  
+   i = 78, time =                7.800 (fs)
+   Exact sum of fluxes =        -0.0050549120
+   Approximate sum of fluxes =        -0.0010752623
+   Sum of probability =         0.0124431745
+   Probability = 
+   1         0.0000000000
+   2         0.0124340490
+   3         0.9875568255
+   4         0.0000000000
+   5         0.0000007126
+   6         0.0000084129
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.1667176391
+NO HOP!
+Final state   =        3
+  
+   i = 79, time =                7.900 (fs)
+   Exact sum of fluxes =         0.0075567672
+   Approximate sum of fluxes =         0.0086294041
+   Sum of probability =         0.0141546363
+   Probability = 
+   1         0.0000000000
+   2         0.0141511700
+   3         0.9858453637
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000034664
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.6363616316
+NO HOP!
+Final state   =        3
+  
+   i = 80, time =                8.000 (fs)
+   Exact sum of fluxes =         0.0121807594
+   Approximate sum of fluxes =         0.0128807008
+   Sum of probability =         0.0161180177
+   Probability = 
+   1         0.0000000000
+   2         0.0161162877
+   3         0.9838819823
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000017300
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.6945498545
+NO HOP!
+Final state   =        3
+  
+   i = 81, time =                8.100 (fs)
+   Exact sum of fluxes =         0.0154331237
+   Approximate sum of fluxes =         0.0161224135
+   Sum of probability =         0.0183688951
+   Probability = 
+   1         0.0000000000
+   2         0.0183679321
+   3         0.9816311049
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000009630
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.6944167010
+NO HOP!
+Final state   =        3
+  
+   i = 82, time =                8.200 (fs)
+   Exact sum of fluxes =         0.0184427354
+   Approximate sum of fluxes =         0.0192222081
+   Sum of probability =         0.0209206130
+   Probability = 
+   1         0.0000000000
+   2         0.0209200121
+   3         0.9790793870
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000006010
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.7262091120
+NO HOP!
+Final state   =        3
+  
+   i = 83, time =                8.300 (fs)
+   Exact sum of fluxes =         0.0215072755
+   Approximate sum of fluxes =         0.0224244380
+   Sum of probability =         0.0237706416
+   Probability = 
+   1         0.0000000000
+   2         0.0237701887
+   3         0.9762293584
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000004529
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.9579493290
+NO HOP!
+Final state   =        3
+  
+   i = 84, time =                8.400 (fs)
+   Exact sum of fluxes =         0.0247130276
+   Approximate sum of fluxes =         0.0257993707
+   Sum of probability =         0.0268957704
+   Probability = 
+   1         0.0000000000
+   2         0.0268953744
+   3         0.9731042296
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000003960
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.7589679339
+NO HOP!
+Final state   =        3
+  
+   i = 85, time =                8.500 (fs)
+   Exact sum of fluxes =         0.0280547852
+   Approximate sum of fluxes =         0.0293330719
+   Sum of probability =         0.0302418392
+   Probability = 
+   1         0.0000000000
+   2         0.0302414409
+   3         0.9697581608
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000003983
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.0899930992
+NO HOP!
+Final state   =        3
+  
+   i = 86, time =                8.600 (fs)
+   Exact sum of fluxes =         0.0314753589
+   Approximate sum of fluxes =         0.0329592741
+   Sum of probability =         0.0337211428
+   Probability = 
+   1         0.0000000000
+   2         0.0337204245
+   3         0.9662788572
+   4         0.0000000000
+   5         0.0000003063
+   6         0.0000004120
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.7077502904
+NO HOP!
+Final state   =        3
+  
+   i = 87, time =                8.700 (fs)
+   Exact sum of fluxes =         0.0348739650
+   Approximate sum of fluxes =         0.0365652854
+   Sum of probability =         0.0372084235
+   Probability = 
+   1         0.0000000000
+   2         0.0372074096
+   3         0.9627915765
+   4         0.0000000000
+   5         0.0000006028
+   6         0.0000004111
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.2598255072
+NO HOP!
+Final state   =        3
+  
+   i = 88, time =                8.800 (fs)
+   Exact sum of fluxes =         0.0381168704
+   Approximate sum of fluxes =         0.0400022964
+   Sum of probability =         0.0405469072
+   Probability = 
+   1         0.0000000000
+   2         0.0405459080
+   3         0.9594530928
+   4         0.0000000000
+   5         0.0000006203
+   6         0.0000003789
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.0974537787
+NO HOP!
+Final state   =        3
+  
+   i = 89, time =                8.900 (fs)
+   Exact sum of fluxes =         0.0410512587
+   Approximate sum of fluxes =         0.0431004198
+   Sum of probability =         0.0435612338
+   Probability = 
+   1         0.0000000000
+   2         0.0435609255
+   3         0.9564387662
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000003083
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.1611824433
+NO HOP!
+Final state   =        3
+  
+   i = 90, time =                9.000 (fs)
+   Exact sum of fluxes =         0.0435242337
+   Approximate sum of fluxes =         0.0456901180
+   Sum of probability =         0.0460795039
+   Probability = 
+   1         0.0000000000
+   2         0.0460793010
+   3         0.9539204961
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000002029
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.4375585031
+NO HOP!
+Final state   =        3
+  
+   i = 91, time =                9.100 (fs)
+   Exact sum of fluxes =         0.0454037701
+   Approximate sum of fluxes =         0.0476261941
+   Sum of probability =         0.0479532687
+   Probability = 
+   1         0.0000000000
+   2         0.0479531879
+   3         0.9520467313
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000808
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.3239376446
+NO HOP!
+Final state   =        3
+  
+   i = 92, time =                9.200 (fs)
+   Exact sum of fluxes =         0.0465972994
+   Approximate sum of fluxes =         0.0488090857
+   Sum of probability =         0.0490810314
+   Probability = 
+   1         0.0000000000
+   2         0.0490810314
+   3         0.9509189686
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.5133224285
+NO HOP!
+Final state   =        3
+  
+   i = 93, time =                9.300 (fs)
+   Exact sum of fluxes =         0.0470633869
+   Approximate sum of fluxes =         0.0491979775
+   Sum of probability =         0.0494209709
+   Probability = 
+   1         0.0000000000
+   2         0.0494204910
+   3         0.9505790291
+   4         0.0000004799
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.5078716729
+NO HOP!
+Final state   =        3
+  
+   i = 94, time =                9.400 (fs)
+   Exact sum of fluxes =         0.0468140398
+   Approximate sum of fluxes =         0.0488127799
+   Sum of probability =         0.0489946771
+   Probability = 
+   1         0.0000000000
+   2         0.0489902947
+   3         0.9510053229
+   4         0.0000043054
+   5         0.0000000000
+   6         0.0000000770
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.9870074727
+NO HOP!
+Final state   =        3
+  
+   i = 95, time =                9.500 (fs)
+   Exact sum of fluxes =         0.0459080376
+   Approximate sum of fluxes =         0.0477255598
+   Sum of probability =         0.0478715507
+   Probability = 
+   1         0.0000000000
+   2         0.0478615806
+   3         0.9521284493
+   4         0.0000076920
+   5         0.0000018531
+   6         0.0000004250
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.9970585104
+NO HOP!
+Final state   =        3
+  
+   i = 96, time =                9.600 (fs)
+   Exact sum of fluxes =         0.0444382499
+   Approximate sum of fluxes =         0.0460451316
+   Sum of probability =         0.0461603137
+   Probability = 
+   1         0.0000000000
+   2         0.0461424177
+   3         0.9538396863
+   4         0.0000112487
+   5         0.0000055867
+   6         0.0000010606
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.4100933525
+NO HOP!
+Final state   =        3
+  
+   i = 97, time =                9.700 (fs)
+   Exact sum of fluxes =         0.0425166147
+   Approximate sum of fluxes =         0.0438993388
+   Sum of probability =         0.0439865638
+   Probability = 
+   1         0.0000000000
+   2         0.0439600284
+   3         0.9560134362
+   4         0.0000153515
+   5         0.0000091614
+   6         0.0000020225
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.1104237300
+NO HOP!
+Final state   =        3
+  
+   i = 98, time =                9.800 (fs)
+   Exact sum of fluxes =         0.0402601771
+   Approximate sum of fluxes =         0.0414190665
+   Sum of probability =         0.0414809682
+   Probability = 
+   1         0.0000000000
+   2         0.0414447452
+   3         0.9585190318
+   4         0.0000203260
+   5         0.0000125754
+   6         0.0000033216
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.7101869678
+NO HOP!
+Final state   =        3
+  
+   i = 99, time =                9.900 (fs)
+   Exact sum of fluxes =         0.0377802931
+   Approximate sum of fluxes =         0.0387263421
+   Sum of probability =         0.0387654101
+   Probability = 
+   1         0.0000000000
+   2         0.0387180555
+   3         0.9612345899
+   4         0.0000265343
+   5         0.0000158752
+   6         0.0000049451
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.7190800478
+NO HOP!
+Final state   =        3
+  
+   i = 100, time =               10.000 (fs)
+   Exact sum of fluxes =         0.0351755883
+   Approximate sum of fluxes =         0.0359270218
+   Sum of probability =         0.0359485866
+   Probability = 
+   1         0.0000000000
+   2         0.0358852267
+   3         0.9640514134
+   4         0.0000344366
+   5         0.0000191283
+   6         0.0000068643
+   7         0.0000000000
+   8         0.0000029308
+   Random number =         0.9810541389
+NO HOP!
+Final state   =        3
+  
+   i = 101, time =               10.100 (fs)
+   Exact sum of fluxes =         0.0325285290
+   Approximate sum of fluxes =         0.0331076816
+   Sum of probability =         0.0331288875
+   Probability = 
+   1         0.0000000000
+   2         0.0330321211
+   3         0.9668711125
+   4         0.0000446569
+   5         0.0000224084
+   6         0.0000090414
+   7         0.0000000000
+   8         0.0000206597
+   Random number =         0.0420128083
+NO HOP!
+Final state   =        3
+  
+   i = 102, time =               10.200 (fs)
+   Exact sum of fluxes =         0.0299046950
+   Approximate sum of fluxes =         0.0303355123
+   Sum of probability =         0.0303563157
+   Probability = 
+   1         0.0000000000
+   2         0.0302249888
+   3         0.9696436843
+   4         0.0000580749
+   5         0.0000257887
+   6         0.0000114337
+   7         0.0000000000
+   8         0.0000360297
+   Random number =         0.2367709247
+NO HOP!
+Final state   =        3
+  
+   i = 103, time =               10.300 (fs)
+   Exact sum of fluxes =         0.0273539243
+   Approximate sum of fluxes =         0.0276601748
+   Sum of probability =         0.0276805419
+   Probability = 
+   1         0.0000000000
+   2         0.0275121739
+   3         0.9723194581
+   4         0.0000759646
+   5         0.0000293386
+   6         0.0000139962
+   7         0.0000000000
+   8         0.0000490685
+   Random number =         0.7288290706
+NO HOP!
+Final state   =        3
+  
+   i = 104, time =               10.400 (fs)
+   Exact sum of fluxes =         0.0249125276
+   Approximate sum of fluxes =         0.0251166758
+   Sum of probability =         0.0251365768
+   Probability = 
+   1         0.0000000000
+   2         0.0249267583
+   3         0.9748634232
+   4         0.0001002185
+   5         0.0000331240
+   6         0.0000166829
+   7         0.0000000000
+   8         0.0000597931
+   Random number =         0.3382046757
+NO HOP!
+Final state   =        3
+  
+   i = 105, time =               10.500 (fs)
+   Exact sum of fluxes =         0.0226060221
+   Approximate sum of fluxes =         0.0227286581
+   Sum of probability =         0.0227480634
+   Probability = 
+   1         0.0000000000
+   2         0.0224894705
+   3         0.9772519366
+   4         0.0001337221
+   5         0.0000372076
+   6         0.0000194479
+   7         0.0000000000
+   8         0.0000682153
+   Random number =         0.9721589832
+NO HOP!
+Final state   =        3
+  
+   i = 106, time =               10.600 (fs)
+   Exact sum of fluxes =         0.0204521351
+   Approximate sum of fluxes =         0.0205118552
+   Sum of probability =         0.0205307324
+   Probability = 
+   1         0.0000000000
+   2         0.0202114866
+   3         0.9794692676
+   4         0.0001810030
+   5         0.0000416502
+   6         0.0000222469
+   7         0.0000000000
+   8         0.0000743457
+   Random number =         0.0825049971
+NO HOP!
+Final state   =        3
+  
+   i = 107, time =               10.700 (fs)
+   Exact sum of fluxes =         0.0184640173
+   Approximate sum of fluxes =         0.0184776944
+   Sum of probability =         0.0184960070
+   Probability = 
+   1         0.0000000000
+   2         0.0180968572
+   3         0.9815039930
+   4         0.0002494023
+   5         0.0000465119
+   6         0.0000250384
+   7         0.0000000000
+   8         0.0000781971
+   Random number =         0.3361316358
+NO HOP!
+Final state   =        3
+  
+   i = 108, time =               10.800 (fs)
+   Exact sum of fluxes =         0.0166540932
+   Approximate sum of fluxes =         0.0166375688
+   Sum of probability =         0.0166552766
+   Probability = 
+   1         0.0000000000
+   2         0.0161445661
+   3         0.9833447234
+   4         0.0003512862
+   5         0.0000518528
+   6         0.0000277848
+   7         0.0000000000
+   8         0.0000797867
+   Random number =         0.3581901240
+NO HOP!
+Final state   =        3
+  
+   i = 109, time =               10.900 (fs)
+   Exact sum of fluxes =         0.0150394175
+   Approximate sum of fluxes =         0.0150088359
+   Sum of probability =         0.0150258944
+   Probability = 
+   1         0.0000000000
+   2         0.0143501262
+   3         0.9849741056
+   4         0.0005084452
+   5         0.0000577331
+   6         0.0000304523
+   7         0.0000000000
+   8         0.0000791376
+   Random number =         0.0846693883
+NO HOP!
+Final state   =        3
+  
+   i = 110, time =               11.000 (fs)
+   Exact sum of fluxes =         0.0136510015
+   Approximate sum of fluxes =         0.0136254369
+   Sum of probability =         0.0136417969
+   Probability = 
+   1         0.0000000000
+   2         0.0127068780
+   3         0.9863582031
+   4         0.0007614138
+   5         0.0000642131
+   6         0.0000330114
+   7         0.0000000000
+   8         0.0000762806
+   Random number =         0.7590975824
+NO HOP!
+Final state   =        3
+  
+   i = 111, time =               11.100 (fs)
+   Exact sum of fluxes =         0.0125530095
+   Approximate sum of fluxes =         0.0125601986
+   Sum of probability =         0.0125758037
+   Probability = 
+   1         0.0000000000
+   2         0.0112069908
+   3         0.9874241963
+   4         0.0011907683
+   5         0.0000713526
+   6         0.0000354378
+   7         0.0000000000
+   8         0.0000712541
+   Random number =         0.5412394769
+NO HOP!
+Final state   =        3
+  
+   i = 112, time =               11.200 (fs)
+   Exact sum of fluxes =         0.0118885796
+   Approximate sum of fluxes =         0.0119791341
+   Sum of probability =         0.0119939149
+   Probability = 
+   1         0.0000000000
+   2         0.0098423171
+   3         0.9880060851
+   4         0.0019705692
+   5         0.0000792099
+   6         0.0000377138
+   7         0.0000000000
+   8         0.0000641050
+   Random number =         0.8540506611
+NO HOP!
+Final state   =        3
+  
+   i = 113, time =               11.300 (fs)
+   Exact sum of fluxes =         0.0120003902
+   Approximate sum of fluxes =         0.0122874939
+   Sum of probability =         0.0123013923
+   Probability = 
+   1         0.0000000380
+   2         0.0086053223
+   3         0.9876986077
+   4         0.0035133093
+   5         0.0000880380
+   6         0.0000397801
+   7         0.0000000000
+   8         0.0000549046
+   Random number =         0.7456132795
+NO HOP!
+Final state   =        3
+  
+   i = 114, time =               11.400 (fs)
+   Exact sum of fluxes =         0.0138513354
+   Approximate sum of fluxes =         0.0146551638
+   Sum of probability =         0.0146681259
+   Probability = 
+   1         0.0000001538
+   2         0.0074905607
+   3         0.9853318741
+   4         0.0069946274
+   5         0.0000973039
+   6         0.0000418201
+   7         0.0000000000
+   8         0.0000436600
+   Random number =         0.9850330045
+NO HOP!
+Final state   =        3
+  
+   i = 115, time =               11.500 (fs)
+   Exact sum of fluxes =         0.0205402077
+   Approximate sum of fluxes =         0.0229984398
+   Sum of probability =         0.0230103174
+   Probability = 
+   1         0.0000003527
+   2         0.0064998411
+   3         0.9769896826
+   4         0.0163281333
+   5         0.0001077426
+   6         0.0000437712
+   7         0.0000000000
+   8         0.0000304766
+   Random number =         0.1781868669
+NO HOP!
+Final state   =        3
+  
+   i = 116, time =               11.600 (fs)
+   Exact sum of fluxes =         0.0451033590
+   Approximate sum of fluxes =         0.0550325629
+   Sum of probability =         0.0550431143
+   Probability = 
+   1         0.0000007289
+   2         0.0056635655
+   3         0.9449568857
+   4         0.0491976253
+   5         0.0001197816
+   6         0.0000461033
+   7         0.0000000000
+   8         0.0000153098
+   Random number =         0.9768025189
+   ATTEMPT between old_state =        3 and new_state =        4
+TRY ENERGY CONSERVATION WITH ISOTROPIC RESCALING:
+   Energy old state  (Ha)  =         2.2546804141
+   Energy new state  (Ha)  =         2.2548399004
+   Kinetic energy    (Ha)  =         2.6035539666
+   Energy difference (Ha)  =         2.6033944803
+SUCCESSFUL HOP!
+   Isotropic rescale factor  =         0.9999693709
+Final state   =        4
+  
+   i = 117, time =               11.700 (fs)
+   Exact sum of fluxes =        -2.3522277912
+   Approximate sum of fluxes =        -0.8536989462
+   Sum of probability =         0.0026444351
+   Probability = 
+   1         0.0000000000
+   2         0.0024681498
+   3         0.0000000000
+   4         0.9973555649
+   5         0.0001762853
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.2377660248
+NO HOP!
+Final state   =        4
+  
+   i = 118, time =               11.800 (fs)
+   Exact sum of fluxes =        -2.0749566171
+   Approximate sum of fluxes =        -0.6218393581
+   Sum of probability =         0.0025516254
+   Probability = 
+   1         0.0000000000
+   2         0.0023822162
+   3         0.0000000000
+   4         0.9974483746
+   5         0.0001551325
+   6         0.0000142767
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.7330451625
+NO HOP!
+Final state   =        4
+  
+   i = 119, time =               11.900 (fs)
+   Exact sum of fluxes =        -0.3051205363
+   Approximate sum of fluxes =        -0.1697268340
+   Sum of probability =         0.0034034265
+   Probability = 
+   1         0.0000000000
+   2         0.0031629242
+   3         0.0000000000
+   4         0.9965965735
+   5         0.0002000078
+   6         0.0000404945
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.0242087825
+NO HOP!
+Final state   =        4
+  
+   i = 120, time =               12.000 (fs)
+   Exact sum of fluxes =        -0.0507870685
+   Approximate sum of fluxes =        -0.0381830332
+   Sum of probability =         0.0032095811
+   Probability = 
+   1         0.0000000000
+   2         0.0029336189
+   3         0.0000000000
+   4         0.9967904189
+   5         0.0002246713
+   6         0.0000512910
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.5386073487
+NO HOP!
+Final state   =        4
+  
+   i = 121, time =               12.100 (fs)
+   Exact sum of fluxes =        -0.0143223919
+   Approximate sum of fluxes =        -0.0118650684
+   Sum of probability =         0.0027289161
+   Probability = 
+   1         0.0000000000
+   2         0.0024281052
+   3         0.0000000000
+   4         0.9972710839
+   5         0.0002463429
+   6         0.0000544680
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.6223414735
+NO HOP!
+Final state   =        4
+  
+   i = 122, time =               12.200 (fs)
+   Exact sum of fluxes =        -0.0052167408
+   Approximate sum of fluxes =        -0.0045037027
+   Sum of probability =         0.0022633819
+   Probability = 
+   1         0.0000000000
+   2         0.0019366807
+   3         0.0000000000
+   4         0.9977366181
+   5         0.0002710669
+   6         0.0000556343
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.8159841850
+NO HOP!
+Final state   =        4
+  
+   i = 123, time =               12.300 (fs)
+   Exact sum of fluxes =        -0.0021423144
+   Approximate sum of fluxes =        -0.0018899786
+   Sum of probability =         0.0018496127
+   Probability = 
+   1         0.0000000000
+   2         0.0014949149
+   3         0.0000000000
+   4         0.9981503873
+   5         0.0002988824
+   6         0.0000558154
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.3635286204
+NO HOP!
+Final state   =        4
+  
+   i = 124, time =               12.400 (fs)
+   Exact sum of fluxes =        -0.0009429601
+   Approximate sum of fluxes =        -0.0008443920
+   Sum of probability =         0.0014919141
+   Probability = 
+   1         0.0000000000
+   2         0.0011070139
+   3         0.0000000000
+   4         0.9985080859
+   5         0.0003296299
+   6         0.0000552703
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.3003287512
+NO HOP!
+Final state   =        4
+  
+   i = 125, time =               12.500 (fs)
+   Exact sum of fluxes =        -0.0004545795
+   Approximate sum of fluxes =        -0.0004130572
+   Sum of probability =         0.0011890920
+   Probability = 
+   1         0.0000000000
+   2         0.0007717768
+   3         0.0000000000
+   4         0.9988109080
+   5         0.0003632229
+   6         0.0000540922
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.9850446882
+NO HOP!
+Final state   =        4
+  
+   i = 126, time =               12.600 (fs)
+   Exact sum of fluxes =        -0.0002665988
+   Approximate sum of fluxes =        -0.0002454724
+   Sum of probability =         0.0009388271
+   Probability = 
+   1         0.0000000000
+   2         0.0004868870
+   3         0.0000000000
+   4         0.9990611729
+   5         0.0003996081
+   6         0.0000523320
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.1212335080
+NO HOP!
+Final state   =        4
+  
+   i = 127, time =               12.700 (fs)
+   Exact sum of fluxes =        -0.0002095967
+   Approximate sum of fluxes =        -0.0001930526
+   Sum of probability =         0.0007386728
+   Probability = 
+   1         0.0000000000
+   2         0.0002499087
+   3         0.0000000000
+   4         0.9992613272
+   5         0.0004387319
+   6         0.0000500322
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.6945623370
+NO HOP!
+Final state   =        4
+  
+   i = 128, time =               12.800 (fs)
+   Exact sum of fluxes =        -0.0002053138
+   Approximate sum of fluxes =        -0.0001858625
+   Sum of probability =         0.0005863354
+   Probability = 
+   1         0.0000000000
+   2         0.0000585751
+   3         0.0000000000
+   4         0.9994136646
+   5         0.0004805210
+   6         0.0000472393
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.3309478275
+NO HOP!
+Final state   =        4
+  
+   i = 129, time =               12.900 (fs)
+   Exact sum of fluxes =        -0.0002144149
+   Approximate sum of fluxes =        -0.0001882721
+   Sum of probability =         0.0005688794
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0000000000
+   4         0.9994311206
+   5         0.0005248717
+   6         0.0000440077
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.9393907402
+NO HOP!
+Final state   =        4
+  
+   i = 130, time =               13.000 (fs)
+   Exact sum of fluxes =        -0.0002157726
+   Approximate sum of fluxes =        -0.0001809522
+   Sum of probability =         0.0006120447
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0000000000
+   4         0.9993879553
+   5         0.0005716435
+   6         0.0000404012
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.3311488935
+NO HOP!
+Final state   =        4
+  
+   i = 131, time =               13.100 (fs)
+   Exact sum of fluxes =        -0.0001973857
+   Approximate sum of fluxes =        -0.0001528376
+   Sum of probability =         0.0006571471
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0000000000
+   4         0.9993428529
+   5         0.0006206550
+   6         0.0000364922
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.3137944532
+NO HOP!
+Final state   =        4
+  
+   i = 132, time =               13.200 (fs)
+   Exact sum of fluxes =        -0.0001603612
+   Approximate sum of fluxes =        -0.0001054879
+   Sum of probability =         0.0006990530
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0000000000
+   4         0.9993009470
+   5         0.0006669202
+   6         0.0000321328
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.5656526479
+NO HOP!
+Final state   =        4
+  
+   i = 133, time =               13.300 (fs)
+   Exact sum of fluxes =        -0.0000756397
+   Approximate sum of fluxes =        -0.0000103510
+   Sum of probability =         0.0007521693
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0000000000
+   4         0.9992478307
+   5         0.0007241101
+   6         0.0000280591
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.5141889267
+NO HOP!
+Final state   =        4
+  
+   i = 134, time =               13.400 (fs)
+   Exact sum of fluxes =         0.0000359012
+   Approximate sum of fluxes =         0.0001117215
+   Sum of probability =         0.0008020877
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0000000000
+   4         0.9991979123
+   5         0.0007783498
+   6         0.0000237379
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.7389557435
+NO HOP!
+Final state   =        4
+  
+   i = 135, time =               13.500 (fs)
+   Exact sum of fluxes =         0.0001846195
+   Approximate sum of fluxes =         0.0002708934
+   Sum of probability =         0.0008826150
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0000294193
+   4         0.9991173850
+   5         0.0008337456
+   6         0.0000194501
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.2676092232
+NO HOP!
+Final state   =        4
+  
+   i = 136, time =               13.600 (fs)
+   Exact sum of fluxes =         0.0003726644
+   Approximate sum of fluxes =         0.0004692367
+   Sum of probability =         0.0009785553
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0000733132
+   4         0.9990214447
+   5         0.0008899648
+   6         0.0000152773
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.9390835740
+NO HOP!
+Final state   =        4
+  
+   i = 137, time =               13.700 (fs)
+   Exact sum of fluxes =         0.0006021786
+   Approximate sum of fluxes =         0.0007088419
+   Sum of probability =         0.0012299517
+   Probability = 
+   1         0.0001526324
+   2         0.0000000000
+   3         0.0001193545
+   4         0.9987700483
+   5         0.0009466702
+   6         0.0000112946
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.3099154724
+NO HOP!
+Final state   =        4
+  
+   i = 138, time =               13.800 (fs)
+   Exact sum of fluxes =         0.0008755339
+   Approximate sum of fluxes =         0.0009920502
+   Sum of probability =         0.0015311902
+   Probability = 
+   1         0.0003501603
+   2         0.0000000000
+   3         0.0001699276
+   4         0.9984688098
+   5         0.0010035345
+   6         0.0000075679
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.9741060027
+NO HOP!
+Final state   =        4
+  
+   i = 139, time =               13.900 (fs)
+   Exact sum of fluxes =         0.0011955644
+   Approximate sum of fluxes =         0.0013216876
+   Sum of probability =         0.0018767195
+   Probability = 
+   1         0.0005844865
+   2         0.0000000000
+   3         0.0002278221
+   4         0.9981232805
+   5         0.0010602588
+   6         0.0000041521
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.9440448746
+NO HOP!
+Final state   =        4
+  
+   i = 140, time =               14.000 (fs)
+   Exact sum of fluxes =         0.0015658445
+   Approximate sum of fluxes =         0.0017013536
+   Sum of probability =         0.0022697019
+   Probability = 
+   1         0.0008554396
+   2         0.0000000000
+   3         0.0002965786
+   4         0.9977302981
+   5         0.0011165938
+   6         0.0000010899
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.4305197186
+NO HOP!
+Final state   =        4
+  
+   i = 141, time =               14.100 (fs)
+   Exact sum of fluxes =         0.0019910828
+   Approximate sum of fluxes =         0.0021358366
+   Sum of probability =         0.0027160745
+   Probability = 
+   1         0.0011627216
+   2         0.0000000000
+   3         0.0003809828
+   4         0.9972839255
+   5         0.0011723701
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.1584040541
+NO HOP!
+Final state   =        4
+  
+   i = 142, time =               14.200 (fs)
+   Exact sum of fluxes =         0.0024777340
+   Approximate sum of fluxes =         0.0026317733
+   Sum of probability =         0.0032210907
+   Probability = 
+   1         0.0015057216
+   2         0.0000000000
+   3         0.0004878390
+   4         0.9967789093
+   5         0.0012275301
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.6818243283
+NO HOP!
+Final state   =        4
+  
+   i = 143, time =               14.300 (fs)
+   Exact sum of fluxes =         0.0030350374
+   Approximate sum of fluxes =         0.0031987781
+   Sum of probability =         0.0037927219
+   Probability = 
+   1         0.0018832932
+   2         0.0000000000
+   3         0.0006272525
+   4         0.9962072781
+   5         0.0012821762
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.1392437608
+NO HOP!
+Final state   =        4
+  
+   i = 144, time =               14.400 (fs)
+   Exact sum of fluxes =         0.0036768654
+   Approximate sum of fluxes =         0.0038514785
+   Sum of probability =         0.0044449711
+   Probability = 
+   1         0.0022934606
+   2         0.0000000000
+   3         0.0008148763
+   4         0.9955550289
+   5         0.0013366342
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.2089138367
+NO HOP!
+Final state   =        4
+  
+   i = 145, time =               14.500 (fs)
+   Exact sum of fluxes =         0.0044252065
+   Approximate sum of fluxes =         0.0046133868
+   Sum of probability =         0.0052006410
+   Probability = 
+   1         0.0027330376
+   2         0.0000000000
+   3         0.0010760551
+   4         0.9947993590
+   5         0.0013915482
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.8483907400
+NO HOP!
+Final state   =        4
+  
+   i = 146, time =               14.600 (fs)
+   Exact sum of fluxes =         0.0053170744
+   Approximate sum of fluxes =         0.0055246628
+   Sum of probability =         0.0060990896
+   Probability = 
+   1         0.0031971370
+   2         0.0000000000
+   3         0.0014539284
+   4         0.9939009104
+   5         0.0014480242
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.7982642567
+NO HOP!
+Final state   =        4
+  
+   i = 147, time =               14.700 (fs)
+   Exact sum of fluxes =         0.0064190887
+   Approximate sum of fluxes =         0.0066586871
+   Sum of probability =         0.0072128235
+   Probability = 
+   1         0.0036785703
+   2         0.0000000000
+   3         0.0020263799
+   4         0.9927871765
+   5         0.0015078732
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.8567787535
+NO HOP!
+Final state   =        4
+  
+   i = 148, time =               14.800 (fs)
+   Exact sum of fluxes =         0.0078605694
+   Approximate sum of fluxes =         0.0081602206
+   Sum of probability =         0.0086858571
+   Probability = 
+   1         0.0041671845
+   2         0.0000000000
+   3         0.0029445056
+   4         0.9913141429
+   5         0.0015740469
+   6         0.0000000000
+   7         0.0000001201
+   8         0.0000000000
+   Random number =         0.6092955907
+NO HOP!
+Final state   =        4
+  
+   i = 149, time =               14.900 (fs)
+   Exact sum of fluxes =         0.0099158526
+   Approximate sum of fluxes =         0.0103420774
+   Sum of probability =         0.0108303431
+   Probability = 
+   1         0.0046493380
+   2         0.0000000000
+   3         0.0045291903
+   4         0.9891696569
+   5         0.0016514945
+   6         0.0000000000
+   7         0.0000003203
+   8         0.0000000000
+   Random number =         0.2375216720
+NO HOP!
+Final state   =        4
+  
+   i = 150, time =               15.000 (fs)
+   Exact sum of fluxes =         0.0132346333
+   Approximate sum of fluxes =         0.0139625527
+   Sum of probability =         0.0144048315
+   Probability = 
+   1         0.0051082019
+   2         0.0000000000
+   3         0.0075470061
+   4         0.9855951685
+   5         0.0017490360
+   6         0.0000000000
+   7         0.0000005875
+   8         0.0000000000
+   Random number =         0.9078938723
+NO HOP!
+Final state   =        4
+  
+   i = 151, time =               15.100 (fs)
+   Exact sum of fluxes =         0.0195947682
+   Approximate sum of fluxes =         0.0211665745
+   Sum of probability =         0.0215572837
+   Probability = 
+   1         0.0055273854
+   2         0.0000000000
+   3         0.0141448182
+   4         0.9784427163
+   5         0.0018840690
+   6         0.0000000000
+   7         0.0000010111
+   8         0.0000000000
+   Random number =         0.4471003069
+NO HOP!
+Final state   =        4
+  
+   i = 152, time =               15.200 (fs)
+   Exact sum of fluxes =         0.0349271313
+   Approximate sum of fluxes =         0.0395084200
+   Sum of probability =         0.0398532472
+   Probability = 
+   1         0.0059088103
+   2         0.0000000000
+   3         0.0318456249
+   4         0.9601467528
+   5         0.0020970291
+   6         0.0000000000
+   7         0.0000017828
+   8         0.0000000000
+   Random number =         0.9921965851
+NO HOP!
+Final state   =        4
+  
+   i = 153, time =               15.300 (fs)
+   Exact sum of fluxes =         0.0849269816
+   Approximate sum of fluxes =         0.1055142825
+   Sum of probability =         0.1058593129
+   Probability = 
+   1         0.0063699058
+   2         0.0000000000
+   3         0.0969729872
+   4         0.8941406871
+   5         0.0025130137
+   6         0.0000000000
+   7         0.0000034061
+   8         0.0000000000
+   Random number =         0.4544869802
+NO HOP!
+Final state   =        4
+  
+   i = 154, time =               15.400 (fs)
+   Exact sum of fluxes =         0.2922931316
+   Approximate sum of fluxes =         0.4598373207
+   Sum of probability =         0.4604240252
+   Probability = 
+   1         0.0078449135
+   2         0.0000000000
+   3         0.4487992545
+   4         0.5395759748
+   5         0.0037718017
+   6         0.0000000000
+   7         0.0000080554
+   8         0.0000000000
+   Random number =         0.0845863716
+   ATTEMPT between old_state =        4 and new_state =        3
+TRY ENERGY CONSERVATION WITH ISOTROPIC RESCALING:
+   Energy old state  (Ha)  =         2.5880059103
+   Energy new state  (Ha)  =         2.5878970379
+   Kinetic energy    (Ha)  =         2.2705357293
+   Energy difference (Ha)  =         2.2706446017
+SUCCESSFUL HOP!
+   Isotropic rescale factor  =         1.0000239748
+Final state   =        3
+  
+   i = 155, time =               15.500 (fs)
+   Exact sum of fluxes =        -1.0448127420
+   Approximate sum of fluxes =        -0.4190616802
+   Sum of probability =         0.0057395834
+   Probability = 
+   1         0.0027829762
+   2         0.0027180968
+   3         0.9942604166
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0001049425
+   7         0.0000000000
+   8         0.0001335678
+   Random number =         0.9326603224
+NO HOP!
+Final state   =        3
+  
+   i = 156, time =               15.600 (fs)
+   Exact sum of fluxes =        -0.1842932454
+   Approximate sum of fluxes =        -0.1052910752
+   Sum of probability =         0.0058619838
+   Probability = 
+   1         0.0032110901
+   2         0.0022235537
+   3         0.9941380162
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000750370
+   7         0.0000000000
+   8         0.0003523030
+   Random number =         0.5640502075
+NO HOP!
+Final state   =        3
+  
+   i = 157, time =               15.700 (fs)
+   Exact sum of fluxes =        -0.0324263264
+   Approximate sum of fluxes =        -0.0205842939
+   Sum of probability =         0.0049618078
+   Probability = 
+   1         0.0022921129
+   2         0.0019980023
+   3         0.9950381922
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000549334
+   7         0.0000000000
+   8         0.0006167592
+   Random number =         0.5603916211
+NO HOP!
+Final state   =        3
+  
+   i = 158, time =               15.800 (fs)
+   Exact sum of fluxes =        -0.0053803208
+   Approximate sum of fluxes =        -0.0026098646
+   Sum of probability =         0.0040112631
+   Probability = 
+   1         0.0005422086
+   2         0.0021312609
+   3         0.9959887369
+   4         0.0000000000
+   5         0.0003631379
+   6         0.0000470625
+   7         0.0000071215
+   8         0.0009204717
+   Random number =         0.3206984628
+NO HOP!
+Final state   =        3
+  
+   i = 159, time =               15.900 (fs)
+   Exact sum of fluxes =         0.0009016168
+   Approximate sum of fluxes =         0.0014688600
+   Sum of probability =         0.0044039256
+   Probability = 
+   1         0.0000000000
+   2         0.0025242560
+   3         0.9955960744
+   4         0.0000000000
+   5         0.0005356740
+   6         0.0000430234
+   7         0.0000228031
+   8         0.0012781690
+   Random number =         0.1044244426
+NO HOP!
+Final state   =        3
+  
+   i = 160, time =               16.000 (fs)
+   Exact sum of fluxes =         0.0020122757
+   Approximate sum of fluxes =         0.0017495251
+   Sum of probability =         0.0066466645
+   Probability = 
+   1         0.0000000000
+   2         0.0031504703
+   3         0.9933533355
+   4         0.0011626036
+   5         0.0005482871
+   6         0.0000358306
+   7         0.0000515915
+   8         0.0016978814
+   Random number =         0.2416557412
+NO HOP!
+Final state   =        3
+  
+   i = 161, time =               16.100 (fs)
+   Exact sum of fluxes =         0.0014076944
+   Approximate sum of fluxes =         0.0007508077
+   Sum of probability =         0.0091846834
+   Probability = 
+   1         0.0000000000
+   2         0.0040284411
+   3         0.9908153166
+   4         0.0024134873
+   5         0.0004340127
+   6         0.0000218892
+   7         0.0001035396
+   8         0.0021833135
+   Random number =         0.8472992329
+NO HOP!
+Final state   =        3
+  
+   i = 162, time =               16.200 (fs)
+   Exact sum of fluxes =         0.0002489082
+   Approximate sum of fluxes =        -0.0005852159
+   Sum of probability =         0.0117144141
+   Probability = 
+   1         0.0000000000
+   2         0.0051860593
+   3         0.9882855859
+   4         0.0033908199
+   5         0.0002132561
+   6         0.0000002934
+   7         0.0001910051
+   8         0.0027329802
+   Random number =         0.2556238138
+NO HOP!
+Final state   =        3
+  
+   i = 163, time =               16.300 (fs)
+   Exact sum of fluxes =        -0.0008504065
+   Approximate sum of fluxes =        -0.0017072997
+   Sum of probability =         0.0146135270
+   Probability = 
+   1         0.0000000000
+   2         0.0066416147
+   3         0.9853864730
+   4         0.0043029270
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0003351935
+   8         0.0033337918
+   Random number =         0.9170420817
+NO HOP!
+Final state   =        3
+  
+   i = 164, time =               16.400 (fs)
+   Exact sum of fluxes =        -0.0014440991
+   Approximate sum of fluxes =        -0.0021980322
+   Sum of probability =         0.0180925066
+   Probability = 
+   1         0.0000000000
+   2         0.0083878010
+   3         0.9819074934
+   4         0.0051699529
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0005910604
+   8         0.0039436923
+   Random number =         0.9949178267
+   ATTEMPT between old_state =        3 and new_state =        4
+TRY ENERGY CONSERVATION WITH ISOTROPIC RESCALING:
+   Energy old state  (Ha)  =         2.3616093151
+   Energy new state  (Ha)  =         2.3623440752
+   Kinetic energy    (Ha)  =         2.4967320421
+   Energy difference (Ha)  =         2.4959972821
+SUCCESSFUL HOP!
+   Isotropic rescale factor  =         0.9998528448
+Final state   =        4
+  
+   i = 165, time =               16.500 (fs)
+   Exact sum of fluxes =        -0.4147721591
+   Approximate sum of fluxes =        -0.3074230512
+   Sum of probability =         0.0275171014
+   Probability = 
+   1         0.0186215016
+   2         0.0000000000
+   3         0.0000000000
+   4         0.9724828986
+   5         0.0000000000
+   6         0.0032391170
+   7         0.0028136628
+   8         0.0028428199
+   Random number =         0.8577859370
+NO HOP!
+Final state   =        4
+  
+   i = 166, time =               16.600 (fs)
+   Exact sum of fluxes =        -0.3189962937
+   Approximate sum of fluxes =        -0.2529670993
+   Sum of probability =         0.0270624952
+   Probability = 
+   1         0.0162490518
+   2         0.0000000000
+   3         0.0000000000
+   4         0.9729375048
+   5         0.0000000000
+   6         0.0031062717
+   7         0.0048233685
+   8         0.0028838033
+   Random number =         0.8797527945
+NO HOP!
+Final state   =        4
+  
+   i = 167, time =               16.700 (fs)
+   Exact sum of fluxes =        -0.2765152743
+   Approximate sum of fluxes =        -0.2287180035
+   Sum of probability =         0.0258941756
+   Probability = 
+   1         0.0126611715
+   2         0.0000000000
+   3         0.0000000000
+   4         0.9741058244
+   5         0.0000000000
+   6         0.0031446827
+   7         0.0079519335
+   8         0.0021363879
+   Random number =         0.0058488923
+   ATTEMPT between old_state =        4 and new_state =        1
+TRY ENERGY CONSERVATION WITH ISOTROPIC RESCALING:
+   Energy old state  (Ha)  =         2.2912140720
+   Energy new state  (Ha)  =         2.2883588584
+   Kinetic energy    (Ha)  =         2.5670630179
+   Energy difference (Ha)  =         2.5699182316
+SUCCESSFUL HOP!
+   Isotropic rescale factor  =         1.0005559700
+Final state   =        1
+  
+   i = 168, time =               16.800 (fs)
+   Exact sum of fluxes =         0.0119302669
+   Approximate sum of fluxes =         0.0126596922
+   Sum of probability =         0.0130324591
+   Probability = 
+   1         0.9869675409
+   2         0.0026912283
+   3         0.0100903837
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000028319
+   7         0.0001437003
+   8         0.0001043149
+   Random number =         0.9616380474
+NO HOP!
+Final state   =        1
+  
+   i = 169, time =               16.900 (fs)
+   Exact sum of fluxes =         0.0126711537
+   Approximate sum of fluxes =         0.0133542357
+   Sum of probability =         0.0136115114
+   Probability = 
+   1         0.9863884886
+   2         0.0030615030
+   3         0.0103363588
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000042734
+   7         0.0001546694
+   8         0.0000547068
+   Random number =         0.9452424221
+NO HOP!
+Final state   =        1
+  
+   i = 170, time =               17.000 (fs)
+   Exact sum of fluxes =         0.0131761113
+   Approximate sum of fluxes =         0.0138053857
+   Sum of probability =         0.0138956012
+   Probability = 
+   1         0.9861043988
+   2         0.0033715604
+   3         0.0103445652
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000097915
+   7         0.0001401752
+   8         0.0000295089
+   Random number =         0.2461993462
+NO HOP!
+Final state   =        1
+  
+   i = 171, time =               17.100 (fs)
+   Exact sum of fluxes =         0.0134556027
+   Approximate sum of fluxes =         0.0140272157
+   Sum of probability =         0.0140693227
+   Probability = 
+   1         0.9859306773
+   2         0.0035961976
+   3         0.0101499106
+   4         0.0001729162
+   5         0.0000000000
+   6         0.0000837518
+   7         0.0000501912
+   8         0.0000163552
+   Random number =         0.8790091395
+NO HOP!
+Final state   =        1
+  
+   i = 172, time =               17.200 (fs)
+   Exact sum of fluxes =         0.0135325290
+   Approximate sum of fluxes =         0.0140460406
+   Sum of probability =         0.0140791339
+   Probability = 
+   1         0.9859208661
+   2         0.0037179808
+   3         0.0098044567
+   4         0.0004263601
+   5         0.0000000000
+   6         0.0001215204
+   7         0.0000000000
+   8         0.0000088160
+   Random number =         0.0585603847
+NO HOP!
+Final state   =        1
+  
+   i = 173, time =               17.300 (fs)
+   Exact sum of fluxes =         0.0134385155
+   Approximate sum of fluxes =         0.0138964963
+   Sum of probability =         0.0139216636
+   Probability = 
+   1         0.9860783364
+   2         0.0037299308
+   3         0.0093788138
+   4         0.0006942019
+   5         0.0000000000
+   6         0.0001146521
+   7         0.0000000000
+   8         0.0000040650
+   Random number =         0.5468747201
+NO HOP!
+Final state   =        1
+  
+   i = 174, time =               17.400 (fs)
+   Exact sum of fluxes =         0.0132105817
+   Approximate sum of fluxes =         0.0136181318
+   Sum of probability =         0.0136359245
+   Probability = 
+   1         0.9863640755
+   2         0.0036359012
+   3         0.0089658918
+   4         0.0009146632
+   5         0.0000000000
+   6         0.0001186508
+   7         0.0000000000
+   8         0.0000008175
+   Random number =         0.8376652340
+NO HOP!
+Final state   =        1
+  
+   i = 175, time =               17.500 (fs)
+   Exact sum of fluxes =         0.0128886957
+   Approximate sum of fluxes =         0.0132530003
+   Sum of probability =         0.0132677990
+   Probability = 
+   1         0.9867322010
+   2         0.0034483458
+   3         0.0086827546
+   4         0.0009936496
+   5         0.0001430490
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.2649033866
+NO HOP!
+Final state   =        1
+  
+   i = 176, time =               17.600 (fs)
+   Exact sum of fluxes =         0.0125230142
+   Approximate sum of fluxes =         0.0128532439
+   Sum of probability =         0.0128696240
+   Probability = 
+   1         0.9871303760
+   2         0.0031987200
+   3         0.0086457719
+   4         0.0008251266
+   5         0.0002000055
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.1007278268
+NO HOP!
+Final state   =        1
+  
+   i = 177, time =               17.700 (fs)
+   Exact sum of fluxes =         0.0121298423
+   Approximate sum of fluxes =         0.0124360971
+   Sum of probability =         0.0124534918
+   Probability = 
+   1         0.9875465082
+   2         0.0028589707
+   3         0.0088607093
+   4         0.0004288127
+   5         0.0003034881
+   6         0.0000000000
+   7         0.0000015111
+   8         0.0000000000
+   Random number =         0.0568380830
+NO HOP!
+Final state   =        1
+  
+   i = 178, time =               17.800 (fs)
+   Exact sum of fluxes =         0.0117825119
+   Approximate sum of fluxes =         0.0120774538
+   Sum of probability =         0.0120933625
+   Probability = 
+   1         0.9879066375
+   2         0.0024912590
+   3         0.0090442419
+   4         0.0000791247
+   5         0.0004787369
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.0413669819
+NO HOP!
+Final state   =        1
+  
+   i = 179, time =               17.900 (fs)
+   Exact sum of fluxes =         0.0115218547
+   Approximate sum of fluxes =         0.0118201276
+   Sum of probability =         0.0118473711
+   Probability = 
+   1         0.9881526289
+   2         0.0020880709
+   3         0.0090182716
+   4         0.0000000000
+   5         0.0007410285
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.0410145546
+NO HOP!
+Final state   =        1
+  
+   i = 180, time =               18.000 (fs)
+   Exact sum of fluxes =         0.0114072409
+   Approximate sum of fluxes =         0.0117267237
+   Sum of probability =         0.0117438815
+   Probability = 
+   1         0.9882561185
+   2         0.0016519354
+   3         0.0090085659
+   4         0.0000216158
+   5         0.0010617644
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.5391240691
+NO HOP!
+Final state   =        1
+  
+   i = 181, time =               18.100 (fs)
+   Exact sum of fluxes =         0.0115126752
+   Approximate sum of fluxes =         0.0118761694
+   Sum of probability =         0.0118942822
+   Probability = 
+   1         0.9881057178
+   2         0.0011747282
+   3         0.0093032932
+   4         0.0000521044
+   5         0.0013641564
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.4855172811
+NO HOP!
+Final state   =        1
+  
+   i = 182, time =               18.200 (fs)
+   Exact sum of fluxes =         0.0119364794
+   Approximate sum of fluxes =         0.0123745730
+   Sum of probability =         0.0123936975
+   Probability = 
+   1         0.9876063025
+   2         0.0006303801
+   3         0.0101279369
+   4         0.0000591739
+   5         0.0015762066
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.5406849958
+NO HOP!
+Final state   =        1
+  
+   i = 183, time =               18.300 (fs)
+   Exact sum of fluxes =         0.0128153030
+   Approximate sum of fluxes =         0.0133712020
+   Sum of probability =         0.0134400940
+   Probability = 
+   1         0.9865599060
+   2         0.0000000000
+   3         0.0117158227
+   4         0.0000516598
+   5         0.0016726115
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.5730146198
+NO HOP!
+Final state   =        1
+  
+   i = 184, time =               18.400 (fs)
+   Exact sum of fluxes =         0.0143461388
+   Approximate sum of fluxes =         0.0150839600
+   Sum of probability =         0.0161358368
+   Probability = 
+   1         0.9838641632
+   2         0.0000000000
+   3         0.0144319141
+   4         0.0000385491
+   5         0.0016653736
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.6623537314
+NO HOP!
+Final state   =        1
+  
+   i = 185, time =               18.500 (fs)
+   Exact sum of fluxes =         0.0168202256
+   Approximate sum of fluxes =         0.0178395308
+   Sum of probability =         0.0195987916
+   Probability = 
+   1         0.9804012084
+   2         0.0000000000
+   3         0.0179944643
+   4         0.0000246901
+   5         0.0015796372
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.1729031240
+NO HOP!
+Final state   =        1
+  
+   i = 186, time =               18.600 (fs)
+   Exact sum of fluxes =         0.0206721669
+   Approximate sum of fluxes =         0.0221328915
+   Sum of probability =         0.0221546809
+   Probability = 
+   1         0.9778453191
+   2         0.0124813178
+   3         0.0082249880
+   4         0.0000119842
+   5         0.0014363909
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.0913887727
+NO HOP!
+Final state   =        1
+  
+   i = 187, time =               18.700 (fs)
+   Exact sum of fluxes =         0.0265599851
+   Approximate sum of fluxes =         0.0287334518
+   Sum of probability =         0.0287554329
+   Probability = 
+   1         0.9712445671
+   2         0.0239863404
+   3         0.0035024170
+   4         0.0000008450
+   5         0.0012658305
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.4372582789
+NO HOP!
+Final state   =        1
+  
+   i = 188, time =               18.800 (fs)
+   Exact sum of fluxes =         0.0354403666
+   Approximate sum of fluxes =         0.0387878458
+   Sum of probability =         0.0388213799
+   Probability = 
+   1         0.9611786201
+   2         0.0356218845
+   3         0.0021259777
+   4         0.0000000000
+   5         0.0010713200
+   6         0.0000021976
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.4615534449
+NO HOP!
+Final state   =        1
+  
+   i = 189, time =               18.900 (fs)
+   Exact sum of fluxes =         0.0486280732
+   Approximate sum of fluxes =         0.0539491634
+   Sum of probability =         0.0539947352
+   Probability = 
+   1         0.9460052648
+   2         0.0516493050
+   3         0.0014747216
+   4         0.0000000000
+   5         0.0008663069
+   6         0.0000044016
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.7842377620
+NO HOP!
+Final state   =        1
+  
+   i = 190, time =               19.000 (fs)
+   Exact sum of fluxes =         0.0676619856
+   Approximate sum of fluxes =         0.0763080890
+   Sum of probability =         0.0763660327
+   Probability = 
+   1         0.9236339673
+   2         0.0746005625
+   3         0.0011027806
+   4         0.0000000000
+   5         0.0006564180
+   6         0.0000062716
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.8018186446
+NO HOP!
+Final state   =        1
+  
+   i = 191, time =               19.100 (fs)
+   Exact sum of fluxes =         0.0936975866
+   Approximate sum of fluxes =         0.1077768278
+   Sum of probability =         0.1078479380
+   Probability = 
+   1         0.8921520620
+   2         0.1065105852
+   3         0.0008863323
+   4         0.0000000000
+   5         0.0004435359
+   6         0.0000074847
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.8219547735
+NO HOP!
+Final state   =        1
+  
+   i = 192, time =               19.200 (fs)
+   Exact sum of fluxes =         0.1261654334
+   Approximate sum of fluxes =         0.1484076362
+   Sum of probability =         0.1484947458
+   Probability = 
+   1         0.8515052542
+   2         0.1474808467
+   3         0.0007789829
+   4         0.0000000000
+   5         0.0002255982
+   6         0.0000077917
+   7         0.0000000000
+   8         0.0000015262
+   Random number =         0.4779871636
+NO HOP!
+Final state   =        1
+  
+   i = 193, time =               19.300 (fs)
+   Exact sum of fluxes =         0.1613483141
+   Approximate sum of fluxes =         0.1940813197
+   Sum of probability =         0.1941862389
+   Probability = 
+   1         0.8058137611
+   2         0.1934199653
+   3         0.0007580619
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000070481
+   7         0.0000000000
+   8         0.0000011636
+   Random number =         0.1906821287
+NO HOP!
+Final state   =        1
+  
+   i = 194, time =               19.400 (fs)
+   Exact sum of fluxes =         0.1928727978
+   Approximate sum of fluxes =         0.2362114381
+   Sum of probability =         0.2365749724
+   Probability = 
+   1         0.7634250276
+   2         0.2357630960
+   3         0.0008060419
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000052462
+   7         0.0000000000
+   8         0.0000005883
+   Random number =         0.0390195104
+NO HOP!
+Final state   =        1
+  
+   i = 195, time =               19.500 (fs)
+   Exact sum of fluxes =         0.2150059781
+   Approximate sum of fluxes =         0.2659372095
+   Sum of probability =         0.2665743782
+   Probability = 
+   1         0.7334256218
+   2         0.2656692935
+   3         0.0009022803
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000025949
+   7         0.0000000000
+   8         0.0000002095
+   Random number =         0.2096178985
+NO HOP!
+Final state   =        1
+  
+   i = 196, time =               19.600 (fs)
+   Exact sum of fluxes =         0.2257664488
+   Approximate sum of fluxes =         0.2795013214
+   Sum of probability =         0.2804220608
+   Probability = 
+   1         0.7195779392
+   2         0.2793976076
+   3         0.0010244463
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000070
+   Random number =         0.2581467451
+NO HOP!
+Final state   =        1
+  
+   i = 197, time =               19.700 (fs)
+   Exact sum of fluxes =         0.2268091949
+   Approximate sum of fluxes =         0.2790438669
+   Sum of probability =         0.2802528486
+   Probability = 
+   1         0.7197471514
+   2         0.2790993407
+   3         0.0011535078
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.7186627082
+NO HOP!
+Final state   =        1
+  
+   i = 198, time =               19.800 (fs)
+   Exact sum of fluxes =         0.2212576233
+   Approximate sum of fluxes =         0.2693421696
+   Sum of probability =         0.2708344722
+   Probability = 
+   1         0.7291655278
+   2         0.2695573703
+   3         0.0012771019
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.4049325362
+NO HOP!
+Final state   =        1
+  
+   i = 199, time =               19.900 (fs)
+   Exact sum of fluxes =         0.2119722751
+   Approximate sum of fluxes =         0.2548098748
+   Sum of probability =         0.2565753054
+   Probability = 
+   1         0.7434246946
+   2         0.2551862068
+   3         0.0013890985
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.3997988932
+NO HOP!
+Final state   =        1
+  
+   i = 200, time =               20.000 (fs)
+   Exact sum of fluxes =         0.2009559712
+   Approximate sum of fluxes =         0.2384362276
+   Sum of probability =         0.2404602970
+   Probability = 
+   1         0.7595397030
+   2         0.2389726842
+   3         0.0014875205
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000922
+   Random number =         0.6163657441
+NO HOP!
+Final state   =        1
+  

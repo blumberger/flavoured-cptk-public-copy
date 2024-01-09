@@ -1,0 +1,1005 @@
+Site Energies (hartree);  nadiab =       3
+ i = 0, time =                0.000 (fs)
+   1         7.2954347933
+   2         7.3048638147
+   3         7.3001050344
+Site Energies (hartree);  nadiab =       3
+ i = 1, time =                0.100 (fs)
+   1         7.4423702323
+   2         7.4520906474
+   3         7.4473111708
+Site Energies (hartree);  nadiab =       3
+ i = 2, time =                0.200 (fs)
+   1         7.5508490969
+   2         7.5608539044
+   3         7.5560548731
+Site Energies (hartree);  nadiab =       3
+ i = 3, time =                0.300 (fs)
+   1         7.6196190586
+   2         7.6299010236
+   3         7.6250835889
+Site Energies (hartree);  nadiab =       3
+ i = 4, time =                0.400 (fs)
+   1         7.6479699831
+   2         7.6585216491
+   3         7.6536869690
+Site Energies (hartree);  nadiab =       3
+ i = 5, time =                0.500 (fs)
+   1         7.6357421243
+   2         7.6465558165
+   3         7.6417050569
+Site Energies (hartree);  nadiab =       3
+ i = 6, time =                0.600 (fs)
+   1         7.5833266337
+   2         7.5943944648
+   3         7.5895287987
+Site Energies (hartree);  nadiab =       3
+ i = 7, time =                0.700 (fs)
+   1         7.4916581411
+   2         7.5029720168
+   3         7.4980926242
+Site Energies (hartree);  nadiab =       3
+ i = 8, time =                0.800 (fs)
+   1         7.3621995394
+   2         7.3737511648
+   3         7.3688592321
+Site Energies (hartree);  nadiab =       3
+ i = 9, time =                0.900 (fs)
+   1         7.1969192081
+   2         7.2087000934
+   3         7.2037968133
+Site Energies (hartree);  nadiab =       3
+ i = 10, time =                1.000 (fs)
+   1         6.9982614110
+   2         7.0102628783
+   3         7.0053494492
+Site Energies (hartree);  nadiab =       3
+ i = 11, time =                1.100 (fs)
+   1         6.7691098613
+   2         6.7813230508
+   3         6.7764006764
+Site Energies (hartree);  nadiab =       3
+ i = 12, time =                1.200 (fs)
+   1         6.5127454975
+   2         6.5251613740
+   3         6.5202312631
+Site Energies (hartree);  nadiab =       3
+ i = 13, time =                1.300 (fs)
+   1         6.2327990221
+   2         6.2454083819
+   3         6.2404717481
+Site Energies (hartree);  nadiab =       3
+ i = 14, time =                1.400 (fs)
+   1         5.9331988832
+   2         5.9459923610
+   3         5.9410504221
+Site Energies (hartree);  nadiab =       3
+ i = 15, time =                1.500 (fs)
+   1         5.6181157793
+   2         5.6310838556
+   3         5.6261378332
+Site Energies (hartree);  nadiab =       3
+ i = 16, time =                1.600 (fs)
+   1         5.2919041134
+   2         5.3050371214
+   3         5.3000882408
+Site Energies (hartree);  nadiab =       3
+ i = 17, time =                1.700 (fs)
+   1         4.9590414969
+   2         4.9723296301
+   3         4.9673791195
+Site Energies (hartree);  nadiab =       3
+ i = 18, time =                1.800 (fs)
+   1         4.6240671479
+   2         4.6375004680
+   3         4.6325495582
+Site Energies (hartree);  nadiab =       3
+ i = 19, time =                1.900 (fs)
+   1         4.2915200877
+   2         4.3050885321
+   3         4.3001384560
+Site Energies (hartree);  nadiab =       3
+ i = 20, time =                2.000 (fs)
+   1         3.9658779065
+   2         3.9795712965
+   3         3.9746232887
+Site Energies (hartree);  nadiab =       3
+ i = 21, time =                2.100 (fs)
+   1         3.6514967812
+   2         3.6653048302
+   3         3.6603601261
+Site Energies (hartree);  nadiab =       3
+ i = 22, time =                2.200 (fs)
+   1         3.3525537610
+   2         3.3664660826
+   3         3.3615259183
+Site Energies (hartree);  nadiab =       3
+ i = 23, time =                2.300 (fs)
+   1         3.0729920285
+   2         3.0869981454
+   3         3.0820637567
+Site Energies (hartree);  nadiab =       3
+ i = 24, time =                2.400 (fs)
+   1         2.8164697680
+   2         2.8305591205
+   3         2.8256317422
+Site Energies (hartree);  nadiab =       3
+ i = 25, time =                2.500 (fs)
+   1         2.5863129541
+   2         2.6004749088
+   3         2.5955557742
+Site Energies (hartree);  nadiab =       3
+ i = 26, time =                2.600 (fs)
+   1         2.3854730458
+   2         2.3996969046
+   3         2.3947872449
+Site Energies (hartree);  nadiab =       3
+ i = 27, time =                2.700 (fs)
+   1         2.2164899224
+   2         2.2307649315
+   3         2.2258659748
+Site Energies (hartree);  nadiab =       3
+ i = 28, time =                2.800 (fs)
+   1         2.0814604167
+   2         2.0957757755
+   3         2.0908887460
+Site Energies (hartree);  nadiab =       3
+ i = 29, time =                2.900 (fs)
+   1         1.9820136182
+   2         1.9963584892
+   3         1.9914846065
+Site Energies (hartree);  nadiab =       3
+ i = 30, time =                3.000 (fs)
+   1         1.9192915703
+   2         1.9336550877
+   3         1.9287955660
+Site Energies (hartree);  nadiab =       3
+ i = 31, time =                3.100 (fs)
+   1         1.8939371029
+   2         1.9083083822
+   3         1.9034644293
+Site Energies (hartree);  nadiab =       3
+ i = 32, time =                3.200 (fs)
+   1         1.9060878765
+   2         1.9204560243
+   3         1.9156288405
+Site Energies (hartree);  nadiab =       3
+ i = 33, time =                3.300 (fs)
+   1         1.9553775754
+   2         1.9697316982
+   3         1.9649224758
+Site Energies (hartree);  nadiab =       3
+ i = 34, time =                3.400 (fs)
+   1         2.0409432593
+   2         2.0552724733
+   3         2.0504823956
+Site Energies (hartree);  nadiab =       3
+ i = 35, time =                3.500 (fs)
+   1         2.1614398317
+   2         2.1757332724
+   3         2.1709635123
+Site Energies (hartree);  nadiab =       3
+ i = 36, time =                3.600 (fs)
+   1         2.3150604074
+   2         2.3293072388
+   3         2.3245589582
+Site Energies (hartree);  nadiab =       3
+ i = 37, time =                3.700 (fs)
+   1         2.4995628238
+   2         2.5137522479
+   3         2.5090265964
+Site Energies (hartree);  nadiab =       3
+ i = 38, time =                3.800 (fs)
+   1         2.7123014601
+   2         2.7264227264
+   3         2.7217208407
+Site Energies (hartree);  nadiab =       3
+ i = 39, time =                3.900 (fs)
+   1         2.9502645058
+   2         2.9643069209
+   3         2.9596299231
+Site Energies (hartree);  nadiab =       3
+ i = 40, time =                4.000 (fs)
+   1         3.2101159147
+   2         3.2240688513
+   3         3.2194178484
+Site Energies (hartree);  nadiab =       3
+ i = 41, time =                4.100 (fs)
+   1         3.4882415677
+   2         3.5020944738
+   3         3.4974705565
+Site Energies (hartree);  nadiab =       3
+ i = 42, time =                4.200 (fs)
+   1         3.7807986029
+   2         3.7945410114
+   3         3.7899452527
+Site Energies (hartree);  nadiab =       3
+ i = 43, time =                4.300 (fs)
+   1         4.0837677215
+   2         4.0973892592
+   3         4.0928227136
+Site Energies (hartree);  nadiab =       3
+ i = 44, time =                4.400 (fs)
+   1         4.3930077149
+   2         4.4064981112
+   3         4.4019618134
+Site Energies (hartree);  nadiab =       3
+ i = 45, time =                4.500 (fs)
+   1         4.7043111876
+   2         4.7176602837
+   3         4.7131552477
+Site Energies (hartree);  nadiab =       3
+ i = 46, time =                4.600 (fs)
+   1         5.0134610939
+   2         5.0266588514
+   3         5.0221860693
+Site Energies (hartree);  nadiab =       3
+ i = 47, time =                4.700 (fs)
+   1         5.3162870434
+   2         5.3293235529
+   3         5.3248839937
+Site Energies (hartree);  nadiab =       3
+ i = 48, time =                4.800 (fs)
+   1         5.6087207682
+   2         5.6215862580
+   3         5.6171808665
+Site Energies (hartree);  nadiab =       3
+ i = 49, time =                4.900 (fs)
+   1         5.8868501147
+   2         5.8995349588
+   3         5.8951646546
+Site Energies (hartree);  nadiab =       3
+ i = 50, time =                5.000 (fs)
+   1         6.1469706999
+   2         6.1594654266
+   3         6.1551311030
+Site Energies (hartree);  nadiab =       3
+ i = 51, time =                5.100 (fs)
+   1         6.3856345893
+   2         6.3979298888
+   3         6.3936324114
+Site Energies (hartree);  nadiab =       3
+ i = 52, time =                5.200 (fs)
+   1         6.5996953485
+   2         6.6117820810
+   3         6.6075222871
+Site Energies (hartree);  nadiab =       3
+ i = 53, time =                5.300 (fs)
+   1         6.7863489940
+   2         6.7982181972
+   3         6.7939968945
+Site Energies (hartree);  nadiab =       3
+ i = 54, time =                5.400 (fs)
+   1         6.9431702239
+   2         6.9548131207
+   3         6.9506310863
+Site Energies (hartree);  nadiab =       3
+ i = 55, time =                5.500 (fs)
+   1         7.0681433808
+   2         7.0795513862
+   3         7.0754093655
+Site Energies (hartree);  nadiab =       3
+ i = 56, time =                5.600 (fs)
+   1         7.1596879663
+   2         7.1708526948
+   3         7.1667514008
+Site Energies (hartree);  nadiab =       3
+ i = 57, time =                5.700 (fs)
+   1         7.2166782227
+   2         7.2275914948
+   3         7.2235316070
+Site Energies (hartree);  nadiab =       3
+ i = 58, time =                5.800 (fs)
+   1         7.2384565731
+   2         7.2491104224
+   3         7.2450925858
+Site Energies (hartree);  nadiab =       3
+ i = 59, time =                5.900 (fs)
+   1         7.2248407779
+   2         7.2352274571
+   3         7.2312522815
+Site Energies (hartree);  nadiab =       3
+ i = 60, time =                6.000 (fs)
+   1         7.1761247651
+   2         7.1862367526
+   3         7.1823048118
+Site Energies (hartree);  nadiab =       3
+ i = 61, time =                6.100 (fs)
+   1         7.0930731767
+   2         7.1029031823
+   3         7.0990150132
+Site Energies (hartree);  nadiab =       3
+ i = 62, time =                6.200 (fs)
+   1         6.9769094874
+   2         6.9864504582
+   3         6.9826065601
+Site Energies (hartree);  nadiab =       3
+ i = 63, time =                6.300 (fs)
+   1         6.8292982757
+   2         6.8385434016
+   3         6.8347442357
+Site Energies (hartree);  nadiab =       3
+ i = 64, time =                6.400 (fs)
+   1         6.6523214239
+   2         6.6612641431
+   3         6.6575101317
+Site Energies (hartree);  nadiab =       3
+ i = 65, time =                6.500 (fs)
+   1         6.4484490654
+   2         6.4570830692
+   3         6.4533745954
+Site Energies (hartree);  nadiab =       3
+ i = 66, time =                6.600 (fs)
+   1         6.2205053194
+   2         6.2288245574
+   3         6.2251619641
+Site Energies (hartree);  nadiab =       3
+ i = 67, time =                6.700 (fs)
+   1         5.9716294237
+   2         5.9796281083
+   3         5.9760116984
+Site Energies (hartree);  nadiab =       3
+ i = 68, time =                6.800 (fs)
+   1         5.7052329216
+   2         5.7129055324
+   3         5.7093355679
+Site Energies (hartree);  nadiab =       3
+ i = 69, time =                6.900 (fs)
+   1         5.4249531210
+   2         5.4322944089
+   3         5.4287711111
+Site Energies (hartree);  nadiab =       3
+ i = 70, time =                7.000 (fs)
+   1         5.1346038279
+   2         5.1416088192
+   3         5.1381323680
+Site Energies (hartree);  nadiab =       3
+ i = 71, time =                7.100 (fs)
+   1         4.8381238831
+   2         4.8447878831
+   3         4.8413584172
+Site Energies (hartree);  nadiab =       3
+ i = 72, time =                7.200 (fs)
+   1         4.5395240868
+   2         4.5458426830
+   3         4.5424602999
+Site Energies (hartree);  nadiab =       3
+ i = 73, time =                7.300 (fs)
+   1         4.2428333728
+   2         4.2488024388
+   3         4.2454671944
+Site Energies (hartree);  nadiab =       3
+ i = 74, time =                7.400 (fs)
+   1         3.9520448801
+   2         3.9576605780
+   3         3.9543724871
+Site Energies (hartree);  nadiab =       3
+ i = 75, time =                7.500 (fs)
+   1         3.6710626554
+   2         3.6763214387
+   3         3.6730804752
+Site Energies (hartree);  nadiab =       3
+ i = 76, time =                7.600 (fs)
+   1         3.4036497189
+   2         3.4085483353
+   3         3.4053544321
+Site Energies (hartree);  nadiab =       3
+ i = 77, time =                7.700 (fs)
+   1         3.1533781510
+   2         3.1579136443
+   3         3.1547666940
+Site Energies (hartree);  nadiab =       3
+ i = 78, time =                7.800 (fs)
+   1         2.9235816623
+   2         2.9277513746
+   3         2.9246512298
+Site Energies (hartree);  nadiab =       3
+ i = 79, time =                7.900 (fs)
+   1         2.7173117731
+   2         2.7211133467
+   3         2.7180598205
+Site Energies (hartree);  nadiab =       3
+ i = 80, time =                8.000 (fs)
+   1         2.5372977413
+   2         2.5407291203
+   3         2.5377219869
+Site Energies (hartree);  nadiab =       3
+ i = 81, time =                8.100 (fs)
+   1         2.3859108863
+   2         2.3889703175
+   3         2.3860093133
+Site Energies (hartree);  nadiab =       3
+ i = 82, time =                8.200 (fs)
+   1         2.2651339583
+   2         2.2678199927
+   3         2.2649048164
+Site Energies (hartree);  nadiab =       3
+ i = 83, time =                8.300 (fs)
+   1         2.1765355746
+   2         2.1788470681
+   3         2.1759773821
+Site Energies (hartree);  nadiab =       3
+ i = 84, time =                8.400 (fs)
+   1         2.1212506331
+   2         2.1231867470
+   3         2.1203621782
+Site Energies (hartree);  nadiab =       3
+ i = 85, time =                8.500 (fs)
+   1         2.0999663120
+   2         2.1015265135
+   3         2.0987466543
+Site Energies (hartree);  nadiab =       3
+ i = 86, time =                8.600 (fs)
+   1         2.1129140049
+   2         2.1140980671
+   3         2.1113624765
+Site Energies (hartree);  nadiab =       3
+ i = 87, time =                8.700 (fs)
+   1         2.1598679043
+   2         2.1606759061
+   3         2.1579841110
+Site Energies (hartree);  nadiab =       3
+ i = 88, time =                8.800 (fs)
+   1         2.2401494822
+   2         2.2405818082
+   3         2.2379333044
+Site Energies (hartree);  nadiab =       3
+ i = 89, time =                8.900 (fs)
+   1         2.3526380351
+   2         2.3526953744
+   3         2.3500896281
+Site Energies (hartree);  nadiab =       3
+ i = 90, time =                9.000 (fs)
+   1         2.4957869083
+   2         2.4954702543
+   3         2.4929067034
+Site Energies (hartree);  nadiab =       3
+ i = 91, time =                9.100 (fs)
+   1         2.6676461250
+   2         2.6669567737
+   3         2.6644348293
+Site Energies (hartree);  nadiab =       3
+ i = 92, time =                9.200 (fs)
+   1         2.8658900114
+   2         2.8648295608
+   3         2.8623486087
+Site Energies (hartree);  nadiab =       3
+ i = 93, time =                9.300 (fs)
+   1         3.0878496687
+   2         3.0864200166
+   3         3.0839794186
+Site Energies (hartree);  nadiab =       3
+ i = 94, time =                9.400 (fs)
+   1         3.3305499418
+   2         3.3287532846
+   3         3.3263523801
+Site Energies (hartree);  nadiab =       3
+ i = 95, time =                9.500 (fs)
+   1         3.5907504065
+   2         3.5885892367
+   3         3.5862273448
+Site Energies (hartree);  nadiab =       3
+ i = 96, time =                9.600 (fs)
+   1         3.8649900126
+   2         3.8624671168
+   3         3.8601435370
+Site Energies (hartree);  nadiab =       3
+ i = 97, time =                9.700 (fs)
+   1         4.1496343567
+   2         4.1467528133
+   3         4.1444668279
+Site Energies (hartree);  nadiab =       3
+ i = 98, time =                9.800 (fs)
+   1         4.4409251129
+   2         4.4376882890
+   3         4.4354391645
+Site Energies (hartree);  nadiab =       3
+ i = 99, time =                9.900 (fs)
+   1         4.7350307733
+   2         4.7314423220
+   3         4.7292293109
+Site Energies (hartree);  nadiab =       3
+ i = 100, time =               10.000 (fs)
+   1         5.0280979613
+   2         5.0241618187
+   3         5.0219841607
+Site Energies (hartree);  nadiab =       3
+ i = 101, time =               10.100 (fs)
+   1         5.3163031777
+   2         5.3120235591
+   3         5.3098804836
+Site Energies (hartree);  nadiab =       3
+ i = 102, time =               10.200 (fs)
+   1         5.5958933871
+   2         5.5912748049
+   3         5.5891655286
+Site Energies (hartree);  nadiab =       3
+ i = 103, time =               10.300 (fs)
+   1         5.8632554647
+   2         5.8583027029
+   3         5.8562264354
+Site Energies (hartree);  nadiab =       3
+ i = 104, time =               10.400 (fs)
+   1         6.1149540822
+   2         6.1096721931
+   3         6.1076281382
+Site Energies (hartree);  nadiab =       3
+ i = 105, time =               10.500 (fs)
+   1         6.3477763958
+   2         6.3421706955
+   3         6.3401580527
+Site Energies (hartree);  nadiab =       3
+ i = 106, time =               10.600 (fs)
+   1         6.5587737984
+   2         6.5528498624
+   3         6.5508678285
+Site Energies (hartree);  nadiab =       3
+ i = 107, time =               10.700 (fs)
+   1         6.7452996466
+   2         6.7390633050
+   3         6.7371110756
+Site Energies (hartree);  nadiab =       3
+ i = 108, time =               10.800 (fs)
+   1         6.9050429498
+   2         6.8985002825
+   3         6.8965770537
+Site Energies (hartree);  nadiab =       3
+ i = 109, time =               10.900 (fs)
+   1         7.0360572914
+   2         7.0292146233
+   3         7.0273195925
+Site Energies (hartree);  nadiab =       3
+ i = 110, time =               11.000 (fs)
+   1         7.1367846200
+   2         7.1296485155
+   3         7.1277808834
+Site Energies (hartree);  nadiab =       3
+ i = 111, time =               11.100 (fs)
+   1         7.2060738459
+   2         7.1986511032
+   3         7.1968100747
+Site Energies (hartree);  nadiab =       3
+ i = 112, time =               11.200 (fs)
+   1         7.2431937141
+   2         7.2354913602
+   3         7.2336761459
+Site Energies (hartree);  nadiab =       3
+ i = 113, time =               11.300 (fs)
+   1         7.2478400603
+   2         7.2398653447
+   3         7.2380751617
+Site Energies (hartree);  nadiab =       3
+ i = 114, time =               11.400 (fs)
+   1         7.2201372023
+   2         7.2118975911
+   3         7.2101316644
+Site Energies (hartree);  nadiab =       3
+ i = 115, time =               11.500 (fs)
+   1         7.1606336727
+   2         7.1521368427
+   3         7.1503944059
+Site Energies (hartree);  nadiab =       3
+ i = 116, time =               11.600 (fs)
+   1         7.0702921004
+   2         7.0615459325
+   3         7.0598262290
+Site Energies (hartree);  nadiab =       3
+ i = 117, time =               11.700 (fs)
+   1         6.9504737067
+   2         6.9414862795
+   3         6.9397885632
+Site Energies (hartree);  nadiab =       3
+ i = 118, time =               11.800 (fs)
+   1         6.8029175787
+   2         6.7936971618
+   3         6.7920206978
+Site Energies (hartree);  nadiab =       3
+ i = 119, time =               11.900 (fs)
+   1         6.6297148250
+   2         6.6202698720
+   3         6.6186139374
+Site Energies (hartree);  nadiab =       3
+ i = 120, time =               12.000 (fs)
+   1         6.4332782247
+   2         6.4236173665
+   3         6.4219812510
+Site Energies (hartree);  nadiab =       3
+ i = 121, time =               12.100 (fs)
+   1         6.2163078444
+   2         6.2064398819
+   3         6.2048228881
+Site Energies (hartree);  nadiab =       3
+ i = 122, time =               12.200 (fs)
+   1         5.9817529419
+   2         5.9716868385
+   3         5.9700882826
+Site Energies (hartree);  nadiab =       3
+ i = 123, time =               12.300 (fs)
+   1         5.7327709825
+   2         5.7225158571
+   3         5.7209350688
+Site Energies (hartree);  nadiab =       3
+ i = 124, time =               12.400 (fs)
+   1         5.4726840902
+   2         5.4622492092
+   3         5.4606855328
+Site Energies (hartree);  nadiab =       3
+ i = 125, time =               12.500 (fs)
+   1         5.2049337352
+   2         5.1943285050
+   3         5.1927812987
+Site Energies (hartree);  nadiab =       3
+ i = 126, time =               12.600 (fs)
+   1         4.9330342241
+   2         4.9222681833
+   3         4.9207368197
+Site Energies (hartree);  nadiab =       3
+ i = 127, time =               12.700 (fs)
+   1         4.6605254688
+   2         4.6496082799
+   3         4.6480921461
+Site Energies (hartree);  nadiab =       3
+ i = 128, time =               12.800 (fs)
+   1         4.3909260622
+   2         4.3798675038
+   3         4.3783660012
+Site Energies (hartree);  nadiab =       3
+ i = 129, time =               12.900 (fs)
+   1         4.1276867763
+   2         4.1164967346
+   3         4.1150092790
+Site Energies (hartree);  nadiab =       3
+ i = 130, time =               13.000 (fs)
+   1         3.8741457022
+   2         3.8628341631
+   3         3.8613601844
+Site Energies (hartree);  nadiab =       3
+ i = 131, time =               13.100 (fs)
+   1         3.6334852498
+   2         3.6220622898
+   3         3.6206012320
+Site Energies (hartree);  nadiab =       3
+ i = 132, time =               13.200 (fs)
+   1         3.4086915597
+   2         3.3971673379
+   3         3.3957186588
+Site Energies (hartree);  nadiab =       3
+ i = 133, time =               13.300 (fs)
+   1         3.2025168810
+   2         3.1909016302
+   3         3.1894648011
+Site Energies (hartree);  nadiab =       3
+ i = 134, time =               13.400 (fs)
+   1         3.0174454123
+   2         3.0057494303
+   3         3.0043239358
+Site Energies (hartree);  nadiab =       3
+ i = 135, time =               13.500 (fs)
+   1         2.8556629974
+   2         2.8438966381
+   3         2.8424819757
+Site Energies (hartree);  nadiab =       3
+ i = 136, time =               13.600 (fs)
+   1         2.7190311991
+   2         2.7072048638
+   3         2.7058005438
+Site Energies (hartree);  nadiab =       3
+ i = 137, time =               13.700 (fs)
+   1         2.6090658825
+   2         2.5971900108
+   3         2.5957955559
+Site Energies (hartree);  nadiab =       3
+ i = 138, time =               13.800 (fs)
+   1         2.5269203151
+   2         2.5150053758
+   3         2.5136203207
+Site Energies (hartree);  nadiab =       3
+ i = 139, time =               13.900 (fs)
+   1         2.4733732202
+   2         2.4614297024
+   3         2.4600535936
+Site Energies (hartree);  nadiab =       3
+ i = 140, time =               14.000 (fs)
+   1         2.4488221514
+   2         2.4368605551
+   3         2.4354929508
+Site Energies (hartree);  nadiab =       3
+ i = 141, time =               14.100 (fs)
+   1         2.4532814723
+   2         2.4413122995
+   3         2.4399527692
+Site Energies (hartree);  nadiab =       3
+ i = 142, time =               14.200 (fs)
+   1         2.4863859832
+   2         2.4744197285
+   3         2.4730678525
+Site Energies (hartree);  nadiab =       3
+ i = 143, time =               14.300 (fs)
+   1         2.5473989939
+   2         2.5354461354
+   3         2.5341015053
+Site Energies (hartree);  nadiab =       3
+ i = 144, time =               14.400 (fs)
+   1         2.6352254434
+   2         2.6232964332
+   3         2.6219586512
+Site Energies (hartree);  nadiab =       3
+ i = 145, time =               14.500 (fs)
+   1         2.7484295370
+   2         2.7365347923
+   3         2.7352034714
+Site Energies (hartree);  nadiab =       3
+ i = 146, time =               14.600 (fs)
+   1         2.8852565118
+   2         2.8734064057
+   3         2.8720811694
+Site Energies (hartree);  nadiab =       3
+ i = 147, time =               14.700 (fs)
+   1         3.0436584493
+   2         3.0318633012
+   3         3.0305437839
+Site Energies (hartree);  nadiab =       3
+ i = 148, time =               14.800 (fs)
+   1         3.2213240871
+   2         3.2095941539
+   3         3.2082800009
+Site Energies (hartree);  nadiab =       3
+ i = 149, time =               14.900 (fs)
+   1         3.4157111268
+   2         3.4040565936
+   3         3.4027474610
+Site Energies (hartree);  nadiab =       3
+ i = 150, time =               15.000 (fs)
+   1         3.6240818247
+   2         3.6125127958
+   3         3.6112083511
+Site Energies (hartree);  nadiab =       3
+ i = 151, time =               15.100 (fs)
+   1         3.8435405589
+   2         3.8320670487
+   3         3.8307669709
+Site Energies (hartree);  nadiab =       3
+ i = 152, time =               15.200 (fs)
+   1         4.0710732042
+   2         4.0597051283
+   3         4.0584091085
+Site Energies (hartree);  nadiab =       3
+ i = 153, time =               15.300 (fs)
+   1         4.3035876467
+   2         4.2923348132
+   3         4.2910425546
+Site Energies (hartree);  nadiab =       3
+ i = 154, time =               15.400 (fs)
+   1         4.5379549210
+   2         4.5268270213
+   3         4.5255382404
+Site Energies (hartree);  nadiab =       3
+ i = 155, time =               15.500 (fs)
+   1         4.7710505575
+   2         4.7600571582
+   3         4.7587715847
+Site Energies (hartree);  nadiab =       3
+ i = 156, time =               15.600 (fs)
+   1         4.9997955112
+   2         4.9889460451
+   3         4.9876634230
+Site Energies (hartree);  nadiab =       3
+ i = 157, time =               15.700 (fs)
+   1         5.2211959210
+   2         5.2104996789
+   3         5.2092197670
+Site Energies (hartree);  nadiab =       3
+ i = 158, time =               15.800 (fs)
+   1         5.4323815442
+   2         5.4218476667
+   3         5.4205702395
+Site Energies (hartree);  nadiab =       3
+ i = 159, time =               15.900 (fs)
+   1         5.6306422735
+   2         5.6202797428
+   3         5.6190045910
+Site Energies (hartree);  nadiab =       3
+ i = 160, time =               16.000 (fs)
+   1         5.8134620997
+   2         5.8032797316
+   3         5.8020066634
+Site Energies (hartree);  nadiab =       3
+ i = 161, time =               16.100 (fs)
+   1         5.9785503567
+   2         5.9685567928
+   3         5.9672856344
+Site Energies (hartree);  nadiab =       3
+ i = 162, time =               16.200 (fs)
+   1         6.1238696187
+   2         6.1140733191
+   3         6.1128039157
+Site Energies (hartree);  nadiab =       3
+ i = 163, time =               16.300 (fs)
+   1         6.2476602000
+   2         6.2380694352
+   3         6.2368016523
+Site Energies (hartree);  nadiab =       3
+ i = 164, time =               16.400 (fs)
+   1         6.3484606586
+   2         6.3390835032
+   3         6.3378172269
+Site Energies (hartree);  nadiab =       3
+ i = 165, time =               16.500 (fs)
+   1         6.4251241674
+   2         6.4159684923
+   3         6.4147036309
+Site Energies (hartree);  nadiab =       3
+ i = 166, time =               16.600 (fs)
+   1         6.4768308301
+   2         6.4679042960
+   3         6.4666407806
+Site Energies (hartree);  nadiab =       3
+ i = 167, time =               16.700 (fs)
+   1         6.5030954358
+   2         6.4944054866
+   3         6.4931432721
+Site Energies (hartree);  nadiab =       3
+ i = 168, time =               16.800 (fs)
+   1         6.5037708153
+   2         6.4953246716
+   3         6.4940637377
+Site Energies (hartree);  nadiab =       3
+ i = 169, time =               16.900 (fs)
+   1         6.4790467471
+   2         6.4708514003
+   3         6.4695917522
+Site Energies (hartree);  nadiab =       3
+ i = 170, time =               17.000 (fs)
+   1         6.4294444885
+   2         6.4215066944
+   3         6.4202483640
+Site Energies (hartree);  nadiab =       3
+ i = 171, time =               17.100 (fs)
+   1         6.3558071288
+   2         6.3481334024
+   3         6.3468764488
+Site Energies (hartree);  nadiab =       3
+ i = 172, time =               17.200 (fs)
+   1         6.2592856165
+   2         6.2518822264
+   3         6.2506267365
+Site Energies (hartree);  nadiab =       3
+ i = 173, time =               17.300 (fs)
+   1         6.1413209626
+   2         6.1341939258
+   3         6.1329400155
+Site Energies (hartree);  nadiab =       3
+ i = 174, time =               17.400 (fs)
+   1         6.0036228653
+   2         5.9967779423
+   3         5.9955257566
+Site Energies (hartree);  nadiab =       3
+ i = 175, time =               17.500 (fs)
+   1         5.8481450029
+   2         5.8415876934
+   3         5.8403374069
+Site Energies (hartree);  nadiab =       3
+ i = 176, time =               17.600 (fs)
+   1         5.6770573050
+   2         5.6707928431
+   3         5.6695446608
+Site Energies (hartree);  nadiab =       3
+ i = 177, time =               17.700 (fs)
+   1         5.4927158331
+   2         5.4867491839
+   3         5.4855033407
+Site Energies (hartree);  nadiab =       3
+ i = 178, time =               17.800 (fs)
+   1         5.2976303538
+   2         5.2919662092
+   3         5.2907229707
+Site Energies (hartree);  nadiab =       3
+ i = 179, time =               17.900 (fs)
+   1         5.0944303159
+   2         5.0890730917
+   3         5.0878327536
+Site Energies (hartree);  nadiab =       3
+ i = 180, time =               18.000 (fs)
+   1         4.8858294499
+   2         4.8807832827
+   3         4.8795461707
+Site Energies (hartree);  nadiab =       3
+ i = 181, time =               18.100 (fs)
+   1         4.6745897271
+   2         4.6698584716
+   3         4.6686249411
+Site Energies (hartree);  nadiab =       3
+ i = 182, time =               18.200 (fs)
+   1         4.4634851693
+   2         4.4590723961
+   3         4.4578428317
+Site Energies (hartree);  nadiab =       3
+ i = 183, time =               18.300 (fs)
+   1         4.2552655632
+   2         4.2511745566
+   3         4.2499493713
+Site Energies (hartree);  nadiab =       3
+ i = 184, time =               18.400 (fs)
+   1         4.0526212619
+   2         4.0488550186
+   3         4.0476346529
+Site Energies (hartree);  nadiab =       3
+ i = 185, time =               18.500 (fs)
+   1         3.8581489751
+   2         3.8547102028
+   3         3.8534951236
+Site Energies (hartree);  nadiab =       3
+ i = 186, time =               18.600 (fs)
+   1         3.6743190351
+   2         3.6712101513
+   3         3.6700008511
+Site Energies (hartree);  nadiab =       3
+ i = 187, time =               18.700 (fs)
+   1         3.5034447182
+   2         3.5006678496
+   3         3.4994648449
+Site Energies (hartree);  nadiab =       3
+ i = 188, time =               18.800 (fs)
+   1         3.3476541716
+   2         3.3452111537
+   3         3.3440149835
+Site Energies (hartree);  nadiab =       3
+ i = 189, time =               18.900 (fs)
+   1         3.2088649583
+   2         3.2067573354
+   3         3.2055685596
+Site Energies (hartree);  nadiab =       3
+ i = 190, time =               19.000 (fs)
+   1         3.0887614429
+   2         3.0869904682
+   3         3.0858096658
+Site Energies (hartree);  nadiab =       3
+ i = 191, time =               19.100 (fs)
+   1         2.9887757055
+   2         2.9873423414
+   3         2.9861701090
+Site Energies (hartree);  nadiab =       3
+ i = 192, time =               19.200 (fs)
+   1         2.9100719052
+   2         2.9089768244
+   3         2.9078137736
+Site Energies (hartree);  nadiab =       3
+ i = 193, time =               19.300 (fs)
+   1         2.8535340920
+   2         2.8527776784
+   3         2.8516244341
+Site Energies (hartree);  nadiab =       3
+ i = 194, time =               19.400 (fs)
+   1         2.8197578408
+   2         2.8193401905
+   3         2.8181973886
+Site Energies (hartree);  nadiab =       3
+ i = 195, time =               19.500 (fs)
+   1         2.8090456105
+   2         2.8089665340
+   3         2.8078348189
+Site Energies (hartree);  nadiab =       3
+ i = 196, time =               19.600 (fs)
+   1         2.8214060117
+   2         2.8216650350
+   3         2.8205450575
+Site Energies (hartree);  nadiab =       3
+ i = 197, time =               19.700 (fs)
+   1         2.8565568269
+   2         2.8571531940
+   3         2.8560456086
+Site Energies (hartree);  nadiab =       3
+ i = 198, time =               19.800 (fs)
+   1         2.9139314364
+   2         2.9148641116
+   3         2.9137695739
+Site Energies (hartree);  nadiab =       3
+ i = 199, time =               19.900 (fs)
+   1         2.9926886221
+   2         2.9939562924
+   3         2.9928754565
+Site Energies (hartree);  nadiab =       3
+ i = 200, time =               20.000 (fs)
+   1         3.0917257090
+   2         3.0933267869
+   3         3.0922603028

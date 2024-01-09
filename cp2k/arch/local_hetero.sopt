@@ -1,0 +1,25 @@
+
+
+
+
+
+
+
+
+
+
+
+CC          = gcc
+CXX         = g++
+CPP         =
+AR          = gcc-ar -r
+FC          = gfortran
+LD          = gfortran
+LIBS        = -lquip_core -latoms -lFoX_sax -lFoX_common -lFoX_utils -lFoX_fsys      -lfftw3  -lderiv -lint -lxcf90 -lxc  -lxsmm -lsmm_dnn_haswell-2015-11-10  -lopenblas_serial  -lstdc++  
+DFLAGS      =  -D__LIBXSMM   -D__HAS_smm_dnn  -D__LIBXC -D__LIBINT -D__LIBINT_MAX_AM=6 -D__LIBDERIV_MAX_AM1=5 -D__FFTW3    -D__QUIP 
+WFLAGS      = -Werror=aliasing -Werror=ampersand -Werror=c-binding-type -Werror=intrinsic-shadow -Werror=intrinsics-std -Werror=line-truncation -Werror=target-lifetime -Werror=underflow -Werror=unused-but-set-variable -Werror=conversion -Werror=uninitialized -Wno-maybe-uninitialized 
+FCDEBFLAGS  =  -std=f2003 -fimplicit-none #-fall-intrinsics
+#FCFLAGS     =  -I$(CP2KINSTALLDIR)/include  -march=native -fno-omit-frame-pointer -g   -O3 -funroll-loops -ffast-math $(PROFOPT) -ffree-form $(FCDEBFLAGS) $(WFLAGS) $(DFLAGS)
+FCFLAGS     =  -I$(CP2KINSTALLDIR)/include  -march=native -fno-omit-frame-pointer -g   -O3 -funroll-loops -ffast-math $(PROFOPT) -ffree-form $(FCDEBFLAGS) $(WFLAGS) $(DFLAGS) -fcheck=bounds,do,recursion,pointer
+LDFLAGS     = -L$(CP2KINSTALLDIR)/lib $(FCFLAGS)
+CFLAGS      =  -I$(CP2KINSTALLDIR)/include  -march=native -fno-omit-frame-pointer -g   -O3 -funroll-loops -ffast-math $(PROFOPT) $(DFLAGS)

@@ -1,0 +1,53 @@
+PSF 
+
+         1 !NTITLE
+
+
+        18 !NATOM
+         1 NAPTH     1    NAPTH        C1       CA    0.000000       12.0100           
+         2 NAPTH     1    NAPTH        C2       CA    0.000000       12.0100           
+         3 NAPTH     1    NAPTH        C3       CA    0.000000       12.0100           
+         4 NAPTH     1    NAPTH        C4       CA    0.000000       12.0100           
+         5 NAPTH     1    NAPTH        C5       CA    0.000000       12.0100           
+         6 NAPTH     1    NAPTH        H1       HA    0.000000        1.0080           
+         7 NAPTH     1    NAPTH        H2       HA    0.000000        1.0080           
+         8 NAPTH     1    NAPTH        H3       HA    0.000000        1.0080           
+         9 NAPTH     1    NAPTH        H4       HA    0.000000        1.0080           
+        10 NAPTH     1    NAPTH        C3B      CA    0.000000       12.0100           
+        11 NAPTH     1    NAPTH        C5B      CA    0.000000       12.0100           
+        12 NAPTH     1    NAPTH        C4B      CA    0.000000       12.0100           
+        13 NAPTH     1    NAPTH        C2B      CA    0.000000       12.0100           
+        14 NAPTH     1    NAPTH        C1B      CA    0.000000       12.0100           
+        15 NAPTH     1    NAPTH        H4B      HA    0.000000        1.0080           
+        16 NAPTH     1    NAPTH        H3B      HA    0.000000        1.0080           
+        17 NAPTH     1    NAPTH        H2B      HA    0.000000        1.0080           
+        18 NAPTH     1    NAPTH        H1B      HA    0.000000        1.0080           
+
+        0 !NBOND: bonds
+
+        0 !NTHETA: angles
+
+        0 !NPHI: dihedrals
+
+        0 !NIMPHI: impropers
+
+         0 !NDON: donors
+
+
+         0 !NACC: acceptors
+
+
+         0 !NNB
+
+         0         0         0         0         0         0         0         0
+         0         0         0         0         0         0         0         0
+         0         0
+
+         1         0 !NGRP NST2
+         0         1         0
+
+
+         0         0 !NUMLP NUMLPH
+
+         0 !NCRTERM: cross-terms
+

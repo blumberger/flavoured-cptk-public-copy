@@ -1,0 +1,181 @@
+
+   &COLVAR
+      &DISTANCE
+           &POINT
+                ATOMS 1 2 3 10 12 5
+                TYPE GEO_CENTER
+           &END POINT
+           &POINT
+               XYZ -0.0009133695 -0.0049447935 2.313155502
+               TYPE FIX_POINT
+           &END POINT
+           ATOMS 1 2
+      &END DISTANCE 
+   &END COLVAR
+
+   
+   &COLVAR
+      &DISTANCE
+           &POINT
+                ATOMS 3 4 11 14 13 10
+                TYPE GEO_CENTER
+           &END POINT
+           &POINT
+               XYZ 0.0009133695 0.0049447935 -2.313155502
+               TYPE FIX_POINT
+           &END POINT
+           ATOMS 1 2
+      &END DISTANCE 
+   &END COLVAR
+
+   
+   &COLVAR
+      &DISTANCE
+           &POINT
+                ATOMS 19 20 21 28 30 23
+                TYPE GEO_CENTER
+           &END POINT
+           &POINT
+               XYZ 9.4477366305 -0.0049447935 2.313155502
+               TYPE FIX_POINT
+           &END POINT
+           ATOMS 1 2
+      &END DISTANCE 
+   &END COLVAR
+
+   
+   &COLVAR
+      &DISTANCE
+           &POINT
+                ATOMS 21 22 29 32 31 28
+                TYPE GEO_CENTER
+           &END POINT
+           &POINT
+               XYZ 9.4495633695 0.0049447935 -2.313155502
+               TYPE FIX_POINT
+           &END POINT
+           ATOMS 1 2
+      &END DISTANCE 
+   &END COLVAR
+
+   
+   &COLVAR
+      &DISTANCE
+           &POINT
+                ATOMS 37 38 39 46 48 41
+                TYPE GEO_CENTER
+           &END POINT
+           &POINT
+               XYZ 18.8963866305 -0.0049447935 2.313155502
+               TYPE FIX_POINT
+           &END POINT
+           ATOMS 1 2
+      &END DISTANCE 
+   &END COLVAR
+
+   
+   &COLVAR
+      &DISTANCE
+           &POINT
+                ATOMS 39 40 47 50 49 46
+                TYPE GEO_CENTER
+           &END POINT
+           &POINT
+               XYZ 18.8982133695 0.0049447935 -2.313155502
+               TYPE FIX_POINT
+           &END POINT
+           ATOMS 1 2
+      &END DISTANCE 
+   &END COLVAR
+
+   
+   &COLVAR
+      &DISTANCE
+           &POINT
+                ATOMS 55 56 57 59 60 61
+                TYPE GEO_CENTER
+           &END POINT
+           &POINT
+               XYZ 28.3517766675 -0.009070704 4.6320116895
+               TYPE FIX_POINT
+           &END POINT
+           ATOMS 1 2
+      &END DISTANCE 
+   &END COLVAR
+
+   
+   &COLVAR
+      &DISTANCE
+           &POINT
+                ATOMS 67 70 73 75 72 69
+                TYPE GEO_CENTER
+           &END POINT
+           &POINT
+               XYZ 28.3401233325 0.009070704 -4.6320116895
+               TYPE FIX_POINT
+           &END POINT
+           ATOMS 1 2
+      &END DISTANCE 
+   &END COLVAR
+
+   
+   &COLVAR
+      &DISTANCE
+           &POINT
+                ATOMS 79 80 81 83 84 85
+                TYPE GEO_CENTER
+           &END POINT
+           &POINT
+               XYZ 37.8004266675 -0.009070704 4.6320116895
+               TYPE FIX_POINT
+           &END POINT
+           ATOMS 1 2
+      &END DISTANCE 
+   &END COLVAR
+
+   
+   &COLVAR
+      &DISTANCE
+           &POINT
+                ATOMS 91 94 97 99 96 93
+                TYPE GEO_CENTER
+           &END POINT
+           &POINT
+               XYZ 37.7887733325 0.009070704 -4.6320116895
+               TYPE FIX_POINT
+           &END POINT
+           ATOMS 1 2
+      &END DISTANCE 
+   &END COLVAR
+
+   
+   &COLVAR
+      &DISTANCE
+           &POINT
+                ATOMS 103 104 105 107 108 109
+                TYPE GEO_CENTER
+           &END POINT
+           &POINT
+               XYZ 47.2490766675 -0.009070704 4.6320116895
+               TYPE FIX_POINT
+           &END POINT
+           ATOMS 1 2
+      &END DISTANCE 
+   &END COLVAR
+
+   
+   &COLVAR
+      &DISTANCE
+           &POINT
+                ATOMS 115 118 121 123 120 117
+                TYPE GEO_CENTER
+           &END POINT
+           &POINT
+               XYZ 47.2374233325 0.009070704 -4.6320116895
+               TYPE FIX_POINT
+           &END POINT
+           ATOMS 1 2
+      &END DISTANCE 
+   &END COLVAR
+
+   

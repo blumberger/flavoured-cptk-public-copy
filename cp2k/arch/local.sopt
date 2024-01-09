@@ -1,0 +1,53 @@
+################################################################################
+#    Single-core version of CP2K compiled on local UCL workstation (Thame)     #
+################################################################################
+
+# Compiler
+CC       = gcc
+CPP      =
+FC       = /usr/bin/gfortran
+#FC       = gfortran
+# Linker
+LD       = /usr/bin/gfortran
+#LD       = gfortran
+# Archiver
+AR       = ar -r
+RANLIB   = ranlib
+
+# FFTW
+#### CHANGE "path" WITH YOUR ACTUAL PATH TO THE FOLDER
+FFTWPATH = /scratch/fivanovic/cp2k_local_compilation_libs/fftw-3.3.5
+FFTW_INC = $(FFTWPATH)/include
+FFTW_LIB = $(FFTWPATH)/lib
+# LibInt
+#### CHANGE "path" WITH YOUR ACTUAL PATH TO THE FOLDER
+LIBINTPATH = /scratch/fivanovic/cp2k_local_compilation_libs/libint-1.1.5
+LIBINT_INC = $(LIBINTPATH)/include
+LIBINT_LIB = $(LIBINTPATH)/lib
+# LibXC
+#### CHANGE "path" WITH YOUR ACTUAL PATH TO THE FOLDER
+LIBXCPATH = /scratch/fivanovic/cp2k_local_compilation_libs/libxc-2.2.2
+LIBXC_INC = $(LIBXCPATH)/include
+LIBXC_LIB = $(LIBXCPATH)/lib
+# Lapack
+#### CHANGE "path" WITH YOUR ACTUAL PATH TO THE FOLDER
+LAPACK_LIB = /scratch/fivanovic/cp2k_local_compilation_libs/lapack-3.11
+
+# Compiler flags
+WFLAGS   = -Waliasing -Wampersand -Wc-binding-type -Wintrinsic-shadow \
+           -Wintrinsics-std -Wline-truncation -Wno-tabs -Wtarget-lifetime \
+           -Wunderflow -Wunused-but-set-variable -Wunused-variable \
+           -Wconversion
+DFLAGS   = -D__FFTW3 -D__LIBINT -D__LIBXC2 \
+           -D__LIBINT_MAX_AM=7 -D__LIBDERIV_MAX_AM1=6 -D__MAX_CONTR=4
+FCFLAGS  = -O2 -std=f2003 -fimplicit-none -ffree-form -fno-omit-frame-pointer \
+           -march=native -ffast-math -funroll-loops -ftree-vectorize -fallow-argument-mismatch -g \
+           -I$(FFTW_INC) -I$(LIBINT_INC) -I$(LIBXC_INC) $(DFLAGS) $(WFLAGS)
+# Linker flags
+LDFLAGS  = $(FCFLAGS)
+LIBS     = -L$(FFTW_LIB) -L$(LIBINT_LIB) -L$(LIBXC_LIB) -L$(LAPACK_LIB) \
+           -llapack -lrefblas -lfftw3 -lxcf90 -lxc -lderiv -lint -lstdc++
+
+#-llapack
+#removed -Werror flag from WFLAGS
+################################################################################

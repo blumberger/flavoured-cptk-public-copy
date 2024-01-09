@@ -1,0 +1,4 @@
+#### Reg test directory with baseline 9fd3f5cb20d20271745613d5b751798732c0c65a branch: speedup_RK4 #########
+
+some useful commands:
+find ./ -type f -exec sed -i 's/topologies/topologies_mixed/g' {} \; -replace all the entries string1 with string2

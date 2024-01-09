@@ -1,0 +1,6069 @@
+LET'S START. 
+Adiabatic Initial Population = 
+   1         0.0063066240
+   2         0.0143186714
+   3         0.7297483386
+   4         0.0185436299
+   5         0.2062323261
+   6         0.0245952081
+   7         0.0002312308
+   8         0.0000239712
+Initial Random Number =         0.6795103406
+First Adiabatic State =        3
+  
+   i = 1, time =                0.100 (fs)
+   Exact sum of fluxes =         0.0079054826
+   Approximate sum of fluxes =         0.0113347693
+   Minimum adiab. energy difference =         0.0005095051
+   Sum of probability =         0.0211572631
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9788427369
+   4         0.0002927485
+   5         0.0191798877
+   6         0.0016801110
+   7         0.0000034432
+   8         0.0000010726
+   Random number =         0.0591472702
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.2460377327
+   2        47.4751776296
+   3         0.0000000000
+   4        12.0890467061
+   5        10.6366530234
+   6         6.8522215445
+   7         4.7574993375
+   8         2.7000676614
+  
+   i = 2, time =                0.200 (fs)
+   Exact sum of fluxes =         0.0173665943
+   Approximate sum of fluxes =         0.0186793461
+   Minimum adiab. energy difference =         0.0006827643
+   Sum of probability =         0.0222310593
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9777689407
+   4         0.0002475443
+   5         0.0202551893
+   6         0.0017205338
+   7         0.0000064306
+   8         0.0000013613
+   Random number =         0.0600288018
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.1014077879
+   2        35.4278070065
+   3         0.0000000000
+   4        12.0269730056
+   5        10.8393851192
+   6         6.8858387197
+   7         4.7656059260
+   8         2.7498825845
+  
+   i = 3, time =                0.300 (fs)
+   Exact sum of fluxes =         0.0206369577
+   Approximate sum of fluxes =         0.0216140368
+   Minimum adiab. energy difference =         0.0008519331
+   Sum of probability =         0.0233514682
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9766485318
+   4         0.0000696331
+   5         0.0215537413
+   6         0.0017185416
+   7         0.0000079536
+   8         0.0000015987
+   Random number =         0.0737575251
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.9723745758
+   2        28.3928900052
+   3         0.0000000000
+   4        11.9708666299
+   5        11.0245973832
+   6         6.9089915894
+   7         4.7719367571
+   8         2.8020908456
+  
+   i = 4, time =                0.400 (fs)
+   Exact sum of fluxes =         0.0225598967
+   Approximate sum of fluxes =         0.0234933686
+   Minimum adiab. energy difference =         0.0010162001
+   Sum of probability =         0.0245774557
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9754225443
+   4         0.0000000000
+   5         0.0228705058
+   6         0.0016960882
+   7         0.0000090092
+   8         0.0000018525
+   Random number =         0.8085495828
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.8572265782
+   2        23.8032290753
+   3         0.0000000000
+   4        11.9236106157
+   5        11.1855619996
+   6         6.9212651092
+   7         4.7763333898
+   8         2.8567076444
+  
+   i = 5, time =                0.500 (fs)
+   Exact sum of fluxes =         0.0240776691
+   Approximate sum of fluxes =         0.0250289334
+   Minimum adiab. energy difference =         0.0011750866
+   Sum of probability =         0.0257017104
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9742982896
+   4         0.0003054660
+   5         0.0237256948
+   6         0.0016585787
+   7         0.0000098543
+   8         0.0000021166
+   Random number =         0.8329145040
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.7544405723
+   2        20.5847332745
+   3         0.0000000000
+   4        11.8929941449
+   5        11.3127681324
+   6         6.9226249927
+   7         4.7787950586
+   8         2.9137811118
+  
+   i = 6, time =                0.600 (fs)
+   Exact sum of fluxes =         0.0254399588
+   Approximate sum of fluxes =         0.0263878299
+   Minimum adiab. energy difference =         0.0013283082
+   Sum of probability =         0.0268692664
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9731307336
+   4         0.0022009047
+   5         0.0230431666
+   6         0.0016121209
+   7         0.0000106691
+   8         0.0000024050
+   Random number =         0.1816433921
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.6626948791
+   2        18.2102644158
+   3         0.0000000000
+   4        11.8909734607
+   5        11.3931113211
+   6         6.9134577080
+   7         4.7794479059
+   8         2.9733894102
+  
+   i = 7, time =                0.700 (fs)
+   Exact sum of fluxes =         0.0267619221
+   Approximate sum of fluxes =         0.0277218775
+   Minimum adiab. energy difference =         0.0014756106
+   Sum of probability =         0.0280858197
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9719141803
+   4         0.0062162419
+   5         0.0202978385
+   6         0.0015574788
+   7         0.0000115188
+   8         0.0000027416
+   Random number =         0.0151056240
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.5808943347
+   2        16.3924294532
+   3         0.0000000000
+   4        11.9235587989
+   5        11.4190477631
+   6         6.8943080976
+   7         4.7783856209
+   8         3.0355919243
+  
+   i = 8, time =                0.800 (fs)
+   Exact sum of fluxes =         0.0280717097
+   Approximate sum of fluxes =         0.0291027947
+   Minimum adiab. energy difference =         0.0016167836
+   Sum of probability =         0.0293897759
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9706102241
+   4         0.0110057979
+   5         0.0168692793
+   6         0.0014990662
+   7         0.0000124916
+   8         0.0000031410
+   Random number =         0.2468719039
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.5081013755
+   2        14.9610888330
+   3         0.0000000000
+   4        11.9791230576
+   5        11.4012480187
+   6         6.8658955818
+   7         4.7757894397
+   8         3.1004408658
+  
+   i = 9, time =                0.900 (fs)
+   Exact sum of fluxes =         0.0294005773
+   Approximate sum of fluxes =         0.0304933256
+   Minimum adiab. energy difference =         0.0017516479
+   Sum of probability =         0.0307266512
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9692733488
+   4         0.0151222308
+   5         0.0141501828
+   6         0.0014370286
+   7         0.0000136157
+   8         0.0000035933
+   Random number =         0.8336512352
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.4435262564
+   2        13.8091927920
+   3         0.0000000000
+   4        12.0392718244
+   5        11.3572743244
+   6         6.8290664283
+   7         4.7718411426
+   8         3.1679691570
+  
+   i = 10, time =                1.000 (fs)
+   Exact sum of fluxes =         0.0307670697
+   Approximate sum of fluxes =         0.0319072147
+   Minimum adiab. energy difference =         0.0018799994
+   Sum of probability =         0.0321014778
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9678985222
+   4         0.0183564189
+   5         0.0123515859
+   6         0.0013744209
+   7         0.0000149475
+   8         0.0000041046
+   Random number =         0.4739930845
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.3865265895
+   2        12.8664100919
+   3         0.0000000000
+   4        12.0915075492
+   5        11.2981741478
+   6         6.7846565291
+   7         4.7667404470
+   8         3.2381547446
+  
+   i = 11, time =                1.100 (fs)
+   Exact sum of fluxes =         0.0321748923
+   Approximate sum of fluxes =         0.0333662907
+   Minimum adiab. energy difference =         0.0019941875
+   Sum of probability =         0.0323402102
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9676597898
+   4         0.0198060944
+   5         0.0112013321
+   6         0.0013114595
+   7         0.0000165951
+   8         0.0000047291
+   Random number =         0.2741656064
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.3365486021
+   2        12.0843067292
+   3         0.0000000000
+   4        12.1296734968
+   5        11.2292825341
+   6         6.7336625474
+   7         4.7607389651
+   8         3.3109439298
+  
+   i = 12, time =                1.200 (fs)
+   Exact sum of fluxes =         0.0336364316
+   Approximate sum of fluxes =         0.0348890046
+   Minimum adiab. energy difference =         0.0019907380
+   Sum of probability =         0.0337794437
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9662205563
+   4         0.0220502562
+   5         0.0104554431
+   6         0.0012496603
+   7         0.0000186352
+   8         0.0000054489
+   Random number =         0.4540503017
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.2931394048
+   2        11.4286684477
+   3         0.0000000000
+   4        12.1506917616
+   5        11.1528493467
+   6         6.6770032632
+   7         4.7541545080
+   8         3.3861899468
+  
+   i = 13, time =                1.300 (fs)
+   Exact sum of fluxes =         0.0351620033
+   Approximate sum of fluxes =         0.0364868541
+   Minimum adiab. energy difference =         0.0019903225
+   Sum of probability =         0.0352882292
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9647117708
+   4         0.0241201075
+   5         0.0099521604
+   6         0.0011886474
+   7         0.0000210895
+   8         0.0000062244
+   Random number =         0.5421999967
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.2559257446
+   2        10.8747273713
+   3         0.0000000000
+   4        12.1532282734
+   5        11.0696570860
+   6         6.6156025009
+   7         4.7473699185
+   8         3.4636468286
+  
+   i = 14, time =                1.400 (fs)
+   Exact sum of fluxes =         0.0367487524
+   Approximate sum of fluxes =         0.0381551216
+   Minimum adiab. energy difference =         0.0019931122
+   Sum of probability =         0.0368617521
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9631382479
+   4         0.0260858177
+   5         0.0096141937
+   6         0.0011302288
+   7         0.0000243505
+   8         0.0000071613
+   Random number =         0.7853072454
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.2246165162
+   2        10.4040960160
+   3         0.0000000000
+   4        12.1362173851
+   5        10.9799092814
+   6         6.5503837726
+   7         4.7408646878
+   8         3.5428999518
+  
+   i = 15, time =                1.500 (fs)
+   Exact sum of fluxes =         0.0384068535
+   Approximate sum of fluxes =         0.0399048748
+   Minimum adiab. energy difference =         0.0019991578
+   Sum of probability =         0.0385100081
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9614899919
+   4         0.0280269105
+   5         0.0093730922
+   6         0.0010733673
+   7         0.0000284866
+   8         0.0000081514
+   Random number =         0.3509130080
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.1989765145
+   2        10.0028896033
+   3         0.0000000000
+   4        12.0995164521
+   5        10.8835748799
+   6         6.4822256739
+   7         4.7352957285
+   8         3.6233188128
+  
+   i = 16, time =                1.600 (fs)
+   Exact sum of fluxes =         0.0401325439
+   Approximate sum of fluxes =         0.0417315815
+   Minimum adiab. energy difference =         0.0020085614
+   Sum of probability =         0.0402283758
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9597716242
+   4         0.0299649894
+   5         0.0092025063
+   6         0.0010178360
+   7         0.0000338976
+   8         0.0000091465
+   Random number =         0.5127729784
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.1788439816
+   2         9.6605544220
+   3         0.0000000000
+   4        12.0428695764
+   5        10.7804119628
+   6         6.4119972286
+   7         4.7314889458
+   8         3.7039640117
+  
+   i = 17, time =                1.700 (fs)
+   Exact sum of fluxes =         0.0419230025
+   Approximate sum of fluxes =         0.0436320892
+   Minimum adiab. energy difference =         0.0020213733
+   Sum of probability =         0.0420136526
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9579863474
+   4         0.0319143733
+   5         0.0090842361
+   6         0.0009636770
+   7         0.0000412373
+   8         0.0000101287
+   Random number =         0.5667291288
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.1640944053
+   2         9.3687756127
+   3         0.0000000000
+   4        11.9665391949
+   5        10.6706043549
+   6         6.3406078948
+   7         4.7306408012
+   8         3.7834839272
+  
+   i = 18, time =                1.800 (fs)
+   Exact sum of fluxes =         0.0437777398
+   Approximate sum of fluxes =         0.0456063213
+   Minimum adiab. energy difference =         0.0020376903
+   Sum of probability =         0.0438652212
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9561347788
+   4         0.0338920730
+   5         0.0090014440
+   6         0.0009095791
+   7         0.0000512483
+   8         0.0000108768
+   Random number =         0.0417010120
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.1546730563
+   2         9.1212103055
+   3         0.0000000000
+   4        11.8707164161
+   5        10.5541469441
+   6         6.2689982609
+   7         4.7342024085
+   8         3.8600065460
+  
+   i = 19, time =                1.900 (fs)
+   Exact sum of fluxes =         0.0456806960
+   Approximate sum of fluxes =         0.0476370538
+   Minimum adiab. energy difference =         0.0020576778
+   Sum of probability =         0.0457665995
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9542334005
+   4         0.0358814993
+   5         0.0089539342
+   6         0.0008549590
+   7         0.0000650845
+   8         0.0000111224
+   Random number =         0.2308744169
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.1505877006
+   2         8.9129513422
+   3         0.0000000000
+   4        11.7554088066
+   5        10.4311835717
+   6         6.1981598588
+   7         4.7439737488
+   8         3.9310264206
+  
+   i = 20, time =                2.000 (fs)
+   Exact sum of fluxes =         0.0476337622
+   Approximate sum of fluxes =         0.0497268832
+   Minimum adiab. energy difference =         0.0020813714
+   Sum of probability =         0.0477200070
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9522799930
+   4         0.0378891845
+   5         0.0089382405
+   6         0.0007974082
+   7         0.0000844611
+   8         0.0000107127
+   Random number =         0.1081877871
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.1518657199
+   2         8.7399559791
+   3         0.0000000000
+   4        11.6215888930
+   5        10.3025459072
+   6         6.1294137684
+   7         4.7618861979
+   8         3.9936513302
+  
+   i = 21, time =                2.100 (fs)
+   Exact sum of fluxes =         0.0496045365
+   Approximate sum of fluxes =         0.0518407814
+   Minimum adiab. energy difference =         0.0021089835
+   Sum of probability =         0.0496924337
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9503075663
+   4         0.0398736614
+   5         0.0089624040
+   6         0.0007355858
+   7         0.0001113402
+   8         0.0000094422
+   Random number =         0.2232476737
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.1586247885
+   2         8.5993505557
+   3         0.0000000000
+   4        11.4694322552
+   5        10.1687686193
+   6         6.0643344036
+   7         4.7892471145
+   8         4.0449364316
+  
+   i = 22, time =                2.200 (fs)
+   Exact sum of fluxes =         0.0515826750
+   Approximate sum of fluxes =         0.0539678344
+   Minimum adiab. energy difference =         0.0021406482
+   Sum of probability =         0.0516742563
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9483257437
+   4         0.0418142287
+   5         0.0090384421
+   6         0.0006659925
+   7         0.0001481183
+   8         0.0000074747
+   Random number =         0.5397096330
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.1710178448
+   2         8.4888217786
+   3         0.0000000000
+   4        11.2997753547
+   5        10.0310333490
+   6         6.0050906000
+   7         4.8258222984
+   8         4.0827714042
+  
+   i = 23, time =                2.300 (fs)
+   Exact sum of fluxes =         0.0535450071
+   Approximate sum of fluxes =         0.0560831710
+   Minimum adiab. energy difference =         0.0021765221
+   Sum of probability =         0.0536413249
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9463586751
+   4         0.0436691108
+   5         0.0091835633
+   6         0.0005852619
+   7         0.0001981347
+   8         0.0000052541
+   Random number =         0.0374555103
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.1892670784
+   2         8.4067187563
+   3         0.0000000000
+   4        11.1135296844
+   5         9.8908171659
+   6         5.9546327906
+   7         4.8687680301
+   8         4.1065375078
+  
+   i = 24, time =                2.400 (fs)
+   Exact sum of fluxes =         0.0554497522
+   Approximate sum of fluxes =         0.0581411264
+   Minimum adiab. energy difference =         0.0022167907
+   Sum of probability =         0.0555529453
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9444470547
+   4         0.0453533568
+   5         0.0094420304
+   6         0.0004911586
+   7         0.0002632045
+   8         0.0000031949
+   Random number =         0.5059913146
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.2136606334
+   2         8.3519935793
+   3         0.0000000000
+   4        10.9116496031
+   5         9.7500298025
+   6         5.9168061458
+   7         4.9124371632
+   8         4.1171552048
+  
+   i = 25, time =                2.500 (fs)
+   Exact sum of fluxes =         0.0572956495
+   Approximate sum of fluxes =         0.0601417108
+   Minimum adiab. energy difference =         0.0022615560
+   Sum of probability =         0.0574075082
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.9425924918
+   4         0.0468367816
+   5         0.0098437906
+   6         0.0003820641
+   7         0.0003432231
+   8         0.0000016488
+   Random number =         0.9766635539
+   ATTEMPT between old_state =        3 and new_state =        4
+TRY ENERGY CONSERVATION WITH ISOTROPIC RESCALING:
+   Energy old state  (Ha)  =         2.4567354476
+   Energy new state  (Ha)  =         2.4589970036
+   Kinetic energy    (Ha)  =         0.3708268972
+   Energy difference (Ha)  =         0.3685653412
+SUCCESSFUL HOP!
+   Isotropic rescale factor  =         0.9969459946
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         2.4893940422
+   2         4.6809896016
+   3        10.6956641058
+   4         0.0000000000
+   5        94.7540078168
+   6        13.1392756814
+   7         9.2116466703
+   8         6.6920890659
+  
+   i = 26, time =                2.600 (fs)
+   Exact sum of fluxes =        -0.0201118238
+   Approximate sum of fluxes =        -0.0195066794
+   Minimum adiab. energy difference =         0.0002419044
+   Sum of probability =         0.0034106746
+   Probability = 
+   1         0.0000216345
+   2         0.0000056728
+   3         0.0000000000
+   4         0.9965893254
+   5         0.0028099410
+   6         0.0005734263
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.1284058070
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         2.4988755283
+   2         4.6367466721
+   3        10.4731379775
+   4         0.0000000000
+   5        99.9933919796
+   6        13.4978289254
+   7         9.4661433387
+   8         6.7571064569
+  
+   i = 27, time =                2.700 (fs)
+   Exact sum of fluxes =        -0.0089213705
+   Approximate sum of fluxes =        -0.0083880502
+   Minimum adiab. energy difference =         0.0002233986
+   Sum of probability =         0.0125406530
+   Probability = 
+   1         0.0000247413
+   2         0.0000047398
+   3         0.0000000000
+   4         0.9874593470
+   5         0.0119155021
+   6         0.0005956699
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.8071081247
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         2.5112420221
+   2         4.5983439816
+   3        10.2518414925
+   4         0.0000000000
+   5       108.2766292261
+   6        14.0247701974
+   7         9.6747764380
+   8         6.8100130334
+  
+   i = 28, time =                2.800 (fs)
+   Exact sum of fluxes =         0.0089198673
+   Approximate sum of fluxes =         0.0102023942
+   Minimum adiab. energy difference =         0.0001992186
+   Sum of probability =         0.0284797931
+   Probability = 
+   1         0.0000273131
+   2         0.0000040411
+   3         0.0000000000
+   4         0.9715202069
+   5         0.0279355669
+   6         0.0005128720
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.3634871413
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         2.5267455727
+   2         4.5660401719
+   3        10.0356682150
+   4         0.0000000000
+   5       121.4185683226
+   6        14.7267894320
+   7         9.8254929114
+   8         6.8529970944
+  
+   i = 29, time =                2.900 (fs)
+   Exact sum of fluxes =         0.0444631640
+   Approximate sum of fluxes =         0.0500873392
+   Minimum adiab. energy difference =         0.0001697493
+   Sum of probability =         0.0623622472
+   Probability = 
+   1         0.0000293868
+   2         0.0000035454
+   3         0.0000000000
+   4         0.9376377528
+   5         0.0620517391
+   6         0.0002760869
+   7         0.0000000000
+   8         0.0000014890
+   Random number =         0.8552237872
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         2.5458267529
+   2         4.5406022292
+   3         9.8302981858
+   4         0.0000000000
+   5       142.4974714418
+   6        15.5826974099
+   7         9.9172562918
+   8         6.8862716948
+  
+   i = 30, time =                3.000 (fs)
+   Exact sum of fluxes =         0.1321801084
+   Approximate sum of fluxes =         0.1627591495
+   Minimum adiab. energy difference =         0.0001389431
+   Sum of probability =         0.1490997016
+   Probability = 
+   1         0.0000313022
+   2         0.0000032874
+   3         0.0000000000
+   4         0.8509002984
+   5         0.1490571018
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000080101
+   Random number =         0.6703472965
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         2.5694968713
+   2         4.5244329572
+   3         9.6482435137
+   4         0.0000000000
+   5       174.0917531703
+   6        16.5253838530
+   7         9.9480127609
+   8         6.9055816811
+  
+   i = 31, time =                3.100 (fs)
+   Exact sum of fluxes =         0.3472091299
+   Approximate sum of fluxes =         0.5321784483
+   Minimum adiab. energy difference =         0.0001206863
+   Sum of probability =         0.3654607740
+   Probability = 
+   1         0.0000338756
+   2         0.0000036067
+   3         0.0000000000
+   4         0.6345392260
+   5         0.3654022472
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000210445
+   Random number =         0.9519441093
+   ATTEMPT between old_state =        4 and new_state =        5
+TRY ENERGY CONSERVATION WITH ISOTROPIC RESCALING:
+   Energy old state  (Ha)  =         2.5751083842
+   Energy new state  (Ha)  =         2.5752290705
+   Kinetic energy    (Ha)  =         0.3465560182
+   Energy difference (Ha)  =         0.3464353319
+SUCCESSFUL HOP!
+   Isotropic rescale factor  =         0.9998258625
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         2.5669156476
+   2         4.4241391914
+   3         9.0866807710
+   4       200.4274067129
+   5         0.0000000000
+   6        19.0471507995
+   7        10.4121773459
+   8         7.1425605441
+  
+   i = 32, time =                3.200 (fs)
+   Exact sum of fluxes =        -0.4735798936
+   Approximate sum of fluxes =        -0.2650417554
+   Minimum adiab. energy difference =         0.0001437598
+   Sum of probability =         0.0032846236
+   Probability = 
+   1         0.0000318152
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.9967153764
+   6         0.0021898688
+   7         0.0010629395
+   8         0.0000000000
+   Random number =         0.4030336651
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         2.6019679620
+   2         4.4322894235
+   3         8.9865353020
+   4       168.2587438003
+   5         0.0000000000
+   6        20.0114773351
+   7        10.3160310768
+   8         7.1211978478
+  
+   i = 33, time =                3.300 (fs)
+   Exact sum of fluxes =        -0.1466942490
+   Approximate sum of fluxes =        -0.0952251004
+   Minimum adiab. energy difference =         0.0002126540
+   Sum of probability =         0.0023717075
+   Probability = 
+   1         0.0000330496
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.9976282925
+   6         0.0018595515
+   7         0.0004791065
+   8         0.0000000000
+   Random number =         0.0639906913
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         2.6368374148
+   2         4.4330377110
+   3         8.8378237474
+   4       113.7474014743
+   5         0.0000000000
+   6        21.1542700628
+   7        10.2719204770
+   8         7.1299756359
+  
+   i = 34, time =                3.400 (fs)
+   Exact sum of fluxes =        -0.0448563984
+   Approximate sum of fluxes =        -0.0334223990
+   Minimum adiab. energy difference =         0.0003109996
+   Sum of probability =         0.0015896345
+   Probability = 
+   1         0.0000332886
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.9984103655
+   6         0.0013864993
+   7         0.0001698466
+   8         0.0000000000
+   Random number =         0.4424038711
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         2.6739168983
+   2         4.4331132895
+   3         8.6714011691
+   4        77.7777356835
+   5         0.0000000000
+   6        22.3118269112
+   7        10.2470534551
+   8         7.1520822946
+  
+   i = 35, time =                3.500 (fs)
+   Exact sum of fluxes =        -0.0191571017
+   Approximate sum of fluxes =        -0.0158906519
+   Minimum adiab. energy difference =         0.0004286088
+   Sum of probability =         0.0010327973
+   Probability = 
+   1         0.0000328948
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.9989672027
+   6         0.0009814475
+   7         0.0000184549
+   8         0.0000000000
+   Random number =         0.3705383274
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         2.7147405358
+   2         4.4362306730
+   3         8.5037137835
+   4        56.4357110706
+   5         0.0000000000
+   6        23.3610686688
+   7        10.2246349513
+   8         7.1784847391
+  
+   i = 36, time =                3.600 (fs)
+   Exact sum of fluxes =        -0.0112199553
+   Approximate sum of fluxes =        -0.0100388217
+   Minimum adiab. energy difference =         0.0005600568
+   Sum of probability =         0.0006859338
+   Probability = 
+   1         0.0000334785
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.9993140662
+   6         0.0006524553
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.7910923228
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         2.7601569367
+   2         4.4438463753
+   3         8.3410265343
+   4        43.1899800154
+   5         0.0000000000
+   6        24.2342904922
+   7        10.1991741745
+   8         7.2058106681
+  
+   i = 37, time =                3.700 (fs)
+   Exact sum of fluxes =        -0.0081224657
+   Approximate sum of fluxes =        -0.0076029931
+   Minimum adiab. energy difference =         0.0007015687
+   Sum of probability =         0.0004195021
+   Probability = 
+   1         0.0000341804
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.9995804979
+   6         0.0003853217
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.0918277102
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         2.8108133349
+   2         4.4566463970
+   3         8.1859763051
+   4        34.4782247864
+   5         0.0000000000
+   6        24.8991326158
+   7        10.1689347690
+   8         7.2326382525
+  
+   i = 38, time =                3.800 (fs)
+   Exact sum of fluxes =        -0.0065702673
+   Approximate sum of fluxes =        -0.0062993789
+   Minimum adiab. energy difference =         0.0008502087
+   Sum of probability =         0.0002092767
+   Probability = 
+   1         0.0000351485
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.9997907233
+   6         0.0001741282
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.9327895530
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         2.8673180611
+   2         4.4750336630
+   3         8.0396827374
+   4        28.4504757248
+   5         0.0000000000
+   6        25.3497787213
+   7        10.1332430230
+   8         7.2582939274
+  
+   i = 39, time =                3.900 (fs)
+   Exact sum of fluxes =        -0.0055933416
+   Approximate sum of fluxes =        -0.0054290708
+   Minimum adiab. energy difference =         0.0009450037
+   Sum of probability =         0.0000365302
+   Probability = 
+   1         0.0000365302
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.9999634698
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.6689587527
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         2.9303249937
+   2         4.4993136548
+   3         7.9026902544
+   4        24.1025096789
+   5         0.0000000000
+   6        25.5965593481
+   7        10.0917484846
+   8         7.2823934640
+  
+   i = 40, time =                4.000 (fs)
+   Exact sum of fluxes =        -0.0048533867
+   Approximate sum of fluxes =        -0.0047411363
+   Minimum adiab. energy difference =         0.0009427292
+   Sum of probability =         0.0000391316
+   Probability = 
+   1         0.0000385342
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000005974
+   5         0.9999608684
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.0704956699
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.0005558783
+   2         4.5297591629
+   3         7.7751001951
+   4        20.8561768746
+   5         0.0000000000
+   6        25.6583157967
+   7        10.0445356285
+   8         7.3047406840
+  
+   i = 41, time =                4.100 (fs)
+   Exact sum of fluxes =        -0.0042373877
+   Approximate sum of fluxes =        -0.0041534445
+   Minimum adiab. energy difference =         0.0009464126
+   Sum of probability =         0.0000773965
+   Probability = 
+   1         0.0000414288
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000359677
+   5         0.9999226035
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.4483789306
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.0788534609
+   2         4.5666789286
+   3         7.6570772602
+   4        18.3624868623
+   5         0.0000000000
+   6        25.5584531844
+   7         9.9913811237
+   8         7.3251089709
+  
+   i = 42, time =                4.200 (fs)
+   Exact sum of fluxes =        -0.0036830603
+   Approximate sum of fluxes =        -0.0036167039
+   Minimum adiab. energy difference =         0.0009552591
+   Sum of probability =         0.0000913609
+   Probability = 
+   1         0.0000455368
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000458241
+   5         0.9999086391
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.5319948221
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.1661794906
+   2         4.6103741487
+   3         7.5484678251
+   4        16.4002713957
+   5         0.0000000000
+   6        25.3217629140
+   7         9.9324085836
+   8         7.3434304077
+  
+   i = 43, time =                4.300 (fs)
+   Exact sum of fluxes =        -0.0031736961
+   Approximate sum of fluxes =        -0.0031194295
+   Minimum adiab. energy difference =         0.0009686288
+   Sum of probability =         0.0000965668
+   Probability = 
+   1         0.0000512326
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000453342
+   5         0.9999034332
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.5773072085
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.2636716057
+   2         4.6612087490
+   3         7.4492229926
+   4        14.8247932312
+   5         0.0000000000
+   6        24.9722534892
+   7         9.8676459641
+   8         7.3595992648
+  
+   i = 44, time =                4.400 (fs)
+   Exact sum of fluxes =        -0.0026963485
+   Approximate sum of fluxes =        -0.0026512389
+   Minimum adiab. energy difference =         0.0009860012
+   Sum of probability =         0.0000998590
+   Probability = 
+   1         0.0000590605
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000407985
+   5         0.9999001410
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.0169284336
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.3726637750
+   2         4.7195786200
+   3         7.3592553911
+   4        13.5377136352
+   5         0.0000000000
+   6        24.5322659338
+   7         9.7972271440
+   8         7.3735403723
+  
+   i = 45, time =                4.500 (fs)
+   Exact sum of fluxes =        -0.0022422504
+   Approximate sum of fluxes =        -0.0022045396
+   Minimum adiab. energy difference =         0.0010069436
+   Sum of probability =         0.0001048548
+   Probability = 
+   1         0.0000695869
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000352679
+   5         0.9998951452
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.1314493614
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.4947347556
+   2         4.7859419458
+   3         7.2784988445
+   4        12.4705579199
+   5         0.0000000000
+   6        24.0220435189
+   7         9.7214236265
+   8         7.3852209120
+  
+   i = 46, time =                4.600 (fs)
+   Exact sum of fluxes =        -0.0018066121
+   Approximate sum of fluxes =        -0.0017751486
+   Minimum adiab. energy difference =         0.0010310674
+   Sum of probability =         0.0001132382
+   Probability = 
+   1         0.0000834892
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000297489
+   5         0.9998867618
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.0665299620
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.6317631047
+   2         4.8608208060
+   3         7.2069667752
+   4        11.5743006614
+   5         0.0000000000
+   6        23.4600025414
+   7         9.6404601557
+   8         7.3945956938
+  
+   i = 47, time =                4.700 (fs)
+   Exact sum of fluxes =        -0.0013813854
+   Approximate sum of fluxes =        -0.0013553826
+   Minimum adiab. energy difference =         0.0010580256
+   Sum of probability =         0.0001261990
+   Probability = 
+   1         0.0001014454
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000247535
+   5         0.9998738010
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.1362452245
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.7859777547
+   2         4.9447933589
+   3         7.1447579061
+   4        10.8130958206
+   5         0.0000000000
+   6        22.8622480638
+   7         9.5547077344
+   8         7.4016400053
+  
+   i = 48, time =                4.800 (fs)
+   Exact sum of fluxes =        -0.0009589662
+   Approximate sum of fluxes =        -0.0009378897
+   Minimum adiab. energy difference =         0.0010875438
+   Sum of probability =         0.0001444590
+   Probability = 
+   1         0.0001238938
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000205652
+   5         0.9998555410
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.5337343875
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         3.9600207997
+   2         5.0385282000
+   3         7.0921904319
+   4        10.1602216208
+   5         0.0000000000
+   6        22.2417192870
+   7         9.4648117187
+   8         7.4063537852
+  
+   i = 49, time =                4.900 (fs)
+   Exact sum of fluxes =        -0.0005292189
+   Approximate sum of fluxes =        -0.0005130642
+   Minimum adiab. energy difference =         0.0011193317
+   Sum of probability =         0.0001673846
+   Probability = 
+   1         0.0001503903
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000169943
+   5         0.9998326154
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.2987630479
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.1570021000
+   2         5.1427795879
+   3         7.0498770957
+   4         9.5954034881
+   5         0.0000000000
+   6        21.6100754501
+   7         9.3714064317
+   8         7.4087342112
+  
+   i = 50, time =                5.000 (fs)
+   Exact sum of fluxes =        -0.0000746167
+   Approximate sum of fluxes =        -0.0000644017
+   Minimum adiab. energy difference =         0.0011530850
+   Sum of probability =         0.0002038525
+   Probability = 
+   1         0.0001781230
+   2         0.0000000000
+   3         0.0000115647
+   4         0.0000141649
+   5         0.9997961475
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.4330569774
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.3804598741
+   2         5.2583770064
+   3         7.0189353966
+   4         9.1028950580
+   5         0.0000000000
+   6        20.9775021910
+   7         9.2753194387
+   8         7.4088253123
+  
+   i = 51, time =                5.100 (fs)
+   Exact sum of fluxes =         0.0004226481
+   Approximate sum of fluxes =         0.0004235000
+   Minimum adiab. energy difference =         0.0011885301
+   Sum of probability =         0.0006607774
+   Probability = 
+   1         0.0001984010
+   2         0.0000000000
+   3         0.0004504525
+   4         0.0000119238
+   5         0.9993392226
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.0836854068
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.6341531276
+   2         5.3862951201
+   3         7.0016568965
+   4         8.6704827417
+   5         0.0000000000
+   6        20.3518984439
+   7         9.1776721179
+   8         7.4066364914
+  
+   i = 52, time =                5.200 (fs)
+   Exact sum of fluxes =         0.0009940941
+   Approximate sum of fluxes =         0.0009761908
+   Minimum adiab. energy difference =         0.0012253183
+   Sum of probability =         0.0011849915
+   Probability = 
+   1         0.0001869399
+   2         0.0000031558
+   3         0.0009841125
+   4         0.0000107833
+   5         0.9988150085
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.5160883794
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.9212462463
+   2         5.5276778327
+   3         7.0024857547
+   4         8.2884449780
+   5         0.0000000000
+   6        19.7408653639
+   7         9.0796551028
+   8         7.4022322433
+  
+   i = 53, time =                5.300 (fs)
+   Exact sum of fluxes =         0.0016845211
+   Approximate sum of fluxes =         0.0016228786
+   Minimum adiab. energy difference =         0.0012631025
+   Sum of probability =         0.0018045138
+   Probability = 
+   1         0.0000819874
+   2         0.0000116533
+   3         0.0016992262
+   4         0.0000116468
+   5         0.9981954862
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.5679079066
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.2416181543
+   2         5.6842308113
+   3         7.0310755823
+   4         7.9491181888
+   5         0.0000000000
+   6        19.1503412694
+   7         8.9828892274
+   8         7.3957105864
+  
+   i = 54, time =                5.400 (fs)
+   Exact sum of fluxes =         0.0025685338
+   Approximate sum of fluxes =         0.0023989034
+   Minimum adiab. energy difference =         0.0013014266
+   Sum of probability =         0.0029029244
+   Probability = 
+   1         0.0000000000
+   2         0.0000284145
+   3         0.0027593150
+   4         0.0000213165
+   5         0.9970970756
+   6         0.0000938784
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.4059075260
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.5834034262
+   2         5.8598754349
+   3         7.1092579939
+   4         7.6467022566
+   5         0.0000000000
+   6        18.5864065247
+   7         8.8894004139
+   8         7.3873150788
+  
+   i = 55, time =                5.500 (fs)
+   Exact sum of fluxes =         0.0037574343
+   Approximate sum of fluxes =         0.0032492671
+   Minimum adiab. energy difference =         0.0013397222
+   Sum of probability =         0.0047675619
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0039295990
+   4         0.0003914426
+   5         0.9952324381
+   6         0.0004465203
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.2849361781
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.9003352204
+   2         6.0677068845
+   3         7.2797756610
+   4         7.3855919718
+   5         0.0000000000
+   6        18.0551189062
+   7         8.8016241384
+   8         7.3773736099
+  
+   i = 56, time =                5.600 (fs)
+   Exact sum of fluxes =         0.0054525324
+   Approximate sum of fluxes =         0.0026814883
+   Minimum adiab. energy difference =         0.0013771944
+   Sum of probability =         0.0074760107
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0047540008
+   5         0.9925239893
+   6         0.0027220098
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.8571249361
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         6.1314874890
+   2         6.3006628281
+   3         7.1308735337
+   4         7.6661256877
+   5         0.0000000000
+   6        17.5638547730
+   7         8.7228147884
+   8         7.3665985260
+  
+   i = 57, time =                5.700 (fs)
+   Exact sum of fluxes =         0.0079934450
+   Approximate sum of fluxes =         0.0076707341
+   Minimum adiab. energy difference =         0.0014127562
+   Sum of probability =         0.0102294558
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0099442377
+   5         0.9897705442
+   6         0.0002852181
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.2381563626
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         6.2925683804
+   2         6.4874099831
+   3         6.9373406311
+   4         8.2984011750
+   5         0.0000000000
+   6        17.1217389338
+   7         8.6572564524
+   8         7.3562941000
+  
+   i = 58, time =                5.800 (fs)
+   Exact sum of fluxes =         0.0120030614
+   Approximate sum of fluxes =         0.0124766255
+   Minimum adiab. energy difference =         0.0014448060
+   Sum of probability =         0.0144216027
+   Probability = 
+   1         0.0000000000
+   2         0.0000094967
+   3         0.0000000000
+   4         0.0144121060
+   5         0.9855783973
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.2330424898
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         6.3850922842
+   2         6.5392772418
+   3         6.8977694243
+   4         9.2103684344
+   5         0.0000000000
+   6        16.7419319287
+   7         8.6107891467
+   8         7.3487782759
+  
+   i = 59, time =                5.900 (fs)
+   Exact sum of fluxes =         0.0186728666
+   Approximate sum of fluxes =         0.0205605387
+   Minimum adiab. energy difference =         0.0014708059
+   Sum of probability =         0.0217996332
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0217908801
+   5         0.9782003668
+   6         0.0000000000
+   7         0.0000087531
+   8         0.0000000000
+   Random number =         0.2007416866
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         6.3652804493
+   2         6.4592256532
+   3         7.0778329420
+   4        10.4244157119
+   5         0.0000000000
+   6        16.4459793418
+   7         8.5921753465
+   8         7.3484973157
+  
+   i = 60, time =                6.000 (fs)
+   Exact sum of fluxes =         0.0302911480
+   Approximate sum of fluxes =         0.0336118680
+   Minimum adiab. energy difference =         0.0014866544
+   Sum of probability =         0.0350571585
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0350253084
+   5         0.9649428415
+   6         0.0000000000
+   7         0.0000318502
+   8         0.0000000000
+   Random number =         0.9387695969
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         6.1900802411
+   2         6.4473886952
+   3         7.3188469146
+   4        11.9842355857
+   5         0.0000000000
+   6        16.2706569175
+   7         8.6149521143
+   8         7.3635122362
+  
+   i = 61, time =                6.100 (fs)
+   Exact sum of fluxes =         0.0511661669
+   Approximate sum of fluxes =         0.0583965049
+   Minimum adiab. energy difference =         0.0014855949
+   Sum of probability =         0.0597970215
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0597251827
+   5         0.9402029785
+   6         0.0000000000
+   7         0.0000618400
+   8         0.0000099988
+   Random number =         0.2018007331
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.9849783787
+   2         6.4090281480
+   3         7.5620372177
+   4        13.9022636304
+   5         0.0000000000
+   6        16.2822603825
+   7         8.7021869497
+   8         7.4085163666
+  
+   i = 62, time =                6.200 (fs)
+   Exact sum of fluxes =         0.0882667507
+   Approximate sum of fluxes =         0.1046026608
+   Minimum adiab. energy difference =         0.0014566073
+   Sum of probability =         0.1059571150
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0000000000
+   4         0.1058153737
+   5         0.8940428850
+   6         0.0000000000
+   7         0.0001043680
+   8         0.0000373733
+   Random number =         0.4655338190
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.7553230713
+   2         6.3222016502
+   3         7.7667979455
+   4        16.0155412139
+   5         0.0000000000
+   6        16.6062899217
+   7         8.8943217965
+   8         7.5099362472
+  
+   i = 63, time =                6.300 (fs)
+   Exact sum of fluxes =         0.1473951747
+   Approximate sum of fluxes =         0.1831012555
+   Minimum adiab. energy difference =         0.0013632730
+   Sum of probability =         0.1489303094
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0000000000
+   4         0.1484897035
+   5         0.8510696906
+   6         0.0001788193
+   7         0.0001713855
+   8         0.0000904011
+   Random number =         0.2915596919
+NO HOP!
+Final state   =        5
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.4904299291
+   2         6.1679272183
+   3         7.8806357710
+   4        17.7432126198
+   5         0.0000000000
+   6        17.4781481498
+   7         9.2613435606
+   8         7.7110549596
+  
+   i = 64, time =                6.400 (fs)
+   Exact sum of fluxes =         0.2189441940
+   Approximate sum of fluxes =         0.2853466913
+   Minimum adiab. energy difference =         0.0012521088
+   Sum of probability =         0.2866178458
+   Probability = 
+   1         0.0000004346
+   2         0.0000000000
+   3         0.0000021707
+   4         0.2861367941
+   5         0.7133821542
+   6         0.0000000000
+   7         0.0002850722
+   8         0.0001933743
+   Random number =         0.2670456652
+   ATTEMPT between old_state =        5 and new_state =        4
+TRY ENERGY CONSERVATION WITH ISOTROPIC RESCALING:
+   Energy old state  (Ha)  =         2.0442723897
+   Energy new state  (Ha)  =         2.0429408070
+   Kinetic energy    (Ha)  =         0.4571467939
+   Energy difference (Ha)  =         0.4584783766
+SUCCESSFUL HOP!
+   Isotropic rescale factor  =         1.0014553470
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         7.2564316637
+   2         8.8140793541
+   3        13.8333041327
+   4         0.0000000000
+   5        18.1654835945
+   6         9.3621253054
+   7         6.4119807447
+   8         5.5880178837
+  
+   i = 65, time =                6.500 (fs)
+   Exact sum of fluxes =        -0.2926553230
+   Approximate sum of fluxes =        -0.2199678038
+   Minimum adiab. energy difference =         0.0014248370
+   Sum of probability =         0.0053907149
+   Probability = 
+   1         0.0000000000
+   2         0.0051926609
+   3         0.0001980540
+   4         0.9946092851
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.0470082459
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         6.7939792909
+   2         8.4362437727
+   3        14.0112291777
+   4         0.0000000000
+   5        16.9765686264
+   6         9.7457372921
+   7         6.6679716978
+   8         5.7293083332
+  
+   i = 66, time =                6.600 (fs)
+   Exact sum of fluxes =        -0.1731051284
+   Approximate sum of fluxes =        -0.1391270264
+   Minimum adiab. energy difference =         0.0016221045
+   Sum of probability =         0.0043114082
+   Probability = 
+   1         0.0000000000
+   2         0.0041187054
+   3         0.0001927028
+   4         0.9956885918
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.4476798761
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         6.4810972143
+   2         8.2379549031
+   3        14.6645336900
+   4         0.0000000000
+   5        14.9120129595
+   6         9.9400716867
+   7         6.8491820780
+   8         5.8004235965
+  
+   i = 67, time =                6.700 (fs)
+   Exact sum of fluxes =        -0.0983416104
+   Approximate sum of fluxes =        -0.0833446459
+   Minimum adiab. energy difference =         0.0015335548
+   Sum of probability =         0.0036107593
+   Probability = 
+   1         0.0000000000
+   2         0.0036107593
+   3         0.0000000000
+   4         0.9963892407
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.6157692326
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         6.2593466605
+   2         8.1534555405
+   3        15.7730540274
+   4         0.0000000000
+   5        12.8030298153
+   6         9.9738517538
+   7         6.9715912068
+   8         5.8177789698
+  
+   i = 68, time =                6.800 (fs)
+   Exact sum of fluxes =        -0.0568332536
+   Approximate sum of fluxes =        -0.0493367669
+   Minimum adiab. energy difference =         0.0013916055
+   Sum of probability =         0.0034292187
+   Probability = 
+   1         0.0000000000
+   2         0.0034292187
+   3         0.0000000000
+   4         0.9965707813
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.3098846726
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         6.0933597742
+   2         8.1408849997
+   3        17.3819691380
+   4         0.0000000000
+   5        11.0676008399
+   6         9.8365994527
+   7         7.0530549902
+   8         5.7983413097
+  
+   i = 69, time =                6.900 (fs)
+   Exact sum of fluxes =        -0.0339043008
+   Approximate sum of fluxes =        -0.0267882618
+   Minimum adiab. energy difference =         0.0012322077
+   Sum of probability =         0.0034473232
+   Probability = 
+   1         0.0000000000
+   2         0.0034473232
+   3         0.0000000000
+   4         0.9965526768
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.6126678843
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.9632195204
+   2         8.1764825135
+   3        19.6304914829
+   4         0.0000000000
+   5        10.1483491683
+   6         9.1777372525
+   7         7.1051284319
+   8         5.7542055590
+  
+   i = 70, time =                7.000 (fs)
+   Exact sum of fluxes =        -0.0206096822
+   Approximate sum of fluxes =        -0.0182378462
+   Minimum adiab. energy difference =         0.0010607420
+   Sum of probability =         0.0036073606
+   Probability = 
+   1         0.0000000000
+   2         0.0036073606
+   3         0.0000000000
+   4         0.9963926394
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.8206673597
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.8575865678
+   2         8.2468733904
+   3        22.8037015374
+   4         0.0000000000
+   5         9.8799289704
+   6         8.1475606832
+   7         7.1271653398
+   8         5.6928743451
+  
+   i = 71, time =                7.100 (fs)
+   Exact sum of fluxes =        -0.0122683842
+   Approximate sum of fluxes =        -0.0096621864
+   Minimum adiab. energy difference =         0.0008806793
+   Sum of probability =         0.0038776302
+   Probability = 
+   1         0.0000000000
+   2         0.0038776302
+   3         0.0000000000
+   4         0.9961223698
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.8136213257
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.7697628199
+   2         8.3445378808
+   3        27.4661213960
+   4         0.0000000000
+   5         9.6901900169
+   6         7.3877039577
+   7         7.0075356901
+   8         5.6179256906
+  
+   i = 72, time =                7.200 (fs)
+   Exact sum of fluxes =        -0.0062745260
+   Approximate sum of fluxes =        -0.0043835852
+   Minimum adiab. energy difference =         0.0006945074
+   Sum of probability =         0.0042543379
+   Probability = 
+   1         0.0000000000
+   2         0.0042543379
+   3         0.0000000000
+   4         0.9957456621
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.2045917082
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.6953813470
+   2         8.4645540477
+   3        34.8287769252
+   4         0.0000000000
+   5         9.5089020089
+   6         7.2605559527
+   7         6.4189157728
+   8         5.5272710476
+  
+   i = 73, time =                7.300 (fs)
+   Exact sum of fluxes =        -0.0004261849
+   Approximate sum of fluxes =         0.0008857059
+   Minimum adiab. energy difference =         0.0005043888
+   Sum of probability =         0.0079271824
+   Probability = 
+   1         0.0000000000
+   2         0.0047322358
+   3         0.0031949467
+   4         0.9920728176
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.2427157798
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.6313216890
+   2         8.6033457310
+   3        47.9567372650
+   4         0.0000000000
+   5         9.3312864188
+   6         7.2571990802
+   7         5.8688706738
+   8         5.3979459865
+  
+   i = 74, time =                7.400 (fs)
+   Exact sum of fluxes =         0.0115914023
+   Approximate sum of fluxes =         0.0156794414
+   Minimum adiab. energy difference =         0.0003134957
+   Sum of probability =         0.0177010950
+   Probability = 
+   1         0.0000000000
+   2         0.0053194014
+   3         0.0123816937
+   4         0.9822989050
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.5682518650
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.5743919320
+   2         8.7557617117
+   3        77.1584455352
+   4         0.0000000000
+   5         9.1620821516
+   6         7.2637788367
+   7         5.5434757112
+   8         5.1365787912
+  
+   i = 75, time =                7.500 (fs)
+   Exact sum of fluxes =         0.1072630690
+   Approximate sum of fluxes =         0.1640162109
+   Minimum adiab. energy difference =         0.0001359747
+   Sum of probability =         0.1125013412
+   Probability = 
+   1         0.0000000000
+   2         0.0060967044
+   3         0.1064046368
+   4         0.8874986588
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.9968330584
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.5149276772
+   2         8.8983259045
+   3       177.8922853021
+   4         0.0000000000
+   5         9.0258119448
+   6         7.2857841695
+   7         5.4103645627
+   8         4.7773237974
+  
+   i = 76, time =                7.600 (fs)
+   Exact sum of fluxes =         0.8467785864
+   Approximate sum of fluxes =         3.7618482847
+   Minimum adiab. energy difference =         0.0001329076
+   Sum of probability =         0.8549134319
+   Probability = 
+   1         0.0000000000
+   2         0.0109971374
+   3         0.8436798643
+   4         0.1450865681
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0002364301
+   8         0.0000000000
+   Random number =         0.8772504573
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.3556958254
+   2         8.7654246849
+   3       181.9974748379
+   4         0.0000000000
+   5         9.1947573665
+   6         7.5029344570
+   7         5.4264574468
+   8         4.5077085064
+  
+   i = 77, time =                7.700 (fs)
+   Exact sum of fluxes =         0.8268669293
+   Approximate sum of fluxes =         2.8487339553
+   Minimum adiab. energy difference =         0.0003034947
+   Sum of probability =         0.8351853044
+   Probability = 
+   1         0.0000000000
+   2         0.0089590723
+   3         0.8254586234
+   4         0.1648146956
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0007676087
+   8         0.0000000000
+   Random number =         0.1555909092
+   ATTEMPT between old_state =        4 and new_state =        3
+TRY ENERGY CONSERVATION WITH ISOTROPIC RESCALING:
+   Energy old state  (Ha)  =         2.3107650877
+   Energy new state  (Ha)  =         2.3104615930
+   Kinetic energy    (Ha)  =         0.4241089605
+   Energy difference (Ha)  =         0.4244124552
+SUCCESSFUL HOP!
+   Isotropic rescale factor  =         1.0003577387
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.4648000818
+   2         9.3718880172
+   3         0.0000000000
+   4        79.7010468926
+   5         8.6519789027
+   6         7.2265427697
+   7         5.1982089805
+   8         4.1032061205
+  
+   i = 78, time =                7.800 (fs)
+   Exact sum of fluxes =        -0.0085598495
+   Approximate sum of fluxes =        -0.0048103190
+   Minimum adiab. energy difference =         0.0004862026
+   Sum of probability =         0.0088272586
+   Probability = 
+   1         0.0000000000
+   2         0.0088258901
+   3         0.9911727414
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000013684
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.1667176391
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.4241351681
+   2         9.5708941179
+   3         0.0000000000
+   4        49.7505472526
+   5         8.5464116346
+   6         7.2262708751
+   7         5.1251247521
+   8         3.8394430701
+  
+   i = 79, time =                7.900 (fs)
+   Exact sum of fluxes =         0.0033318187
+   Approximate sum of fluxes =         0.0044145122
+   Minimum adiab. energy difference =         0.0006712643
+   Sum of probability =         0.0101741104
+   Probability = 
+   1         0.0000000000
+   2         0.0101737095
+   3         0.9898258896
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000004009
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.6363616316
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.3892342638
+   2         9.7847524344
+   3         0.0000000000
+   4        36.0347511297
+   5         8.4548089171
+   6         7.2131869954
+   7         5.0539938702
+   8         3.6070016823
+  
+   i = 80, time =                8.000 (fs)
+   Exact sum of fluxes =         0.0076654659
+   Approximate sum of fluxes =         0.0083732167
+   Minimum adiab. energy difference =         0.0008559557
+   Sum of probability =         0.0117569726
+   Probability = 
+   1         0.0000000000
+   2         0.0117568612
+   3         0.9882430274
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000001113
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.6945498545
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.3580968251
+   2        10.0068887019
+   3         0.0000000000
+   4        28.2594583753
+   5         8.3838867231
+   6         7.1876331293
+   7         4.9856044402
+   8         3.4019608345
+  
+   i = 81, time =                8.100 (fs)
+   Exact sum of fluxes =         0.0105823309
+   Approximate sum of fluxes =         0.0112655597
+   Minimum adiab. energy difference =         0.0010388398
+   Sum of probability =         0.0135967020
+   Probability = 
+   1         0.0000000000
+   2         0.0135937372
+   3         0.9864032980
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000052
+   7         0.0000029596
+   8         0.0000000000
+   Random number =         0.6944167010
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.3296622493
+   2        10.2324975768
+   3         0.0000000000
+   4        23.2844793446
+   5         8.3371812696
+   6         7.1492294864
+   7         4.9202885768
+   8         3.2204757970
+  
+   i = 82, time =                8.200 (fs)
+   Exact sum of fluxes =         0.0132105454
+   Approximate sum of fluxes =         0.0139691698
+   Minimum adiab. energy difference =         0.0012187508
+   Sum of probability =         0.0157111949
+   Probability = 
+   1         0.0000000000
+   2         0.0157062991
+   3         0.9842888051
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000048958
+   8         0.0000000000
+   Random number =         0.7262091120
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.3030650180
+   2        10.4561514247
+   3         0.0000000000
+   4        19.8472434562
+   5         8.3164922681
+   6         7.0986739854
+   7         4.8583634444
+   8         3.0592570097
+  
+   i = 83, time =                8.300 (fs)
+   Exact sum of fluxes =         0.0158685390
+   Approximate sum of fluxes =         0.0167491862
+   Minimum adiab. energy difference =         0.0013945095
+   Sum of probability =         0.0181093157
+   Probability = 
+   1         0.0000000000
+   2         0.0181029855
+   3         0.9818906843
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000063302
+   8         0.0000000000
+   Random number =         0.9579493290
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.2774988262
+   2        10.6713104054
+   3         0.0000000000
+   4        17.3457712592
+   5         8.3218075787
+   6         7.0380099371
+   7         4.8001804845
+   8         2.9155600918
+  
+   i = 84, time =                8.400 (fs)
+   Exact sum of fluxes =         0.0186611231
+   Approximate sum of fluxes =         0.0196946201
+   Minimum adiab. energy difference =         0.0015648536
+   Sum of probability =         0.0207821968
+   Probability = 
+   1         0.0000000000
+   2         0.0207746029
+   3         0.9792178032
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000075939
+   8         0.0000000000
+   Random number =         0.7589679339
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.2522246774
+   2        10.8705771651
+   3         0.0000000000
+   4        15.4575762636
+   5         8.3520437475
+   6         6.9701615727
+   7         4.7460203830
+   8         2.7870962050
+  
+   i = 85, time =                8.500 (fs)
+   Exact sum of fluxes =         0.0216041812
+   Approximate sum of fluxes =         0.0228135806
+   Minimum adiab. energy difference =         0.0017284238
+   Sum of probability =         0.0236962131
+   Probability = 
+   1         0.0000000000
+   2         0.0236867887
+   3         0.9763037869
+   4         0.0000000000
+   5         0.0000005596
+   6         0.0000000000
+   7         0.0000088648
+   8         0.0000000000
+   Random number =         0.0899930992
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.2265436351
+   2        11.0458000512
+   3         0.0000000000
+   4        13.9947406775
+   5         8.4055183516
+   6         6.8982189653
+   7         4.6961739834
+   8         2.6719526485
+  
+   i = 86, time =                8.600 (fs)
+   Exact sum of fluxes =         0.0246643507
+   Approximate sum of fluxes =         0.0260652861
+   Minimum adiab. energy difference =         0.0018836171
+   Sum of probability =         0.0267860424
+   Probability = 
+   1         0.0000000000
+   2         0.0267743999
+   3         0.9732139576
+   4         0.0000000000
+   5         0.0000013884
+   6         0.0000000017
+   7         0.0000102524
+   8         0.0000000000
+   Random number =         0.7077502904
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.1998545017
+   2        11.1886766075
+   3         0.0000000000
+   4        12.8416989133
+   5         8.4801918704
+   6         6.8248403875
+   7         4.6508368051
+   8         2.5685144104
+  
+   i = 87, time =                8.700 (fs)
+   Exact sum of fluxes =         0.0277720894
+   Approximate sum of fluxes =         0.0293715520
+   Minimum adiab. energy difference =         0.0020283499
+   Sum of probability =         0.0299607179
+   Probability = 
+   1         0.0000000000
+   2         0.0299467713
+   3         0.9700392821
+   4         0.0000000000
+   5         0.0000021653
+   6         0.0000000000
+   7         0.0000117813
+   8         0.0000000000
+   Random number =         0.2598255072
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.1716037549
+   2        11.2911018882
+   3         0.0000000000
+   4        11.9253799871
+   5         8.5731283300
+   6         6.7520225267
+   7         4.6101878797
+   8         2.4754178593
+  
+   i = 88, time =                8.800 (fs)
+   Exact sum of fluxes =         0.0308194393
+   Approximate sum of fluxes =         0.0326124832
+   Minimum adiab. energy difference =         0.0021318982
+   Sum of probability =         0.0312986913
+   Probability = 
+   1         0.0000000000
+   2         0.0312823117
+   3         0.9687013087
+   4         0.0000000000
+   5         0.0000028561
+   6         0.0000000000
+   7         0.0000135235
+   8         0.0000000000
+   Random number =         0.0974537787
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.1413756480
+   2        11.3461531393
+   3         0.0000000000
+   4        11.2005014898
+   5         8.6786209111
+   6         6.6810425927
+   7         4.5743405959
+   8         2.3914943900
+  
+   i = 89, time =                8.900 (fs)
+   Exact sum of fluxes =         0.0336782071
+   Approximate sum of fluxes =         0.0356462960
+   Minimum adiab. energy difference =         0.0021314161
+   Sum of probability =         0.0340636094
+   Probability = 
+   1         0.0000000000
+   2         0.0340447824
+   3         0.9659363906
+   4         0.0000000000
+   5         0.0000033117
+   6         0.0000000000
+   7         0.0000155153
+   8         0.0000000000
+   Random number =         0.1611824433
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.1088620624
+   2        11.3487194093
+   3         0.0000000000
+   4        10.6458177339
+   5         8.7834579996
+   6         6.6125380606
+   7         4.5433040425
+   8         2.3157380390
+  
+   i = 90, time =                9.000 (fs)
+   Exact sum of fluxes =         0.0362091827
+   Approximate sum of fluxes =         0.0383193057
+   Minimum adiab. energy difference =         0.0021412151
+   Sum of probability =         0.0365116800
+   Probability = 
+   1         0.0000000000
+   2         0.0364913203
+   3         0.9634883200
+   4         0.0000000000
+   5         0.0000026212
+   6         0.0000000088
+   7         0.0000177297
+   8         0.0000000000
+   Random number =         0.4375585031
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.0739686954
+   2        11.2967831704
+   3         0.0000000000
+   4        10.2687255981
+   5         8.8562157496
+   6         6.5464594313
+   7         4.5169900730
+   8         2.2472616647
+  
+   i = 91, time =                9.100 (fs)
+   Exact sum of fluxes =         0.0382852870
+   Approximate sum of fluxes =         0.0404910481
+   Minimum adiab. energy difference =         0.0021614352
+   Sum of probability =         0.0385133392
+   Probability = 
+   1         0.0000000000
+   2         0.0384929733
+   3         0.9614866608
+   4         0.0000000000
+   5         0.0000000480
+   6         0.0000001235
+   7         0.0000201943
+   8         0.0000000000
+   Random number =         0.3239376446
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.0367319966
+   2        11.1911028998
+   3         0.0000000000
+   4        10.1054577082
+   5         8.8443340511
+   6         6.4823848915
+   7         4.4951852058
+   8         2.1852909596
+  
+   i = 92, time =                9.200 (fs)
+   Exact sum of fluxes =         0.0398045229
+   Approximate sum of fluxes =         0.0420485993
+   Minimum adiab. energy difference =         0.0021919455
+   Sum of probability =         0.0399712563
+   Probability = 
+   1         0.0000000000
+   2         0.0399479090
+   3         0.9600287437
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000004090
+   7         0.0000229383
+   8         0.0000000000
+   Random number =         0.5133224285
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.9973442940
+   2        11.0353305899
+   3         0.0000000000
+   4        10.1614813139
+   5         8.7311148405
+   6         6.4196272904
+   7         4.4776311621
+   8         2.1291431104
+  
+   i = 93, time =                9.300 (fs)
+   Exact sum of fluxes =         0.0407092517
+   Approximate sum of fluxes =         0.0429324768
+   Minimum adiab. energy difference =         0.0022323046
+   Sum of probability =         0.0408231100
+   Probability = 
+   1         0.0000000000
+   2         0.0407962839
+   3         0.9591768900
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000009802
+   7         0.0000258458
+   8         0.0000000000
+   Random number =         0.5078716729
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.9561583380
+   2        10.8358166426
+   3         0.0000000000
+   4        10.3747372719
+   5         8.5712416986
+   6         6.3573965932
+   7         4.4639194807
+   8         2.0782085003
+  
+   i = 94, time =                9.400 (fs)
+   Exact sum of fluxes =         0.0409790426
+   Approximate sum of fluxes =         0.0431264706
+   Minimum adiab. energy difference =         0.0022626627
+   Sum of probability =         0.0431931308
+   Probability = 
+   1         0.0000000000
+   2         0.0431616178
+   3         0.9568068692
+   4         0.0000000000
+   5         0.0000005404
+   6         0.0000019617
+   7         0.0000290109
+   8         0.0000000000
+   Random number =         0.9870074727
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.9135898476
+   2        10.6002193512
+   3         0.0000000000
+   4        10.6904325639
+   5         8.4151284312
+   6         6.2951499728
+   7         4.4535870714
+   8         2.0319527679
+  
+   i = 95, time =                9.500 (fs)
+   Exact sum of fluxes =         0.0406437500
+   Approximate sum of fluxes =         0.0426688930
+   Minimum adiab. energy difference =         0.0021819907
+   Sum of probability =         0.0426965328
+   Probability = 
+   1         0.0000000000
+   2         0.0426561209
+   3         0.9573034672
+   4         0.0000000000
+   5         0.0000046203
+   6         0.0000035350
+   7         0.0000322565
+   8         0.0000000000
+   Random number =         0.9970585104
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.8701392533
+   2        10.3371421943
+   3         0.0000000000
+   4        11.0856764718
+   5         8.2834851619
+   6         6.2326611344
+   7         4.4461258945
+   8         1.9899012560
+  
+   i = 96, time =                9.600 (fs)
+   Exact sum of fluxes =         0.0397644025
+   Approximate sum of fluxes =         0.0416318507
+   Minimum adiab. energy difference =         0.0020933943
+   Sum of probability =         0.0416248358
+   Probability = 
+   1         0.0000000000
+   2         0.0415746361
+   3         0.9583751642
+   4         0.0000000000
+   5         0.0000088542
+   6         0.0000058520
+   7         0.0000354935
+   8         0.0000000000
+   Random number =         0.4100933525
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.8263166718
+   2        10.0550848400
+   3         0.0000000000
+   4        11.5548435033
+   5         8.1818108784
+   6         6.1702200499
+   7         4.4409652450
+   8         1.9516371257
+  
+   i = 97, time =                9.700 (fs)
+   Exact sum of fluxes =         0.0384325112
+   Approximate sum of fluxes =         0.0401200222
+   Minimum adiab. energy difference =         0.0019990537
+   Sum of probability =         0.0401031729
+   Probability = 
+   1         0.0000000000
+   2         0.0400208364
+   3         0.9598968271
+   4         0.0000000000
+   5         0.0000132619
+   6         0.0000090025
+   7         0.0000387841
+   8         0.0000212880
+   Random number =         0.1104237300
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.7826689336
+   2         9.7621151936
+   3         0.0000000000
+   4        12.1001468663
+   5         8.1095436358
+   6         6.1085008812
+   7         4.4375064239
+   8         1.9167903337
+  
+   i = 98, time =                9.800 (fs)
+   Exact sum of fluxes =         0.0367357470
+   Approximate sum of fluxes =         0.0382323674
+   Minimum adiab. energy difference =         0.0019003621
+   Sum of probability =         0.0382095728
+   Probability = 
+   1         0.0000000000
+   2         0.0380934416
+   3         0.9617904272
+   4         0.0000000000
+   5         0.0000175366
+   6         0.0000131558
+   7         0.0000419073
+   8         0.0000435315
+   Random number =         0.7101869678
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.7396790178
+   2         9.4649742068
+   3         0.0000000000
+   4        12.7285442689
+   5         8.0641890827
+   6         6.0485410613
+   7         4.4351252880
+   8         1.8850422242
+  
+   i = 99, time =                9.900 (fs)
+   Exact sum of fluxes =         0.0347782806
+   Approximate sum of fluxes =         0.0360840813
+   Minimum adiab. energy difference =         0.0017983717
+   Sum of probability =         0.0360538988
+   Probability = 
+   1         0.0000000000
+   2         0.0359070584
+   3         0.9639461012
+   4         0.0000000000
+   5         0.0000214839
+   6         0.0000183349
+   7         0.0000447296
+   8         0.0000622921
+   Random number =         0.7190800478
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.6977956640
+   2         9.1693290444
+   3         0.0000000000
+   4        13.4504137774
+   5         8.0423646026
+   6         5.9914888216
+   7         4.4332523757
+   8         1.8561131850
+  
+   i = 100, time =               10.000 (fs)
+   Exact sum of fluxes =         0.0326477304
+   Approximate sum of fluxes =         0.0337704529
+   Minimum adiab. energy difference =         0.0016939273
+   Sum of probability =         0.0337308987
+   Probability = 
+   1         0.0000000000
+   2         0.0335561189
+   3         0.9662691013
+   4         0.0000000000
+   5         0.0000254536
+   6         0.0000246057
+   7         0.0000471736
+   8         0.0000775470
+   Random number =         0.9810541389
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.6574333489
+   2         8.8796005099
+   3         0.0000000000
+   4        14.2797411910
+   5         8.0408354687
+   6         5.9384507718
+   7         4.4312970338
+   8         1.8297592186
+  
+   i = 101, time =               10.100 (fs)
+   Exact sum of fluxes =         0.0304267333
+   Approximate sum of fluxes =         0.0313798869
+   Minimum adiab. energy difference =         0.0015877528
+   Sum of probability =         0.0313283467
+   Probability = 
+   1         0.0000000000
+   2         0.0311282753
+   3         0.9686716533
+   4         0.0000000000
+   5         0.0000293026
+   6         0.0000319772
+   7         0.0000490732
+   8         0.0000897184
+   Random number =         0.0420128083
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.6189424259
+   2         8.5990982120
+   3         0.0000000000
+   4        15.2346410727
+   5         8.0565487805
+   6         5.8903894560
+   7         4.4287429287
+   8         1.8057685674
+  
+   i = 102, time =               10.200 (fs)
+   Exact sum of fluxes =         0.0281795397
+   Approximate sum of fluxes =         0.0289797512
+   Minimum adiab. energy difference =         0.0014804691
+   Sum of probability =         0.0289124307
+   Probability = 
+   1         0.0000000000
+   2         0.0286892388
+   3         0.9710875693
+   4         0.0000000000
+   5         0.0000334215
+   6         0.0000404754
+   7         0.0000504191
+   8         0.0000988758
+   Random number =         0.2367709247
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.5826309295
+   2         8.3301410928
+   3         0.0000000000
+   4        16.3386337960
+   5         8.0869151904
+   6         5.8480479779
+   7         4.4251100841
+   8         1.7839572850
+  
+   i = 103, time =               10.300 (fs)
+   Exact sum of fluxes =         0.0259552219
+   Approximate sum of fluxes =         0.0266204352
+   Minimum adiab. energy difference =         0.0013726277
+   Sum of probability =         0.0265320166
+   Probability = 
+   1         0.0000000000
+   2         0.0262877912
+   3         0.9734679834
+   4         0.0000000000
+   5         0.0000377736
+   6         0.0000500956
+   7         0.0000511230
+   8         0.0001052333
+   Random number =         0.7288290706
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.5487519084
+   2         8.0741997745
+   3         0.0000000000
+   4        17.6222900563
+   5         8.1297031372
+   6         5.8119530536
+   7         4.4200392982
+   8         1.7641665081
+  
+   i = 104, time =               10.400 (fs)
+   Exact sum of fluxes =         0.0238085407
+   Approximate sum of fluxes =         0.0243577048
+   Minimum adiab. energy difference =         0.0012647413
+   Sum of probability =         0.0242405152
+   Probability = 
+   1         0.0000000000
+   2         0.0239778777
+   3         0.9757594848
+   4         0.0000000000
+   5         0.0000421680
+   6         0.0000606130
+   7         0.0000510099
+   8         0.0001088466
+   Random number =         0.3382046757
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.5175331720
+   2         7.8322504776
+   3         0.0000000000
+   4        19.1255272654
+   5         8.1830152690
+   6         5.7823741434
+   7         4.4132389554
+   8         1.7462553284
+  
+   i = 105, time =               10.500 (fs)
+   Exact sum of fluxes =         0.0217580413
+   Approximate sum of fluxes =         0.0222089243
+   Minimum adiab. energy difference =         0.0011572559
+   Sum of probability =         0.0220517979
+   Probability = 
+   1         0.0000000000
+   2         0.0217720736
+   3         0.9779482021
+   4         0.0000000000
+   5         0.0000472519
+   6         0.0000720444
+   7         0.0000502885
+   8         0.0001101395
+   Random number =         0.9721589832
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.4891600878
+   2         7.6046709630
+   3         0.0000000000
+   4        20.9018961866
+   5         8.2453889983
+   6         5.7593688562
+   7         4.4045272902
+   8         1.7301031966
+  
+   i = 106, time =               10.600 (fs)
+   Exact sum of fluxes =         0.0198277382
+   Approximate sum of fluxes =         0.0201973465
+   Minimum adiab. energy difference =         0.0010505785
+   Sum of probability =         0.0199831614
+   Probability = 
+   1         0.0000000000
+   2         0.0196880533
+   3         0.9800168386
+   4         0.0000000000
+   5         0.0000527766
+   6         0.0000843289
+   7         0.0000489748
+   8         0.0001090279
+   Random number =         0.0825049971
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.4637850543
+   2         7.3914862284
+   3         0.0000000000
+   4        23.0243091489
+   5         8.3154519348
+   6         5.7428365923
+   7         4.3938685429
+   8         1.7156053878
+  
+   i = 107, time =               10.700 (fs)
+   Exact sum of fluxes =         0.0180466824
+   Approximate sum of fluxes =         0.0183517171
+   Minimum adiab. energy difference =         0.0009450974
+   Sum of probability =         0.0180538439
+   Probability = 
+   1         0.0000000000
+   2         0.0177448720
+   3         0.9819461561
+   4         0.0000000000
+   5         0.0000588161
+   6         0.0000970672
+   7         0.0000470947
+   8         0.0001059939
+   Random number =         0.3361316358
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.4415539602
+   2         7.1925544652
+   3         0.0000000000
+   4        25.5940216731
+   5         8.3920846675
+   6         5.7324669129
+   7         4.3813123914
+   8         1.7026685868
+  
+   i = 108, time =               10.800 (fs)
+   Exact sum of fluxes =         0.0164257024
+   Approximate sum of fluxes =         0.0166825138
+   Minimum adiab. energy difference =         0.0008411586
+   Sum of probability =         0.0164263633
+   Probability = 
+   1         0.0000000000
+   2         0.0159363418
+   3         0.9835736367
+   4         0.0001684274
+   5         0.0000655917
+   6         0.0001101189
+   7         0.0000447742
+   8         0.0001011093
+   Random number =         0.3581901240
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.4225828631
+   2         7.0074855928
+   3         0.0000000000
+   4        28.7565774512
+   5         8.4744160382
+   6         5.7278480903
+   7         4.3669930902
+   8         1.6912128360
+  
+   i = 109, time =               10.900 (fs)
+   Exact sum of fluxes =         0.0150002599
+   Approximate sum of fluxes =         0.0152272315
+   Minimum adiab. energy difference =         0.0007391065
+   Sum of probability =         0.0150009334
+   Probability = 
+   1         0.0000000000
+   2         0.0142693306
+   3         0.9849990666
+   4         0.0003988141
+   5         0.0000731336
+   6         0.0001233734
+   7         0.0000421841
+   8         0.0000940976
+   Random number =         0.0846693883
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.4069987498
+   2         6.8358631360
+   3         0.0000000000
+   4        32.7271413555
+   5         8.5615468539
+   6         5.7284216529
+   7         4.3511284754
+   8         1.6811655908
+  
+   i = 110, time =               11.000 (fs)
+   Exact sum of fluxes =         0.0138160618
+   Approximate sum of fluxes =         0.0140369517
+   Minimum adiab. energy difference =         0.0006392643
+   Sum of probability =         0.0138168493
+   Probability = 
+   1         0.0000000000
+   2         0.0127361684
+   3         0.9861831507
+   4         0.0007369786
+   5         0.0000815336
+   6         0.0001366773
+   7         0.0000393733
+   8         0.0000861180
+   Random number =         0.7590975824
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.3949102187
+   2         6.6771668759
+   3         0.0000000000
+   4        37.8385667145
+   5         8.6526752720
+   6         5.7336322775
+   7         4.3339626651
+   8         1.6724647149
+  
+   i = 111, time =               11.100 (fs)
+   Exact sum of fluxes =         0.0129750644
+   Approximate sum of fluxes =         0.0132285937
+   Minimum adiab. energy difference =         0.0005419685
+   Sum of probability =         0.0129759384
+   Probability = 
+   1         0.0000000000
+   2         0.0113311594
+   3         0.9870240616
+   4         0.0012915761
+   5         0.0000909357
+   6         0.0001496055
+   7         0.0000364054
+   8         0.0000762564
+   Random number =         0.5412394769
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.3864398882
+   2         6.5308830099
+   3         0.0000000000
+   4        44.6314593312
+   5         8.7472016267
+   6         5.7427741350
+   7         4.3157609326
+   8         1.6650532467
+  
+   i = 112, time =               11.200 (fs)
+   Exact sum of fluxes =         0.0127095663
+   Approximate sum of fluxes =         0.0130747544
+   Minimum adiab. energy difference =         0.0004475682
+   Sum of probability =         0.0127106702
+   Probability = 
+   1         0.0000000000
+   2         0.0100435067
+   3         0.9872893298
+   4         0.0023046994
+   5         0.0001012814
+   6         0.0001624789
+   7         0.0000333449
+   8         0.0000653591
+   Random number =         0.8540506611
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.3817281797
+   2         6.3964980210
+   3         0.0000000000
+   4        54.0450420293
+   5         8.8443574641
+   6         5.7551833484
+   7         4.2967732306
+   8         1.6588800378
+  
+   i = 113, time =               11.300 (fs)
+   Exact sum of fluxes =         0.0136490986
+   Approximate sum of fluxes =         0.0143282359
+   Minimum adiab. energy difference =         0.0003565421
+   Sum of probability =         0.0136504744
+   Probability = 
+   1         0.0000000000
+   2         0.0088815070
+   3         0.9863495256
+   4         0.0043974210
+   5         0.0001130530
+   6         0.0001748672
+   7         0.0000301372
+   8         0.0000534890
+   Random number =         0.7456132795
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.3809788526
+   2         6.2736952325
+   3         0.0000000000
+   4        67.8428852706
+   5         8.9431189136
+   6         5.7700636528
+   7         4.2771835558
+   8         1.6538901300
+  
+   i = 114, time =               11.400 (fs)
+   Exact sum of fluxes =         0.0176909495
+   Approximate sum of fluxes =         0.0193495996
+   Minimum adiab. energy difference =         0.0002696485
+   Sum of probability =         0.0176928606
+   Probability = 
+   1         0.0000000000
+   2         0.0078243458
+   3         0.9823071394
+   4         0.0094873958
+   5         0.0001255819
+   6         0.0001882419
+   7         0.0000267282
+   8         0.0000405671
+   Random number =         0.9850330045
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.3845120641
+   2         6.1623001797
+   3         0.0000000000
+   4        89.7050987922
+   5         9.0422255498
+   6         5.7864347903
+   7         4.2570532051
+   8         1.6500205897
+  
+   i = 115, time =               11.500 (fs)
+   Exact sum of fluxes =         0.0321947738
+   Approximate sum of fluxes =         0.0378217711
+   Minimum adiab. energy difference =         0.0001885084
+   Sum of probability =         0.0321976597
+   Probability = 
+   1         0.0000000000
+   2         0.0068818417
+   3         0.9678023403
+   4         0.0249241140
+   5         0.0001390810
+   6         0.0002030512
+   7         0.0000226146
+   8         0.0000269572
+   Random number =         0.1781868669
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.3930137943
+   2         6.0628264673
+   3         0.0000000000
+   4       128.3170701469
+   5         9.1386717657
+   6         5.8027463898
+   7         4.2360965854
+   8         1.6471632984
+  
+   i = 116, time =               11.600 (fs)
+   Exact sum of fluxes =         0.0959391241
+   Approximate sum of fluxes =         0.1275810981
+   Minimum adiab. energy difference =         0.0001183952
+   Sum of probability =         0.0959443332
+   Probability = 
+   1         0.0000000000
+   2         0.0061212285
+   3         0.9040556668
+   4         0.0894151928
+   5         0.0001536753
+   6         0.0002253546
+   7         0.0000165499
+   8         0.0000123320
+   Random number =         0.9768025189
+   ATTEMPT between old_state =        3 and new_state =        4
+TRY ENERGY CONSERVATION WITH ISOTROPIC RESCALING:
+   Energy old state  (Ha)  =         2.2545805408
+   Energy new state  (Ha)  =         2.2546989360
+   Kinetic energy    (Ha)  =         0.3985040351
+   Energy difference (Ha)  =         0.3983856399
+SUCCESSFUL HOP!
+   Isotropic rescale factor  =         0.9998514394
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.3155573371
+   2         5.8085193298
+   3       204.3059105125
+   4         0.0000000000
+   5         9.6588582263
+   6         5.9851746766
+   7         4.3013593774
+   8         1.6583610992
+  
+   i = 117, time =               11.700 (fs)
+   Exact sum of fluxes =        -2.6980498386
+   Approximate sum of fluxes =        -0.7975521712
+   Minimum adiab. energy difference =         0.0000814684
+   Sum of probability =         0.0043641986
+   Probability = 
+   1         0.0000212329
+   2         0.0040026113
+   3         0.0000000000
+   4         0.9956358014
+   5         0.0002089969
+   6         0.0000617626
+   7         0.0000695949
+   8         0.0000000000
+   Random number =         0.2377660248
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.3753227208
+   2         5.8092619095
+   3       296.9108831749
+   4         0.0000000000
+   5         9.5515610527
+   6         5.9222272832
+   7         4.2386243045
+   8         1.6514244977
+  
+   i = 118, time =               11.800 (fs)
+   Exact sum of fluxes =        -0.7432936983
+   Approximate sum of fluxes =        -0.3185413617
+   Minimum adiab. energy difference =         0.0001189850
+   Sum of probability =         0.0045944253
+   Probability = 
+   1         0.0000116588
+   2         0.0041497122
+   3         0.0000000000
+   4         0.9954055747
+   5         0.0002296907
+   6         0.0001574249
+   7         0.0000459386
+   8         0.0000000000
+   Random number =         0.7330451625
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.4094829501
+   2         5.7632009848
+   3       203.2932797948
+   4         0.0000000000
+   5         9.5904444661
+   6         5.9162392935
+   7         4.2064293814
+   8         1.6500029884
+  
+   i = 119, time =               11.900 (fs)
+   Exact sum of fluxes =        -0.0985548300
+   Approximate sum of fluxes =        -0.0677345016
+   Minimum adiab. energy difference =         0.0001897091
+   Sum of probability =         0.0045067258
+   Probability = 
+   1         0.0000066102
+   2         0.0039902890
+   3         0.0000000000
+   4         0.9954932742
+   5         0.0002619183
+   6         0.0002124991
+   7         0.0000354092
+   8         0.0000000000
+   Random number =         0.0242087825
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.4334425619
+   2         5.6996301894
+   3       127.5048999999
+   4         0.0000000000
+   5         9.6989934350
+   6         5.9365770024
+   7         4.1886840665
+   8         1.6517503932
+  
+   i = 120, time =               12.000 (fs)
+   Exact sum of fluxes =        -0.0224624295
+   Approximate sum of fluxes =        -0.0177649257
+   Minimum adiab. energy difference =         0.0002652100
+   Sum of probability =         0.0040030565
+   Probability = 
+   1         0.0000045471
+   2         0.0034474441
+   3         0.0000000000
+   4         0.9959969435
+   5         0.0002893802
+   6         0.0002317826
+   7         0.0000299025
+   8         0.0000000000
+   Random number =         0.5386073487
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.4584833687
+   2         5.6383162450
+   3        91.2063829276
+   4         0.0000000000
+   5         9.8252714300
+   6         5.9625985416
+   7         4.1749478818
+   8         1.6550732447
+  
+   i = 121, time =               12.100 (fs)
+   Exact sum of fluxes =        -0.0068487625
+   Approximate sum of fluxes =        -0.0056071263
+   Minimum adiab. energy difference =         0.0003394062
+   Sum of probability =         0.0034866721
+   Probability = 
+   1         0.0000036250
+   2         0.0028951256
+   3         0.0000000000
+   4         0.9965133279
+   5         0.0003202292
+   6         0.0002410734
+   7         0.0000266188
+   8         0.0000000000
+   Random number =         0.6223414735
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.4871540840
+   2         5.5831723022
+   3        71.2681336119
+   4         0.0000000000
+   5         9.9582384886
+   6         5.9896600286
+   7         4.1631159067
+   8         1.6596371938
+  
+   i = 122, time =               12.200 (fs)
+   Exact sum of fluxes =        -0.0021055901
+   Approximate sum of fluxes =        -0.0016594877
+   Minimum adiab. energy difference =         0.0004105509
+   Sum of probability =         0.0030035466
+   Probability = 
+   1         0.0000031505
+   2         0.0023750584
+   3         0.0000000000
+   4         0.9969964534
+   5         0.0003550560
+   6         0.0002460120
+   7         0.0000242698
+   8         0.0000000000
+   Random number =         0.8159841850
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.5203019659
+   2         5.5350466047
+   3        58.9180161807
+   4         0.0000000000
+   5        10.0949771134
+   6         6.0161693444
+   7         4.1526655071
+   8         1.6653544593
+  
+   i = 123, time =               12.300 (fs)
+   Exact sum of fluxes =        -0.0003689741
+   Approximate sum of fluxes =        -0.0001748613
+   Minimum adiab. energy difference =         0.0004778889
+   Sum of probability =         0.0025648598
+   Probability = 
+   1         0.0000028719
+   2         0.0018975131
+   3         0.0000000000
+   4         0.9974351402
+   5         0.0003936813
+   6         0.0002483588
+   7         0.0000224346
+   8         0.0000000000
+   Random number =         0.3635286204
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.5584135689
+   2         5.4941560254
+   3        50.6160427373
+   4         0.0000000000
+   5        10.2340275335
+   6         6.0413472785
+   7         4.1434319795
+   8         1.6721945065
+  
+   i = 124, time =               12.400 (fs)
+   Exact sum of fluxes =         0.0003066650
+   Approximate sum of fluxes =         0.0004034617
+   Minimum adiab. energy difference =         0.0005410073
+   Sum of probability =         0.0021739530
+   Probability = 
+   1         0.0000027339
+   2         0.0014651942
+   3         0.0000000000
+   4         0.9978260470
+   5         0.0004364812
+   6         0.0002486535
+   7         0.0000208901
+   8         0.0000000000
+   Random number =         0.3003287512
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.6018773589
+   2         5.4605466078
+   3        44.7107557517
+   4         0.0000000000
+   5        10.3748432958
+   6         6.0645797083
+   7         4.1353278777
+   8         1.6801488493
+  
+   i = 125, time =               12.500 (fs)
+   Exact sum of fluxes =         0.0005301716
+   Approximate sum of fluxes =         0.0005849897
+   Minimum adiab. energy difference =         0.0005996556
+   Sum of probability =         0.0018174348
+   Probability = 
+   1         0.0000026825
+   2         0.0010658299
+   3         0.0000000000
+   4         0.9981825652
+   5         0.0004825318
+   6         0.0002468323
+   7         0.0000195582
+   8         0.0000000000
+   Random number =         0.9850446882
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.6510512808
+   2         5.4341484125
+   3        40.3378922240
+   4         0.0000000000
+   5        10.5170604724
+   6         6.0854262725
+   7         4.1283545253
+   8         1.6892219054
+  
+   i = 126, time =               12.600 (fs)
+   Exact sum of fluxes =         0.0005548179
+   Approximate sum of fluxes =         0.0005905768
+   Minimum adiab. energy difference =         0.0006536250
+   Sum of probability =         0.0014993774
+   Probability = 
+   1         0.0000026544
+   2         0.0007018579
+   3         0.0000000000
+   4         0.9985006226
+   5         0.0005331298
+   6         0.0002433463
+   7         0.0000183891
+   8         0.0000000000
+   Random number =         0.1212335080
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.7063155153
+   2         5.4149344032
+   3        37.0072179273
+   4         0.0000000000
+   5        10.6604825946
+   6         6.1034581380
+   7         4.1224936866
+   8         1.6994229176
+  
+   i = 127, time =               12.700 (fs)
+   Exact sum of fluxes =         0.0004965599
+   Approximate sum of fluxes =         0.0005238471
+   Minimum adiab. energy difference =         0.0007027644
+   Sum of probability =         0.0012167844
+   Probability = 
+   1         0.0000027109
+   2         0.0003723685
+   3         0.0000000000
+   4         0.9987832156
+   5         0.0005870144
+   6         0.0002374163
+   7         0.0000172744
+   8         0.0000000000
+   Random number =         0.6945623370
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.7680942352
+   2         5.4028978283
+   3        34.4195644192
+   4         0.0000000000
+   5        10.8048822684
+   6         6.1183389075
+   7         4.1177422754
+   8         1.7107663419
+  
+   i = 128, time =               12.800 (fs)
+   Exact sum of fluxes =         0.0003939617
+   Approximate sum of fluxes =         0.0004183564
+   Minimum adiab. energy difference =         0.0007469464
+   Sum of probability =         0.0009626320
+   Probability = 
+   1         0.0000028390
+   2         0.0000678738
+   3         0.0000000000
+   4         0.9990373680
+   5         0.0006455735
+   6         0.0002300686
+   7         0.0000162772
+   8         0.0000000000
+   Random number =         0.3309478275
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.8368398463
+   2         5.3980242283
+   3        32.3836418506
+   4         0.0000000000
+   5        10.9501369222
+   6         6.1297563687
+   7         4.1141063906
+   8         1.7232720041
+  
+   i = 129, time =               12.900 (fs)
+   Exact sum of fluxes =         0.0002769214
+   Approximate sum of fluxes =         0.0003015321
+   Minimum adiab. energy difference =         0.0007860440
+   Sum of probability =         0.0009471156
+   Probability = 
+   1         0.0000029680
+   2         0.0000000000
+   3         0.0000000000
+   4         0.9990528844
+   5         0.0007073354
+   6         0.0002214564
+   7         0.0000153557
+   8         0.0000000000
+   Random number =         0.9393907402
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.9130634952
+   2         5.4003615056
+   3        30.7728858716
+   4         0.0000000000
+   5        11.0962601799
+   6         6.1374002213
+   7         4.1115809364
+   8         1.7369635202
+  
+   i = 130, time =               13.000 (fs)
+   Exact sum of fluxes =         0.0001580647
+   Approximate sum of fluxes =         0.0001847280
+   Minimum adiab. energy difference =         0.0008199608
+   Sum of probability =         0.0010007371
+   Probability = 
+   1         0.0000032114
+   2         0.0000000000
+   3         0.0000000000
+   4         0.9989992629
+   5         0.0007716101
+   6         0.0002114365
+   7         0.0000144792
+   8         0.0000000000
+   Random number =         0.3311488935
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         4.9973421964
+   2         5.4099855199
+   3        29.4999978988
+   4         0.0000000000
+   5        11.2430692887
+   6         6.1410752121
+   7         4.1101643637
+   8         1.7518680800
+  
+   i = 131, time =               13.100 (fs)
+   Exact sum of fluxes =         0.0000444725
+   Approximate sum of fluxes =         0.0000744899
+   Minimum adiab. energy difference =         0.0008486176
+   Sum of probability =         0.0010568696
+   Probability = 
+   1         0.0000035878
+   2         0.0000000000
+   3         0.0000000000
+   4         0.9989431304
+   5         0.0008391351
+   6         0.0002004891
+   7         0.0000136576
+   8         0.0000000000
+   Random number =         0.3137944532
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.0903139899
+   2         5.4269847836
+   3        28.5038201817
+   4         0.0000000000
+   5        11.3906800745
+   6         6.1405733662
+   7         4.1098617519
+   8         1.7680196184
+  
+   i = 132, time =               13.200 (fs)
+   Exact sum of fluxes =        -0.0000737486
+   Approximate sum of fluxes =        -0.0000395531
+   Minimum adiab. energy difference =         0.0008719540
+   Sum of probability =         0.0011075482
+   Probability = 
+   1         0.0000041694
+   2         0.0000000000
+   3         0.0000000000
+   4         0.9988924518
+   5         0.0009031064
+   6         0.0001874621
+   7         0.0000128103
+   8         0.0000000000
+   Random number =         0.5656526479
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.1926798279
+   2         5.4514755231
+   3        27.7409616721
+   4         0.0000000000
+   5        11.5391439627
+   6         6.1357920549
+   7         4.1106990688
+   8         1.7854570852
+  
+   i = 133, time =               13.300 (fs)
+   Exact sum of fluxes =        -0.0001491840
+   Approximate sum of fluxes =        -0.0001095389
+   Minimum adiab. energy difference =         0.0008898689
+   Sum of probability =         0.0011741849
+   Probability = 
+   1         0.0000050056
+   2         0.0000000000
+   3         0.0000000000
+   4         0.9988258151
+   5         0.0009809127
+   6         0.0001761458
+   7         0.0000121208
+   8         0.0000000000
+   Random number =         0.5141889267
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.3053153664
+   2         5.4837354264
+   3        27.1824810430
+   4         0.0000000000
+   5        11.6882813320
+   6         6.1265476623
+   7         4.1126266144
+   8         1.8042167477
+  
+   i = 134, time =               13.400 (fs)
+   Exact sum of fluxes =        -0.0002222951
+   Approximate sum of fluxes =        -0.0001753429
+   Minimum adiab. energy difference =         0.0009023129
+   Sum of probability =         0.0012353191
+   Probability = 
+   1         0.0000065043
+   2         0.0000000000
+   3         0.0000000000
+   4         0.9987646809
+   5         0.0010542644
+   6         0.0001631355
+   7         0.0000114150
+   8         0.0000000000
+   Random number =         0.7389557435
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.4290567786
+   2         5.5240615937
+   3        26.8075992160
+   4         0.0000000000
+   5        11.8380832956
+   6         6.1128092670
+   7         4.1156793710
+   8         1.8243462294
+  
+   i = 135, time =               13.500 (fs)
+   Exact sum of fluxes =        -0.0002835601
+   Approximate sum of fluxes =        -0.0001141509
+   Minimum adiab. energy difference =         0.0009092444
+   Sum of probability =         0.0012897300
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0000000000
+   4         0.9987102700
+   5         0.0011288983
+   6         0.0001501453
+   7         0.0000106863
+   8         0.0000000000
+   Random number =         0.2676092232
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.5618910869
+   2         5.5757307776
+   3        26.6032347898
+   4         0.0000000000
+   5        11.9888706208
+   6         6.0946147144
+   7         4.1198572969
+   8         1.8459012967
+  
+   i = 136, time =               13.600 (fs)
+   Exact sum of fluxes =        -0.0003195190
+   Approximate sum of fluxes =         0.0001308478
+   Minimum adiab. energy difference =         0.0009106185
+   Sum of probability =         0.0013531909
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0000000000
+   4         0.9986468091
+   5         0.0012062297
+   6         0.0001369479
+   7         0.0000100133
+   8         0.0000000000
+   Random number =         0.9390835740
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.6283563870
+   2         5.7158470596
+   3        26.5630917109
+   4         0.0000000000
+   5        12.1404070931
+   6         6.0719749415
+   7         4.1251691469
+   8         1.8689364257
+  
+   i = 137, time =               13.700 (fs)
+   Exact sum of fluxes =        -0.0003411862
+   Approximate sum of fluxes =        -0.0002734791
+   Minimum adiab. energy difference =         0.0009064037
+   Sum of probability =         0.0015021472
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0000870803
+   4         0.9984978528
+   5         0.0012819054
+   6         0.0001238498
+   7         0.0000093117
+   8         0.0000000000
+   Random number =         0.3099154724
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.6942714490
+   2         5.8802948562
+   3        26.6866106588
+   4         0.0000000000
+   5        12.2929882579
+   6         6.0450077662
+   7         4.1316316996
+   8         1.8935184646
+  
+   i = 138, time =               13.800 (fs)
+   Exact sum of fluxes =        -0.0003365991
+   Approximate sum of fluxes =        -0.0002629077
+   Minimum adiab. energy difference =         0.0008965707
+   Sum of probability =         0.0016159935
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0001367572
+   4         0.9983840065
+   5         0.0013592649
+   6         0.0001113607
+   7         0.0000086107
+   8         0.0000000000
+   Random number =         0.9741060027
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.7693252975
+   2         6.0614792328
+   3        26.9792934840
+   4         0.0000000000
+   5        12.4465330735
+   6         6.0138607253
+   7         4.1392459442
+   8         1.9197178225
+  
+   i = 139, time =               13.900 (fs)
+   Exact sum of fluxes =        -0.0003072958
+   Approximate sum of fluxes =        -0.0002243568
+   Minimum adiab. energy difference =         0.0008811260
+   Sum of probability =         0.0017376336
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0001949192
+   4         0.9982623664
+   5         0.0014359341
+   6         0.0000988658
+   7         0.0000079144
+   8         0.0000000000
+   Random number =         0.9440448746
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.8540501121
+   2         6.2611081793
+   3        27.4521958320
+   4         0.0000000000
+   5        12.6013663884
+   6         5.9787262478
+   7         4.1480629988
+   8         1.9476172513
+  
+   i = 140, time =               14.000 (fs)
+   Exact sum of fluxes =        -0.0002493112
+   Approximate sum of fluxes =        -0.0001554532
+   Minimum adiab. energy difference =         0.0008600515
+   Sum of probability =         0.0018685360
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0002636076
+   4         0.9981314640
+   5         0.0015104434
+   6         0.0000873215
+   7         0.0000071635
+   8         0.0000000000
+   Random number =         0.4305197186
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         5.9489771500
+   2         6.4812904579
+   3        28.1248785004
+   4         0.0000000000
+   5        12.7576654165
+   6         5.9398852569
+   7         4.1581000421
+   8         1.9773069229
+  
+   i = 141, time =               14.100 (fs)
+   Exact sum of fluxes =        -0.0001455424
+   Approximate sum of fluxes =        -0.0000383181
+   Minimum adiab. energy difference =         0.0008333538
+   Sum of probability =         0.0020251898
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0003535049
+   4         0.9979748102
+   5         0.0015887276
+   6         0.0000765420
+   7         0.0000064153
+   8         0.0000000000
+   Random number =         0.1584040541
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         6.0546861349
+   2         6.7245198700
+   3        29.0258975051
+   4         0.0000000000
+   5        12.9154653999
+   6         5.8975928539
+   7         4.1693864644
+   8         2.0088842902
+  
+   i = 142, time =               14.200 (fs)
+   Exact sum of fluxes =         0.0000014060
+   Approximate sum of fluxes =         0.0001245008
+   Minimum adiab. energy difference =         0.0008010509
+   Sum of probability =         0.0022003302
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0004675280
+   4         0.9977996698
+   5         0.0016610911
+   6         0.0000661161
+   7         0.0000055950
+   8         0.0000000000
+   Random number =         0.6818243283
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         6.1717873135
+   2         6.9936569630
+   3        30.1963871722
+   4         0.0000000000
+   5        13.0753159624
+   6         5.8521828165
+   7         4.1819808151
+   8         2.0424628906
+  
+   i = 143, time =               14.300 (fs)
+   Exact sum of fluxes =         0.0002199284
+   Approximate sum of fluxes =         0.0003634052
+   Minimum adiab. energy difference =         0.0007631827
+   Sum of probability =         0.0024230979
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0006236301
+   4         0.9975769021
+   5         0.0017377257
+   6         0.0000569731
+   7         0.0000047690
+   8         0.0000000000
+   Random number =         0.1392437608
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         6.3008740898
+   2         7.2919855236
+   3        31.6946961661
+   4         0.0000000000
+   5        13.2374384362
+   6         5.8040373382
+   7         4.1959529052
+   8         2.0781699705
+  
+   i = 144, time =               14.400 (fs)
+   Exact sum of fluxes =         0.0005290962
+   Approximate sum of fluxes =         0.0006988598
+   Minimum adiab. energy difference =         0.0007197987
+   Sum of probability =         0.0027040935
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0008389376
+   4         0.9972959065
+   5         0.0018128476
+   6         0.0000484864
+   7         0.0000038219
+   8         0.0000000000
+   Random number =         0.2089138367
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         6.4426236198
+   2         7.6233579554
+   3        33.6050126516
+   4         0.0000000000
+   5        13.4024969274
+   6         5.7535729987
+   7         4.2113665094
+   8         2.1161477363
+  
+   i = 145, time =               14.500 (fs)
+   Exact sum of fluxes =         0.0009777556
+   Approximate sum of fluxes =         0.0011835855
+   Minimum adiab. energy difference =         0.0006709610
+   Sum of probability =         0.0030871341
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0011510401
+   4         0.9969128659
+   5         0.0018921796
+   6         0.0000410967
+   7         0.0000028177
+   8         0.0000000000
+   Random number =         0.8483907400
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         6.5977192604
+   2         7.9922233995
+   3        36.0510409619
+   4         0.0000000000
+   5        13.5711023360
+   6         5.7012008834
+   7         4.2283151387
+   8         2.1565569682
+  
+   i = 146, time =               14.600 (fs)
+   Exact sum of fluxes =         0.0016273451
+   Approximate sum of fluxes =         0.0018849641
+   Minimum adiab. energy difference =         0.0006167817
+   Sum of probability =         0.0036259897
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0016143411
+   4         0.9963740103
+   5         0.0019753154
+   6         0.0000346268
+   7         0.0000017064
+   8         0.0000000000
+   Random number =         0.7982642567
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         6.7668066702
+   2         8.4037617829
+   3        39.2178375869
+   4         0.0000000000
+   5        13.7440243675
+   6         5.6474249588
+   7         4.2469214697
+   8         2.1995818965
+  
+   i = 147, time =               14.700 (fs)
+   Exact sum of fluxes =         0.0026044775
+   Approximate sum of fluxes =         0.0029427780
+   Minimum adiab. energy difference =         0.0005574039
+   Sum of probability =         0.0044376116
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0023423449
+   4         0.9955623884
+   5         0.0020657139
+   6         0.0000291291
+   7         0.0000004236
+   8         0.0000000000
+   Random number =         0.8567787535
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         6.9504310286
+   2         8.8638059554
+   3        43.3955402548
+   4         0.0000000000
+   5        13.9226009690
+   6         5.5927701053
+   7         4.2673340897
+   8         2.2454376187
+  
+   i = 148, time =               14.800 (fs)
+   Exact sum of fluxes =         0.0041549705
+   Approximate sum of fluxes =         0.0046321919
+   Minimum adiab. energy difference =         0.0004930675
+   Sum of probability =         0.0057559859
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0035592764
+   4         0.9942440141
+   5         0.0021720202
+   6         0.0000246893
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.6092955907
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         7.1490201532
+   2         9.3791192539
+   3        49.0578746612
+   4         0.0000000000
+   5        14.1084521672
+   6         5.5378214993
+   7         4.2897385601
+   8         2.2943737624
+  
+   i = 149, time =               14.900 (fs)
+   Exact sum of fluxes =         0.0067836357
+   Approximate sum of fluxes =         0.0075307959
+   Minimum adiab. energy difference =         0.0004241189
+   Sum of probability =         0.0080752746
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0057461083
+   4         0.9919247254
+   5         0.0023030077
+   6         0.0000212274
+   7         0.0000000000
+   8         0.0000049312
+   Random number =         0.2375216720
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         7.3627616173
+   2         9.9572244889
+   3        57.0331620385
+   4         0.0000000000
+   5        14.3037894660
+   6         5.4832182946
+   7         4.3143836144
+   8         2.3466854279
+  
+   i = 150, time =               15.000 (fs)
+   Exact sum of fluxes =         0.0117473320
+   Approximate sum of fluxes =         0.0131182243
+   Minimum adiab. energy difference =         0.0003512284
+   Sum of probability =         0.0126431630
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0101209364
+   4         0.9873568370
+   5         0.0024800980
+   6         0.0000193100
+   7         0.0000000000
+   8         0.0000228185
+   Random number =         0.9078938723
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         7.5910909224
+   2        10.6058330769
+   3        68.8692635647
+   4         0.0000000000
+   5        14.5124196014
+   6         5.4298578157
+   7         4.3416645177
+   8         2.4027517072
+  
+   i = 151, time =               15.100 (fs)
+   Exact sum of fluxes =         0.0226704878
+   Approximate sum of fluxes =         0.0258557707
+   Minimum adiab. energy difference =         0.0002756598
+   Sum of probability =         0.0230476624
+   Probability = 
+   1         0.0000000000
+   2         0.0000000000
+   3         0.0202641163
+   4         0.9769523376
+   5         0.0027206162
+   6         0.0000186928
+   7         0.0000000000
+   8         0.0000442370
+   Random number =         0.4471003069
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         7.8324597893
+   2        11.3318041072
+   3        87.7488890338
+   4         0.0000000000
+   5        14.7412291196
+   6         5.3789109350
+   7         4.3722047230
+   8         2.4630774987
+  
+   i = 152, time =               15.200 (fs)
+   Exact sum of fluxes =         0.0527124319
+   Approximate sum of fluxes =         0.0632586026
+   Minimum adiab. energy difference =         0.0002005246
+   Sum of probability =         0.0527904856
+   Probability = 
+   1         0.0003530192
+   2         0.0000000000
+   3         0.0491737486
+   4         0.9472095144
+   5         0.0031726134
+   6         0.0000213797
+   7         0.0000000000
+   8         0.0000697247
+   Random number =         0.9921965851
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         8.0819359147
+   2        12.1355804967
+   3       120.6278266972
+   4         0.0000000000
+   5        15.0059208156
+   6         5.3326651147
+   7         4.4073949063
+   8         2.5284944735
+  
+   i = 153, time =               15.300 (fs)
+   Exact sum of fluxes =         0.1594555855
+   Approximate sum of fluxes =         0.2175405521
+   Minimum adiab. energy difference =         0.0001354556
+   Sum of probability =         0.1596792121
+   Probability = 
+   1         0.0012884835
+   2         0.0000000000
+   3         0.1540032418
+   4         0.8403207879
+   5         0.0042544547
+   6         0.0000310833
+   7         0.0000000000
+   8         0.0001019489
+   Random number =         0.4544869802
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         8.3239852004
+   2        12.9896309885
+   3       178.5739257458
+   4         0.0000000000
+   5        15.3560968663
+   6         5.2970680133
+   7         4.4513756157
+   8         2.6008951510
+  
+   i = 154, time =               15.400 (fs)
+   Exact sum of fluxes =         0.4763097733
+   Approximate sum of fluxes =         0.8998980199
+   Minimum adiab. energy difference =         0.0001109919
+   Sum of probability =         0.4771292474
+   Probability = 
+   1         0.0028184275
+   2         0.0000000000
+   3         0.4660320427
+   4         0.5228707526
+   5         0.0080568283
+   6         0.0000671472
+   7         0.0000000000
+   8         0.0001548016
+   Random number =         0.0845863716
+   ATTEMPT between old_state =        4 and new_state =        3
+TRY ENERGY CONSERVATION WITH ISOTROPIC RESCALING:
+   Energy old state  (Ha)  =         2.5880300013
+   Energy new state  (Ha)  =         2.5879190094
+   Kinetic energy    (Ha)  =         0.3669365677
+   Energy difference (Ha)  =         0.3670475597
+SUCCESSFUL HOP!
+   Isotropic rescale factor  =         1.0001512298
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         8.8539226599
+   2        14.6896776048
+   3         0.0000000000
+   4       217.9333828132
+   5        14.8707839720
+   6         5.1646568809
+   7         4.4256181659
+   8         2.6529956959
+  
+   i = 155, time =               15.500 (fs)
+   Exact sum of fluxes =        -0.4542707562
+   Approximate sum of fluxes =        -0.2335173485
+   Minimum adiab. energy difference =         0.0001512982
+   Sum of probability =         0.0044251182
+   Probability = 
+   1         0.0031968317
+   2         0.0010460765
+   3         0.9955748818
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000168957
+   8         0.0001653142
+   Random number =         0.9326603224
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         9.0758625826
+   2        15.6892117658
+   3         0.0000000000
+   4       159.8752709175
+   5        15.3791153863
+   6         5.1545592229
+   7         4.4879812936
+   8         2.7409537479
+  
+   i = 156, time =               15.600 (fs)
+   Exact sum of fluxes =        -0.0868340273
+   Approximate sum of fluxes =        -0.0548159332
+   Minimum adiab. energy difference =         0.0002256376
+   Sum of probability =         0.0063671238
+   Probability = 
+   1         0.0049750307
+   2         0.0010064574
+   3         0.9936328762
+   4         0.0000000000
+   5         0.0001543523
+   6         0.0000000000
+   7         0.0000057669
+   8         0.0002255164
+   Random number =         0.5640502075
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         9.3509383680
+   2        16.9492044134
+   3         0.0000000000
+   4       107.2021600647
+   5        15.7647029365
+   6         5.1322555029
+   7         4.5408180907
+   8         2.8314770026
+  
+   i = 157, time =               15.700 (fs)
+   Exact sum of fluxes =        -0.0160932107
+   Approximate sum of fluxes =        -0.0079774219
+   Minimum adiab. energy difference =         0.0003115508
+   Sum of probability =         0.0091100568
+   Probability = 
+   1         0.0069461068
+   2         0.0011147916
+   3         0.9908899432
+   4         0.0000000000
+   5         0.0007608018
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0002883566
+   Random number =         0.5603916211
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         9.6417626276
+   2        18.4069396563
+   3         0.0000000000
+   4        77.6401375576
+   5        16.1170344297
+   6         5.1114784382
+   7         4.5920878342
+   8         2.9282962033
+  
+   i = 158, time =               15.800 (fs)
+   Exact sum of fluxes =         0.0033144026
+   Approximate sum of fluxes =         0.0071081665
+   Minimum adiab. energy difference =         0.0004011295
+   Sum of probability =         0.0119697652
+   Probability = 
+   1         0.0092082334
+   2         0.0013568789
+   3         0.9880302348
+   4         0.0000000000
+   5         0.0010431803
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0003614726
+   Random number =         0.3206984628
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         9.9316786239
+   2        20.0476837431
+   3         0.0000000000
+   4        60.3018318420
+   5        16.4574255008
+   6         5.0982739539
+   7         4.6432929757
+   8         3.0333107667
+  
+   i = 159, time =               15.900 (fs)
+   Exact sum of fluxes =         0.0119134474
+   Approximate sum of fluxes =         0.0146874498
+   Minimum adiab. energy difference =         0.0004899845
+   Sum of probability =         0.0151191541
+   Probability = 
+   1         0.0118000306
+   2         0.0017406143
+   3         0.9848808459
+   4         0.0000000000
+   5         0.0011299188
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0004485904
+   Random number =         0.1044244426
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1        10.2089007501
+   2        21.8645423593
+   3         0.0000000000
+   4        49.3665494196
+   5        16.7810558806
+   6         5.0974651231
+   7         4.6933219632
+   8         3.1480162145
+  
+   i = 160, time =               16.000 (fs)
+   Exact sum of fluxes =         0.0177084744
+   Approximate sum of fluxes =         0.0203186471
+   Minimum adiab. energy difference =         0.0005740481
+   Sum of probability =         0.0185752993
+   Probability = 
+   1         0.0146977463
+   2         0.0022884907
+   3         0.9814247007
+   4         0.0000000000
+   5         0.0010517499
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0005373124
+   Random number =         0.2416557412
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1        10.4624239189
+   2        23.8437631587
+   3         0.0000000000
+   4        42.1373109130
+   5        17.0636696802
+   6         5.1143279239
+   7         4.7395940918
+   8         3.2738974462
+  
+   i = 161, time =               16.100 (fs)
+   Exact sum of fluxes =         0.0228259533
+   Approximate sum of fluxes =         0.0255859978
+   Minimum adiab. energy difference =         0.0006483989
+   Sum of probability =         0.0228267233
+   Probability = 
+   1         0.0178520605
+   2         0.0030302577
+   3         0.9771732767
+   4         0.0004871817
+   5         0.0007943067
+   6         0.0000002900
+   7         0.0000000000
+   8         0.0006626266
+   Random number =         0.8472992329
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1        10.6815950032
+   2        25.9575299733
+   3         0.0000000000
+   4        37.3054976617
+   5        17.2593499312
+   6         5.1538927491
+   7         4.7795952359
+   8         3.4125093182
+  
+   i = 162, time =               16.200 (fs)
+   Exact sum of fluxes =         0.0278683076
+   Approximate sum of fluxes =         0.0309216813
+   Minimum adiab. energy difference =         0.0007070724
+   Sum of probability =         0.0278691884
+   Probability = 
+   1         0.0211561967
+   2         0.0039954512
+   3         0.9721308116
+   4         0.0015484950
+   5         0.0003402114
+   6         0.0000000000
+   7         0.0000148102
+   8         0.0008140239
+   Random number =         0.2556238138
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1        10.8564219646
+   2        28.1544197388
+   3         0.0000000000
+   4        34.2098521472
+   5        17.3020531018
+   6         5.2187464471
+   7         4.8134899813
+   8         3.5654350918
+  
+   i = 163, time =               16.300 (fs)
+   Exact sum of fluxes =         0.0329901526
+   Approximate sum of fluxes =         0.0363877150
+   Minimum adiab. energy difference =         0.0007441063
+   Sum of probability =         0.0332436175
+   Probability = 
+   1         0.0244734749
+   2         0.0051926403
+   3         0.9667563825
+   4         0.0025358028
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000473810
+   8         0.0009943185
+   Random number =         0.9170420817
+NO HOP!
+Final state   =        3
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1        10.9786758243
+   2        30.3571091890
+   3         0.0000000000
+   4        32.5072422143
+   5        17.1258662233
+   6         5.3082590546
+   7         4.8452763728
+   8         3.7340160651
+  
+   i = 164, time =               16.400 (fs)
+   Exact sum of fluxes =         0.0381164307
+   Approximate sum of fluxes =         0.0418386067
+   Minimum adiab. energy difference =         0.0007451826
+   Sum of probability =         0.0389615998
+   Probability = 
+   1         0.0276394046
+   2         0.0028745950
+   3         0.9610384002
+   4         0.0071336589
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0001135941
+   8         0.0012003474
+   Random number =         0.9949178267
+   ATTEMPT between old_state =        3 and new_state =        4
+TRY ENERGY CONSERVATION WITH ISOTROPIC RESCALING:
+   Energy old state  (Ha)  =         2.3616500582
+   Energy new state  (Ha)  =         2.3624063728
+   Kinetic energy    (Ha)  =         0.4209675185
+   Energy difference (Ha)  =         0.4202112039
+SUCCESSFUL HOP!
+   Isotropic rescale factor  =         0.9991012910
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         8.2087154967
+   2        16.1098151798
+   3        31.9825149698
+   4         0.0000000000
+   5        34.9951351134
+   6         6.5265801685
+   7         5.7610775550
+   8         4.4658111610
+  
+   i = 165, time =               16.500 (fs)
+   Exact sum of fluxes =        -0.3719792243
+   Approximate sum of fluxes =        -0.2786079575
+   Minimum adiab. energy difference =         0.0007437987
+   Sum of probability =         0.0182033854
+   Probability = 
+   1         0.0162259326
+   2         0.0000000000
+   3         0.0000000000
+   4         0.9817966146
+   5         0.0000000000
+   6         0.0005124318
+   7         0.0003382138
+   8         0.0011268071
+   Random number =         0.8577859370
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         8.2471847623
+   2        16.6822868715
+   3        32.5206842264
+   4         0.0000000000
+   5        31.9661627426
+   6         6.6994212551
+   7         5.8157356949
+   8         4.7141227501
+  
+   i = 166, time =               16.600 (fs)
+   Exact sum of fluxes =        -0.2547384415
+   Approximate sum of fluxes =        -0.2049854757
+   Minimum adiab. energy difference =         0.0007103666
+   Sum of probability =         0.0193856780
+   Probability = 
+   1         0.0166960019
+   2         0.0000000000
+   3         0.0000000000
+   4         0.9806143220
+   5         0.0000000000
+   6         0.0007444490
+   7         0.0007514773
+   8         0.0011937498
+   Random number =         0.8797527945
+NO HOP!
+Final state   =        4
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         8.3144275619
+   2        17.3826635825
+   3        34.0512111435
+   4         0.0000000000
+   5        28.2759290042
+   6         6.8651212443
+   7         5.8857214545
+   8         4.9493032192
+  
+   i = 167, time =               16.700 (fs)
+   Exact sum of fluxes =        -0.1883662912
+   Approximate sum of fluxes =        -0.1588620327
+   Minimum adiab. energy difference =         0.0006621416
+   Sum of probability =         0.0206684932
+   Probability = 
+   1         0.0171092356
+   2         0.0000000000
+   3         0.0000000000
+   4         0.9793315068
+   5         0.0000000000
+   6         0.0009789028
+   7         0.0015173395
+   8         0.0010630153
+   Random number =         0.0058488923
+   ATTEMPT between old_state =        4 and new_state =        1
+TRY ENERGY CONSERVATION WITH ISOTROPIC RESCALING:
+   Energy old state  (Ha)  =         2.2912865330
+   Energy new state  (Ha)  =         2.2884056478
+   Kinetic energy    (Ha)  =         0.4367730269
+   Energy difference (Ha)  =         0.4396539120
+SUCCESSFUL HOP!
+   Isotropic rescale factor  =         1.0032924999
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        15.6170919057
+   3        10.9020455397
+   4         8.3963233366
+   5         6.2698744765
+   6         3.8264009591
+   7         3.5054630016
+   8         3.1890453336
+  
+   i = 168, time =               16.800 (fs)
+   Exact sum of fluxes =        -0.1028201579
+   Approximate sum of fluxes =        -0.0951178993
+   Minimum adiab. energy difference =         0.0015780138
+   Sum of probability =         0.0000000000
+   Probability = 
+   1         1.0000000000
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.9616380474
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        15.3286644036
+   3        10.7591257888
+   4         8.4754778208
+   5         6.0973961576
+   6         3.8938917613
+   7         3.6015899985
+   8         3.2467736602
+  
+   i = 169, time =               16.900 (fs)
+   Exact sum of fluxes =        -0.0900818453
+   Approximate sum of fluxes =        -0.0837768875
+   Minimum adiab. energy difference =         0.0016062843
+   Sum of probability =         0.0000000000
+   Probability = 
+   1         1.0000000000
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.9452424221
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        15.0588809016
+   3        10.5781093550
+   4         8.5366783622
+   5         5.9140225811
+   6         3.9613942903
+   7         3.7327888343
+   8         3.2768776510
+  
+   i = 170, time =               17.000 (fs)
+   Exact sum of fluxes =        -0.0788040559
+   Approximate sum of fluxes =        -0.0736466831
+   Minimum adiab. energy difference =         0.0016330329
+   Sum of probability =         0.0000000000
+   Probability = 
+   1         1.0000000000
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.2461993462
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        14.8122201978
+   3        10.3674064793
+   4         8.5734330916
+   5         5.7257260071
+   6         4.0290938052
+   7         3.8891700290
+   8         3.2897755376
+  
+   i = 171, time =               17.100 (fs)
+   Exact sum of fluxes =        -0.0688727149
+   Approximate sum of fluxes =        -0.0646556583
+   Minimum adiab. energy difference =         0.0016575840
+   Sum of probability =         0.0000000000
+   Probability = 
+   1         1.0000000000
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.8790091395
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        14.5928314499
+   3        10.1357656703
+   4         8.5816842030
+   5         5.5367074603
+   6         4.1033618318
+   7         4.0575648346
+   8         3.2928728700
+  
+   i = 172, time =               17.200 (fs)
+   Exact sum of fluxes =        -0.0601498746
+   Approximate sum of fluxes =        -0.0567197142
+   Minimum adiab. energy difference =         0.0016794423
+   Sum of probability =         0.0000057853
+   Probability = 
+   1         0.9999942147
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000057853
+   8         0.0000000000
+   Random number =         0.0585603847
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        14.4029021309
+   3         9.8918057352
+   4         8.5600518039
+   5         5.3499060352
+   6         4.2656793561
+   7         4.1530395127
+   8         3.2899724853
+  
+   i = 173, time =               17.300 (fs)
+   Exact sum of fluxes =        -0.0525359140
+   Approximate sum of fluxes =        -0.0496708356
+   Minimum adiab. energy difference =         0.0016983240
+   Sum of probability =         0.0000015005
+   Probability = 
+   1         0.9999984995
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000015005
+   Random number =         0.5468747201
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        14.2427731229
+   3         9.6442663351
+   4         8.5095897827
+   5         5.1674713008
+   6         4.4710796197
+   7         4.2183728239
+   8         3.2830542084
+  
+   i = 174, time =               17.400 (fs)
+   Exact sum of fluxes =        -0.0458972764
+   Approximate sum of fluxes =        -0.0435000303
+   Minimum adiab. energy difference =         0.0017142785
+   Sum of probability =         0.0000041906
+   Probability = 
+   1         0.9999958094
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000041906
+   Random number =         0.8376652340
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        14.1102179565
+   3         9.4022425336
+   4         8.4334722168
+   5         4.9912137592
+   6         4.6897742870
+   7         4.2805959227
+   8         3.2732340175
+  
+   i = 175, time =               17.500 (fs)
+   Exact sum of fluxes =        -0.0401144275
+   Approximate sum of fluxes =        -0.0381071712
+   Minimum adiab. energy difference =         0.0017275850
+   Sum of probability =         0.0000056550
+   Probability = 
+   1         0.9999943450
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000056550
+   Random number =         0.2649033866
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        14.0015361192
+   3         9.1766146152
+   4         8.3357823134
+   5         4.9240933040
+   6         4.8153488379
+   7         4.3403871240
+   8         3.2612147323
+  
+   i = 176, time =               17.600 (fs)
+   Exact sum of fluxes =        -0.0350611467
+   Approximate sum of fluxes =        -0.0332205420
+   Minimum adiab. energy difference =         0.0017388426
+   Sum of probability =         0.0000064333
+   Probability = 
+   1         0.9999935667
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000064333
+   Random number =         0.1007278268
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        13.9108868945
+   3         8.9828161052
+   4         8.2201112981
+   5         5.1532778071
+   6         4.6552899092
+   7         4.3972352245
+   8         3.2474797232
+  
+   i = 177, time =               17.700 (fs)
+   Exact sum of fluxes =        -0.0307101210
+   Approximate sum of fluxes =        -0.0289282497
+   Minimum adiab. energy difference =         0.0017483969
+   Sum of probability =         0.0000127486
+   Probability = 
+   1         0.9999872514
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000063724
+   8         0.0000063762
+   Random number =         0.0568380830
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        13.8348693220
+   3         8.8443698216
+   4         8.0869443712
+   5         5.3783048714
+   6         4.5044628975
+   7         4.4463692360
+   8         3.2324164634
+  
+   i = 178, time =               17.800 (fs)
+   Exact sum of fluxes =        -0.0268668886
+   Approximate sum of fluxes =        -0.0249764192
+   Minimum adiab. energy difference =         0.0017570522
+   Sum of probability =         0.0000234198
+   Probability = 
+   1         0.9999765802
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000172653
+   8         0.0000061545
+   Random number =         0.0413669819
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        13.7667183673
+   3         8.7922454683
+   4         7.9350894840
+   5         5.5804976524
+   6         4.5061610367
+   7         4.3464161521
+   8         3.2162776334
+  
+   i = 179, time =               17.900 (fs)
+   Exact sum of fluxes =        -0.0234635445
+   Approximate sum of fluxes =        -0.0214572728
+   Minimum adiab. energy difference =         0.0017654508
+   Sum of probability =         0.0000057032
+   Probability = 
+   1         0.9999942968
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000057032
+   Random number =         0.0410145546
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        13.7012278993
+   3         8.8589600805
+   4         7.7666999713
+   5         5.7391839217
+   6         4.5514692844
+   7         4.2055804174
+   8         3.1992759527
+  
+   i = 180, time =               18.000 (fs)
+   Exact sum of fluxes =        -0.0203988614
+   Approximate sum of fluxes =        -0.0183037502
+   Minimum adiab. energy difference =         0.0017741840
+   Sum of probability =         0.0000062931
+   Probability = 
+   1         0.9999937069
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000011736
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000051195
+   Random number =         0.5391240691
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        13.6337848642
+   3         9.0697796450
+   4         7.5892192295
+   5         5.8364515989
+   6         4.5922934884
+   7         4.0708787269
+   8         3.1815740205
+  
+   i = 181, time =               18.100 (fs)
+   Exact sum of fluxes =        -0.0175614004
+   Approximate sum of fluxes =        -0.0154945479
+   Minimum adiab. energy difference =         0.0017837849
+   Sum of probability =         0.0000043971
+   Probability = 
+   1         0.9999956029
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000043971
+   Random number =         0.4855172811
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        13.5604033628
+   3         9.4376003981
+   4         7.4109889176
+   5         5.8664254801
+   6         4.6267952764
+   7         3.9427228589
+   8         3.1632789670
+  
+   i = 182, time =               18.200 (fs)
+   Exact sum of fluxes =        -0.0148275257
+   Approximate sum of fluxes =        -0.0128704608
+   Minimum adiab. energy difference =         0.0017946923
+   Sum of probability =         0.0000036002
+   Probability = 
+   1         0.9999963998
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000036002
+   Random number =         0.5406849958
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        13.4779890270
+   3         9.9642139960
+   4         7.2383851126
+   5         5.8373314940
+   6         4.6535030664
+   7         3.8209076442
+   8         3.1444616717
+  
+   i = 183, time =               18.300 (fs)
+   Exact sum of fluxes =        -0.0120523646
+   Approximate sum of fluxes =        -0.0101867693
+   Minimum adiab. energy difference =         0.0018070405
+   Sum of probability =         0.0000027100
+   Probability = 
+   1         0.9999972900
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000027100
+   Random number =         0.5730146198
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        13.3858885432
+   3        10.6469672247
+   4         7.0756814825
+   5         5.7642376225
+   6         4.6708247519
+   7         3.7051234052
+   8         3.1251453482
+  
+   i = 184, time =               18.400 (fs)
+   Exact sum of fluxes =        -0.0090361343
+   Approximate sum of fluxes =        -0.0071133257
+   Minimum adiab. energy difference =         0.0018198947
+   Sum of probability =         0.0000017334
+   Probability = 
+   1         0.9999982666
+   2         0.0000000000
+   3         0.0000000000
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000017334
+   Random number =         0.6623537314
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        13.2913418975
+   3        11.4797785474
+   4         6.9255481030
+   5         5.6615086749
+   6         4.6770728920
+   7         3.5949945079
+   8         3.1052944261
+  
+   i = 185, time =               18.500 (fs)
+   Exact sum of fluxes =        -0.0054839078
+   Approximate sum of fluxes =        -0.0028673668
+   Minimum adiab. energy difference =         0.0018229785
+   Sum of probability =         0.0034746014
+   Probability = 
+   1         0.9965253986
+   2         0.0000000000
+   3         0.0034739400
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000006614
+   Random number =         0.1729031240
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        13.2688582410
+   3        12.3947749619
+   4         6.7894160866
+   5         5.5398888875
+   6         4.6705381927
+   7         3.4901005984
+   8         3.0847892856
+  
+   i = 186, time =               18.600 (fs)
+   Exact sum of fluxes =        -0.0010489227
+   Approximate sum of fluxes =         0.0026373536
+   Minimum adiab. energy difference =         0.0017334646
+   Sum of probability =         0.0054260196
+   Probability = 
+   1         0.9945739804
+   2         0.0000000000
+   3         0.0054260196
+   4         0.0000000000
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.0913887727
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        13.9540447671
+   3        12.7696348520
+   4         6.6677930628
+   5         5.4066361771
+   6         4.6497599457
+   7         3.3900556702
+   8         3.0634410434
+  
+   i = 187, time =               18.700 (fs)
+   Exact sum of fluxes =         0.0049357319
+   Approximate sum of fluxes =         0.0080859913
+   Minimum adiab. energy difference =         0.0015793154
+   Sum of probability =         0.0087950713
+   Probability = 
+   1         0.9912049287
+   2         0.0062147556
+   3         0.0025774164
+   4         0.0000028993
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.4372582789
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        15.3160307596
+   3        12.6439024261
+   4         6.5597136931
+   5         5.2661498788
+   6         4.6135658776
+   7         3.2944197170
+   8         3.0408621876
+  
+   i = 188, time =               18.800 (fs)
+   Exact sum of fluxes =         0.0133456272
+   Approximate sum of fluxes =         0.0168575731
+   Minimum adiab. energy difference =         0.0014278246
+   Sum of probability =         0.0165488831
+   Probability = 
+   1         0.9834511169
+   2         0.0151434607
+   3         0.0013968051
+   4         0.0000086173
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.4615534449
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        16.9410472824
+   3        12.4268182058
+   4         6.4628169818
+   5         5.1209282659
+   6         4.5613017704
+   7         3.2028907768
+   8         3.0163848559
+  
+   i = 189, time =               18.900 (fs)
+   Exact sum of fluxes =         0.0254327481
+   Approximate sum of fluxes =         0.0302412679
+   Minimum adiab. energy difference =         0.0012899448
+   Sum of probability =         0.0279300936
+   Probability = 
+   1         0.9720699064
+   2         0.0269736057
+   3         0.0009436291
+   4         0.0000128588
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.7842377620
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        18.7518429812
+   3        12.1548893381
+   4         6.3731904738
+   5         4.9720730885
+   6         4.4928929168
+   7         3.1155951576
+   8         2.9886586916
+  
+   i = 190, time =               19.000 (fs)
+   Exact sum of fluxes =         0.0427517560
+   Approximate sum of fluxes =         0.0499570068
+   Minimum adiab. energy difference =         0.0011722373
+   Sum of probability =         0.0445046834
+   Probability = 
+   1         0.9554953166
+   2         0.0437878095
+   3         0.0007009068
+   4         0.0000159671
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.8018186446
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        20.6347659094
+   3        11.8284979282
+   4         6.2853971524
+   5         4.8196749846
+   6         4.4086107405
+   7         3.0346032194
+   8         2.9541306900
+  
+   i = 191, time =               19.100 (fs)
+   Exact sum of fluxes =         0.0665679198
+   Approximate sum of fluxes =         0.0777817879
+   Minimum adiab. energy difference =         0.0010811933
+   Sum of probability =         0.0675475763
+   Probability = 
+   1         0.9324524237
+   2         0.0669691562
+   3         0.0005581895
+   4         0.0000182231
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000020075
+   Random number =         0.8219547735
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        22.3723568096
+   3        11.4438147641
+   4         6.1931309209
+   5         4.6633877049
+   6         4.3091837228
+   7         2.9681472373
+   8         2.9029713904
+  
+   i = 192, time =               19.200 (fs)
+   Exact sum of fluxes =         0.0966312973
+   Approximate sum of fluxes =         0.1139105230
+   Minimum adiab. energy difference =         0.0010233959
+   Sum of probability =         0.0968077124
+   Probability = 
+   1         0.9031922876
+   2         0.0963058045
+   3         0.0004797886
+   4         0.0000198517
+   5         0.0000000000
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000022675
+   Random number =         0.4779871636
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        23.6358620698
+   3        10.9991132751
+   4         6.0900515699
+   5         4.5027920374
+   6         4.1956873161
+   7         2.9194364763
+   8         2.8304730711
+  
+   i = 193, time =               19.300 (fs)
+   Exact sum of fluxes =         0.1295979038
+   Approximate sum of fluxes =         0.1546478763
+   Minimum adiab. energy difference =         0.0010039523
+   Sum of probability =         0.1296433036
+   Probability = 
+   1         0.8703566964
+   2         0.1284882867
+   3         0.0004472801
+   4         0.0000209361
+   5         0.0006860336
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000007671
+   Random number =         0.1906821287
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        24.0936181912
+   3        10.5004355588
+   4         5.9716557150
+   5         4.3383052623
+   6         4.0700371743
+   7         2.8754798857
+   8         2.7488485493
+  
+   i = 194, time =               19.400 (fs)
+   Exact sum of fluxes =         0.1593335507
+   Approximate sum of fluxes =         0.1920782953
+   Minimum adiab. energy difference =         0.0010248659
+   Sum of probability =         0.1593742691
+   Probability = 
+   1         0.8406257309
+   2         0.1574216726
+   3         0.0004442191
+   4         0.0000216159
+   5         0.0014867288
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000326
+   Random number =         0.0390195104
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        23.6019585292
+   3         9.9632732650
+   4         5.8365779231
+   5         4.1715599225
+   6         3.9352304161
+   7         2.8299298269
+   8         2.6648202315
+  
+   i = 195, time =               19.500 (fs)
+   Exact sum of fluxes =         0.1800909945
+   Approximate sum of fluxes =         0.2179794591
+   Minimum adiab. energy difference =         0.0010842175
+   Sum of probability =         0.1801280400
+   Probability = 
+   1         0.8198719600
+   2         0.1774224576
+   3         0.0004580478
+   4         0.0000218228
+   5         0.0022257117
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.2096178985
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        22.3099546508
+   3         9.4097297354
+   4         5.6870119753
+   5         4.0053152400
+   6         3.7951480579
+   7         2.7818683457
+   8         2.5808760859
+  
+   i = 196, time =               19.600 (fs)
+   Exact sum of fluxes =         0.1897862200
+   Approximate sum of fluxes =         0.2289648617
+   Minimum adiab. energy difference =         0.0011770885
+   Sum of probability =         0.1898206739
+   Probability = 
+   1         0.8101793261
+   2         0.1864588285
+   3         0.0004765085
+   4         0.0000216964
+   5         0.0028636404
+   6         0.0000000000
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.2581467451
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        20.5497237623
+   3         8.8625429030
+   4         5.5272556915
+   5         3.8426408521
+   6         3.6538073090
+   7         2.7319761519
+   8         2.4985575616
+  
+   i = 197, time =               19.700 (fs)
+   Exact sum of fluxes =         0.1900084668
+   Approximate sum of fluxes =         0.2271701434
+   Minimum adiab. energy difference =         0.0012975497
+   Sum of probability =         0.1900428272
+   Probability = 
+   1         0.8099571728
+   2         0.1861561015
+   3         0.0004924396
+   4         0.0000211901
+   5         0.0033714104
+   6         0.0000016855
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.7186627082
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        18.6419399421
+   3         8.3387998376
+   4         5.3619613303
+   5         3.6860687634
+   6         3.5145771175
+   7         2.6812825106
+   8         2.4189722952
+  
+   i = 198, time =               19.800 (fs)
+   Exact sum of fluxes =         0.1838777783
+   Approximate sum of fluxes =         0.2171467742
+   Minimum adiab. energy difference =         0.0014401511
+   Sum of probability =         0.1839125702
+   Probability = 
+   1         0.8160874298
+   2         0.1796507078
+   3         0.0004998517
+   4         0.0000204169
+   5         0.0037381694
+   6         0.0000034243
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.4049325362
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        16.7960448423
+   3         7.8487328001
+   4         5.1949695239
+   5         3.5372594362
+   6         3.3798364285
+   7         2.6307256715
+   8         2.3428272083
+  
+   i = 199, time =               19.900 (fs)
+   Exact sum of fluxes =         0.1742751265
+   Approximate sum of fluxes =         0.2030408856
+   Minimum adiab. energy difference =         0.0016004103
+   Sum of probability =         0.1743087193
+   Probability = 
+   1         0.8256912807
+   2         0.1698085299
+   3         0.0004998732
+   4         0.0000193794
+   5         0.0039771499
+   6         0.0000037869
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.3997988932
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        15.1141514289
+   3         7.3969274916
+   4         5.0289761112
+   5         3.3970484720
+   6         3.2510469368
+   7         2.5810124872
+   8         2.2705036098
+  
+   i = 200, time =               20.000 (fs)
+   Exact sum of fluxes =         0.1550166228
+   Approximate sum of fluxes =         0.1770293634
+   Minimum adiab. energy difference =         0.0017749752
+   Sum of probability =         0.1550473534
+   Probability = 
+   1         0.8449526466
+   2         0.1505922517
+   3         0.0004639504
+   4         0.0000173166
+   5         0.0039706048
+   6         0.0000032299
+   7         0.0000000000
+   8         0.0000000000
+   Random number =         0.6163657441
+NO HOP!
+Final state   =        1
+  
+  
+METHOD FOR DECOHERENCE: DAMPING.
+    Damping time (fs) = 
+   1         0.0000000000
+   2        13.6277075704
+   3         6.9839388827
+   4         4.8657345650
+   5         3.2656481208
+   6         3.1289395117
+   7         2.5326106276
+   8         2.2021300876
+  
