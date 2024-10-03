@@ -79,13 +79,15 @@ IMPLICIT NONE
              adiab_print_hamiltonian,    &
              adiab_print_pseudo_hamiltonian,    &
              adiab_print_nace,           &
+             adiab_print_nace_active,    &
              adiab_print_nacv,           &
              adiab_print_hop_nacv,       &
              adiab_print_stateno,        &
              adiab_print_exact_forces,   &
              adiab_print_active_state,   &
              adiab_print_sh_info,        &
-             adiab_print_pvecs
+             adiab_print_pvecs,          &
+             print_new_state_indices
 
 CONTAINS
 
@@ -653,7 +655,56 @@ CONTAINS
    END SUBROUTINE adiab_print_nace
 
 
+  SUBROUTINE adiab_print_nace_active(adiab_section, active_state, nace, nadiab, &
+             norbitals, itimes, deltatMD, times)
+   TYPE(section_vals_type), POINTER         :: adiab_section
+   REAL(KIND=dp), DIMENSION(:,:)            :: nace
+   INTEGER, INTENT(IN)                      :: nadiab, norbitals
+   INTEGER, INTENT(IN)                      :: active_state
+   INTEGER, POINTER                         :: itimes
+   REAL(KIND=dp), INTENT(IN)                  :: deltatMD, times
 
+   CHARACTER(len=*), PARAMETER :: routineN = 'adiab_print_nace_active', &
+     routineP = moduleN//':'//routineN
+
+   INTEGER                                  :: unit_nr
+   INTEGER                                  :: iadiab, iorbitals
+   CHARACTER(LEN=default_string_length)     ::  my_format, my_format2
+   TYPE(cp_logger_type), POINTER            :: logger
+   LOGICAL                                  :: new_file
+   REAL(KIND=dp)                            :: unit_conv, unit_conv_fs, time
+   CHARACTER(LEN=default_string_length)     :: unit_str
+
+   NULLIFY(logger)
+   logger => cp_get_default_logger()
+
+   unit_nr=cp_print_key_unit_nr(logger,adiab_section,"PRINT%NACE",&
+              extension=".xyz",middle_name="nace-active", log_filename=.FALSE.,&
+              is_new_file=new_file)
+
+   IF (unit_nr>0) THEN
+
+      CALL section_vals_val_get(adiab_section,"PRINT%NACE%UNIT",&
+           c_val=unit_str)
+      unit_conv = cp_unit_from_cp2k(1.0_dp,TRIM(unit_str))
+      unit_conv_fs = cp_unit_from_cp2k(1.0_dp,"fs")
+      time = unit_conv_fs*times*deltatMD
+
+      WRITE ( unit_nr, "( A,A,A,I8,A,I8)" ) "NACE_ACTIVE (",TRIM(unit_str),");  nadiab =", nadiab, "; norbitals =",&
+                                  norbitals
+      WRITE ( unit_nr, '(A,I0,A,F20.3,A,F0.10)' )   " i = ",itimes,", time = ",time, " (fs)"
+
+      DO iorbitals=1,norbitals
+        my_format="(I4,1X,I4,"
+        write(my_format2,"(I8)") nadiab*norbitals
+        WRITE(unit_nr,TRIM(my_format)//"1X,"//TRIM(my_format2)//"F20.10)") active_state, iorbitals, &
+                          unit_conv*nace( (active_state-1)*norbitals + iorbitals,:)
+      ENDDO
+
+   END IF
+   CALL cp_print_key_finished_output(unit_nr,logger,adiab_section,"PRINT%NACE")
+
+  END SUBROUTINE adiab_print_nace_active
 
    SUBROUTINE adiab_print_matrix_density(adiab_section, coefficients, nadiab, &
               norbitals, itimes, deltatMD, times)
@@ -889,6 +940,44 @@ CONTAINS
     END IF
     CALL cp_print_key_finished_output(unit_nr,logger,adiab_section,"PRINT%STATE")
    END SUBROUTINE adiab_print_stateno
+
+   SUBROUTINE print_new_state_indices(sh_env, sh_print_env)
+
+! subroutine for printing out the indices of adiabats of the previous
+! timestep, to which the indicies of the adiabats in the current
+! timestep correspond -- FI 18/03/2024
+
+        TYPE(sh_print_env_type), INTENT(IN) :: sh_print_env
+        TYPE(sh_env_type), INTENT(IN) :: sh_env
+        INTEGER :: unit_number
+        REAL(KIND=dp) :: times, real_time, convert_to_fs, delta_t_MD
+        TYPE(section_vals_type), POINTER :: adiab_section
+        TYPE(cp_logger_type), POINTER :: logger
+
+       
+        NULLIFY(logger)
+        logger => cp_get_default_logger()
+        times = sh_print_env%times
+        delta_t_MD = sh_print_env%deltatMD 
+        adiab_section => sh_print_env%adiab_section
+
+        unit_number=cp_print_key_unit_nr(logger,adiab_section,"PRINT%NEW_STATE_INDICES",&
+               extension=".log", middle_name="state-tracker",log_filename=.FALSE.)
+
+        if (unit_number > 0) then
+
+          convert_to_fs = cp_unit_from_cp2k(1.0_dp,"fs")
+          real_time = times*delta_t_MD*convert_to_fs
+
+          write( unit_number, '(A,I0,A,F20.3,A,F0.10)' )   "   i = ",INT(times),", time = ",real_time, " (fs)"
+          write(unit_number,*) sh_env%adiab_nace_env%map_new2old
+
+        end if
+
+
+    CALL cp_print_key_finished_output(unit_number,logger,adiab_section,"PRINT%NEW_STATE_INDICES")
+
+   END SUBROUTINE print_new_state_indices
 
 
    SUBROUTINE adiab_print_sh_info(sh_print_env, keyword)

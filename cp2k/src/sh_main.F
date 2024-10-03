@@ -89,7 +89,8 @@ MODULE sh_main
                                              adiab_print_hamiltonian, &
                                              adiab_print_pseudo_hamiltonian, &
                                              adiab_print_nacv, &
-                                             adiab_print_pvecs
+                                             adiab_print_pvecs, &
+                                             adiab_print_nace_active
 
 
 
@@ -212,7 +213,6 @@ CONTAINS
      REAL(KIND=dp)                                  :: convert_nacv
      INTEGER                                        :: i
      COMPLEX(KIND=dp), dimension(:), allocatable    :: ctotal
-     INTEGER                                        :: number_CT_states
 
      NULLIFY(positions_com_tp, velocities_com_tp)
      NULLIFY(logger)
@@ -400,6 +400,10 @@ CONTAINS
         CALL adiab_print_adiabat_energies(adiab_section, sh_env%E_tp, nadiab, deltatMD, times)
         CALL adiab_print_hamiltonian(adiab_section, -AIMAG(sh_env%H_tp), nadiab,norbitals,itimes, deltatMD)
         CALL adiab_print_pseudo_hamiltonian(adiab_section, -AIMAG(sh_env%H_tp), nadiab,norbitals,itimes, deltatMD)
+        CALL adiab_print_nace_active(adiab_section, sh_env%active_state, sh_env%adiab_nace_t, nadiab, norbitals, &
+itimes, deltatMD, times)
+
+
         IF (sh_env%aom_couplings_keyword) THEN
             CALL adiab_print_nacv(adiab_section, sh_env%nacv, nadiab, norbitals, sh_env%atoms_per_site, itimes, deltatMD)
             call adiab_print_pvecs(adiab_section, PC_allrvecs, itimes, deltatMD, times, sh_env%atoms_per_site, nadiab)
@@ -945,7 +949,7 @@ print *, "ACTIVE STATE", active_state
      !> Calculate the overlap between C_tp and C_t, reorder state if required,
      !> calculate the adiabatic nace [and diabatic nace at (t)]
      !IF (do_nace_speedup) THEN
-        CALL calc_adiab_nace(sh_env, adiab_section)
+        CALL calc_adiab_nace(sh_env, sh_print_env, adiab_section)
      !ELSE
      !   CALL calc_adiab_nace_old(sh_env, adiab_section)
      !END IF
@@ -1216,6 +1220,10 @@ print *, "ACTIVE STATE", active_state
      CALL adiab_print_site_energies(adiab_section, site_energies, nadiab, deltatMD, times)
      CALL adiab_print_off_diagonals(adiab_section, couplings, nadiab-1, deltatMD, times)
      CALL adiab_print_adiabat_energies(adiab_section, sh_env%E_tp, nadiab, deltatMD, times)
+     CALL adiab_print_nace_active(adiab_section, sh_env%active_state, sh_env%adiab_nace_t, nadiab, norbitals, &
+itimes, deltatMD, times)
+
+
      IF (sh_env%aom_couplings_keyword) THEN
         CALL adiab_print_nacv(adiab_section, sh_env%nacv, nadiab, norbitals, sh_env%atoms_per_site ,itimes, deltatMD)
         CALL adiab_print_pvecs(adiab_section, PC_allrvecs, itimes, deltatMD, times, sh_env%atoms_per_site, nadiab)
