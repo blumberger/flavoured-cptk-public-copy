@@ -1035,7 +1035,7 @@ subroutine calcforces_frozenH(Hin, C, state, Fin, forces_adiab)
               do i=1,mat
                  ! Diagonal term, it depends on the forces. The minus is already
                  ! part of diagonal forces calculation from FIST.
-                 forces_adiab(d,j) = forces_adiab(d,j) +(abs(C(i,state))**2)*Fin(d,j,i)
+                 forces_adiab(d,j) = forces_adiab(d,j) + (abs(C(i,state))**2)*Fin(d,j,i)
               end do 
            end do
         end do
@@ -5217,7 +5217,7 @@ END SUBROUTINE classically_forbidden_hops
           X1  = X2
       end do
  
- !     CALL adiab_print_nace(adiab_section, NACE, nadiab, norbitals, itimes, deltatMD, times)
+!      CALL adiab_print_nace(adiab_section, NACE, nadiab, norbitals, itimes, deltatMD, times)
       CALL adiab_print_coeff(adiab_section, ctin,nadiab, norbitals,itimes, deltatMD, &
                              times)
       CALL adiab_print_pop(adiab_section, ABS(ctotal) ,nadiab,norbitals,itimes, deltatMD, &

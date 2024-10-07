@@ -48,7 +48,8 @@ MODULE aom_utils
    USE machine,                        ONLY: m_getpid
    USE sh_types,                      ONLY: sh_print_env_type, &
                                              sh_env_type
-   USE aom_print,                      ONLY: adiab_print_sh_info
+   USE aom_print,                      ONLY: adiab_print_sh_info, &
+                                                 print_new_state_indices
 
   USE cp_parser_methods,               ONLY: read_float_object
 
@@ -1119,7 +1120,7 @@ SUBROUTINE calc_fect_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, p
                                           ct_ind, sh_env%connlist1_ct,sh_env%connlist2_ct, sh_env%atomlist_ct, &
                                           sh_env%nacv_ct)
 
-  
+
 !WTP_comment: the Sab_list_fect as well as nacv should be tested here...
 
    !> loop over states: note that it does not matter if donor molecules comes
@@ -2785,11 +2786,12 @@ end subroutine nace1_time_t
 !> \brief I've divided the calc_adiab_nace subroutine into discrete chunks in
 !         order to profiling it with a finer resolution. This is chunk 2.
 !**********************************************************************************
-subroutine nace2(sh_env, mol, print_here)
+subroutine nace2(sh_env, sh_print_env, mol, print_here)
 
         TYPE(sh_env_type)                         :: sh_env
         INTEGER                                    :: mol
         LOGICAL                                    :: print_here
+        TYPE(sh_print_env_type), INTENT(IN) :: sh_print_env
 
         CHARACTER(len=*), PARAMETER :: routineN ='nace2', &
                     routineP = moduleN//':'//routineN
@@ -2892,6 +2894,12 @@ subroutine nace2(sh_env, mol, print_here)
            CPABORT("Problem in the mapping between old and new states.")
        ENDIF
 !> End of 2.
+
+!open(212,file="adiabatic_indices.txt",position="append")
+!write(212,*) sh_env%adiab_nace_env%map_new2old
+!close(212)
+
+call print_new_state_indices(sh_env, sh_print_env)
 
 end subroutine nace2
 
@@ -3062,10 +3070,11 @@ end subroutine nace7
 !**********************************************************************************
 !> \brief 
 !**********************************************************************************
-subroutine calc_adiab_nace(sh_env, adiab_section)
+subroutine calc_adiab_nace(sh_env, sh_print_env, adiab_section)
         !this subroutine calculates the adiabatic nace used in the calculation
         !of the hopping probability and also in the RK adiabatic propagation 
         TYPE(sh_env_type)                         :: sh_env
+        TYPE(sh_print_env_type), INTENT(IN) :: sh_print_env
         TYPE(section_vals_type), POINTER           :: adiab_section
 
         CHARACTER(len=*), PARAMETER :: routineN ='calc_adiab_nace', &
@@ -3083,7 +3092,7 @@ subroutine calc_adiab_nace(sh_env, adiab_section)
             CALL nace1_time_tp(sh_env, mat, sh_env%deltat)
         end if
         !CALL nace1(sh_env, mat, sh_env%deltat)
-        CALL nace2(sh_env, mat, print_here)
+        CALL nace2(sh_env, sh_print_env, mat, print_here)
         CALL nace3(sh_env)
         CALL nace4(sh_env, mat)
         CALL nace5(sh_env)

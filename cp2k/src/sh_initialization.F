@@ -134,6 +134,7 @@ CONTAINS
      NULLIFY(optimization_section)
      NULLIFY(site_energy_section)
 
+
      CALL section_vals_val_get(adiab_section,"NUCLEAR_TIMESTEP",&
          r_val=MDtimestep)
      sh_env%deltat = MDtimestep !> MD time step
@@ -213,6 +214,7 @@ CONTAINS
                              seed=initial_seed)
      ALLOCATE(sh_env%rng_stream)
      sh_env%rng_stream = rng_stream
+
 
      !> Get wavefunction diabatic coefficients from the input file for the
      !restart file option
@@ -319,10 +321,6 @@ CONTAINS
     !------------------------------------------------------------------------------------------
     CASE("FROZEN_COUPLINGS")
 
-	open(959, file="coupling_list.txt",position="append")
-	write(959,*) "here"
-	close(959)
-
         ! Frozen coupling would have the possibility of using multi-state for
         ! the CT block for example. 
         !sh_env%multistate = .TRUE.
@@ -332,25 +330,13 @@ CONTAINS
         !> Get Hab for the first upper and lower diagonal (tridiagonal matrix
         !will be formed)
 
-	open(959, file="coupling_list.txt",position="append")
-	write(959,*) "here"
-	close(959)
-         
         CALL section_vals_val_get(frozen_coupling_section,"CONNECTIVITY_FRZ_C",&
              l_val=sh_env%connectivity_frz_c)
-
-	open(959, file="coupling_list.txt",position="append")
-	write(959,*) "here"
-	close(959)
 
         IF (sh_env%connectivity_frz_c) THEN 
            CALL section_vals_val_get(frozen_coupling_section,"INTERACTION_NUMBER",&
                 i_val=ninteractions)
            CALL section_vals_list_get(frozen_coupling_section,"_DEFAULT_KEYWORD_",list=frz_couplings_list) !Read list tresp from input
-	   open(959, file="coupling_list.txt",position="append")
-	   write(959,*) "here"
-	   close(959)
-
            CALL read_list_frz_couplings(ninteractions, frz_couplings_list, sh_env%frz_coup_connectivity, sh_env%frz_couplings)
 	   !CPABORT("TEST DONE")
  
@@ -464,7 +450,6 @@ CONTAINS
 
      !get CT block for donor and acceptor
      ct_block => section_vals_get_subs_vals(site_energy_section,"CT_BLOCK")
-  
 
      !> Initialize input parameters: 
      !> cutoff to define the neighborough list
@@ -724,6 +709,7 @@ CONTAINS
      CHARACTER(LEN=default_string_length)           :: STO_input_string
      REAL(KIND=dp)                                  :: STO_rmin,STO_rmax,STO_dr
      INTEGER                                        :: STO_debug
+     INTEGER                                        :: atom_index, conn_counter
 
      NULLIFY(listcoeff)
      NULLIFY(coupling_section)
@@ -1025,6 +1011,18 @@ CONTAINS
 !     print *, "connlist1: ", sh_env%connlist1_d
 !     print *, "connlist2: ", sh_env%connlist2_d 
 
+     open(422, file="donor-connectivity.xyz", position="append")
+     write(422,*) "Printing sulphur atoms' nearest neighbours:"
+
+     do conn_counter = 1,size(sh_env%connlist2_d, dim=2)
+        atom_index = sh_env%connlist2_d(1,conn_counter)
+        if (Atp_loc(1,atom_index) == 16) then
+               write(422,*) sh_env%connlist2_d(:,conn_counter)
+        end if
+     end do
+
+     close(422)
+
      ! coefficients donor phase
      ALLOCATE(sh_env%pcoeffs_d(atoms_per_donor))
      ALLOCATE (sh_env%scoeffs_d(atoms_per_donor))
@@ -1058,6 +1056,19 @@ CONTAINS
      !output: sh_env%connlist1, sh_env%connlist2, which are the intramoleculat
      !connectivities with and without considering the zeors
      call connect_list2(Atp_loc(2:4,:), sh_env%atomlist_a, sh_env%connlist1_a, sh_env%connlist2_a, sh_env%cutoff_connect)
+
+     open(433, file="acceptor-connectivity.xyz", position="append")
+     write(433,*) "Print oxygen atoms' nearest neighbours:"
+
+     do conn_counter = 1,size(sh_env%connlist2_a, dim=2)
+        atom_index = sh_env%connlist2_a(1,conn_counter)
+        if (Atp_loc(1,atom_index) == 8) then
+               write(433,*) sh_env%connlist2_a(:,conn_counter)
+        end if
+     end do
+
+     close(433)
+
 
      ! coefficients acceptor phase
      ALLOCATE(sh_env%pcoeffs_a(atoms_per_acceptor))

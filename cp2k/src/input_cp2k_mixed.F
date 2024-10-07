@@ -1057,6 +1057,13 @@ CONTAINS
      CALL section_add_subsection(sub2section,print_key)
      CALL section_release(print_key)
 
+     CALL cp_print_key_section_create(print_key_section=print_key,&
+          name="NEW_STATE_INDICES",&
+          description="Prints the mapping of the adiabatic state indices of the previous timestep onto the new timestep", &
+          common_iter_levels=1,&
+          filename="")
+     CALL section_add_subsection(sub2section,print_key)
+     CALL section_release(print_key)
 
      CALL cp_print_key_section_create(print_key_section=print_key,&
           name="NACE",&
