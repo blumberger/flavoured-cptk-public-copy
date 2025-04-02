@@ -1,0 +1,225 @@
+# 1 "/work/e05/e05/fivanovic/flavoured-cptk-X-SH-coulomb-barrier/cp2k/src/subsys/particle_list_types.F"
+# 1 "<built-in>"
+# 1 "<command-line>"
+# 1 "/work/e05/e05/fivanovic/flavoured-cptk-X-SH-coulomb-barrier/cp2k/src/subsys/particle_list_types.F"
+!-----------------------------------------------------------------------------!
+!   CP2K: A general program to perform molecular dynamics simulations         !
+!   Copyright (C) 2000 - 2016  CP2K developers group                          !
+!-----------------------------------------------------------------------------!
+
+! *****************************************************************************
+!> \brief represent a simple array based list of the given type
+!> \note
+!>     ____              _ _     __  __           _ _  __         _____ _     _       _____ _ _      _
+!>    |  _ \  ___  _ __ ( ) |_  |  \/  | ___   __| (_)/ _|_   _  |_   _| |__ (_)___  |  ___(_) | ___| |
+!>    | | | |/ _ \| '_ \|/| __| | |\/| |/ _ \ / _` | | |_| | | |   | | | '_ \| / __| | |_  | | |/ _ \ |
+!>    | |_| | (_) | | | | | |_  | |  | | (_) | (_| | |  _| |_| |   | | | | | | \__ \ |  _| | | |  __/_|
+!>    |____/ \___/|_| |_|  \__| |_|  |_|\___/ \__,_|_|_|  \__, |   |_| |_| |_|_|___/ |_|   |_|_|\___(_)
+!>                                                        |___/
+!>      ____ _                  ___                              _ _       _       _
+!>     / ___| | ___  ___  ___  |_ _|_ __ ___  _ __ ___   ___  __| (_) __ _| |_ ___| |_   _
+!>    | |   | |/ _ \/ __|/ _ \  | || '_ ` _ \| '_ ` _ \ / _ \/ _` | |/ _` | __/ _ \ | | | |
+!>    | |___| | (_) \__ \  __/  | || | | | | | | | | | |  __/ (_| | | (_| | ||  __/ | |_| |
+!>     \____|_|\___/|___/\___| |___|_| |_| |_|_| |_| |_|\___|\__,_|_|\__,_|\__\___|_|\__, |
+!>                                                                                   |___/
+!>     _____ _     _       _____ _ _      _
+!>    |_   _| |__ (_)___  |  ___(_) | ___| |
+!>      | | | '_ \| / __| | |_  | | |/ _ \ |
+!>      | | | | | | \__ \ |  _| | | |  __/_|
+!>      |_| |_| |_|_|___/ |_|   |_|_|\___(_)
+!>
+!>      This is a template
+!>
+!>      **** DO NOT MODIFY THE .F FILES ****
+!>      modify the .template and .instantition instead
+!> \par History
+!>      08.2003 created [fawzi]
+!> \author Fawzi Mohamed
+! *****************************************************************************
+MODULE particle_list_types
+  USE particle_types,                  ONLY: deallocate_particle_set,&
+                                             particle_type
+
+# 1 "/work/e05/e05/fivanovic/flavoured-cptk-X-SH-coulomb-barrier/cp2k/src/subsys/../base/base_uses.f90" 1
+! Basic use statements and preprocessor macros
+! should be included in the use statements
+
+  USE base_hooks,                      ONLY: cp__a,&
+                                             cp__b,&
+                                             cp__w,&
+                                             cp__l,&
+                                             cp_abort,&
+                                             cp_warn,&
+                                             timeset,&
+                                             timestop
+
+
+! Dangerous: Full path can be arbitrarily long and might overflow Fortran line.
+
+
+
+
+
+
+
+
+
+! The MARK_USED macro can be used to mark an argument/variable as used.
+! It is intended to make it possible to switch on -Werror=unused-dummy-argument,
+! but deal elegantly with e.g. library wrapper routines that take arguments only used if the library is linked in. 
+! This code should be valid for any Fortran variable, is always standard conforming,
+! and will be optimized away completely by the compiler
+# 39 "/work/e05/e05/fivanovic/flavoured-cptk-X-SH-coulomb-barrier/cp2k/src/subsys/particle_list_types.F" 2
+
+  IMPLICIT NONE
+  PRIVATE
+
+  LOGICAL, PRIVATE, PARAMETER :: debug_this_module=.TRUE.
+  CHARACTER(len=*), PARAMETER, PRIVATE :: moduleN = 'particle_list_types'
+  INTEGER, PRIVATE, SAVE :: last_particle_list_id=0
+
+  !API
+  PUBLIC :: particle_list_type, particle_list_p_type,&
+            particle_list_create, particle_list_retain,&
+            particle_list_release
+
+!***
+
+! *****************************************************************************
+!> \brief represent a list of objects
+!> \param id_nr identification number of this list
+!> \param ref_count reference count (see doc/ReferenceCounting.html)
+!> \param n_el the number of elements in the list
+!> \param owns_list if the els are owned by this structure, and
+!>        should be deallocated by it
+!> \param list the array of object, might be oversized,
+!>        only the fist n_el have some meaning
+!> \par History
+!>      08.2003 created [fawzi]
+!> \author Fawzi Mohamed
+! *****************************************************************************
+  TYPE particle_list_type
+     INTEGER :: id_nr, ref_count, n_els
+     LOGICAL :: owns_els
+     TYPE(particle_type), DIMENSION(:), POINTER :: els
+  END TYPE particle_list_type
+
+! *****************************************************************************
+!> \brief represents a pointer to a list
+!> \param list the pointer to the list
+!> \par History
+!>      08.2003 created [fawzi]
+!> \author Fawzi Mohamed
+! *****************************************************************************
+  TYPE particle_list_p_type
+     TYPE(particle_list_type), POINTER :: list
+  END TYPE particle_list_p_type
+
+CONTAINS
+
+! *****************************************************************************
+!> \brief creates a list
+!> \param list the list to allocate and initialize
+!> \param els_ptr the elements to store in the list (the array is only,
+!>        referenced, not copied!)
+!> \param owns_els if the list takes the ownership of els_ptr and
+!>        will deallocate it (defaults to true)
+!> \param n_els number of elements in the list (at least one els_ptr or
+!>        n_els should be given)
+!> \par History
+!>      08.2003 created [fawzi]
+!> \author Fawzi Mohamed
+! *****************************************************************************
+SUBROUTINE particle_list_create(list, els_ptr, &
+     owns_els, n_els)
+    TYPE(particle_list_type), OPTIONAL, &
+      POINTER                                :: list
+    TYPE(particle_type), DIMENSION(:), &
+      OPTIONAL, POINTER                      :: els_ptr
+    LOGICAL, INTENT(in), OPTIONAL            :: owns_els
+    INTEGER, INTENT(in), OPTIONAL            :: n_els
+
+    CHARACTER(len=*), PARAMETER :: routineN = 'particle_list_create', &
+      routineP = moduleN//':'//routineN
+
+  IF(.NOT.(PRESENT(els_ptr).OR.PRESENT(n_els)))CALL cp__a("subsys/particle_list_types.F",111)
+
+  ALLOCATE(list)
+  last_particle_list_id=last_particle_list_id+1
+  list%id_nr=last_particle_list_id
+  list%ref_count=1
+  list%owns_els=.TRUE.
+  list%n_els=0
+  IF (PRESENT(owns_els)) list%owns_els=owns_els
+  NULLIFY(list%els)
+  IF (PRESENT(els_ptr)) THEN
+     list%els => els_ptr
+     IF (ASSOCIATED(els_ptr)) THEN
+        list%n_els=SIZE(els_ptr)
+     END IF
+  END IF
+  IF (PRESENT(n_els)) list%n_els=n_els
+  IF (.NOT.ASSOCIATED(list%els)) THEN
+     ALLOCATE(list%els(list%n_els))
+     IF(.NOT.(list%owns_els))CALL cp__a("subsys/particle_list_types.F",130)
+  END IF
+END SUBROUTINE particle_list_create
+
+! *****************************************************************************
+!> \brief retains a list (see doc/ReferenceCounting.html)
+!> \param list the list to retain
+!> \par History
+!>      08.2003 created [fawzi]
+!> \author Fawzi Mohamed
+! *****************************************************************************
+SUBROUTINE particle_list_retain(list)
+    TYPE(particle_list_type), POINTER        :: list
+
+    CHARACTER(len=*), PARAMETER :: routineN = 'particle_list_retain', &
+      routineP = moduleN//':'//routineN
+
+  IF(.NOT.(ASSOCIATED(list)))CALL cp__a("subsys/particle_list_types.F",147)
+  IF(.NOT.(list%ref_count>0))CALL cp__a("subsys/particle_list_types.F",148)
+  list%ref_count=list%ref_count+1
+END SUBROUTINE particle_list_retain
+
+! *****************************************************************************
+!> \brief releases a  list (see doc/ReferenceCounting.html)
+!> \param list the list to release
+!> \par History
+!>      08.2003 created [fawzi]
+!> \author Fawzi Mohamed
+! *****************************************************************************
+SUBROUTINE particle_list_release(list)
+    TYPE(particle_list_type), POINTER        :: list
+
+    CHARACTER(len=*), PARAMETER :: routineN = 'particle_list_release', &
+      routineP = moduleN//':'//routineN
+
+  IF (ASSOCIATED(list)) THEN
+     IF(.NOT.(list%ref_count>0))CALL cp__a("subsys/particle_list_types.F",166)
+     list%ref_count=list%ref_count-1
+     IF (list%ref_count==0) THEN
+        IF (list%owns_els) THEN
+           IF (ASSOCIATED(list%els)) THEN
+              CALL deallocate_particle_set(list%els)
+           END IF
+        END IF
+        NULLIFY(list%els)
+        DEALLOCATE(list)
+     END IF
+  END IF
+  NULLIFY(list)
+END SUBROUTINE particle_list_release
+
+! template def put here so that line numbers in template and derived
+! files are almost the same (multi-line use change it a bit)
+! [template(el_typename,el_type,USE,deallocate_els_code)]
+! ARGS:
+!  USE = "use particle_types, only: particle_type, deallocate_particle_set"
+!  deallocate_els_code = "call deallocate_particle_set(list%els)"
+!  el_type = "type(particle_type)"
+!  el_typename = "particle"
+
+
+END MODULE particle_list_types
