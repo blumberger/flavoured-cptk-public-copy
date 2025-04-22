@@ -1171,11 +1171,6 @@ SUBROUTINE calc_fect_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, p
                                           ct_ind, sh_env%connlist1_ct,sh_env%connlist2_ct, sh_env%atomlist_ct, &
                                           sh_env%nacv_ct)
 
-  !open(438, file="FECT_overlap_array.txt", position="append")
-  !write(438,*) "One step taken", Sab_list_fect
-  !close(438)
-
-
 !WTP_comment: the Sab_list_fect as well as nacv should be tested here...
 
    !> loop over states: note that it does not matter if donor molecules comes

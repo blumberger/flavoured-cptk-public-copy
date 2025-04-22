@@ -1279,20 +1279,11 @@ CONTAINS
                       ENDIF
                       cr_block_keyword  = .False.
 
-!                      call test_diagonalisation(C,E)
-                      !open(454,file="single-phase-ff.txt",position="append")
-                      !write(454,*) energies_1_mol_list(1,:)
-                      !write(454,*) energies_1_mol_List(3,:)
-                      !close(454)
-
                       CALL single_phase_energies_forces(adiab_section,energies_1_mol_list, energies, &
                                     intra_forces_global, global_forces, my_energies, &
                                     active_system_info, mixed_env, my_itimes, my_mol_index, &
                                     fe_block_keyword, cr_block_keyword) 
 
-                      open(555,file="single-phase-se.txt",position="append")
-                      write(555,*) my_energies
-                      close(555)
                     CASE("CT-FE-CR")
                       fe_block_keyword  = .True.
                       cr_block_keyword  = .True.
@@ -1314,19 +1305,11 @@ CONTAINS
                ELSE
                 !> This does add-sub scheme for Hamiltoninans where num of
                 !states = num of molecules (e.g. AOM and TRESP)
-                      !open(455,file="fobsh-ff.txt",position="append")
-                      !write(455,*) energies_1_mol_list(1,:)
-                      !write(455,*) energies_1_mol_list(2,:)
-                      !close(455)
 
                    CALL add_energies_forces_mem_saver_V2( energies_1_mol_list, energies, intra_forces_global, &
                                                       global_forces, my_energies, &
                                                       active_system_info, &
                                                        mixed_env, my_itimes)
-
-                      open(555,file="single-phase-se.txt",position="append")
-                      write(555,*) my_energies
-                      close(555)
 
                  !OLD subroutine
                 !CALL add_energies_forces_mem_saver( energies_1_mol_list, energies, intra_forces_global, &

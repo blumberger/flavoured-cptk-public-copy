@@ -94,7 +94,6 @@ CONTAINS
      !TYPE(molecule_kind_type), DIMENSION(:), POINTER    :: molecule_kind_set
      !TYPE(distribution_1d_type), POINTER                :: local_molecules
      !TYPE(molecule_type), DIMENSION(:), POINTER         :: molecule_set
-     !INTEGER, DIMENSION(:), POINTER, OPTIONAL       :: my_mol_index !this are the decomp list indeces
      INTEGER, DIMENSION(:), POINTER                 :: my_mol_index !this are the decomp list indeces 
 
      CHARACTER(len=*), PARAMETER :: routineN ='create_sh_env', &
@@ -133,7 +132,6 @@ CONTAINS
      NULLIFY(wf_restart_section)
      NULLIFY(optimization_section)
      NULLIFY(site_energy_section)
-
 
      CALL section_vals_val_get(adiab_section,"NUCLEAR_TIMESTEP",&
          r_val=MDtimestep)
@@ -273,7 +271,7 @@ CONTAINS
  
     end if
 
-    !Added the coditional coulomb barrier section in the ct_block
+    !Added the conditional coulomb barrier section in the ct_block
     !section so it's grouped up with the other site energy keywords --
     !FI 05/01/24 
   
@@ -318,6 +316,15 @@ CONTAINS
          !CALL read_list_frz_couplings(ninteractions, frz_couplings_list, sh_env%frz_coup_connectivity, sh_env%frz_couplings) 
  
          CALL set_aom_env_fect(nadiab, norbitals, natom,positions_tp,adiab_section,sh_env)
+
+    !------------------------------------------------------------------------------------------
+    CASE("SINGLE-PHASE-FECT")
+
+         sh_env%sp_fect_keyword = .TRUE.
+         sh_env%freeze_multip_forces = .FALSE.
+
+         CALL set_aom_env_sp_fect(nadiab, norbitals, &
+         natom,positions_tp,adiab_section,sh_env, my_mol_index)
     !------------------------------------------------------------------------------------------
     CASE("FROZEN_COUPLINGS")
 
@@ -381,8 +388,7 @@ CONTAINS
         ALLOCATE(sh_env%NN(mat, mat))
         ALLOCATE(sh_env%grad_tresp(3,mat, COUNT(sh_env%ext_pres)))
 !TEST
-        !ALLOCATE(sh_env%test_grad_tresp(3,mat, mat, COUNT(sh_env%ext_pres)))
- 
+        !ALLOCATE(sh_env%test_grad_tresp(3,mat, mat, COUNT(sh_env%ext_pres))) 
 
     CASE DEFAULT
         CPABORT("There is no method to calculate the coupling")
@@ -1057,6 +1063,10 @@ CONTAINS
      !connectivities with and without considering the zeors
      call connect_list2(Atp_loc(2:4,:), sh_env%atomlist_a, sh_env%connlist1_a, sh_env%connlist2_a, sh_env%cutoff_connect)
 
+     open(333, file="2phase_pdi_connlist.txt", position="append")
+     write(333,*) sh_env%connlist2_a
+     close(333)
+
      open(433, file="acceptor-connectivity.xyz", position="append")
      write(433,*) "Print oxygen atoms' nearest neighbours:"
 
@@ -1173,6 +1183,317 @@ CONTAINS
      DEALLOCATE(pcoefftot_ct)
 
   END SUBROUTINE set_aom_env_fect
+
+  SUBROUTINE set_aom_env_sp_fect(nadiab, norbitals, natom, positions_tp, &
+  adiab_section, sh_env, my_mol_index)
+
+     INTEGER, INTENT(IN)                            :: nadiab, norbitals, natom
+     REAL(kind=dp), DIMENSION(:,:),POINTER          :: positions_tp
+     TYPE(section_vals_type), POINTER               :: adiab_section
+     TYPE(sh_env_type), INTENT(INOUT)               :: sh_env
+     INTEGER, DIMENSION(:), POINTER                 :: my_mol_index
+
+     CHARACTER(len=*), PARAMETER :: routineN ='set_aom_env_sp_fect', &
+     routineP = moduleN//':'//routineN
+
+     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE       :: pcoefftot_h, scoefftot_h, &
+                                                       pcoefftot_e, scoefftot_e
+     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE       :: pcoefftot_fe_h, scoefftot_fe_h, &
+                                                       pcoefftot_ct_h,scoefftot_ct_h !AOM coeff files for XT-CT coupling via HOMO-HOMO overlap
+     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE       :: pcoefftot_fe_e, scoefftot_fe_e, &
+                                                       pcoefftot_ct_e, scoefftot_ct_e !AOM coeff files for XT-CT via LUMO-LUMO overlap (e-transfer)         
+     integer                                        :: mat, i
+     integer, dimension(:), ALLOCATABLE             :: ext_elements
+
+     LOGICAL, dimension(:), POINTER                 :: active_logical
+     TYPE(cp_sll_val_type), POINTER                 :: listcoeff, list_tresp
+     CHARACTER(LEN=default_string_length)           :: file_name_s_psigma, file_name_s_ppi
+     TYPE(section_vals_type), POINTER               :: coupling_section, site_energy_section, ct_block
+     TYPE(section_vals_type), POINTER               :: fe_block, fect_block 
+     TYPE(section_vals_type), POINTER               :: tresp_coupling_section
+
+     REAL(KIND=dp), dimension(:,:), allocatable     :: Atp_loc
+     LOGICAL, DIMENSION(:), ALLOCATABLE             :: submask
+     INTEGER                                        :: initial_atom_mol1, final_atom_mol1, atoms_per_mol, parsed_atoms_per_mol
+     !only one set of atom counters needed here as it's a single-phase system
+     CHARACTER(LEN=default_string_length)           :: STO_input_string
+     REAL(KIND=dp)                                  :: STO_rmin,STO_rmax,STO_dr
+     INTEGER                                        :: STO_debug
+     INTEGER                                        :: atom_index, conn_counter
+
+     NULLIFY(listcoeff)
+     NULLIFY(coupling_section)
+     NULLIFY(site_energy_section, ct_block)
+     NULLIFY(site_energy_section, fe_block)
+     NULLIFY(site_energy_section, fect_block)
+
+     open(324, file="set_aom_env_log.txt", position="append")
+
+     coupling_section => section_vals_get_subs_vals(adiab_section, "AOM")
+
+     site_energy_section => section_vals_get_subs_vals(adiab_section,"METHOD_SITE_ENERGIES")
+     !get CT block for donor and acceptor
+     ct_block => section_vals_get_subs_vals(site_energy_section,"CT_BLOCK")
+     fe_block => section_vals_get_subs_vals(site_energy_section,"FE_BLOCK")
+
+     !> Initialize input parameters: 
+     !> Get number of atoms per molecule from input file keyword
+     CALL section_vals_val_get(coupling_section,"NUMBER_AOM_ATOMS_PER_SITE",&
+             i_val=atoms_per_mol)
+     sh_env%atoms_per_site = atoms_per_mol
+
+     !> cutoff to define the neighborough list
+     CALL section_vals_val_get(coupling_section,"CUT_OFF_CONNECTIVITY",&
+             r_val=sh_env%cutoff_connect)
+     !> cutoff to define the neighborough list
+     CALL section_vals_val_get(coupling_section,"CUT_OFF_BETWEEN_SITES",&
+             r_val=sh_env%cutoff_sites)
+
+     write(324,*) sh_env%cutoff_sites
+     write(324,*) sh_env%cutoff_connect
+     !> minao is an atomic overlap cutoff
+     CALL section_vals_val_get(coupling_section,"ATOMIC_OVERLAP_CUTOFF",&
+             r_val=sh_env%minao)
+     !> dR is the increment for the gradient finite difference calculation
+     CALL section_vals_val_get(coupling_section,"NACV_INCREMENT",&
+             r_val=sh_env%dR)
+
+     write(324,*) sh_env%minao
+     write(324,*) sh_env%dR
+     !> analytics would probably calculates analytic forces for a 2 state sytems
+     !(Spencer 2016)
+     CALL section_vals_val_get(coupling_section,"ANALYTICS", l_val=sh_env%analytics)
+     !> This remove bias coming from the finite difference calculation of the
+      !> gradients of the Hamiltonian from AOM
+
+     CALL section_vals_val_get(coupling_section,"RANDOM_DERIVATIVE", l_val=sh_env%do_random)
+
+     CALL section_vals_val_get(coupling_section,"STO_EXPONENTS",&
+             c_val=STO_input_string)
+!WTP_merge: STO_EXPONENTS is required input; the rest STO_* have default
+     CALL section_vals_val_get(coupling_section,"STO_RMIN",&
+             r_val=STO_rmin)
+     CALL section_vals_val_get(coupling_section,"STO_RMAX",&
+             r_val=STO_rmax)
+     CALL section_vals_val_get(coupling_section,"STO_DR",&
+             r_val=STO_dr)
+     CALL section_vals_val_get(coupling_section,"STO_DEBUG",&
+             i_val=STO_debug)
+
+     !> Scaling factor Hab = scaling*Sab_bar
+     CALL section_vals_val_get(coupling_section,"SCALING_FACTOR_h-h",&
+             r_val=sh_env%scaling_hh)
+     CALL section_vals_val_get(coupling_section,"SCALING_FACTOR_e-e",&
+             r_val=sh_env%scaling_ee)
+     CALL section_vals_val_get(coupling_section,"SCALING_FACTOR_fect_etransfer",&
+             r_val=sh_env%scaling_fect_e)
+     CALL section_vals_val_get(coupling_section,"SCALING_FACTOR_fect_htransfer",&
+             r_val=sh_env%scaling_fect_h)
+
+     write(324,*) sh_env%scaling_ee
+     write(324,*) sh_env%scaling_fect_h
+
+     !now reading in lists of AOM coefficients, the order in which
+     !they're passed into the input file needs to match the order in
+     !which they're read in
+
+     CALL section_vals_list_get(coupling_section,"_DEFAULT_KEYWORD_",list=listcoeff) !Read them in the input files
+     !Transform them into four arrays. In this case external presence is not
+     !read anymore.
+
+     !h-h and e-e coupling
+
+     CALL read_listcoeff(listcoeff, ext_elements, active_logical, &
+                         scoefftot_h, pcoefftot_h, sh_env%atoms_per_site)
+
+     ALLOCATE(sh_env%pcoeffs_hh(sh_env%atoms_per_site))
+     ALLOCATE(sh_env%scoeffs_hh(sh_env%atoms_per_site))
+
+     sh_env%pcoeffs_hh = pcoefftot_h
+     sh_env%scoeffs_hh = scoefftot_h
+
+     write(324,*) sh_env%scoeffs_hh
+
+     DEALLOCATE(pcoefftot_h)
+     DEALLOCATE(scoefftot_h)
+     DEALLOCATE(active_logical)
+
+     CALL read_listcoeff(listcoeff, ext_elements, active_logical, &
+                         scoefftot_e, pcoefftot_e, sh_env%atoms_per_site)
+     
+     ALLOCATE(sh_env%pcoeffs_ee(sh_env%atoms_per_site))
+     ALLOCATE(sh_env%scoeffs_ee(sh_env%atoms_per_site))
+
+     sh_env%pcoeffs_ee = pcoefftot_e
+     sh_env%scoeffs_ee = scoefftot_e
+
+     write(324,*) sh_env%pcoeffs_ee
+
+     DEALLOCATE(pcoefftot_e)
+     DEALLOCATE(scoefftot_e)
+     DEALLOCATE(active_logical)
+                 
+     !XT-CT coupling with HOMOS of CT and XT (h-transfer)
+     CALL read_listcoeff(listcoeff, ext_elements, active_logical, &
+                         scoefftot_fe_h, pcoefftot_fe_h, sh_env%atoms_per_site)
+
+     ALLOCATE(sh_env%pcoeffs_fe_h(sh_env%atoms_per_site))
+     ALLOCATE(sh_env%scoeffs_fe_h(sh_env%atoms_per_site))
+
+     sh_env%pcoeffs_fe_h = pcoefftot_fe_h
+     sh_env%scoeffs_fe_h = scoefftot_fe_h
+
+     write(324,*) sh_env%pcoeffs_fe_h
+
+     DEALLOCATE(active_logical)
+                 
+     CALL read_listcoeff(listcoeff, ext_elements, active_logical, &
+                 scoefftot_ct_h, pcoefftot_ct_h, sh_env%atoms_per_site)
+
+     ALLOCATE(sh_env%pcoeffs_ct_h(sh_env%atoms_per_site))
+     ALLOCATE(sh_env%scoeffs_ct_h(sh_env%atoms_per_site))
+
+     sh_env%pcoeffs_ct_h = pcoefftot_ct_h
+     sh_env%scoeffs_ct_h = scoefftot_ct_h
+
+     DEALLOCATE(pcoefftot_fe_h)
+     DEALLOCATE(scoefftot_fe_h)
+     DEALLOCATE(pcoefftot_ct_h)
+     DEALLOCATE(scoefftot_ct_h) 
+     DEALLOCATE(active_logical)
+ 
+     !XT-CT coupling with LUMOS of CT and XT (e-transfer)
+     CALL read_listcoeff(listcoeff, ext_elements, active_logical, &
+                         scoefftot_fe_e, pcoefftot_fe_e, sh_env%atoms_per_site)
+
+     ALLOCATE(sh_env%pcoeffs_fe_e(sh_env%atoms_per_site))
+     ALLOCATE(sh_env%scoeffs_fe_e(sh_env%atoms_per_site))
+
+     sh_env%pcoeffs_fe_e = pcoefftot_fe_e
+     sh_env%scoeffs_fe_e = scoefftot_fe_e
+
+     DEALLOCATE(active_logical)
+                 
+     CALL read_listcoeff(listcoeff, ext_elements, active_logical, &
+                         scoefftot_ct_e, pcoefftot_ct_e, sh_env%atoms_per_site)
+
+     ALLOCATE(sh_env%pcoeffs_ct_e(sh_env%atoms_per_site))
+     ALLOCATE(sh_env%scoeffs_ct_e(sh_env%atoms_per_site))
+
+     sh_env%pcoeffs_ct_e = pcoefftot_ct_e
+     sh_env%scoeffs_ct_e = scoefftot_ct_e
+
+     DEALLOCATE(pcoefftot_fe_e)
+     DEALLOCATE(scoefftot_fe_e)
+     DEALLOCATE(pcoefftot_ct_e)
+     DEALLOCATE(scoefftot_ct_e)
+     DEALLOCATE(active_logical)
+
+     !check molecule parsing
+     initial_atom_mol1 = sh_env%full_system_info(1, my_mol_index(1))
+     final_atom_mol1 = sh_env%full_system_info(2, my_mol_index(1))
+     parsed_atoms_per_mol = final_atom_mol1 - initial_atom_mol1 + 1
+
+     IF (atoms_per_mol .ne. parsed_atoms_per_mol) THEN
+        CPABORT("NO. ATOMS PER MOLECULE IN INPUT FILE DOESN'T MATCH MOLECULAR STRUCTURE")
+     ENDIF
+
+     IF (norbitals .ne. 1) THEN
+        CPABORT("Orbital degeneracy not yet implemented in X-SH")
+     ENDIF
+
+     !norbitals must be 1: we have not implemented degeneracy
+     mat = norbitals*nadiab !> Size of the vectorial space where the wavefunctions are projected
+
+
+     !> TRESP relavant 
+     NULLIFY(tresp_coupling_section)
+     NULLIFY(list_tresp)
+     tresp_coupling_section => section_vals_get_subs_vals(adiab_section, "TRESP_COUPLINGS")
+     !> READ TRESP CHARGES TEST
+     CALL section_vals_list_get(tresp_coupling_section,"_DEFAULT_KEYWORD_",list=list_tresp)!Read list tresp from input
+     CALL section_vals_val_get(tresp_coupling_section,"CUT_OFF_BETWEEN_FE_SITES",&
+          r_val=sh_env%cutoff_sites_fe)
+     !> determine if the TRESP are taken from Gaussian code and divide by
+     ! sqrt(2) if that's the case (see Multiwfn.pdf for explanation)
+
+     CALL read_list_tresp(sh_env%atoms_per_site, list_tresp, ext_elements, active_logical, sh_env%tresp_charges)
+     DEALLOCATE(active_logical)
+
+     !allocating nacv storage arrays, every atom can feel force from all
+     !diabat types, so conditional not needed
+
+     !nearest-neighbour list for tresp + nacv arrays for e-e and h-h coupling
+     ALLOCATE(sh_env%NN(size(my_mol_index), size(my_mol_index)))
+
+     ALLOCATE(sh_env%nacv_hh(3, size(my_mol_index)-1, &
+(size(my_mol_index)-1)*sh_env%atoms_per_site))
+
+     ALLOCATE(sh_env%nacv_ee(3, size(my_mol_index)-1, &
+size(my_mol_index)-1)*sh_env%atoms_per_site))
+
+     !nacv arrays for xt-ct coupling via h-transfer 
+     ALLOCATE(sh_env%nacv_fe_h(3, size(my_mol_index)-1, sh_env%atoms_per_site*(size(my_mol_index)-1)))
+     ALLOCATE(sh_env%nacv_ct_h(3, size(my_mol_index)-1, sh_env%atoms_per_site*(size(my_mol_index)-1)))
+
+     !nacv arrays for xt-ct coupling via e-transfer 
+     ALLOCATE(sh_env%nacv_fe_e(3, size(my_mol_index)-1, sh_env%atoms_per_site*(size(my_mol_index)-1)))
+     ALLOCATE(sh_env%nacv_ct_e(3, size(my_mol_index)-1, sh_env%atoms_per_site*(size(my_mol_index)-1)))
+
+     !nacv tresp array
+     ALLOCATE(sh_env%grad_tresp(3, size(my_mol_index)-1, &
+(size(my_mol_index)-1)*sh_env%atoms_per_site))
+
+     sh_env%nacv_ee = 0.0_dp
+     sh_env%nacv_hh = 0.0_dp
+     sh_env%nacv_fe_h = 0.0_dp
+     sh_env%nacv_ct_h = 0.0_dp
+     sh_env%nacv_fe_e = 0.0_dp
+     sh_env%nacv_ct_e = 0.0_dp
+
+     ALLOCATE(sh_env%siteenergies(3,mat))
+     sh_env%siteenergies = 0.0_dp
+
+     CALL STO_initialize_splines(STO_input_string,STO_rmin,STO_rmax,STO_dr,&
+                                 STO_debug)
+
+     !> READ THE AOM COEFFICIENT DONOR
+     !> CONSTRUCT THE CONNLIST 
+     ALLOCATE(submask(sh_env%atoms_per_site))   !temp array
+     submask =.NOT.( (sh_env%scoeffs_hh.eq.0) .AND. (sh_env%pcoeffs_hh.eq.0) ) !Only select atoms with orbitals
+
+     write(324,*) submask
+
+     ALLOCATE(sh_env%atomlist(COUNT(submask(1:sh_env%atoms_per_site))))
+     !counting the number of True elements in the submask
+
+     sh_env%atomlist = PACK( (/ (i, i=1,sh_env%atoms_per_site) /), submask(1:sh_env%atoms_per_site) )
+     !PACK takes indices of atoms that =TRUE in the mask, so only
+     !indices of AOM-active atoms
+
+     write(324,*) sh_env%atomlist
+
+     ALLOCATE(sh_env%connlist2(4,size(sh_env%atomlist)))
+     ALLOCATE(sh_env%connlist1(4,sh_env%atoms_per_site))
+
+     !passing coordinates of AOM-active atoms into Atp_loc
+     ALLOCATE(Atp_loc(4,sh_env%atoms_per_site))
+     Atp_loc(1,1:sh_env%atoms_per_site) = dble(ext_elements)
+     Atp_loc(2:4,1:sh_env%atoms_per_site) = positions_tp(1:3,initial_atom_mol1:final_atom_mol1)
+
+     CALL connect_list2(Atp_loc(2:4,:), sh_env%atomlist, sh_env%connlist1, sh_env%connlist2, sh_env%cutoff_connect)
+
+     write(324,*) sh_env%connlist2
+
+     DEALLOCATE(submask)
+     DEALLOCATE(Atp_loc)
+     DEALLOCATE(ext_elements)
+
+     close(324)
+
+     CPABORT("FI - TESTING")
+
+  END SUBROUTINE set_aom_env_sp_fect
 
 ! *****************************************************************************
 !> \brief This allocates aom_env variables. One could in principle put these

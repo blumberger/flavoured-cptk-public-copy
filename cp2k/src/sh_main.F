@@ -357,21 +357,6 @@ CONTAINS
      END IF
 
 
-!!TEST FROZEN 
-!    do i =1, size(sh_env%H_tp,1)
-!      do k = 1, size(sh_env%H_tp,1)
-!         if (i .ne. k) then
-!            if ((k+1 == i) .or.(k-1 == i)) then
-!               sh_env%H_tp(i,k) = cmplx(0.0D0,0.001102479,dp) 
-!            else
-!               sh_env%H_tp(i,k) = cmplx(0.0D0,0.0D0,dp)
-!            end if
-!         end if
-!     end do
-!    end do
-!sh_env%nacv = 0.0D0
-!!print *, "sh_env%H_tp(:,:)", sh_env%H_tp
-
      !> HAMILTONIAN DIAGONALIZATION
      !The adiabaticity subroutine diagonalises the diabatic Hamiltonian H_tp
      !It gives us back the eigenvalues E_tp and eigenvectors C_tp

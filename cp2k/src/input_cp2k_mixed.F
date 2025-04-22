@@ -465,11 +465,10 @@ CONTAINS
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
-
     CALL keyword_create(keyword, name="BLOCK_TYPE",&
          description="Determine the right site energy combination for the"//&
                      " generation of a given Hamiltonian (e.g. FE or CT-FE ..)",&
-         usage="BLOCK_TYPE CT or FE or CT-FE or CT-FE-CR or CT-CR",  type_of_var=char_t)
+         usage="BLOCK_TYPE CT or FE or CT-FE or CT-FE-CR or CT-CR or FECT-1-PHASE",  type_of_var=char_t)
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
@@ -611,7 +610,7 @@ CONTAINS
     !> start new sub2section METHOD_COUPLING, part of ADIABATIC subsection
     CALL keyword_create(keyword, name="METHOD_COUPLING",&
          description="Defines the method to calculate off-diagonal matrix elements.",&
-         usage="METHOD_COUPLING AOM or TRESP or FROZEN_COUPLINGS",  type_of_var=char_t)
+         usage="METHOD_COUPLING AOM,TRESP,FROZEN_COUPLINGS or FE&CT",  type_of_var=char_t)
     CALL section_add_keyword(subsection,keyword)
     CALL keyword_release(keyword)
 !********************************************************************************
@@ -680,13 +679,6 @@ CONTAINS
          usage="True", & 
          default_l_val=.TRUE., &
          lone_keyword_l_val=.TRUE.)
-    CALL section_add_keyword(sub2section,keyword)
-    CALL keyword_release(keyword)
-
-    CALL keyword_create(keyword, name="CUT_OFF_BETWEEN_SITES",&
-         description="Cut-off distance over which excitonic couplings are set to zero.",&
-         usage="20.0D0", type_of_var=real_t, &
-         unit_str="angstrom")
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 
@@ -760,6 +752,34 @@ CONTAINS
 
     CALL keyword_create(keyword, name="SCALING_FACTOR_FECT",&
          description="Hab = C*Sab. This is the scaling C for the FE-CT coupling",&
+         usage="0.50D0*0.065190D0, HARTREE", type_of_var=real_t,&
+         unit_str="hartree")
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="SCALING_FACTOR_e-e",&
+         description="Hab = C*Sab. This is the scaling C for e-e coupling in the single-phase system",&
+         usage="0.50D0*0.065190D0, HARTREE", type_of_var=real_t,&
+         unit_str="hartree")
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="SCALING_FACTOR_h-h",&
+         description="Hab = C*Sab. This is the scaling C for h-h coupling in the single-phase system",&
+         usage="0.50D0*0.065190D0, HARTREE", type_of_var=real_t,&
+         unit_str="hartree")
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="SCALING_FACTOR_fect_etransfer",&
+         description="Hab = C*Sab. This is the scaling C for fe-ct coupling which happens via e-transfer",&
+         usage="0.50D0*0.065190D0, HARTREE", type_of_var=real_t,&
+         unit_str="hartree")
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+
+    CALL keyword_create(keyword, name="SCALING_FACTOR_fect_htransfer",&
+         description="Hab = C*Sab. This is the scaling C for fe-ct coupling which happens via h-transfer",&
          usage="0.50D0*0.065190D0, HARTREE", type_of_var=real_t,&
          unit_str="hartree")
     CALL section_add_keyword(sub2section,keyword)
