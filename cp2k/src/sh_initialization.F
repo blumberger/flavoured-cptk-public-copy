@@ -1199,7 +1199,7 @@ CONTAINS
      REAL(KIND=dp), DIMENSION(:), ALLOCATABLE       :: pcoefftot_h, scoefftot_h, &
                                                        pcoefftot_e, scoefftot_e
      REAL(KIND=dp), DIMENSION(:), ALLOCATABLE       :: pcoefftot_fe_h, scoefftot_fe_h, &
-                                                       pcoefftot_ct_h,scoefftot_ct_h !AOM coeff files for XT-CT coupling via HOMO-HOMO overlap
+                                                       pcoefftot_ct_h, scoefftot_ct_h !AOM coeff files for XT-CT coupling via HOMO-HOMO overlap
      REAL(KIND=dp), DIMENSION(:), ALLOCATABLE       :: pcoefftot_fe_e, scoefftot_fe_e, &
                                                        pcoefftot_ct_e, scoefftot_ct_e !AOM coeff files for XT-CT via LUMO-LUMO overlap (e-transfer)         
      integer                                        :: mat, i
@@ -1291,6 +1291,8 @@ CONTAINS
              r_val=sh_env%scaling_fect_h)
 
      write(324,*) sh_env%scaling_ee
+     write(324,*) sh_env%scaling_hh
+     write(324,*) sh_env%scaling_fect_e
      write(324,*) sh_env%scaling_fect_h
 
      !now reading in lists of AOM coefficients, the order in which
@@ -1353,6 +1355,9 @@ CONTAINS
      ALLOCATE(sh_env%pcoeffs_ct_h(sh_env%atoms_per_site))
      ALLOCATE(sh_env%scoeffs_ct_h(sh_env%atoms_per_site))
 
+     ALLOCATE(sh_env%elements(size(ext_elements)))
+     sh_env%elements_sp = ext_elements
+
      sh_env%pcoeffs_ct_h = pcoefftot_ct_h
      sh_env%scoeffs_ct_h = scoefftot_ct_h
 
@@ -1388,6 +1393,7 @@ CONTAINS
      DEALLOCATE(pcoefftot_ct_e)
      DEALLOCATE(scoefftot_ct_e)
      DEALLOCATE(active_logical)
+
 
      !check molecule parsing
      initial_atom_mol1 = sh_env%full_system_info(1, my_mol_index(1))
@@ -1426,23 +1432,23 @@ CONTAINS
      !nearest-neighbour list for tresp + nacv arrays for e-e and h-h coupling
      ALLOCATE(sh_env%NN(size(my_mol_index), size(my_mol_index)))
 
-     ALLOCATE(sh_env%nacv_hh(3, size(my_mol_index)-1, &
-(size(my_mol_index)-1)*sh_env%atoms_per_site))
+     ALLOCATE(sh_env%nacv_hh(3, size(my_mol_index), &
+size(my_mol_index)*sh_env%atoms_per_site))
 
-     ALLOCATE(sh_env%nacv_ee(3, size(my_mol_index)-1, &
-size(my_mol_index)-1)*sh_env%atoms_per_site))
+     ALLOCATE(sh_env%nacv_ee(3, size(my_mol_index), &
+size(my_mol_index)*sh_env%atoms_per_site))
 
      !nacv arrays for xt-ct coupling via h-transfer 
-     ALLOCATE(sh_env%nacv_fe_h(3, size(my_mol_index)-1, sh_env%atoms_per_site*(size(my_mol_index)-1)))
-     ALLOCATE(sh_env%nacv_ct_h(3, size(my_mol_index)-1, sh_env%atoms_per_site*(size(my_mol_index)-1)))
+     ALLOCATE(sh_env%nacv_fe_h(3, size(my_mol_index), sh_env%atoms_per_site*size(my_mol_index)))
+     ALLOCATE(sh_env%nacv_ct_h(3, size(my_mol_index), sh_env%atoms_per_site*size(my_mol_index)))
 
      !nacv arrays for xt-ct coupling via e-transfer 
-     ALLOCATE(sh_env%nacv_fe_e(3, size(my_mol_index)-1, sh_env%atoms_per_site*(size(my_mol_index)-1)))
-     ALLOCATE(sh_env%nacv_ct_e(3, size(my_mol_index)-1, sh_env%atoms_per_site*(size(my_mol_index)-1)))
+     ALLOCATE(sh_env%nacv_fe_e(3, size(my_mol_index), sh_env%atoms_per_site*size(my_mol_index)))
+     ALLOCATE(sh_env%nacv_ct_e(3, size(my_mol_index), sh_env%atoms_per_site*size(my_mol_index)))
 
      !nacv tresp array
-     ALLOCATE(sh_env%grad_tresp(3, size(my_mol_index)-1, &
-(size(my_mol_index)-1)*sh_env%atoms_per_site))
+     ALLOCATE(sh_env%grad_tresp(3, size(my_mol_index), &
+size(my_mol_index)*sh_env%atoms_per_site))
 
      sh_env%nacv_ee = 0.0_dp
      sh_env%nacv_hh = 0.0_dp
@@ -1491,7 +1497,6 @@ size(my_mol_index)-1)*sh_env%atoms_per_site))
 
      close(324)
 
-     CPABORT("FI - TESTING")
 
   END SUBROUTINE set_aom_env_sp_fect
 

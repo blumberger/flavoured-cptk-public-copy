@@ -52,7 +52,8 @@ MODULE sh_main
                                              adiabaticity,              &
                                              calc_multiphase_Xmatrix_elements, &
                                              calc_fect_Xmatrix_elements, &
-                                             calc_aom_Xmatrix_elements_first_step, & 
+                                             calc_aom_Xmatrix_elements_first_step, &
+                                             single_phase_fect_Hamiltonian, &
                                              calc_aom_Xmatrix_elements, &
                                              make_adiabX,               &
                                              read_listcoeff,            &
@@ -127,7 +128,8 @@ MODULE sh_main
                                              prop_wf_HS_corr,                 & 
                                              classically_forbidden_hops,      &
                                              define_active_region,            &
-                                             calc_psi_after_correction
+                                             calc_psi_after_correction,       &
+                                             single_phase_Hxt
 
      USE parallel_rng_types,           ONLY: UNIFORM,&
                                           create_rng_stream,&
@@ -336,6 +338,14 @@ CONTAINS
 
          CALL calc_tresp_coup_fect(sh_env, energies_tp, orb, positions_com_tp, adiab_section) 
 
+     ELSE IF (sh_env%sp_fect_keyword) THEN
+
+         CALL calc_coms_and_nlist(sh_env%cutoff_sites_fe, orb, positions_com_tp, &
+                                    sh_env%active_system_info, sh_env%NN)
+
+         CALL single_phase_fect_Hamiltonian(sh_env, orb, energies_tp, adiab_section, positions_com_tp) 
+
+         CALL single_phase_Hxt(sh_env, energies_tp, orb, positions_com_tp, adiab_section)
 
      ELSE IF (sh_env%tresp_couplings_keyword) THEN 
          !> TRESP COUPLINGS
@@ -500,6 +510,9 @@ print *, "ACTIVE STATE", active_state
          new_state = mod(active_state + 1, mat) 
          IF ((new_state).EQ.0) new_state = mat
      ENDIF 
+
+
+     CPABORT("FI - TESTING")
 
      !> ######## FORCES CALCULATION   ###########################################################
      print*, "FOBSH| ACTIVE STATE = ", active_state

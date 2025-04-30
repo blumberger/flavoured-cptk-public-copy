@@ -104,7 +104,8 @@ MODULE non_adiabatic_utils
                   define_active_region,            &
                   calc_psi_after_correction,       &
                   apply_decoherence,               & 
-                  propagate_wf_diab_nace_interpol
+                  propagate_wf_diab_nace_interpol, &
+                  single_phase_Hxt
                   
 
 CONTAINS
@@ -454,6 +455,155 @@ END SUBROUTINE calc_coms_and_nlist_fect_fe
 !close (21)
 !stop
   end subroutine  calc_tresp_coup
+
+SUBROUTINE single_phase_Hxt(sh_env, energies_tp, orb, positions_com_tp, adiab_section)
+     TYPE(sh_env_type)                               :: sh_env
+     REAL(kind=dp), DIMENSION(:),  POINTER           :: energies_tp 
+     integer, intent(in)                             :: orb
+     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE        :: tresp_charges  !tresp charges taken from input file, they refer 
+                                                                       !to a single mol and should be extended
+                                                                       !for multi-phase system
+     INTEGER, DIMENSION(:,:), POINTER                :: NN
+     REAL(kind=dp), DIMENSION(:,:),POINTER, &
+                                   INTENT(IN)        :: positions_com_tp
+
+     CHARACTER(len=*), PARAMETER                     :: routineN ='calc_tresp_coup_fect', &
+     routineP = moduleN//':'//routineN
+
+     integer                                         :: i, k, dim_
+     integer                                         :: init_atom_mol_i, final_atom_mol_i, atoms_per_mol_i
+     integer                                         :: init_atom_mol_k, final_atom_mol_k, atoms_per_mol_k
+     real(kind=dp), allocatable, dimension(:,:)      :: crd_i, crd_k
+     real(kind=dp), allocatable, dimension(:)        :: charges1, charges2
+     real(kind=dp)                                   :: tresp_coup
+     real(kind=dp),  dimension(:,:), allocatable     :: grad1 !gradients acting on atoms of mol1
+     logical                                         :: Gaussian_charges
+
+     TYPE(section_vals_type), POINTER                :: adiab_section
+     TYPE(section_vals_type), POINTER                :: ct_block
+     TYPE(section_vals_type), POINTER                :: site_energy_section
+     INTEGER, DIMENSION(:), allocatable              :: phase_indices
+     INTEGER                                         :: nadiab, number_CT_states, number_excitons
+     INTEGER                                         :: xt_state
+
+     tresp_charges = sh_env%tresp_charges
+
+     NULLIFY(site_energy_section, ct_block)
+     site_energy_section => section_vals_get_subs_vals(adiab_section,"METHOD_SITE_ENERGIES")
+     ct_block => section_vals_get_subs_vals(site_energy_section,"CT_BLOCK")
+
+     ! TOTAL number states
+     CALL section_vals_val_get(adiab_section,"NUMBER_DIABATIC_STATES",&
+                          i_val=nadiab)
+
+     ALLOCATE(phase_indices(size(sh_env%index_active_mols)))
+     phase_indices = sh_env%index_active_mols
+
+     ALLOCATE(NN(size(phase_indices),size(phase_indices)))
+     NN = sh_env%NN
+
+     number_CT_states = (size(phase_indices)-1)*size(phase_indices)
+     number_excitons = nadiab - number_CT_states
+     xt_state = number_CT_states
+
+     open(776,file="tresp_log.txt",position="append")
+
+     !> COMMENT_SG: Tresp charegs array should be generalized for multiple
+     !molecules
+     !and phases
+     !> COMMENT_SG: This is the only NOT general bit of the whole subroutine. It
+     !assumes just one type of charges (it can be easily generalized)
+     !#########  WARNING ##############################################
+     ALLOCATE(charges1(size(tresp_charges)))
+     ALLOCATE(charges2(size(tresp_charges)))
+     charges1 = tresp_charges
+     charges2 = tresp_charges
+     !#################################################################
+     !Tresp charges from gaussian code fitting must be divided by srt(2)
+     Gaussian_charges = sh_env%Gaussian_charges
+
+     do i=1,size(phase_indices) 
+        xt_state = xt_state + 1
+        write(776,*) xt_state
+
+        do k=1,size(phase_indices)
+
+           ! do calculation only for molecules within cut-off radius. 
+           if (NN(i,k) == 1) then
+
+              !> diagonal construction
+              if (k==i) then 
+                sh_env%H_tp(xt_state,xt_state) = cmplx(0.0D0,(-energies_tp(xt_state)), dp)
+                write(776,*) sh_env%H_tp(xt_state,xt_state)
+
+              !loop over upper diagonal
+              else if ( k > i ) then
+
+                !> find coordinates mol 1 of the pair
+                init_atom_mol_i = sh_env%full_system_info(1,phase_indices(i))
+                final_atom_mol_i = sh_env%full_system_info(2,phase_indices(i))
+                atoms_per_mol_i = (final_atom_mol_i-init_atom_mol_i)+1
+
+                !> find coordinates mol 2 of the pair
+                init_atom_mol_k = sh_env%full_system_info(1,phase_indices(k))
+                final_atom_mol_k = sh_env%full_system_info(2,phase_indices(k))
+                atoms_per_mol_k = (final_atom_mol_k-init_atom_mol_k)+1
+
+                write(776,*) sh_env%full_system_info(:,phase_indices(i)), phase_indices(i)
+
+                !> this allocation deallocation is maybe inefficient
+                !but it was the only thing I found to be general for
+                !multi-phases (in case molecules have different number
+                !of atoms)
+                ALLOCATE(crd_i(3,atoms_per_mol_i))
+                ALLOCATE(crd_k(3,atoms_per_mol_k))
+
+                do dim_=1,3
+                   crd_i(dim_,:) = positions_com_tp(dim_, init_atom_mol_i:final_atom_mol_i)
+                   crd_k(dim_,:) = positions_com_tp(dim_, init_atom_mol_k:final_atom_mol_k)
+                end do
+
+                ! calc coupling for a given pair of states
+                CALL calc_trsp_ab(crd_i, crd_k, charges1, charges2, tresp_coup, Gaussian_charges)
+
+                write(776,*) xt_state, xt_state+k-i, tresp_coup
+
+                sh_env%H_tp(xt_state, xt_state+k-i) = cmplx(0.0D0,-tresp_coup,dp) 
+                sh_env%H_tp(xt_state+k-i, xt_state) = sh_env%H_tp(xt_state, xt_state+k-i)
+                !sign of the off-diag is minus consisently with diagonals
+
+                CALL calc_grad_coup( crd_i, crd_k, charges1, charges2, grad1, Gaussian_charges)
+
+                !> store gradient in the correct array entry
+                sh_env%grad_tresp(1,k,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i) = grad1(1,:)
+                sh_env%grad_tresp(2,k,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i) = grad1(2,:)
+                sh_env%grad_tresp(3,k,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i) = grad1(3,:)
+
+                ! calc gradient on atoms belonging to mol k, from
+                ! atoms belonging to mol i, and store the former
+                ! arrays
+                CALL calc_grad_coup( crd_k, crd_i, charges2, charges1, grad1, Gaussian_charges)
+
+                !> store gradient in the correct array entry
+                sh_env%grad_tresp(1,i,(k-1)*atoms_per_mol_k+1:k*atoms_per_mol_k) = grad1(1,:)
+                sh_env%grad_tresp(2,i,(k-1)*atoms_per_mol_k+1:k*atoms_per_mol_k) = grad1(2,:)
+                sh_env%grad_tresp(3,i,(k-1)*atoms_per_mol_k+1:k*atoms_per_mol_k) = grad1(3,:)
+
+                DEALLOCATE(crd_i,crd_k)
+
+              end if 
+           end if 
+
+        end do
+     end do
+
+    DEALLOCATE(charges1,charges2)
+    DEALLOCATE(NN)
+    DEALLOCATE(phase_indices)
+
+    close(776)
+
+END SUBROUTINE single_phase_Hxt
 
 !**********************************************************************************
 !> \brief Construction of the tresp couplings and their gradients for FE block

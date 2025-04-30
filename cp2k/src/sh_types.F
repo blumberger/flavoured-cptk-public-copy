@@ -165,6 +165,7 @@ END TYPE adiab_nace_env_type
      REAL(KIND=dp), DIMENSION(:), POINTER       :: pcoeffs_ee, scoeffs_ee, pcoeffs_hh, scoeffs_hh
      REAL(KIND=dp), DIMENSION(:), POINTER       :: pcoeffs_fe_h, scoeffs_fe_h, pcoeffs_ct_h, scoeffs_ct_h
      REAL(KIND=dp), DIMENSION(:), POINTER       :: pcoeffs_fe_e, scoeffs_fe_e, pcoeffs_ct_e, scoeffs_ct_e
+     integer, dimension(:), ALLOCATABLE       :: elements_sp
 
      LOGICAL                                  :: freeze_multip_forces
 
