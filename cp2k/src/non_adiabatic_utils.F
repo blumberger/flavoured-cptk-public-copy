@@ -2820,8 +2820,8 @@ SUBROUTINE xsh_single_phase_forces(adiab_section, act_state, eigenvectors, input
 
 !        open(124,file="force-log.txt",position="append")
 !        open(156,file="active-eigenvecs.txt",position="append")
-        open(525,file="total-forces.txt",position="append")
-        open(998,file="diagonal-forces.txt",position="append")
+!        open(525,file="total-forces.txt",position="append")
+!        open(998,file="diagonal-forces.txt",position="append")
 
         natom = size(input_F,2)
 !        write(124,*) natom
@@ -2861,7 +2861,7 @@ SUBROUTINE xsh_single_phase_forces(adiab_section, act_state, eigenvectors, input
                  forces_adiab(axis,atom) = forces_adiab(axis,atom) + &
 (abs(eigenvectors(state,act_state))**2)*input_F(axis,atom,state) 
 
-               write(998,*) axis, atom, forces_adiab(axis,atom)
+!               write(998,*) axis, atom, forces_adiab(axis,atom)
 
                end do
 
@@ -3105,7 +3105,7 @@ SUBROUTINE xsh_single_phase_forces(adiab_section, act_state, eigenvectors, input
                  END IF !end of condition that mol1 != nI
               end do !end of loop of mol1
 
-              write(525,*) axis, atom, forces_adiab(axis,atom)
+!              write(525,*) axis, atom, forces_adiab(axis,atom)
               
          end do
         end do
@@ -3113,8 +3113,8 @@ SUBROUTINE xsh_single_phase_forces(adiab_section, act_state, eigenvectors, input
 
 !        close(124)
 !        close(156)
-        close(525)
-        close(998)
+!        close(525)
+!        close(998)
 
         DEALLOCATE(phase_indices)
  
@@ -4223,10 +4223,6 @@ ENDIF
                     END IF
 
                  ELSE IF (force_env%mixed_env%sh_env%sp_fect_keyword) THEN
-
-                         open(914,file="check-decomp.txt",position="append")
-                         write(914,*) force_env%mixed_env%sh_env%index_active_mols
-                         close(914)
 
                          CALL xsh_approx_nacv_sp(adiab_section, force_env%mixed_env%sh_env%active_state, &
                          force_env%mixed_env%sh_env%new_state, force_env%mixed_env%sh_env%C_tp, &

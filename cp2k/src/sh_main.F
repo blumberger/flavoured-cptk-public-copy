@@ -273,10 +273,7 @@ CONTAINS
      !added by FI 05/01/24
      IF (sh_env%add_coulomb_pot) THEN
         
-	!energies_tp = 0.0 
 	energies_tp(1:sh_env%number_ct_states) = energies_tp(1:sh_env%number_ct_states) + sh_env%coulomb_barrier
-	energies_tp(sh_env%number_ct_states+1: size(energies_tp)) = energies_tp(sh_env%number_ct_states+1: size(energies_tp)) &
- + sh_env%energy_offset
 
      END IF
 
@@ -340,6 +337,9 @@ CONTAINS
 !         write(321,*) sh_env%NN
 !         close(321)
 
+  	energies_tp(sh_env%number_ct_states+1: size(energies_tp)) = energies_tp(sh_env%number_ct_states+1: size(energies_tp)) &
+ + sh_env%energy_offset
+
          CALL calc_fect_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, positions_com_tp)
 
          CALL calc_tresp_coup_fect(sh_env, energies_tp, orb, positions_com_tp, adiab_section) 
@@ -353,6 +353,9 @@ CONTAINS
 !         write(321,*) "NN:"
 !         write(321,*) sh_env%NN
 !         close(321)
+
+	energies_tp(sh_env%number_ct_states+1: size(energies_tp)) = energies_tp(sh_env%number_ct_states+1: size(energies_tp)) &
+ + sh_env%energy_offset
 
          CALL single_phase_fect_Hamiltonian(sh_env, orb, energies_tp, adiab_section, positions_com_tp) 
 

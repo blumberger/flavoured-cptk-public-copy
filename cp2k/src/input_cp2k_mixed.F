@@ -502,7 +502,7 @@ CONTAINS
 
     CALL keyword_create(keyword, name="XT_CT_OFFSET",&
          description="energy offset between interfacial CT diabat and XT diabats",&
-         usage="real value", type_of_var=real_t)
+         usage="real value", type_of_var=real_t, default_r_val=0.0_dp)
     CALL section_add_keyword(sub3section,keyword)
     CALL keyword_release(keyword)
 
@@ -679,6 +679,12 @@ CONTAINS
          usage="True", & 
          default_l_val=.TRUE., &
          lone_keyword_l_val=.TRUE.)
+    CALL section_add_keyword(sub2section,keyword)
+    CALL keyword_release(keyword)
+    CALL keyword_create(keyword, name="CUT_OFF_BETWEEN_SITES",&
+         description="Cut-off distance over which excitonic couplings are set to zero.",&
+         usage="20.0D0", type_of_var=real_t, &
+         unit_str="angstrom")
     CALL section_add_keyword(sub2section,keyword)
     CALL keyword_release(keyword)
 

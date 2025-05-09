@@ -235,45 +235,40 @@ CONTAINS
     ! adiabatic nacv calculations should be generalized to handle a multi-state
     ! hamiltoninan even without freezing the couplings
     CALL section_vals_val_get(site_energy_section,"MULTI_STATES",l_val=sh_env%multistate)
+
+    !if multi-state, this checks if you want to add a static coulomb
+    !potential
+
     if (sh_env%multistate) then 
        ct_block => section_vals_get_subs_vals(site_energy_section,"CT_BLOCK")
        CALL section_vals_val_get(ct_block,"ADD_COULOMB_POTENTIAL", &
                                                              l_val=sh_env%add_coulomb_pot)
+       if (sh_env%add_coulomb_pot) then
+
+       CALL section_vals_val_get(ct_block,"SITE_NUMBER",&
+                   i_val=nsites)
+
+       sh_env%number_ct_states = nsites
+
+       CALL section_vals_list_get(ct_block,"_DEFAULT_KEYWORD_",list=coulomb_barrier_list)
+
+       CALL read_list_coulomb_barrier(nsites, coulomb_barrier_list, sh_env%coulomb_barrier)
+
+       !added three new variables to the sh_env type: coulomb_barrier = 1D
+       !array of coulomb barrier values, order corresponds to order of CT
+       !states in X-SH electronic Hamiltonian; number_ct_states = number of
+       !ct states in the system, passed in from the SITE_NUMBER keyword,
+       !used to update the site energies of the CT states in sh_main.F;
+       !energy_offset = ground-state energy difference between interfacial CT-state
+       !(set to zero) and XT manifold -- !FI 05/01/24
+       
+       end if
+
+       !Added the conditional coulomb barrier section in the ct_block
+       !section so it's grouped up with the other site energy keywords --
+       !FI 05/01/24 
+
     end if
-
-
-    !conditional section added for coulomb barrier keyword, if
-    !keyword=T, the site number is called from the input file, and the
-    !coulomb barrer values are read from the FRZ_DIAGONALS.include file
-    !-- FI 05/01/24
-
-    if (sh_env%add_coulomb_pot) then
-
-    CALL section_vals_val_get(ct_block,"SITE_NUMBER",&
-                i_val=nsites)
-
-    sh_env%number_ct_states = nsites
-
-    CALL section_vals_list_get(ct_block,"_DEFAULT_KEYWORD_",list=coulomb_barrier_list)
-
-    CALL section_vals_val_get(ct_block,"XT_CT_OFFSET",&
-                r_val=sh_env%energy_offset)
-
-    CALL read_list_coulomb_barrier(nsites, coulomb_barrier_list, sh_env%coulomb_barrier)
-
-    !added three new variables to the sh_env type: coulomb_barrier = 1D
-    !array of coulomb barrier values, order corresponds to order of CT
-    !states in X-SH electronic Hamiltonian; number_ct_states = number of
-    !ct states in the system, passed in from the SITE_NUMBER keyword,
-    !used to update the site energies of the CT states in sh_main.F;
-    !energy_offset = ground-state energy difference between interfacial CT-state
-    !(set to zero) and XT manifold -- !FI 05/01/24
- 
-    end if
-
-    !Added the conditional coulomb barrier section in the ct_block
-    !section so it's grouped up with the other site energy keywords --
-    !FI 05/01/24 
   
     !sh_env%multistate = .False.
     !initialize couplings
@@ -310,6 +305,9 @@ CONTAINS
     CASE("MULTI-FECT")
          sh_env%multifect_couplings_keyword = .TRUE.
 
+         CALL section_vals_val_get(ct_block,"XT_CT_OFFSET",&
+                   r_val=sh_env%energy_offset)
+
          sh_env%freeze_multip_forces = .FALSE.  !??? do I need this
          !> FE block (TRESP) is also intialized in the following subroutine
 
@@ -322,6 +320,9 @@ CONTAINS
 
          sh_env%sp_fect_keyword = .TRUE.
          sh_env%freeze_multip_forces = .FALSE.
+
+         CALL section_vals_val_get(ct_block,"XT_CT_OFFSET",&
+                   r_val=sh_env%energy_offset)
 
          CALL set_aom_env_sp_fect(nadiab, norbitals, &
          natom,positions_tp,adiab_section,sh_env, my_mol_index)

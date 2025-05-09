@@ -1430,10 +1430,10 @@ SUBROUTINE single_phase_fect_Hamiltonian(sh_env, orb, energies_tp, adiab_section
                         !use this to get overlap from reshaped S array
                         overlap = reshaped_S_hh(mol2,mol1)
 
-                        write(355,*) mol1, mol2, overlap
+!                        write(355,*) mol1, mol2, overlap
 
                         !assign matrix element and transpose, multiply by AOM scaling
-                        sh_env%H_tp(state1,state2) = cmplx(0.0D0, sh_env%scaling_hh*overlap, dp)
+                        sh_env%H_tp(state1,state2) = cmplx(0.0D0, -sh_env%scaling_hh*overlap, dp)
                         sh_env%H_tp(state2,state1) = sh_env%H_tp(state1,state2)
 
                 !same hole site --> e-e overlap, same process
@@ -1443,7 +1443,7 @@ SUBROUTINE single_phase_fect_Hamiltonian(sh_env, orb, energies_tp, adiab_section
                         mol2 = CT_states_info(2,state2)
                         overlap = reshaped_S_ee(mol2,mol1)
 
-                        sh_env%H_tp(state1,state2) = cmplx(0.0D0, sh_env%scaling_ee*overlap, dp)
+                        sh_env%H_tp(state1,state2) = cmplx(0.0D0, -sh_env%scaling_ee*overlap, dp)
                         sh_env%H_tp(state2,state1) = sh_env%H_tp(state1,state2)
 
                 END IF
@@ -1471,7 +1471,7 @@ SUBROUTINE single_phase_fect_Hamiltonian(sh_env, orb, energies_tp, adiab_section
 
 !                write(355,*) mol1, mol2, overlap
 
-                sh_env%H_tp(state1,state3) = cmplx(0.0D0, sh_env%scaling_fect_h*overlap, dp)
+                sh_env%H_tp(state1,state3) = cmplx(0.0D0, -sh_env%scaling_fect_h*overlap, dp)
                 sh_env%H_tp(state3,state1) = sh_env%H_tp(state1,state3)
 
         !xt and h on same molecule
@@ -1481,7 +1481,7 @@ SUBROUTINE single_phase_fect_Hamiltonian(sh_env, orb, energies_tp, adiab_section
                 mol2 = site_index
                 overlap = reshaped_S_fect_e(mol2,mol1)
 
-                sh_env%H_tp(state1,state3) = cmplx(0.0D0, sh_env%scaling_fect_h*overlap, dp)
+                sh_env%H_tp(state1,state3) = cmplx(0.0D0, -sh_env%scaling_fect_h*overlap, dp)
                 sh_env%H_tp(state3,state1) = sh_env%H_tp(state1,state3)
 
       END IF
@@ -1504,7 +1504,6 @@ SUBROUTINE single_phase_fect_Hamiltonian(sh_env, orb, energies_tp, adiab_section
 
 
 END SUBROUTINE single_phase_fect_Hamiltonian
-
 
 !**********************************************************************************
 !> \brief This subroutine calculates the AOM couplings and the non-orthogonal
