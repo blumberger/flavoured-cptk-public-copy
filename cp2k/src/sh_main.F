@@ -129,7 +129,8 @@ MODULE sh_main
                                              classically_forbidden_hops,      &
                                              define_active_region,            &
                                              calc_psi_after_correction,       &
-                                             single_phase_Hxt
+                                             single_phase_Hxt,                &
+                                             xsh_single_phase_forces
 
      USE parallel_rng_types,           ONLY: UNIFORM,&
                                           create_rng_stream,&
@@ -334,6 +335,11 @@ CONTAINS
          CALL calc_coms_and_nlist_fect_fe(sh_env, sh_env%cutoff_sites_fe, orb, positions_com_tp, &
                                     adiab_section, sh_env%NN)
 
+!         open(321,file="nlist_log.txt",position="append") 
+!         write(321,*) "NN:"
+!         write(321,*) sh_env%NN
+!         close(321)
+
          CALL calc_fect_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, positions_com_tp)
 
          CALL calc_tresp_coup_fect(sh_env, energies_tp, orb, positions_com_tp, adiab_section) 
@@ -342,6 +348,11 @@ CONTAINS
 
          CALL calc_coms_and_nlist(sh_env%cutoff_sites_fe, orb, positions_com_tp, &
                                     sh_env%active_system_info, sh_env%NN)
+
+!         open(321,file="nlist_log.txt",position="append") 
+!         write(321,*) "NN:"
+!         write(321,*) sh_env%NN
+!         close(321)
 
          CALL single_phase_fect_Hamiltonian(sh_env, orb, energies_tp, adiab_section, positions_com_tp) 
 
@@ -511,9 +522,6 @@ print *, "ACTIVE STATE", active_state
          IF ((new_state).EQ.0) new_state = mat
      ENDIF 
 
-
-     CPABORT("FI - TESTING")
-
      !> ######## FORCES CALCULATION   ###########################################################
      print*, "FOBSH| ACTIVE STATE = ", active_state
      IF (sh_env%aom_couplings_keyword) THEN
@@ -581,6 +589,24 @@ print *, "ACTIVE STATE", active_state
                                         forces_adiab=sh_env%forces_adiab, frozen_c=.FALSE., &
                                         nacv=sh_env%grad_tresp, scaling_C_fect=sh_env%scaling_fect, &
                                         nacv_fe=sh_env%nacv_fe, nacv_ct=sh_env%nacv_ct)
+
+        ELSE
+             CPABORT("MULTI-STATE MUST BE TRUE")
+        END IF
+
+     !> X-SH single-phase forces
+     ELSE IF (sh_env%sp_fect_keyword) THEN
+        IF (sh_env%multistate) THEN
+
+            CALL xsh_single_phase_forces(adiab_section, active_state, sh_env%C_tp, &
+                                        diagonal_F,  &
+                                        sh_env%ext_pres, sh_env%full_system_info, &
+                                        orb, sh_env%index_active_mols, &
+                                        sh_env%nacv_hh, sh_env%nacv_ee, &
+                                        sh_env%forces_adiab, &
+                                        sh_env%grad_tresp, sh_env%nacv_fe_e, sh_env%nacv_ct_e, &
+                                        sh_env%nacv_fe_h, sh_env%nacv_ct_h, sh_env%scaling_hh, & 
+                                        sh_env%scaling_ee, sh_env%scaling_fect_h, sh_env%scaling_fect_e)
 
         ELSE
              CPABORT("MULTI-STATE MUST BE TRUE")
@@ -889,6 +915,16 @@ print *, "ACTIVE STATE", active_state
 
          CALL calc_tresp_coup_fect(sh_env, energies_tp, orb, positions_com_tp, adiab_section)
 
+     !single-phase X-SH couplings and gradients
+     ELSE IF (sh_env%sp_fect_keyword) THEN
+
+         CALL calc_coms_and_nlist(sh_env%cutoff_sites_fe, orb, positions_com_tp, &
+                                    sh_env%active_system_info, sh_env%NN)
+
+         CALL single_phase_fect_Hamiltonian(sh_env, orb, energies_tp, adiab_section, positions_com_tp) 
+
+         CALL single_phase_Hxt(sh_env, energies_tp, orb, positions_com_tp, adiab_section)
+
          !> TRESP COUPLINGS 
      ELSE IF (sh_env%tresp_couplings_keyword) THEN
          !> CALCULATE THE CENTER OF MAS AND CONSTRUCT NEIGHBOURS LIST
@@ -953,6 +989,7 @@ print *, "ACTIVE STATE", active_state
      !ELSE
      !   CALL calc_adiab_nace_old(sh_env, adiab_section)
      !END IF
+
 
      !> PROPAGATE THE ELECTRON FOR ONE MOLECULAR TIMESTEP
      !>the CHARGE CARRIER WF is called sh_env%ctin
@@ -1147,6 +1184,39 @@ print *, "ACTIVE STATE", active_state
              CPABORT("MULTI-STATE MUST BE TRUE")
          END IF
 
+     !> X-SH single-phase forces
+     ELSE IF (sh_env%sp_fect_keyword) THEN
+        IF (sh_env%multistate) THEN
+
+            CALL xsh_single_phase_forces(adiab_section, sh_env%active_state, sh_env%C_tp, &
+                                        diagonal_F,  &
+                                        sh_env%ext_pres, sh_env%full_system_info, &
+                                        orb, sh_env%index_active_mols, &
+                                        sh_env%nacv_hh, sh_env%nacv_ee, &
+                                        sh_env%forces_adiab, &
+                                        sh_env%grad_tresp, sh_env%nacv_fe_e, sh_env%nacv_ct_e, &
+                                        sh_env%nacv_fe_h, sh_env%nacv_ct_h, sh_env%scaling_hh, & 
+                                        sh_env%scaling_ee, sh_env%scaling_fect_h, sh_env%scaling_fect_e)
+
+           IF (sh_env%attempt_hop) THEN
+
+            CALL xsh_single_phase_forces(adiab_section, sh_env%new_state, sh_env%C_tp, &
+                                        diagonal_F,  &
+                                        sh_env%ext_pres, sh_env%full_system_info, &
+                                        orb, sh_env%index_active_mols, &
+                                        sh_env%nacv_hh, sh_env%nacv_ee, &
+                                        sh_env%forces_adiab_new, &
+                                        sh_env%grad_tresp, sh_env%nacv_fe_e, sh_env%nacv_ct_e, &
+                                        sh_env%nacv_fe_h, sh_env%nacv_ct_h, sh_env%scaling_hh, & 
+                                        sh_env%scaling_ee, sh_env%scaling_fect_h, sh_env%scaling_fect_e)
+
+           ENDIF
+
+        ELSE
+             CPABORT("MULTI-STATE MUST BE TRUE")
+        END IF
+
+
      ELSE IF (sh_env%tresp_couplings_keyword) THEN
         !CALL calcforces_frozenH(Hin=-AIMAG(sh_env%H_tp), C=sh_env%C_tp, state=sh_env%active_state, Fin=diagonal_F, &
         !                          forces_adiab=sh_env%forces_adiab)
@@ -1159,25 +1229,6 @@ print *, "ACTIVE STATE", active_state
                                ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, orb=orb, &
                                         nacv=sh_env%grad_tresp)
      
-!!!TEST TO REMOVE
-!OPEN (UNIT = 21, FILE = "FORCES_formatted.dat", position="append",action="write")
-!
-!do i=1,SIZE(sh_env%forces_adiab,2) !atoms
-!     write(21,*) "atom", i, sh_env%forces_adiab(:,i)
-!end do
-!close (21) 
-!        call calcforces_smart_grad_test(state=sh_env%active_state, C=sh_env%C_tp, &
-!                                        Fin=diagonal_F, forces_adiab=sh_env%forces_adiab, &
-!                                        ext_pres=sh_env%ext_pres, active_system_info=sh_env%active_system_info, &
-!                                        orb=orb, full_grad=sh_env%test_grad_tresp)
-!       
-!!!TEST TO REMOVE
-!OPEN (UNIT = 27, FILE = "FORCES_formatted_FULL.dat", position="append",action="write")
-!
-!do i=1,SIZE(sh_env%forces_adiab,2) !atoms
-!     write(27,*) "atom", i, sh_env%forces_adiab(:,i)
-!end do
-!close (27) 
          IF (sh_env%attempt_hop) THEN
              call calcforces_smart_grad(state=sh_env%new_state, C=sh_env%C_tp, &
                                   Fin=diagonal_F, forces_adiab=sh_env%forces_adiab_new, &
@@ -1247,6 +1298,8 @@ itimes, deltatMD, times)
      DEALLOCATE(positions_com_tp) 
      deallocate(exact_forces)
      deallocate(site_energies, couplings, adiab_c, adiab_pop)
+
+
     END SUBROUTINE propagate_namd_all_steps
 
 END MODULE sh_main

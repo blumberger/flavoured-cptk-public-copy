@@ -105,7 +105,8 @@ MODULE non_adiabatic_utils
                   calc_psi_after_correction,       &
                   apply_decoherence,               & 
                   propagate_wf_diab_nace_interpol, &
-                  single_phase_Hxt
+                  single_phase_Hxt,                &
+                  xsh_single_phase_forces
                   
 
 CONTAINS
@@ -456,18 +457,21 @@ END SUBROUTINE calc_coms_and_nlist_fect_fe
 !stop
   end subroutine  calc_tresp_coup
 
+!*************************************************************************************
+!Subroutine for calculating XT-block of X-SH Hamiltonian in single-phase
+!system, basically the same as the 2-phase system, but I removed the
+!reading-in of the donor/acceptor indices as we don't need this anymore.
+!*************************************************************************************
 SUBROUTINE single_phase_Hxt(sh_env, energies_tp, orb, positions_com_tp, adiab_section)
      TYPE(sh_env_type)                               :: sh_env
      REAL(kind=dp), DIMENSION(:),  POINTER           :: energies_tp 
      integer, intent(in)                             :: orb
-     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE        :: tresp_charges  !tresp charges taken from input file, they refer 
-                                                                       !to a single mol and should be extended
-                                                                       !for multi-phase system
+     REAL(KIND=dp), DIMENSION(:), ALLOCATABLE        :: tresp_charges  !tresp charges taken from input file
      INTEGER, DIMENSION(:,:), POINTER                :: NN
      REAL(kind=dp), DIMENSION(:,:),POINTER, &
                                    INTENT(IN)        :: positions_com_tp
 
-     CHARACTER(len=*), PARAMETER                     :: routineN ='calc_tresp_coup_fect', &
+     CHARACTER(len=*), PARAMETER                     :: routineN = 'single_phase_Hxt', &
      routineP = moduleN//':'//routineN
 
      integer                                         :: i, k, dim_
@@ -499,14 +503,17 @@ SUBROUTINE single_phase_Hxt(sh_env, energies_tp, orb, positions_com_tp, adiab_se
      ALLOCATE(phase_indices(size(sh_env%index_active_mols)))
      phase_indices = sh_env%index_active_mols
 
+     !taking nearest-neighbour array from sh_env
      ALLOCATE(NN(size(phase_indices),size(phase_indices)))
      NN = sh_env%NN
 
      number_CT_states = (size(phase_indices)-1)*size(phase_indices)
      number_excitons = nadiab - number_CT_states
+
+     !starting index of 1st exciton in H is this + 1
      xt_state = number_CT_states
 
-     open(776,file="tresp_log.txt",position="append")
+!     open(776,file="tresp_log.txt",position="append")
 
      !> COMMENT_SG: Tresp charegs array should be generalized for multiple
      !molecules
@@ -524,7 +531,7 @@ SUBROUTINE single_phase_Hxt(sh_env, energies_tp, orb, positions_com_tp, adiab_se
 
      do i=1,size(phase_indices) 
         xt_state = xt_state + 1
-        write(776,*) xt_state
+!        write(776,*) "first state:", xt_state
 
         do k=1,size(phase_indices)
 
@@ -534,7 +541,6 @@ SUBROUTINE single_phase_Hxt(sh_env, energies_tp, orb, positions_com_tp, adiab_se
               !> diagonal construction
               if (k==i) then 
                 sh_env%H_tp(xt_state,xt_state) = cmplx(0.0D0,(-energies_tp(xt_state)), dp)
-                write(776,*) sh_env%H_tp(xt_state,xt_state)
 
               !loop over upper diagonal
               else if ( k > i ) then
@@ -549,7 +555,8 @@ SUBROUTINE single_phase_Hxt(sh_env, energies_tp, orb, positions_com_tp, adiab_se
                 final_atom_mol_k = sh_env%full_system_info(2,phase_indices(k))
                 atoms_per_mol_k = (final_atom_mol_k-init_atom_mol_k)+1
 
-                write(776,*) sh_env%full_system_info(:,phase_indices(i)), phase_indices(i)
+!                write(776,*) "mol info:"
+!                write(776,*) sh_env%full_system_info(:,phase_indices(i)), phase_indices(i)
 
                 !> this allocation deallocation is maybe inefficient
                 !but it was the only thing I found to be general for
@@ -566,8 +573,6 @@ SUBROUTINE single_phase_Hxt(sh_env, energies_tp, orb, positions_com_tp, adiab_se
                 ! calc coupling for a given pair of states
                 CALL calc_trsp_ab(crd_i, crd_k, charges1, charges2, tresp_coup, Gaussian_charges)
 
-                write(776,*) xt_state, xt_state+k-i, tresp_coup
-
                 sh_env%H_tp(xt_state, xt_state+k-i) = cmplx(0.0D0,-tresp_coup,dp) 
                 sh_env%H_tp(xt_state+k-i, xt_state) = sh_env%H_tp(xt_state, xt_state+k-i)
                 !sign of the off-diag is minus consisently with diagonals
@@ -578,6 +583,10 @@ SUBROUTINE single_phase_Hxt(sh_env, energies_tp, orb, positions_com_tp, adiab_se
                 sh_env%grad_tresp(1,k,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i) = grad1(1,:)
                 sh_env%grad_tresp(2,k,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i) = grad1(2,:)
                 sh_env%grad_tresp(3,k,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i) = grad1(3,:)
+
+ !               write(776,*) "grad index:"
+ !               write(776,*) (i-1)*atoms_per_mol_i+1,i*atoms_per_mol_i
+ !               write(776,*) (k-1)*atoms_per_mol_k+1,k*atoms_per_mol_k
 
                 ! calc gradient on atoms belonging to mol k, from
                 ! atoms belonging to mol i, and store the former
@@ -601,7 +610,7 @@ SUBROUTINE single_phase_Hxt(sh_env, energies_tp, orb, positions_com_tp, adiab_se
     DEALLOCATE(NN)
     DEALLOCATE(phase_indices)
 
-    close(776)
+!    close(776)
 
 END SUBROUTINE single_phase_Hxt
 
@@ -654,6 +663,8 @@ END SUBROUTINE single_phase_Hxt
      CALL section_vals_val_get(ct_block,"INDEX_ACCEPTOR_MOLS",&
                                i_vals=acceptor_ind)
 
+!     open(776,file="tresp_log.txt",position="append")
+
      IF (sh_env%fe_donor) THEN
        ALLOCATE(fe_ind(SIZE(donor_ind)))
        fe_ind = donor_ind
@@ -684,6 +695,7 @@ END SUBROUTINE single_phase_Hxt
      sh_env%grad_tresp = 0.0D0
 
      do i=1,SIZE(fe_ind) 
+!       write(776,*) "first state:", orb*(i-1)+total_CT_states+1
         do k=1,SIZE(fe_ind)
            ! do calculation only for molecules within cut-off radious. 
            if (NN(i,k) == 1) then
@@ -720,6 +732,9 @@ END SUBROUTINE single_phase_Hxt
                           !final_atom_mol_k = sh_env%active_system_info(2,fe_ind(k))
                           atoms_per_mol_k = (final_atom_mol_k-init_atom_mol_k)+1
 
+!                          write(776,*) "mol_info:"
+!                          write(776,*) sh_env%full_system_info(:,fe_ind(i)), fe_ind(i)
+
                           !> this allocation deallocation is maybe inefficient
                           !but it was the only thing I found to be general for
                           !multi-phases (in case molecules have different number
@@ -745,6 +760,10 @@ END SUBROUTINE single_phase_Hxt
                           sh_env%grad_tresp(1,orb*(k-1)+d,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i) = grad1(1,:)
                           sh_env%grad_tresp(2,orb*(k-1)+d,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i) = grad1(2,:)
                           sh_env%grad_tresp(3,orb*(k-1)+d,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i) = grad1(3,:)
+
+!                          write(776,*) "grad index:"
+!                          write(776,*) (i-1)*atoms_per_mol_i+1,i*atoms_per_mol_i
+!                          write(776,*) (k-1)*atoms_per_mol_k+1,k*atoms_per_mol_k
 
                           ! calc gradient on atoms belonging to mol k, from
                           ! atoms belonging to mol i, and store the former
@@ -783,6 +802,8 @@ END SUBROUTINE single_phase_Hxt
     DEALLOCATE(charges1,charges2)
     DEALLOCATE(fe_ind)
     DEALLOCATE(NN) 
+
+!    close(776)
 
   end subroutine  calc_tresp_coup_fect
 
@@ -1877,6 +1898,328 @@ subroutine calc_hop_nacv_approx_multip(adiab_section, instate, C, Fin, &
 end subroutine calc_hop_nacv_approx_multip
 
 !**********************************************************************************
+!Subroutine to calculate the nacv between the old and new adiabats
+!following a surface hop. This is done by using the finite-difference
+!diabatic nacv's, and weighting them by the diabatic coefficients of the
+!old and new adiabats. This is therefore basically the same as
+!calculating the adiabatic force, but the diabatic coefficients no
+!longer belong to a single (active) adiabatic state.
+!**********************************************************************************
+SUBROUTINE xsh_approx_nacv_sp(adiab_section, act_state, new_state, eigenvectors, input_F, &
+                  ext_pres, full_system_info, orb, mol_index, &
+                  nacv_hh, nacv_ee, adiabat_energies, &
+                  nacv_tresp, nacv_fe_e, nacv_ct_e, nacv_fe_h, nacv_ct_h, & 
+                  scaling_hh, scaling_ee, scaling_fect_h, scaling_fect_e, hop_nacv)
+
+        TYPE(section_vals_type), POINTER            :: adiab_section
+        INTEGER, INTENT(in)                         :: act_state, orb, new_state
+        REAL(KIND=dp), intent(in), dimension(:,:)   :: eigenvectors
+        REAL(KIND=dp), intent(in), dimension(:,:,:) :: input_F
+        REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE  :: pseudo_forces
+        REAL(KIND=dp), DIMENSION(:), ALLOCATABLE, &
+                             INTENT(IN), OPTIONAL    :: adiabat_energies
+ 
+        LOGICAL, dimension(:), INTENT(IN)           :: ext_pres
+        INTEGER, DIMENSION(:,:), ALLOCATABLE, &
+                                      INTENT(IN)     :: full_system_info
+        REAL(KIND=dp), INTENT(in), DIMENSION(:,:,:)  :: nacv_hh
+        REAL(KIND=dp), INTENT(in), DIMENSION(:,:,:)  :: nacv_ee
+        REAL(KIND=dp), INTENT(in), DIMENSION(:,:,:)  :: nacv_fe_e, nacv_fe_h
+        REAL(KIND=dp), INTENT(in), DIMENSION(:,:,:)  :: nacv_ct_e, nacv_ct_h
+        REAL(KIND=dp), INTENT(in), DIMENSION(:,:,:)  :: nacv_tresp
+        INTEGER, INTENT(in), DIMENSION(:)      :: mol_index
+        REAL(KIND = dp), INTENT(IN)            :: scaling_hh, scaling_ee, scaling_fect_h, scaling_fect_e
+        REAL(kind=dp), DIMENSION(:,:), INTENT(OUT), ALLOCATABLE,  &
+                                           OPTIONAL  :: hop_nacv
+
+
+        CHARACTER(len=*), PARAMETER :: routineN ='xsh_approx_nacv_sp', &
+                               routineP = moduleN//':'//routineN
+
+        INTEGER                                     :: state, act_atom_count, mol1, mol2
+        INTEGER                                     :: index1, index2, CT_h_index, CT_e_index
+        INTEGER                                     :: natom, nadiab
+        INTEGER                                     :: mol_global, atom, axis
+        TYPE(section_vals_type), POINTER            :: site_energy_section, ct_block
+        INTEGER                                     :: nI
+        INTEGER, DIMENSION(:), ALLOCATABLE          :: phase_indices
+        INTEGER                                     :: number_CT_states
+        REAL(KIND=dp)                               :: reciprocal_Ediff
+
+        NULLIFY(site_energy_section,ct_block)
+
+        natom = size(input_F,2)
+        ALLOCATE(pseudo_forces(3,natom))
+        ALLOCATE(hop_nacv(3,natom))
+
+!        open(127,file="nacv-eigenvecs.txt",position="append")
+
+        ALLOCATE(phase_indices(size(mol_index)))
+        do mol1=1,size(mol_index)
+            phase_indices(mol1) = mol1
+        end do
+
+       ! TOTAL number states
+        CALL section_vals_val_get(adiab_section,"NUMBER_DIABATIC_STATES",&
+                          i_val=nadiab)
+
+        reciprocal_Ediff = adiabat_energies(new_state) - adiabat_energies(act_state)
+        reciprocal_Ediff = 1/reciprocal_Ediff
+
+        number_CT_states = size(phase_indices)*(size(phase_indices)-1)
+
+        site_energy_section => section_vals_get_subs_vals(adiab_section,"METHOD_SITE_ENERGIES")
+        ct_block => section_vals_get_subs_vals(site_energy_section,"CT_BLOCK")
+
+        !computing forces on all atoms along 1 axis
+        do axis=1,3
+         
+         act_atom_count = 0 !active region atom counter
+         do atom=1,natom
+
+               pseudo_forces(axis,atom) = 0.0D0
+
+               !> diagonal forces from CT and FE blocks
+               do state=1,nadiab
+
+               !taking diagonal force on atom from state, then doing
+               !this for all contributing states
+
+                 pseudo_forces(axis,atom) = pseudo_forces(axis,atom) + &
+eigenvectors(state,act_state)*eigenvectors(state,new_state)*input_F(axis,atom,state)
+
+               end do
+
+               !ext_pres(atom)=true only in active region
+               IF (ext_pres(atom)) THEN
+
+                 !iterating over number of molecules in active region
+                 do mol1=1,size(full_system_info,2)
+                    !checks if atom is in certain active molecule
+                    IF (atom .ge. full_system_info(1,mol1) .AND. atom .le. full_system_info(2,mol1)) THEN
+                          mol_global = mol1 !mol index in DECOMP
+                          act_atom_count = act_atom_count + 1 !atom index in active region only
+
+                          do mol2=1,size(mol_index)
+                              IF (mol_global .eq. mol_index(mol2)) THEN
+                                   nI = mol2 !mol index relative to active region only
+                              END IF
+                          end do
+
+                    END IF
+                 end do
+               ELSE
+                 CYCLE !non-active atom --> move to next atom
+               END IF
+
+               !finding atom indices still relevant, as passing in
+               !adiabatic nacv's due to gradient of all atoms
+
+               !iterating over all mols that dont have atom (!= nI);
+               !still useful bc all non-zero nacv terms affecting a
+               !single diabat will appear in adiabatic definition, but
+               !just weighted differently
+
+               do mol1=1,size(phase_indices)
+                 IF (mol1 .ne. nI) THEN
+
+                         ! getting diabatic coefficients (from active eigenstate) for two excitons
+                         index1 = number_CT_states+nI
+                         index2 = number_CT_states+mol1
+
+!                         write(127,*) "xt-xt coupling"
+!                         write(127,*)  "1st exciton diabat:", eigenvectors(index1,act_state)
+!                         write(127,*) "2nd exciton diabat:", eigenvectors(index2,act_state)
+
+                         !apply xt-xt force by indexing tresp nacv
+                         pseudo_forces(axis,atom) = pseudo_forces(axis,atom) + & 
+                         (-1.0D0)*nacv_tresp(axis,mol1,act_atom_count)*(eigenvectors(index1,act_state)* &
+eigenvectors(index2,new_state) + eigenvectors(index1,new_state)*eigenvectors(index2,act_state))
+
+                         !now moving on to xt-ct coupling gradients, by
+                         !first assuming nI is excitonic (index1 stays the same)
+
+                         !mol1 is hole --> fect coupling via h-h
+                         CT_h_index = 1 + (mol1-1)*(size(phase_indices)-1) !h on mol1, getting minimum CT-index
+                         IF (nI .lt. mol1) THEN
+                                 
+                                 !e on nI, getting incremental index on top of h
+                                 CT_e_index = nI - 1
+
+                         ELSE IF (nI .gt. mol1) THEN
+
+                                 ! if nI > mol1, -2 bc one molecule is skipped from index (the one with h)
+                                 CT_e_index = nI - 2
+
+                         END IF
+                         index2 = CT_h_index+CT_e_index
+
+!                         write(127,*) "xt-ct coupling, h-h"
+!                         write(127,*) "xt on", nI, eigenvectors(index1,act_state)
+!                         write(127,*) "h on", mol1, eigenvectors(index2,act_state)
+
+                         !obtained diabatic indices, now index the nacv and add to atomic force
+                         pseudo_forces(axis,atom) = pseudo_forces(axis,atom) + &
+                                 scaling_fect_h*(-1.0D0)*nacv_fe_h(axis,mol1,act_atom_count)*(eigenvectors(index1,act_state)* &
+eigenvectors(index2,new_state) + eigenvectors(index1,new_state)*eigenvectors(index2,act_state))
+
+                         !nI is hole, xt on mol1 --> fect coupling via
+                         !h-h, so u1 changes to mol1 xt index
+                         index1 = number_CT_states+mol1
+
+                         CT_h_index = 1 + (nI-1)*(size(phase_indices)-1) !h now on nI, so e/XT on mol1
+                         IF (mol1 .lt. nI) THEN
+                                 CT_e_index = mol1 - 1
+                         ELSE IF (mol1 .gt. nI) THEN
+                                 CT_e_index = mol1 - 2
+                         END IF
+                         index2 = CT_h_index+CT_e_index
+
+                         !obtained diabatic coeffs for mol1 exciton, and
+                         !CT-state where h on nI and e on mol1
+                         !(otherwise coupling is zero), now add to force
+                         
+                        pseudo_forces(axis,atom) = pseudo_forces(axis,atom) + &
+                                 scaling_fect_h*(-1.0D0)*nacv_ct_h(axis,mol1,act_atom_count)*(eigenvectors(index1,act_state)* &
+eigenvectors(index2,new_state) + eigenvectors(index1,new_state)*eigenvectors(index2,act_state))
+
+                         !nacv_ct used when nI is hole, bc the nacv_ct
+                         !stores nacv caused by the gradients of atoms
+                         !on nI(h) hitting couplings involving mol1(xt)
+
+                         !with same logic, nacv_fe contains gradients of
+                         !atoms on nI(xt) hitting couplings involving
+                         !mol1(h)
+
+                         !now onto fect e-e couplings, starting with xt(+h)
+                         !on nI again
+                         index1 = number_CT_states+nI
+
+                         CT_h_index = 1 + (nI-1)*(size(phase_indices)-1) !h on nI as well
+                         IF (mol1 .lt. nI) THEN
+                                 !e on mol1 with corresponding CT index
+                                 CT_e_index = mol1 - 1
+                         ELSE IF (mol1 .gt. nI) THEN
+                                 CT_e_index = mol1 - 2
+                         END IF
+                         index2 = CT_h_index+CT_e_index
+
+!                         write(127,*) "xt-ct coupling, e-e"
+!                         write(127,*) "xt on", nI, eigenvectors(index1,act_state)
+!                         write(127,*) "h on", mol1, eigenvectors(index2,act_state)
+
+                         pseudo_forces(axis,atom) = pseudo_forces(axis,atom) + &
+                                 scaling_fect_e*(-1.0D0)*nacv_fe_e(axis,mol1,act_atom_count)*(eigenvectors(index1,act_state)* &
+eigenvectors(index2,new_state) + eigenvectors(index1,new_state)*eigenvectors(index2,act_state))
+
+                         !second set of fect e-e couplings, e on nI,
+                         !xt(+h) on mol1
+                         index1 = number_CT_states+mol1
+
+                         CT_h_index = 1 + (mol1-1)*(size(phase_indices)-1) !h on mol1 as well
+                         IF (nI .lt. mol1) THEN
+                                 CT_e_index = nI - 1
+                         ELSE IF (nI .gt. mol1) THEN
+                                 CT_e_index = nI - 2
+                         END IF
+                         index2 = CT_h_index+CT_e_index
+
+                         pseudo_forces(axis,atom) = pseudo_forces(axis,atom) + &
+                                 scaling_fect_e*(-1.0D0)*nacv_ct_e(axis,mol1,act_atom_count)*(eigenvectors(index1,act_state)* &
+eigenvectors(index2,new_state) + eigenvectors(index1,new_state)*eigenvectors(index2,act_state))
+
+                         !xt-xt and xt-ct forces done, now moving on to
+                         !forces from e-e and h-h couplings
+
+                         !iterating over second set of mols, nI and mol1
+                         !assumed to be coupled charges, all other mols
+                         !can have the opposite charge
+                         do mol2=1,size(phase_indices)
+                             IF (mol2 .ne. nI .AND. mol2 .ne. mol1) THEN
+                             !CT-states with charge on nI and mol1 must
+                             !share charge on mol2 for non-zero coupling
+
+                                !minimum CT-index if h on nI
+                                CT_h_index = 1 + (nI-1)*(size(phase_indices)-1)
+                                IF (mol2 .lt. nI) THEN !e then on mol2
+                                        CT_e_index = mol2 - 1
+                                ELSE IF (mol2 .gt. nI) THEN
+                                        CT_e_index = mol2 - 2
+                                END IF
+                                index1 = CT_h_index+CT_e_index
+
+                                !mol1 then also has h, e still on mol2
+                                !but < mol1 so CT_e_index updated
+
+                                CT_h_index = 1 + (mol1-1)*(size(phase_indices)-1)
+                                IF (mol2 .lt. mol1) THEN !e then on mol2
+                                        CT_e_index = mol2 - 1
+                                ELSE IF (mol2 .gt. mol1) THEN
+                                        CT_e_index = mol2 - 2
+                                END IF
+                                index2 = CT_h_index+CT_e_index
+
+!                                write(127,*) "h-h coupling"
+!                                write(127,*) "h1 on", nI, eigenvectors(index1,act_state)
+!                                write(127,*) "h2 on", mol1, eigenvectors(index2,act_state)
+
+                                !index nacv_hh which stores nacv of atom
+                                !in nI on coupling of nI with mol1
+                                pseudo_forces(axis,atom) = pseudo_forces(axis,atom) + &
+                                        scaling_hh*(-1.0D0)*nacv_hh(axis,mol1,act_atom_count)*(eigenvectors(index1,act_state)* &
+eigenvectors(index2,new_state) + eigenvectors(index1,new_state)*eigenvectors(index2,act_state))
+
+                                !h-h coupling done, moving on to e-e coupling
+
+                                !nI and mol1 have e, share h on mol2
+                                CT_h_index = 1 + (mol2-1)*(size(phase_indices)-1)
+                                IF (nI .lt. mol2) THEN
+                                        CT_e_index = nI - 1
+                                ELSE IF (nI .gt. mol2) THEN
+                                        CT_e_index = nI - 2
+                                END IF
+                                index1 = CT_h_index+CT_e_index
+
+                                !nI and mol1 share h on mol2, so
+                                !CT_h_index now the same
+                                IF (mol1 .lt. mol2) THEN
+                                        CT_e_index = mol1 - 1
+                                ELSE IF (mol1 .gt. mol2) THEN
+                                        CT_e_index = mol1 - 2
+                                END IF 
+                                index2 = CT_h_index+CT_e_index
+
+                                !now indexing nacv_ee, which stores nacv
+                                !terms from atom in nI on e-e coupling involving nI and mol1
+                                pseudo_forces(axis,atom) = pseudo_forces(axis,atom) + &
+                                        scaling_ee*(-1.0D0)*nacv_ee(axis,mol1,act_atom_count)*(eigenvectors(index1,act_state)* &
+eigenvectors(index2,new_state) + eigenvectors(index1,new_state)*eigenvectors(index2,act_state))
+
+                                !end of loop for single active atom
+                                !force along 1 axis
+
+                            END IF !end of condition that mol2 != mol1 or nI
+                         end do !end of loop over mol2
+
+                 END IF !end of condition that mol1 != nI
+              end do !end of loop of mol1
+              
+         end do
+        end do
+        !end of loops over all atoms and axes
+
+        !nacv defined as -F/deltaE
+        hop_nacv = -pseudo_forces*reciprocal_Ediff
+
+        DEALLOCATE(phase_indices)
+        DEALLOCATE(pseudo_forces)
+
+!        close(127)
+ 
+END SUBROUTINE xsh_approx_nacv_sp
+
+
+!**********************************************************************************
 !> \brief adiabatic NACV for X-SH (similar to forces but for state a and b) 
 !in X-SH 
 !
@@ -2420,6 +2763,363 @@ close(429)
 
 end subroutine calcforces_smart_grad
 
+!*************************************************************************************
+!xsh_single_phase_forces: subroutine for calculating atomic forces (in
+!active and incactive regions) for single-phase X-SH with fluctuating
+!couplings.
+
+!INPUTS: adiab_section: pointer to adiab section of input file ;
+!act_state: integer No. of active state index ; eigenvectors:
+!nadiab x nadiab matrix of eigenvectors ordered into columns ; input_F:
+!input matrix of site energy force terms for each atom/axis ; ext_pres:
+!array of all atoms with true/false depending on active region ;
+!full_system_info: 2D array with start/end atom indices of all molecules
+!in system ; orb: int, No. of orbitals on each mol (only designed for 1);
+!mol_index: decomp index of mols ; nacv arrays with dim ax,state,atom where atom's
+!gradient hits coupling involving state along ax
+
+
+!OUTPUT: forces_adiab: array of total force on each atom and axis
+!*************************************************************************************        
+SUBROUTINE xsh_single_phase_forces(adiab_section, act_state, eigenvectors, input_F, &
+                  ext_pres, full_system_info, orb, mol_index, &
+                  nacv_hh, nacv_ee, forces_adiab, &
+                  nacv_tresp, nacv_fe_e, nacv_ct_e, nacv_fe_h, nacv_ct_h, & 
+                  scaling_hh, scaling_ee, scaling_fect_h, scaling_fect_e)
+
+        TYPE(section_vals_type), POINTER            :: adiab_section
+        integer, intent(in)                         :: act_state, orb
+        REAL(KIND=dp), intent(in), dimension(:,:)   :: eigenvectors
+        REAL(KIND=dp), intent(in), dimension(:,:,:) :: input_F
+        REAL(KIND=dp), dimension(:,:), POINTER      :: forces_adiab
+        LOGICAL, dimension(:), INTENT(IN)           :: ext_pres
+        INTEGER, DIMENSION(:,:), ALLOCATABLE, &
+                                      INTENT(IN)     :: full_system_info
+        REAL(KIND=dp), INTENT(in), DIMENSION(:,:,:)  :: nacv_hh
+        REAL(KIND=dp), INTENT(in), DIMENSION(:,:,:)  :: nacv_ee
+        REAL(KIND=dp), INTENT(in), DIMENSION(:,:,:)  :: nacv_fe_e, nacv_fe_h
+        REAL(KIND=dp), INTENT(in), DIMENSION(:,:,:)  :: nacv_ct_e, nacv_ct_h
+        REAL(KIND=dp), INTENT(in), DIMENSION(:,:,:)  :: nacv_tresp
+        INTEGER, INTENT(in), DIMENSION(:)      :: mol_index
+        REAL(KIND = dp), INTENT(IN)            :: scaling_hh, scaling_ee, scaling_fect_h, scaling_fect_e
+
+        CHARACTER(len=*), PARAMETER :: routineN ='xsh_single_phase_forces', &
+                               routineP = moduleN//':'//routineN
+
+        INTEGER                                     :: state, act_atom_count, mol1, mol2
+        INTEGER                                     :: CT_h_index, CT_e_index
+        INTEGER                                     :: natom, nadiab
+        INTEGER                                     :: mol_global, atom, axis
+        TYPE(section_vals_type), POINTER            :: site_energy_section, ct_block
+        INTEGER                                     :: nI
+        INTEGER, DIMENSION(:), ALLOCATABLE          :: phase_indices
+        INTEGER                                     :: number_CT_states
+        REAL(KIND=dp)                               :: u1, u2
+
+        NULLIFY(site_energy_section,ct_block)
+
+!        open(124,file="force-log.txt",position="append")
+!        open(156,file="active-eigenvecs.txt",position="append")
+        open(525,file="total-forces.txt",position="append")
+        open(998,file="diagonal-forces.txt",position="append")
+
+        natom = size(input_F,2)
+!        write(124,*) natom
+!        write(124,*) size(input_F,3)
+
+        ALLOCATE(phase_indices(size(mol_index)))
+        do mol1=1,size(mol_index)
+            phase_indices(mol1) = mol1
+        end do
+
+!        write(124,*) size(phase_indices), size(mol_index)
+
+       ! TOTAL number states
+        CALL section_vals_val_get(adiab_section,"NUMBER_DIABATIC_STATES",&
+                          i_val=nadiab)
+
+        number_CT_states = size(phase_indices)*(size(phase_indices)-1)
+!        write(124,*) number_CT_states
+
+        site_energy_section => section_vals_get_subs_vals(adiab_section,"METHOD_SITE_ENERGIES")
+        ct_block => section_vals_get_subs_vals(site_energy_section,"CT_BLOCK")
+
+        !computing forces on all atoms along 1 axis
+        do axis=1,3
+         
+         act_atom_count = 0 !active region atom counter
+         do atom=1,natom
+
+               forces_adiab(axis,atom) = 0.0D0
+
+               !> diagonal forces from CT and FE blocks
+               do state=1,nadiab
+
+               !taking diagonal force on atom from state, then doing
+               !this for all contributing states
+
+                 forces_adiab(axis,atom) = forces_adiab(axis,atom) + &
+(abs(eigenvectors(state,act_state))**2)*input_F(axis,atom,state) 
+
+               write(998,*) axis, atom, forces_adiab(axis,atom)
+
+               end do
+
+               !ext_pres(atom)=true only in active region
+               IF (ext_pres(atom)) THEN
+
+                 !iterating over number of molecules in active region
+                 do mol1=1,size(full_system_info,2)
+                    !checks if atom is in certain active molecule
+                    IF (atom .ge. full_system_info(1,mol1) .AND. atom .le. full_system_info(2,mol1)) THEN
+                          mol_global = mol1 !mol index in DECOMP
+                          act_atom_count = act_atom_count + 1 !atom index in active region only
+
+                          do mol2=1,size(mol_index)
+                              IF (mol_global .eq. mol_index(mol2)) THEN
+                                   nI = mol2 !mol index relative to active region only
+                              END IF
+                          end do
+
+                    END IF
+                 end do
+               ELSE
+                 CYCLE !non-active atom --> move to next atom
+               END IF
+
+               !iterating over all mols that dont have atom (!= nI)
+               do mol1=1,size(phase_indices)
+                 IF (mol1 .ne. nI) THEN
+
+                         ! getting diabatic coefficients (from active eigenstate) for two excitons
+                         u1 = eigenvectors(number_CT_states+nI, act_state)
+                         u2 = eigenvectors(number_CT_states+mol1, act_state)
+
+!                         write(156,*) "xt-xt coupling"
+!                         write(156,*) "1st exciton diabat:", u1
+!                         write(156,*) "2nd exciton diabat:", u2
+
+                         !apply xt-xt force by indexing tresp nacv
+                         forces_adiab(axis,atom) = forces_adiab(axis,atom) + & 
+                         (-2.0D0)*u1*u2*nacv_tresp(axis,mol1,act_atom_count)
+
+                         !now moving on to xt-ct coupling gradients, by
+                         !first assuming nI is excitonic (u1 stays the same)
+
+                         !mol1 is hole --> fect coupling via h-h
+                         CT_h_index = 1 + (mol1-1)*(size(phase_indices)-1) !h on mol1, getting minimum CT-index
+                         IF (nI .lt. mol1) THEN
+                                 
+                                 !e on nI, getting incremental index on top of h
+                                 CT_e_index = nI - 1
+
+                         ELSE IF (nI .gt. mol1) THEN
+
+                                 !if nI > mol1, -2 bc one molecule is skipped from index (the one with h)
+                                 CT_e_index = nI - 2
+
+                         END IF
+                         u2 = eigenvectors(CT_h_index+CT_e_index, act_state)
+
+!                         write(156,*) "xt-ct coupling, h-h"
+!                         write(156,*) "xt on", nI, u1
+!                         write(156,*) "h on", mol1, u2
+
+!                         write(124,*) "Exciton on mol", nI
+!                         write(124,*) nI + number_CT_states
+!                         write(124,*) "e on mol", nI
+!                         write(124,*) "h on mol", mol1
+!                         write(124,*) CT_h_index, CT_e_index
+
+                         !obtained diabatic coeffs, now index the nacv and add to atomic force
+                         forces_adiab(axis,atom) = forces_adiab(axis,atom) + &
+                                 scaling_fect_h*(-2.0D0)*u1*u2*nacv_fe_h(axis,mol1,act_atom_count)
+
+                         !nI is hole, xt on mol1 --> fect coupling via
+                         !h-h, so u1 changes to mol1 xt index
+                         u1 = eigenvectors(number_CT_states+mol1, act_state)
+
+                         CT_h_index = 1 + (nI-1)*(size(phase_indices)-1) !h now on nI, so e/XT on mol1
+                         IF (mol1 .lt. nI) THEN
+                                 CT_e_index = mol1 - 1
+                         ELSE IF (mol1 .gt. nI) THEN
+                                 CT_e_index = mol1 - 2
+                         END IF
+                         u2 = eigenvectors(CT_h_index+CT_e_index, act_state)
+
+                         !obtained diabatic coeffs for mol1 exciton, and
+                         !CT-state where h on nI and e on mol1
+                         !(otherwise coupling is zero), now add to force
+
+!                         write(124,*) "Exciton on mol", mol1
+!                         write(124,*) mol1 + number_CT_states
+!                         write(124,*) "e on mol", mol1
+!                         write(124,*) "h on mol", nI
+!                         write(124,*) CT_h_index, CT_e_index
+                         
+                         forces_adiab(axis,atom) = forces_adiab(axis,atom) + &
+                                 scaling_fect_h*(-2.0D0)*u1*u2*nacv_ct_h(axis,mol1,act_atom_count)
+
+                         !nacv_ct used when nI is hole, bc the nacv_ct
+                         !stores nacv caused by the gradients of atoms
+                         !on nI(h) hitting couplings involving mol1(xt)
+
+                         !with same logic, nacv_fe contains gradients of
+                         !atoms on nI(xt) hitting couplings involving
+                         !mol1(h)
+
+                         !now onto fect e-e couplings, starting with xt(+h)
+                         !on nI again
+                         u1 = eigenvectors(number_CT_states+nI, act_state)
+
+                         CT_h_index = 1 + (nI-1)*(size(phase_indices)-1) !h on nI as well
+                         IF (mol1 .lt. nI) THEN
+                                 !e on mol1 with corresponding CT index
+                                 CT_e_index = mol1 - 1
+                         ELSE IF (mol1 .gt. nI) THEN
+                                 CT_e_index = mol1 - 2
+                         END IF
+                         u2 = eigenvectors(CT_h_index+CT_e_index, act_state)
+
+!                         write(156,*) "xt-ct coupling, e-e"
+!                         write(156,*) "xt on", nI, u1
+!                         write(156,*) "h on", mol1, u2
+!
+!                         write(124,*) "Exciton on mol", nI
+!                         write(124,*) nI + number_CT_states
+!                         write(124,*) "e on mol", mol1
+!                         write(124,*) "h on mol", nI
+!                         write(124,*) CT_h_index, CT_e_index
+
+                         forces_adiab(axis,atom) = forces_adiab(axis,atom) + &
+                                 scaling_fect_e*(-2.0D0)*u1*u2*nacv_fe_e(axis,mol1,act_atom_count)
+
+                         !second set of fect e-e couplings, e on nI,
+                         !xt(+h) on mol1
+                         u1 = eigenvectors(number_CT_states+mol1, act_state)
+
+                         CT_h_index = 1 + (mol1-1)*(size(phase_indices)-1) !h on mol1 as well
+                         IF (nI .lt. mol1) THEN
+                                 CT_e_index = nI - 1
+                         ELSE IF (nI .gt. mol1) THEN
+                                 CT_e_index = nI - 2
+                         END IF
+                         u2 = eigenvectors(CT_h_index+CT_e_index, act_state)
+
+!                         write(124,*) "Exciton on mol", mol1
+!                         write(124,*) mol1 + number_CT_states
+!                         write(124,*) "e on mol", nI
+!                         write(124,*) "h on mol", mol1
+!                         write(124,*) CT_h_index, CT_e_index
+
+                         forces_adiab(axis,atom) = forces_adiab(axis,atom) + &
+                                 scaling_fect_e*(-2.0D0)*u1*u2*nacv_ct_e(axis,mol1,act_atom_count)
+
+                         !xt-xt and xt-ct forces done, now moving on to
+                         !forces from e-e and h-h couplings
+
+                         !iterating over second set of mols, nI and mol1
+                         !assumed to be coupled charges, all other mols
+                         !can have the opposite charge
+                         do mol2=1,size(phase_indices)
+                             IF (mol2 .ne. nI .AND. mol2 .ne. mol1) THEN
+                             !CT-states with charge on nI and mol1 must
+                             !share charge on mol2 for non-zero coupling
+
+                                !minimum CT-index if h on nI
+                                CT_h_index = 1 + (nI-1)*(size(phase_indices)-1)
+                                IF (mol2 .lt. nI) THEN !e then on mol2
+                                        CT_e_index = mol2 - 1
+                                ELSE IF (mol2 .gt. nI) THEN
+                                        CT_e_index = mol2 - 2
+                                END IF
+                                u1 = eigenvectors(CT_h_index+CT_e_index, act_state)
+
+!                                write(124,*) "h1 on mol", nI
+!                                write(124,*) "e1 on mol", mol2
+!                                write(124,*) CT_h_index, CT_e_index
+
+                                !mol1 then also has h, e still on mol2
+                                !but < nI so CT_e_index updated
+
+                                CT_h_index = 1 + (mol1-1)*(size(phase_indices)-1)
+                                IF (mol2 .lt. mol1) THEN !e then on mol2
+                                        CT_e_index = mol2 - 1
+                                ELSE IF (mol2 .gt. mol1) THEN
+                                        CT_e_index = mol2 - 2
+                                END IF
+                                u2 = eigenvectors(CT_h_index+CT_e_index, act_state)
+
+!                                write(124,*) "h2 on mol", mol1
+!                                write(124,*) "e2 on mol", mol2
+!                                write(124,*) CT_h_index, CT_e_index
+!
+!                                write(156,*) "h-h coupling"
+!                                write(156,*) "h1 on", nI, u1
+!                                write(156,*) "h2 on", mol1, u2
+
+                                !index nacv_hh which stores nacv of atom
+                                !in nI on coupling of nI with mol1
+                                forces_adiab(axis,atom) = forces_adiab(axis,atom) + &
+                                        scaling_hh*(-2.0D0)*u1*u2*nacv_hh(axis,mol1,act_atom_count)
+
+                                !h-h coupling done, moving on to e-e coupling
+
+                                !nI and mol1 have e, share h on mol2
+                                CT_h_index = 1 + (mol2-1)*(size(phase_indices)-1)
+                                IF (nI .lt. mol2) THEN
+                                        CT_e_index = nI - 1
+                                ELSE IF (nI .gt. mol2) THEN
+                                        CT_e_index = nI - 2
+                                END IF
+                                u1 = eigenvectors(CT_h_index+CT_e_index, act_state)
+
+!                                write(124,*) "h1 on mol", mol2
+!                                write(124,*) "e1 on mol", nI
+!                                write(124,*) CT_h_index, CT_e_index
+
+                                !nI and mol1 share h on mol2, so
+                                !CT_h_index now the same
+                                IF (mol1 .lt. mol2) THEN
+                                        CT_e_index = mol1 - 1
+                                ELSE IF (mol1 .gt. mol2) THEN
+                                        CT_e_index = mol1 - 2
+                                END IF 
+                                u2 = eigenvectors(CT_h_index+CT_e_index, act_state)
+
+!                                write(124,*) "h2 on mol", mol2
+!                                write(124,*) "e2 on mol", mol1
+!                                write(124,*) CT_h_index, CT_e_index
+
+                                !now indexing nacv_ee, which stores nacv
+                                !terms from atom in nI on e-e coupling involving nI and mol1
+                                forces_adiab(axis,atom) = forces_adiab(axis,atom) + &
+                                        scaling_ee*(-2.0D0)*u1*u2*nacv_ee(axis,mol1,act_atom_count)
+
+                                !end of loop for single active atom
+                                !force along 1 axis
+
+                            END IF !end of condition that mol2 != mol1 or nI
+                         end do !end of loop over mol2
+
+                 END IF !end of condition that mol1 != nI
+              end do !end of loop of mol1
+
+              write(525,*) axis, atom, forces_adiab(axis,atom)
+              
+         end do
+        end do
+        !end of loops over all atoms and axes
+
+!        close(124)
+!        close(156)
+        close(525)
+        close(998)
+
+        DEALLOCATE(phase_indices)
+ 
+END SUBROUTINE xsh_single_phase_forces
+
 !**********************************************************************************
 !> \brief Construction of the forces for X-SH
 !
@@ -2474,6 +3174,9 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
         NULLIFY(site_energy_section,ct_block,fect_block) 
 
         natom = SIZE(Fin,2)
+
+        open(557,file="diagonal-forces.txt",position="append")
+        open(555,file="total-forces.txt",position="append")
 
         my_frozen_c = .FALSE.
         IF (PRESENT(frozen_c)) my_frozen_c = frozen_c
@@ -2648,6 +3351,7 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
                           enddo
                       enddo
                   ENDIF
+
                ENDDO
             ENDDO
 
@@ -2664,6 +3368,8 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
                   do i=1,total_states
                     forces_adiab(d,j) = forces_adiab(d,j) + (abs(C(i,instate))**2)*Fin(d,j,i)
                   end do
+
+                  write(557,*) d, j, forces_adiab(d,j)
 
                   IF (my_frozen_c) THEN
                     CYCLE !> frozen coupling only need diag F
@@ -2752,6 +3458,8 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
                       ENDDO
                     ENDDO
                   ENDIF
+
+                  write(555,*) d, j, forces_adiab(d,j)
                ENDDO
             ENDDO
 
@@ -2760,6 +3468,9 @@ subroutine calcforces_smart_grad_fect(adiab_section, instate, C, Fin, &
    DEALLOCATE(fee_ind)
    DEALLOCATE(ctt_ind)
    DEALLOCATE(ext_pres_fe) 
+
+   close(555)
+   close(557)
 
 end subroutine calcforces_smart_grad_fect
 
@@ -3510,6 +4221,25 @@ ENDIF
                                            active_system_info=force_env%mixed_env%sh_env%active_system_info, &
                                            orb=orb, hop_nacv=hop_nacv, frozen_c=.TRUE.)
                     END IF
+
+                 ELSE IF (force_env%mixed_env%sh_env%sp_fect_keyword) THEN
+
+                         open(914,file="check-decomp.txt",position="append")
+                         write(914,*) force_env%mixed_env%sh_env%index_active_mols
+                         close(914)
+
+                         CALL xsh_approx_nacv_sp(adiab_section, force_env%mixed_env%sh_env%active_state, &
+                         force_env%mixed_env%sh_env%new_state, force_env%mixed_env%sh_env%C_tp, &
+                         force_env%mixed_env%F, force_env%mixed_env%sh_env%ext_pres, &
+                         force_env%mixed_env%sh_env%full_system_info, orb, force_env%mixed_env%sh_env%index_active_mols, &
+                         force_env%mixed_env%sh_env%nacv_hh, force_env%mixed_env%sh_env%nacv_ee, &
+                         force_env%mixed_env%sh_env%E_tp, force_env%mixed_env%sh_env%grad_tresp, &
+                         force_env%mixed_env%sh_env%nacv_fe_e, &
+                         force_env%mixed_env%sh_env%nacv_ct_e, force_env%mixed_env%sh_env%nacv_fe_h, &
+                         force_env%mixed_env%sh_env%nacv_ct_h, force_env%mixed_env%sh_env%scaling_hh, &
+                         force_env%mixed_env%sh_env%scaling_ee, force_env%mixed_env%sh_env%scaling_fect_h, &
+                         force_env%mixed_env%sh_env%scaling_fect_e, hop_nacv)
+
                  ELSE 
                      CPABORT("There is no method to calculate the NACV in FAST approx.")
                  END IF
@@ -5345,12 +6075,14 @@ END SUBROUTINE classically_forbidden_hops
       COMPLEX(KIND=dp)                                :: ctcomp
       integer                                         :: t2
       integer                                         :: i
+
  
       ALLOCATE(ctotal(mat),       Hdiff(mat,mat),  &
                X1(mat,mat),       X2(mat,mat),     &
                X12(mat,mat),      my_H_t(mat, mat),&
                my_H_tp(mat, mat))
-      
+
+
       ! Control the offset of hamiltonian and renormalisation of wf
       ! See Hammes-Schiffer, Tully 1994 (Proton transfer in solution) for offset
       offset = .TRUE.
@@ -5360,6 +6092,7 @@ END SUBROUTINE classically_forbidden_hops
       !                         clarity)
       my_H_t = sh_env%H_t
       my_H_tp = sh_env%H_tp
+      
       if (offset) then
          do i = 1, mat
             !WTP_TEST_XT: 1 --> 101 (when test XT block)
@@ -5387,7 +6120,7 @@ END SUBROUTINE classically_forbidden_hops
       
           ! Do the RK4 algorithm (see wiki)
           CALL RK4(ctin, X1, X12, X2, deltaTe, mat) 
-          
+ 
           ! Normalisation stuff
           ctmag = 0.0D0
           ctcomp = CMPLX(0.0D0, 0.0D0,dp)
@@ -5413,11 +6146,11 @@ END SUBROUTINE classically_forbidden_hops
           do i=1,mat
                ctotal(i) = conjg(ctin(i))*ctin(i)
           end do
-
  
           !update
           X1  = X2
       end do
+
  
 !      CALL adiab_print_nace(adiab_section, NACE, nadiab, norbitals, itimes, deltatMD, times)
       CALL adiab_print_coeff(adiab_section, ctin,nadiab, norbitals,itimes, deltatMD, &

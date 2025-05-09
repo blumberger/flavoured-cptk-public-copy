@@ -141,8 +141,6 @@ MODULE force_env_methods
                                              add_energies_forces_mem_saver, &
                                              single_phase_energies_forces
 
-  USE aom_utils,                       ONLY: test_diagonalisation
-
 #include "./base/base_uses.f90"
 !> CHANGE_AC
 !> 15-12-11
@@ -486,6 +484,8 @@ CONTAINS
        CALL cp_print_key_finished_output(output_unit,logger,force_env%force_env_section,&
                                          "PRINT%PROGRAM_RUN_INFO")
     END IF
+
+
 
   END SUBROUTINE force_env_calc_energy_force
 
@@ -897,8 +897,6 @@ CONTAINS
     LOGICAL                                  :: multistate
     CHARACTER(LEN=default_string_length)     :: block_type_keyword
     LOGICAL                                  :: fe_block_keyword, cr_block_keyword
-    REAL(kind=dp), dimension(4,4) :: C
-    REAL(kind=dp), dimension(4) :: E
 
     NULLIFY(atomic_kinds, local_particles, molecule_set, molecule_kind_set, local_molecules)
 !> End CHANGE_AC and SG
@@ -1220,13 +1218,6 @@ CONTAINS
                                        my_mol_index,  ext_pres, & 
                                        active_system_info, full_system_info=full_system_info)
 
-!> some prints to help debugging
-!print *, "FOB_SH| EXT PRESS:", ext_pres
-!print *, "active sys info", active_system_info(1, :)
-!print *, "active sys info", active_system_info(2, :)
-!print *, "full sys info", full_system_info(1, :)
-!print *, "full sys info", full_system_info(2, :)
-
            IF (ALLOCATED(thermo%pot_list)) THEN
            !Enter this part only if the active atoms DECOMP has been constructed,
            !otherwise you MUST provide N FORCE_EVALS one for each site energy
@@ -1323,6 +1314,7 @@ CONTAINS
                         map_index, mapping_section,adiab_section,mixed_env,my_itimes, &
                         adiab_keyword, mixed_energy%pot,atomic_kinds, &
                         local_particles, my_mol_index, ext_pres, active_system_info, full_system_info)
+
            ELSE
                 !COMMENT_SG: these two additional ways of combining force_evals
                 !should be DEPRECATED and removed but they are kept for testing

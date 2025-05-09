@@ -149,29 +149,36 @@ CONTAINS
     NULLIFY(logger)
     logger => cp_get_default_logger()
 
+
     unit_nr=cp_print_key_unit_nr(logger,adiab_section,"PRINT%COEFFICIENTS",&
                extension=".xyz", middle_name="coeff", log_filename=.FALSE.)
     unit_conv_fs = cp_unit_from_cp2k(1.0_dp,"fs")
-   
+ 
     IF (unit_nr>0) THEN
 
        time = times*deltatMD*unit_conv_fs
+
        WRITE ( unit_nr, "( A,A,I8,A,I8)" ) "Psi", "; nadiab =", nadiab, "; norbitals =",&
                                    norbitals
        WRITE ( unit_nr, '(A,I0,A,F20.3,A,F0.10)' )   " i = ",itimes,", time = ",time, " (fs)"
 
        DO iadiab=1, nadiab
           DO iorbitals=1,norbitals
+
          my_format="(I4,1X,I4,"
          WRITE(unit_nr,TRIM(my_format)//"1X,2F20.10)") iadiab, iorbitals, &
                    REAL(coefficients((iadiab-1)*norbitals + iorbitals)),   &
                    AIMAG(coefficients((iadiab-1)*norbitals + iorbitals))
+
          ENDDO
        ENDDO
+
 
     END IF
 
     CALL cp_print_key_finished_output(unit_nr,logger,adiab_section,"PRINT%COEFFICIENTS")
+
+
    END SUBROUTINE adiab_print_coeff
 
 
@@ -363,6 +370,7 @@ CONTAINS
 
     NULLIFY(logger)
     logger => cp_get_default_logger()
+
 
     unit_nr=cp_print_key_unit_nr(logger,adiab_section,"PRINT%POPULATIONS",&
                extension=".xyz", middle_name="pop",log_filename=.FALSE.)
@@ -727,6 +735,7 @@ CONTAINS
 
     ALLOCATE(matrix(nadiab*norbitals, nadiab*norbitals))
 
+
     NULLIFY(logger)
     logger => cp_get_default_logger()
 
@@ -767,6 +776,8 @@ CONTAINS
     CALL cp_print_key_finished_output(unit_nr,logger,adiab_section,"PRINT%DENSITY_MATRIX")
 
     DEALLOCATE(matrix)
+
+
    END SUBROUTINE adiab_print_matrix_density
 
 

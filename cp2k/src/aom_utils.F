@@ -150,69 +150,12 @@ IMPLICIT NONE
              calc_adiab_nace_old,                  &
              matinvsqrt,                           &
              nace1_time_t,                         &
-             test_diagonalisation,                 &
              single_phase_fect_Hamiltonian
  
 
 CONTAINS
 
-!**********************************************************************************
-!> \brief Diagonalize the Hamiltonian and calculate eigevlaues and eigenvectors.
-!>        Although this subroutine is not strictly related to AOM (but is is
-!>        general, it has to stay here to avoid compilation issue 
-!>        non_adiabatic_utils.F -> aom_utils.F -> non_adiabatic_utils.F
-!> \author AC [Edited SG]
-!**********************************************************************************
-subroutine test_diagonalisation(C,E)
 
-     COMPLEX(kind=dp), dimension(4,4) :: H
-     REAL(kind=dp), dimension(4,4), intent(out) :: C
-     REAL(kind=dp), dimension(4), intent(out) :: E
-
-     integer :: mol
-     integer :: stat, LWORK
-     character(len=1) :: job, up
-     REAL(KIND=dp), dimension(:), allocatable :: DGETRI_WORK
-
-     CHARACTER(len=*), PARAMETER :: routineN ='test_diagonalisation', &
-                            routineP = moduleN//':'//routineN
-
-     allocate(DGETRI_WORK(3*size(C)-1))
-
-     H(:,:) = cmplx(0.0D0,0.0D0,dp)
-     H(1,1) = cmplx(0.0D0,-48.235890356315537,dp)
-     H(2,2) = cmplx(0.0D0,-48.235890356315522,dp)
-     H(3,3) = cmplx(0.0D0,-48.232423954119767,dp)
-     H(4,4) = cmplx(0.0D0,-48.224571909614411,dp)
-     H(1,4) = cmplx(0.0D0,-1.83740000000000010E-003,dp)
-     H(4,1) = cmplx(0.0D0,-1.83740000000000010E-003,dp)
-
-     C = -AIMAG(H)
-
-     job = 'V'
-     up = 'U'
-     LWORK = -1
-     mol = size(H,1)
-
-call DSYEV(job, up, mol, C, mol, E, DGETRI_WORK, LWORK, stat)
-        if (stat /= 0) then
-                CPABORT("Error with subroutine DSYEV: error status")
-        end if
-        LWORK = max(3*size(C)-1, int(DGETRI_WORK(1)))
-
-        deallocate(DGETRI_WORK)
-        allocate(DGETRI_WORK(LWORK))
-
-
-
-        call DSYEV(job, up, mol, C, mol, E, DGETRI_WORK, LWORK, stat)
-        if (stat /= 0) then
-                CPABORT("Error with subroutine DSYEV: error status")
-        end if
-
-        deallocate(DGETRI_WORK)
-end subroutine test_diagonalisation
- 
 subroutine adiabaticity(H, C, E)
         !this subroutine will allow calculation of surface hopping probabilities
         !between N adiabatic surfaces
@@ -1172,10 +1115,6 @@ SUBROUTINE calc_fect_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, p
                                           ct_ind, sh_env%connlist1_ct,sh_env%connlist2_ct, sh_env%atomlist_ct, &
                                           sh_env%nacv_ct)
 
-    open(919,file="sab-fect-hh",position="append")
-    write(919,*) Sab_list_fect
-    close(919)
-
 
 !WTP_comment: the Sab_list_fect as well as nacv should be tested here...
 
@@ -1288,6 +1227,20 @@ SUBROUTINE calc_fect_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, p
 
 END SUBROUTINE calc_fect_Xmatrix_elements
 
+!**************************************************************************************************
+!subroutine to calculate X-SH Hamiltonian for single-phase system, where
+!state-space spans XT and CT-states
+
+!INPUTS: sh_env is a type whose attributes hold properties about XSH dynamics,
+!such as AOM scaling coeffs, etc. orb: No. orbitals per (charged)
+!diabat, RESICTED TO 1 FOR NOW. Energies_tp: 1D array of site energies.
+!Adiab_section: section of input file keywords. Positions_com_tp: 3D coords of 
+!all atoms in system.
+
+!OUTPUT: 2D electronic Hamiltonian with complex elements
+
+!AUTHOR: FI 05/2025 
+!**************************************************************************************************
 SUBROUTINE single_phase_fect_Hamiltonian(sh_env, orb, energies_tp, adiab_section, positions_com_tp)
 
      TYPE(sh_env_type)                         :: sh_env
@@ -1311,12 +1264,12 @@ SUBROUTINE single_phase_fect_Hamiltonian(sh_env, orb, energies_tp, adiab_section
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE  :: Sab_list_ee, reshaped_S_ee
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE  :: Sab_list_fect_h, Sab_list_fect_e, reshaped_S_fect_h, reshaped_S_fect_e
      REAL(KIND=dp)                             :: overlap
-     integer                                   :: mol1, mol2
-     integer                                   :: site_index
+     INTEGER                                   :: mol1, mol2
+     INTEGER                                   :: site_index
 
      NULLIFY(site_energy_section,ct_block)
 
-     open(349,file="hamiltonian_log.txt",position="append")
+!     open(355,file="hamiltonian_log.txt",position="append")
 
      ! TOTAL number states
      CALL section_vals_val_get(adiab_section,"NUMBER_DIABATIC_STATES",&
@@ -1330,22 +1283,19 @@ SUBROUTINE single_phase_fect_Hamiltonian(sh_env, orb, energies_tp, adiab_section
         phase_indices(i) = i
     end do
 
-    write(349,*) nadiab
-
-    write(349,*) phase_indices
-    write(349,*) sh_env%active_system_info
+!    write(355,*) "No. mols:", size(phase_indices)
 
     !calculating hole-hole couplings between all possible molecule pairs
     CALL calc_aom_coup_nacv_single_phase(sh_env, sh_env%atoms_per_site, sh_env%elements_sp, sh_env%pcoeffs_hh, sh_env%scoeffs_hh, &
                                           phase_indices, sh_env%connlist1, sh_env%connlist2, sh_env%atomlist, &
                                           positions_com_tp, sh_env%active_system_info, sh_env%nacv_hh, Sab_list_hh)
+                             
 
     !calculating electron-electron couplings between all possible molecule pairs
     CALL calc_aom_coup_nacv_single_phase(sh_env, sh_env%atoms_per_site, sh_env%elements_sp, sh_env%pcoeffs_ee, sh_env%scoeffs_ee, &
                                           phase_indices, sh_env%connlist1, sh_env%connlist2, sh_env%atomlist, &
                                           positions_com_tp, sh_env%active_system_info, sh_env%nacv_ee, Sab_list_ee)
 
-    write(349,*) Sab_list_ee
 
     !couplings between excitons and CT-states via hole-hole overlap
     CALL calc_aom_coup_nacv_fect(sh_env, sh_env%atoms_per_site, sh_env%elements_sp, sh_env%pcoeffs_ct_h, sh_env%scoeffs_ct_h, &
@@ -1364,6 +1314,8 @@ SUBROUTINE single_phase_fect_Hamiltonian(sh_env, orb, energies_tp, adiab_section
                                           phase_indices, sh_env%connlist1, sh_env%connlist2, sh_env%atomlist, &
                                           sh_env%nacv_fe_e)
 
+!    write(355,*) "S_ee size:", size(Sab_list_ee,2)
+!    write(355,*) "S_fect_e size:", size(Sab_list_fect_e,2)
 
     number_CT_states = size(phase_indices)*(size(phase_indices) - 1)
     number_excitons = nadiab - number_CT_states
@@ -1371,12 +1323,17 @@ SUBROUTINE single_phase_fect_Hamiltonian(sh_env, orb, energies_tp, adiab_section
     ALLOCATE(CT_states_info(2,number_CT_states)) !this is to store the e/h-molecule pairs of each CT-state
     state1 = 0 !setting a counter
 
+!    write(355,*) "CT info size:", size(CT_states_info,2)
+
     !iterate through all possible molecule combos
     do i=1,size(phase_indices)
           do j=1,size(phase_indices)                
                 IF (j .ne. i) THEN
 
                         state1 = state1 + 1
+
+!                        write(355,*) "info counter:", state1
+
                         CT_states_info(1,state1) = i !hole on molecule i
                         CT_states_info(2,state1) = j !electron on j
 
@@ -1384,29 +1341,43 @@ SUBROUTINE single_phase_fect_Hamiltonian(sh_env, orb, energies_tp, adiab_section
           end do
     end do
 
-    write(349,*) CT_states_info
-
     sh_env%H_tp(:,:) = cmplx(0.0D0, 0.0D0)
 
+    !secondary arrays to store calculated overlaps
     ALLOCATE(reshaped_S_hh(size(phase_indices), size(phase_indices)))
     ALLOCATE(reshaped_S_ee(size(phase_indices), size(phase_indices)))
     reshaped_S_hh = 0.0D0
     reshaped_S_ee = 0.0D0
 
+    !iterating through each column of S_lists
     do i=1,size(Sab_list_ee,2)
 
+        !indices of overlapping mols
         mol1 = Sab_list_ee(1,i)
         mol2 = Sab_list_ee(2,i)
-        reshaped_S_ee(mol2,mol1) = Sab_list_ee(3,i)
-        reshaped_S_ee(mol1,mol2) = Sab_list_ee(3,i)
 
+!        write(355,*) "mol1:", mol1
+!        write(355,*) "mol2:", mol2
+
+        !making sure indices are assigned
+        IF (mol1 .ne. 0 .AND. mol2 .ne. 0) THEN
+            !1st row for mol2, 2nd row for mol1
+            reshaped_S_ee(mol2,mol1) = Sab_list_ee(3,i)
+            reshaped_S_ee(mol1,mol2) = Sab_list_ee(3,i)
+        END IF
+
+        !doing the same for h-h overlaps
         mol1 = Sab_list_hh(1,i)
         mol2 = Sab_list_hh(2,i)
-        reshaped_S_hh(mol2,mol1) = Sab_list_hh(3,i)
-        reshaped_S_hh(mol1,mol2) = Sab_list_hh(3,i)
+
+        IF (mol1 .ne. 0 .AND. mol2 .ne. 0) THEN
+            reshaped_S_hh(mol2,mol1) = Sab_list_hh(3,i)
+            reshaped_S_hh(mol1,mol2) = Sab_list_hh(3,i)
+        END IF
 
     end do
 
+    !repeating the same as above but for fect coupling via e-e or h-h overlap
     ALLOCATE(reshaped_S_fect_e(size(phase_indices), size(phase_indices)))
     ALLOCATE(reshaped_S_fect_h(size(phase_indices), size(phase_indices)))
     reshaped_S_fect_h = 0.0D0
@@ -1416,15 +1387,26 @@ SUBROUTINE single_phase_fect_Hamiltonian(sh_env, orb, energies_tp, adiab_section
 
        mol1 = Sab_list_fect_e(1,i)
        mol2 = Sab_list_fect_e(2,i)
-       reshaped_S_fect_e(mol2,mol1) = Sab_list_fect_e(3,i)
+
+       IF (mol1 .ne. 0 .AND. mol2 .ne. 0) THEN
+            reshaped_S_fect_e(mol2,mol1) = Sab_list_fect_e(3,i)
+       END IF
 
        mol1 = Sab_list_fect_h(1,i)
        mol2 = Sab_list_fect_h(2,i)
-       reshaped_S_fect_h(mol2,mol1) = Sab_list_fect_h(3,i)
+
+!       write(355,*) "mol1:", mol1
+!       write(355,*) "mol2:", mol2
+
+       IF (mol1 .ne. 0 .AND. mol2 .ne. 0) THEN
+            reshaped_S_fect_h(mol2,mol1) = Sab_list_fect_h(3,i)
+       END IF
 
     end do
 
-    open(212,file="site_energy_check.txt",position="append")
+!    write(355,*) "H-dimension:", size(sh_env%H_tp,1)
+!    write(355,*) "Sab_hh:"
+!    write(355,*) Sab_list_hh
 
     !assigning CT-block of electronic Hamiltonian
     do state1=1,number_CT_states
@@ -1433,21 +1415,28 @@ SUBROUTINE single_phase_fect_Hamiltonian(sh_env, orb, energies_tp, adiab_section
         IF (state1 .eq. state2) THEN !diagonal element, assign site energy
 
                 sh_env%H_tp(state1,state2) = cmplx(0.0D0,(-energies_tp(state1)), dp)
-                write(212,*) sh_env%H_tp(state1,state2)
 
         ELSE IF (state2 .gt. state1) THEN !upper off-diagonal, assign CT-coupling
 
+                !getting difference between states' molecules
                 CT_site_difference = CT_states_info(:,state2) - CT_states_info(:,state1)
 
+                !CT-states have same electron site --> h-h overlap
                 IF (CT_site_difference(2) .eq. 0) THEN
 
+                        !first row of this array is index of hole molecule
                         mol1 = CT_states_info(1,state1)
                         mol2 = CT_states_info(1,state2)
+                        !use this to get overlap from reshaped S array
                         overlap = reshaped_S_hh(mol2,mol1)
 
+                        write(355,*) mol1, mol2, overlap
+
+                        !assign matrix element and transpose, multiply by AOM scaling
                         sh_env%H_tp(state1,state2) = cmplx(0.0D0, sh_env%scaling_hh*overlap, dp)
                         sh_env%H_tp(state2,state1) = sh_env%H_tp(state1,state2)
 
+                !same hole site --> e-e overlap, same process
                 ELSE IF (CT_site_difference(1) .eq. 0) THEN
 
                         mol1 = CT_states_info(2,state1)
@@ -1460,43 +1449,47 @@ SUBROUTINE single_phase_fect_Hamiltonian(sh_env, orb, energies_tp, adiab_section
                 END IF
        END IF
 
-     end do
+     end do !finished loop over CT-states for CT-state 1
 
-     write(349,*) state1
+!     write(355,*) "Sab_fect_h:"
+!     write(355,*) Sab_list_fect_h
 
+     !now loop over excitons for CT-state 1
      site_index = 0
-     do state3=number_CT_states+1,nadiab
+     do state3=number_CT_states+1,nadiab !XT-block always last
 
-        write(349,*) state3
-
+        !1st exciton --> 1st mol in decomp
         site_index = site_index + 1
         FECT_site_difference = CT_states_info(:,state1) - site_index
 
+        !xt and e on same molecule --> h-h overlap
         IF (FECT_site_difference(2) .eq. 0) THEN
                 
                 mol1 = CT_states_info(1,state1)
                 mol2 = site_index
                 overlap = reshaped_S_fect_h(mol2,mol1)
 
+!                write(355,*) mol1, mol2, overlap
+
                 sh_env%H_tp(state1,state3) = cmplx(0.0D0, sh_env%scaling_fect_h*overlap, dp)
                 sh_env%H_tp(state3,state1) = sh_env%H_tp(state1,state3)
 
+        !xt and h on same molecule
         ELSE IF (FECT_site_difference(1) .eq. 0) THEN
 
                 mol1 = CT_states_info(2,state1)
                 mol2 = site_index
                 overlap = reshaped_S_fect_e(mol2,mol1)
 
-                sh_env%H_tp(state1,state3) = cmplx(0.0D0, sh_env%scaling_fect_e*overlap, dp)
+                sh_env%H_tp(state1,state3) = cmplx(0.0D0, sh_env%scaling_fect_h*overlap, dp)
                 sh_env%H_tp(state3,state1) = sh_env%H_tp(state1,state3)
 
-       END IF
+      END IF
 
-     end do
-    end do
+     end do !ending loop over XT-states
+    end do !ending loop over all CT-states
 
-    close(349)
-    close(212)
+!    close(355)
 
     DEALLOCATE(CT_states_info)
     DEALLOCATE(phase_indices)
@@ -1687,7 +1680,6 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
                           !IF MULTISTATE THEN  XXXX
                             !calculate gradients
 
-
                             call calc_dRSab(Atp, phase_atomlist, & !!
                                phase_connlist1, pcoeffsrun(1:atoms_per_mol_i,i), phase_scoeffs, & !!
                                nacv(1:3, k,(i-1)*atoms_per_mol_i+1:i*atoms_per_mol_i), & !!
@@ -1764,7 +1756,6 @@ SUBROUTINE calc_aom_coup_nacv_fect(sh_env, atoms_fe, elements_fe, fe_pcoeffs,fe_
      REAL(KIND=dp)                                       :: S
      INTEGER                                             :: count_
      !real(kind=dp), allocatable                          :: PC_rvecs(:,:)
-
 
      ALLOCATE(Atp(4,atoms_fe))
      ALLOCATE(Btp(4,atoms_ct))
@@ -3176,7 +3167,7 @@ subroutine nace6(sh_env, mol, deltat)
           sh_env%adiab_nace_env%T1,   mol, &    
           inv_deltat, sh_env%adiab_nace_tp, mol) 
    end if 
-     
+ 
 end subroutine nace6
 
 !**********************************************************************************
@@ -3213,6 +3204,7 @@ subroutine nace7(sh_env, mol)
            !Enddo
         ENDIF
         ! End of 7
+
 
 end subroutine nace7
 

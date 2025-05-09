@@ -216,11 +216,13 @@ active_system_info, full_system_info)
        ELSE
           !> Main CALL: calculate the Hamiltonian, propagate the electronic dynamics
 
+
           CALL propagate_namd_all_steps(nadiab, norbitals,         &
                         positions_tp, energies_tp, sh_env, itimes,     &
                          adiab_section, & 
                         my_bo_keyword, atomic_kinds,                    &
                         local_particles, my_test_keyword,diagonal_F=mixed_env%F)
+
        ENDIF
     ENDIF
     !> IMPORTANT: store all sh_env for the future timesteps.
@@ -240,6 +242,7 @@ active_system_info, full_system_info)
     !> IMPORTANT : GIVE BACK THE FORCES TO FIST
     energy_adiabat = sh_env%E_tp(sh_env%active_state)
     forces_adiab = sh_env%forces_adiab
+
     DO iparticle = 1, natom
       jparticle = map_index(iparticle)
       SELECT CASE(method_keyword)
@@ -288,6 +291,7 @@ active_system_info, full_system_info)
     END IF
     DEALLOCATE(positions_tp, forces_adiab)
     DEALLOCATE(velocities_tp)
+
    END SUBROUTINE adiab_fssh_routines
 
 END MODULE non_adiabatic_methods
