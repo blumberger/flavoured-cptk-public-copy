@@ -1288,13 +1288,15 @@ SUBROUTINE single_phase_fect_Hamiltonian(sh_env, orb, energies_tp, adiab_section
     !calculating hole-hole couplings between all possible molecule pairs
     CALL calc_aom_coup_nacv_single_phase(sh_env, sh_env%atoms_per_site, sh_env%elements_sp, sh_env%pcoeffs_hh, sh_env%scoeffs_hh, &
                                           phase_indices, sh_env%connlist1, sh_env%connlist2, sh_env%atomlist, &
-                                          positions_com_tp, sh_env%active_system_info, sh_env%nacv_hh, Sab_list_hh)
+                                          positions_com_tp, sh_env%active_system_info, sh_env%nacv_hh, Sab_list_hh, &
+                                          sh_env%NN)
                              
 
     !calculating electron-electron couplings between all possible molecule pairs
 !    CALL calc_aom_coup_nacv_single_phase(sh_env, sh_env%atoms_per_site, sh_env%elements_sp, sh_env%pcoeffs_ee, sh_env%scoeffs_ee, &
 !                                          phase_indices, sh_env%connlist1, sh_env%connlist2, sh_env%atomlist, &
-!                                          positions_com_tp, sh_env%active_system_info, sh_env%nacv_ee, Sab_list_ee)
+!                                          positions_com_tp, sh_env%active_system_info, sh_env%nacv_ee, Sab_list_ee, &
+!                                          sh_env%NN)
 !
 !
 !    !couplings between excitons and CT-states via hole-hole overlap
@@ -1520,12 +1522,12 @@ END SUBROUTINE single_phase_fect_Hamiltonian
 !**********************************************************************************
 SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeffs, phase_scoeffs, phase_ind, & 
                                            phase_connlist1, phase_connlist2, phase_atomlist, &
-                                           positions_com_tp, active_system_info, nacv, Sab_list)
+                                           positions_com_tp, active_system_info, nacv, Sab_list, &
+                                           NN_array)
 
      TYPE(sh_env_type)                                   :: sh_env
      integer, intent(IN)                                 :: atoms
      integer, dimension(:), ALLOCATABLE, INTENT(IN)      :: elements
-     !integer, intent(in)                     :: mol!, orb
      INTEGER, DIMENSION(:), ALLOCATABLE, INTENT(IN)      :: phase_ind !is active region-based
      INTEGER, DIMENSION(:,:), ALLOCATABLE, INTENT(IN)    :: active_system_info
      REAL(kind=dp), DIMENSION(:,:),POINTER, &
@@ -1537,6 +1539,9 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
      INTEGER, DIMENSION(:), POINTER, INTENT(IN)          :: phase_atomlist
      REAL(KIND=dp), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT)    :: Sab_list
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER, INTENT(INOUT)  :: nacv    
+     INTEGER, DIMENSION(:,:), INTENT(IN), OPTIONAL       :: NN_array
+     ! FI - 05/2025, adding nearest neighbour array for a given phase,
+     ! to only couple neighbouring molecules if one wants
   
    
      CHARACTER(len=*), PARAMETER             :: routineN ='calc_aom_coup_nacv_single_phase', &
@@ -1549,10 +1554,8 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
      INTEGER, DIMENSION(:,:), ALLOCATABLE                :: bneighbour, aneighbour
      REAL(KIND=dp)                                       :: S 
      INTEGER                                             :: count_
-     !real(kind=dp), allocatable                          :: PC_rvecs(:,:)
+     LOGICAL                                             :: using_nn !FI - 05/2025 - check whether NN is being used
       
-
-     !ALLOCATE(PC_allrvecs(5,mol*atoms))
      !ALLOCATE(PC_rvecs(3,atoms))
 
      ALLOCATE(Atp(4,atoms))
@@ -1560,7 +1563,13 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
      !similar array to AOM single phase H but without the third dimension (here
      !is just tp). Also pcoeffsrun exists because AOM coeffiient need to be
      !renormalized for each structure
-     ALLOCATE(pcoeffsrun(atoms,SIZE(phase_ind))) 
+     ALLOCATE(pcoeffsrun(atoms,SIZE(phase_ind)))
+
+     IF (present(NN_array)) THEN
+         using_nn = .TRUE.
+     ELSE
+         using_nn = .FALSE.
+     END IF
 
      ! SG: both neighbour and nacv could be allocated alredy in
      ! sh_initialization
@@ -1577,17 +1586,24 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
 
      !IDEA to possibly further developed in calc_multiphase_Xmatrix_elements
      !to reduce memory storage of the zeros:
-     ! variable storage of Sab (two molecules may get e.g. further apart and
-     ! would not be stored if NN !=1) 
+     !variable storage of Sab (two molecules may get e.g. further apart and
+     !would not be stored if NN !=1) 
+
      count_ = 0
      do i=1,SIZE(phase_ind)     
         do k=1, SIZE(phase_ind)
-              ! XXX TO ADD IF CONNECTIVITY THEN 
-!                   if (sh_env%NN(i,k) == 1) then
-           ! count only upper part
+
+           !count only upper part
            if (k>i) then
               count_ = count_ + 1
+
+
+              !negate counter if not nn
+              if (using_nn .AND. NN_array(i,k) .eq. 0) THEN
+                 count_ = count_ - 1
+              end if
            end if
+
         end do
      end do 
 
@@ -1600,8 +1616,9 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
                ind_i = phase_ind(i)
             
                !> find index mol i (which is the donor mol a given phase)
-!WTP_buggy: use first_ind/second_ind as indexes to get value from
-!active_system_info might be buggy!??? 
+               !WTP_buggy: use first_ind/second_ind as indexes to get value from
+               !active_system_info might be buggy!??? 
+
                init_atom_mol_i = active_system_info(1, ind_i)
                final_atom_mol_i = active_system_info(2, ind_i)
                atoms_per_mol_i = (final_atom_mol_i-init_atom_mol_i)+1
@@ -1648,10 +1665,6 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
                     end if
 
 
-                    !XXX MULTISTATE NEEDS ADJUSTMENT
-                    !if (mod(itimes-1, sh_env%multiple_time_step) .eq. 0 & 
-                    !      .and. sh_env%multiple_time_step .ne. 1) then 
-
                            call sab_screen_new(Atp, phase_atomlist, &
                             phase_connlist1, pcoeffsrun(:,i),&
                            & phase_atomlist, Btp, phase_atomlist, &
@@ -1660,10 +1673,16 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
                                                                                 sh_env%minao)
                      !end if
 
-                   !only call overlap if neighbours list says so
-                   ! if (sh_env%NN(phase_ind(i),phase_ind(k)) == 1) then 
-                        ! we only do the upper diagonal to save time
-                        if (k>i) then 
+                       ! we only do the upper diagonal to save time
+                        if (k>i) then
+
+                           !FI - 05/2025 - checking the nn is used; if so, only proceed if
+                           !mols within cutoff distance
+
+                           if (using_nn .AND. NN_array(i,k) .eq. 0) then
+                                   CYCLE !skip k if not nn
+                           end if
+
                            count_  = count_+1
                            !calculate overlap Sab 
                            call calc_sab(Atp, phase_connlist2, &
@@ -1692,8 +1711,8 @@ SUBROUTINE calc_aom_coup_nacv_single_phase(sh_env, atoms, elements, phase_pcoeff
                                sh_env%do_random, sh_env)                         !!
 
                        end if !over the upper diag
-              end do !loop over k
- 
+
+              end do !loop over k 
      end do !loop over i
 
 
