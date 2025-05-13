@@ -47,7 +47,8 @@ MODULE sh_initialization
 
      USE parallel_rng_types,           ONLY: UNIFORM,&
                                              create_rng_stream,&
-                                             rng_stream_type
+                                             rng_stream_type,  &
+                                             next_random_number
  
      USE cp_log_handling,              ONLY: cp_get_default_logger, &
                                              cp_logger_type
@@ -205,6 +206,7 @@ CONTAINS
      !> INITIALIZE THE RANDOM GENERATOR
      CALL section_vals_val_get(adiab_section,"SEED",i_val=input_seed)
      initial_seed(:,:) = REAL(input_seed,KIND=dp)
+
      !CALL create_rng_stream(rng_stream=sh_env%rng_stream,&
      CALL create_rng_stream(rng_stream=rng_stream,&
                              name="aom fssh",&
@@ -212,7 +214,6 @@ CONTAINS
                              seed=initial_seed)
      ALLOCATE(sh_env%rng_stream)
      sh_env%rng_stream = rng_stream
-
 
      !> Get wavefunction diabatic coefficients from the input file for the
      !restart file option
@@ -1527,6 +1528,7 @@ size(my_mol_index)*sh_env%atoms_per_site))
 !     write(324,*) "Conn list:"
 !     write(324,*) sh_env%connlist2
 
+
      DEALLOCATE(submask)
      DEALLOCATE(Atp_loc)
      DEALLOCATE(ext_elements)
@@ -1722,7 +1724,6 @@ size(my_mol_index)*sh_env%atoms_per_site))
 
      sh_env%elements = PACK(ext_elements, sh_env%ext_pres) !Only select active atoms
 
-
      allocate(atomlist_mask(c))
      atomlist_mask =.NOT.((scoefftot.eq.0).AND.(pcoefftot.eq.0)) !Only select atoms with orbitals
      allocate(submask(aom_atoms))
@@ -1747,6 +1748,7 @@ size(my_mol_index)*sh_env%atoms_per_site))
                                                                               !coeff
                                                                               !not
                                                                               !zero
+
      allocate(sh_env%connlist2(4,size(sh_env%atomlist)))
      do i=1,aom_atoms
           do j=1,norbitals
@@ -1754,7 +1756,6 @@ size(my_mol_index)*sh_env%atoms_per_site))
           end do
           sh_env%scoeffs(i) = scoefftot(start - 1 + i)
      end do
-
 
      !> CONSTRUCT THE CONNLIST
      !we fill out the connlist arrays before calculating the nacv

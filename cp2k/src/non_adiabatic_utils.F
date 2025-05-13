@@ -1221,24 +1221,6 @@ subroutine calcforces_frozenH(Hin, C, state, Fin, forces_adiab)
         ! couplings that is why do not need to be considered here. 
 
 
-open(427, file="adiabatic_atom_forces_x.txt", position="append")
-        write(427,*) forces_adiab(1, 13403:13442)
-        write(427,*) forces_adiab(1, 13883:13921)
-!        write(427,*) forces_adiab(1, 14363:14402) 
-close(427)
-
-open(428, file="adiabatic_atom_forces_y.txt", position="append")
-        write(428,*) forces_adiab(2, 13403:13442)
-        write(428,*) forces_adiab(2, 13883:13921)
-!        write(427,*) forces_adiab(1, 14363:14402) 
-close(428)
-
-open(429, file="adiabatic_atom_forces_z.txt", position="append")
-        write(429,*) forces_adiab(3, 13403:13442)
-        write(429,*) forces_adiab(3, 13883:13921)
-!        write(427,*) forces_adiab(1, 14363:14402) 
-close(429)
-
 end subroutine calcforces_frozenH
 
 !**********************************************************************************
@@ -2740,25 +2722,6 @@ subroutine calcforces_smart_grad(state, C, Fin, forces_adiab, &
               end do 
            ENDDO
         ENDDO
-
-open(427, file="adiabatic_atom_forces_x.txt", position="append")
-        write(427,*) forces_adiab(1, 13403:13442)
-        write(427,*) forces_adiab(1, 13883:13921)
-!        write(427,*) forces_adiab(1, 14363:14402) 
-close(427)
-
-open(428, file="adiabatic_atom_forces_y.txt", position="append")
-        write(428,*) forces_adiab(2, 13403:13442)
-        write(428,*) forces_adiab(2, 13883:13921)
-!        write(427,*) forces_adiab(1, 14363:14402) 
-close(428)
-
-open(429, file="adiabatic_atom_forces_z.txt", position="append")
-        write(429,*) forces_adiab(3, 13403:13442)
-        write(429,*) forces_adiab(3, 13883:13921)
-!        write(427,*) forces_adiab(1, 14363:14402) 
-close(429)
-
 
 
 end subroutine calcforces_smart_grad

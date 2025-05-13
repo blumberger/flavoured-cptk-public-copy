@@ -270,13 +270,6 @@ CONTAINS
      !#####################  SITE ENERGIES SECTION  #############################
      ! Site energies are modified only if multistate is active
 
-     !added by FI 05/01/24
-     IF (sh_env%add_coulomb_pot) THEN
-        
-	energies_tp(1:sh_env%number_ct_states) = energies_tp(1:sh_env%number_ct_states) + sh_env%coulomb_barrier
-
-     END IF
-
      !######### COUPLING DEFINITION AND H CONSTRUCTION ########################
      IF (sh_env%aom_couplings_keyword) THEN
          !> ------------------  AOM section -------------------------------------
@@ -319,6 +312,13 @@ CONTAINS
 
      !> MULTI-PHASE COUPLINGS 
      ELSE IF (sh_env%multiphase_couplings_keyword) THEN 
+
+         !added by FI 05/01/24
+         IF (sh_env%add_coulomb_pot) THEN
+              
+            energies_tp(1:sh_env%number_ct_states) = energies_tp(1:sh_env%number_ct_states) + sh_env%coulomb_barrier
+
+         END IF
          
          !> CALCULATE THE CENTER OF MASS AND CONSTRUCT NEIGHBOURS LIST
          !this is needed to calculate the NN list (XXX not yet used)
@@ -332,13 +332,19 @@ CONTAINS
          CALL calc_coms_and_nlist_fect_fe(sh_env, sh_env%cutoff_sites_fe, orb, positions_com_tp, &
                                     adiab_section, sh_env%NN)
 
+         !added by FI 05/01/24
+         IF (sh_env%add_coulomb_pot) THEN
+              
+            energies_tp(1:sh_env%number_ct_states) = energies_tp(1:sh_env%number_ct_states) + sh_env%coulomb_barrier
+  	    energies_tp(sh_env%number_ct_states+1: size(energies_tp)) = energies_tp(sh_env%number_ct_states+1: size(energies_tp)) &
+ + sh_env%energy_offset
+
+         END IF
+ 
 !         open(321,file="nlist_log.txt",position="append") 
 !         write(321,*) "NN:"
 !         write(321,*) sh_env%NN
 !         close(321)
-
-  	energies_tp(sh_env%number_ct_states+1: size(energies_tp)) = energies_tp(sh_env%number_ct_states+1: size(energies_tp)) &
- + sh_env%energy_offset
 
          CALL calc_fect_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, positions_com_tp)
 
@@ -349,14 +355,20 @@ CONTAINS
          CALL calc_coms_and_nlist(sh_env%cutoff_sites_fe, orb, positions_com_tp, &
                                     sh_env%active_system_info, sh_env%NN)
 
+         !added by FI 05/01/24
+         IF (sh_env%add_coulomb_pot) THEN
+              
+            energies_tp(1:sh_env%number_ct_states) = energies_tp(1:sh_env%number_ct_states) + sh_env%coulomb_barrier
+	    energies_tp(sh_env%number_ct_states+1: size(energies_tp)) = energies_tp(sh_env%number_ct_states+1: size(energies_tp)) &
+ + sh_env%energy_offset
+
+         END IF
+ 
 !         open(321,file="nlist_log.txt",position="append") 
 !         write(321,*) "NN:"
 !         write(321,*) sh_env%NN
 !         close(321)
-
-	energies_tp(sh_env%number_ct_states+1: size(energies_tp)) = energies_tp(sh_env%number_ct_states+1: size(energies_tp)) &
- + sh_env%energy_offset
-
+        
          CALL single_phase_fect_Hamiltonian(sh_env, orb, energies_tp, adiab_section, positions_com_tp) 
 
          CALL single_phase_Hxt(sh_env, energies_tp, orb, positions_com_tp, adiab_section)
@@ -850,20 +862,6 @@ print *, "ACTIVE STATE", active_state
      !XT-CT offset is added on to the site energies of the XT states --
      !FI 05/01/24
 
-     IF (sh_env%add_coulomb_pot) THEN
-
-	!energies_tp = 0.0
-        !The above assignment was used to ensure the coulomb barrier is
-        !reproduced in X-SH, and that the site energies are assigned
-        !correctly, setting energies_tp to zero removes the force-field
-        !component of the site energy -- FI 05/01/24
-
-	energies_tp(1:sh_env%number_ct_states) = energies_tp(1:sh_env%number_ct_states) + sh_env%coulomb_barrier
-	energies_tp(sh_env%number_ct_states+1: size(energies_tp)) = energies_tp(sh_env%number_ct_states+1: size(energies_tp)) &
- + sh_env%energy_offset 
-
-     END IF
-
      !######### COUPLING DEFINITION AND H CONSTRUCTION ########################
      IF (sh_env%aom_couplings_keyword) THEN
          !------------------  AOM section -------------------------------------
@@ -906,6 +904,14 @@ print *, "ACTIVE STATE", active_state
          CALL calc_coms_and_nlist(sh_env%cutoff_sites, orb, crds=positions_com_tp, &
                                     active_system_info=sh_env%active_system_info, NN=sh_env%NN)
 
+         IF (sh_env%add_coulomb_pot) THEN
+
+            energies_tp(1:sh_env%number_ct_states) = energies_tp(1:sh_env%number_ct_states) + sh_env%coulomb_barrier
+            energies_tp(sh_env%number_ct_states+1: size(energies_tp)) = energies_tp(sh_env%number_ct_states+1: size(energies_tp)) &
+ + sh_env%energy_offset 
+
+         END IF
+
          CALL calc_multiphase_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, positions_com_tp)
 
      !> X-SH 
@@ -913,6 +919,14 @@ print *, "ACTIVE STATE", active_state
 
          CALL calc_coms_and_nlist_fect_fe(sh_env, sh_env%cutoff_sites_fe, orb, positions_com_tp, &
                                     adiab_section, sh_env%NN)
+
+         IF (sh_env%add_coulomb_pot) THEN
+
+            energies_tp(1:sh_env%number_ct_states) = energies_tp(1:sh_env%number_ct_states) + sh_env%coulomb_barrier
+            energies_tp(sh_env%number_ct_states+1: size(energies_tp)) = energies_tp(sh_env%number_ct_states+1: size(energies_tp)) &
+ + sh_env%energy_offset 
+
+         END IF
 
          CALL calc_fect_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, positions_com_tp)
 
@@ -923,6 +937,14 @@ print *, "ACTIVE STATE", active_state
 
          CALL calc_coms_and_nlist(sh_env%cutoff_sites_fe, orb, positions_com_tp, &
                                     sh_env%active_system_info, sh_env%NN)
+
+         IF (sh_env%add_coulomb_pot) THEN
+
+            energies_tp(1:sh_env%number_ct_states) = energies_tp(1:sh_env%number_ct_states) + sh_env%coulomb_barrier
+            energies_tp(sh_env%number_ct_states+1: size(energies_tp)) = energies_tp(sh_env%number_ct_states+1: size(energies_tp)) &
+ + sh_env%energy_offset 
+
+         END IF
 
          CALL single_phase_fect_Hamiltonian(sh_env, orb, energies_tp, adiab_section, positions_com_tp) 
 
