@@ -365,10 +365,10 @@ CONTAINS
 
          END IF
  
-         open(321,file="nlist_log.txt",position="append") 
-         write(321,*) "NN:"
-         write(321,*) sh_env%NN
-         close(321)
+!         open(321,file="nlist_log.txt",position="append") 
+!         write(321,*) "NN:"
+!         write(321,*) sh_env%NN
+!         close(321)
         
          CALL single_phase_fect_Hamiltonian(sh_env, orb, energies_tp, adiab_section, positions_com_tp) 
 
