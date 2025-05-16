@@ -352,9 +352,9 @@ CONTAINS
 
      ELSE IF (sh_env%sp_fect_keyword) THEN
 
-         CALL calc_coms_and_nlist(sh_env%cutoff_sites_fe, orb, positions_com_tp, &
+         CALL calc_coms_and_nlist(sh_env%cutoff_sites, orb, positions_com_tp, &
                                     sh_env%active_system_info, sh_env%NN)
-         !using the xt-xt coupling cutoff for NN here
+         !using the AOM coupling cutoff for tresp and AOM cutoffs
 
          !added by FI 05/01/24
          IF (sh_env%add_coulomb_pot) THEN
@@ -936,7 +936,7 @@ print *, "ACTIVE STATE", active_state
      !single-phase X-SH couplings and gradients
      ELSE IF (sh_env%sp_fect_keyword) THEN
 
-         CALL calc_coms_and_nlist(sh_env%cutoff_sites_fe, orb, positions_com_tp, &
+         CALL calc_coms_and_nlist(sh_env%cutoff_sites, orb, positions_com_tp, &
                                     sh_env%active_system_info, sh_env%NN)
 
          IF (sh_env%add_coulomb_pot) THEN
