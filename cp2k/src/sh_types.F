@@ -224,6 +224,9 @@ END TYPE adiab_nace_env_type
 !molecules
      LOGICAL                                  :: multistate
      LOGICAL                                  :: add_coulomb_pot
+     INTEGER                                  :: number_ct_states
+     REAL(KIND=DP), DIMENSION(:), POINTER     :: coulomb_barrier
+     REAL(KIND=DP)                            :: energy_offset
 
 !> Constant over the simulations
      integer                                  :: natom !Total number of atoms

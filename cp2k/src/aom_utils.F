@@ -48,7 +48,8 @@ MODULE aom_utils
    USE machine,                        ONLY: m_getpid
    USE sh_types,                      ONLY: sh_print_env_type, &
                                              sh_env_type
-   USE aom_print,                      ONLY: adiab_print_sh_info
+   USE aom_print,                      ONLY: adiab_print_sh_info, &
+                                                 print_new_state_indices
 
   USE cp_parser_methods,               ONLY: read_float_object
 
@@ -145,6 +146,7 @@ IMPLICIT NONE
              read_listdiabcoeff,                   & 
              read_list_tresp,                      &
              read_list_frz_couplings,              &
+	     read_list_coulomb_barrier,            &
              calc_adiab_nace_old,                  &
              matinvsqrt,                           &
              nace1_time_t                   
@@ -1118,6 +1120,8 @@ SUBROUTINE calc_fect_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, p
                                           ct_ind, sh_env%connlist1_ct,sh_env%connlist2_ct, sh_env%atomlist_ct, &
                                           sh_env%nacv_ct)
 
+
+
 !WTP_comment: the Sab_list_fect as well as nacv should be tested here...
 
    !> loop over states: note that it does not matter if donor molecules comes
@@ -1192,6 +1196,8 @@ SUBROUTINE calc_fect_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, p
         end do
     end do
 
+!  open(900,file="index-log.txt",position="append")
+
   !> do-loop for the FE-CT block
   count_ = 0
   IF (sh_env%fe_donor) THEN !FE_IS DONOR
@@ -1209,14 +1215,25 @@ SUBROUTINE calc_fect_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, p
     do state1=1, total_FE_states 
       do state2=1, SIZE(ct_ind)
         count_ = count_ + 1  
-        sh_env%H_tp(total_CT_states+state1, (state2-1)*SIZE(ct_ind)+state1) = &
+        sh_env%H_tp(total_CT_states+state1, (state2-1)*SIZE(fe_ind)+state1) = &
                            cmplx(0.0D0, -sh_env%scaling_fect*Sab_list_fect(3, count_),dp)
+
+        !size(fe_ind) used to be size(ct_ind) in this block, trying fix
+        !- FI - 05/2025
+
+!        write(900,*) "state1:", total_CT_states + state1
+!        write(900,*) "state2:", (state2-1)*SIZE(fe_ind)+state1
+!        write(900,*) "Sab column:"
+!        write(900,*) Sab_list_fect(1:3,count_)
+
   !> another of half H...
-        sh_env%H_tp((state2-1)*SIZE(ct_ind)+state1, total_CT_states+state1) = &
-        sh_env%H_tp(total_CT_states+state1, (state2-1)*SIZE(ct_ind)+state1)
+        sh_env%H_tp((state2-1)*SIZE(fe_ind)+state1, total_CT_states+state1) = &
+        sh_env%H_tp(total_CT_states+state1, (state2-1)*SIZE(fe_ind)+state1)
       end do
     end do
   END IF
+
+!  close(900)
 
    DEALLOCATE(CT_states_info)
    DEALLOCATE(first_ind)
@@ -1226,6 +1243,7 @@ SUBROUTINE calc_fect_Xmatrix_elements(sh_env, orb, energies_tp, adiab_section, p
    DEALLOCATE(Sab_list_dphase)
    DEALLOCATE(Sab_list_aphase)
    DEALLOCATE(Sab_list_fect)
+
 
 END SUBROUTINE calc_fect_Xmatrix_elements
 
@@ -1652,7 +1670,7 @@ SUBROUTINE calc_aom_coup_nacv_fect(sh_env, atoms_fe, elements_fe, fe_pcoeffs,fe_
 !WTP_comment: a/bneighbour generated here
                     call sab_screen_new(Atp, fe_atomlist, &
                                         fe_connlist1, pcoeffsrun_fe(:,i),&
-                                        fe_atomlist, Btp, ct_atomlist, &
+                                       fe_atomlist, Btp, ct_atomlist, &
                                         ct_connlist1, pcoeffsrun_ct(:,k),&
                                         aneighbour(:,1:atoms_per_mol_i), bneighbour(:,1:atoms_per_mol_k), &
                                         sh_env%minao)
@@ -1676,6 +1694,14 @@ SUBROUTINE calc_aom_coup_nacv_fect(sh_env, atoms_fe, elements_fe, fe_pcoeffs,fe_
 !!    write (23,*) "atoms: ", temp, bneighbour(:,temp) 
 !!  end do
 !!close(23)
+
+                    !open(878, file="AOM_acoeffs.txt", position="append")
+                    !write(878,*) "Value of i:", i, "Value of k:", k
+                    !close(878)
+
+                    !open(535, file="calc_olap_data.txt", position="append")
+                    !write(535,*) "Value of i:", i, "Value of k:", k
+                    !close(535)
  
                            count_  = count_+1
                            !calculate overlap Sab 
@@ -2775,11 +2801,12 @@ end subroutine nace1_time_t
 !> \brief I've divided the calc_adiab_nace subroutine into discrete chunks in
 !         order to profiling it with a finer resolution. This is chunk 2.
 !**********************************************************************************
-subroutine nace2(sh_env, mol, print_here)
+subroutine nace2(sh_env, sh_print_env, mol, print_here)
 
         TYPE(sh_env_type)                         :: sh_env
         INTEGER                                    :: mol
         LOGICAL                                    :: print_here
+        TYPE(sh_print_env_type), INTENT(IN) :: sh_print_env
 
         CHARACTER(len=*), PARAMETER :: routineN ='nace2', &
                     routineP = moduleN//':'//routineN
@@ -2882,6 +2909,12 @@ subroutine nace2(sh_env, mol, print_here)
            CPABORT("Problem in the mapping between old and new states.")
        ENDIF
 !> End of 2.
+
+!open(212,file="adiabatic_indices.txt",position="append")
+!write(212,*) sh_env%adiab_nace_env%map_new2old
+!close(212)
+
+!call print_new_state_indices(sh_env, sh_print_env)
 
 end subroutine nace2
 
@@ -3052,10 +3085,11 @@ end subroutine nace7
 !**********************************************************************************
 !> \brief 
 !**********************************************************************************
-subroutine calc_adiab_nace(sh_env, adiab_section)
+subroutine calc_adiab_nace(sh_env, sh_print_env, adiab_section)
         !this subroutine calculates the adiabatic nace used in the calculation
         !of the hopping probability and also in the RK adiabatic propagation 
         TYPE(sh_env_type)                         :: sh_env
+        TYPE(sh_print_env_type), INTENT(IN) :: sh_print_env
         TYPE(section_vals_type), POINTER           :: adiab_section
 
         CHARACTER(len=*), PARAMETER :: routineN ='calc_adiab_nace', &
@@ -3073,7 +3107,7 @@ subroutine calc_adiab_nace(sh_env, adiab_section)
             CALL nace1_time_tp(sh_env, mat, sh_env%deltat)
         end if
         !CALL nace1(sh_env, mat, sh_env%deltat)
-        CALL nace2(sh_env, mat, print_here)
+        CALL nace2(sh_env, sh_print_env, mat, print_here)
         CALL nace3(sh_env)
         CALL nace4(sh_env, mat)
         CALL nace5(sh_env)
@@ -3385,11 +3419,14 @@ print *, "CTIN", ctin
     LOGICAL                                                :: is_ok
     TYPE(val_type), POINTER                                :: val
     REAL(KIND=dp)                                          :: my_pres
+    REAL(KIND=DP), DIMENSION(:), ALLOCATABLE, TARGET :: coupling_list
 
     NULLIFY(val)
 
     ALLOCATE(h1(ninteractions,2))
     ALLOCATE(frz_couplings(ninteractions))
+    ALLOCATE(coupling_list(ninteractions))
+    coupling_list=0.0
 
     !this reads line by line the section listcoeff, and for each line it has
     !the different CASES 
@@ -3459,11 +3496,129 @@ print *, "CTIN", ctin
           END DO
       END DO
 
+   !frz_couplings => coupling_list
+   !open(959,file="coupling_list.txt",position="append")
+   !write(959,*) frz_couplings
+   !close(959)
+
    END SUBROUTINE read_list_frz_couplings
+
+!**********************************************************************************
+!> \brief
+
+!this is a modified version of the read_list_frz_couplings subroutine,
+!which reads the FRZ_DIAGONALS.include file into a 1D array
+
+!input - nsites = number of site energies you are reading in; listcoeff
+!= pointer to the FRZ_DIAGONALS file
+
+!output - barrier_vals, 1D array of coulomb barrier values that were
+!written into the file 
+!**********************************************************************************
+
+   SUBROUTINE read_list_coulomb_barrier(nsites, listcoeff, barrier_vals)
+
+    TYPE(cp_sll_val_type), POINTER                         :: listcoeff
+    !INTEGER, DIMENSION(:,:), POINTER, INTENT(OUT)        :: h1
+    !INTEGER, DIMENSION(:), ALLOCATABLE, INTENT(OUT)        :: h2
+    REAL(KIND=dp), DIMENSION(:), POINTER, INTENT(OUT)  :: barrier_vals
+    INTEGER, INTENT(IN)                                    :: nsites
+
+    CHARACTER(len=*), PARAMETER :: routineN = 'read_listcoeff', &
+      routineP = moduleN//':'//routineN
+
+    CHARACTER(len=2*default_string_length)                 :: line_att
+    CHARACTER(len=default_string_length)                   :: error_message
+    INTEGER                                                :: default_id, end_c, &
+                                                              iatom, j,  &
+                                                              start_c, wrd
+    LOGICAL                                                :: is_ok
+    TYPE(val_type), POINTER                                :: val
+    REAL(KIND=dp)                                          :: my_pres
+
+    NULLIFY(val)
+
+    !ALLOCATE(h1(nsites,2))
+    ALLOCATE(barrier_vals(nsites))
+
+    !this reads line by line the section listcoeff, and for each line it has
+    !the different CASES 
+       DO iatom=1,nsites
+          ! we use only the first default_string_length characters of each line
+          is_ok=cp_sll_val_next(listcoeff,val) !logical 
+          CALL val_get(val,c_val=line_att)
+          default_id = str2id(s2s(""))
+          ! Read name and atomic coordinates
+          start_c=1
+          DO wrd=1,3
+             DO j=start_c,LEN(line_att)
+                IF (line_att(j:j)/=' ') THEN
+                   start_c=j
+                   EXIT
+                END IF
+             END DO
+             end_c=LEN(line_att)+1
+             DO j=start_c,LEN(line_att)
+                IF (line_att(j:j)==' ') THEN
+                   end_c=j
+                   EXIT
+                END IF
+             END DO
+             !IF(LEN_TRIM(line_att(start_c:end_c-1)) == 0)& !length of the number
+             !                                               ! without space
+             !   CALL cp_abort(__LOCATION__,&
+             !        "Incorrectly formatted input line for atom "//&
+             !        TRIM(ADJUSTL(cp_to_string(iatom)))//&
+             !        " found in COORD section. Input line: <"//&
+             !        TRIM(line_att)//"> ")
+             SELECT CASE (wrd)
+             CASE (1)  ! read active or not atom (carrying a charge)
+                CALL read_float_object(line_att(start_c:end_c-1),&
+                                       my_pres,error_message)
+                !h1(iatom,1) = INT(my_pres)
+                IF(LEN_TRIM(error_message) /= 0)&
+                   CALL cp_abort(__LOCATION__,&
+                        "Incorrectly formatted input line for atom "//&
+                        TRIM(ADJUSTL(cp_to_string(iatom)))//&
+                        " found in COORD section. "//TRIM(error_message)//&
+                        " Input line: <"//TRIM(line_att)//"> ")
+             CASE (2)  ! read active or not atom (carrying a charge)
+                CALL read_float_object(line_att(start_c:end_c-1),&
+                                       my_pres,error_message)
+                !h1(iatom,2) = INT(my_pres)
+                IF(LEN_TRIM(error_message) /= 0)&
+                   CALL cp_abort(__LOCATION__,&
+                        "Incorrectly formatted input line for atom "//&
+                        TRIM(ADJUSTL(cp_to_string(iatom)))//&
+                        " found in COORD section. "//TRIM(error_message)//&
+                        " Input line: <"//TRIM(line_att)//"> ")
+             CASE (3) ! transition charge (this must be divided by sqrt(2) if it
+                      !comes from gaussian fitting of the electrostatic potential 
+                CALL read_float_object(line_att(start_c:end_c-1),&
+                                       barrier_vals(iatom),error_message)
+                IF(LEN_TRIM(error_message) /= 0)&
+                   CALL cp_abort(__LOCATION__,&
+                        "Incorrectly formatted input line for atom "//&
+                        TRIM(ADJUSTL(cp_to_string(iatom)))//&
+                        " found in COORD section. "//TRIM(error_message)//&
+                        " Input line: <"//TRIM(line_att)//"> ")
+
+             END SELECT
+             start_c = end_c
+             IF (start_c > LEN_TRIM(line_att)) EXIT
+          END DO
+      END DO
+
+   !open(434,file="coulomb_vals.txt")
+   !write(434,*) barrier_vals
+   !close(434)
+
+   END SUBROUTINE read_list_coulomb_barrier
 
 !**********************************************************************************
 !> \brief 
 !**********************************************************************************
+ 
    SUBROUTINE read_list_tresp(natom_mol, listcoeff, ext_elements, ext_pres, tresp_charges)
 
     TYPE(cp_sll_val_type), POINTER                         :: listcoeff

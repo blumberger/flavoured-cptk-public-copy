@@ -146,6 +146,7 @@ CONTAINS
     ALLOCATE(forces_adiab(3,natom))
     factor = 1
 
+
     my_bo_keyword = .TRUE.
     my_test_keyword = .FALSE.
     IF (method_keyword.eq."FSSH") THEN
@@ -161,6 +162,7 @@ CONTAINS
          i_val=nadiab)
     CALL section_vals_val_get(adiab_section,"NUMBER_ORBITALS",&
          i_val=norbitals)
+
 
     itimes => my_itimes
     DO iparticle = 1, natom
@@ -181,6 +183,8 @@ CONTAINS
        !> This 0th step is executed at the very beginning of the simulation, when
        !qs_mol_dyn_low subroutine calls force_env_calc_energy_force for the
        !first time and this calls in turn the present subroutine
+
+
 
        CALL create_sh_env(nadiab, norbitals, natom, &
                            positions_tp, adiab_section, & 

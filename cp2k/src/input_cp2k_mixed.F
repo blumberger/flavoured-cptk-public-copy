@@ -488,6 +488,27 @@ CONTAINS
     CALL section_add_keyword(sub3section,keyword)
     CALL keyword_release(keyword)
 
+!----------------------------------------------------------------------------
+    !two keywords added in ct-block section of SITE ENERGIES M,ETHODS
+    !SECTION, onSITE NUMBER specifies number of CT states in system, and
+    !XT_CT_OFFSET specifies energy offset between interfacial CT-state
+    !and XT manifold -- FI 05/01/24
+
+    CALL keyword_create(keyword, name="SITE_NUMBER",&
+         description="Number of diabatic states in your full Hamiltonian",&
+         usage="positive integer", type_of_var=integer_t)
+    CALL section_add_keyword(sub3section,keyword)
+    CALL keyword_release(keyword)
+
+
+    CALL keyword_create(keyword, name="XT_CT_OFFSET",&
+         description="energy offset between interfacial CT diabat and XT diabats",&
+         usage="real value", type_of_var=real_t)
+    CALL section_add_keyword(sub3section,keyword)
+    CALL keyword_release(keyword)
+
+!------------------------------------------------------------------------------
+
     CALL keyword_create(keyword, name="DIELECTRIC_SCREENING",&
          description="Dielectric epsilon of the screened Coulomb",&
          usage="3.0 WITHOUT UNITS", type_of_var=real_t)
@@ -1036,13 +1057,28 @@ CONTAINS
      CALL section_add_subsection(sub2section,print_key)
      CALL section_release(print_key)
 
+     CALL cp_print_key_section_create(print_key_section=print_key,&
+          name="NEW_STATE_INDICES",&
+          description="Prints the mapping of the adiabatic state indices of the previous timestep onto the new timestep", &
+          common_iter_levels=1,&
+          filename="")
+     CALL section_add_subsection(sub2section,print_key)
+     CALL section_release(print_key)
 
      CALL cp_print_key_section_create(print_key_section=print_key,&
           name="NACE",&
           description="Controls the output of the diabatic NACE.",&
           common_iter_levels=1,&
-          filename="",         &
+          filename="", &
           unit_str = "fs^-1")
+     CALL section_add_subsection(sub2section,print_key)
+     CALL section_release(print_key)
+
+     CALL cp_print_key_section_create(print_key_section=print_key,&
+          name="SURFACE_WF",&
+          description="Prints out diabatic coefficients of active surface wavefunction.",&
+          common_iter_levels=1,&
+          filename="")
      CALL section_add_subsection(sub2section,print_key)
      CALL section_release(print_key)
 

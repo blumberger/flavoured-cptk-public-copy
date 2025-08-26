@@ -556,6 +556,14 @@ function S_splines_psigma(R,Zi,Zj)
   a3=STO_psigma_spline_coeffs(STO_map2D(STO_mapZ(Zi),STO_mapZ(Zj)),l+1,4)
   S_splines_psigma=a0+a1*R+a2*R**2+a3*R**3
  end if
+
+!if (R>STO_spline_bounds(2)) then
+	!open(551, file="spline_data.txt", position="append")
+	!write(551,*) "Calculating sigma overlap"
+	!write(551,*) S_splines_psigma
+	!close(551)
+!end if
+
 end function
 
 function S_splines_ppi(R,Zi,Zj)
@@ -564,6 +572,7 @@ function S_splines_ppi(R,Zi,Zj)
  integer :: Zi,Zj,l
  real(kind=dp) S_splines_ppi
  S_splines_ppi=0.0_dp
+
  if(R<STO_spline_bounds(2)) then
   l=int((R-STO_spline_bounds(1))/STO_spline_bounds(3))
   a0=STO_ppi_spline_coeffs(STO_map2D(STO_mapZ(Zi),STO_mapZ(Zj)),l+1,1)
@@ -572,6 +581,14 @@ function S_splines_ppi(R,Zi,Zj)
   a3=STO_ppi_spline_coeffs(STO_map2D(STO_mapZ(Zi),STO_mapZ(Zj)),l+1,4)
   S_splines_ppi=a0+a1*R+a2*R**2+a3*R**3
  end if
+
+!if (R>STO_spline_bounds(2)) then
+	!open(551, file="spline_data.txt", position="append")
+	!write(551,*) "calculating pi overlap"
+	!write(551,*) S_splines_ppi
+	!close(551)
+!end if
+
 end function
 
 !--------PC added functino to build S lookuptable----------
@@ -855,7 +872,8 @@ end function
 
       REAL(KIND=dp), intent(in) :: xyz(:,:)
       integer, intent(in) :: atomlist(:)
-      integer, intent(out) :: connectlist1(:,:), connectlist2(:,:)
+      integer, intent(inout) :: connectlist1(:,:), connectlist2(:,:)
+      !changed 'out' intent to 'inout' for connectlists- FI
       REAL(KIND=dp), intent(in)        :: cutoff_connect
       integer :: i,j,k,l
       REAL(KIND=dp) :: distvec(3), DNRM2
@@ -871,6 +889,10 @@ end function
 
       connectlist1=0
       connectlist2=0
+
+      !open(919,file="connectlist_sizes.txt", position="append")
+      !write(919,*) size(connectlist1,2), size(connectlist2,2)
+      !close(919)
 
       !WTP_4.2_Debug:
       !print *, "xyz: and size(1,:), size(:,1)", xyz(:,:), size(xyz(1,:)), size(xyz(:,1))
@@ -892,6 +914,12 @@ end function
             if (atomlist(i) .ne. k .and. DNRM2(3,distvec,1) < cutoff_connect) then
                                j = j + 1
 
+                               !if (j .eq. 5) then
+                                !       open(667,file="emergency",position="append")
+                                !       write(667,*) "bug found"
+                                !       close(667)
+                               !end if
+
                                !WTP_4.2_Debug: add if statement
 !!                               if (j<5) then
                                connectlist1(j,l) = k
@@ -907,8 +935,8 @@ end function
          end do
 
 !WTP_4.2_Debug:
-         print *, "Debug: "
-         print *, "j= ", j
+         !print *, "Debug: "
+         !print *, "j= ", j
          
          !WTP_4.2_Debug:
 !!         if(j>4) then
@@ -958,13 +986,26 @@ end function
                    .and. DNRM2(3,distvec,1) < cutoff_connect) then
 
                                j = j + 1
+
+                               !if (j .eq. 5) then
+                               !        open(667,file="emergency",position="append")
+                               !        write(667,*) "bug found"
+                               !        close(667)
+                               !end if
+
                                connectlist1(j,l) = k
                                connectlist2(j,i) = k
                end if
             end do
 
-            connectlist1(j+1,l) =  atomlist(i)
-            connectlist2(j+1,i) =  atomlist(i)
+            !open(343, file="j_vals.txt",position="append")
+            !write(343,*) "j val is:", j
+            !close(343)
+
+            !connectlist1(j+1,l) =  atomlist(i)
+            !connectlist2(j+1,i) =  atomlist(i)
+            !commented these out bc they go beyond the number of rows in
+            !connectlists - FI
          else
              CPABORT("No such functional group")
          end if
@@ -977,6 +1018,13 @@ end function
                do while (connectlist1(k,connectlist2(j,i)) > 0)
                   k=k+1
                end do
+
+               !if (k .gt. 4) then
+               !   open(667,file="emergency",position="append")
+               !   write(667,*) "bug found"
+               !   close(667)
+               !end if
+
                connectlist1(k,connectlist2(j,i))=connectlist2(1,i)         
             end if        
          end do
@@ -1166,11 +1214,12 @@ end function
       REAL(KIND=dp), intent(in) :: expcoeffb(:,:)
       REAL(KIND=dp), intent(in) :: mua, musb(:)
       REAL(KIND=dp), intent(in) :: dist(:)
-      REAL(KIND=dp), intent(out) :: sarray(:)
+      REAL(KIND=dp), intent(inout) :: sarray(:)
       REAL(KIND=dp), allocatable :: c(:,:)
       REAL(KIND=dp) :: t
+      REAL :: olap
       integer :: stat_err
-      integer :: i
+      integer :: i, index1
       ! OZ: new arguments atomicZa, atomicZb types
       integer, intent(in) :: atomicZa, atomicZb(:)
       allocate(c(3,size(expcoeffa,2)), stat=stat_err)
@@ -1181,8 +1230,25 @@ end function
           !t = (mua - musb(i))/(mua + musb(i)) !abs??? 
           
           if((atomicZa/=1).and.(atomicZb(i)/=1)) then
+
+	  olap = (c(1,i) + c(2,i)) * S_splines_ppi(dist(i),atomicZa,atomicZb(i)) +&
+                                 c(3,i) * S_splines_psigma(dist(i),atomicZa,atomicZb(i))
+
+	  !if (dist(i) .gt. STO_spline_bounds(2)) then
+		!open(535, file = "calc_olap_data.txt", position="append")
+		!write(535,*) olap
+		!close(535)
+          !end if
+
           sarray(i) = (c(1,i) + c(2,i)) * S_splines_ppi(dist(i),atomicZa,atomicZb(i)) +&
                                  c(3,i) * S_splines_psigma(dist(i),atomicZa,atomicZb(i))
+
+	  !if (dist(i) .gt. STO_spline_bounds(2)) then
+		!open(442, file = "calc_olap_data2.txt", position="append")
+		!write(442,*) sarray(i)
+		!close(442)
+          !end if
+
           end if
 
           !if (abs(t) .lt. epsilon(0.D0)) then
@@ -1202,6 +1268,20 @@ end function
          sarray(i) = 1.d0
         end if
       end do
+
+      !do index1=1,size(expcoeffa,2)
+	!if (dist(index1) .gt. STO_spline_bounds(2)) then
+		!open(535, file="calc_olap_data.txt",position="append")
+		!write(535,*) sarray(index1)
+		!close(535)
+	!end if
+      !end do
+
+      !open(535, file="calc_olap_data.txt", position = "append")
+      !write(535,*) sarray
+      !write(535,*) "row avg is:", sum(sarray)/size(sarray)
+      !close(535)
+
       deallocate(c)
       return
   end subroutine calc_overlap_p_Z
@@ -1626,11 +1706,20 @@ end function
       ! OZ: mimicking the utilization of muap and musbp
       integer, dimension(:), allocatable ::  atomicZb
       integer :: atomicZa
+      integer :: index2, index3, index4
       ! OZ: augmented the slaters matrix - added sulfur sigma and pi mu coeffs
       slaters(:,1)=(/0.0D0, 0.0D0, 3.0D0, 0.9560D0, 1.2881D0, 1.100D0, 1.9237D0, 2.2458D0,&
                      0.0D0, 0.0D0, 0.0D0, 0.0000D0, 0.0000D0, 0.000D0, 0.0000D0, 2.1223D0/)
       slaters(:,2)=(/0.0D0, 0.0D0, 0.0D0, 0.0000D0, 1.2107D0, 1.000D0, 1.6000D0, 2.2266D0,&
                      0.0D0, 0.0D0, 0.0D0, 0.0000D0, 0.0000D0, 0.000D0, 0.0000D0, 1.8273D0/)
+
+      !do index3=1,size(connlista,2)
+	!do index4=1,size(connlista,1)
+	 !open(776,file="connlist_elements.txt", position="append")
+	 !write(776,*) connlista(index3,index4)
+	 !close(776)
+	!end do
+      !end do
 
         allocate(prervecsa(3,size(prexyza,2)),stat=stat_err)
         allocate(xyza(4,size(connlista,2)),stat=stat_err)
@@ -1659,6 +1748,25 @@ deallocate(prervecsa)
         if (present(prexyzb) .and. present(precoeffbp) .and. &
                         present(sab) .and. present(connlistb)) then
 
+        !do index3=1,size(connlistb,2)
+  	  !do index4=1,size(connlistb,1)
+  	   !open(776,file="connlist_elements.txt", position="append")
+  	   !write(776,*) connlistb(index3,index4)
+  	   !close(776)
+  	  !end do
+        !end do
+
+        !open(878, file="AOM_acoeffs.txt",position="append")
+        !write(878,*) "size of a is:", size(precoeffap)
+        !write(878,*) precoeffap
+        !close(878)
+
+        !open(979, file="AOM_bcoeffs.txt",position="append")
+        !write(979,*) "size of b is:", size(precoeffbp)
+        !write(979,*) precoeffbp
+        !close(979)
+
+
         allocate(unitvecs(3,size(connlistb,2),3),stat=stat_err)
         allocate(dist(size(connlistb,2)),stat=stat_err)
         allocate(prervecsb(3,size(prexyzb,2)),stat=stat_err)
@@ -1676,10 +1784,20 @@ deallocate(prervecsa)
         rvecsb(:,i)=prervecsb(:,connlistb(1,i))        
         end do  
        deallocate(prervecsb)
-       
+
+        !do index3=1,size(connlistb,2)
+  	  !do index4=1,size(connlistb,1)
+  	   !open(121,file="coordlist_elements.txt", position="append")
+  	   !write(121,*) xyzb(index3,index4)
+	   !write(121,*) xyza(index3,index4)
+  	   !close(121)
+  	  !end do
+        !end do
+
         allocate(musbp(size(xyzb,2)),stat=stat_err)
         ! OZ: preallocate atomicZb
         allocate(atomicZb(size(xyzb,2)),stat=stat_err)
+
         allocate(sarrayp(size(xyzb,2),size(xyza,2)), stat=stat_err)
 
         do i=1,size(xyzb,2)
@@ -1689,10 +1807,19 @@ deallocate(prervecsa)
          !print *, "musbp is", musbp(i)
         end do
 
+	!open(923, file="atomic_nums.txt")
+	!write(923,*) atomicZb
+	!close(923)
+
         do i=1,size(xyza,2)
           muap=slaters(int(xyza(1,i)),2)
           ! OZ: resolve atomic Z
           atomicZa=int(xyza(1,i))
+	 
+	  !open(923, file="atomic_nums.txt")
+	  !write(923,*) atomicZa
+	  !close(923)
+
           !print *, "muap is", muap 
           !calculate unitvectors for each atom in monomer A
           !and distance array
@@ -1704,9 +1831,26 @@ deallocate(prervecsa)
           !Do the expansion for monomer B
           call project_onto_unitvectors(unitvecs, rvecsb, expcoeffb)
 
+	  !open(535, file="calc_olap_data.txt", position="append")
+	  !write(535,*) "overlap"
+	  !close(535)
+
           !Calculate the overlaps
           call calc_overlap_p_Z(expcoeffa, expcoeffb, muap, musbp, dist, sarrayp(:,i),&
                                 atomicZa, atomicZb)
+
+	  !do index2=1,size(dist)
+		!if (dist(index2) .gt. STO_spline_bounds(2)) then
+			!open(535, file="calc_olap_data.txt",position="append")
+			!write(535,*) sarrayp(index2,i)
+			!close(535)
+		!end if
+	  !end do
+
+          !open(566, file="sab_info.txt", position="append")
+          !write(566,*) sarrayp(:,i)
+          !close(566)
+
         end do
 
         call DGEMV('t', size(sarrayp,1), size(sarrayp,2), 1.0d0, sarrayp,&
@@ -1754,7 +1898,9 @@ deallocate(prervecsa)
              call project_onto_unitvectors(unitvecs(:,1:j,:), rvecsa(:,i), expcoeffa(:,1:j))
              call project_onto_unitvectors(unitvecs(:,1:j,:), rvecsa(:,1:j), expcoeffb(:,1:j))
 
-             
+	     !open(535, file="calc_olap_data.txt", position="append")
+	     !write(535,*) "normalisation"
+	     !close(535)
 
              call calc_overlap_p_Z(expcoeffa(:,1:j), expcoeffb(:,1:j), muap, musbp(1:j), dist(1:j), sarrayp(1:j,i),&
                                    atomicZa, atomicZb(1:j))
@@ -1776,7 +1922,7 @@ deallocate(prervecsa)
               precoeffap(connlista(1,i)) = coeffap(i)
           end do
          ! OZ: free atomicZb array - SAB norm
-         deallocate(sarrayp, expcoeffa, expcoeffb, dist, unitvecs, musbp, atomicZb) 
+         deallocate(expcoeffa, expcoeffb, dist, unitvecs, musbp, atomicZb) 
 
       else
 !         print*, 'Wrong argument passing to calc_sab' 
@@ -1924,6 +2070,12 @@ deallocate(prervecsa)
           !Calculate the overlaps
           !call calc_overlap_p(expcoeffa, expcoeffb, muap, musbp, dist, sarray(:,i))
           !Calculate the overlaps
+
+	  !open(535, file="calc_olap_data.txt", position="append")
+	  !write(535,*) "overlap turbo"
+	  !close(535)
+
+
           call calc_overlap_p_Z(expcoeffa, expcoeffb, muap, musbp, dist,sarray(:,i),&
                                 atomicZa, atomicZb)
         end do
@@ -1962,6 +2114,11 @@ deallocate(prervecsa)
              call project_onto_unitvectors(unitvecs, rvecsa(:,i), expcoeffa)
              call project_onto_unitvectors(unitvecs, rvecsa, expcoeffb)
              !call calc_overlap_p(expcoeffa, expcoeffb, muap, musbp, dist, sarray(:,i))
+
+	     !open(535, file="calc_olap_data.txt", position="append")
+	     !write(535,*) "norm turbo"
+	     !close(535)
+
               call calc_overlap_p_Z(expcoeffa,expcoeffb, muap, musbp, dist, sarray(:,i),&
                                    atomicZa, atomicZb)
 
@@ -2380,6 +2537,12 @@ deallocate(prervecsa)
          !call calc_overlap_p(expcoeffa, expcoeffb, muap, musbp, dist, sarray(:,i))
          ! OZ: sulfur support - SAB
          !Calculate the overlaps
+
+
+	 !open(535, file="calc_olap_data.txt", position="append")
+	 !write(535,*) "overlap screen"
+	 !close(535)
+
           call calc_overlap_p_Z(expcoeffa, expcoeffb, muap, musbp, dist,sarray(:,i),&
                                 atomicZa, atomicZb)
 
@@ -2558,6 +2721,11 @@ deallocate(prervecsa)
 
 !            Calculate the overlaps
              !call calc_overlap_p(expcoeffa, expcoeffb, muap, musbp, dist, sarrayline)
+
+	     !open(535, file="calc_olap_data.txt", position="append")
+	     !write(535,*) "overlap turbo 2"
+	     !close(535)
+
              call calc_overlap_p_Z(expcoeffa, expcoeffb, muap, musbp, dist,sarrayline,&
                                 atomicZa, atomicZb)
 
@@ -2601,6 +2769,11 @@ deallocate(prervecsa)
              call project_onto_unitvectors(unitvecs, rvecsa(:,i), expcoeffa)
              call project_onto_unitvectors(unitvecs, rvecsa, expcoeffb)
              !call calc_overlap_p(expcoeffa, expcoeffb, muap, musbp, dist, sarray(:,i))
+
+	     !open(535, file="calc_olap_data.txt", position="append")
+	     !write(535,*) "norm turbo 2"
+	     !close(535)
+
              call calc_overlap_p_Z(expcoeffa, expcoeffb, muap,musbp, dist, sarray(:,i),&
                                    atomicZa, atomicZb)
  

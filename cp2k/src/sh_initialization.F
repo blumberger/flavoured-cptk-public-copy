@@ -28,7 +28,8 @@ MODULE sh_initialization
                                              read_listdiabcoeff,                  &
                                              read_list_tresp,                     &
                                              calc_multiphase_Xmatrix_elements,    &
-                                             read_list_frz_couplings   
+                                             read_list_frz_couplings,             &
+					     read_list_coulomb_barrier   
 
      USE sh_types,                    ONLY: sh_env_type
 
@@ -114,9 +115,12 @@ CONTAINS
 
      TYPE(cp_sll_val_type), POINTER                 :: list_tresp
      TYPE(cp_sll_val_type), POINTER                 :: frz_couplings_list
+     TYPE(cp_sll_val_type), POINTER                 :: coulomb_barrier_list
+     REAL(KIND=dp), DIMENSION(:), POINTER           :: coulomb_barrier_contribution
+
      integer, dimension(:), ALLOCATABLE             :: ext_elements
      LOGICAL, DIMENSION(:), POINTER                 :: active_logical
-     INTEGER                                        :: natom_mol, ninteractions
+     INTEGER                                        :: natom_mol, ninteractions, nsites
      INTEGER, DIMENSION(:,:), ALLOCATABLE           :: full_system_info
      INTEGER, DIMENSION(:,:), ALLOCATABLE           :: active_system_info
      LOGICAL, DIMENSION(:), POINTER                 :: ext_pres
@@ -129,6 +133,7 @@ CONTAINS
      NULLIFY(wf_restart_section)
      NULLIFY(optimization_section)
      NULLIFY(site_energy_section)
+
 
      CALL section_vals_val_get(adiab_section,"NUCLEAR_TIMESTEP",&
          r_val=MDtimestep)
@@ -210,6 +215,7 @@ CONTAINS
      ALLOCATE(sh_env%rng_stream)
      sh_env%rng_stream = rng_stream
 
+
      !> Get wavefunction diabatic coefficients from the input file for the
      !restart file option
      !COMMENT_SG: this section should be optional somehow---STILL TO IMPROVE USING e.g.
@@ -235,7 +241,41 @@ CONTAINS
        ct_block => section_vals_get_subs_vals(site_energy_section,"CT_BLOCK")
        CALL section_vals_val_get(ct_block,"ADD_COULOMB_POTENTIAL", &
                                                              l_val=sh_env%add_coulomb_pot)
-    end if 
+    end if
+
+
+    !conditional section added for coulomb barrier keyword, if
+    !keyword=T, the site number is called from the input file, and the
+    !coulomb barrer values are read from the FRZ_DIAGONALS.include file
+    !-- FI 05/01/24
+
+    if (sh_env%add_coulomb_pot) then
+
+    CALL section_vals_val_get(ct_block,"SITE_NUMBER",&
+                i_val=nsites)
+
+    sh_env%number_ct_states = nsites
+
+    CALL section_vals_list_get(ct_block,"_DEFAULT_KEYWORD_",list=coulomb_barrier_list)
+
+    CALL section_vals_val_get(ct_block,"XT_CT_OFFSET",&
+                r_val=sh_env%energy_offset)
+
+    CALL read_list_coulomb_barrier(nsites, coulomb_barrier_list, sh_env%coulomb_barrier)
+
+    !added three new variables to the sh_env type: coulomb_barrier = 1D
+    !array of coulomb barrier values, order corresponds to order of CT
+    !states in X-SH electronic Hamiltonian; number_ct_states = number of
+    !ct states in the system, passed in from the SITE_NUMBER keyword,
+    !used to update the site energies of the CT states in sh_main.F;
+    !energy_offset = ground-state energy difference between interfacial CT-state
+    !(set to zero) and XT manifold -- !FI 05/01/24
+ 
+    end if
+
+    !Added the coditional coulomb barrier section in the ct_block
+    !section so it's grouped up with the other site energy keywords --
+    !FI 05/01/24 
   
     !sh_env%multistate = .False.
     !initialize couplings
@@ -274,9 +314,13 @@ CONTAINS
 
          sh_env%freeze_multip_forces = .FALSE.  !??? do I need this
          !> FE block (TRESP) is also intialized in the following subroutine
+
+         !CALL read_list_frz_couplings(ninteractions, frz_couplings_list, sh_env%frz_coup_connectivity, sh_env%frz_couplings) 
+ 
          CALL set_aom_env_fect(nadiab, norbitals, natom,positions_tp,adiab_section,sh_env)
     !------------------------------------------------------------------------------------------
     CASE("FROZEN_COUPLINGS")
+
         ! Frozen coupling would have the possibility of using multi-state for
         ! the CT block for example. 
         !sh_env%multistate = .TRUE.
@@ -285,14 +329,17 @@ CONTAINS
         frozen_coupling_section => section_vals_get_subs_vals(adiab_section, "FROZEN_COUPLINGS")
         !> Get Hab for the first upper and lower diagonal (tridiagonal matrix
         !will be formed)
-         
+
         CALL section_vals_val_get(frozen_coupling_section,"CONNECTIVITY_FRZ_C",&
              l_val=sh_env%connectivity_frz_c)
+
         IF (sh_env%connectivity_frz_c) THEN 
            CALL section_vals_val_get(frozen_coupling_section,"INTERACTION_NUMBER",&
                 i_val=ninteractions)
            CALL section_vals_list_get(frozen_coupling_section,"_DEFAULT_KEYWORD_",list=frz_couplings_list) !Read list tresp from input
-           CALL read_list_frz_couplings(ninteractions, frz_couplings_list, sh_env%frz_coup_connectivity, sh_env%frz_couplings) 
+           CALL read_list_frz_couplings(ninteractions, frz_couplings_list, sh_env%frz_coup_connectivity, sh_env%frz_couplings)
+	   !CPABORT("TEST DONE")
+ 
         ELSE
            CALL section_vals_val_get(frozen_coupling_section,"FIRST_OFF_DIAGONALS_VAL",&
              r_val=sh_env%first_off_d_Hab)
@@ -403,7 +450,6 @@ CONTAINS
 
      !get CT block for donor and acceptor
      ct_block => section_vals_get_subs_vals(site_energy_section,"CT_BLOCK")
-  
 
      !> Initialize input parameters: 
      !> cutoff to define the neighborough list
@@ -663,6 +709,7 @@ CONTAINS
      CHARACTER(LEN=default_string_length)           :: STO_input_string
      REAL(KIND=dp)                                  :: STO_rmin,STO_rmax,STO_dr
      INTEGER                                        :: STO_debug
+     INTEGER                                        :: atom_index, conn_counter
 
      NULLIFY(listcoeff)
      NULLIFY(coupling_section)
@@ -783,13 +830,25 @@ CONTAINS
      !read anymore.
      CALL read_listcoeff(listcoeff, ext_elements_d, active_logical, &
                          scoefftot_d, pcoefftot_d, atoms_per_donor) !donor
+
+     DEALLOCATE(active_logical)
+
      CALL read_listcoeff(listcoeff, ext_elements_a, active_logical, &
                          scoefftot_a, pcoefftot_a, atoms_per_acceptor) !acceptor
+
+     DEALLOCATE(active_logical)
+                 
      !> AOM for X-SH
      CALL read_listcoeff(listcoeff, ext_elements_fe, active_logical, &
                          scoefftot_fe, pcoefftot_fe, atoms_per_fe) !FE:: donor/acceptor
+
+     DEALLOCATE(active_logical)
+                 
      CALL read_listcoeff(listcoeff, ext_elements_ct, active_logical, &
                          scoefftot_ct, pcoefftot_ct, atoms_per_ct) !CT:: donor/acceptor
+
+     DEALLOCATE(active_logical)
+ 
      !>WTP_4.2: add 2 orbs. for CR here!!
      !>maybe with a if(CR) statement???
      !> ....
@@ -865,6 +924,7 @@ CONTAINS
                    !for multiple molecule kind so that the coupling
                    !calculation is general for any num atoms per molecule
      CALL read_list_tresp(sh_env%atoms_per_site, list_tresp, ext_elements, active_logical, sh_env%tresp_charges)
+     DEALLOCATE(active_logical)
 
      !> active_logical is not necessary since inactive atoms will anyway have
      !0
@@ -951,6 +1011,18 @@ CONTAINS
 !     print *, "connlist1: ", sh_env%connlist1_d
 !     print *, "connlist2: ", sh_env%connlist2_d 
 
+     open(422, file="donor-connectivity.xyz", position="append")
+     write(422,*) "Printing sulphur atoms' nearest neighbours:"
+
+     do conn_counter = 1,size(sh_env%connlist2_d, dim=2)
+        atom_index = sh_env%connlist2_d(1,conn_counter)
+        if (Atp_loc(1,atom_index) == 16) then
+               write(422,*) sh_env%connlist2_d(:,conn_counter)
+        end if
+     end do
+
+     close(422)
+
      ! coefficients donor phase
      ALLOCATE(sh_env%pcoeffs_d(atoms_per_donor))
      ALLOCATE (sh_env%scoeffs_d(atoms_per_donor))
@@ -984,6 +1056,19 @@ CONTAINS
      !output: sh_env%connlist1, sh_env%connlist2, which are the intramoleculat
      !connectivities with and without considering the zeors
      call connect_list2(Atp_loc(2:4,:), sh_env%atomlist_a, sh_env%connlist1_a, sh_env%connlist2_a, sh_env%cutoff_connect)
+
+     open(433, file="acceptor-connectivity.xyz", position="append")
+     write(433,*) "Print oxygen atoms' nearest neighbours:"
+
+     do conn_counter = 1,size(sh_env%connlist2_a, dim=2)
+        atom_index = sh_env%connlist2_a(1,conn_counter)
+        if (Atp_loc(1,atom_index) == 8) then
+               write(433,*) sh_env%connlist2_a(:,conn_counter)
+        end if
+     end do
+
+     close(433)
+
 
      ! coefficients acceptor phase
      ALLOCATE(sh_env%pcoeffs_a(atoms_per_acceptor))
@@ -1020,7 +1105,11 @@ CONTAINS
      Atp_loc(2:4,1:atoms_per_fe) = positions_tp(1:3,init_atom_mol_fe:final_atom_mol_fe)
      !output: sh_env%connlist1, sh_env%connlist2, which are the intramoleculat
      !connectivities with and without considering the zeors
-     call connect_list2(Atp_loc(2:4,:), sh_env%atomlist_fe, sh_env%connlist1_fe, sh_env%connlist2_fe, sh_env%cutoff_connect)
+     call connect_list2(Atp_loc(2:4,:), sh_env%atomlist_fe,sh_env%connlist1_fe, sh_env%connlist2_fe, sh_env%cutoff_connect)
+
+     !open(221,file="fe_atomlist.txt",position="append")
+     !write(221,*) sh_env%atomlist_fe
+     !close(221)
 
      !WTP_TEST
 !     WRITE(*,*) 'connlist1_fe: ', sh_env%connlist1_fe
@@ -1050,6 +1139,10 @@ CONTAINS
      sh_env%atomlist_ct = PACK( (/ (i, i=1,atoms_per_ct) /), submask(1:atoms_per_ct) )
      allocate(sh_env%connlist2_ct(4,size(sh_env%atomlist_ct)))
      ALLOCATE(sh_env%connlist1_ct(4,atoms_per_ct))
+
+     !open(223, file="ct_atomlist.txt", position="append")
+     !write(223,*) sh_env%atomlist_ct
+     !close(223)
 
      ! SG: this line again assume same number of atoms for each molecule and it
      ! assumes all molecules have the same connlist1 connlist2

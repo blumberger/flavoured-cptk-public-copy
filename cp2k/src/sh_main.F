@@ -89,7 +89,9 @@ MODULE sh_main
                                              adiab_print_hamiltonian, &
                                              adiab_print_pseudo_hamiltonian, &
                                              adiab_print_nacv, &
-                                             adiab_print_pvecs
+                                             adiab_print_pvecs, &
+                                             adiab_print_nace_active, &
+                                             adiab_print_surface_wf
 
 
 
@@ -210,7 +212,7 @@ CONTAINS
      TYPE(section_vals_type), POINTER               :: coupling_section
      CHARACTER(LEN=default_string_length)           :: coupling_keyword
      REAL(KIND=dp)                                  :: convert_nacv
-     INTEGER                                        :: i
+     INTEGER                                        :: i, k
      COMPLEX(KIND=dp), dimension(:), allocatable    :: ctotal
 
      NULLIFY(positions_com_tp, velocities_com_tp)
@@ -265,10 +267,16 @@ CONTAINS
 
      !#####################  SITE ENERGIES SECTION  #############################
      ! Site energies are modified only if multistate is active
-     IF (sh_env%multistate) THEN
-         IF (sh_env%add_coulomb_pot) THEN
-                CALL add_coulomb_energy_to_CT(sh_env, adiab_section, energies_tp, diagonal_F, positions_com_tp)
-         END IF
+
+     !added by FI 05/01/24
+     IF (sh_env%add_coulomb_pot) THEN
+        
+!	energies_tp = 0.0 
+	energies_tp(1:sh_env%number_ct_states) = energies_tp(1:sh_env%number_ct_states) + sh_env%coulomb_barrier
+	energies_tp(sh_env%number_ct_states+1: size(energies_tp)) = energies_tp(sh_env%number_ct_states+1: size(energies_tp)) &
+ + sh_env%energy_offset
+
+
      END IF
 
      !######### COUPLING DEFINITION AND H CONSTRUCTION ########################
@@ -371,7 +379,7 @@ CONTAINS
      !initialize Adiabatic energies that will be used for trivial hopping and
      !decoherence corrections
      CALL adiabaticity(-AIMAG(sh_env%H_tp), sh_env%C_tp, sh_env%E_tp)
-     
+    
      !> PRINT
      !> print site energies 
      allocate(site_energies(mat))
@@ -394,6 +402,7 @@ CONTAINS
         CALL adiab_print_adiabat_energies(adiab_section, sh_env%E_tp, nadiab, deltatMD, times)
         CALL adiab_print_hamiltonian(adiab_section, -AIMAG(sh_env%H_tp), nadiab,norbitals,itimes, deltatMD)
         CALL adiab_print_pseudo_hamiltonian(adiab_section, -AIMAG(sh_env%H_tp), nadiab,norbitals,itimes, deltatMD)
+
         IF (sh_env%aom_couplings_keyword) THEN
             CALL adiab_print_nacv(adiab_section, sh_env%nacv, nadiab, norbitals, sh_env%atoms_per_site, itimes, deltatMD)
             call adiab_print_pvecs(adiab_section, PC_allrvecs, itimes, deltatMD, times, sh_env%atoms_per_site, nadiab)
@@ -804,12 +813,27 @@ print *, "ACTIVE STATE", active_state
      CALL translate_com(positions_tp, keyword_translate, positions_com_tp, local_particles, atomic_kinds = atomic_kinds)  
 
      !#####################  SITE ENERGIES SECTION  #############################
-     ! Site energies are modified only if multistate is active
-     IF (sh_env%multistate) THEN
-         IF (sh_env%add_coulomb_pot) THEN
-                CALL add_coulomb_energy_to_CT(sh_env, adiab_section, energies_tp, diagonal_F, positions_com_tp)
-         END IF
+     ! Site energies are modified only if add_coulomb_pot is true
+
+     !Coulomb barrier was read into a 1D array in sh_init, here this
+     !array is added on to the site energies of the CT states, and the
+     !XT-CT offset is added on to the site energies of the XT states --
+     !FI 05/01/24
+
+     IF (sh_env%add_coulomb_pot) THEN
+
+	!energies_tp = 0.0
+        !The above assignment was used to ensure the coulomb barrier is
+        !reproduced in X-SH, and that the site energies are assigned
+        !correctly, setting energies_tp to zero removes the force-field
+        !component of the site energy -- FI 05/01/24
+
+	energies_tp(1:sh_env%number_ct_states) = energies_tp(1:sh_env%number_ct_states) + sh_env%coulomb_barrier
+	energies_tp(sh_env%number_ct_states+1: size(energies_tp)) = energies_tp(sh_env%number_ct_states+1: size(energies_tp)) &
+ + sh_env%energy_offset 
+
      END IF
+
      !######### COUPLING DEFINITION AND H CONSTRUCTION ########################
      IF (sh_env%aom_couplings_keyword) THEN
          !------------------  AOM section -------------------------------------
@@ -904,6 +928,7 @@ print *, "ACTIVE STATE", active_state
      !decoherence corrections
      CALL adiabaticity(-AIMAG(sh_env%H_tp), sh_env%C_tp, sh_env%E_tp)
 
+
      !> store adiabatic nace and diabatic from the previous step
      sh_env%adiab_nace_t = sh_env%adiab_nace_tp !adiabatic nace at t are used just
                                                 !for adiabatic propagation which is DEPRECATED
@@ -924,7 +949,7 @@ print *, "ACTIVE STATE", active_state
      !> Calculate the overlap between C_tp and C_t, reorder state if required,
      !> calculate the adiabatic nace [and diabatic nace at (t)]
      !IF (do_nace_speedup) THEN
-        CALL calc_adiab_nace(sh_env, adiab_section)
+        CALL calc_adiab_nace(sh_env, sh_print_env, adiab_section)
      !ELSE
      !   CALL calc_adiab_nace_old(sh_env, adiab_section)
      !END IF
@@ -1195,6 +1220,11 @@ print *, "ACTIVE STATE", active_state
      CALL adiab_print_site_energies(adiab_section, site_energies, nadiab, deltatMD, times)
      CALL adiab_print_off_diagonals(adiab_section, couplings, nadiab-1, deltatMD, times)
      CALL adiab_print_adiabat_energies(adiab_section, sh_env%E_tp, nadiab, deltatMD, times)
+     CALL adiab_print_nace_active(adiab_section, sh_env%active_state, sh_env%adiab_nace_t, nadiab, norbitals, &
+itimes, deltatMD, times)
+     CALL adiab_print_surface_wf(adiab_section, sh_env%active_state, nadiab, norbitals, sh_env%C_tp, itimes, deltatMD, times)
+
+
      IF (sh_env%aom_couplings_keyword) THEN
         CALL adiab_print_nacv(adiab_section, sh_env%nacv, nadiab, norbitals, sh_env%atoms_per_site ,itimes, deltatMD)
         CALL adiab_print_pvecs(adiab_section, PC_allrvecs, itimes, deltatMD, times, sh_env%atoms_per_site, nadiab)

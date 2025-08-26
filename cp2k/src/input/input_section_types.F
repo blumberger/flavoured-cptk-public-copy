@@ -1378,7 +1378,6 @@ CONTAINS
               ") out of bounds (1:"//cp_to_string(SIZE(s_vals%subs_vals,2))&
               //")")
     list => s_vals%values(ik,irs)%list
-
   END SUBROUTINE section_vals_list_get
 
 ! *****************************************************************************

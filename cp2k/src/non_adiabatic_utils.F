@@ -631,7 +631,8 @@ END SUBROUTINE calc_coms_and_nlist_fect_fe
      end do
 
     DEALLOCATE(charges1,charges2)
-    DEALLOCATE(fe_ind) 
+    DEALLOCATE(fe_ind)
+    DEALLOCATE(NN) 
 
   end subroutine  calc_tresp_coup_fect
 
@@ -1024,6 +1025,7 @@ subroutine calcforces_frozenH(Hin, C, state, Fin, forces_adiab)
         mat = size(Hin,1) !might have denerate states and also a larger number
                           !of states then the active molecules. Therefore as long as the couplings are
                           !fixed this can be used for calculating multi-phase and CT Hamiltoninans
+
         !loop over 3 cartesians 
         do d=1,3 
            do j=1,natom
@@ -1034,7 +1036,7 @@ subroutine calcforces_frozenH(Hin, C, state, Fin, forces_adiab)
               do i=1,mat
                  ! Diagonal term, it depends on the forces. The minus is already
                  ! part of diagonal forces calculation from FIST.
-                 forces_adiab(d,j) = forces_adiab(d,j) +(abs(C(i,state))**2)*Fin(d,j,i)
+                 forces_adiab(d,j) = forces_adiab(d,j) + (abs(C(i,state))**2)*Fin(d,j,i)
               end do 
            end do
         end do
@@ -5216,7 +5218,7 @@ END SUBROUTINE classically_forbidden_hops
           X1  = X2
       end do
  
- !     CALL adiab_print_nace(adiab_section, NACE, nadiab, norbitals, itimes, deltatMD, times)
+!      CALL adiab_print_nace(adiab_section, NACE, nadiab, norbitals, itimes, deltatMD, times)
       CALL adiab_print_coeff(adiab_section, ctin,nadiab, norbitals,itimes, deltatMD, &
                              times)
       CALL adiab_print_pop(adiab_section, ABS(ctotal) ,nadiab,norbitals,itimes, deltatMD, &
