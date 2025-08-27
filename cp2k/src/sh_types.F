@@ -159,6 +159,14 @@ END TYPE adiab_nace_env_type
      LOGICAL                                  :: fe_donor  !True: donor is FE, False: acceptor is FE
      REAL(KIND = dp)                          :: e_offset  !WTP_4.2: E_FE(R_gs) - E_CT(R_gs)
 
+     !SINGLE PHASE XSH AOM PARAMETERS DEFINED HERE
+     REAL(KIND = dp)                          :: scaling_hh, scaling_ee, scaling_fect_e, scaling_fect_h
+     REAL(KIND = dp), DIMENSION(:,:,:), POINTER :: nacv_hh, nacv_ee, nacv_fe_h, nacv_ct_h, nacv_fe_e, nacv_ct_e
+     REAL(KIND=dp), DIMENSION(:), POINTER       :: pcoeffs_ee, scoeffs_ee, pcoeffs_hh, scoeffs_hh
+     REAL(KIND=dp), DIMENSION(:), POINTER       :: pcoeffs_fe_h, scoeffs_fe_h, pcoeffs_ct_h, scoeffs_ct_h
+     REAL(KIND=dp), DIMENSION(:), POINTER       :: pcoeffs_fe_e, scoeffs_fe_e, pcoeffs_ct_e, scoeffs_ct_e
+     integer, dimension(:), ALLOCATABLE       :: elements_sp
+
      LOGICAL                                  :: freeze_multip_forces
 
 !> AOM arrays
@@ -215,6 +223,7 @@ END TYPE adiab_nace_env_type
      LOGICAL                                  :: tresp_couplings_keyword 
      LOGICAL                                  :: multiphase_couplings_keyword 
      LOGICAL                                  :: multifect_couplings_keyword 
+     LOGICAL                                  :: sp_fect_keyword !single-phase fect keyword
  
      INTEGER, DIMENSION(:,:), ALLOCATABLE     :: full_system_info  
      INTEGER, DIMENSION(:,:), ALLOCATABLE     :: active_system_info  

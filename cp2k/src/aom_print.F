@@ -87,8 +87,7 @@ IMPLICIT NONE
              adiab_print_active_state,   &
              adiab_print_sh_info,        &
              adiab_print_pvecs,          &
-             print_new_state_indices,    &
-             adiab_print_surface_wf
+             print_new_state_indices
 
 CONTAINS
 
@@ -150,29 +149,36 @@ CONTAINS
     NULLIFY(logger)
     logger => cp_get_default_logger()
 
+
     unit_nr=cp_print_key_unit_nr(logger,adiab_section,"PRINT%COEFFICIENTS",&
                extension=".xyz", middle_name="coeff", log_filename=.FALSE.)
     unit_conv_fs = cp_unit_from_cp2k(1.0_dp,"fs")
-   
+ 
     IF (unit_nr>0) THEN
 
        time = times*deltatMD*unit_conv_fs
+
        WRITE ( unit_nr, "( A,A,I8,A,I8)" ) "Psi", "; nadiab =", nadiab, "; norbitals =",&
                                    norbitals
        WRITE ( unit_nr, '(A,I0,A,F20.3,A,F0.10)' )   " i = ",itimes,", time = ",time, " (fs)"
 
        DO iadiab=1, nadiab
           DO iorbitals=1,norbitals
+
          my_format="(I4,1X,I4,"
          WRITE(unit_nr,TRIM(my_format)//"1X,2F20.10)") iadiab, iorbitals, &
                    REAL(coefficients((iadiab-1)*norbitals + iorbitals)),   &
                    AIMAG(coefficients((iadiab-1)*norbitals + iorbitals))
+
          ENDDO
        ENDDO
+
 
     END IF
 
     CALL cp_print_key_finished_output(unit_nr,logger,adiab_section,"PRINT%COEFFICIENTS")
+
+
    END SUBROUTINE adiab_print_coeff
 
 
@@ -364,6 +370,7 @@ CONTAINS
 
     NULLIFY(logger)
     logger => cp_get_default_logger()
+
 
     unit_nr=cp_print_key_unit_nr(logger,adiab_section,"PRINT%POPULATIONS",&
                extension=".xyz", middle_name="pop",log_filename=.FALSE.)
@@ -656,59 +663,6 @@ CONTAINS
    END SUBROUTINE adiab_print_nace
 
 
-  SUBROUTINE adiab_print_surface_wf(adiab_section, active_state, nadiab, &
-norbitals, C, itimes, deltatMD, times)
-
-   TYPE(section_vals_type), POINTER         :: adiab_section
-   INTEGER, INTENT(IN)                      :: active_state, norbitals, nadiab
-   INTEGER, POINTER                         :: itimes
-   REAL(KIND=dp), INTENT(IN)                :: deltatMD, times
-   REAL(kind=dp), intent(in), dimension(:,:) :: C
-
-   CHARACTER(len=*), PARAMETER :: routineN = 'adiab_print_surface_wf', &
-     routineP = moduleN//':'//routineN
-
-   INTEGER                                  :: unit_nr
-   INTEGER                                  :: iadiab, iorbitals
-   CHARACTER(LEN=default_string_length)     ::  my_format, my_format2
-   TYPE(cp_logger_type), POINTER            :: logger
-   LOGICAL                                  :: new_file
-   REAL(KIND=dp)                            :: unit_conv, unit_conv_fs, time
-   CHARACTER(LEN=default_string_length)     :: unit_str
-
-   NULLIFY(logger)
-   logger => cp_get_default_logger()
-
-   unit_nr=cp_print_key_unit_nr(logger,adiab_section,"PRINT%SURFACE_WF",&
-              extension=".xyz",middle_name="surface-wf", log_filename=.FALSE.,&
-              is_new_file=new_file)
-
-   IF (unit_nr>0) THEN
-
-!      CALL section_vals_val_get(adiab_section,"PRINT%SURFACE_WF")
-!      unit_conv = cp_unit_from_cp2k(1.0_dp,TRIM(unit_str))
-      unit_conv_fs = cp_unit_from_cp2k(1.0_dp,"fs")
-      time = unit_conv_fs*times*deltatMD
-
-      WRITE ( unit_nr, "( A,I8,A,I8)" ) "SURFACE_WF;  nadiab=", nadiab, "; norbitals =",&
-                                  norbitals
-      WRITE ( unit_nr, '(A,I0,A,F20.3,A,F0.10)' )   " i = ",itimes,", time = ",time, " (fs)"
-
-
-       DO iadiab=1, nadiab
-          DO iorbitals=1,norbitals
-         my_format="(I4,1X,I4,"
-         WRITE(unit_nr,TRIM(my_format)//"1X,420F20.10)") iadiab, iorbitals, &
-                   C(iadiab,active_state)
-         ENDDO
-       ENDDO
-
-
-   END IF
-   CALL cp_print_key_finished_output(unit_nr,logger,adiab_section,"PRINT%SURFACE_WF")
-
-  END SUBROUTINE adiab_print_surface_wf
-
   SUBROUTINE adiab_print_nace_active(adiab_section, active_state, nace, nadiab, &
              norbitals, itimes, deltatMD, times)
    TYPE(section_vals_type), POINTER         :: adiab_section
@@ -781,6 +735,7 @@ norbitals, C, itimes, deltatMD, times)
 
     ALLOCATE(matrix(nadiab*norbitals, nadiab*norbitals))
 
+
     NULLIFY(logger)
     logger => cp_get_default_logger()
 
@@ -821,6 +776,8 @@ norbitals, C, itimes, deltatMD, times)
     CALL cp_print_key_finished_output(unit_nr,logger,adiab_section,"PRINT%DENSITY_MATRIX")
 
     DEALLOCATE(matrix)
+
+
    END SUBROUTINE adiab_print_matrix_density
 
 

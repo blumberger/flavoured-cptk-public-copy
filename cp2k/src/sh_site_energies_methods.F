@@ -60,7 +60,8 @@ MODULE sh_site_energies_methods
                add_energies_forces, &
                create_ext_press_list, &
                add_energies_forces_mem_saver, &
-               multi_block_energies_forces 
+               multi_block_energies_forces, &
+               single_phase_energies_forces
 
 CONTAINS
 
@@ -173,8 +174,236 @@ subroutine create_ext_press_list(molecule_kind_set, local_molecules, molecule_se
               
 end subroutine create_ext_press_list
 
+SUBROUTINE single_phase_energies_forces(adiab_section,energies_1_mol_list, energies, &
+                                    intra_forces_global, global_forces, my_energies, &
+                                    active_system_info, mixed_env, my_itimes, my_mol_index, &
+                                    fe_block_keyword, cr_block_keyword) 
 
-! *****************************************************************************
+   TYPE(section_vals_type), POINTER          :: adiab_section
+   TYPE(mixed_environment_type), &
+      POINTER                                :: mixed_env
+   TYPE(mixed_force_type), DIMENSION(:), &
+     POINTER                                 :: global_forces
+   REAL(KIND=dp), DIMENSION(:), POINTER      :: energies
+   REAL(KIND=dp), DIMENSION(:), POINTER      :: my_energies
+   REAL(KIND=dp), ALLOCATABLE                :: intra_forces_global(:,:,:) 
+   REAL(KIND=dp), ALLOCATABLE                :: energies_1_mol_list(:,:)
+   INTEGER, POINTER                          :: my_itimes !CHANGE_AC
+   INTEGER, DIMENSION(:,:), INTENT(IN)       :: active_system_info
+   LOGICAL, INTENT(IN)                       :: fe_block_keyword, cr_block_keyword
+
+   CHARACTER(len=*), PARAMETER :: routineN ='single_phase_energies_forces', &
+     routineP = moduleN//':'//routineN
+
+   INTEGER :: init_atom_mol_i, final_atom_mol_i, atoms_per_mol_i
+   INTEGER :: init_atom_mol_j, final_atom_mol_j, atoms_per_mol_j
+   INTEGER                                   :: i,j
+   INTEGER                                   :: start_i,end_i,start_j,end_j,atoms
+   TYPE(section_vals_type), POINTER          :: site_energy_section
+   TYPE(section_vals_type), POINTER          :: ct_block, fect_block  
+   CHARACTER(LEN=default_string_length)           :: fe_keyword  
+   INTEGER                                   :: total_states, state, nadiab, natom
+   INTEGER, DIMENSION(:,:), ALLOCATABLE      :: intra_forces_info
+   INTEGER                                   :: count_
+   INTEGER, DIMENSION(:), INTENT(IN)         :: my_mol_index !this is the decomp index
+
+   NULLIFY(site_energy_section,ct_block, fect_block)
+   NULLIFY( my_energies)
+   ! TOTAL number states
+   CALL section_vals_val_get(adiab_section,"NUMBER_DIABATIC_STATES",&
+                        i_val=nadiab)
+
+   site_energy_section => section_vals_get_subs_vals(adiab_section,"METHOD_SITE_ENERGIES")
+   ct_block => section_vals_get_subs_vals(site_energy_section,"CT_BLOCK")
+
+      !> this are the output add-sub energies and forces
+   ALLOCATE(my_energies(nadiab))
+   natom = SIZE(global_forces(1)%forces(:,:), 2)
+
+   !> we do F allocation just at the first step and never again just to NOT
+   !allocate and deallocate this big array at every step. NOTE that this array is
+   !now never deallocated and just deallocated by the compiler at the very end.
+   !One should probably write a subroutine that deallocate all allocatable just
+   !at the very end of cp2k
+    if(my_itimes .eq. 0) then
+       ALLOCATE(mixed_env%F(3,natom,nadiab))
+    end if
+  
+   !> construct a intra_forces_info array with the index of the atoms that are
+   !part of the intra_forces_global array that stores only the active atoms.
+   !intra_forces_info is therefore an array with the same shape as
+   !active_system_info but with sequential numbering of the atoms.
+   ALLOCATE(intra_forces_info(2,SIZE(active_system_info,2)))
+   atoms = 0
+   do i=1,SIZE(active_system_info,2)
+         !> find numer of atoms in mol i
+         init_atom_mol_i = active_system_info(1,i)
+         final_atom_mol_i = active_system_info(2,i)
+         atoms_per_mol_i = (final_atom_mol_i-init_atom_mol_i)+1
+         atoms = atoms + atoms_per_mol_i
+         intra_forces_info(1,i) = (atoms - atoms_per_mol_i)+1
+         intra_forces_info(2,i) = atoms
+   end do
+
+   if ((fe_block_keyword) .and. (cr_block_keyword)) then
+      !> some checks  N*(N-1)+N+1 is the total number of states
+      total_states = SIZE(my_mol_index)*SIZE(my_mol_index) + 1
+   else if ((.not. fe_block_keyword) .and. (cr_block_keyword)) then 
+      !> some checks  N*(N-1)+1 is the total number of states
+      total_states = SIZE(my_mol_index)*SIZE(my_mol_index) - SIZE(my_mol_index) + 1
+   else if ((fe_block_keyword) .and. (.not. cr_block_keyword)) then
+      !> some checks  N*(N-1)+N is the total number of states
+      total_states = SIZE(my_mol_index)*SIZE(my_mol_index)
+   else 
+      total_states = SIZE(my_mol_index)*SIZE(my_mol_index)
+   end if
+
+   IF (total_states .ne. nadiab) THEN 
+         CPABORT("NUMBER_DIABATIC_STATES different from total n states")
+   END IF
+
+
+   !> loop over states: note that it does not matter if donor molecules comes
+   !after acceptor in the xyz or viceversa, or the molecules are DDDAAA or ADADA
+   !as the index of each molecule is referred to DECOMP file
+   state = 0
+   do i=1,SIZE(my_mol_index)
+      do j=1,SIZE(my_mol_index)
+
+         if (i .ne. j) then
+
+         state = state + 1
+         !> we create site energies from the 2 force_evals sections: the first
+         !neutral, the second charged (with donor and acc Froce-fields).
+         my_energies(state) = energies(1) + energies_1_mol_list(2,i) - energies_1_mol_list(1,i) &
+            + energies_1_mol_list(3,j) - energies_1_mol_list(1,j)  
+
+         !> we allocate diagonal forces array. All the atoms for a give state i
+         !get the value of the neutral force_field that contains: intra +
+         !nonbonded interactions
+         mixed_env%F(:,:,state) = global_forces(1)%forces
+         
+         !> find index mol i (which is state i) of the pair
+         init_atom_mol_i = active_system_info(1,i)
+         final_atom_mol_i = active_system_info(2,i)
+         atoms_per_mol_i = (final_atom_mol_i-init_atom_mol_i)+1
+
+         !> find index mol j (which is state j) of the pair
+         init_atom_mol_j = active_system_info(1,j)
+         final_atom_mol_j = active_system_info(2,j)
+         atoms_per_mol_j = (final_atom_mol_j-init_atom_mol_j)+1
+
+         !> since  mixed_env%F stores all the atoms the numbering is a
+         !bit more triky and relies on the "global numbering" (which is an info
+         !contained in active_system_info). Whereas intra_forces_global stores
+         !just the active atoms and so the numbering should be sequential and
+         !this info is included in intra_forces_info
+
+        start_i = intra_forces_info(1,i)
+        end_i = intra_forces_info(2,i)
+
+       !> first molecule i of the pair
+        mixed_env%F(1,init_atom_mol_i:final_atom_mol_i,state) = &
+                           mixed_env%F(1,init_atom_mol_i:final_atom_mol_i,state) + &
+                           intra_forces_global(2,1,start_i:end_i) - &
+                           intra_forces_global(1,1,start_i:end_i)
+        mixed_env%F(2,init_atom_mol_i:final_atom_mol_i,state) = &
+                           mixed_env%F(2,init_atom_mol_i:final_atom_mol_i,state) + &
+                           intra_forces_global(2,2,start_i:end_i) - &
+                           intra_forces_global(1,2,start_i:end_i)
+        mixed_env%F(3,init_atom_mol_i:final_atom_mol_i,state) = &
+                           mixed_env%F(3,init_atom_mol_i:final_atom_mol_i,state) + &
+                           intra_forces_global(2,3,start_i:end_i) - &
+                           intra_forces_global(1,3,start_i:end_i)
+
+        start_j = intra_forces_info(1,j)
+        end_j = intra_forces_info(2,j)
+
+       !> second mol j of the pair
+        mixed_env%F(1,init_atom_mol_j:final_atom_mol_j,state) = &
+                           mixed_env%F(1,init_atom_mol_j:final_atom_mol_j,state) + &
+                           intra_forces_global(3,1,start_j:end_j) - &
+                           intra_forces_global(1,1,start_j:end_j)
+        mixed_env%F(2,init_atom_mol_j:final_atom_mol_j,state) = &
+                           mixed_env%F(2,init_atom_mol_j:final_atom_mol_j,state) + &
+                           intra_forces_global(3,2,start_j:end_j) - &
+                           intra_forces_global(1,2,start_j:end_j)
+        mixed_env%F(3,init_atom_mol_j:final_atom_mol_j,state) = &
+                           mixed_env%F(3,init_atom_mol_j:final_atom_mol_j,state) + &
+                           intra_forces_global(3,3,start_j:end_j) - &
+                           intra_forces_global(1,3,start_j:end_j)
+
+
+           end if
+      end do
+   end do
+
+!                   open(913,file="diagonal_forces_state1.txt",position="append")
+!                   do i = 1,size(mixed_env%F(3,:,1))
+!                   write(913,*) mixed_env%F(3,i,1)
+!                   end do
+!                   close(913)
+!
+
+  !> THE FE BLOCK (always after the CT Block)
+  IF (fe_block_keyword) THEN
+      !energies_1_mol_list like in the CT case
+  
+      !> loop over each (active) state starting from where CT were left
+      count_ = 0
+      DO i = state+1, total_states !loop over num of diabatic states until the end
+         count_ = count_ + 1
+         !> get index actual mol excited BUT in the base 1,2,3..
+         !ind1 = exc_ind(count_)
+   
+         !> we create site energies from the 2 force_evals sections: the first
+         !neutral, the second charge and the THIRD excited.
+         my_energies(i) = energies(1) + energies_1_mol_list(4,count_) - energies_1_mol_list(1,count_)
+
+         !> we allocate diagonal forces array. All the atoms for a give state i
+         !assume the value of the neutral force_field that contains: intra +
+         !nonbonded interactions
+         mixed_env%F(:,:,i) = global_forces(1)%forces
+         
+         !> find index mol i (which is state i) of the pair
+         init_atom_mol_i = active_system_info(1,count_)
+         final_atom_mol_i = active_system_info(2,count_)
+         atoms_per_mol_i = (final_atom_mol_i-init_atom_mol_i)+1
+   
+   
+         !> since intra_forces_global stores only active atoms the numbering is a
+         !bit more triky and relies on the n of atoms per mol (which is an info
+         !contained in active_system_info)
+         start_i = intra_forces_info(1,count_)
+         end_i = intra_forces_info(2,count_)
+
+         mixed_env%F(1,init_atom_mol_i:final_atom_mol_i,i) = &
+                            mixed_env%F(1,init_atom_mol_i:final_atom_mol_i,i) + &
+                            intra_forces_global(4,1,start_i:end_i) - &
+                            intra_forces_global(1,1,start_i:end_i)
+         mixed_env%F(2,init_atom_mol_i:final_atom_mol_i,i) = &
+                            mixed_env%F(2,init_atom_mol_i:final_atom_mol_i,i) + &
+                            intra_forces_global(4,2,start_i:end_i) - &
+                            intra_forces_global(1,2,start_i:end_i)
+         mixed_env%F(3,init_atom_mol_i:final_atom_mol_i,i) = &
+                            mixed_env%F(3,init_atom_mol_i:final_atom_mol_i,i) + &
+                            intra_forces_global(4,3,start_i:end_i) - &
+                            intra_forces_global(1,3,start_i:end_i)
+      END DO
+   END IF
+
+   DEALLOCATE(intra_forces_info)
+
+!open(912,file="site-energies.txt",position="append")
+!write(912,*) "1st CT-state, anion opt-config:", my_energies(1)
+!write(912,*) "1st XT-state, exciton opt-config:", my_energies(381)
+!write(912,*) "total energy, anion opt-config:", energies(1)
+!close(912)
+
+
+END SUBROUTINE single_phase_energies_forces
+
+ ! *****************************************************************************
 !> \brief This subroutine does the addition and subtraction scheme for the 
 !         CT, FE, CR states  
 !> \note This subroutine gives non-degenerate site_energies (degeneracy may be
@@ -231,6 +460,14 @@ SUBROUTINE multi_block_energies_forces(adiab_section,energies_1_mol_list, energi
                         i_vals=donor_index)
    CALL section_vals_val_get(ct_block,"INDEX_ACCEPTOR_MOLS",&
                         i_vals=acceptor_index)
+
+   !open(911, file="exciton_opt_geom.txt", position="append")
+   !write(911,*) "neutral FF energy is:", energies_1_mol_list(1,1)
+   !write(911,*) "anion FF energy is:", energies_1_mol_list(2,1)
+   !write(911,*) "cation FF energy is:", energies_1_mol_list(2,1)             
+   !write(911,*) "exciton FF energy is:", energies_1_mol_list(4,1)
+   !close(911)
+
 
    ind1 = donor_index(1) 
    do i=2,SIZE(donor_index)

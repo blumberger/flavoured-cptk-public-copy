@@ -138,7 +138,8 @@ MODULE force_env_methods
                                              create_ext_press_list, &
                                              ct_block_energies_forces,&
                                              multi_block_energies_forces,&
-                                             add_energies_forces_mem_saver
+                                             add_energies_forces_mem_saver, &
+                                             single_phase_energies_forces
 
 #include "./base/base_uses.f90"
 !> CHANGE_AC
@@ -483,6 +484,8 @@ CONTAINS
        CALL cp_print_key_finished_output(output_unit,logger,force_env%force_env_section,&
                                          "PRINT%PROGRAM_RUN_INFO")
     END IF
+
+
 
   END SUBROUTINE force_env_calc_energy_force
 
@@ -1022,6 +1025,7 @@ CONTAINS
        CALL cp_rm_default_logger()
     END DO
 
+
     ! Handling Parallel execution
     CALL mp_sync(force_env%para_env%group)
     ! Let's transfer energy, natom, forces, virials
@@ -1214,13 +1218,6 @@ CONTAINS
                                        my_mol_index,  ext_pres, & 
                                        active_system_info, full_system_info=full_system_info)
 
-!> some prints to help debugging
-!print *, "FOB_SH| EXT PRESS:", ext_pres
-!print *, "active sys info", active_system_info(1, :)
-!print *, "active sys info", active_system_info(2, :)
-!print *, "full sys info", full_system_info(1, :)
-!print *, "full sys info", full_system_info(2, :)
-
            IF (ALLOCATED(thermo%pot_list)) THEN
            !Enter this part only if the active atoms DECOMP has been constructed,
            !otherwise you MUST provide N FORCE_EVALS one for each site energy
@@ -1243,6 +1240,7 @@ CONTAINS
                       !CALL ct_block_energies_forces(adiab_section,energies_1_mol_list, energies, &
                       !              intra_forces_global, global_forces, my_energies, &
                       !              active_system_info, mixed_env, my_itimes, my_mol_index)
+
                       CALL multi_block_energies_forces(adiab_section,energies_1_mol_list, energies, &
                                     intra_forces_global, global_forces, my_energies, &
                                     active_system_info, mixed_env, my_itimes, my_mol_index, &
@@ -1265,7 +1263,19 @@ CONTAINS
                                     intra_forces_global, global_forces, my_energies, &
                                     active_system_info, mixed_env, my_itimes, my_mol_index, &
                                     fe_block_keyword, cr_block_keyword) 
-                   CASE("CT-FE-CR")
+                   CASE("FECT-1-PHASE")
+                           fe_block_keyword = .True.
+                      IF (nforce_eval .ne. 4) THEN
+                         CPABORT("MUST HAVE 4 FORCE EVAL SECTIONS FOR SINGLE PHASE FECT")
+                      ENDIF
+                      cr_block_keyword  = .False.
+
+                      CALL single_phase_energies_forces(adiab_section,energies_1_mol_list, energies, &
+                                    intra_forces_global, global_forces, my_energies, &
+                                    active_system_info, mixed_env, my_itimes, my_mol_index, &
+                                    fe_block_keyword, cr_block_keyword) 
+
+                    CASE("CT-FE-CR")
                       fe_block_keyword  = .True.
                       cr_block_keyword  = .True.
                       CALL multi_block_energies_forces(adiab_section,energies_1_mol_list, energies, &
@@ -1286,11 +1296,13 @@ CONTAINS
                ELSE
                 !> This does add-sub scheme for Hamiltoninans where num of
                 !states = num of molecules (e.g. AOM and TRESP)
+
                    CALL add_energies_forces_mem_saver_V2( energies_1_mol_list, energies, intra_forces_global, &
                                                       global_forces, my_energies, &
                                                       active_system_info, &
                                                        mixed_env, my_itimes)
-                !OLD subroutine
+
+                 !OLD subroutine
                 !CALL add_energies_forces_mem_saver( energies_1_mol_list, energies, intra_forces_global, &
                 !                                      my_mol_index, &
                 !                                      global_forces, my_energies, &
@@ -1302,6 +1314,7 @@ CONTAINS
                         map_index, mapping_section,adiab_section,mixed_env,my_itimes, &
                         adiab_keyword, mixed_energy%pot,atomic_kinds, &
                         local_particles, my_mol_index, ext_pres, active_system_info, full_system_info)
+
            ELSE
                 !COMMENT_SG: these two additional ways of combining force_evals
                 !should be DEPRECATED and removed but they are kept for testing

@@ -184,13 +184,10 @@ CONTAINS
        !qs_mol_dyn_low subroutine calls force_env_calc_energy_force for the
        !first time and this calls in turn the present subroutine
 
-
-
        CALL create_sh_env(nadiab, norbitals, natom, &
                            positions_tp, adiab_section, & 
-                           sh_env, my_mol_index, ext_pres, active_system_info, full_system_info)
-
-       print *, "WTP_4.2_Debug1"
+                           sh_env, my_mol_index, ext_pres, &
+active_system_info, full_system_info) 
   
        CALL propagate_namd_first_step(nadiab, norbitals,     &
                  positions_tp, velocities_tp, energies_tp, sh_env, itimes, &
@@ -218,11 +215,14 @@ CONTAINS
           !sh_env%old_state = -1
        ELSE
           !> Main CALL: calculate the Hamiltonian, propagate the electronic dynamics
+
+
           CALL propagate_namd_all_steps(nadiab, norbitals,         &
                         positions_tp, energies_tp, sh_env, itimes,     &
                          adiab_section, & 
                         my_bo_keyword, atomic_kinds,                    &
                         local_particles, my_test_keyword,diagonal_F=mixed_env%F)
+
        ENDIF
     ENDIF
     !> IMPORTANT: store all sh_env for the future timesteps.
@@ -242,6 +242,7 @@ CONTAINS
     !> IMPORTANT : GIVE BACK THE FORCES TO FIST
     energy_adiabat = sh_env%E_tp(sh_env%active_state)
     forces_adiab = sh_env%forces_adiab
+
     DO iparticle = 1, natom
       jparticle = map_index(iparticle)
       SELECT CASE(method_keyword)
@@ -290,6 +291,7 @@ CONTAINS
     END IF
     DEALLOCATE(positions_tp, forces_adiab)
     DEALLOCATE(velocities_tp)
+
    END SUBROUTINE adiab_fssh_routines
 
 END MODULE non_adiabatic_methods
