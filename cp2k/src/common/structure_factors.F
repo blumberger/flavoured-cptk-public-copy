@@ -215,7 +215,11 @@ CONTAINS
     ey ( m1 ) = 1.0_dp
     ez ( n1 ) = 1.0_dp
 
-    fp = CMPLX ( COS ( vec ( 1 ) ), -SIN ( vec ( 1 ) ),KIND=dp)
+    ! ex_k = e^{i 2 pi kx  Rx)
+    ! where kx is the x component of the k vector
+    ! vecx is the x component of the vec (R*Cell_inv)
+    ! i is the imaginary unit and pi is 3.14...
+    fp = CMPLX ( COS(vec(1)), -SIN(vec(1) ),KIND=dp)
     fm = CONJG ( fp )
     DO j = 1, -l0
        ex (  j + l0 ) = ex (  j + l0 - 1 ) * fp

@@ -68,7 +68,8 @@ MODULE input_section_types
             section_vals_get, section_vals_get_subs_vals, section_vals_val_get, section_vals_list_get,&
             section_vals_write, section_vals_add_values, section_vals_get_subs_vals2,&
             section_vals_val_set, section_vals_val_unset, section_vals_get_subs_vals3,&
-            section_vals_set_subs_vals, section_vals_duplicate, section_vals_remove_values
+            section_vals_set_subs_vals, section_vals_duplicate, section_vals_remove_values, &
+            section_vals_list_check
   PUBLIC :: write_section_xml
 
   PUBLIC :: section_get_ival,&
@@ -1378,7 +1379,65 @@ CONTAINS
               ") out of bounds (1:"//cp_to_string(SIZE(s_vals%subs_vals,2))&
               //")")
     list => s_vals%values(ik,irs)%list
+
   END SUBROUTINE section_vals_list_get
+
+! *****************************************************************************
+!> \brief Checks values are given in the input file
+!> \param section_vals ...
+!> \param keyword_name the name of the keyword you want
+!> \param i_rep_section which repetition of the section you are interested in
+!>        (defaults to 1)
+!> \retval res => (logical) existance of the values section
+!> \author Matt Ellis (95ellismle@gmail.com)
+!> \note  -I have created this as the 'can_return_null' parameter in the 
+!>         'section_vals_get_subs_vals' won't work for me.
+! *****************************************************************************
+  FUNCTION section_vals_list_check(section_vals, keyword_name, i_rep_section) RESULT(res)
+    TYPE(section_vals_type), POINTER         :: section_vals
+    CHARACTER(len=*), INTENT(in)             :: keyword_name
+    INTEGER, OPTIONAL                        :: i_rep_section
+    LOGICAL                                  :: res
+
+    CHARACTER(len=*), PARAMETER :: routineN = 'section_vals_list_check', &
+                                   routineP = moduleN//':'//routineN
+
+    INTEGER                                  :: ik, irs, len_key, my_index, &
+                                                tmp_index
+    TYPE(section_type), POINTER              :: section
+    TYPE(section_vals_type), POINTER         :: s_vals
+
+    CPASSERT(ASSOCIATED(section_vals))
+    CPASSERT(section_vals%ref_count>0)
+    my_index=INDEX(keyword_name,'%')+1
+    len_key=LEN_TRIM(keyword_name)
+    IF (my_index>1) THEN
+       DO
+          tmp_index=INDEX(keyword_name(my_index:len_key),"%")
+          IF (tmp_index<=0) EXIT
+          my_index=my_index+tmp_index
+       END DO
+       s_vals => section_vals_get_subs_vals(section_vals,keyword_name(1:my_index-2))
+    ELSE
+       s_vals=> section_vals
+    END IF
+
+    irs=1
+    IF (PRESENT(i_rep_section)) irs=i_rep_section
+    section => s_vals%section
+    ik=section_get_keyword_index(s_vals%section,keyword_name(my_index:len_key))
+    IF(ik==-2)&
+         CALL cp_abort(__LOCATION__,&
+              "section "//TRIM(section%name)//" does not contain keyword "//&
+              TRIM(keyword_name(my_index:len_key)))
+    IF(.NOT.(irs>0.AND.irs<=SIZE(s_vals%subs_vals,2)))&
+         CALL cp_abort(__LOCATION__,&
+              "section repetition requested ("//cp_to_string(irs)//&
+              ") out of bounds (1:"//cp_to_string(SIZE(s_vals%subs_vals,2))&
+              //")")
+
+    res = SIZE(s_vals%values) > 0
+  END FUNCTION section_vals_list_check
 
 ! *****************************************************************************
 !> \brief sets the requested value

@@ -124,6 +124,10 @@ MODULE force_env_types
 ! *****************************************************************************
   TYPE force_env_type
      INTEGER :: id_nr,ref_count,in_use,method_name_id
+
+     ! Let CP2K whether we are doing a surface hopping simulation or not.
+     LOGICAL :: do_fssh
+
      REAL ( KIND=dp )                                    :: additional_potential
      TYPE ( fist_environment_type ), POINTER             :: fist_env
      TYPE ( meta_env_type ), POINTER                     :: meta_env

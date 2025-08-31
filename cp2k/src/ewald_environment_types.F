@@ -10,32 +10,41 @@
 !> \author CJM NOV-30-2003
 ! *****************************************************************************
 MODULE ewald_environment_types
-  USE cp_log_handling,                 ONLY: cp_get_default_logger,&
+  USE cp_log_handling,                 ONLY: cp_get_default_logger,        &
                                              cp_logger_type
-  USE cp_output_handling,              ONLY: cp_print_key_finished_output,&
+  USE cp_output_handling,              ONLY: cp_print_key_finished_output, &
                                              cp_print_key_unit_nr
-  USE cp_para_env,                     ONLY: cp_para_env_release,&
+  USE cp_para_env,                     ONLY: cp_para_env_release,          &
                                              cp_para_env_retain
   USE cp_para_types,                   ONLY: cp_para_env_type
   USE cp_units,                        ONLY: cp_unit_from_cp2k
+  USE cp_linked_list_val,              ONLY: cp_sll_val_type,              &
+                                             cp_sll_val_next
   USE input_cp2k_poisson,              ONLY: create_ewald_section
-  USE input_enumeration_types,         ONLY: enum_i2c,&
+  USE input_enumeration_types,         ONLY: enum_i2c,                     &
                                              enumeration_type
-  USE input_keyword_types,             ONLY: keyword_get,&
+  USE input_keyword_types,             ONLY: keyword_get,                  &
                                              keyword_type
-  USE input_section_types,             ONLY: section_get_keyword,&
-                                             section_release,&
-                                             section_type,&
-                                             section_vals_get_subs_vals,&
-                                             section_vals_release,&
-                                             section_vals_retain,&
-                                             section_vals_type,&
-                                             section_vals_val_get
+  USE input_section_types,             ONLY: section_get_keyword,          &
+                                             section_release,              &
+                                             section_type,                 &
+                                             section_vals_get_subs_vals,   &
+                                             section_vals_release,         &
+                                             section_vals_retain,          &
+                                             section_vals_type,            &
+                                             section_vals_val_get,         &
+                                             section_vals_list_get,        &
+                                             section_vals_list_check
   USE kinds,                           ONLY: dp
-  USE pw_poisson_types,                ONLY: do_ewald_ewald,&
-                                             do_ewald_none,&
-                                             do_ewald_pme,&
+  USE pw_poisson_types,                ONLY: do_ewald_ewald,               &
+                                             do_ewald_none,                &
+                                             do_ewald_pme,                 &
+                                             do_ewald_dsf,                 &
                                              do_ewald_spme
+  USE input_val_types,                 ONLY: val_get,                      &
+                                             val_type
+
+
 #include "./base/base_uses.f90"
 
   IMPLICIT NONE
@@ -51,7 +60,9 @@ MODULE ewald_environment_types
   TYPE ewald_environment_type
     PRIVATE
     INTEGER   :: id_nr, ref_count
+    LOGICAL   :: do_fssh                  ! Flag for using fssh code
     LOGICAL   :: do_multipoles            ! Flag for using the multipole code
+    LOGICAL   :: print_charges            ! Print charges from charged states
     INTEGER   :: do_ipol                  ! Solver for induced dipoles
     INTEGER   :: max_multipole            ! max expansion in the multipoles
     INTEGER   :: max_ipol_iter            ! max number of interation for induced dipoles
@@ -69,8 +80,11 @@ MODULE ewald_environment_types
     ! continuous at a pair distance equal to rcut. this is ignored by the
     ! multipole code and is otherwise only active when SHIFT_CUTOFF is used.
     REAL(KIND=dp), DIMENSION(:,:,:), POINTER :: interaction_cutoffs
+    REAL(KIND=dp), DIMENSION(:,:), POINTER   :: interaction_cutoffs_dsf
     ! store current cell, used to rebuild lazily.
     REAL(KIND = dp), DIMENSION(3,3)          :: cell_hmat = -1.0_dp
+    ! The partial charges on the molecule in the charged state
+    REAL(KIND=dp), DIMENSION(:), POINTER     :: charge_state_q
   END TYPE ewald_environment_type
 
 ! *****************************************************************************
@@ -128,8 +142,9 @@ CONTAINS
 ! *****************************************************************************
   SUBROUTINE ewald_env_get(ewald_env, ewald_type, alpha, eps_pol, epsilon, &
        gmax, ns_max, o_spline, group, para_env, id_nr, poisson_section, precs, &
-       rcut, do_multipoles, max_multipole, do_ipol, max_ipol_iter, &
-       interaction_cutoffs, cell_hmat)
+       rcut, do_multipoles, max_multipole, do_ipol, max_ipol_iter,         &
+       interaction_cutoffs, cell_hmat, interaction_cutoffs_dsf,            &
+       do_fssh, charge_state_q, print_charges)
     TYPE(ewald_environment_type), POINTER    :: ewald_env
     INTEGER, OPTIONAL                        :: ewald_type
     REAL(KIND=dp), OPTIONAL                  :: alpha, eps_pol, epsilon
@@ -146,7 +161,12 @@ CONTAINS
                                                 max_ipol_iter
     REAL(KIND=dp), DIMENSION(:, :, :), &
       OPTIONAL, POINTER                      :: interaction_cutoffs
+    REAL(KIND=dp), OPTIONAL, POINTER         :: interaction_cutoffs_dsf(:,:)
     REAL(KIND=dp), DIMENSION(3, 3), OPTIONAL :: cell_hmat
+    LOGICAL, OPTIONAL                        :: do_fssh
+    REAL(KIND=dp), DIMENSION(:),       &  
+      OPTIONAL, POINTER                      :: charge_state_q
+    LOGICAL, OPTIONAL, INTENT(OUT)           :: print_charges
 
     CHARACTER(len=*), PARAMETER :: routineN = 'ewald_env_get', &
       routineP = moduleN//':'//routineN
@@ -154,6 +174,7 @@ CONTAINS
     CPASSERT(ASSOCIATED(ewald_env))
 
     IF (PRESENT(id_nr)) id_nr = ewald_env%id_nr
+    IF (PRESENT(print_charges)) print_charges = ewald_env%print_charges
     IF (PRESENT(ewald_type)) ewald_type = ewald_env%ewald_type
     IF (PRESENT(do_multipoles)) do_multipoles = ewald_env%do_multipoles
     IF (PRESENT(do_ipol)) do_ipol = ewald_env%do_ipol
@@ -172,7 +193,11 @@ CONTAINS
     IF (PRESENT(poisson_section)) poisson_section => ewald_env%poisson_section
     IF (PRESENT(interaction_cutoffs)) interaction_cutoffs => &
       ewald_env%interaction_cutoffs
+    IF (PRESENT(interaction_cutoffs_dsf)) interaction_cutoffs_dsf => &
+                                ewald_env%interaction_cutoffs_dsf
     IF (PRESENT(cell_hmat)) cell_hmat = ewald_env%cell_hmat
+    IF (PRESENT(do_fssh)) do_fssh = ewald_env%do_fssh
+    IF (PRESENT(charge_state_q))  charge_state_q => ewald_env%charge_state_q
   END SUBROUTINE ewald_env_get
 
 ! *****************************************************************************
@@ -196,8 +221,9 @@ CONTAINS
 !> \author CJM
 ! *****************************************************************************
   SUBROUTINE ewald_env_set(ewald_env, ewald_type, alpha, epsilon, eps_pol, &
-       gmax, ns_max, precs, o_spline, para_env, id_nr, poisson_section, &
-       interaction_cutoffs, cell_hmat)
+       gmax, ns_max, precs, o_spline, para_env, id_nr, poisson_section,    &
+       interaction_cutoffs, cell_hmat, do_fssh, print_charges,             &
+       interaction_cutoffs_dsf)
 
     TYPE(ewald_environment_type), POINTER    :: ewald_env
     INTEGER, OPTIONAL                        :: ewald_type
@@ -212,7 +238,10 @@ CONTAINS
       POINTER                                :: poisson_section
     REAL(KIND=dp), DIMENSION(:, :, :), &
       OPTIONAL, POINTER                      :: interaction_cutoffs
+    REAL(KIND=dp), OPTIONAL, POINTER         :: interaction_cutoffs_dsf(:,:)
     REAL(KIND=dp), DIMENSION(3, 3), OPTIONAL :: cell_hmat
+    LOGICAL , OPTIONAL                       :: do_fssh
+    LOGICAL, OPTIONAL, INTENT(IN)            :: print_charges
 
     CHARACTER(len=*), PARAMETER :: routineN = 'ewald_env_set', &
       routineP = moduleN//':'//routineN
@@ -236,7 +265,11 @@ CONTAINS
     END IF
     IF (PRESENT(interaction_cutoffs)) ewald_env%interaction_cutoffs => &
       interaction_cutoffs
+    IF (PRESENT(interaction_cutoffs_dsf)) ewald_env%interaction_cutoffs_dsf => &
+      interaction_cutoffs_dsf
     IF (PRESENT(cell_hmat)) ewald_env%cell_hmat = cell_hmat
+    IF (PRESENT(do_fssh)) ewald_env%do_fssh = do_fssh
+    IF (PRESENT(print_charges)) ewald_env%print_charges = print_charges
   END SUBROUTINE ewald_env_set
 
 ! *****************************************************************************
@@ -261,7 +294,11 @@ CONTAINS
     NULLIFY(ewald_env%poisson_section)
     CALL cp_para_env_retain(para_env)
     ewald_env%para_env => para_env
+    ewald_env%do_fssh = .FALSE.
+    ewald_env%print_charges = .FALSE.
     NULLIFY(ewald_env%interaction_cutoffs) ! allocated and initialized later
+    NULLIFY(ewald_env%interaction_cutoffs_dsf) ! allocated and initialized later
+    NULLIFY(ewald_env%charge_state_q)      ! allocated and initialized in read
   END SUBROUTINE ewald_env_create
 
 ! *****************************************************************************
@@ -304,6 +341,12 @@ CONTAINS
           IF (ASSOCIATED(ewald_env%interaction_cutoffs)) THEN
              DEALLOCATE(ewald_env%interaction_cutoffs)
           ENDIF
+          IF (ASSOCIATED(ewald_env%interaction_cutoffs_dsf)) THEN
+             DEALLOCATE(ewald_env%interaction_cutoffs_dsf)
+          ENDIF
+          IF (ASSOCIATED(ewald_env%charge_state_q)) THEN
+            DEALLOCATE(ewald_env%charge_state_q)
+          END IF
           DEALLOCATE (  ewald_env)
        ENDIF
     END IF
@@ -323,15 +366,19 @@ CONTAINS
     CHARACTER(len=*), PARAMETER :: routineN = 'read_ewald_section', &
       routineP = moduleN//':'//routineN
 
-    INTEGER                                  :: iw
+    INTEGER                                  :: iw, ncharges, iq
     INTEGER, DIMENSION(:), POINTER           :: gmax_read
-    LOGICAL                                  :: explicit
+    LOGICAL                                  :: explicit, cond
     REAL(KIND=dp)                            :: dummy
+    REAL(KIND=dp), POINTER                   :: charges(:)
     TYPE(cp_logger_type), POINTER            :: logger
+    TYPE(cp_sll_val_type), POINTER           :: values
     TYPE(enumeration_type), POINTER          :: enum
     TYPE(keyword_type), POINTER              :: keyword
     TYPE(section_type), POINTER              :: section
-    TYPE(section_vals_type), POINTER         :: multipole_section
+    TYPE(section_vals_type), POINTER         :: multipole_section,  &
+                                                charge_state_section
+    TYPE(val_type), POINTER                  :: val
 
     NULLIFY(enum, keyword, section, multipole_section)
     logger=>cp_get_default_logger()
@@ -388,6 +435,47 @@ CONTAINS
        END SELECT
     END IF
 
+    !---------------------------------------------
+    ! Charge State
+    NULLIFY(charge_state_section)
+    charge_state_section => section_vals_get_subs_vals(ewald_section, "CHARGE_STATE",   &
+                                                       can_return_null=.TRUE.)
+    cond = section_vals_list_check(charge_state_section, "_DEFAULT_KEYWORD_")
+    IF (ASSOCIATED(charge_state_section) .AND. cond) THEN
+       CALL section_vals_val_get(charge_state_section, "PRINT_CHARGES",                 &
+                                 l_val=ewald_env%print_charges)
+       CALL section_vals_list_get(charge_state_section, "_DEFAULT_KEYWORD_", list=values)
+       
+       ! First read how many charge states there are
+       cond = .TRUE.
+       ncharges = 0
+       NULLIFY(val, charges)
+       DO WHILE(cond)
+         cond = (ncharges < 1e3) .AND. cp_sll_val_next(values, val)
+         IF (.NOT. cond)  EXIT
+   
+         CALL val_get(val, r_vals=charges)
+         ncharges = ncharges + SIZE(charges)
+       END DO
+   
+       ! Allocate the correct sized array and fill it
+       ALLOCATE(ewald_env%charge_state_q(ncharges))
+       ewald_env%charge_state_q = 0.0_dp
+       cond = .TRUE.
+       iq = 1
+       CALL section_vals_list_get(charge_state_section, "_DEFAULT_KEYWORD_", list=values)
+       DO WHILE(cond)
+         cond = (ncharges < 1e3) .AND. cp_sll_val_next(values, val)
+         IF (.NOT. cond)  EXIT
+         
+         CALL val_get(val, r_vals=charges)
+         ewald_env%charge_state_q(iq:iq+SIZE(charges)-1) = charges
+         iq = iq + SIZE(charges)
+       END DO
+    END IF
+    ! End Charge State
+    !---------------------------------------------
+
     iw=cp_print_key_unit_nr(logger,ewald_section,"PRINT%PROGRAM_RUN_INFO",&
          extension=".log")
     IF ( iw > 0 ) THEN
@@ -429,6 +517,8 @@ CONTAINS
                   'G-space max. Miller index', ewald_env%gmax
              WRITE ( iw, '( T2,"EWALD| ",A,T71,I10 )' ) &
                   'Spline interpolation order ', ewald_env%o_spline
+          CASE ( do_ewald_dsf )
+             
           CASE DEFAULT
              CPABORT("")
           END SELECT

@@ -53,6 +53,9 @@ MODULE force_env_methods
   USE eip_silicon,                     ONLY: eip_bazant,&
                                              eip_lenosky
   USE external_potential_methods,      ONLY: add_external_potential
+  USE ewald_environment_types,         ONLY: ewald_environment_type, &
+                                             ewald_env_get, &
+                                             ewald_env_set
   USE fist_environment_types,          ONLY: fist_env_retain,&
                                              fist_environment_type, &
                                              fist_env_get
@@ -111,7 +114,15 @@ MODULE force_env_methods
                                              mixed_map_forces
   USE particle_list_types,             ONLY: particle_list_p_type,&
                                              particle_list_type
+  USE particle_types,                  ONLY: particle_type
   USE physcon,                         ONLY: debye
+  USE pw_poisson_types,                ONLY: do_ewald_none,        &
+                                             do_ewald_ewald,       &
+                                             do_ewald_pme,         &
+                                             do_ewald_spme,        &
+                                             do_ewald_fssh_ewald,  &
+                                             do_ewald_fssh_dsf,    &
+                                             do_ewald_dsf
   USE qmmm_force,                      ONLY: qmmm_calc_energy_force
   USE qmmm_types,                      ONLY: qmmm_env_retain,&
                                              qmmm_env_type
@@ -139,6 +150,7 @@ MODULE force_env_methods
                                              ct_block_energies_forces,&
                                              multi_block_energies_forces,&
                                              add_energies_forces_mem_saver, &
+                                             add_coulomb_interactions, &
                                              single_phase_energies_forces
 
 #include "./base/base_uses.f90"
@@ -283,7 +295,9 @@ CONTAINS
                calculate_forces,energy_consistency,linres=linres_run,&
                require_consistent_energy_force=require_consistent_energy_force)
        CASE ( use_mixed_force )
+          force_env%mixed_env%sh_env%finished_coulomb_step = .FALSE. 
           CALL mixed_energy_forces(force_env,calculate_forces, my_itimes) !CHANGE_AC
+          force_env%mixed_env%sh_env%finished_coulomb_step = .FALSE. 
        CASE default
           CPABORT("")
        END SELECT
@@ -718,6 +732,7 @@ CONTAINS
     TYPE(section_vals_type), POINTER         :: force_env_section
     TYPE(mixed_environment_type), OPTIONAL, &
       POINTER                                :: mixed_env
+    INTEGER                                  :: mixing_type
 
     CHARACTER(len=*), PARAMETER :: routineN = 'force_env_create', &
       routineP = moduleN//':'//routineN
@@ -746,6 +761,9 @@ CONTAINS
 
     CALL section_vals_retain(force_env_section)
     force_env%force_env_section => force_env_section
+
+    ! Init the surface hopping variable
+    force_env%do_fssh = .FALSE.
 
     IF (PRESENT(fist_env)) THEN
        CPASSERT(ASSOCIATED(fist_env))
@@ -785,6 +803,13 @@ CONTAINS
     IF (PRESENT(mixed_env)) THEN
        CPASSERT(ASSOCIATED(mixed_env))
        CPASSERT(force_env%in_use==0)
+
+       ! Check if we are using surface hopping
+       CALL section_vals_val_get(force_env_section, "MIXED%MIXING_TYPE", &
+                                 i_val=mixing_type)
+       IF (mixing_type .eq. mix_adiab) THEN
+         force_env%do_fssh = .TRUE.
+       END IF
        force_env%in_use=use_mixed_force
        force_env%mixed_env => mixed_env
        CALL mixed_env_retain ( mixed_env)
@@ -877,8 +902,11 @@ CONTAINS
 !      POINTER                                :: my_global_forces
     REAL(KIND=dp), DIMENSION(:), POINTER     :: my_energies
 
-    TYPE(fist_energy_type), POINTER              :: thermo !CHANGE SG
-    TYPE(fist_environment_type), POINTER         :: fist_env  !CHANGE SG
+    TYPE(fist_energy_type), POINTER          :: thermo !CHANGE SAM
+    TYPE(fist_environment_type), POINTER     :: fist_env  !CHANGE SAM
+    TYPE(force_env_type), POINTER            :: my_force_env
+    TYPE(ewald_environment_type), POINTER    :: ewald_env
+    INTEGER                                  :: ewald_type
 !    TYPE(molecule_kind_type), POINTER        :: molecule_kind
     TYPE(molecule_kind_type), DIMENSION(:), &
       POINTER                                :: molecule_kind_set
@@ -888,9 +916,9 @@ CONTAINS
     REAL(KIND=dp), ALLOCATABLE                 :: intra_forces(:,:)
     REAL(KIND=dp), ALLOCATABLE                 :: intra_forces_global(:,:,:)
     TYPE(section_vals_type), POINTER         :: energy_decomp_section
-    INTEGER                                  :: act_atoms, output_unit
+    INTEGER                                  :: act_atoms, output_unit, &
+                                                ewald_type_init, ES_fist_count
     INTEGER, DIMENSION(:), POINTER           :: my_mol_index !CHANGE SG
-!additional keywords
     INTEGER, DIMENSION(:,:), ALLOCATABLE     :: full_system_info
     INTEGER, DIMENSION(:,:), ALLOCATABLE     :: active_system_info
     LOGICAL, DIMENSION(:), POINTER           :: ext_pres
@@ -898,6 +926,9 @@ CONTAINS
     CHARACTER(LEN=default_string_length)     :: block_type_keyword
     LOGICAL                                  :: fe_block_keyword, cr_block_keyword
 
+    CHARACTER(LEN=3) :: s
+    CHARACTER(LEN=default_path_length) :: fstr
+    INTEGER :: i, j
     NULLIFY(atomic_kinds, local_particles, molecule_set, molecule_kind_set, local_molecules)
 !> End CHANGE_AC and SG
 
@@ -925,6 +956,85 @@ CONTAINS
 
     NULLIFY(map_index, glob_natoms, global_forces)
     nforce_eval = SIZE(force_env%sub_force_env)
+    !*******************
+    ! SURFACE HOPPING MODIFICATIONS
+    !
+    ! Set the `do_fssh` in all sub_force_envs.
+    DO iforce_eval=1, nforce_eval
+       force_env%sub_force_env(iforce_eval)%force_env%do_fssh = force_env%do_fssh
+    END DO
+    
+    !---------------------------------!
+    ! Just for electrostatics in FSSH !
+    !---------------------------------!
+    ! If we are doing a fssh calculation (and the ewald_type isn't set) then 
+    ! set the ewald type and change how the electrostatics are calculated.
+    IF (force_env%do_fssh .AND. .NOT. ALLOCATED(force_env%mixed_env%ewald_types) ) THEN
+       ALLOCATE(force_env%mixed_env%do_electro_fist_env(nforce_eval))
+       ALLOCATE(force_env%mixed_env%ewald_types(nforce_eval))
+       force_env%mixed_env%do_electro_fist_env = .FALSE.
+
+       ES_fist_count = 0
+       DO iforce_eval=1, nforce_eval
+          my_force_env => force_env%sub_force_env(iforce_eval)%force_env
+          IF  (my_force_env%in_use == use_fist_force) THEN
+             ! use getters to get the data
+             CALL force_env_get(my_force_env, fist_env=fist_env)
+             CALL fist_env_get(fist_env, ewald_env=ewald_env)
+             CALL ewald_env_get(ewald_env, ewald_type=ewald_type)
+             ewald_type_init = ewald_type 
+             ! modify ES calc type wth the setters
+             ! Add a flag to tell SH that we'll be using electrostatics later
+             ! (and what type)
+             SELECT CASE(ewald_type)
+             CASE(do_ewald_none)
+                force_env%mixed_env%ewald_types(iforce_eval) = do_ewald_none
+
+             CASE(do_ewald_fssh_ewald)
+                force_env%mixed_env%do_electro_fist_env(iforce_eval) = .TRUE.
+                force_env%mixed_env%ewald_types(iforce_eval) = do_ewald_fssh_ewald
+
+             CASE (do_ewald_ewald)
+                ES_fist_count = ES_fist_count + 1
+                force_env%mixed_env%do_electro_fist_env(iforce_eval) = .TRUE.
+                force_env%mixed_env%ewald_types(iforce_eval) = do_ewald_fssh_ewald
+                ! Turn off the electrostatics within FIST
+                CALL ewald_env_set(ewald_env, ewald_type=do_ewald_none,     &
+                                   do_fssh=.TRUE.)
+             
+             CASE (do_ewald_fssh_dsf)
+                force_env%mixed_env%do_electro_fist_env(iforce_eval) = .TRUE.
+                force_env%mixed_env%ewald_types(iforce_eval) = do_ewald_fssh_dsf
+
+             CASE (do_ewald_dsf)
+                ES_fist_count = ES_fist_count + 1
+                force_env%mixed_env%do_electro_fist_env(iforce_eval) = .TRUE.
+                force_env%mixed_env%ewald_types(iforce_eval) = do_ewald_fssh_dsf
+                ! Turn off the electrostatics within FIST
+                CALL ewald_env_set(ewald_env, ewald_type=do_ewald_none,     &
+                                   do_fssh=.TRUE.)
+             CASE (do_ewald_pme)
+                ES_fist_count = ES_fist_count + 1
+                CPABORT("PME electrostatics not yet compatible with surface hopping")
+             
+             CASE (do_ewald_spme)
+                ES_fist_count = ES_fist_count + 1
+                CPABORT("SPME electrostatics not yet compatible with surface hopping")
+             
+             CASE DEFAULT
+                CPABORT("No method given for calculating electrostatics")
+             
+             END SELECT
+
+          END IF
+       END DO
+
+       IF (ES_fist_count > 1) THEN
+         CPABORT("Can't handle multiple fist sections with charges.")
+       END IF
+    END IF
+    !End FSSH electrostatics section
+    !------------------------------------------------------------------------_
     mixed_section => section_vals_get_subs_vals(force_env_section,"MIXED")
 
     mapping_section => section_vals_get_subs_vals(mixed_section,"MAPPING")
@@ -954,6 +1064,11 @@ CONTAINS
         intra_forces_global = 0.0_dp
     END IF
 
+    ! END SURFACE HOP MODIFICATIONS
+    !**********************************************
+
+
+    !> COMMENT_SG: start looping over force_eval sections
     glob_natoms = 0
 !> COMMENT_SG: start looping over force_eval section
     DO iforce_eval = 1, nforce_eval
@@ -1025,7 +1140,6 @@ CONTAINS
        CALL cp_rm_default_logger()
     END DO
 
-
     ! Handling Parallel execution
     CALL mp_sync(force_env%para_env%group)
     ! Let's transfer energy, natom, forces, virials
@@ -1041,6 +1155,8 @@ CONTAINS
                force_env%sub_force_env(iforce_eval)%force_env%para_env%source) THEN
              ! Forces
              DO iparticle = 1, glob_natoms(iforce_eval)
+               !NB: Store forces from particles%els (or particle_set) into global forces
+               !    These are mixed in `add_energies_forces` etc... later.
                 global_forces(iforce_eval)%forces(:,iparticle) = &
                      particles(iforce_eval)%list%els(iparticle)%f
 !NB: here is where the forces from each particles in els are passed to the global
@@ -1068,6 +1184,7 @@ CONTAINS
        CALL cp_results_mp_bcast(results(iforce_eval)%results, source, force_env%para_env)
     END DO
 
+    ! Take care of this line to store energies_1_mol_list
     force_env%mixed_env%energies = energies
 
 !    IF (ALLOCATED(thermo%pot_list)) THEN
@@ -1084,6 +1201,12 @@ CONTAINS
        particles_mix%els(iparticle)%f(:) = 0.0_dp
     END DO
 
+
+    !*********************************************************
+    ! Start: Mixing of forces based on different types.
+    !
+    !        This section mixes the forces calculated from the individual 
+    !        fist sections from the input file.
     CALL section_vals_val_get(mixed_section,"MIXING_TYPE",i_val=mixing_type)
     SELECT CASE(mixing_type)
     CASE(mix_linear_combination)
@@ -1240,7 +1363,6 @@ CONTAINS
                       !CALL ct_block_energies_forces(adiab_section,energies_1_mol_list, energies, &
                       !              intra_forces_global, global_forces, my_energies, &
                       !              active_system_info, mixed_env, my_itimes, my_mol_index)
-
                       CALL multi_block_energies_forces(adiab_section,energies_1_mol_list, energies, &
                                     intra_forces_global, global_forces, my_energies, &
                                     active_system_info, mixed_env, my_itimes, my_mol_index, &
@@ -1301,21 +1423,49 @@ CONTAINS
                                                       global_forces, my_energies, &
                                                       active_system_info, &
                                                        mixed_env, my_itimes)
-
-                 !OLD subroutine
+                !OLD subroutine
                 !CALL add_energies_forces_mem_saver( energies_1_mol_list, energies, intra_forces_global, &
                 !                                      my_mol_index, &
                 !                                      global_forces, my_energies, &
                 !                            molecule_kind_set, local_molecules, molecule_set, mixed_env, my_itimes)
                END IF 
 
-                CALL adiab_fssh_routines(particles_mix, virial_mix, results_mix,   &
+               ! Add electrostatics for surface hopping
+               IF (force_env%do_fssh .AND. ALLOCATED(force_env%mixed_env%ewald_types)) THEN
+                  CPASSERT(ALLOCATED(force_env%mixed_env%ewald_types))
+                  CPASSERT(SIZE(force_env%mixed_env%do_electro_fist_env) == nforce_eval)
+                  CPASSERT(SIZE(force_env%mixed_env%ewald_types) == nforce_eval)
+                  DO iforce_eval=1, nforce_eval
+                     IF (force_env%mixed_env%do_electro_fist_env(iforce_eval)) THEN
+                        CALL force_env_get(force_env%sub_force_env(iforce_eval)%force_env,        &
+                                           fist_env=fist_env)
+                        CALL add_coulomb_interactions(force_env%mixed_env, fist_env, my_energies, &
+                                                      iforce_eval, my_mol_index)
+                     END IF
+                  END DO
+               END IF
+
+               CALL adiab_fssh_routines(particles_mix, virial_mix, results_mix,   &
                         my_energies, virials, results, nforce_eval,&
                         map_index, mapping_section,adiab_section,mixed_env,my_itimes, &
                         adiab_keyword, mixed_energy%pot,atomic_kinds, &
                         local_particles, my_mol_index, ext_pres, active_system_info, full_system_info)
-
            ELSE
+                ! Add electrostatics for surface hopping
+                IF (force_env%do_fssh .AND. ALLOCATED(force_env%mixed_env%ewald_types)) THEN
+                   CPASSERT(ALLOCATED(force_env%mixed_env%ewald_types))
+                   CPASSERT(SIZE(force_env%mixed_env%do_electro_fist_env) == nforce_eval)
+                   CPASSERT(SIZE(force_env%mixed_env%ewald_types) == nforce_eval)
+                   DO iforce_eval=1, nforce_eval
+                      IF (force_env%mixed_env%do_electro_fist_env(iforce_eval)) THEN
+                         CALL force_env_get(force_env%sub_force_env(iforce_eval)%force_env,        &
+                                            fist_env=fist_env)
+                         CALL add_coulomb_interactions(force_env%mixed_env, fist_env, my_energies, &
+                                                       iforce_eval, my_mol_index)
+                      END IF
+                   END DO
+                END IF
+
                 !COMMENT_SG: these two additional ways of combining force_evals
                 !should be DEPRECATED and removed but they are kept for testing
                 !purposes.
@@ -1330,12 +1480,35 @@ CONTAINS
                         adiab_keyword, mixed_energy%pot,atomic_kinds, &
                         local_particles, my_mol_index, ext_pres, active_system_info, full_system_info)
            END IF
-           !print*, "AC_energies", my_energies 
+
+!           DO i=1, SIZE(mixed_env%F, 3)
+!                PRINT *, "Writing frc_state ", i
+!                WRITE(s, '(I3)') i
+!                s = TRIM(s)
+!                fstr = "frc_state_"//TRIM(ADJUSTL(s))//".xyz"
+!                OPEN(55, file=fstr)
+!                WRITE (55,'(A)') "60"
+!                WRITE (55,'(A,I2,A)') "i =       ",i,", time =        0.000, E =       0.0"
+!                DO j=1, SIZE(mixed_env%F, 2)
+!                    WRITE (55, '(A, 3F20.10)') "  C ", mixed_env%F(1,j,i), mixed_env%F(2,j,i), &
+!                                           mixed_env%F(3,j,i)
+!                END DO
+!                CLOSE(55)
+!           END DO
+
+!PRINT *, "E_i:", my_energies
 
            DEALLOCATE(my_energies)
     CASE DEFAULT
        CPABORT("")
     END SELECT
+    ! End: Finish the mixing of fist forces
+    !****************************************************************
+
+    
+    !****************************************************************
+    ! Start: Release the temporary memory used.
+    !
     !Simply deallocate and loose the pointer references..
     DO iforce_eval = 1, nforce_eval
        DEALLOCATE(global_forces(iforce_eval)%forces)
@@ -1367,6 +1540,8 @@ CONTAINS
        END IF
     END IF
     CALL cp_print_key_finished_output(unit_nr,logger,mixed_section,"PRINT%DIPOLE")
+    !******************************************************************
+
   END SUBROUTINE mixed_energy_forces
 
 END MODULE force_env_methods

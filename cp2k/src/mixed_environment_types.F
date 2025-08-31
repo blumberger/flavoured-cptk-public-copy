@@ -51,7 +51,8 @@ MODULE mixed_environment_types
 !> 15-12-11
 !> Add a new object into the mixed_environment_type
 !> Require for Non Adiabatic Molecular Dynamics
-  USE sh_types,                       ONLY: sh_env_type
+  USE sh_types,                        ONLY: sh_env_type, &
+                                             sh_release
 !> End CHANGE_AC
 
 #include "./base/base_uses.f90"
@@ -89,8 +90,11 @@ MODULE mixed_environment_types
 !> 15-12-11
 !> Add a new object into the mixed_environment_type
 !> Require for Non Adiabatic Molecular Dynamics
-     TYPE (sh_env_type)                           :: sh_env
-     REAL(KIND=dp), DIMENSION(:,:,:), POINTER       :: F
+     TYPE (sh_env_type)                               :: sh_env
+     ! Should be pointer type
+     REAL(KIND=dp), DIMENSION(:,:,:), POINTER     :: F
+     INTEGER, ALLOCATABLE, DIMENSION(:)               :: ewald_types
+     LOGICAL, ALLOCATABLE, DIMENSION(:)               :: do_electro_fist_env
 !> End CHANGE_AC
 
 
@@ -418,6 +422,30 @@ CONTAINS
           IF (ASSOCIATED(mixed_env%group_distribution)) THEN
              DEALLOCATE(mixed_env%group_distribution)
           END IF
+          !! SG: Matt version of DSF had these lines
+          !! Surface hopping environment release
+          !IF (ALLOCATED(mixed_env%F)) THEN ! Check SH is used...
+          !  CALL sh_release(mixed_env%sh_env)
+          !  DEALLOCATE(mixed_env%F)
+          !  IF (ALLOCATED(mixed_env%do_electro_fist_env)) THEN
+          !     DEALLOCATE(mixed_env%do_electro_fist_env)
+          !  END IF
+          !  IF (ALLOCATED(mixed_env%ewald_types)) THEN
+          !     DEALLOCATE(mixed_env%ewald_types)
+          !  END IF
+          !END IF
+          ! Surface hopping environment release
+          IF (ASSOCIATED(mixed_env%F)) THEN ! Check SH is used...
+            !CALL sh_release(mixed_env%sh_env)
+            DEALLOCATE(mixed_env%F)
+            IF (ALLOCATED(mixed_env%do_electro_fist_env)) THEN
+               DEALLOCATE(mixed_env%do_electro_fist_env)
+            END IF
+            IF (ALLOCATED(mixed_env%ewald_types)) THEN
+               DEALLOCATE(mixed_env%ewald_types)
+            END IF
+          END IF
+
           DEALLOCATE(mixed_env)
        END IF
     END IF

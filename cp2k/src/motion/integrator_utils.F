@@ -1831,17 +1831,16 @@ CONTAINS
 !> \author AC (June 2016)
 ! *****************************************************************************
   SUBROUTINE vv_second_if_sh_rescaling ( tmp, atomic_kind_set, local_particles, particle_set,&
-       core_particle_set, shell_particle_set, nparticle_kind,&
-       shell_adiabatic, dt, u, new_velocities)
+                                         nparticle_kind, shell_adiabatic, dt, u, new_velocities)
 
     TYPE(tmp_variables_type), POINTER        :: tmp
     TYPE(atomic_kind_type), DIMENSION(:), &
       POINTER                                :: atomic_kind_set
     TYPE(distribution_1d_type), POINTER      :: local_particles
     TYPE(particle_type), DIMENSION(:), &
-      POINTER                                :: particle_set, &
-                                                core_particle_set, &
-                                                shell_particle_set
+      POINTER                                :: particle_set!, &
+                                                !core_particle_set, &
+                                                !shell_particle_set
     INTEGER, INTENT(IN)                      :: nparticle_kind
     LOGICAL, INTENT(IN)                      :: shell_adiabatic
     REAL(KIND=dp)                            :: dt

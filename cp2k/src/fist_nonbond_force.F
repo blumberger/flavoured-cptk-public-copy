@@ -46,6 +46,7 @@ MODULE fist_nonbond_force
                                              siepmann_type,&
                                              tersoff_type
   USE particle_types,                  ONLY: particle_type
+  USE pw_poisson_types,                ONLY: do_ewald_dsf
   USE shell_potential_types,           ONLY: get_shell,&
                                              shell_kind_type
   USE splines_methods,                 ONLY: potential_s
@@ -61,8 +62,9 @@ MODULE fist_nonbond_force
   CHARACTER(len=*), PARAMETER, PRIVATE :: moduleN = 'fist_nonbond_force'
   LOGICAL, PARAMETER, PRIVATE :: debug_this_module = .FALSE.
 
-  PUBLIC :: force_nonbond,&
-            bonded_correct_gaussian
+  PUBLIC :: force_nonbond,                       &
+            bonded_correct_gaussian,             &
+            bonded_correct_gaussian_fssh
 
 CONTAINS
 
@@ -110,9 +112,9 @@ CONTAINS
     LOGICAL                                  :: all_terms, do_multipoles, &
                                                 full_nl, shell_present
     LOGICAL, ALLOCATABLE, DIMENSION(:)       :: is_shell_kind
-    REAL(KIND=dp) :: alpha, beta, beta_a, beta_b, energy, etot, fac_ei, &
+    REAL(KIND=dp) :: alpha, beta, beta_a, beta_b, energy, etot, fac_ei,       &
       fac_kind, fac_vdw, fscalar, mm_radius_a, mm_radius_b, qcore_a, qcore_b, &
-      qeff_a, qeff_b, qshell_a, qshell_b, rab2, rab2_com, rab2_max
+      qeff_a, qeff_b, qshell_a, qshell_b, rab2, rab2_com, rab2_max, rcut
     REAL(KIND=dp), ALLOCATABLE, DIMENSION(:) :: mm_radius, qcore, qeff, qshell
     REAL(KIND=dp), DIMENSION(3) :: cell_v, cvi, fatom_a, fatom_b, fcore_a, &
       fcore_b, fshell_a, fshell_b, rab, rab_cc, rab_com, rab_cs, rab_sc, &
@@ -123,6 +125,7 @@ CONTAINS
     REAL(KIND=dp), DIMENSION(:, :), POINTER  :: ij_kind_full_fac
     REAL(KIND=dp), DIMENSION(:, :, :), &
       POINTER                                :: ei_interaction_cutoffs
+    REAL(KIND=dp), POINTER                   :: ei_interaction_cutoffs_dsf(:, :)
     TYPE(atomic_kind_type), POINTER          :: atomic_kind
     TYPE(cp_logger_type), POINTER            :: logger
     TYPE(fist_neighbor_type), POINTER        :: nonbonded
@@ -138,6 +141,8 @@ CONTAINS
     TYPE(spline_data_p_type), DIMENSION(:), &
       POINTER                                :: spline_data
     TYPE(spline_factor_type), POINTER        :: spl_f
+    LOGICAL                                  :: do_fssh
+
 
     CALL timeset(routineN,handle)
     NULLIFY (logger)
@@ -150,8 +155,10 @@ CONTAINS
          rcore_last_update_pbc=rcore_last_update_pbc, &
          ij_kind_full_fac=ij_kind_full_fac)
     CALL ewald_env_get(ewald_env, alpha=alpha, ewald_type=ewald_type, &
-         do_multipoles=do_multipoles, &
-         interaction_cutoffs=ei_interaction_cutoffs)
+         do_multipoles=do_multipoles,                                 &
+         interaction_cutoffs=ei_interaction_cutoffs,                  &
+         interaction_cutoffs_dsf=ei_interaction_cutoffs_dsf,             &
+         do_fssh=do_fssh, rcut=rcut)
 
     ! Initializing the potential energy, pressure tensor and force
     pot_nonbond    = 0.0_dp
@@ -245,6 +252,9 @@ CONTAINS
 
              ! Determine the scaling factors
              fac_ei = fac_kind
+             IF (do_fssh) THEN
+               fac_ei = 0.0_dp
+             END IF
              fac_vdw = fac_kind
              full_nl = ANY(pot%type == tersoff_type).OR.ANY(pot%type == siepmann_type)
              IF ((.NOT.full_nl).AND.(atom_a == atom_b)) THEN
@@ -406,8 +416,8 @@ CONTAINS
                          CALL add_force_nonbond(fcore_a,fatom_b,pv,fscalar,rab,use_virial)
                       ELSE
                          ! core-core interaction is always pure point charge
-                         energy = potential_coulomb(rab2,fscalar,fac_ei*qcore_a*qcore_b,&
-                                                    ewald_type,alpha,0.0_dp,&
+                         energy = potential_coulomb(rab2,fscalar,fac_ei*qcore_a*qcore_b,     &
+                                                    ewald_type,alpha,0.0_dp,                 &
                                                     ei_interaction_cutoffs(1,kind_a,kind_b))
                          CALL add_force_nonbond(fcore_a,fcore_b,pv,fscalar,rab,use_virial)
                       END IF
@@ -500,6 +510,7 @@ CONTAINS
                    rab  = rab_com
                    rab2 = rab2_com
                    fscalar = 0.0_dp
+
                    IF (fac_vdw > 0) THEN
                       energy = potential_s(spline_data,rab2,fscalar,spl_f,logger)
                       etot = etot + energy*fac_vdw
@@ -508,8 +519,10 @@ CONTAINS
                    IF (fac_ei > 0) THEN
                       ! note that potential_coulomb increments fscalar
                       energy = potential_coulomb(rab2,fscalar,fac_ei*qeff_a*qeff_b,&
-                                                 ewald_type,alpha,beta,&
-                                                 ei_interaction_cutoffs(3,kind_a,kind_b))
+                                             ewald_type,alpha,beta,&
+                                             ei_interaction_cutoffs(3,kind_a,kind_b),&
+                                             dsf_cutoff=ei_interaction_cutoffs_dsf(kind_a,kind_b),&
+                                             rc=rcut)
                       etot = etot + energy
                    END IF
                    CALL add_force_nonbond(fatom_a,fatom_b,pv,fscalar,rab,use_virial)
@@ -578,6 +591,7 @@ CONTAINS
           !$omp end parallel
        END DO Kind_Group_Loop
     END DO Lists
+
 
     !sample peak memory
     CALL m_memory()
@@ -658,9 +672,11 @@ CONTAINS
 !>      Splitted routines to clean and to fix a bug with the tensor whose
 !>      original definition was not correct for PBC.. [Teodoro Laino -06/2007]
 ! *****************************************************************************
-  SUBROUTINE bonded_correct_gaussian(fist_nonbond_env, atomic_kind_set, &
-             local_particles, particle_set, ewald_env, v_bonded_corr, pv_bc, &
-             shell_particle_set, core_particle_set, atprop_env, cell, use_virial)
+  SUBROUTINE bonded_correct_gaussian(fist_nonbond_env, atomic_kind_set,        &
+                                     local_particles, particle_set, ewald_env, &
+                                     v_bonded_corr, pv_bc, shell_particle_set, &
+                                     core_particle_set, atprop_env, cell,      &
+                                     use_virial, force_out)
 
     TYPE(fist_nonbond_env_type), POINTER     :: fist_nonbond_env
     TYPE(atomic_kind_type), POINTER          :: atomic_kind_set( : )
@@ -675,22 +691,26 @@ CONTAINS
     TYPE(atprop_type), POINTER               :: atprop_env
     TYPE(cell_type), POINTER                 :: cell
     LOGICAL, INTENT(IN)                      :: use_virial
+    REAL(KIND=dp), OPTIONAL, INTENT(OUT)     :: force_out(:,:)
 
     CHARACTER(LEN=*), PARAMETER :: routineN = 'bonded_correct_gaussian', &
       routineP = moduleN//':'//routineN
 
     INTEGER :: atom_a, atom_b, group, handle, iatom, iend, igrp, ilist, &
       ipair, istart, kind_a, kind_b, natoms_per_kind, nkind, npairs, shell_a, &
-      shell_b
+      shell_b, ewald_type
     INTEGER, DIMENSION(:, :), POINTER        :: list
     LOGICAL                                  :: a_is_shell, b_is_shell, &
                                                 do_multipoles, full_nl, &
                                                 shell_adiabatic
+    REAL(KIND=dp), DIMENSION(:, :, :), &
+      POINTER                                :: ei_interaction_cutoffs
+    REAL(KIND=dp), POINTER                   :: ei_interaction_cutoffs_dsf(:, :)
     REAL(KIND=dp)                            :: alpha, const, fac_cor, &
                                                 fac_ei, qcore_a, qcore_b, &
                                                 qeff_a, qeff_b, qshell_a, &
-                                                qshell_b
-    REAL(KIND=dp), DIMENSION(3)              :: rca, rcb, rsa, rsb
+                                                qshell_b, rcut_ewald
+    REAL(KIND=dp), DIMENSION(3)              :: rca, rcb, rsb, rsa
     REAL(KIND=dp), DIMENSION(:, :), POINTER  :: ij_kind_full_fac
     TYPE(atomic_kind_type), POINTER          :: atomic_kind
     TYPE(fist_neighbor_type), POINTER        :: nonbonded
@@ -707,10 +727,12 @@ CONTAINS
     v_bonded_corr = 0.0_dp
 
     CALL fist_nonbond_env_get(fist_nonbond_env, nonbonded=nonbonded, &
-         potparm14=potparm14, potparm=potparm, &
-         ij_kind_full_fac=ij_kind_full_fac)
+                              potparm14=potparm14, potparm=potparm, &
+                              ij_kind_full_fac=ij_kind_full_fac)
     CALL ewald_env_get(ewald_env, alpha=alpha, do_multipoles=do_multipoles, &
-         group=group)
+                       group=group, ewald_type=ewald_type, rcut=rcut_ewald, &
+                       interaction_cutoffs=ei_interaction_cutoffs, &
+                       interaction_cutoffs_dsf=ei_interaction_cutoffs_dsf)
     ! Defining the constants
     const = 2.0_dp*alpha*oorootpi
 
@@ -770,7 +792,6 @@ CONTAINS
                                charge_shell=qshell_a)
                 shell_a = particle_set(atom_a)%shell_index
                 rca = core_particle_set(shell_a)%r
-                rsa = shell_particle_set(shell_a)%r
              ELSE
                 qcore_a = qeff_a
                 qshell_a = HUGE(0.0_dp)
@@ -818,11 +839,24 @@ CONTAINS
                      atom_a, shell_b, .TRUE., alpha, qcore_a, qcore_b, &
                      const, fac_cor, pv_bc, atprop_env, use_virial)
              ELSE
-                ! correct for ion-ion interaction
-                CALL bonded_correct_gaussian_low(rca, rcb, cell, &
-                     v_bonded_corr, particle_set, particle_set, &
-                     atom_a, atom_b, .TRUE., alpha, qcore_a, qcore_b, &
-                     const, fac_cor, pv_bc, atprop_env, use_virial)
+                IF (PRESENT(force_out)) THEN
+                   ! correct for ion-ion interaction
+                   CALL bonded_correct_gaussian_low(rca, rcb, cell,      &
+                        v_bonded_corr, particle_set, particle_set,       &
+                        atom_a, atom_b, .TRUE., alpha, qcore_a, qcore_b, &
+                        const, fac_cor, pv_bc, atprop_env, use_virial)
+
+                ELSE
+                   IF (ewald_type /= do_ewald_dsf) THEN
+                      ! correct for ion-ion interaction
+                      CALL bonded_correct_gaussian_low(rca, rcb, cell, &
+                           v_bonded_corr, particle_set, particle_set, &
+                           atom_a, atom_b, .TRUE., alpha, qcore_a, qcore_b, &
+                           const, fac_cor, pv_bc, atprop_env, use_virial)
+                   END IF
+                  
+                END IF
+
              END IF
 
              ! Second part: take care of shell-shell, shell-core/ion and
@@ -903,6 +937,201 @@ CONTAINS
   END SUBROUTINE bonded_correct_gaussian
 
 ! *****************************************************************************
+!> \brief corrects electrostatics for bonded terms for surface hopping
+!>        electrostatics.
+!> \param fist_nonbond_env ...
+!> \param atomic_kind_set ...
+!> \param particle_set ...
+!> \param ewald_env ...
+!> \param v_bonded_corr ...
+!> \param pv_bc ...
+!> \param shell_particle_set ...
+!> \param core_particle_set ...
+!> \param atprop_env ...
+!> \param cell ...
+!> \param use_virial ...
+!> \history Copied from the original `bonded_correct_gaussian` SR
+!> \author Matt
+! *****************************************************************************
+  SUBROUTINE bonded_correct_gaussian_fssh(fist_nonbond_env, atomic_kind_set,        &
+                                          particle_set, ewald_env, e_per_at,        &
+                                          cell, force_out)
+
+    TYPE(fist_nonbond_env_type), POINTER        :: fist_nonbond_env
+    TYPE(atomic_kind_type), POINTER             :: atomic_kind_set( : )
+    TYPE(particle_type), POINTER                :: particle_set( : )
+    TYPE(ewald_environment_type), POINTER       :: ewald_env
+    REAL(KIND=dp), DIMENSION(:), INTENT(OUT)    :: e_per_at
+    TYPE(cell_type), POINTER                    :: cell
+    REAL(KIND=dp), INTENT(OUT)                  :: force_out(:,:)
+
+    CHARACTER(LEN=*), PARAMETER :: routineN = 'bonded_correct_gaussian_fssh', &
+      routineP = moduleN//':'//routineN
+
+    INTEGER :: atom_a, atom_b, group, handle, iend, igrp, ilist, &
+      ipair, istart, kind_a, kind_b, npairs
+      
+    INTEGER, DIMENSION(:, :), POINTER        :: list
+    REAL(KIND=dp)                            :: alpha, const, fac_cor, &
+                                                fac_ei, qcore_a, qcore_b, &
+                                                qeff_a, qeff_b
+    REAL(KIND=dp), DIMENSION(3)              :: rca, rcb
+    REAL(KIND=dp), DIMENSION(:, :), POINTER  :: ij_kind_full_fac
+    REAL(KIND=dp)                            :: v_bonded_corr
+    TYPE(atomic_kind_type), POINTER          :: atomic_kind
+    TYPE(fist_neighbor_type), POINTER        :: nonbonded
+    TYPE(neighbor_kind_pairs_type), POINTER  :: neighbor_kind_pair
+    TYPE(pair_potential_pp_type), POINTER    :: potparm, potparm14
+    TYPE(pair_potential_single_type), &
+      POINTER                                :: pot
+
+    CALL timeset(routineN,handle)
+
+    ! Initializing values
+    v_bonded_corr = 0.0_dp
+    e_per_at = 0.0_dp
+
+    CALL fist_nonbond_env_get(fist_nonbond_env, nonbonded=nonbonded, &
+         potparm14=potparm14, potparm=potparm, &
+         ij_kind_full_fac=ij_kind_full_fac)
+    CALL ewald_env_get(ewald_env, alpha=alpha, &
+         group=group)
+    ! Defining the constants
+    const = 2.0_dp*alpha*oorootpi
+
+    CPASSERT(ASSOCIATED(fist_nonbond_env%charges))
+
+    Lists: DO ilist=1,nonbonded%nlists
+       neighbor_kind_pair => nonbonded%neighbor_kind_pairs(ilist)
+       npairs = neighbor_kind_pair%nscale
+       IF (npairs==0) CYCLE
+       list => neighbor_kind_pair%list
+       Kind_Group_Loop: DO igrp = 1, neighbor_kind_pair%ngrp_kind
+          istart = neighbor_kind_pair%grp_kind_start(igrp)
+          IF (istart > npairs) THEN
+             EXIT
+          END IF
+          iend = MIN(npairs,neighbor_kind_pair%grp_kind_end(igrp))
+
+          Pairs: DO ipair = istart, iend
+             atom_a = list(1,ipair)
+             atom_b = list(2,ipair)
+             ! Get actual atomic kinds, since atom_a is not always of
+             ! kind_a and atom_b of kind_b, ie. they might be swapped.
+             kind_a = particle_set(atom_a)%atomic_kind%kind_number
+             kind_b = particle_set(atom_b)%atomic_kind%kind_number
+
+             pot => potparm%pot(kind_a,kind_b)%pot
+
+             ! Determine the scaling factors
+             fac_ei = ij_kind_full_fac(kind_a, kind_b)
+             IF (ipair <= neighbor_kind_pair%nscale) &
+                fac_ei = fac_ei*neighbor_kind_pair%ei_scale(ipair)
+
+             ! The amount of correction is related to the
+             ! amount of scaling as follows:
+             fac_cor = 1.0_dp - fac_ei
+             IF (fac_cor <= 0.0_dp) CYCLE
+
+             ! Parameters for kind a
+             atomic_kind => atomic_kind_set(kind_a)
+             qeff_a=fist_nonbond_env%charges(atom_a)
+             qcore_a = qeff_a
+             rca = particle_set(atom_a)%r
+
+             ! Parameters for kind b
+             atomic_kind => atomic_kind_set(kind_b)
+             qeff_b=fist_nonbond_env%charges(atom_b)
+             qcore_b = qeff_b
+             rcb = particle_set(atom_b)%r
+
+             ! First part: take care of core/ion-core/ion correction
+             ! correct for ion-ion interaction
+             CALL bonded_correct_gaussian_low_fssh(rca, rcb, cell,  &
+                              v_bonded_corr, alpha, qeff_a, qeff_b, &
+                              const, fac_cor,                       &
+                              fi_out=force_out(:, atom_a),          &
+                              fj_out=force_out(:, atom_b)         )
+
+             e_per_at(atom_a) = e_per_at(atom_a) + v_bonded_corr
+
+          END DO Pairs
+       END DO Kind_Group_Loop
+    END DO Lists
+
+    CALL timestop(handle)
+
+  END SUBROUTINE bonded_correct_gaussian_fssh
+
+! *****************************************************************************
+!> \brief ...
+!> \param r1 ...
+!> \param r2 ...
+!> \param cell ...
+!> \param v_bonded_corr ...
+!> \param particle_set1 ...
+!> \param particle_set2 ...
+!> \param i ...
+!> \param j ...
+!> \param shell_adiabatic ...
+!> \param alpha ...
+!> \param q1 ...
+!> \param q2 ...
+!> \param const ...
+!> \param fac_cor ...
+!> \param pv_bc ...
+!> \param atprop_env ...
+!> \param use_virial ...
+!> \par History
+!>      Splitted routines to clean and to fix a bug with the tensor whose
+!>      original definition was not correct for PBC..
+!> \author Matt Ellis (originally Teodoro Laino)
+! *****************************************************************************
+  SUBROUTINE bonded_correct_gaussian_low_fssh(r1, r2, cell, vbc, alpha, q1,   &
+                                              q2, const, fac_cor, fi_out, fj_out)
+
+    REAL(KIND=dp), DIMENSION(3)              :: r1, r2
+    TYPE(cell_type), POINTER                 :: cell
+    REAL(KIND=dp), INTENT(OUT)               :: vbc
+    REAL(KIND=dp), INTENT(IN)                :: alpha, q1, q2, const, fac_cor
+    REAL(KIND=dp), INTENT(OUT)               :: fi_out(3), fj_out(3)
+
+    CHARACTER(LEN=*), PARAMETER :: routineN = 'bonded_correct_gaussian_low_fssh', &
+      routineP = moduleN//':'//routineN
+    REAL(KIND=dp), PARAMETER :: ac1 = 0.254829592_dp, ac2 = -0.284496736_dp, &
+      ac3 = 1.421413741_dp, ac4 = -1.453152027_dp, ac5 = 1.061405429_dp, &
+      pc = 0.3275911_dp
+
+    REAL(KIND=dp)                            :: arg, dij, e_arg_arg, errf, &
+                                                fscalar, idij, rijsq, tc
+    REAL(KIND=dp), DIMENSION(3)              :: rij, fij
+
+    rij = r1 - r2
+    rij = pbc(rij,cell)
+    rijsq = rij(1)*rij(1) + rij(2)*rij(2) + rij(3)*rij(3)
+    idij = 1.0_dp/SQRT(rijsq)
+    dij = rijsq*idij
+    arg = alpha*dij
+    e_arg_arg = EXP(-arg**2)
+    tc = 1.0_dp/(1.0_dp + pc*arg)
+
+    ! Defining errf=1-erfc
+    errf = 1.0_dp - ((((ac5*tc + ac4)*tc + ac3)*tc + ac2)*tc + ac1)*tc*e_arg_arg
+
+    ! Getting the potential
+    vbc = -q1*q2*idij*errf*fac_cor
+
+    ! Subtracting the force from the total force
+    fscalar = q1*q2*idij**2*(idij*errf - const*e_arg_arg)*fac_cor
+
+    fij = fscalar*rij
+    fi_out(:) = fi_out(:) - fij(:)
+    fj_out(:) = fj_out(:) + fij(:)
+
+  END SUBROUTINE bonded_correct_gaussian_low_fssh
+
+
+! *****************************************************************************
 !> \brief ...
 !> \param r1 ...
 !> \param r2 ...
@@ -926,9 +1155,11 @@ CONTAINS
 !>      original definition was not correct for PBC..
 !> \author Teodoro Laino
 ! *****************************************************************************
-  SUBROUTINE bonded_correct_gaussian_low(r1, r2, cell, v_bonded_corr,&
-       particle_set1, particle_set2, i, j, shell_adiabatic, alpha, q1, q2, &
-       const, fac_cor, pv_bc, atprop_env, use_virial)
+  SUBROUTINE bonded_correct_gaussian_low(r1, r2, cell, v_bonded_corr,         &
+                                         particle_set1, particle_set2, i, j,  &
+                                         shell_adiabatic, alpha, q1, q2,      &
+                                         const, fac_cor, pv_bc, atprop_env,   &
+                                         use_virial)
     REAL(KIND=dp), DIMENSION(3)              :: r1, r2
     TYPE(cell_type), POINTER                 :: cell
     REAL(KIND=dp), INTENT(INOUT)             :: v_bonded_corr
@@ -981,7 +1212,7 @@ CONTAINS
     particle_set1(i)%f(1) = particle_set1(i)%f(1) - fscalar*rij(1)
     particle_set1(i)%f(2) = particle_set1(i)%f(2) - fscalar*rij(2)
     particle_set1(i)%f(3) = particle_set1(i)%f(3) - fscalar*rij(3)
-
+   
     particle_set2(j)%f(1) = particle_set2(j)%f(1) + fscalar*rij(1)
     particle_set2(j)%f(2) = particle_set2(j)%f(2) + fscalar*rij(2)
     particle_set2(j)%f(3) = particle_set2(j)%f(3) + fscalar*rij(3)
@@ -1009,6 +1240,7 @@ CONTAINS
 
   END SUBROUTINE bonded_correct_gaussian_low
 
+
 ! *****************************************************************************
 !> \brief specific for shell models cleans the interaction core-shell on the same
 !>      atom
@@ -1032,7 +1264,7 @@ CONTAINS
 !>      original definition was not correct for PBC..
 !> \author Teodoro Laino
 ! *****************************************************************************
-  SUBROUTINE bonded_correct_gaussian_low_sh(r1, r2, cell, v_bonded_corr, &
+SUBROUTINE bonded_correct_gaussian_low_sh(r1, r2, cell, v_bonded_corr, &
        core_particle_set, shell_particle_set, i, shell_adiabatic, alpha, q1, q2,&
        const, pv_bc, atprop_env, use_virial)
     REAL(KIND=dp), DIMENSION(3)              :: r1, r2
@@ -1060,6 +1292,7 @@ CONTAINS
                                                 rijsq, tc, tc2, tc4, vbc
     REAL(KIND=dp), DIMENSION(3)              :: fr, rij
     REAL(KIND=dp), DIMENSION(3, 3)           :: fbc
+
 
     rij = r1 - r2
     rij = pbc(rij,cell)

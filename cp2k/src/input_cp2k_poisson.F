@@ -12,7 +12,8 @@
 MODULE input_cp2k_poisson
   USE bibliography,                    ONLY: &
        Aguado2003, Blochl1995, Darden1993, Essmann1995, Ewald1921, &
-       Genovese2006, Genovese2007, Laino2008, Martyna1999, Toukmaji1996
+       Genovese2006, Genovese2007, Laino2008, Martyna1999, Toukmaji1996,&
+       Fennell2006
   USE cell_types,                      ONLY: use_perd_none,&
                                              use_perd_x,&
                                              use_perd_xy,&
@@ -23,6 +24,7 @@ MODULE input_cp2k_poisson
                                              use_perd_z
   USE cp_output_handling,              ONLY: add_last_numeric,&
                                              cp_print_key_section_create,&
+                                             debug_print_level, &
                                              low_print_level,&
                                              medium_print_level
   USE cp_units,                        ONLY: cp_unit_to_cp2k
@@ -61,6 +63,7 @@ MODULE input_cp2k_poisson
                                              PERIODIC_BC
   USE pw_poisson_types,                ONLY: &
        do_ewald_ewald, do_ewald_none, do_ewald_pme, do_ewald_spme, &
+       do_ewald_dsf, &
        pw_poisson_analytic, pw_poisson_implicit, pw_poisson_mt, &
        pw_poisson_multipole, pw_poisson_periodic, pw_poisson_wavelet
   USE pw_spline_utils,                 ONLY: no_precond,&
@@ -269,7 +272,7 @@ CONTAINS
 SUBROUTINE create_ewald_section(section)
     TYPE(section_type), POINTER              :: section
 
-    CHARACTER(len=*), PARAMETER :: routineN = 'create_ewald_section', &
+    CHARACTER(len=*), PARAMETER :: routineN = 'create_ewald_section',  &
       routineP = moduleN//':'//routineN
 
     TYPE(keyword_type), POINTER              :: keyword
@@ -279,26 +282,29 @@ SUBROUTINE create_ewald_section(section)
   CALL section_create(section,name="ewald",&
        description="Ewald parameters controlling electrostatic only for CLASSICAL MM.",&
        n_keywords=7, n_subsections=0, repeats=.FALSE., &
-       citations=(/Ewald1921,Darden1993,Essmann1995,Toukmaji1996,Laino2008/))
+       citations=(/Ewald1921,Darden1993,Essmann1995,Toukmaji1996,Laino2008,Fennell2006/))
 
   NULLIFY(keyword,print_key,subsection)
   CALL keyword_create(keyword, name="EWALD_TYPE",&
        description="The type of ewald you want to perform.",&
-       citations=(/Ewald1921,Essmann1995,Darden1993/),&
+       citations=(/Ewald1921,Essmann1995,Darden1993,Fennell2006/),&
        usage="EWALD_TYPE (NONE|EWALD|PME|SPME)",&
        default_i_val=do_ewald_ewald,&
        enum_c_vals=(/"none     ",&
                      "ewald    ",&
                      "pme      ",&
-                     "spme     " /),&
+                     "spme     ",& 
+                     "dsf      "/),&
        enum_i_vals=(/do_ewald_none,&
                      do_ewald_ewald,&
                      do_ewald_pme,&
-                     do_ewald_spme/),&
+                     do_ewald_spme,&
+                     do_ewald_dsf/),&
        enum_desc=s2a("NONE standard real-space coulomb potential is computed together with the non-bonded contributions",&
                      "EWALD is the standard non-fft based ewald",&
                      "PME is the particle mesh using fft interpolation",&
-                     "SPME is the smooth particle mesh using beta-Euler splines (recommended)"))
+                     "SPME is the smooth particle mesh using beta-Euler splines (recommended)",&
+                     "DSF is a linear scaling pairwise method, using real space and a correction"))
   CALL section_add_keyword(section,keyword)
   CALL keyword_release(keyword)
 
@@ -359,6 +365,32 @@ SUBROUTINE create_ewald_section(section)
        usage="epsilon 1e-6", default_r_val=1.e-6_dp)
   CALL section_add_keyword(section,keyword)
   CALL keyword_release(keyword)
+
+  CALL section_create(subsection, name="CHARGE_STATE",                         &
+                      description="A keyword only used when running surface"// &
+       " hopping simulations. Tell CP2K what partial charges a molecule has"// &
+       " in its charged state. Values are given as a list of reals separated"//&
+       " by spaces.", n_keywords=2, n_subsections=0, repeats=.FALSE.)
+
+  CALL keyword_create(keyword,  name="_DEFAULT_KEYWORD_",                      &
+                      description="The charges on 1 molecule in its"//         &    
+                                  " charged state.", repeats=.TRUE.,           &    
+                      usage="{Real} {Real} ...", type_of_var=real_t, n_var=-1  )    
+
+  CALL section_add_keyword(subsection, keyword)
+  CALL keyword_release(keyword)
+
+  CALL keyword_create(keyword,  name="PRINT_CHARGES",                          &
+                      description="Choose whether you want to print the "//    &    
+                                  "charges of each state", repeats=.FALSE.,    &    
+                      usage="{Logical}", default_l_val=.FALSE.)    
+
+  CALL section_add_keyword(subsection, keyword)
+  CALL keyword_release(keyword)
+
+  CALL section_add_subsection(section, subsection)
+  CALL section_release(subsection)
+
 
   NULLIFY(subsection)
   CALL create_rsgrid_section(subsection)

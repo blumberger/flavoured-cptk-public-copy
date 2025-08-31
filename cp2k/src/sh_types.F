@@ -57,6 +57,9 @@ IMPLICIT NONE
    CHARACTER(len=*), PARAMETER, PRIVATE :: moduleN = 'sh_types'
 
 
+   TYPE real_ES_NN
+      INTEGER                                    :: atoma, atomb
+   END  TYPE real_ES_NN 
 
    TYPE sh_print_env_type
 !> General variable
@@ -147,7 +150,6 @@ END TYPE adiab_nace_env_type
      !integer, dimension(:,:), POINTER         :: bneighbour_d, aneighbour_d
      !integer, dimension(:,:), POINTER         :: bneighbour_a, aneighbour_a
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER :: nacv_dphase, nacv_aphase   ! off-diagonal gradient of aom Hamilton.
-
      REAL(KIND=dp), DIMENSION(:,:,:), POINTER :: nacv_fe, nacv_ct
      REAL(KIND=dp), DIMENSION(:), POINTER     :: pcoeffs_fe, pcoeffs_ct
      REAL(KIND=dp), DIMENSION(:), POINTER     :: scoeffs_fe, scoeffs_ct
@@ -287,13 +289,329 @@ END TYPE adiab_nace_env_type
 !> To print
      TYPE(sh_print_env_type)                 :: sh_print_env
 
+! Full Coulomb Interactions
+     LOGICAL                                 :: finished_coulomb_step
+
 !> CHANGE ME, added nace_allocatables
     TYPE(adiab_nace_env_type)                :: adiab_nace_env
 
    END TYPE sh_env_type
 
-   PUBLIC :: sh_env_type, &
-             sh_print_env_type
+   PUBLIC :: sh_env_type,       &
+             sh_print_env_type, &
+             sh_release,        &
+             sh_init
 
+
+CONTAINS
+
+   !**********************************************************
+   !> \brief Will initialise the attributes of the sh_env_type
+   !>        . This basically just means NULLIFYing pointers.
+   !> \author Matt
+   !**********************************************************
+   SUBROUTINE sh_init(sh_env)
+      TYPE(sh_env_type)                      :: sh_env
+
+      CHARACTER(len=*), PARAMETER :: routineN ='sh_init',  &
+                                     routineP = moduleN//':'//routineN
+      NULLIFY(sh_env%rm_t, sh_env%elements, sh_env%siteenergies,  &
+              sh_env%atomlist, sh_env%neighbourlist,              &
+              sh_env%connlist1, sh_env%connlist2, sh_env%Btp,     &
+              sh_env%pcoeffs, sh_env%scoeffs, sh_env%pcoeffsrun,  &
+              sh_env%At, sh_env%Atm, sh_env%Atp, sh_env%Bt,       &
+              sh_env%Btm, sh_env%nacv, sh_env%Stt, sh_env%Stmt,   &
+              sh_env%Sttm, sh_env%Stmtm, sh_env%grad_tresp,       &
+              sh_env%test_grad_tresp,                             &
+              sh_env%crds, sh_env%NN, sh_env%frz_couplings,       &
+              sh_env%frz_coup_connectivity, sh_env%rng_stream,    &
+              sh_env%forces_adiab, sh_env%velocities_tp,          &
+              sh_env%diabatic_nace_tp, sh_env%H_t, sh_env%H_tp,   &
+              sh_env%ctin, sh_env%ctin_t, sh_env%bneighbour,      &
+              sh_env%ctin_before_deco, sh_env%ctin_after_deco,    &
+              sh_env%ctin_after_tranf_correction, sh_env%rm_tm,   &
+              sh_env%active_region, sh_env%adiab_overlap,         &
+              sh_env%adiab_nace_tp, sh_env%adiab_nace_t,          &
+              sh_env%class_forbidden_hop_t, sh_env%aneighbour,    &
+              sh_env%forces_adiab_new, sh_env%diabatic_nace_t,    &
+              sh_env%Stptp, sh_env%Stpt, sh_env%Sttp              )
+
+      
+   END SUBROUTINE
+
+   !**********************************************************
+   !> \brief Deallocate the sh environment
+   !> \params sh_env => The surface hopping environment
+   !**********************************************************
+   SUBROUTINE sh_release(sh_env)
+      TYPE(sh_env_type)                      :: sh_env
+
+      CHARACTER(len=*), PARAMETER :: routineN ='sh_release',  &
+                                     routineP = moduleN//':'//routineN
+      
+      ! First handle the allocatables
+      IF (ALLOCATED(sh_env%tresp_charges)) THEN
+          DEALLOCATE(sh_env%tresp_charges)
+      END IF
+
+      IF (ALLOCATED(sh_env%full_system_info)) THEN
+          DEALLOCATE(sh_env%full_system_info)
+      END IF
+
+      IF (ALLOCATED(sh_env%active_system_info)) THEN
+          DEALLOCATE(sh_env%active_system_info)
+      END IF
+
+      IF (ALLOCATED(sh_env%C_t)) THEN
+          DEALLOCATE(sh_env%C_t)
+      END IF
+
+      IF (ALLOCATED(sh_env%C_tp)) THEN
+          DEALLOCATE(sh_env%C_tp)
+      END IF
+
+      IF (ALLOCATED(sh_env%E_t)) THEN
+          DEALLOCATE(sh_env%E_t)
+      END IF
+
+      IF (ALLOCATED(sh_env%E_tp)) THEN
+          DEALLOCATE(sh_env%E_tp)
+      END IF
+
+      IF (ALLOCATED(sh_env%readcoeff)) THEN
+          DEALLOCATE(sh_env%readcoeff)
+      END IF
+
+      
+
+      ! Now handle the pointers
+      ! N.B. These pointers should mostly be allocatables.
+      
+      IF (ASSOCIATED(sh_env%forces_adiab_new)) THEN
+          DEALLOCATE(sh_env%forces_adiab_new)
+      END IF
+
+      IF (ASSOCIATED(sh_env%siteenergies)) THEN
+          DEALLOCATE(sh_env%siteenergies)
+      END IF
+
+      IF (ASSOCIATED(sh_env%aneighbour)) THEN
+          DEALLOCATE(sh_env%aneighbour)
+      END IF
+
+      IF (ASSOCIATED(sh_env%bneighbour)) THEN
+          DEALLOCATE(sh_env%bneighbour)
+      END IF
+
+      IF (ASSOCIATED(sh_env%rm_t)) THEN
+          DEALLOCATE(sh_env%rm_t)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%rm_tm)) THEN
+          DEALLOCATE(sh_env%rm_tm)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%elements)) THEN
+          DEALLOCATE(sh_env%elements)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%atomlist)) THEN
+          DEALLOCATE(sh_env%atomlist)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%neighbourlist)) THEN
+          DEALLOCATE(sh_env%neighbourlist)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%connlist1)) THEN
+          DEALLOCATE(sh_env%connlist1)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%connlist2)) THEN
+          DEALLOCATE(sh_env%connlist2)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%pcoeffs)) THEN
+          DEALLOCATE(sh_env%pcoeffs)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%scoeffs)) THEN
+          DEALLOCATE(sh_env%scoeffs)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%pcoeffsrun)) THEN
+          DEALLOCATE(sh_env%pcoeffsrun)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%At)) THEN
+          DEALLOCATE(sh_env%At)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%Atm)) THEN
+          DEALLOCATE(sh_env%Atm)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%Atp)) THEN
+          DEALLOCATE(sh_env%Atp)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%Bt)) THEN
+          DEALLOCATE(sh_env%Bt)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%Btp)) THEN
+          DEALLOCATE(sh_env%Btp)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%Btm)) THEN
+          DEALLOCATE(sh_env%Btm)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%nacv)) THEN
+          DEALLOCATE(sh_env%nacv)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%Stt)) THEN
+          DEALLOCATE(sh_env%Stt)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%Stpt)) THEN
+          DEALLOCATE(sh_env%Stpt)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%Sttp)) THEN
+          DEALLOCATE(sh_env%Sttp)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%Stptp)) THEN
+          DEALLOCATE(sh_env%Stptp)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%Stmt)) THEN
+          DEALLOCATE(sh_env%Stmt)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%Sttm)) THEN
+          DEALLOCATE(sh_env%Sttm)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%Stmtm)) THEN
+          DEALLOCATE(sh_env%Stmtm)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%grad_tresp)) THEN
+          DEALLOCATE(sh_env%grad_tresp)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%test_grad_tresp)) THEN
+          DEALLOCATE(sh_env%test_grad_tresp)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%crds)) THEN
+          DEALLOCATE(sh_env%crds)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%NN)) THEN
+          DEALLOCATE(sh_env%NN)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%frz_couplings)) THEN
+          DEALLOCATE(sh_env%frz_couplings)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%frz_coup_connectivity)) THEN
+          DEALLOCATE(sh_env%frz_coup_connectivity)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%rng_stream)) THEN
+          DEALLOCATE(sh_env%rng_stream)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%forces_adiab)) THEN
+          DEALLOCATE(sh_env%forces_adiab)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%velocities_tp)) THEN
+          DEALLOCATE(sh_env%velocities_tp)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%diabatic_nace_t)) THEN
+          DEALLOCATE(sh_env%diabatic_nace_t)
+      END IF
+
+      IF (ASSOCIATED(sh_env%diabatic_nace_tp)) THEN
+          DEALLOCATE(sh_env%diabatic_nace_tp)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%H_t)) THEN
+          DEALLOCATE(sh_env%H_t)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%H_tp)) THEN
+          DEALLOCATE(sh_env%H_tp)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%ctin)) THEN
+          DEALLOCATE(sh_env%ctin)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%ctin_t)) THEN
+          DEALLOCATE(sh_env%ctin_t)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%ctin_before_deco)) THEN
+          DEALLOCATE(sh_env%ctin_before_deco)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%ctin_after_deco)) THEN
+          DEALLOCATE(sh_env%ctin_after_deco)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%ctin_after_tranf_correction)) THEN
+          DEALLOCATE(sh_env%ctin_after_tranf_correction)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%active_region)) THEN
+          DEALLOCATE(sh_env%active_region)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%adiab_overlap)) THEN
+          DEALLOCATE(sh_env%adiab_overlap)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%adiab_nace_tp)) THEN
+          DEALLOCATE(sh_env%adiab_nace_tp)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%adiab_nace_t)) THEN
+          DEALLOCATE(sh_env%adiab_nace_t)
+      END IF
+      
+      IF (ASSOCIATED(sh_env%class_forbidden_hop_t)) THEN
+          DEALLOCATE(sh_env%class_forbidden_hop_t)
+      END IF
+
+
+      IF (ALLOCATED(sh_env%readcoeff)) THEN
+         DEALLOCATE(sh_env%readcoeff)
+      END IF
+
+      CALL sh_print_release(sh_env%sh_print_env)
+
+   END SUBROUTINE
+
+   !**********************************************************
+   !> \brief Deallocate the sh print environment
+   !> \params sh_env => The surface hopping environment
+   !**********************************************************
+   SUBROUTINE sh_print_release(sh_print_env)
+      TYPE(sh_print_env_type)                      :: sh_print_env
+
+      CHARACTER(len=*), PARAMETER :: routineN ='sh_print_release',  &
+                                     routineP = moduleN//':'//routineN
+
+      DEALLOCATE(sh_print_env%adiab_energies_t)   
+
+   END SUBROUTINE
 
 END MODULE sh_types

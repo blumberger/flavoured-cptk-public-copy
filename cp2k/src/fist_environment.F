@@ -223,7 +223,7 @@ CONTAINS
 !> \date    22.05.2000
 !> \author  MK
 !> \version 1.0
-!> \note Changed by Matt (17/07/2017). Added a method for doing energy
+!> \note Changed by Matt Ellis, 95ellismle@gmail.com, (17/07/2017). Added a method for doing energy
 !>         decomposition.
 ! *****************************************************************************
   SUBROUTINE fist_init_subsys ( fist_env, subsys, cell, cell_ref, fist_nonbond_env,&

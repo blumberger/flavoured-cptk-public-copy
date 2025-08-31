@@ -186,14 +186,14 @@ CONTAINS
 
        CALL create_sh_env(nadiab, norbitals, natom, &
                            positions_tp, adiab_section, & 
-                           sh_env, my_mol_index, ext_pres, &
-active_system_info, full_system_info) 
+                           sh_env, my_mol_index, ext_pres, active_system_info, full_system_info)
+
+       print *, "WTP_4.2_Debug1"
   
-       CALL propagate_namd_first_step(nadiab, norbitals,     &
-                 positions_tp, velocities_tp, energies_tp, sh_env, itimes, &
-                   adiab_section,& 
-                 my_bo_keyword, atomic_kinds, &
-                 local_particles, my_test_keyword, method_keyword, diagonal_F=mixed_env%F)
+       CALL propagate_namd_first_step(nadiab, norbitals, positions_tp, velocities_tp, &
+                                      energies_tp, sh_env, itimes, adiab_section, my_bo_keyword, &
+                                      atomic_kinds, local_particles, my_test_keyword, & 
+                                      method_keyword, diagonal_F=mixed_env%F)
 
     ELSE
        !> Get the information for the previous timesteps
@@ -215,14 +215,11 @@ active_system_info, full_system_info)
           !sh_env%old_state = -1
        ELSE
           !> Main CALL: calculate the Hamiltonian, propagate the electronic dynamics
-
-
           CALL propagate_namd_all_steps(nadiab, norbitals,         &
                         positions_tp, energies_tp, sh_env, itimes,     &
                          adiab_section, & 
                         my_bo_keyword, atomic_kinds,                    &
                         local_particles, my_test_keyword,diagonal_F=mixed_env%F)
-
        ENDIF
     ENDIF
     !> IMPORTANT: store all sh_env for the future timesteps.
@@ -291,7 +288,6 @@ active_system_info, full_system_info)
     END IF
     DEALLOCATE(positions_tp, forces_adiab)
     DEALLOCATE(velocities_tp)
-
    END SUBROUTINE adiab_fssh_routines
 
 END MODULE non_adiabatic_methods

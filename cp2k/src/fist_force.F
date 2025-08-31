@@ -72,9 +72,10 @@ MODULE fist_force
   USE particle_types,                  ONLY: particle_type
   USE physcon,                         ONLY: debye
   USE pme,                             ONLY: pme_evaluate
-  USE pw_poisson_types,                ONLY: do_ewald_ewald,&
-                                             do_ewald_none,&
-                                             do_ewald_pme,&
+  USE pw_poisson_types,                ONLY: do_ewald_ewald,     &
+                                             do_ewald_none,      &
+                                             do_ewald_pme,       &
+                                             do_ewald_dsf,       &
                                              do_ewald_spme
   USE shell_potential_types,           ONLY: shell_kind_type
   USE spme,                            ONLY: spme_evaluate
@@ -181,9 +182,7 @@ CONTAINS
     INTEGER ::  imol, nkind,  nmol_per_kind, first_atom, last_atom,& 
                 atoms_active_region, aoi, count_idx, act_atoms
     REAL(KIND=dp), ALLOCATABLE, DIMENSION(:, :) :: forces_intra_aoi
-!    REAL(KIND=dp), ALLOCATABLE                 :: intra_forces(:,:)
 
-    
     CALL timeset(routineN,handle)
     NULLIFY(logger)
     NULLIFY(subsys,virial,atprop_env,para_env,force_env_section)
@@ -251,6 +250,8 @@ IF (ALLOCATED(thermo%pot_list)) THEN
    CALL section_vals_val_get(ener_decomp_section, "NUM_ACTIVE_ATOMS", &
                              i_val=act_atoms)
    IF (act_atoms /= atoms_active_region) THEN
+      PRINT *, "Atoms in DECOMP section: ", act_atoms
+      PRINT *, "Atoms counted: ", atoms_active_region
       CPABORT("num_act_atoms incorrect")
    END IF
 ALLOCATE(forces_intra_aoi(3, atoms_active_region))
@@ -387,7 +388,8 @@ END IF
     END IF
 
     ! Get g-space non-bonded forces:
-    IF(ewald_type /= do_ewald_none)THEN
+    IF(ewald_type /= do_ewald_none .AND. ewald_type /= do_ewald_dsf)THEN
+
        ! Determine size of the forces array
        SELECT CASE(ewald_type)
        CASE(do_ewald_ewald)
@@ -395,6 +397,7 @@ END IF
        CASE DEFAULT
           fg_coulomb_size = natoms
        END SELECT
+
        ! Allocate and zeroing arrays
        ALLOCATE(fg_coulomb(3, fg_coulomb_size))
        fg_coulomb = 0.0_dp
@@ -472,6 +475,7 @@ END IF
                         pv_coulomb=pv_coulomb)
                 END IF
              END IF
+            
           CASE(do_ewald_pme)
              ! Parallelisation over grids --> allocate all atoms
              IF(shell_present)THEN
@@ -529,51 +533,12 @@ END IF
           END SELECT
        END IF
 
-       ! Subtract the interaction between screening charges. This is a
-       ! correction in real-space and depends on the neighborlists. Therefore
-       ! it is only executed if fist_nonbond_env%do_nonbonded is set.
-       IF(fist_nonbond_env%do_nonbonded)THEN
-          ! Correction for core-shell model
-          IF(shell_present)THEN
-             CALL bonded_correct_gaussian(fist_nonbond_env, atomic_kind_set, &
-                  local_particles, particle_set, ewald_env, thermo%e_bonded, &
-                  pv_bc, shell_particle_set=shell_particle_set, &
-                  core_particle_set=core_particle_set, atprop_env=atprop_env, cell=cell, &
-                  use_virial=use_virial)
-          ELSE
-             IF(.NOT. do_multipoles)THEN
-                CALL bonded_correct_gaussian(fist_nonbond_env, &
-                     atomic_kind_set, local_particles, particle_set, &
-                     ewald_env, thermo%e_bonded, pv_bc=pv_bc, atprop_env=atprop_env, cell=cell, &
-                     use_virial=use_virial)
-             END IF
-          END IF
-       END IF
-
-       IF(.NOT. do_multipoles)THEN
-          ! Multipole code has its own printing routine.
-          CALL ewald_print(iw2, pot_nonbond, vg_coulomb, thermo%e_self, thermo%e_neut,&
-               thermo%e_bonded)
-       END IF
     ELSE
        IF(use_virial)THEN
           pv_g  = 0.0_dp
           pv_bc = 0.0_dp
        END IF
        thermo%e_neut = 0.0_dp
-    END IF
-
-    IF(iw>0)THEN
-       IF(ALLOCATED(fg_coulomb))THEN
-          WRITE(iw,'(A)')" FIST:: NONBONDED ELECTROSTATIC FORCES IN G-SPACE..."
-          WRITE(iw,'(3f15.9)')((fg_coulomb(j,i),j=1,3),i = 1, SIZE(fg_coulomb,2))
-       END IF
-       IF(shell_present .AND. shell_model_ad .AND. ALLOCATED(fgshell_coulomb))THEN
-          WRITE(iw,'(A)')" FIST:: SHELL NONBONDED ELECTROSTATIC FORCES IN G-SPACE..."
-          WRITE(iw,'(3f15.9)')((fgshell_coulomb(j,i),j=1,3),i = 1, SIZE(fgshell_coulomb,2))
-          WRITE(iw,'(A)')" FIST:: CORE NONBONDED ELECTROSTATIC FORCES IN G-SPACE..."
-          WRITE(iw,'(3f15.9)')((fgcore_coulomb(j,i),j=1,3),i = 1, SIZE(fgcore_coulomb,2))
-       END IF
     END IF
 
     ! Get intramolecular forces
@@ -618,39 +583,84 @@ END IF
        END IF
     ENDIF
 
-
-IF (ALLOCATED(thermo%pot_list)) THEN
-!TEST: store the forces that we need
-    count_idx = 0
-    nkind = SIZE ( molecule_kind_set )
-    DO ikind = 1, nkind
-       nmol_per_kind = local_molecules % n_el ( ikind )
-       DO imol = 1, nmol_per_kind
-           i = local_molecules % list ( ikind ) % array ( imol )
-           molecule => molecule_set ( i )
-           molecule_kind => molecule % molecule_kind
-           IF (ANY(my_mol_index==i)) THEN
-              CALL get_molecule ( molecule, first_atom=first_atom, last_atom=last_atom )
-              DO aoi=first_atom, last_atom
-                  count_idx = count_idx + 1
-                  forces_intra_aoi(1, count_idx) = particle_set(aoi)%f(1)
-                  forces_intra_aoi(2, count_idx) = particle_set(aoi)%f(2)
-                  forces_intra_aoi(3, count_idx) = particle_set(aoi)%f(3)
-              END DO
+    ! Store the forces that we need
+    IF (ALLOCATED(thermo%pot_list)) THEN
+        count_idx = 0
+        nkind = SIZE ( molecule_kind_set )
+        DO ikind = 1, nkind
+           nmol_per_kind = local_molecules % n_el ( ikind )
+           DO imol = 1, nmol_per_kind
+               i = local_molecules % list ( ikind ) % array ( imol )
+               molecule => molecule_set ( i )
+               molecule_kind => molecule % molecule_kind
+               IF (ANY(my_mol_index==i)) THEN
+                  CALL get_molecule ( molecule, first_atom=first_atom, last_atom=last_atom )
+                  DO aoi=first_atom, last_atom
+                      count_idx = count_idx + 1
+                      forces_intra_aoi(1, count_idx) = particle_set(aoi)%f(1)
+                      forces_intra_aoi(2, count_idx) = particle_set(aoi)%f(2)
+                      forces_intra_aoi(3, count_idx) = particle_set(aoi)%f(3)
+                  END DO
+               END IF
+           END DO
+        END DO
+    
+        CALL fist_env_set(fist_env=fist_env, intra_forces=forces_intra_aoi)
+    END IF
+    
+    ! We must add the electrostatic covalent screening after we construct the
+    ! forces_intra_aoi array so we don't get the forces mixed up later.
+    ! This only matters for surface hopping.
+    IF (ewald_type /= do_ewald_none .AND. ewald_type /= do_ewald_dsf) THEN
+        ! Subtract the interaction between screening charges. This is a
+        ! correction in real-space and depends on the neighborlists. Therefore
+        ! it is only executed if fist_nonbond_env%do_nonbonded is set.
+        IF(fist_nonbond_env%do_nonbonded)THEN
+           ! Correction for core-shell model
+           IF(shell_present)THEN
+              CALL bonded_correct_gaussian(fist_nonbond_env, atomic_kind_set, &
+                   local_particles, particle_set, ewald_env, thermo%e_bonded, &
+                   pv_bc, shell_particle_set=shell_particle_set, &
+                   core_particle_set=core_particle_set, atprop_env=atprop_env, cell=cell, &
+                   use_virial=use_virial)
+           ELSE
+              IF(.NOT. do_multipoles)THEN
+                 CALL bonded_correct_gaussian(fist_nonbond_env, &
+                      atomic_kind_set, local_particles, particle_set, &
+                      ewald_env, thermo%e_bonded, pv_bc=pv_bc, atprop_env=atprop_env, cell=cell, &
+                      use_virial=use_virial)
+              END IF
            END IF
-       END DO
-    END DO
+        END IF
+    
+        IF(.NOT. do_multipoles)THEN
+           ! Multipole code has its own printing routine.
+           CALL ewald_print(iw2, pot_nonbond, vg_coulomb, thermo%e_self, thermo%e_neut,&
+                thermo%e_bonded)
+        END IF
+    
+    END IF
+    
+    ! Print electrostatic (reciprocal space) quantities
+    IF(iw>0)THEN
+       IF(ALLOCATED(fg_coulomb))THEN
+          WRITE(iw,'(A)')" FIST:: NONBONDED ELECTROSTATIC FORCES IN G-SPACE..."
+          WRITE(iw,'(3f15.9)')((fg_coulomb(j,i),j=1,3),i = 1, SIZE(fg_coulomb,2))
+       END IF
+       IF(shell_present .AND. shell_model_ad .AND. ALLOCATED(fgshell_coulomb))THEN
+          WRITE(iw,'(A)')" FIST:: SHELL NONBONDED ELECTROSTATIC FORCES IN G-SPACE..."
+          WRITE(iw,'(3f15.9)')((fgshell_coulomb(j,i),j=1,3),i = 1, SIZE(fgshell_coulomb,2))
+          WRITE(iw,'(A)')" FIST:: CORE NONBONDED ELECTROSTATIC FORCES IN G-SPACE..."
+          WRITE(iw,'(3f15.9)')((fgcore_coulomb(j,i),j=1,3),i = 1, SIZE(fgcore_coulomb,2))
+       END IF
+    END IF
+    
+    IF(iw>0)THEN
+       WRITE(iw,'(A)')" FIST:: TOSTORE"
+       WRITE(iw,'(3f15.9)')((particle_set(i)%f(j),j=1,3), i = 1, SIZE(particle_set))
+    END IF
 
-
-    CALL fist_env_set(fist_env=fist_env, intra_forces=forces_intra_aoi)
-
-END IF
-
-IF(iw>0)THEN
-WRITE(iw,'(A)')" FIST:: TOSTORE"
-WRITE(iw,'(3f15.9)')((particle_set(i)%f(j),j=1,3), i = 1, SIZE(particle_set))
-END IF
-
+    ! Print intra molecular quantities
     IF(iw>0)THEN
        xdum1 = cp_unit_from_cp2k(pot_bond,"kcalmol")
        xdum2 = cp_unit_from_cp2k(pot_bend,"kcalmol")
@@ -709,6 +719,7 @@ END IF
        f_total(2, i)= particle_set(i)%f(2)+ f_nonbond(2, i)
        f_total(3, i)= particle_set(i)%f(3)+ f_nonbond(3, i)
     END DO
+
     IF(shell_present)THEN
        ALLOCATE(fshell_total(3,nshell))
        ALLOCATE(fcore_total(3,nshell))
@@ -885,6 +896,12 @@ END IF
              particle_set(i)%f(3)= f_total(3, i)
           END DO
        END IF
+    CASE (do_ewald_dsf)
+       DO i = 1, natoms
+          particle_set(i)%f(1)= f_total(1, i)
+          particle_set(i)%f(2)= f_total(2, i)
+          particle_set(i)%f(3)= f_total(3, i)
+       END DO
     END SELECT
 
     IF(iw>0)THEN
@@ -971,6 +988,7 @@ END IF
        END IF
        DEALLOCATE(fshell_nonbond)
     END IF
+
     CALL cp_print_key_finished_output(iw,logger,mm_section,"PRINT%DERIVATIVES")
     CALL cp_print_key_finished_output(iw2,logger,mm_section,"PRINT%EWALD_INFO")
     CALL timestop(handle)

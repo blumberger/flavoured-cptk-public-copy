@@ -84,7 +84,10 @@ MODULE pw_poisson_types
   INTEGER, PARAMETER, PUBLIC               :: do_ewald_none=1,&
                                               do_ewald_ewald=2,&
                                               do_ewald_pme=3,&
-                                              do_ewald_spme=4
+                                              do_ewald_spme=4, &
+                                              do_ewald_DSF=5, &
+                                              do_ewald_fssh_ewald=6,&  ! surface hopping
+                                              do_ewald_fssh_DSF=7      ! surface hopping
 
   INTEGER, PARAMETER, PUBLIC               :: PERIODIC3D = 1000,&
                                               ANALYTIC2D = 1001,&

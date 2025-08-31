@@ -30,13 +30,15 @@ MODULE ewald_pw_methods
   USE pw_poisson_methods,              ONLY: pw_poisson_set
 ! CJM, pw_poisson_rebuild
   USE pw_poisson_read_input,           ONLY: pw_poisson_read_parameters
-  USE pw_poisson_types,                ONLY: do_ewald_ewald,&
-                                             do_ewald_none,&
-                                             do_ewald_pme,&
-                                             do_ewald_spme,&
-                                             pw_poisson_create,&
+  USE pw_poisson_types,                ONLY: do_ewald_ewald,           &
+                                             do_ewald_none,            &
+                                             do_ewald_pme,             &
+                                             do_ewald_spme,            &
+                                             do_ewald_dsf,             &
+                                             do_ewald_fssh_ewald,      &
+                                             pw_poisson_create,        &
                                              pw_poisson_parameter_type,&
-                                             pw_poisson_release,&
+                                             pw_poisson_release,       &
                                              pw_poisson_type
   USE pw_pool_types,                   ONLY: pw_pool_p_type,&
                                              pw_pool_type
@@ -96,7 +98,7 @@ SUBROUTINE ewald_pw_grid_update( ewald_pw, ewald_env, cell_hmat)
 
 
   SELECT CASE ( ewald_type )
-  CASE ( do_ewald_ewald )
+  CASE ( do_ewald_ewald, do_ewald_fssh_ewald )
      CALL ewald_pw_get ( ewald_pw, pw_big_pool = pw_big_pool, &
                          dg = dg, poisson_env=poisson_env )
      CALL pw_grid_change ( cell_hmat, pw_big_pool % pw_grid )
@@ -127,9 +129,9 @@ SUBROUTINE ewald_pw_grid_update( ewald_pw, ewald_env, cell_hmat)
      CALL pw_grid_change ( cell_hmat, pw_big_pool % pw_grid )
      CALL ewald_pw_set ( ewald_pw, pw_big_pool = pw_big_pool, &
           poisson_env=poisson_env)
-  CASE ( do_ewald_none )
+  CASE ( do_ewald_none, do_ewald_dsf )
   CASE default
-     CPABORT("")
+     CPABORT("No valid electrostatics method selected.")
   END SELECT
   IF (ASSOCIATED(poisson_env)) THEN
      ALLOCATE(pw_pools(1))

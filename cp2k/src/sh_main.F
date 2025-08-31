@@ -61,6 +61,9 @@ MODULE sh_main
                                              calc_adiab_nace_old,       &
                                              nace1_time_t
 
+     USE bibliography,                    ONLY: Spencer2016,            &
+                                                cite_reference
+
      USE sh_types,                    ONLY: sh_env_type, &
                                                 sh_print_env_type
 
@@ -171,7 +174,7 @@ CONTAINS
                                   velocities_tp,  &
                                   energies_tp,  &
                                   sh_env, itimes, &
-                                  adiab_section, my_bo_keyword,  &
+                                  adiab_section, my_bo_keyword, &
                                   atomic_kinds, local_particles,                &
                                   my_test_keyword, method_keyword, diagonal_F)
 
@@ -216,6 +219,8 @@ CONTAINS
      REAL(KIND=dp)                                  :: convert_nacv
      INTEGER                                        :: i
      COMPLEX(KIND=dp), dimension(:), allocatable    :: ctotal
+
+     CALL cite_reference(Spencer2016)
 
      NULLIFY(positions_com_tp, velocities_com_tp)
      NULLIFY(logger)

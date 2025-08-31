@@ -16,6 +16,8 @@ MODULE force_fields_all
                                              get_atomic_kind_set,&
                                              set_atomic_kind
   USE atoms_input,                     ONLY: read_shell_coord_input
+  USE bibliography,                    ONLY: Fennell2006,&
+                                             cite_reference
   USE cell_types,                      ONLY: cell_type
   USE cp_linked_list_val,              ONLY: cp_sll_val_next,&
                                              cp_sll_val_type
@@ -23,6 +25,7 @@ MODULE force_fields_all
   USE damping_dipole_types,            ONLY: damping_p_create,&
                                              damping_p_type,&
                                              tang_toennies
+  USE erf_fn,                          ONLY: erfc
   USE ewald_environment_types,         ONLY: ewald_env_get,&
                                              ewald_env_set,&
                                              ewald_environment_type
@@ -73,6 +76,7 @@ MODULE force_fields_all
        tersoff_type
   USE particle_types,                  ONLY: allocate_particle_set,&
                                              particle_type
+  USE pw_poisson_types,                ONLY: do_ewald_dsf
   USE physcon,                         ONLY: bohr
   USE qmmm_ff_fist,                    ONLY: qmmm_ff_precond_only_qm
   USE qmmm_types_low,                  ONLY: qmmm_env_mm_type
@@ -3314,9 +3318,10 @@ CONTAINS
                                                 nkinds
     REAL(KIND=dp)                            :: alpha, beta, mm_radius1, &
                                                 mm_radius2, rcut2, &
-                                                rcut2_ewald, tmp
+                                                rcut2_ewald, tmp, rcut, x
     REAL(KIND=dp), DIMENSION(:, :, :), &
       POINTER                                :: interaction_cutoffs
+    REAL(KIND=dp), DIMENSION(:, :), POINTER  :: interaction_cutoffs_dsf
     TYPE(atomic_kind_type), POINTER          :: atomic_kind
 
     CALL timeset(routineN,handle)
@@ -3325,8 +3330,10 @@ CONTAINS
     nkinds = SIZE(atomic_kind_set)
     ! allocate the array with interaction cutoffs for the electrostatics, used
     ! to make the electrostatic interaction continuous at ewald_env%rcut
-    ALLOCATE(interaction_cutoffs(3,nkinds,nkinds))
+    ALLOCATE(interaction_cutoffs(3,nkinds,nkinds), &
+             interaction_cutoffs_dsf(nkinds,nkinds))
     interaction_cutoffs = 0.0_dp
+
 
     ! compute the interaction cutoff if SHIFT_CUTOFF is active
     IF (ff_type%shift_cutoff) THEN
@@ -3345,30 +3352,43 @@ CONTAINS
                 atomic_kind => atomic_kind_set(i2)
                 CALL get_atomic_kind(atomic_kind=atomic_kind, mm_radius=mm_radius2)
                 ! cutoff for core-core
-                interaction_cutoffs(1,i1,i2) = potential_coulomb(rcut2, tmp, &
-                  1.0_dp, ewald_type, alpha, 0.0_dp, 0.0_dp)
-                ! cutoff for core-shell, core-ion, shell-core or ion-core
-                IF (mm_radius1 > 0.0_dp) THEN
-                   beta = sqrthalf/mm_radius1
+                IF (ewald_type /= do_ewald_dsf) THEN
+                  interaction_cutoffs(1,i1,i2) = potential_coulomb(rcut2, tmp, &
+                     1.0_dp, ewald_type, alpha, 0.0_dp, 0.0_dp)
+                  ! cutoff for core-shell, core-ion, shell-core or ion-core
+                  IF (mm_radius1 > 0.0_dp) THEN
+                     beta = sqrthalf/mm_radius1
+                  ELSE
+                     beta = 0.0_dp
+                  END IF
+                  interaction_cutoffs(2,i1,i2) = potential_coulomb(rcut2, tmp, &
+                    1.0_dp, ewald_type, alpha, beta, 0.0_dp)
+                  ! cutoff for shell-shell or ion-ion
+                  IF (mm_radius1 + mm_radius2 > 0.0_dp) THEN
+                     beta = sqrthalf/SQRT(mm_radius1*mm_radius1+mm_radius2*mm_radius2)
+                  ELSE
+                     beta = 0.0_dp
+                  END IF
+                  interaction_cutoffs(3,i1,i2) = potential_coulomb(rcut2, tmp, &
+                    1.0_dp, ewald_type, alpha, beta, 0.0_dp)
+
+                ! Damped shifted forces method
                 ELSE
-                   beta = 0.0_dp
+
+                   CALL cite_reference(Fennell2006)
+                   rcut = SQRT(rcut2_ewald)
+                   x = alpha * rcut
+                   interaction_cutoffs(:, i1, i2) = erfc(x)/rcut
+                   interaction_cutoffs_dsf(i1,i2) = erfc(x)/rcut2_ewald + &
+                        1.1283791670955126_dp * alpha * EXP(- x**2)/rcut
                 END IF
-                interaction_cutoffs(2,i1,i2) = potential_coulomb(rcut2, tmp, &
-                  1.0_dp, ewald_type, alpha, beta, 0.0_dp)
-                ! cutoff for shell-shell or ion-ion
-                IF (mm_radius1 + mm_radius2 > 0.0_dp) THEN
-                   beta = sqrthalf/SQRT(mm_radius1*mm_radius1+mm_radius2*mm_radius2)
-                ELSE
-                   beta = 0.0_dp
-                END IF
-                interaction_cutoffs(3,i1,i2) = potential_coulomb(rcut2, tmp, &
-                  1.0_dp, ewald_type, alpha, beta, 0.0_dp)
              END IF
           END DO
        END DO
     END IF
 
-    CALL ewald_env_set(ewald_env, interaction_cutoffs=interaction_cutoffs)
+    CALL ewald_env_set(ewald_env, interaction_cutoffs=interaction_cutoffs,    &
+                       interaction_cutoffs_dsf=interaction_cutoffs_dsf)
 
     CALL timestop(handle)
   END SUBROUTINE force_field_pack_eicut

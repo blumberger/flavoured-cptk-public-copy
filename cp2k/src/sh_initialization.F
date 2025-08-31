@@ -277,6 +277,7 @@ CONTAINS
     sh_env%aom_couplings_keyword = .FALSE.
     sh_env%frozen_couplings_keyword = .FALSE.
     sh_env%tresp_couplings_keyword = .FALSE.
+    sh_env%sp_fect_keyword = .FALSE.
 
     !WTP_for_X-SH: !! .TRUE.
     !!sh_env%Gaussian_charges = .FALSE. !!
@@ -390,7 +391,7 @@ CONTAINS
         ALLOCATE(sh_env%NN(mat, mat))
         ALLOCATE(sh_env%grad_tresp(3,mat, COUNT(sh_env%ext_pres)))
 !TEST
-        !ALLOCATE(sh_env%test_grad_tresp(3,mat, mat, COUNT(sh_env%ext_pres))) 
+        !ALLOCATE(sh_env%test_grad_tresp(3,mat, mat, COUNT(sh_env%ext_pres)))
 
     CASE DEFAULT
         CPABORT("There is no method to calculate the coupling")

@@ -14,9 +14,10 @@ MODULE dg_rho0_types
   USE pw_grid_types,                   ONLY: pw_grid_type
   USE pw_methods,                      ONLY: pw_zero
   USE pw_poisson_types,                ONLY: do_ewald_ewald,&
-                                             do_ewald_none,&
-                                             do_ewald_pme,&
-                                             do_ewald_spme
+                                             do_ewald_none, &
+                                             do_ewald_pme,  &
+                                             do_ewald_spme, &
+                                             do_ewald_fssh_ewald
   USE pw_types,                        ONLY: REALDATA3D,&
                                              pw_create,&
                                              pw_p_type,&
@@ -211,7 +212,7 @@ CONTAINS
 
     CALL pw_release ( dg_rho0 % density % pw)
     SELECT CASE ( dg_rho0 % type )
-    CASE ( do_ewald_ewald )
+    CASE ( do_ewald_ewald, do_ewald_fssh_ewald )
        CALL pw_create ( dg_rho0 % density % pw, pw_grid, REALDATA3D)
        CALL dg_rho0_pme_gauss ( dg_rho0 % density, dg_rho0 % zet ( 1 ))
     CASE ( do_ewald_pme )

@@ -34,12 +34,18 @@ MODULE fist_neighbor_list_types
      ! to beginning of the array 'list'. nscale is the number of elements in
      ! *_scale that are effectively used. This way one does not have to
      ! reallocate the *_scale arrays for every new scaled pair interaction.
-     ! The field is_info is only used to switch between the regular nonbonded
+     ! The field is_onfo is only used to switch between the regular nonbonded
      ! and the nonbonded14 splines for the van der waals interactions.
      REAL(KIND=dp), POINTER, DIMENSION(:)    :: ei_scale
      REAL(KIND=dp), POINTER, DIMENSION(:)    :: vdw_scale
      LOGICAL, POINTER, DIMENSION(:)          :: is_onfo
      INTEGER                                 :: nscale
+     ! Surface hopping addition -just optimisations for multiple coulomb sums
+     LOGICAL                                 :: do_list 
+     LOGICAL, ALLOCATABLE, DIMENSION(:)      :: skip_grp
+     INTEGER                                 :: max_at, min_at
+     INTEGER, ALLOCATABLE, DIMENSION(:)      :: max_ats, min_ats
+
   END TYPE neighbor_kind_pairs_type
 
 ! *****************************************************************************
@@ -71,10 +77,24 @@ CONTAINS
 
     INTEGER                                  :: i
 
+    TYPE(neighbor_kind_pairs_type), POINTER  :: neigh_type
+
     IF (ASSOCIATED(fist_neighbor)) THEN
        ! deallocate neighbor_kind_pairs
        IF (ASSOCIATED(fist_neighbor%neighbor_kind_pairs)) THEN
           DO i = 1, SIZE(fist_neighbor%neighbor_kind_pairs)
+
+             neigh_type => fist_neighbor%neighbor_kind_pairs(i)
+             IF (ALLOCATED(neigh_type%skip_grp)) THEN
+                DEALLOCATE(neigh_type%skip_grp)
+             END IF
+             IF (ALLOCATED(neigh_type%max_ats)) THEN
+               DEALLOCATE(neigh_type%max_ats)
+             END IF
+             IF (ALLOCATED(neigh_type%min_ats)) THEN
+               DEALLOCATE(neigh_type%min_ats)
+             END IF
+
              IF (ASSOCIATED(fist_neighbor%neighbor_kind_pairs(i)%list)) THEN
                 DEALLOCATE(fist_neighbor%neighbor_kind_pairs(i)%list)
              END IF

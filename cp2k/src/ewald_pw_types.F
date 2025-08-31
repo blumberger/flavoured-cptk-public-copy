@@ -37,6 +37,7 @@ MODULE ewald_pw_types
   USE pw_poisson_read_input,           ONLY: pw_poisson_read_parameters
   USE pw_poisson_types,                ONLY: &
        do_ewald_ewald, do_ewald_none, do_ewald_pme, do_ewald_spme, &
+       do_ewald_dsf, &
        pw_poisson_create, pw_poisson_parameter_type, pw_poisson_release, &
        pw_poisson_retain, pw_poisson_type
   USE pw_pool_types,                   ONLY: pw_pool_create,&
@@ -336,10 +337,10 @@ CONTAINS
        CALL rs_grid_release_descriptor ( rs_desc)
 
        CALL pw_grid_release ( pw_big_grid)
-    CASE ( do_ewald_none )
+    CASE ( do_ewald_none, do_ewald_dsf )
        ! No EWALD sums..
     CASE default
-       CPABORT("")
+       CPABORT("No valid electrostatics method selected.")
     END SELECT
     ! Poisson Environment
     IF (ASSOCIATED(ewald_pw%poisson_env)) THEN

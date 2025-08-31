@@ -119,7 +119,8 @@ MODULE integrator
                                              zero_md_ener
 !  USE aom_utils,                       ONLY: check_hop_attempt, &
  
-  USE sh_types,                       ONLY: sh_env_type
+  USE sh_types,                        ONLY: sh_env_type, &
+                                             sh_release
 
   USE non_adiabatic_utils,             ONLY: apply_decoherence, &
                                              check_hop_attempt, &
@@ -1307,7 +1308,6 @@ END SUBROUTINE adiab_overlap_check
     nparticle    = particles%n_els
     particle_set => particles%els
     molecule_set => molecules%els
-
 
     CALL get_atomic_kind_set(atomic_kind_set=atomic_kind_set,&
          shell_present=shell_present,shell_adiabatic=shell_adiabatic,&

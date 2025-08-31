@@ -76,7 +76,7 @@ MODULE bibliography
        Luber2014, Berghold2011, DelBen2015b, Campana2009,              &
        Schiffmann2015, Bruck2014, Rappe1992, Ceriotti2012,             &
        Ceriotti2010, Walewski2014, Monkhorst1976, MacDonald1978,       &
-       Gilbert2008
+       Gilbert2008, Spencer2016, Fennell2006
 
 
 CONTAINS
@@ -92,6 +92,34 @@ CONTAINS
 !>       link in the input reference manual.
 ! *****************************************************************************
   SUBROUTINE add_all_references()
+
+    CALL add_reference(key=Fennell2006, ISI_record=s2a(&
+                       "AU Fennel C. J",                  &
+                       "   Gezelter J. D",                & 
+                       "TI Is the ewald summation still necessary?"//&
+                       " pairwise alternatives to the accepted standard "//&
+                       "for long-range electrostatics.",  &
+                       "SO J. Chem. Phys.",               &
+                       "PY 2006",                         &
+                       "VL 123",                          &
+                       "IS 23",                           &
+                       "BP 234104",                       &
+                       "ER"),                             &
+                       DOI="10.1063/1.4960144"            )
+
+    CALL add_reference(key=Spencer2016, ISI_record=s2a(&
+                       "AU Spencer J",                    &
+                       "   Gajdos F",                     & 
+                       "   Blumberger J",                 &
+                       "TI FOB-SH: Fragment orbital-based surface hopping for charge carrier transport in"// &
+                       " organic and biological molecules and materials", &
+                       "SO J. Chem. Phys.",               &
+                       "PY 2016",                         &
+                       "VL 145",                          &
+                       "IS ",                             &
+                       "BP 064102",                       &
+                       "ER"),                             &
+                       DOI="10.1063/1.2206581"            )
 
     CALL add_reference(key=Ceriotti2012, ISI_record=s2a(&
          "AU Ceriotti, M",&

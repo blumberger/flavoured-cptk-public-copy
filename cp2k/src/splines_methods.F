@@ -216,6 +216,7 @@ CONTAINS
     y1 = invh*((yhi-ylo) + ((f13-a*a)*y2lo-(f13-b*b)*y2hi)*3.0_dp*h26)
     y1 = 2.0_dp * y1 * x4 * spl_f%dscale(1)
 
+
     potential_s = potential_s + spl_f%cutoff
   END FUNCTION potential_s
 
