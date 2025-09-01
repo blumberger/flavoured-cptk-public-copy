@@ -1,0 +1,62 @@
+
+&GLOBAL
+  BLACS_GRID             SQUARE
+  PREFERRED_FFT_LIBRARY  FFTW
+  PRINT_LEVEL            LOW
+  PROGRAM_NAME           CP2K
+  PROJECT_NAME           run
+  RUN_TYPE               MD
+&END GLOBAL
+&MOTION
+	&MD
+        ENSEMBLE      NVE
+        STEPS         200
+        TIMESTEP      0.1
+        TEMPERATURE   300
+        &THERMOSTAT
+            REGION  GLOBAL
+            &NOSE
+                 LENGTH      3
+                 YOSHIDA     3
+                 TIMECON     1000
+                 MTS         2
+            &END NOSE
+        &END THERMOSTAT
+        &PRINT
+            &PROGRAM_RUN_INFO LOW 
+            &END PROGRAM_RUN_INFO  
+        &END PRINT
+   	&END MD
+  	&PRINT
+	 &TRAJECTORY  LOW
+            FORMAT  XYZ
+            &EACH
+                MD          200
+            &END EACH
+        &END TRAJECTORY
+       &VELOCITIES  LOW
+           FORMAT  XYZ
+           &EACH
+               MD          20
+           &END EACH
+       &END VELOCITIES
+       &FORCES  LOW
+           FORMAT  XYZ
+           &EACH
+               MD          20
+           &END EACH
+       &END FORCES
+        &RESTART_HISTORY OFF
+        &END RESTART_HISTORY
+        &RESTART ON
+            &EACH
+                MD 200
+            &END EACH
+        &END RESTART
+        &MIXED_ENERGIES OFF
+        &END MIXED_ENERGIES
+   	&END PRINT
+   	@INCLUDE CONSTRAINT.include
+&END MOTION
+@SET DO_ES 1
+@INCLUDE FORCE_EVAL.include

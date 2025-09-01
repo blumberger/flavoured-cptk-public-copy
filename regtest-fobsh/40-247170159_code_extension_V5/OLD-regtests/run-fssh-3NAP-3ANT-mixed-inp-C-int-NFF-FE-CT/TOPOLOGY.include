@@ -1,0 +1,78 @@
+
+            &CELL
+                        ABC                   60.0    60.0    60.0
+                        PERIODIC  XYZ
+                &END CELL
+
+
+                &KIND CP
+                        ELEMENT C
+                &END KIND
+                &KIND CX
+                        ELEMENT C
+                &END KIND
+                &KIND CY
+                        ELEMENT C
+                &END KIND
+                &KIND CZ
+                        ELEMENT C
+                &END KIND
+                &KIND CG
+                        ELEMENT C
+                &END KIND
+                &KIND HX
+                        ELEMENT H
+                &END KIND
+                &KIND H
+                        ELEMENT H
+                &END KIND
+                &KIND CN
+                        ELEMENT C
+                &END KIND
+
+                &KIND Ne
+                        ELEMENT Ne
+                &END KIND
+
+                &TOPOLOGY
+                        COORD_FILE_FORMAT XYZ
+                        COORD_FILE_NAME   pos-init.xyz
+                        NUMBER_OF_ATOMS                   248
+                        CONN_FILE_FORMAT  MOL_SET
+                        &MOL_SET
+                            &MOLECULE
+                                NMOL              2 
+                                CONN_FILE_NAME    ./../topologies_excitons/Ne.psf
+                                CONN_FILE_FORMAT  UPSF
+                            &END MOLECULE
+   @INCLUDE ./site_energies/S-1-4.include  
+   @INCLUDE ./site_energies/S-1-5.include  
+   @INCLUDE ./site_energies/S-1-6.include  
+   @INCLUDE ./site_energies/S-2-4.include  
+   @INCLUDE ./site_energies/S-2-5.include  
+   @INCLUDE ./site_energies/S-2-6.include  
+   @INCLUDE ./site_energies/S-3-4.include  
+   @INCLUDE ./site_energies/S-3-5.include  
+   @INCLUDE ./site_energies/S-3-6.include  
+   @INCLUDE ./site_energies/Sx-4.include  
+   @INCLUDE ./site_energies/Sx-5.include  
+   @INCLUDE ./site_energies/Sx-6.include  
+
+                            &MOLECULE
+                                NMOL              120 
+                                CONN_FILE_NAME    ./../topologies_excitons/Ne.psf
+                                CONN_FILE_FORMAT  UPSF
+                            &END MOLECULE
+                            
+                        &END MOL_SET
+                        &DUMP_PSF
+                                &EACH
+                                   MD          1000
+                                &END EACH
+                                FILENAME ./input
+                        &END DUMP_PSF
+                &END TOPOLOGY
+
+              # @INCLUDE ../COLVAR.include
+
+            

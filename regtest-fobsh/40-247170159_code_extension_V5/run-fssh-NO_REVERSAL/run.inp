@@ -1,0 +1,218 @@
+
+&GLOBAL
+  BLACS_GRID             SQUARE
+  PREFERRED_FFT_LIBRARY  FFTW
+  PRINT_LEVEL            LOW
+  PROGRAM_NAME           CP2K
+  PROJECT_NAME           run
+  RUN_TYPE               MD
+&END GLOBAL
+&MOTION
+	&MD
+        ENSEMBLE      NVE
+        STEPS         200
+        TIMESTEP      0.1
+        TEMPERATURE   400
+        &THERMOSTAT
+            REGION  GLOBAL
+            &NOSE
+                 LENGTH      3
+                 YOSHIDA     3
+                 TIMECON     1000
+                 MTS         2
+            &END NOSE
+        &END THERMOSTAT
+        &PRINT
+            &PROGRAM_RUN_INFO LOW 
+            &END PROGRAM_RUN_INFO  
+        &END PRINT
+   	&END MD
+  	&PRINT
+	 &TRAJECTORY  LOW
+            FORMAT  XYZ
+            &EACH
+                MD          200
+            &END EACH
+        &END TRAJECTORY
+        #&VELOCITIES  LOW
+        #    FORMAT  XYZ
+        #    &EACH
+        #        MD          1
+        #    &END EACH
+        #&END VELOCITIES
+        #&FORCES  LOW
+        #    FORMAT  XYZ
+        #    &EACH
+        #        MD          1
+        #    &END EACH
+        #&END FORCES
+        &RESTART_HISTORY OFF
+        &END RESTART_HISTORY
+        &RESTART ON
+            &EACH
+                MD 200
+            &END EACH
+        &END RESTART
+        &MIXED_ENERGIES OFF
+        &END MIXED_ENERGIES
+   	&END PRINT
+   	@INCLUDE CONSTRAINT.include
+&END MOTION
+&MULTIPLE_FORCE_EVALS
+   FORCE_EVAL_ORDER 1..3
+   MULTIPLE_SUBSYS
+&END
+&FORCE_EVAL
+        METHOD MIXED
+        &MIXED
+                MIXING_TYPE ADIABATIC
+                &ADIABATIC
+                  METHOD_PROPAGATION                    FSSH
+                  INITIALIZATION                        DIABATIC
+                  FIRST_DIABAT                          1
+                  FIRST_ADIABAT                         1
+                  ELECTRONIC_PARTIAL_STEP               5
+                  SEED                                  986271203
+                  REPRESENTATION                        DIABATIC_BASIS
+                  PRINT_MORE                            T
+                  NUCLEAR_TIMESTEP  [fs]                0.1
+                  NUMBER_DIABATIC_STATES                8
+                  NUMBER_ORBITALS                       1
+                  CENTER_OF_MASS                        T
+                  &OPTIMIZATION
+                       DO_SPEEDUP_LJ                         T
+                       DO_SPEEDUP_INTRA                      T
+                       SURF_HOP_CHOICE                       TRIVIAL_HOP_CORRECT
+                       REORDERING_STATES_USING_OVERLAP       T
+                       RK_PROPAGATION                        DIABATIC_RK
+                  &END OPTIMIZATION
+                  &DECOHERENCE
+                        DECOHERENCE_CORRECTIONS               DAMPING
+                        DECO_TIME                             EDC
+                        EDC_C                                 1.0
+                        EDC_E0                                0.0
+                        SPURIOUS_TRANSFER_CORR                T
+                        THRESHOLD_TAU_FORCES                  1e-20
+                        TEMPERATURE_FG_WIDTH                  400
+                        DECOHERENCE_CRITERION                 1e-06
+                  &END DECOHERENCE
+                  &ENERGY_CONSERVATION
+                        METHOD_RESCALING                      NACV
+                        METHOD_ADIABATIC_NACV                 FAST
+                        METHOD_REVERSAL                       NEVER
+                  &END ENERGY_CONSERVATION
+                  METHOD_COUPLING                       AOM
+                  &AOM
+                       #PSIGMA_FILE_NAME                 ../topologies/S_psigma.txt
+                       #PPI_FILE_NAME                    ../topologies/S_ppi.txt
+                       #PSIGMA_C_S_FILE_NAME             ../topologies/S_psigma_carbon_sulfur.dat
+                       #PPI_C_S_FILE_NAME                ../topologies/S_ppi_carbon_sulfur.dat
+                       #PSIGMA_S_S_FILE_NAME             ../topologies/S_psigma_sulfur_sulfur.dat
+                       #PPI_S_S_FILE_NAME                ../topologies/S_ppi_sulfur_sulfur.dat
+                       STO_EXPONENTS                       6:1.000,7:1.500,16:1.8273
+                      NUMBER_AOM_ATOMS_PER_SITE                 18
+                       MULTIPLE_TIME_STEP                    1
+                       CUT_OFF_BETWEEN_SITES [angstrom]      12.0
+                       CUT_OFF_CONNECTIVITY                  3.5
+                       SCALING_FACTOR   [hartree]            0.050596443
+                       CBAR                                  0.5082
+                       ATOMIC_OVERLAP_CUTOFF                 1e-17
+                       ANALYTICS                             F
+                       NACV_INCREMENT   [bohr]               0.0018872589
+                       @INCLUDE AOM_COEFF.include
+                  &END AOM
+                  &PRINT
+                      #&PVECS LOW
+                      #   &EACH
+                      #       MD          1
+                      #   &END EACH
+                      #&END PVECS
+
+                      &COEFFICIENTS  LOW
+                         &EACH
+                             MD          1
+                         &END EACH
+                      &END COEFFICIENTS
+                      &PSEUDO_HAMILTONIAN
+                         UNIT     hartree
+                         &EACH
+                             MD          1
+                         &END EACH
+                      &END PSEUDO_HAMILTONIAN
+                      #&HAMILTONIAN
+                      #   UNIT     hartree
+                      #   &EACH
+                      #       MD          1
+                      #   &END EACH
+                      #&END HAMILTONIAN
+                      #&HOP_NACV
+                      #   &EACH
+                      #       MD          1
+                      #   &END EACH
+                      #&END HOP_NACV
+                      #&NACV
+                      #   &EACH
+                      #       MD          200
+                      #   &END EACH
+                      #&END NACV
+                      #&NACE
+                      #   &EACH
+                      #       MD          200
+                      #   &END EACH
+                      #&END NACE
+                      &SH_INFO
+                         &EACH
+                             MD          1
+                         &END EACH
+                      &END SH_INFO
+                      &ADIABAT_ENERGIES
+                         &EACH
+                             MD          1
+                         &END EACH
+                      &END ADIABAT_ENERGIES
+                      &SITE_ENERGIES
+                         &EACH
+                             MD          1
+                         &END EACH
+                      &END SITE_ENERGIES
+                      &OFF_DIAGONALS
+                         &EACH
+                             MD          1
+                         &END EACH
+                      &END OFF_DIAGONALS
+                      &POPULATIONS  LOW
+                         &EACH
+                             MD          1
+                         &END EACH
+                      &END POPULATIONS
+                      &ADIAB_POPULATIONS  LOW
+                         &EACH
+                             MD          1
+                         &END EACH
+                      &END ADIAB_POPULATIONS
+                  &END PRINT
+                &END ADIABATIC
+                &PRINT
+                        &PROGRAM_RUN_INFO OFF
+                                        &EACH
+                                                MD 200
+                                        &END EACH
+                        &END PROGRAM_RUN_INFO
+                &END PRINT
+        &END MIXED
+        @INCLUDE DECOMP.include
+        &SUBSYS
+                #&COORD
+                #    @INCLUDE COORD.init
+                #:&END COORD
+                &VELOCITY
+                    @INCLUDE VELOC.init
+                &END VELOCITY
+                @INCLUDE TOPOLOGY-NEUTRAL-ONLY.include
+        &END SUBSYS
+&END FORCE_EVAL
+
+@SET DO_LJ  1
+@INCLUDE FORCE_EVAL.include
+@SET DO_LJ  0
+@INCLUDE FORCE_EVAL.include

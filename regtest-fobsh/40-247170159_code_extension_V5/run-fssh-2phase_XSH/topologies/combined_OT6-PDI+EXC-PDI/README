@@ -1,0 +1,20 @@
+Files needed for runnings XSH at PDI-T6 interface (with FE-CT):
+
+HOMO_6T_AOM_COEFF.include --> AOM coeff T6  (which is the electron donor)
+LUMO_PDI_AOM_COEFF.include --> AOM coeff PDI (which is the hole acceptor)
+PCTDIH_b1155_ZAQZUM01_b1175_PDIEXC_b0930.prm --> TrESP charges PDI (which is the exciton tranport layer)
+
+PCTDIH.psf --> topology PDI neutral
+PCTDIH_ANION.psf --> topology PDI anion
+PTCDIH_EXC_b0930.psf --> topology PDI exciton
+
+ZAQZUM01.psf --> topology T6 neutral 
+ZAQZUM01HOLE.psf --> topology T6 cation
+
+PCTDIH_b1155_ZAQZUM01_b1175_PDIEXC_b0930.prm --> combined FF with types of PDI (anion+exciton+neutral) & T6 (cation+neutral)
+
+
+CHECK TO DO:
+- Check that when only FE is active PDI reorganization energy is: ~390 meV  (this I have checked it in part by regstesting to what I had before)
+- Check that when only PDI is negatively charged, reorganization energy is: ~256 meV 
+- Check that when only T6 is positevely charged, reorganization energy is: ~253 meV 

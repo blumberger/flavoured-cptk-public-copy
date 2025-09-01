@@ -1,0 +1,325 @@
+ DBCSR| Multiplication driver                                               BLAS
+ DBCSR| Multrec recursion limit                                              512
+ DBCSR| Multiplication stack size                                           1000
+ DBCSR| Maximum elements for images                                    UNLIMITED
+ DBCSR| Randmat seed                                                    12341313
+ DBCSR| Multiplication size stacks                                             3
+
+
+  **** **** ******  **  PROGRAM STARTED AT               2025-08-30 19:01:19.997
+ ***** ** ***  *** **   PROGRAM STARTED ON                       LAPTOP-V89OQBOH
+ **    ****   ******    PROGRAM STARTED BY                                   sam
+ ***** **    ** ** **   PROGRAM PROCESS ID                                  1157
+  **** **  *******  **  PROGRAM STARTED IN /home/sam/flavoured-cptk/regtest-fobs
+                                           h/temp/run-fssh-3NAP-3ANT-3FF-FE-CT-C
+                                           R-C-inter-FDB
+
+ CP2K| version string:                    CP2K version 4.0 (Development Version)
+ CP2K| source code revision number:                                git:8a0a0fb62
+ CP2K| cp2kflags: fftw3                                                         
+ CP2K| is freely available from                            https://www.cp2k.org/
+ CP2K| Program compiled at                         Wed Aug 27 08:16:19 CEST 2025
+ CP2K| Program compiled on                                       LAPTOP-V89OQBOH
+ CP2K| Program compiled for                                      cp2k_local_dell
+ CP2K| Data directory path                    /home/sam/flavoured-cptk/cp2k/data
+ CP2K| Input file name                                                   run.inp
+
+ GLOBAL| Force Environment number                                              1
+ GLOBAL| Basis set file name                                           POTENTIAL
+ GLOBAL| MM Potential file name                                     MM_POTENTIAL
+ GLOBAL| Coordinate file name                                       pos-init.xyz
+ GLOBAL| Force Environment number                                              2
+ GLOBAL| Basis set file name                                           POTENTIAL
+ GLOBAL| MM Potential file name                                     MM_POTENTIAL
+ GLOBAL| Coordinate file name                                       pos-init.xyz
+ GLOBAL| Force Environment number                                              3
+ GLOBAL| Basis set file name                                           POTENTIAL
+ GLOBAL| MM Potential file name                                     MM_POTENTIAL
+ GLOBAL| Coordinate file name                                       pos-init.xyz
+ GLOBAL| Force Environment number                                              4
+ GLOBAL| Basis set file name                                           POTENTIAL
+ GLOBAL| MM Potential file name                                     MM_POTENTIAL
+ GLOBAL| Coordinate file name                                       pos-init.xyz
+ GLOBAL| Method name                                                        CP2K
+ GLOBAL| Project name                                                        run
+ GLOBAL| Preferred FFT library                                             FFTW3
+ GLOBAL| Preferred diagonalization lib.                                       SL
+ GLOBAL| Run type                                                             MD
+ GLOBAL| All-to-all communication in single precision                          F
+ GLOBAL| FFTs using library dependent lengths                                  F
+ GLOBAL| Global print level                                                  LOW
+ GLOBAL| Total number of message passing processes                             1
+ GLOBAL| Number of threads for this process                                    1
+ GLOBAL| This output is from process                                           0
+ GLOBAL| CPU model name :  12th Gen Intel(R) Core(TM) i7-1260P
+
+ MEMORY| system memory details [Kb]
+ MEMORY|                        rank 0           min           max       average
+ MEMORY| MemTotal              7977148       7977148       7977148       7977148
+ MEMORY| MemFree               4180196       4180196       4180196       4180196
+ MEMORY| Buffers                  6168          6168          6168          6168
+ MEMORY| Cached                1223952       1223952       1223952       1223952
+ MEMORY| Slab                   199012        199012        199012        199012
+ MEMORY| SReclaimable           125012        125012        125012        125012
+ MEMORY| MemLikelyFree         5535328       5535328       5535328       5535328
+
+ TOTAL NUMBER OF FORCE EVALS           4
+ NOTE:n_subforce_eval           3
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        1
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:         1
+ COLVARS|   ATOM:         2
+ COLVARS|   ATOM:         3
+ COLVARS|   ATOM:        10
+ COLVARS|   ATOM:        12
+ COLVARS|   ATOM:         5
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       -0.000913   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        2
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:         3
+ COLVARS|   ATOM:         4
+ COLVARS|   ATOM:        11
+ COLVARS|   ATOM:        14
+ COLVARS|   ATOM:        13
+ COLVARS|   ATOM:        10
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        0.000913    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        3
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        19
+ COLVARS|   ATOM:        20
+ COLVARS|   ATOM:        21
+ COLVARS|   ATOM:        28
+ COLVARS|   ATOM:        30
+ COLVARS|   ATOM:        23
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        9.447737   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        4
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        21
+ COLVARS|   ATOM:        22
+ COLVARS|   ATOM:        29
+ COLVARS|   ATOM:        32
+ COLVARS|   ATOM:        31
+ COLVARS|   ATOM:        28
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:        9.449563    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        5
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        37
+ COLVARS|   ATOM:        38
+ COLVARS|   ATOM:        39
+ COLVARS|   ATOM:        46
+ COLVARS|   ATOM:        48
+ COLVARS|   ATOM:        41
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       18.896387   -0.004945    2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        6
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        39
+ COLVARS|   ATOM:        40
+ COLVARS|   ATOM:        47
+ COLVARS|   ATOM:        50
+ COLVARS|   ATOM:        49
+ COLVARS|   ATOM:        46
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       18.898213    0.004945   -2.313156
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        7
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        55
+ COLVARS|   ATOM:        56
+ COLVARS|   ATOM:        57
+ COLVARS|   ATOM:        59
+ COLVARS|   ATOM:        60
+ COLVARS|   ATOM:        61
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       28.351777   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        8
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        67
+ COLVARS|   ATOM:        70
+ COLVARS|   ATOM:        73
+ COLVARS|   ATOM:        75
+ COLVARS|   ATOM:        72
+ COLVARS|   ATOM:        69
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       28.340123    0.009071   -4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:        9
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        79
+ COLVARS|   ATOM:        80
+ COLVARS|   ATOM:        81
+ COLVARS|   ATOM:        83
+ COLVARS|   ATOM:        84
+ COLVARS|   ATOM:        85
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       37.800427   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       10
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:        91
+ COLVARS|   ATOM:        94
+ COLVARS|   ATOM:        97
+ COLVARS|   ATOM:        99
+ COLVARS|   ATOM:        96
+ COLVARS|   ATOM:        93
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       37.788773    0.009071   -4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       11
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:       103
+ COLVARS|   ATOM:       104
+ COLVARS|   ATOM:       105
+ COLVARS|   ATOM:       107
+ COLVARS|   ATOM:       108
+ COLVARS|   ATOM:       109
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       47.249077   -0.009071    4.632012
+          ----------------------------------------------------------------------
+          ----------------------------------------------------------------------
+ COLVARS| COLVAR INPUT INDEX:       12
+ COLVARS| BOND          >>> POINTS:                                    1       2
+ COLVARS| INFORMATION ON DEFINED GEOMETRICAL POINTS
+ COLVARS|  POINT Nr.     1 OF TYPE: GEO_CENTER
+ COLVARS|   ATOMS BUILDING THE GEOMETRICAL POINT
+ COLVARS|   ATOM:       115
+ COLVARS|   ATOM:       118
+ COLVARS|   ATOM:       121
+ COLVARS|   ATOM:       123
+ COLVARS|   ATOM:       120
+ COLVARS|   ATOM:       117
+ COLVARS|  POINT Nr.     2 OF TYPE: FIX_POINT
+ COLVARS|   XYZ POSITION OF FIXED POINT:       47.237423    0.009071   -4.632012
+          ----------------------------------------------------------------------
+ RESTRAINT| Active restraint on COLLECTIVE section Nr.     1. K [a.u.]= 0.005000
+ RESTRAINT| Active restraint on COLLECTIVE section Nr.     2. K [a.u.]= 0.005000
+ RESTRAINT| Active restraint on COLLECTIVE section Nr.     3. K [a.u.]= 0.005000
+ RESTRAINT| Active restraint on COLLECTIVE section Nr.     4. K [a.u.]= 0.005000
+ RESTRAINT| Active restraint on COLLECTIVE section Nr.     5. K [a.u.]= 0.005000
+ RESTRAINT| Active restraint on COLLECTIVE section Nr.     6. K [a.u.]= 0.005000
+ RESTRAINT| Active restraint on COLLECTIVE section Nr.     7. K [a.u.]= 0.005000
+ RESTRAINT| Active restraint on COLLECTIVE section Nr.     8. K [a.u.]= 0.005000
+ RESTRAINT| Active restraint on COLLECTIVE section Nr.     9. K [a.u.]= 0.005000
+ RESTRAINT| Active restraint on COLLECTIVE section Nr.    10. K [a.u.]= 0.005000
+ RESTRAINT| Active restraint on COLLECTIVE section Nr.    11. K [a.u.]= 0.005000
+ RESTRAINT| Active restraint on COLLECTIVE section Nr.    12. K [a.u.]= 0.005000
+ DECOMP =  T
+ DECOMP =  T
+ DECOMP =  T
+
+ MD| Molecular Dynamics Protocol 
+ MD| Ensemble Type                                                           NVE
+ MD| Number of Time Steps                                                    200
+ MD| Time Step [fs]                                                         0.10
+ MD| Temperature [K]                                                      300.00
+ MD| Temperature tolerance [K]                                              0.00
+ MD| Constraints activated 
+ MD| Tolerance for shake                                              0.1000E-05
+ MD| Print MD information every                                        1 step(s)
+ MD| File type     Print frequency[steps]                             File names
+ MD| Coordinates          200                                      run-pos-1.xyz
+ MD| Velocities             1                                      run-vel-1.xyz
+ MD| Energies               1                                         run-1.ener
+ MD| Dump                 200                                      run-1.restart
+
+ ROT| Rotational Analysis Info 
+ ROT| Principal axes and moments of inertia in atomic units:
+ ROT|                                1                 2                 3
+ ROT| EIGENVALUES            0.147348159E+13   0.181154206E+13   0.188503186E+13
+ ROT|      X                     0.725533885      -0.686324004      -0.050595880
+ ROT|      Y                     0.081160793       0.012326244       0.996624799
+ ROT|      Z                     0.683383865       0.727191464      -0.064645708
+ ROT| Numer of Rotovibrational vectors:     6
+
+ Calculation of degrees of freedom
+                                                      Number of atoms:       248
+                                 Number of Intramolecular constraints:         0
+                                 Number of Intermolecular constraints:         0
+                                  Invariants(translation + rotations):         3
+                                                   Degrees of freedom:       741
+
+
+ Restraints Information
+                                  Number of Intramolecular restraints:         0
+                                  Number of Intermolecular restraints:        12
+
+ *** WARNING in motion/thermostat/thermostat_methods.F:280 :: Thermostat ***
+ *** for Particles has been defined but the ensemble provided does not   ***
+ *** support thermostat for Particles! Ignoring thermostat input.        ***
+
+ ************************** Velocities initialization **************************
+ Initial Temperature                                                    333.01 K
+ COM velocity:           -0.000023072435      0.000013407134     -0.000010397276
+ *******************************************************************************
+
+
+ *******************************************************************************
+ *   ___                                                                       *
+ *  /   \                                                                      *
+ * [ABORT]                                                                     *
+ *  \___/   Value requested, but no value set getting value from keyword FE_IS *
+ *    |                           of section FE_CT_BLOCK                       *
+ *  O/|                                                                        *
+ * /| |                                                                        *
+ * / \                                        input/input_section_types.F:1315 *
+ *******************************************************************************
+
+
+ ===== Routine Calling Stack ===== 
+
+            2 qs_mol_dyn_low
+            1 CP2K

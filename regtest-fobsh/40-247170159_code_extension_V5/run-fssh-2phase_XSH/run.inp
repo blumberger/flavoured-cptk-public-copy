@@ -1,0 +1,227 @@
+
+&GLOBAL
+  BLACS_GRID             SQUARE
+  PREFERRED_FFT_LIBRARY  FFTW
+  PRINT_LEVEL            LOW
+  PROGRAM_NAME           CP2K
+  PROJECT_NAME           run
+  RUN_TYPE               MD
+&END GLOBAL
+&MOTION
+	&MD
+        ENSEMBLE      NVE
+        STEPS         100
+        TIMESTEP      0.05
+        &PRINT
+            &PROGRAM_RUN_INFO LOW 
+            &END PROGRAM_RUN_INFO  
+        &END PRINT
+   	&END MD
+  	&PRINT
+	 &TRAJECTORY  LOW
+            FORMAT  XYZ
+            &EACH
+                MD          200
+            &END EACH
+        &END TRAJECTORY
+        #&VELOCITIES  LOW
+        #    FORMAT  XYZ
+        #    &EACH
+        #        MD          100000
+        #    &END EACH
+        #&END VELOCITIES
+        #&FORCES  LOW
+        #    FORMAT  XYZ
+        #    &EACH
+        #        MD          100
+        #    &END EACH
+        #&END FORCES
+        &RESTART_HISTORY OFF
+        &END RESTART_HISTORY
+        &RESTART ON
+            &EACH
+                MD 200
+            &END EACH
+        &END RESTART
+        &MIXED_ENERGIES OFF
+        &END MIXED_ENERGIES
+   	&END PRINT
+   	@INCLUDE ./CONSTRAINT.include
+&END MOTION
+&MULTIPLE_FORCE_EVALS
+   FORCE_EVAL_ORDER 1..4
+   MULTIPLE_SUBSYS
+&END
+&FORCE_EVAL
+        METHOD MIXED
+        &MIXED
+                MIXING_TYPE ADIABATIC
+                &ADIABATIC
+                  METHOD_PROPAGATION                    FSSH
+                  INITIALIZATION                        DIABATIC
+                  FIRST_DIABAT                          7
+                  FIRST_ADIABAT                         1
+                  ELECTRONIC_PARTIAL_STEP               5
+                  SEED                        923767698
+                  REPRESENTATION                        DIABATIC_BASIS
+                  PRINT_MORE                            F
+                  NUCLEAR_TIMESTEP  [fs]                0.05
+                  NUMBER_DIABATIC_STATES                12
+                  NUMBER_ORBITALS                       1
+                  CENTER_OF_MASS                        T
+                  &OPTIMIZATION
+                       DO_SPEEDUP_LJ                         F
+                       DO_SPEEDUP_INTRA                      F
+                       SURF_HOP_CHOICE                       TRIVIAL_HOP_CORRECT
+                       REORDERING_STATES_USING_OVERLAP       T
+                       RK_PROPAGATION                        DIABATIC_RK_FAST
+                  &END OPTIMIZATION
+                  &DECOHERENCE
+                        DECOHERENCE_CORRECTIONS               DAMPING
+                        DECO_TIME                             EDC
+                        EDC_C                                 1.0
+                        EDC_E0                                0.0
+                        SPURIOUS_TRANSFER_CORR                T
+                        THRESHOLD_TAU_FORCES                  1e-20
+                        TEMPERATURE_FG_WIDTH                  300
+                        DECOHERENCE_CRITERION                 1e-06
+                  &END DECOHERENCE
+                  &ENERGY_CONSERVATION
+                        METHOD_RESCALING                      NACV
+                        METHOD_ADIABATIC_NACV                 FAST
+                        METHOD_REVERSAL                       ALWAYS
+                  &END ENERGY_CONSERVATION
+                  &METHOD_SITE_ENERGIES
+                        MULTI_STATES                          T
+                        BLOCK_TYPE                            CT-FE
+                        &CT_BLOCK
+                           ADD_COULOMB_POTENTIAL                F
+			   SITE_NUMBER                          3
+			   @INCLUDE                             FRZ_DIAGONALS_COULOMB.include
+			   XT_CT_OFFSET                         0.0
+                           INDEX_DONOR_MOLS                     254 284 285
+                           INDEX_ACCEPTOR_MOLS                  306 318 330
+                           N_DONOR_ATOMS                        44
+                           N_ACCEPTOR_ATOMS                     40
+                           @INCLUDE                             ESP_OT6_cat.include
+                           @INCLUDE                             ESP_PTCDIH_anion.include
+                           DIELECTRIC_SCREENING                 3.0
+                        &END CT_BLOCK
+                        &FE_CT_BLOCK   
+                            FE_IS                                ACCEPTOR
+                        &END FE_CT_BLOCK
+                  &END METHOD_SITE_ENERGIES
+                  METHOD_COUPLING                        MULTI-FECT
+                  &AOM  #WTP_to_be_changed_this_section
+                       STO_EXPONENTS                         6:1.385600,7:1.617102,8:1.505135,16:1.641119
+                       CUT_OFF_BETWEEN_SITES [angstrom]      12.0
+                       CUT_OFF_CONNECTIVITY                  3.57
+                       SCALING_FACTOR_DONOR   [hartree]            0.347759
+                       SCALING_FACTOR_ACCEPTOR   [hartree]            -0.347759
+                       SCALING_FACTOR_FECT   [hartree]       0.627360
+                       ATOMIC_OVERLAP_CUTOFF                 1e-17
+                       ANALYTICS                             F
+                       NACV_INCREMENT   [bohr]               0.0018872589
+                       @INCLUDE                              HOMO_6T_AOM_COEFF.include
+                       @INCLUDE                              LUMO_PDI_AOM_COEFF.include
+                       @INCLUDE                              HOMO_PDI_AOM_COEFF.include
+                       @INCLUDE                              HOMO_6T_AOM_COEFF.include
+# The above four INCLUDE order should be: donor/acceptor/FE/CT
+                  &END AOM
+                  &TRESP_COUPLINGS
+                       CUT_OFF_BETWEEN_FE_SITES [angstrom]      12
+                       @INCLUDE PTCDIH_S1_TRESP_CHARGES-crys-camb3lyp_6-31Gdp.include 
+                  &END TRESP_COUPLINGS
+
+                  &PRINT
+                      #&PVECS LOW
+                      #   &EACH
+                      #       MD          100
+                      #   &END EACH
+                      #&END PVECS
+
+                      &COEFFICIENTS  LOW
+                         &EACH
+                             MD          1
+                         &END EACH
+                      &END COEFFICIENTS
+                      &PSEUDO_HAMILTONIAN
+                         UNIT     hartree
+                         &EACH
+                             MD          1
+                         &END EACH
+                      &END PSEUDO_HAMILTONIAN
+                      #&HAMILTONIAN
+                      #   UNIT     hartree
+                      #   &EACH
+                      #       MD          1
+                      #   &END EACH
+                      #&END HAMILTONIAN
+                      #&HOP_NACV
+                      #   &EACH
+                      #       MD          1
+                      #   &END EACH
+                      #&END HOP_NACV
+                      #&NACV
+                      #   &EACH
+                      #       MD          1
+                      #   &END EACH
+                      #&END NACV
+                      &NACE LOW
+                         &EACH
+                             MD          1
+                         &END EACH
+                      &END NACE
+                      &SH_INFO
+                         &EACH
+                             MD          1
+                         &END EACH
+                      &END SH_INFO
+	              &ADIABAT_ENERGIES
+                         &EACH
+                             MD          1
+                         &END EACH
+                      &END ADIABAT_ENERGIES
+                      &SITE_ENERGIES
+                         &EACH
+                             MD          1
+                         &END EACH
+                      &END SITE_ENERGIES
+                      &OFF_DIAGONALS
+                         &EACH
+                             MD          1
+                         &END EACH
+                      &END OFF_DIAGONALS
+                      &POPULATIONS  LOW
+                         &EACH
+                             MD          1
+                         &END EACH
+                      &END POPULATIONS
+                      &ADIAB_POPULATIONS  LOW
+                         &EACH
+                             MD          1
+                         &END EACH
+                      &END ADIAB_POPULATIONS
+                  &END PRINT
+                &END ADIABATIC
+                &PRINT
+                        &PROGRAM_RUN_INFO OFF
+                                        &EACH
+                                                MD 100000
+                                        &END EACH
+                        &END PROGRAM_RUN_INFO
+                &END PRINT
+        &END MIXED
+        @INCLUDE ./DECOMP.include
+        &SUBSYS
+                #&COORD
+                #    @INCLUDE COORD.init
+                #:&END COORD
+                &VELOCITY
+                    @INCLUDE vel-init.xyz
+                &END VELOCITY
+                @INCLUDE ./TOPOLOGY-NEUTRAL-ONLY.include
+        &END SUBSYS
+&END FORCE_EVAL
+@INCLUDE ./FF_ACTIVE.include
+

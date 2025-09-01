@@ -1,0 +1,6 @@
+
+           &ENERGY_DECOMP
+              INDEX_MOL_DECOMP 204  212  220  228  236  244  252  260  268  276  284  292  300  308  316  324  332  340  348  356
+              NUM_ACTIVE_ATOMS 360
+           &END ENERGY_DECOMP
+                

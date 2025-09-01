@@ -1,0 +1,5 @@
+
+@SET DO_LJ  1
+@INCLUDE ./FORCE_EVAL.include
+@SET DO_LJ  0
+@INCLUDE ./FORCE_EVAL.include

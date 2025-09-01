@@ -1,0 +1,32 @@
+
+    @IF ${SITE_ENERGY} == 11
+    
+            
+                &MOLECULE
+                    NMOL              3
+                    CONN_FILE_NAME    ./../topologies_excitons/NAPHTA04_NEUTRAL_NO_CHARGE_SAM.psf
+                    CONN_FILE_FORMAT  UPSF
+               &END MOLECULE
+            
+            
+                &MOLECULE
+                    NMOL              1
+                    CONN_FILE_NAME    ./../topologies_excitons/ANTHRACENE_NEUTRAL_NO_CHARGE_SAM.psf
+                    CONN_FILE_FORMAT  UPSF
+               &END MOLECULE
+            
+                &MOLECULE
+                    NMOL              1
+                    CONN_FILE_NAME    ./../topologies_excitons/ANTHRACENE_EXCITON_NO_CHARGE_EXC.psf
+                    CONN_FILE_FORMAT  UPSF
+               &END MOLECULE
+    
+                &MOLECULE
+                    NMOL              1
+                    CONN_FILE_NAME    ./../topologies_excitons/ANTHRACENE_NEUTRAL_NO_CHARGE_SAM.psf
+                    CONN_FILE_FORMAT  UPSF
+               &END MOLECULE
+            
+            
+    @ENDIF
+    

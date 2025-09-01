@@ -1,0 +1,131 @@
+ DBCSR| Multiplication driver                                               BLAS
+ DBCSR| Multrec recursion limit                                              512
+ DBCSR| Multiplication stack size                                           1000
+ DBCSR| Maximum elements for images                                    UNLIMITED
+ DBCSR| Randmat seed                                                    12341313
+ DBCSR| Multiplication size stacks                                             3
+
+
+  **** **** ******  **  PROGRAM STARTED AT               2025-08-30 19:02:10.764
+ ***** ** ***  *** **   PROGRAM STARTED ON                       LAPTOP-V89OQBOH
+ **    ****   ******    PROGRAM STARTED BY                                   sam
+ ***** **    ** ** **   PROGRAM PROCESS ID                                  1169
+  **** **  *******  **  PROGRAM STARTED IN /home/sam/flavoured-cptk/regtest-fobs
+                                           h/temp/run-fssh-3NAP-3ANT-mixed-inp-C
+                                           -int-3FF-FE-CT
+
+ CP2K| version string:                    CP2K version 4.0 (Development Version)
+ CP2K| source code revision number:                                git:8a0a0fb62
+ CP2K| cp2kflags: fftw3                                                         
+ CP2K| is freely available from                            https://www.cp2k.org/
+ CP2K| Program compiled at                         Wed Aug 27 08:16:19 CEST 2025
+ CP2K| Program compiled on                                       LAPTOP-V89OQBOH
+ CP2K| Program compiled for                                      cp2k_local_dell
+ CP2K| Data directory path                    /home/sam/flavoured-cptk/cp2k/data
+ CP2K| Input file name                                                   run.inp
+
+ GLOBAL| Force Environment number                                              1
+ GLOBAL| Basis set file name                                           POTENTIAL
+ GLOBAL| MM Potential file name                                     MM_POTENTIAL
+ GLOBAL| Coordinate file name                                       pos-init.xyz
+ GLOBAL| Force Environment number                                              2
+ GLOBAL| Basis set file name                                           POTENTIAL
+ GLOBAL| MM Potential file name                                     MM_POTENTIAL
+ GLOBAL| Coordinate file name                                       pos-init.xyz
+ GLOBAL| Force Environment number                                              3
+ GLOBAL| Basis set file name                                           POTENTIAL
+ GLOBAL| MM Potential file name                                     MM_POTENTIAL
+ GLOBAL| Coordinate file name                                       pos-init.xyz
+ GLOBAL| Force Environment number                                              4
+ GLOBAL| Basis set file name                                           POTENTIAL
+ GLOBAL| MM Potential file name                                     MM_POTENTIAL
+ GLOBAL| Coordinate file name                                       pos-init.xyz
+ GLOBAL| Method name                                                        CP2K
+ GLOBAL| Project name                                                        run
+ GLOBAL| Preferred FFT library                                             FFTW3
+ GLOBAL| Preferred diagonalization lib.                                       SL
+ GLOBAL| Run type                                                             MD
+ GLOBAL| All-to-all communication in single precision                          F
+ GLOBAL| FFTs using library dependent lengths                                  F
+ GLOBAL| Global print level                                                  LOW
+ GLOBAL| Total number of message passing processes                             1
+ GLOBAL| Number of threads for this process                                    1
+ GLOBAL| This output is from process                                           0
+ GLOBAL| CPU model name :  12th Gen Intel(R) Core(TM) i7-1260P
+
+ MEMORY| system memory details [Kb]
+ MEMORY|                        rank 0           min           max       average
+ MEMORY| MemTotal              7977148       7977148       7977148       7977148
+ MEMORY| MemFree               4174908       4174908       4174908       4174908
+ MEMORY| Buffers                  6352          6352          6352          6352
+ MEMORY| Cached                1231304       1231304       1231304       1231304
+ MEMORY| Slab                   199124        199124        199124        199124
+ MEMORY| SReclaimable           125132        125132        125132        125132
+ MEMORY| MemLikelyFree         5537696       5537696       5537696       5537696
+
+ TOTAL NUMBER OF FORCE EVALS           4
+ NOTE:n_subforce_eval           3
+ DECOMP =  T
+ DECOMP =  T
+ DECOMP =  T
+
+ MD| Molecular Dynamics Protocol 
+ MD| Ensemble Type                                                           NVE
+ MD| Number of Time Steps                                                    200
+ MD| Time Step [fs]                                                         0.10
+ MD| Temperature [K]                                                      300.00
+ MD| Temperature tolerance [K]                                              0.00
+ MD| Print MD information every                                        1 step(s)
+ MD| File type     Print frequency[steps]                             File names
+ MD| Coordinates          200                                      run-pos-1.xyz
+ MD| Velocities             1                                      run-vel-1.xyz
+ MD| Energies               1                                         run-1.ener
+ MD| Dump                 200                                      run-1.restart
+
+ ROT| Rotational Analysis Info 
+ ROT| Principal axes and moments of inertia in atomic units:
+ ROT|                                1                 2                 3
+ ROT| EIGENVALUES            0.985896973E+10   0.107170943E+11   0.110804981E+11
+ ROT|      X                    -0.154147334      -0.988042579      -0.003234479
+ ROT|      Y                     0.692344076      -0.105677900      -0.713786986
+ ROT|      Z                     0.704910121      -0.112267733       0.700355393
+ ROT| Numer of Rotovibrational vectors:     6
+
+ Calculation of degrees of freedom
+                                                      Number of atoms:       248
+                                 Number of Intramolecular constraints:         0
+                                 Number of Intermolecular constraints:         0
+                                  Invariants(translation + rotations):         3
+                                                   Degrees of freedom:       741
+
+
+ Restraints Information
+                                  Number of Intramolecular restraints:         0
+                                  Number of Intermolecular restraints:         0
+
+ *** WARNING in motion/thermostat/thermostat_methods.F:280 :: Thermostat ***
+ *** for Particles has been defined but the ensemble provided does not   ***
+ *** support thermostat for Particles! Ignoring thermostat input.        ***
+
+ ************************** Velocities initialization **************************
+ Initial Temperature                                                      0.00 K
+ COM velocity:            0.000000000000      0.000000000000      0.000000000000
+ *******************************************************************************
+
+
+ *******************************************************************************
+ *   ___                                                                       *
+ *  /   \                                                                      *
+ * [ABORT]                                                                     *
+ *  \___/   Value requested, but no value set getting value from keyword FE_IS *
+ *    |                           of section FE_CT_BLOCK                       *
+ *  O/|                                                                        *
+ * /| |                                                                        *
+ * / \                                        input/input_section_types.F:1315 *
+ *******************************************************************************
+
+
+ ===== Routine Calling Stack ===== 
+
+            2 qs_mol_dyn_low
+            1 CP2K

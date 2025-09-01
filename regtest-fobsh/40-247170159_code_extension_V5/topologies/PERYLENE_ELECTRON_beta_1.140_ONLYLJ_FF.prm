@@ -1,0 +1,64 @@
+BONDS
+
+ CA   HA    0.00    1.086
+ CB   HA    0.00    1.086
+ CA   CA    0.00    1.398
+ CA   CK    0.00    1.398
+ CB   CK    0.00    1.426842  !growing
+ CK   CK    0.00    1.37178  !shrinking
+ CA   CB    0.00    1.398
+
+ANGLES
+
+ CA   CA   HA     0.00  119.880
+ CK   CB   HA     0.00  119.880
+ CA   CB   HA     0.00  119.880
+ CB   CA   HA     0.00  119.880
+ CA   CA   CA     0.00  120.020
+ CA   CA   CB     0.00  120.020
+ CA   CA   CK     0.00  120.020
+ CK   CA   CK     0.00  120.020
+ CA   CB   CK     0.00  120.020
+ CB   CK   CK     0.00  120.020
+ CA   CK   CK     0.00  120.020
+ CA   CK   CB     0.00  120.020
+
+DIHEDRALS
+
+CA	CA	CA	HA   0.000    2  180.000
+CA	CA	CA	CA   0.000    2  180.000
+CA	CA	CA	CK   0.000    2  180.000
+CA	CA	CB	HA   0.000    2  180.000
+CA	CA	CB	CK   0.000    2  180.000
+CK	CA	CK	CK   0.000    2  180.000
+CK	CA	CK	CB   0.000    2  180.000
+CK	CB	CA	HA   0.000    2  180.000
+CK	CK	CB	CA   0.000    2  180.000
+CK	CK	CB	HA   0.000    2  180.000
+CK	CK	CA	CA   0.000    2  180.000
+CA	CB	CK	CA   0.000    2  180.000
+CB	CA	CA	CA   0.000    2  180.000
+CB	CA	CA	HA   0.000    2  180.000
+CB	CK	CK	CB   0.000    2  180.000
+CB	CK	CK	CA   0.000    2  180.000
+CB	CK	CA	CA   0.000    2  180.000
+CA	CK	CB	HA   0.000    2  180.000
+CA	CK	CK	CA   0.000    2  180.000
+HA	CA	CA	HA   0.000    2  180.000
+HA	CA	CB	HA   0.000    2  180.000
+
+
+NONBONDED
+
+!atom  ignored    epsilon      Rmin/2   ignored   eps,1-4       Rmin/2,1-4
+!
+CA       0.000000000    0.086000000    1.908000000
+CK       0.000000000    0.086000000    1.908000000
+CB       0.000000000    0.086000000    1.908000000
+HA        0.000000000    0.015700000    1.450000000
+END
+
+
+
+
+

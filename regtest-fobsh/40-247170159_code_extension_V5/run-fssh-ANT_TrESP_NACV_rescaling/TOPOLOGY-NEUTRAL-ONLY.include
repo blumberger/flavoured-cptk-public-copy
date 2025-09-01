@@ -1,0 +1,43 @@
+
+                
+                &CELL
+                        ABC                    8.562    6.038    11.184
+                        ALPHA_BETA_GAMMA       90.0    124.7    90.0
+                        MULTIPLE_UNIT_CELL     4    40    2
+                        PERIODIC               XYZ
+                &END CELL
+
+                
+                &KIND CP
+                        ELEMENT C
+                &END KIND
+                &KIND H
+                        ELEMENT H
+                &END KIND
+                &KIND CN
+                        ELEMENT C
+                &END KIND
+
+                &TOPOLOGY
+                        COORD_FILE_FORMAT XYZ
+                        COORD_FILE_NAME   pos-init.xyz
+                        NUMBER_OF_ATOMS                   15360
+                        CONN_FILE_FORMAT  MOL_SET
+                        &MOL_SET
+                
+                               &MOLECULE
+                                   NMOL              640
+                                   CONN_FILE_NAME    ../topologies/ANTHRACENE_NEUTRAL_NO_CHARGE_HUI.psf
+                                   CONN_FILE_FORMAT  UPSF
+                              &END MOLECULE
+                      
+                        &END MOL_SET
+                        &DUMP_PSF
+                                &EACH
+                                   MD          1
+                                &END EACH
+                                FILENAME ./input
+                        &END DUMP_PSF
+                &END TOPOLOGY
+                 
+            

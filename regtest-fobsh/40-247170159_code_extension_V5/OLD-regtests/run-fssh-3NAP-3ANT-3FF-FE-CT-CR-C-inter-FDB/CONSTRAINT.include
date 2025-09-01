@@ -1,0 +1,3 @@
+        &CONSTRAINT
+                    @INCLUDE ./COLLECTIVE.include
+       &END CONSTRAINT
